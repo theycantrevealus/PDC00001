@@ -130,7 +130,7 @@ class Modul extends Utility {
 				->execute();
 	}
 
-	private module_server_side($parameter) {
+	/*private module_server_side($parameter) {
 		return
 			self::$query
 				->select('modul', array(
@@ -151,7 +151,7 @@ class Modul extends Utility {
 				->limit($parameter[3])
 
 				->execute();
-	}
+	}*/
 
 	private function edit_modul($parameter) {
 		return

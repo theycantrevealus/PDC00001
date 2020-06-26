@@ -179,7 +179,15 @@ class Query {
 				$buildQuery .= ' WHERE ' . implode(' ', $whereBuilder);
 			}
 			$buildQuery = trim($buildQuery);
-			return $buildQuery . self::$queryStringOrder . ' ' . self::$limit . ' ' . self::$offset;
+			if(isset(self::$limit)) {
+				if(isset(self::$offset)) {
+					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit . ' ' . self::$offset;	
+				} else {
+					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit;
+				}
+			} else {
+				return $buildQuery . self::$queryStringOrder;
+			}
 		} else if(self::$queryMode == 'insert') {
 			$defineColumn = array();
 			foreach (self::$queryParams as $key => $value) {
