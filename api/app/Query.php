@@ -245,9 +245,6 @@ class Query {
 		try {
 			$responseBuilder = array();
 
-			//Return query for development. Delete it when production
-			$responseBuilder['response_query'] = self::buildQuery();
-			
 			$query = self::$pdo->prepare(self::buildQuery());
 			$query->execute(self::$queryValues);
 			
