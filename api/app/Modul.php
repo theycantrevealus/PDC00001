@@ -54,7 +54,12 @@ class Modul extends Utility {
 
 			//__HOST__/Modul/methods_tree
 			return self::get_methods_tree();
-		
+
+		} else if($parameter[1] == 'get_child') {
+
+			//__HOST__/Modul/methods_tree
+			return self::get_child($parameter[2]);			
+
 		} else if($parameter[1] == 'module_server_side') {
 
 			//__HOST__/Modul/module_server_side
@@ -154,6 +159,26 @@ class Modul extends Utility {
 	}*/
 
 	private function edit_modul($parameter) {
+		//CHECKING GROUP CHILD
+		$modul_data = self::get_child($parameter['id']);
+
+		foreach ($modul_data as $key => $value) {
+			$update_group = self::$query
+				->update('modul', array(
+					'menu_group' => $parameter['menu_group']	
+				))
+
+				->where(array(
+					'modul.deleted_at' => 'IS NULL',
+					'AND',
+					'modul.id' => '= ?'
+				), array(
+					$value
+				))
+
+				->execute();
+		}
+		
 		return
 			self::$query
 				->update('modul', array(
@@ -177,6 +202,38 @@ class Modul extends Utility {
 				))
 
 				->execute();
+	}
+
+	private function get_child($parameter) {
+		$child_list = array();
+		$modul_data = self::$query
+
+		->select('modul', array(
+			'id'
+		))
+
+		->where(array(
+			'modul.deleted_at' => 'IS NULL',
+			'AND',
+			'modul.parent' => '= ?'
+		), array(
+			$parameter
+		))
+
+		->execute();
+		
+		foreach ($modul_data['response_data'] as $key => $value) {
+
+			array_push($child_list, $value['id']);
+
+			$gs = self::get_child($value['id']);
+			if(count($gs) > 0) {
+				$child_list = array_merge($child_list, $gs);
+			}
+
+		}
+
+		return $child_list;
 	}
 
 
