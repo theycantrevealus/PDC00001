@@ -13,7 +13,7 @@ class Query {
 	static $whereParameter = array();
 	static $whereLogic = array();
 	private $tables = array();
-	private $limit, $offset;
+	static $limit, $offset;
 
 	public function __construct($connection) {
 		self::$pdo = $connection;
@@ -125,12 +125,14 @@ class Query {
 	function offset($parameter) {
 
 		self::$offset = 'OFFSET ' . $parameter;
+		return $this;
 
 	}
 
 	function limit($parameter) {
 
 		self::$limit = 'LIMIT ' . $parameter;
+		return $this;
 
 	}
 
@@ -179,8 +181,8 @@ class Query {
 				$buildQuery .= ' WHERE ' . implode(' ', $whereBuilder);
 			}
 			$buildQuery = trim($buildQuery);
-			if(isset(self::$limit)) {
-				if(isset(self::$offset)) {
+			if(isset(self::$limit) && intval(self::$limit) > 0) {
+				if(isset(self::$offset) && intval(self::$offset) > 0) {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit . ' ' . self::$offset;	
 				} else {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit;
@@ -242,6 +244,10 @@ class Query {
 	function execute() {
 		try {
 			$responseBuilder = array();
+
+			//Return query for development. Delete it when production
+			$responseBuilder['response_query'] = self::buildQuery();
+			
 			$query = self::$pdo->prepare(self::buildQuery());
 			$query->execute(self::$queryValues);
 			

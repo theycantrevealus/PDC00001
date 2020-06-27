@@ -35,6 +35,18 @@ class Contoh extends Utility {
 
 							->execute();
 					break;
+				case 'select_where_limit':
+					return
+						self::$query
+							->select('pegawai', array(
+								'uid',
+								'email'
+							))
+							->offset(1)
+							->limit(1)
+
+							->execute();
+					break;
 				case 'select_where':
 					return
 
