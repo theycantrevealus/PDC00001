@@ -6,7 +6,6 @@ use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 
-
 class Inventori extends Utility {
 	static $pdo;
 	static $query;
@@ -27,140 +26,14 @@ class Inventori extends Utility {
 				case 'kategori':
 					return self::get_kategori();
 					break;
-				case 'select_where':
-					return
-
-						self::$query
-							->select('pegawai', array(
-								'uid',
-								'email'
-							))
-
-							->where(array(
-								'pegawai.deleted_at' => 'IS NULL',
-								'OR',
-								'pegawai.uid' => '= ?'
-							), array(
-								'8113652d-4cb7-e850-d487-281a1762042a'
-							))
-
-							->execute();
+				case 'kategori_detail':
+					return self::get_kategori_detail($parameter[2]);
 					break;
-				case 'select_join':
-					return
-
-						self::$query
-							->select('pegawai_akses', array(
-								'id AS id_akses'
-							))
-
-							->join('pegawai', array(
-								'uid',
-								'email',
-								'nama AS nama_pegawai'
-							))
-
-							->join('modul', array(
-								'id AS id_modul',
-								'nama AS nama_modul'
-							))
-
-							->on(array(
-								array('pegawai_akses.uid_pegawai','=','pegawai.uid'),
-								array('pegawai_akses.modul','=','modul.id')
-							))
-
-							->execute();
+				case 'satuan':
+					return self::get_satuan();
 					break;
-				case 'select_join_where':
-					return
-
-						self::$query
-							->select('pegawai_akses', array(
-								'id AS id_akses'
-							))
-
-							->join('pegawai', array(
-								'uid',
-								'email',
-								'nama AS nama_pegawai'
-							))
-
-							->join('modul', array(
-								'id AS id_modul',
-								'nama AS nama_modul'
-							))
-
-							->on(array(
-								array('pegawai_akses.uid_pegawai','=','pegawai.uid'),
-								array('pegawai_akses.modul','=','modul.id')
-							))
-
-							->where(array(
-								'pegawai.deleted_at' => 'IS NULL',
-								'AND',
-								'pegawai.uid' => '= ?'
-							), array(
-								'8113652d-4cb7-e850-d487-281a1762042a'
-							))
-
-							->execute();
-					break;
-				case 'insert':
-					return
-						self::$query
-							->insert('modul', array(
-								'nama' => 'Nama Modul',
-								'identifier' => 'modul/test',
-								'keterangan' => 'Keterangan Modul',
-								'created_at' => parent::format_date(),
-								'updated_at' => parent::format_date(),
-								'parent' => 1,
-								'icon' => 'person',
-								'show_on_menu' => 'Y',
-								'show_order' => 1,
-								'menu_group' => 1
-							))
-
-							->execute();
-				 	break;
-				 case 'update_where':
-					return
-						self::$query
-							->update('modul', array(
-								'nama' => 'Nama Modul',
-								'identifier' => 'modul/test',
-								'keterangan' => 'Keterangan Modul',
-								'updated_at' => parent::format_date(),
-								'parent' => 1,
-								'icon' => 'person',
-								'show_on_menu' => 'Y',
-								'show_order' => 1,
-								'menu_group' => 1
-							))
-
-							->where(array(
-								'modul.deleted_at' => 'IS NULL',
-								'AND',
-								'modul.id' => '= ?'
-							), array(
-								7
-							))
-
-							->execute();
-				 	break;
-				case 'delete':
-					return
-						self::$query
-							->delete('modul')
-
-							->where(array(
-								'modul.id' => '= ?'
-							), array(
-								7
-							))
-
-							->execute();
+				case 'satuan_detail':
+					return self::get_satuan_detail($parameter[2]);
 					break;
 				default:
 					return 'Unknown request';
@@ -170,12 +43,389 @@ class Inventori extends Utility {
 		}
 	}
 
+	public function __DELETE__($parameter = array()) {
+		return self::delete($parameter);
+	}
 
+	public function __POST__($parameter = array()) {
+		switch ($parameter['request']) {
+			case 'tambah_kategori':
+				self::tambah_kategori($parameter);
+				break;
+			case 'edit_kategori':
+				self::edit_kategori($parameter);
+			case 'tambah_satuan':
+				self::tambah_satuan($parameter);
+				break;
+			case 'edit_satuan':
+				self::edit_satuan($parameter);
+				break;
+			default:
+				# code...
+				break;
+		}
+	}
+//===========================================================================================KATEGORI
+	private function tambah_kategori($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+		$check = self::duplicate_check(array(
+			'table' => 'master_inv_kategori',
+			'check' => $parameter['nama']
+		));
+		if(count($check['response_data']) > 0) {
+			$check['response_message'] = 'Duplicate data detected';
+			$check['response_result'] = 0;
+			unset($check['response_data']);
+			return $check;
+		} else {
+			$uid = parent::gen_uuid();
+			$worker = self::$query
+			->insert('master_inv_kategori', array(
+				'uid' => $uid,
+				'nama' => $parameter['nama'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->execute();
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type' => 'activity',
+					'column' => array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'new_value',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value' => array(
+						$uid,
+						$UserData['data']->uid,
+						'master_inv_kategori',
+						'I',
+						json_encode($parameter),
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class' => __CLASS__
+				));
+			}
+			return $worker;
+		}
+	}
 
+	private function edit_kategori($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+		$old = self::get_kategori_detail($parameter['uid']);
+
+		$worker = self::$query
+		->update('master_inv_kategori', array(
+			'nama' => $parameter['nama'],
+			'updated_at' => parent::format_date()
+		))
+		->where(array(
+			'master_inv_kategori.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_kategori.uid' => '= ?'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
+
+		if($worker['response_result'] > 0) {
+			unset($parameter['access_token']);
+
+			
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'old_value',
+					'new_value',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter['uid'],
+					$UserData['data']->uid,
+					'master_inv_kategori',
+					'U',
+					json_encode($old['response_data'][0]),
+					json_encode($parameter),
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+
+		return $worker;
+	}
 
 	private function get_kategori() {
-		return self::$query->select('');
+		$data = self::$query
+		->select('master_inv_kategori', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv_kategori.deleted_at' => 'IS NULL'
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+
+	private function get_kategori_detail($parameter) {
+		$data = self::$query
+		->select('master_inv_kategori', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv_kategori.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_kategori.uid' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+//===========================================================================================SATUAN
+	private function get_satuan() {
+		$data = self::$query
+		->select('master_inv_satuan', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv_satuan.deleted_at' => 'IS NULL'
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+
+	private function get_satuan_detail($parameter) {
+		$data = self::$query
+		->select('master_inv_satuan', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv_satuan.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_satuan.uid' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+
+	private function tambah_satuan($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$check = self::duplicate_check(array(
+			'table' => 'master_inv_satuan',
+			'check' => $parameter['nama']
+		));
+		if(count($check['response_data']) > 0) {
+			$check['response_message'] = 'Duplicate data detected';
+			$check['response_result'] = 0;
+			unset($check['response_data']);
+			return $check;
+		} else {
+			$uid = parent::gen_uuid();
+			$worker = self::$query
+			->insert('master_inv_satuan', array(
+				'uid' => $uid,
+				'nama' => $parameter['nama'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->execute();
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type' => 'activity',
+					'column' => array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'new_value',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value' => array(
+						$uid,
+						$UserData['data']->uid,
+						'master_inv_satuan',
+						'I',
+						json_encode($parameter),
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class' => __CLASS__
+				));
+			}
+			return $worker;
+		}
+	}
+
+	private function edit_satuan($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$old = self::get_satuan_detail($parameter['uid']);
+
+		$worker = self::$query
+		->update('master_inv_satuan', array(
+			'nama' => $parameter['nama'],
+			'updated_at' => parent::format_date()
+		))
+		->where(array(
+			'master_inv_satuan.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_satuan.uid' => '= ?'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
+
+		if($worker['response_result'] > 0) {
+			unset($parameter['access_token']);
+
+			
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'old_value',
+					'new_value',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter['uid'],
+					$UserData['data']->uid,
+					'master_inv_satuan',
+					'U',
+					json_encode($old['response_data'][0]),
+					json_encode($parameter),
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+
+		return $worker;
+	}
+//===========================================================================================DELETE
+	private function delete($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$worker = self::$query
+		->delete($parameter[6])
+		->where(array(
+			$parameter[6] . '.uid' => '= ?'
+		), array(
+			$parameter[7]
+		))
+		->execute();
+		if($worker['response_result'] > 0) {
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter[7],
+					$UserData['data']->uid,
+					$parameter[6],
+					'D',
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+		return $worker;
+	}
+
+	private function duplicate_check($parameter) {
+		return self::$query
+		->select($parameter['table'], array(
+			'uid',
+			'nama'
+		))
+		->where(array(
+			$parameter['table'] . '.deleted_at' => 'IS NULL',
+			'AND',
+			$parameter['table'] . '.nama' => '= ?'
+		), array(
+			$parameter['check']
+		))
+		->execute();
 	}
 }
