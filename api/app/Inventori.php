@@ -3,6 +3,7 @@
 namespace PondokCoder;
 
 use PondokCoder\Query as Query;
+use PondokCoder\Authorization as Authorization;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 
@@ -35,8 +36,23 @@ class Inventori extends Utility {
 				case 'satuan_detail':
 					return self::get_satuan_detail($parameter[2]);
 					break;
+				case 'gudang':
+					return self::get_gudang();
+					break;
+				case 'gudang_detail':
+					return self::get_gudang_detail($parameter[2]);
+					break;
+				case 'item_detail':
+					return self::get_item_detail($parameter[2]);
+					break;
+				case 'manufacture':
+					return self::get_manufacture();
+					break;
+				case 'manufacture_detail':
+					return self::get_manufacture_detail($parameter[2]);
+					break;
 				default:
-					return 'Unknown request';
+					return self::get_item();
 			}
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
@@ -50,16 +66,29 @@ class Inventori extends Utility {
 	public function __POST__($parameter = array()) {
 		switch ($parameter['request']) {
 			case 'tambah_kategori':
-				self::tambah_kategori($parameter);
+				return self::tambah_kategori($parameter);
 				break;
 			case 'edit_kategori':
-				self::edit_kategori($parameter);
+				return self::edit_kategori($parameter);
 			case 'tambah_satuan':
-				self::tambah_satuan($parameter);
+				return self::tambah_satuan($parameter);
+				break;
+			case 'tambah_gudang':
+				return self::tambah_gudang($parameter);
+				break;
+			case 'edit_gudang':
+				return self::edit_gudang($parameter);
 				break;
 			case 'edit_satuan':
-				self::edit_satuan($parameter);
+				return self::edit_satuan($parameter);
 				break;
+			case 'tambah_manufacture':
+				return self::tambah_manufacture($parameter);
+				break;
+			case 'edit_manufacture':
+				return self::edit_manufacture($parameter);
+			case 'tambah_item':
+				return self::tambah_item($parameter);
 			default:
 				# code...
 				break;
@@ -97,7 +126,6 @@ class Inventori extends Utility {
 						'user_uid',
 						'table_name',
 						'action',
-						'new_value',
 						'logged_at',
 						'status',
 						'login_id'
@@ -107,7 +135,6 @@ class Inventori extends Utility {
 						$UserData['data']->uid,
 						'master_inv_kategori',
 						'I',
-						json_encode($parameter),
 						parent::format_date(),
 						'N',
 						$UserData['data']->log_id
@@ -297,7 +324,6 @@ class Inventori extends Utility {
 						'user_uid',
 						'table_name',
 						'action',
-						'new_value',
 						'logged_at',
 						'status',
 						'login_id'
@@ -307,7 +333,6 @@ class Inventori extends Utility {
 						$UserData['data']->uid,
 						'master_inv_satuan',
 						'I',
-						json_encode($parameter),
 						parent::format_date(),
 						'N',
 						$UserData['data']->log_id
@@ -372,6 +397,363 @@ class Inventori extends Utility {
 		}
 
 		return $worker;
+	}
+//===========================================================================================GUDANG
+	private function get_gudang() {
+		$data = self::$query
+		->select('master_inv_gudang', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv_gudang.deleted_at' => 'IS NULL'
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+
+	private function get_gudang_detail($parameter) {
+		$data = self::$query
+		->select('master_inv_gudang', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv_gudang.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_gudang.uid' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+
+	private function tambah_gudang($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$check = self::duplicate_check(array(
+			'table' => 'master_inv_gudang',
+			'check' => $parameter['nama']
+		));
+		if(count($check['response_data']) > 0) {
+			$check['response_message'] = 'Duplicate data detected';
+			$check['response_result'] = 0;
+			unset($check['response_data']);
+			return $check;
+		} else {
+			$uid = parent::gen_uuid();
+			$worker = self::$query
+			->insert('master_inv_gudang', array(
+				'uid' => $uid,
+				'nama' => $parameter['nama'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->execute();
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type' => 'activity',
+					'column' => array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value' => array(
+						$uid,
+						$UserData['data']->uid,
+						'master_inv_gudang',
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class' => __CLASS__
+				));
+			}
+			return $worker;
+		}
+	}
+
+	private function edit_gudang($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$old = self::get_gudang_detail($parameter['uid']);
+
+		$worker = self::$query
+		->update('master_inv_gudang', array(
+			'nama' => $parameter['nama'],
+			'updated_at' => parent::format_date()
+		))
+		->where(array(
+			'master_inv_gudang.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_gudang.uid' => '= ?'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
+
+		if($worker['response_result'] > 0) {
+			unset($parameter['access_token']);
+
+			
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'old_value',
+					'new_value',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter['uid'],
+					$UserData['data']->uid,
+					'master_inv_gudang',
+					'U',
+					json_encode($old['response_data'][0]),
+					json_encode($parameter),
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+
+		return $worker;
+	}
+//===========================================================================================Manufacture
+	private function get_manufacture() {
+		$data = self::$query
+		->select('master_manufacture', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_manufacture.deleted_at' => 'IS NULL'
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+
+	private function get_manufacture_detail($parameter) {
+		$data = self::$query
+		->select('master_manufacture', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_manufacture.deleted_at' => 'IS NULL',
+			'AND',
+			'master_manufacture.uid' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+
+	private function tambah_manufacture($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$check = self::duplicate_check(array(
+			'table' => 'master_manufacture',
+			'check' => $parameter['nama']
+		));
+		if(count($check['response_data']) > 0) {
+			$check['response_message'] = 'Duplicate data detected';
+			$check['response_result'] = 0;
+			unset($check['response_data']);
+			return $check;
+		} else {
+			$uid = parent::gen_uuid();
+			$worker = self::$query
+			->insert('master_manufacture', array(
+				'uid' => $uid,
+				'nama' => $parameter['nama'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->execute();
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type' => 'activity',
+					'column' => array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value' => array(
+						$uid,
+						$UserData['data']->uid,
+						'master_manufacture',
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class' => __CLASS__
+				));
+			}
+			return $worker;
+		}
+	}
+
+	private function edit_manufacture($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$old = self::get_manufacture_detail($parameter['uid']);
+
+		$worker = self::$query
+		->update('master_manufacture', array(
+			'nama' => $parameter['nama'],
+			'updated_at' => parent::format_date()
+		))
+		->where(array(
+			'master_manufacture.deleted_at' => 'IS NULL',
+			'AND',
+			'master_manufacture.uid' => '= ?'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
+
+		if($worker['response_result'] > 0) {
+			unset($parameter['access_token']);
+
+			
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'old_value',
+					'new_value',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter['uid'],
+					$UserData['data']->uid,
+					'master_manufacture',
+					'U',
+					json_encode($old['response_data'][0]),
+					json_encode($parameter),
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+
+		return $worker;
+	}
+//===========================================================================================ITEM
+	private function tambah_item($parameter){
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+
+		//Check Ketersediaan Segment / Partial Save
+		if(isset($parameter['segment_informasi'])) {
+			$check = self::duplicate_check(array(
+				'table' => 'master_inv',
+				'check' => $parameter['nama']
+			));
+			if(count($check['response_data']) > 0) {
+				$uid = parent::gen_uuid();
+				$worker = self::$query->insert('master_inv', array(
+					'uid' => $uid,
+					'nama' => $parameter['nama'],
+					'kategori' => $parameter['kategori'],
+					'manufacture' => $parameter['manufacture'],
+					'keterangan' => $parameter['keterangan'],
+					'created_at' => parent::format_date(),
+					'updated_at' => parent::format_date()
+				));
+
+				if($worker['response_result'] > 0) {
+					$log = parent::log(array(
+						'type' => 'activity',
+						'column' => array(
+							'unique_target',
+							'user_uid',
+							'table_name',
+							'action',
+							'logged_at',
+							'status',
+							'login_id'
+						),
+						'value' => array(
+							$uid,
+							$UserData['data']->uid,
+							'master_inv',
+							'I',
+							parent::format_date(),
+							'N',
+							$UserData['data']->log_id
+						),
+						'class' => __CLASS__
+					));
+				}
+			}
+		}
+
+		return ;
 	}
 //===========================================================================================DELETE
 	private function delete($parameter) {
