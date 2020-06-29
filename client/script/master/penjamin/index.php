@@ -1,7 +1,7 @@
 <script type="text/javascript">
 	$(function(){
 		var MODE = "tambah", selectedUID;
-		var tableKategori = $("#table-penjamin").DataTable({
+		var tablePenjamin = $("#table-penjamin").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/Penjamin/penjamin",
 				type: "GET",
@@ -56,7 +56,7 @@
 					},
 					type:"DELETE",
 					success:function(response) {
-						tableKategori.ajax.reload();
+						tablePenjamin.ajax.reload();
 					},
 					error: function(response) {
 						console.log(response);
@@ -113,7 +113,7 @@
 					success: function(response){
 						$("#txt_nama").val("");
 						$("#form-tambah").modal("hide");
-						tableKategori.ajax.reload();
+						tablePenjamin.ajax.reload();
 					},
 					error: function(response) {
 						console.log(response);
