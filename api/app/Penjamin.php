@@ -43,11 +43,11 @@ class Penjamin extends Utility {
 	public function __POST__($parameter = array()){
 		switch ($parameter['request']) {
 			case 'tambah_penjamin':
-				self::tambah_penjamin($parameter);
+				return self::tambah_penjamin($parameter);
 				break;
 
 			case 'edit_penjamin':
-				self::edit_penjamin($parameter);
+				return self::edit_penjamin($parameter);
 				break;
 
 			default:
@@ -139,7 +139,8 @@ class Penjamin extends Utility {
 								'created_at'=>parent::format_date(),
 								'updated_at'=>parent::format_date()
 								)
-						)->execute();
+						)
+						->execute();
 
 			if ($penjamin['response_result'] > 0){
 				$log = parent::log(array(
