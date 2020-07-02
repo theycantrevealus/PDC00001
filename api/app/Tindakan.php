@@ -43,11 +43,11 @@ class Tindakan extends Utility {
 	public function __POST__($parameter = array()){
 		switch ($parameter['request']) {
 			case 'tambah_tindakan':
-				self::tambah_tindakan($parameter);
+				return self::tambah_tindakan($parameter);
 				break;
 
 			case 'edit_tindakan':
-				self::edit_tindakan($parameter);
+				return self::edit_tindakan($parameter);
 				break;
 
 			default:

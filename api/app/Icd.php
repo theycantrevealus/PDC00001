@@ -52,19 +52,19 @@ class Icd extends Utility {
 	public function __POST__($parameter = array()){
 		switch ($parameter['request']) {
 			case 'tambah_icd9':
-				self::tambah_icd('master_icd_9', $parameter);
+				return self::tambah_icd('master_icd_9', $parameter);
 				break;
 
 			case 'edit_icd9':
-				self::edit_icd('master_icd_9', $parameter);
+				return self::edit_icd('master_icd_9', $parameter);
 				break;
 
 			case 'tambah_icd10':
-				self::tambah_icd('master_icd_10', $parameter);
+				return self::tambah_icd('master_icd_10', $parameter);
 				break;
 
 			case 'edit_icd10':
-				self::edit_icd('master_icd_10', $parameter);
+				return self::edit_icd('master_icd_10', $parameter);
 				break;
 
 			default:
@@ -112,8 +112,7 @@ class Icd extends Utility {
 						'kode',
 						'nama',
 						'created_at',
-						'updated_at'
-,					)
+						'updated_at'					)
 				)
 				->where(array(
 							$table_name . '.deleted_at' => 'IS NULL',
