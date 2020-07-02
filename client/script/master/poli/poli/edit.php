@@ -1,14 +1,14 @@
 <script type="text/javascript">
-    $(function(){
-        var dataObject= {}, 
+	$(function(){
+		var dataObject= {}, 
             hargaPenjamin = {}, 
             tindakanPoli = [];
 
         var state_tindakan_uid = '';
         var tindakan, penjamin;
-        var no_urut = 1;
 
-        /*load data tindakan*/
+
+		/*load data tindakan*/
         tindakan = loadTindakan();
         penjamin = loadPenjamin();
 
@@ -16,6 +16,66 @@
         $(".tindakan").select2({});
         $(".harga").inputmask({alias: 'currency', rightAlign: true, placeholder: "0.00", prefix: "", autoGroup: false, digitsOptional: true});
 
+		/*========= Load Poli ========*/
+		var uid = <?php echo json_encode(__PAGES__[4]); ?>;
+	
+		$.ajax({
+			async: false,
+			url:__HOSTAPI__ + "/Poli/poli-detail/" + uid,
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+			},
+			type:"GET",
+			success:function(response) {
+				
+				var metaData = response.response_package.response_data;
+				var temp_nama = metaData[0].nama;
+				var nama = temp_nama.replace('Poli ', '');
+
+				var tindakanData = metaData[0].tindakan;
+
+				dataObject.uid = uid;
+				dataObject.nama = "Poli " + nama;
+
+				$.each(tindakanData, function(key, item){
+					var uid_tindakan = item.uid_tindakan;
+					var uid_penjamin = item.uid_penjamin;
+					var harga = parseFloat(item.harga);
+					var nama_tindakan;
+
+					if (uid_tindakan in hargaPenjamin){
+	                    hargaPenjamin[uid_tindakan][uid_penjamin] = harga; 
+	                } else {
+	                    hargaPenjamin[uid_tindakan] = {[uid_penjamin]: harga}; 
+	                }
+
+	                /*===== GET NAME OF POLI =====*/
+
+	                if (!(tindakanPoli.includes(uid_tindakan))){
+	                	$.each(tindakan, function(key, item){
+		                	if (item.uid == uid_tindakan){
+		                		nama_tindakan = item.nama;
+		                	}
+		                });
+
+	                	tindakanPoli.push(uid_tindakan);
+	                	getTindakanOnLoad(uid_tindakan, nama_tindakan);
+                		setNomorUrut("table-tindakan","no_urut");
+	                }
+
+					$("#tindakan option[value='"+ uid_tindakan +"']").remove();
+        			$("#tindakan option[value='']").attr("selected");
+				});
+				
+				dataObject['tindakan'] = hargaPenjamin;
+
+				$("#txt_nama").val(nama);
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
+		/*===========================*/
 
         $("#tindakan").on('change', function(){
             var params = [];
@@ -44,6 +104,7 @@
             //===
 
             //=== Set Back option List
+            delete dataObject.tindakan[uid];
             setBackTindakan(tindakan, uid);
         });
 
@@ -140,6 +201,8 @@
             //==== Set table content
             var no = 1;
             var html_content = ""; 
+            
+            //console.log(tindakan);
             $.each(tindakan, function(key, item){
 
                 if (item.uid in hargaPenjamin){
@@ -192,13 +255,12 @@
 
         $("#btnSubmit").on('click', function(){
             dataObject.tindakan = hargaPenjamin;
-            
-            //console.log(dataObject);
+
             if (dataObject.nama != "") {
                 $.ajax({
                     url: __HOSTAPI__ + "/Poli",
                     data: {
-                        request : "tambah_poli",
+                        request : "edit_poli",
                         dataObject : dataObject
                     },
                     beforeSend: function(request) {
@@ -328,6 +390,24 @@
         $("#tindakan").trigger("change");
     }
 
+    /*========== FOR FIRST LOAD WHEN LOAD DATA FOR EDIT ==========*/
+    function getTindakanOnLoad(uid_tindakan, nama_tindakan){
+
+        $("#tindakan option[value='"+ uid_tindakan +"']").remove();
+        $("#tindakan option[value='']").attr("selected");
+    
+        html = "<tr id='tindakan_" + uid_tindakan + "'>" + 
+                    "<td class='no_urut'></td>" +
+                    "<td><a href='#' class='linkTindakan'>"+ nama_tindakan +"</a></td>" +
+                    "<td><button type='button' rel='tooltip' id='btn_tindakan_"+ uid_tindakan +"' class='btn btn-sm btn-danger btnHapusTindakan' data-toggle='tooltip' data-placement='top' title='' data-original-title='Hapus'><i class='fa fa-trash'></i></button></td>" +
+                "</tr>";
+
+        $("#table-tindakan tbody").append(html);
+        $("#tindakan").val("");
+        $("#tindakan").trigger("change");
+    }
+    /*=============================================================*/
+
     function setBackTindakan(arr_tindakan, uid_tindakan){
         var name_tindakan;
 
@@ -374,5 +454,6 @@
             $(this).text( $(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") ); 
         })
     }
+
 
 </script>
