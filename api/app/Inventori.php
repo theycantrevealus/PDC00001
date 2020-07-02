@@ -87,10 +87,14 @@ class Inventori extends Utility {
 				break;
 			case 'edit_manufacture':
 				return self::edit_manufacture($parameter);
+				break;
 			case 'tambah_item':
 				return self::tambah_item($parameter);
+			case 'edit_item':
+				return self::edit_item($parameter);
+				break;
 			default:
-				# code...
+				return array();
 				break;
 		}
 	}
@@ -702,29 +706,149 @@ class Inventori extends Utility {
 
 		return $worker;
 	}
+//===========================================================================================ITEM DETAIL
+	private function get_konversi($parameter) {
+		$dataKonversi = self::$query
+		->select('master_inv_satuan_konversi', array(
+			'dari_satuan',
+			'ke_satuan',
+			'rasio'
+		))
+		->where(array(
+			'master_inv_satuan_konversi.barang' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		return $dataKonversi['response_data'];
+	}
+
+	private function get_varian($parameter) { //array('barang'=>'', 'satuan' => '')
+		$dataVarian = self::$query
+		->select('master_inv_satuan_varian', array(
+			'satuan',
+			'nama'
+		))
+		->where(array(
+			'master_inv_satuan_varian.barang' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		return $dataVarian['response_data'];
+	}
+
+	private function get_kombinasi($parameter) { //array('barang'=>'', 'satuan' => '')
+		$dataVarian = self::$query
+		->select('master_inv_kombinasi', array(
+			'barang_kombinasi',
+			'satuan',
+			'varian',
+			'qty'
+		))
+		->where(array(
+			'master_inv_kombinasi.barang' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		return $dataVarian['response_data'];
+	}
 //===========================================================================================ITEM
-	private function tambah_item($parameter){
+	private function get_item() {
+		$data = self::$query
+		->select('master_inv', array(
+			'uid',
+			'nama',
+			'kategori',
+			'manufacture',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv.deleted_at' => 'IS NULL'
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['kategori'] = self::get_kategori_detail($value['kategori'])['response_data'][0];
+			$data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
+			$autonum++;
+		}
+		return $data;
+	}
+
+	private function get_item_detail($parameter) {
+		$data = self::$query
+		->select('master_inv', array(
+			'uid',
+			'nama',
+			'kode_barang',
+			'keterangan',
+			'kategori',
+			'manufacture',
+			'satuan_terkecil',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv.uid' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+
+			//Prepare Image File
+			$data['response_data'][$key]['image'] = file_exists('../assets/images/inventori/' . $value['uid'] . '.png');
+
+			//GET Item Info
+			$data['response_data'][$key]['kombinasi'] = self::get_kombinasi($value['uid']);
+			$data['response_data'][$key]['konversi'] = self::get_konversi($value['uid']);
+			$data['response_data'][$key]['varian'] = self::get_varian($value['uid']);
+		}
+		return $data;
+	}
+
+	private function tambah_item($parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+		$error_count = 0;
+		$uid = parent::gen_uuid();
 
 		//Check Ketersediaan Segment / Partial Save
 		if(isset($parameter['segment_informasi'])) {
 			$check = self::duplicate_check(array(
 				'table' => 'master_inv',
-				'check' => $parameter['nama']
+				'check' => $parameter['segment_informasi']['nama']
 			));
+
 			if(count($check['response_data']) > 0) {
-				$uid = parent::gen_uuid();
+				$check['response_message'] = 'Duplicate data detected';
+				$check['response_result'] = 0;
+				unset($check['response_data']);
+				return $check;
+			} else {
 				$worker = self::$query->insert('master_inv', array(
 					'uid' => $uid,
-					'nama' => $parameter['nama'],
-					'kategori' => $parameter['kategori'],
-					'manufacture' => $parameter['manufacture'],
-					'keterangan' => $parameter['keterangan'],
+					'nama' => $parameter['segment_informasi']['nama'],
+					'kode_barang' => $parameter['segment_informasi']['kode'],
+					'kategori' => $parameter['segment_informasi']['kategori'],
+					'manufacture' => $parameter['segment_informasi']['manufacture'],
+					'keterangan' => $parameter['segment_informasi']['keterangan'],
+					'satuan_terkecil' => $parameter['segment_informasi']['satuan_terkecil'],
 					'created_at' => parent::format_date(),
 					'updated_at' => parent::format_date()
-				));
+				))
+				->execute();
 
 				if($worker['response_result'] > 0) {
 					$log = parent::log(array(
@@ -749,11 +873,299 @@ class Inventori extends Utility {
 						),
 						'class' => __CLASS__
 					));
+				} else {
+					$error_count += 1;
+				}
+
+				if($parameter['save_mode'] == true) {
+					$worker['response_uid'] = $uid;
+				}
+			}	
+		}
+
+		if(isset($parameter['segment_satuan'])) {
+
+			//Save Data Konversi
+			foreach ($parameter['segment_satuan']['populate_konversi'] as $key => $value) {
+				//check if exist
+				$check = self::$query->select('master_inv_satuan_konversi', array(
+					'barang'
+				))
+				->where(array(
+					'barang' => '= ?',
+					'AND',
+					'dari_satuan' => '= ?',
+					'AND',
+					'ke_satuan' => '= ?'
+				), array(
+					$uid,
+					$value['getDari'],
+					$value['getKe']
+				))
+				->execute();
+
+				if(count($check['response_data']) > 0) {
+					$worker = self::$query->update('master_inv_satuan_konversi', array(
+						'rasio' => $value['getRasio']
+					))
+					->where(array(
+						'dari_satuan' => '= ?',
+						'AND',
+						'ke_satuan' => '= ?'
+					), array(
+						$value['getDari'],
+						$value['getKe']
+					))
+					->execute();
+
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						$error_count += 1;
+					}
+				} else {
+					$worker = self::$query->insert('master_inv_satuan_konversi', array(
+						'rasio' => $value['getRasio'],
+						'dari_satuan' => $value['getDari'],
+						'ke_satuan' => $value['getKe'],
+						'barang' => $uid
+					))
+					->execute();
+
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						$error_count += 1;
+					}
+				}
+			}
+
+			//Save Data Varian
+			foreach ($parameter['segment_satuan']['populate_varian'] as $key => $value) {
+				//Key = Satuan
+				//Value = array kemasan
+				foreach ($value as $VarianKy => $VarianValue) {
+					$check = self::$query->select('master_inv_satuan_varian', array(
+						'nama'
+					))
+					->where(array(
+						'master_inv_satuan_varian.barang' => '= ?',
+						'AND',
+						'master_inv_satuan_varian.satuan' => '= ?',
+						'AND',
+						'master_inv_satuan_varian.nama' => '= ?'
+					), array(
+						$uid, $key, $VarianValue
+					))
+					->execute();
+
+					if($check['response_result'] > 0) {
+						//update
+					} else {
+						//insert
+						$worker = self::$query->insert('master_inv_satuan_varian', array(
+							'barang' => $uid,
+							'satuan' => $key,
+							'nama' => $VarianValue,
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						))
+						->execute();
+						if($worker['response_result'] > 0) {
+							//log
+						} else {
+							$error_count += 1;
+						}
+					}
+				}
+			}
+		}
+		$worker['response_error'] = $error_count;
+		return $worker;
+	}
+
+	private function edit_item($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$error_count = 0;
+
+		//Check Ketersediaan Segment / Partial Save
+		if(isset($parameter['segment_informasi'])) {
+			$check = self::duplicate_check(array(
+				'table' => 'master_inv',
+				'check' => $parameter['segment_informasi']['nama']
+			));
+
+			if(count($check['response_data']) > 0) {
+				$check['response_message'] = 'Duplicate data detected';
+				$check['response_result'] = 0;
+				unset($check['response_data']);
+				return $check;
+			} else {
+				$worker = self::$query->update('master_inv', array(
+					'nama' => $parameter['segment_informasi']['nama'],
+					'kode_barang' => $parameter['segment_informasi']['kode'],
+					'kategori' => $parameter['segment_informasi']['kategori'],
+					'manufacture' => $parameter['segment_informasi']['manufacture'],
+					'satuan_terkecil' => $parameter['segment_informasi']['satuan_terkecil'],
+					'keterangan' => $parameter['segment_informasi']['keterangan'],
+					'created_at' => parent::format_date(),
+					'updated_at' => parent::format_date()
+				))
+				->where(array(
+					'uid' => $parameter['uid']
+				))
+				->execute();
+
+				if($worker['response_result'] > 0) {
+					$log = parent::log(array(
+						'type' => 'activity',
+						'column' => array(
+							'unique_target',
+							'user_uid',
+							'table_name',
+							'action',
+							'logged_at',
+							'status',
+							'login_id'
+						),
+						'value' => array(
+							$uid,
+							$UserData['data']->uid,
+							'master_inv',
+							'I',
+							parent::format_date(),
+							'N',
+							$UserData['data']->log_id
+						),
+						'class' => __CLASS__
+					));
+				} else {
+					$error_count += 1;
+				}
+
+				if($parameter['save_mode'] == true) {
+					$worker['response_uid'] = $uid;
 				}
 			}
 		}
 
-		return ;
+		if(isset($parameter['segment_satuan'])) {
+
+			//Save Data Konversi
+			foreach ($parameter['segment_satuan']['populate_konversi'] as $key => $value) {
+				//check if exist
+				$check = self::$query->select('master_inv_satuan_konversi', array(
+					'barang'
+				))
+				->where(array(
+					'barang' => '= ?',
+					'AND',
+					'dari_satuan' => '= ?',
+					'AND',
+					'ke_satuan' => '= ?'
+				), array(
+					$parameter['uid'],
+					$value['getDari'],
+					$value['getKe']
+				))
+				->execute();
+
+				if(count($check['response_data']) > 0) {
+					$worker = self::$query->update('master_inv_satuan_konversi', array(
+						'rasio' => $value['getRasio']
+					))
+					->where(array(
+						'dari_satuan' => '= ?',
+						'AND',
+						'ke_satuan' => '= ?'
+					), array(
+						$value['getDari'],
+						$value['getKe']
+					))
+					->execute();
+
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						$error_count += 1;
+					}
+				} else {
+					$worker = self::$query->insert('master_inv_satuan_konversi', array(
+						'rasio' => $value['getRasio'],
+						'dari_satuan' => $value['getDari'],
+						'ke_satuan' => $value['getKe'],
+						'barang' => $parameter['uid']
+					))
+					->execute();
+
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						$error_count += 1;
+					}
+				}
+			}
+
+			//Save Data Varian
+			foreach ($parameter['segment_satuan']['populate_varian'] as $key => $value) {
+				//Key = Satuan
+				//Value = array kemasan
+				foreach ($value as $VarianKy => $VarianValue) {
+					$check = self::$query->select('master_inv_satuan_varian', array(
+						'nama'
+					))
+					->where(array(
+						'master_inv_satuan_varian.barang' => '= ?',
+						'AND',
+						'master_inv_satuan_varian.satuan' => '= ?',
+						'AND',
+						'master_inv_satuan_varian.nama' => '= ?'
+					), array(
+						$uid, $key, $VarianValue
+					))
+					->execute();
+
+					if($check['response_result'] > 0) {
+						//update
+						$worker = self::$query->update('master_inv_satuan_varian', array(
+							'nama' => $VarianValue,
+							'updated_at' => parent::format_date()
+						))
+						->where(array(
+							'master_inv_satuan_varian.id' => '= ?',
+							'AND',
+							'master_inv_satuan_varian.deleted_at' => 'IS NULL',
+						), array(
+							$check['response_data'][0]['id']
+						))
+						->execute();
+						if($worker['response_result'] > 0) {
+							//log
+						} else {
+							$error_count += 1;
+						}
+					} else {
+						//insert
+						$worker = self::$query->insert('master_inv_satuan_varian', array(
+							'barang' => $uid,
+							'satuan' => $key,
+							'nama' => $VarianValue,
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						))
+						->execute();
+						if($worker['response_result'] > 0) {
+							//log
+						} else {
+							$error_count += 1;
+						}
+					}
+				}
+			}
+		}
+		$worker['response_error'] = $error_count;
+		return $worker;
 	}
 //===========================================================================================DELETE
 	private function delete($parameter) {

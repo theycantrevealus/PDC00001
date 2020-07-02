@@ -52,5 +52,6 @@
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr-airbnb.rtl.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/jqvmap.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.css" rel="stylesheet">
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/croppie-master/croppie.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/custom.css" rel="stylesheet">
 </head>
