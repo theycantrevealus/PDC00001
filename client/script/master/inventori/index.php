@@ -1,9 +1,9 @@
 <script type="text/javascript">
 	$(function(){
 		var MODE = "tambah", selectedUID;
-		var tableKategori = $("#table-kategori").DataTable({
+		var tableGudang = $("#table-item").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/Inventori/kategori",
+				url: __HOSTAPI__ + "/Inventori",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -30,11 +30,21 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
+						return "<span id=\"nama_" + row["uid"] + "\">" + row["kategori"].nama + "</span>";
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<span id=\"nama_" + row["uid"] + "\">" + row["manufacture"].nama + "</span>";
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button class=\"btn btn-info btn-sm btn-edit-kategori\" id=\"kategori_edit_" + row["uid"] + "\">" +
+									"<a href=\"" + __HOSTNAME__ + "/master/inventori/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm\">" +
 										"<i class=\"fa fa-pencil\"></i> Edit" +
-									"</button>" +
-									"<button id=\"kategori_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-kategori\">" +
+									"</a>" +
+									"<button id=\"gudang_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-gudang\">" +
 										"<i class=\"fa fa-trash\"></i> Hapus" +
 									"</button>" +
 								"</div>";
@@ -43,20 +53,20 @@
 			]
 		});
 
-		$("body").on("click", ".btn-delete-kategori", function(){
+		$("body").on("click", ".btn-delete-gudang", function(){
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
-			var conf = confirm("Hapus kategori item?");
+			var conf = confirm("Hapus gudang item?");
 			if(conf) {
 				$.ajax({
-					url:__HOSTAPI__ + "/Inventori/master_inv_kategori/" + uid,
+					url:__HOSTAPI__ + "/Inventori/master_inv_gudang/" + uid,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
 					type:"DELETE",
 					success:function(response) {
-						tableKategori.ajax.reload();
+						tableGudang.ajax.reload();
 					},
 					error: function(response) {
 						console.log(response);
@@ -65,22 +75,22 @@
 			}
 		});
 
-		$("body").on("click", ".btn-edit-kategori", function() {
+		$("body").on("click", ".btn-edit-gudang", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 			selectedUID = uid;
 			MODE = "edit";
 			$("#txt_nama").val($("#nama_" + uid).html());
 			$("#form-tambah").modal("show");
-			$("#modal-large-title").html("Edit Kategori");
+			$("#modal-large-title").html("Edit Gudang");
 			return false;
 		});
 
-		$("#tambah-kategori").click(function() {
+		$("#tambah-gudang").click(function() {
 
 			$("#form-tambah").modal("show");
 			MODE = "tambah";
-			$("#modal-large-title").html("Tambah Kategori");
+			$("#modal-large-title").html("Tambah Gudang");
 
 		});
 
@@ -90,12 +100,12 @@
 				var form_data = {};
 				if(MODE == "tambah") {
 					form_data = {
-						"request": "tambah_kategori",
+						"request": "tambah_gudang",
 						"nama": nama
 					};
 				} else {
 					form_data = {
-						"request": "edit_kategori",
+						"request": "edit_gudang",
 						"uid": selectedUID,
 						"nama": nama
 					};
@@ -112,7 +122,7 @@
 					success: function(response){
 						$("#txt_nama").val("");
 						$("#form-tambah").modal("hide");
-						tableKategori.ajax.reload();
+						tableGudang.ajax.reload();
 					},
 					error: function(response) {
 						console.log(response);
@@ -123,26 +133,3 @@
 
 	});
 </script>
-
-<div id="form-tambah" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog modal-md bg-danger" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="modal-large-title">Tambah Kategori</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<div class="form-group col-md-12">
-					<label for="txt_no_skp">Nama Kategori:</label>
-					<input type="text" class="form-control" id="txt_nama" />
-				</div>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-				<button type="button" class="btn btn-primary" id="btnSubmit">Submit</button>
-			</div>
-		</div>
-	</div>
-</div>

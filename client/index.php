@@ -7,6 +7,7 @@
 	var __HOSTNAME__ = <?php echo json_encode(__HOSTNAME__); ?>;
 	var __HOSTAPI__ = <?php echo json_encode(__HOSTAPI__); ?>;
 	var __PAGES__ = <?php echo json_encode(__PAGES__); ?>;
+	var __HOST__ = <?php echo json_encode(__HOST__); ?>;
 
 </script>
 

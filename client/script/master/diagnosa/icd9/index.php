@@ -1,9 +1,9 @@
 <script type="text/javascript">
 	$(function(){
-		var MODE = "tambah", selectedUID;
-		var tableKategori = $("#table-kategori").DataTable({
+		var MODE = "tambah", selectedID;
+		var tableIcd = $("#table-icd9").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/Inventori/kategori",
+				url: __HOSTAPI__ + "/Icd/icd9",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -25,16 +25,21 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
+						return "<span id=\"kode_" + row["id"] + "\">" + row["kode"] + "</span>";
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<span id=\"nama_" + row["id"] + "\">" + row["nama"] + "</span>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button class=\"btn btn-info btn-sm btn-edit-kategori\" id=\"kategori_edit_" + row["uid"] + "\">" +
-										"<i class=\"fa fa-pencil\"></i> Edit" +
+									"<button class=\"btn btn-info btn-sm btn-edit-icd9\" id=\"icd9_edit_" + row["id"] + "\">" +
+										"<i class=\"fa fa-edit\"></i> Edit" +
 									"</button>" +
-									"<button id=\"kategori_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-kategori\">" +
+									"<button id=\"icd9_delete_" + row['id'] + "\" class=\"btn btn-danger btn-sm btn-delete-icd9\">" +
 										"<i class=\"fa fa-trash\"></i> Hapus" +
 									"</button>" +
 								"</div>";
@@ -43,20 +48,20 @@
 			]
 		});
 
-		$("body").on("click", ".btn-delete-kategori", function(){
-			var uid = $(this).attr("id").split("_");
-			uid = uid[uid.length - 1];
+		$("body").on("click", ".btn-delete-icd9", function(){
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
 
-			var conf = confirm("Hapus kategori item?");
+			var conf = confirm("Hapus ICD 9 item?");
 			if(conf) {
 				$.ajax({
-					url:__HOSTAPI__ + "/Inventori/master_inv_kategori/" + uid,
+					url:__HOSTAPI__ + "/Icd/master_icd_9/" + id,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
 					type:"DELETE",
 					success:function(response) {
-						tableKategori.ajax.reload();
+						tableIcd.ajax.reload();
 					},
 					error: function(response) {
 						console.log(response);
@@ -65,54 +70,60 @@
 			}
 		});
 
-		$("body").on("click", ".btn-edit-kategori", function() {
-			var uid = $(this).attr("id").split("_");
-			uid = uid[uid.length - 1];
-			selectedUID = uid;
+		
+		$("body").on("click", ".btn-edit-icd9", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			selectedID = id;
 			MODE = "edit";
-			$("#txt_nama").val($("#nama_" + uid).html());
+			$("#txt_kode").val($("#kode_" + id).html());
+			$("#txt_nama").val($("#nama_" + id).html());
 			$("#form-tambah").modal("show");
-			$("#modal-large-title").html("Edit Kategori");
 			return false;
 		});
 
-		$("#tambah-kategori").click(function() {
-
+		
+		$("#tambah-icd9").click(function() {
+			$("#txt_kode").val("");
+			$("#txt_nama").val("");
 			$("#form-tambah").modal("show");
 			MODE = "tambah";
-			$("#modal-large-title").html("Tambah Kategori");
-
 		});
 
+
 		$("#btnSubmit").click(function() {
+			var kode = $("#txt_kode").val();
 			var nama = $("#txt_nama").val();
-			if(nama != "") {
+			if(kode != "" && nama != "") {
 				var form_data = {};
 				if(MODE == "tambah") {
 					form_data = {
-						"request": "tambah_kategori",
+						"request": "tambah_icd9",
+						"kode": kode,
 						"nama": nama
 					};
 				} else {
 					form_data = {
-						"request": "edit_kategori",
-						"uid": selectedUID,
+						"request": "edit_icd9",
+						"id": selectedID,
+						"kode": kode,
 						"nama": nama
 					};
 				}
 
 				$.ajax({
 					async: false,
-					url: __HOSTAPI__ + "/Inventori",
+					url: __HOSTAPI__ + "/Icd",
 					data: form_data,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
 					type: "POST",
 					success: function(response){
+						$("#txt_kode").val("");
 						$("#txt_nama").val("");
 						$("#form-tambah").modal("hide");
-						tableKategori.ajax.reload();
+						tableIcd.ajax.reload();
 					},
 					error: function(response) {
 						console.log(response);
@@ -128,15 +139,19 @@
 	<div class="modal-dialog modal-md bg-danger" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="modal-large-title">Tambah Kategori</h5>
+				<h5 class="modal-title" id="modal-large-title">Tambah ICD 9</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
+				<div class="form-group col-md-6">
+					<label for="txt_no_skp">Kode Diagnosa:</label>
+					<input type="text" maxlength="6" class="form-control" id="txt_kode" />
+				</div>
 				<div class="form-group col-md-12">
-					<label for="txt_no_skp">Nama Kategori:</label>
-					<input type="text" class="form-control" id="txt_nama" />
+					<label for="txt_no_skp">Diagnosa:</label>
+					<textarea class="form-control" id="txt_nama" rows="3"></textarea>
 				</div>
 			</div>
 			<div class="modal-footer">

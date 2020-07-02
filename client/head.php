@@ -11,6 +11,9 @@
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-material-icons.rtl.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-fontawesome-free.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-fontawesome-free.rtl.css" rel="stylesheet">
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-select2.css" rel="stylesheet">
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-select2.rtl.css" rel="stylesheet">
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/select2/select2.min.css" rel="stylesheet">
 	<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133433427-1"></script> -->
 	<!-- <script>
 		window.dataLayer = window.dataLayer || [];
@@ -49,5 +52,6 @@
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr-airbnb.rtl.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/jqvmap.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.css" rel="stylesheet">
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/croppie-master/croppie.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/custom.css" rel="stylesheet">
 </head>

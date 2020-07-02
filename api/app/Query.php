@@ -4,7 +4,9 @@ namespace PondokCoder;
 use PondokCoder\QueryException as QueryException;
 class Query {
 	static $pdo;
+	static $keyType;
 	static $queryMode;
+	static $keyReturn;
 	static $queryString;
 	static $queryStringOrder;
 	static $queryParams = array();
@@ -18,6 +20,7 @@ class Query {
 	public function __construct($connection) {
 		self::$pdo = $connection;
 		self::$queryString = '';
+		self::$keyType = '';
 	}
 
 	function insert($table, $parameter = array()) {
@@ -31,6 +34,13 @@ class Query {
 			array_push(self::$queryParams, $key);
 			array_push(self::$queryValues, $value);
 		}
+
+		return $this;
+	}
+
+	function returning($parameter) {
+		self::$keyType = ' RETURNING '. $parameter;
+		self::$keyReturn = $parameter;
 		return $this;
 	}
 
@@ -196,6 +206,10 @@ class Query {
 				array_push($defineColumn, '?');
 			}
 			$buildQuery .= $this->tables[0] . ' (' . implode(',', self::$queryParams) . ') VALUES (' . implode(',', $defineColumn) . ')';
+			
+			if(self::$keyType != '') {
+				$buildQuery .= self::$keyType;
+			}
 			return $buildQuery;
 		} else if(self::$queryMode == 'update') {
 			$defineColumn = array();
@@ -252,6 +266,11 @@ class Query {
 				$read = $query->fetchAll(\PDO::FETCH_ASSOC);
 				$responseBuilder['response_data'] = (count($read) > 0) ? $read : array();
 			} else if(self::$queryMode == 'insert') {
+				if(self::$keyType != '') {
+					$getReturn = $query->fetchAll(\PDO::FETCH_ASSOC);
+					$responseBuilder['response_unique'] = $getReturn[0][self::$keyReturn];
+				}
+
 				$responseBuilder['response_message'] = ($query->rowCount() > 0) ? 'Data berhasil ditambahkan' : 'Data gagal ditambahkan';
 			} else if(self::$queryMode == 'update') {
 				$responseBuilder['response_message'] = ($query->rowCount() > 0) ? 'Data berhasil diupdate' : 'Data gagal diupdate';
@@ -264,6 +283,8 @@ class Query {
 			self::$queryValues = array();
 			self::$queryParams = array();
 			self::$queryString = '';
+			self::$keyType = '';
+			self::$keyReturn = '';
 
 			$responseBuilder['response_result'] = $query->rowCount();
 			return $responseBuilder;

@@ -97,7 +97,7 @@ class Pegawai extends Utility {
 				$user_arr_data = array(
 					'uid' => $read[0]['uid'],
 					'email' => $read[0]['email'],
-					'log_id' => $LOG_ID
+					'log_id' => $log
 				);
 				//$secret_key = bin2hex(random_bytes(32));
 				$secret_key = file_get_contents('taknakal.pub');
