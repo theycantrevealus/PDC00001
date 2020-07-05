@@ -107,7 +107,7 @@ class Query {
 	}
 
 	function select($table, $parameter = array()) {
-		$this->tables = array();
+		//$this->tables = array();
 		self::$queryValues = array();
 		self::$queryParams = array();
 		self::$queryMode = 'select';
@@ -258,7 +258,7 @@ class Query {
 	function execute() {
 		try {
 			$responseBuilder = array();
-
+			//$responseBuilder['response_query'] = self::buildQuery(); ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$query = self::$pdo->prepare(self::buildQuery());
 			$query->execute(self::$queryValues);
 			
@@ -277,6 +277,7 @@ class Query {
 			} else if(self::$queryMode == 'delete') {
 				$responseBuilder['response_message'] = ($query->rowCount() > 0) ? 'Data berhasil dihapus' : 'Data gagal dihapus';
 			}
+			$this->tables = array();
 			self::$whereParameter = array();
 			self::$joinString = array();
 			self::$whereLogic = array();
