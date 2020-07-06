@@ -84,7 +84,7 @@
 										</div>
 									</div>
 									<div class="col-md-12">
-										<table class="table table-bordered table-striped" id="table-tindakan">
+										<table class="table table-bordered" id="table-tindakan">
 											<thead>
 												<tr>
 													<th style="width: 20px;">No</th>
