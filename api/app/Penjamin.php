@@ -140,9 +140,10 @@ class Penjamin extends Utility {
 								'updated_at'=>parent::format_date()
 								)
 						)
+						->returning('uid')
 						->execute();
 
-			if ($penjamin['response_result'] > 0){
+			if ($penjamin['response_result'] > 0) {
 				$log = parent::log(array(
 							'type'=>'activity',
 							'column'=>array(
@@ -173,7 +174,7 @@ class Penjamin extends Utility {
 		}
 	}
 
-	private function edit_penjamin($parameter){
+	private function edit_penjamin($parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
