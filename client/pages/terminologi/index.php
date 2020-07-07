@@ -7,9 +7,9 @@
 					<li class="breadcrumb-item active" aria-current="page">Terminologi Manager</li>
 				</ol>
 			</nav>
-			<h1 class="m-0">Terminologi</h1>
+			<h2 class="m-0">Terminologi</h2>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/pegawai/tambah" class="btn btn-info ml-3">Tambah Terminologi</a>
+		<a href="<?php echo __HOSTNAME__; ?>/terminologi/tambah" class="btn btn-info ml-3">Tambah Terminologi</a>
 	</div>
 </div>
 
@@ -19,12 +19,12 @@
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
 				<div class="table-responsive border-bottom" data-toggle="lists">
-					<table class="table mb-0 thead-border-top-0" id="table-terminologi">
+					<table class="table table-striped" id="table-terminologi">
 						<thead>
 							<tr>
 								<th style="width: 20px;">No</th>
 								<th>Term</th>
-								<th>Aksi</th>
+								<th width="40%">Aksi</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
