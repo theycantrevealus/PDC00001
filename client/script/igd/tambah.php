@@ -164,10 +164,32 @@
 		    };
 		}
 
+		var imageResultPopulator = [];
+
+		function hiJackImage(toHi) {
+			imageResultPopulator.push(toHi);
+		}
 
 
 
-		let editorSubjectiveData, editorObjectiveData, editorPlanningData;
+
+		let editorKeluhanData, editorSubjectiveData, editorObjectiveData, editorPlanningData;
+
+		ClassicEditor
+			.create( document.querySelector( '#txt_keluhan' ), {
+				extraPlugins: [ MyCustomUploadAdapterPlugin ],
+				placeholder: "Edit keluhan utama ..."
+				/*ckfinder: {
+					uploadUrl: __HOSTFRONT__ + "/api/Upload"
+				}*/
+			} )
+			.then( editor => {
+				editorKeluhanData = editor;
+				window.editor = editor;
+			} )
+			.catch( err => {
+				//console.error( err.stack );
+			} );
 
 
 		ClassicEditor
