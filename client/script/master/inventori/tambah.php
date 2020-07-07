@@ -17,12 +17,20 @@
 			url: __HOST__ + "/assets/images/inventori/unset.png"
 		});
 
+		$("#status-informasi").hide();
+		$("#status-satuan").hide();
+		$("#status-penjamin").hide();
+		$("#status-lokasi").hide();
+		$("#status-monitoring").hide();
+
 		$("#txt_nama").keyup(function() {
 			$(".label_nama").html($(this).val());
+			check_panel_informasi();
 		});
 
 		$("#txt_kode").keyup(function() {
 			$(".label_kode").html($(this).val().toUpperCase());
+			check_panel_informasi();
 		});
 
 		$("#txt_kategori").change(function() {
@@ -32,6 +40,16 @@
 		$("#txt_manufacture").change(function() {
 			$(".label_manufacture").html($(this).find("option:selected").text());
 		});
+
+		function check_panel_informasi() {
+			var nama = $("#txt_nama").val();
+			var kode = $("#txt_kode").val();
+			if(nama != "" && kode != "") {
+				$("#status-informasi").fadeIn();
+			} else {
+				$("#status-informasi").fadeOut();
+			}
+		}
 
 
 		function load_kategori(target, selected = "") {
@@ -107,10 +125,15 @@
 				},
 				type:"GET",
 				success:function(response) {
+					$("#table-lokasi-gudang tbody").html("");
+					$("#table-monitoring tbody").html("");
 					gudangData = response.response_package.response_data;
 					for(var a = 0; a < gudangData.length; a++) {
+						//========================================================LOKASI SIMPAN
 						var newGudangRow = document.createElement("TR");
-
+						$(newGudangRow).attr({
+							"id": "rak_gudang_" + gudangData[a].uid
+						});
 						var newGudangAICell = document.createElement("TD");
 						var newGudangNameCell = document.createElement("TD");
 						var newGudangRakCell = document.createElement("TD");
@@ -125,7 +148,83 @@
 						$(newGudangRow).append(newGudangAICell);
 						$(newGudangRow).append(newGudangNameCell);
 						$(newGudangRow).append(newGudangRakCell);
+						//========================================================MONITORING
+						
+						var newMonitoringRow = document.createElement("TR");
 
+						var newMonitoringAI = document.createElement("TD");
+						var newMonitoringGudang = document.createElement("TD");						
+
+						var varian_data = populate_varian_data();
+
+						$(newMonitoringRow).append(newMonitoringAI);
+						$(newMonitoringRow).append(newMonitoringGudang);
+
+						
+
+						$("#table-monitoring tbody").append(newMonitoringRow);
+
+						var monitoringVarian = [];
+						
+						for(var keys in varian_data) {
+							for(var bb = 0; bb < varian_data[keys]["data"].length; bb++) {
+								monitoringVarian.push({
+									"satuan":keys,
+									"caption":varian_data[keys]["text"],
+									"data":varian_data[keys]["data"][bb]
+								});
+							}
+						}
+
+						for(var aa = 0; aa < monitoringVarian.length; aa++) {
+							var extraRow = document.createElement("TR");
+							
+							var newMonitoringMinimum = document.createElement("TD");
+							var newMonitoringMinimumSatuan = document.createElement("TD");
+							$(newMonitoringMinimumSatuan).html(monitoringVarian[aa].caption + " - " + monitoringVarian[aa].data);
+							var newMonitoringMaksimum = document.createElement("TD");
+							var newMonitoringMaksimumSatuan = document.createElement("TD");
+							$(newMonitoringMaksimumSatuan).html(monitoringVarian[aa].caption + " - " + monitoringVarian[aa].data);
+					
+							var inputMinimum = document.createElement("INPUT");
+							$(inputMinimum).addClass("form-control").attr({
+								"gudang-monitor": gudangData[a].uid,
+								"satuan-monitor": monitoringVarian[aa].satuan,
+								"varian-monitor": aa,
+								"placeholder": "Nilai Minimum",
+								"id": "nilai_minimum_" + gudangData[a].uid + "_" + monitoringVarian[aa].satuan + "_" + aa
+							});
+							$(newMonitoringMinimum).append(inputMinimum);
+
+							var inputMaximum = document.createElement("INPUT");
+							$(inputMaximum).addClass("form-control").attr({
+								"gudang-monitor": gudangData[a].uid,
+								"satuan-monitor": monitoringVarian[aa].satuan,
+								"varian-monitor": aa,
+								"placeholder": "Nilai Maximum",
+								"id": "nilai_maksimum_" + gudangData[a].uid + "_" + monitoringVarian[aa].satuan + "_" + aa
+							});
+							$(newMonitoringMaksimum).append(inputMaximum);
+
+
+							if(aa == 0) {
+								$("#table-monitoring tbody tr:eq(0)").append(newMonitoringMinimum);
+								$("#table-monitoring tbody tr:eq(0)").append(newMonitoringMinimumSatuan);
+								$("#table-monitoring tbody tr:eq(0)").append(newMonitoringMaksimum);
+								$("#table-monitoring tbody tr:eq(0)").append(newMonitoringMaksimumSatuan);
+							} else {
+								$(extraRow).append(newMonitoringMinimum);
+								$(extraRow).append(newMonitoringMinimumSatuan);
+								$(extraRow).append(newMonitoringMaksimum);
+								$(extraRow).append(newMonitoringMaksimumSatuan);
+
+								$("#table-monitoring tbody").append(extraRow);
+							}
+						}
+
+						$(newMonitoringAI).html((a + 1)).attr("rowspan", monitoringVarian.length);
+						$(newMonitoringGudang).html(gudangData[a].nama).attr("rowspan", monitoringVarian.length);
+						
 						$("#table-lokasi-gudang tbody").append(newGudangRow);
 					}
 				},
@@ -135,8 +234,6 @@
 			});
 			return gudangData;
 		}
-
-		loadGudang();
 
 		productLib = load_product();
 
@@ -224,7 +321,7 @@
 								$("#table-penjamin tbody").append(
 									"<tr>" +
 										"<td>" + varian_data[key]["text"] + " - " + varian_data[key]["data"][b] + "</td>" +
-										"<td class=\"harga_penjamin_item\"></td>" +
+										"<td class=\"harga_penjamin_item\" satuan=\"harga_satuan_" + key + "\" penjamin=\"hargaPenjamin_" + penjaminData[a].uid + "\" id=\"harga_varian_" + b + "\"></td>" +
 									"</tr>"
 								);
 							}
@@ -343,6 +440,7 @@
 			$(target).find("tbody").append(rowContainer);
 
 			rebase_table(target);
+			checkSatuanKonversi(nextID);
 		}
 
 		function rebase_table(target) {
@@ -436,27 +534,40 @@
 				$("#konversi_satuan_row_container_" + id).addClass("bg-danger-custom error-element");
 			} else {
 				$("#konversi_satuan_row_container_" + id).removeClass("bg-danger-custom error-element");
-			}	
+			}
+			checkSatuanAll();
+		}
+
+		function checkSatuanAll(){
+			var satuanError = 0;
+			$("#table-konversi-satuan tbody tr").each(function() {
+				if($(this).hasClass("error-element")) {
+					satuanError += 1;
+				}
+			});
+			if(satuanError == 0) {
+				$("#status-satuan").fadeIn();
+			} else {
+				$("#status-satuan").fadeOut();
+			}
 		}
 
 		function autoVarian(forID, init = true) {
 
-			var nextVarianID = $(".varian_value_receptor_" + forID).length + 1;
-			
+			var nextVarianID = $(".child_konversi_" + forID).length + 1;
+
 			//Reset Counter
-			$(".varian_value_receptor_" + forID).removeClass("new_varian");
-			$(".child_konversi_" + forID).removeClass("new-class-varian");
-			$(".varian-delete_" + forID).removeClass("new_varian");
-
+			/*$(".varian_value_receptor_" + forID).removeClass("new_varian");
+			$(".varian-delete_" + forID).removeClass("new_varian");*/
 			var newVarianValue = document.createElement("INPUT");
-			$(newVarianValue).addClass("form-control form-control-prepended new_varian varian_value_receptor varian_value_receptor_" + forID).attr({
-				"placeholder": "DEFAULT",
-				"id": "varian_value_receptor_" + forID + "_" + nextVarianID
-			});
-
+			
 			if(init) {
-				$("#table-varian tbody tr#varian_satuan_" + forID + " td:eq(2)").html("	<div class=\"form-group\">" +
-																							"<label for=\"varian_value_receptor_" + forID + "_" + nextVarianID + "\"><small class\"text-danger\">Varian tetap</small></label>" +
+				$(newVarianValue).addClass("form-control form-control-prepended new_varian varian_value_receptor varian_value_receptor_" + forID).attr({
+					"placeholder": "_1",
+					"id": "varian_value_receptor_" + forID + "_1"
+				});
+				$("#table-varian tbody tr#single_satuan_grouper_" + forID + "_1 td:eq(2)").html("	<div class=\"form-group\">" +
+																							"<label for=\"varian_value_receptor_" + forID + "_1\"><small class\"text-danger\">Varian tetap</small></label>" +
 																							"<div class=\"input-group input-group-merge mb-2\" style=\"width: 270px;\">" +
 																								"<div class=\"input-group-prepend\">" +
 																									"<div class=\"input-group-text\">" +
@@ -465,37 +576,74 @@
 																								"</div>" +
 																							"</div>" +
 																						"</div>")
-				$("#table-varian tbody tr#varian_satuan_" + forID + " td:eq(2)").find(".input-group").prepend(newVarianValue);
+				$("#table-varian tbody tr#single_satuan_grouper_" + forID + "_1 td:eq(2)").find(".input-group").prepend(newVarianValue);
 			} else {
+				$(".child_konversi_" + forID).removeClass("new-class-varian");
+				$(newVarianValue).addClass("form-control form-control-prepended new_varian varian_value_receptor varian_value_receptor_" + forID).attr({
+					"placeholder": "_" + nextVarianID,
+					"id": "varian_value_receptor_" + forID + "_" + nextVarianID
+				});
 				var newVarianInputRow = document.createElement("TR");
-				$(newVarianInputRow).addClass("child_konversi new-class-varian child_konversi_" + forID).attr("id", "single_satuan_grouper_" + forID + "_" + nextVarianID);
+				$(newVarianInputRow).addClass("child_konversi colled new-class-varian child_konversi_" + forID).attr({
+					"id": "single_satuan_grouper_" + forID + "_" + nextVarianID
+				});
 
 				var newVarianCell = document.createElement("TD");
-				$(newVarianCell).html("	<div class=\"form-group\">" +
-											"<label for=\"varian_value_receptor_" + forID + "_" + nextVarianID + "\"></label>" +
-											"<div class=\"input-group input-group-merge mb-2\" style=\"width: 270px;\">" +
-												"<div class=\"input-group-prepend\">" +
-													"<div class=\"input-group-text\">" +
-														"<span class=\"fas fa-chevron-right\"></span>" +
-													"</div>" +
-												"</div>" +
+				$(newVarianCell).html("<div class=\"form-group\">" +
+										"<label for=\"varian_value_receptor_" + forID + "_" + nextVarianID + "\"></label>" +
+										"<div class=\"input-group input-group-merge mb-2\" style=\"width: 270px;\">" +
+											"<div class=\"input-group-prepend\">" +
+												"<button id=\"delete_varian_value_receptor_"+ forID + "_" + nextVarianID + "\" class=\"btn btn-sm btn-danger varian-delete new_varian varian-delete_" + forID + "\"><small class\"text-danger\"><i class=\"fa fa-times\"></i></small></button>" +
 											"</div>" +
 										"</div>" +
-										"<button id=\"delete_varian_value_receptor_"+ forID + "_" + nextVarianID + "\" class=\"btn btn-sm btn-danger varian-delete new_varian varian-delete_" + forID + "\"><small class\"text-danger\"><i class=\"fa fa-times\"></i> Hapus varian</small></button>");
+									"</div>");
 				$(newVarianCell).find(".input-group").prepend(newVarianValue);
 				$(newVarianInputRow).append(newVarianCell);
-				if(nextVarianID == 1) {
-					$("#table-varian tbody tr#varian_satuan_" + forID).after(newVarianInputRow);
-				} else {
-					$(newVarianInputRow).insertAfter($("#varian_value_receptor_" + forID + "_" + (nextVarianID - 1)).parent().parent().parent().parent());
-				}
-				$("#table-varian tbody tr#varian_satuan_" + forID + " td:eq(0)").attr("rowspan", $(".varian_value_receptor_" + forID).length);
-				$("#table-varian tbody tr#varian_satuan_" + forID + " td:eq(1)").attr("rowspan", $(".varian_value_receptor_" + forID).length);
+				
+				$(newVarianInputRow).insertAfter($("#single_satuan_grouper_" + forID + "_" + (nextVarianID - 1)));
+
+				$("#table-varian tbody tr#single_satuan_grouper_" + forID + "_1 td:eq(0)").attr("rowspan", $(".child_konversi_" + forID).length);
+				$("#table-varian tbody tr#single_satuan_grouper_" + forID + "_1 td:eq(1)").attr("rowspan", $(".child_konversi_" + forID).length);
 			}
 			rekap_varian = populate_varian_data();
-
+			rebaseVarian();
 			//Render penjamin view
 			load_penjamin();
+			loadGudang();
+		}
+
+		function rebaseVarian() {
+			var classList = [];
+			$("#table-varian tbody tr.colled").each(function(e) {
+				var id = $(this).attr("id").split("_");
+				var grouperSatuan = id[id.length - 2];
+				var singleSatuan = id[id.length - 1];
+
+				if(!inArray(grouperSatuan, classList)) {
+					classList.push(grouperSatuan);
+				}
+			});
+
+			for(var classKey in classList) {
+				$(".child_konversi_" + classList[classKey]).each(function(e) {
+					var id = $(this).attr("id").split("_");
+					var grouperSatuan = id[id.length - 2];
+					var singleSatuan = id[id.length - 1];
+
+					$(this).attr({
+						"id": "single_satuan_grouper_" + grouperSatuan + "_" + (e + 1)
+					});
+
+					$(this).find("input.varian_value_receptor").attr({
+						"placeholder": (e + 1),
+						"id": "varian_value_receptor_" + grouperSatuan + "_" + (e + 1)
+					});
+
+					$(this).find("button.varian-delete").attr({
+						"id": "delete_varian_value_receptor_" + grouperSatuan + "_" + (e + 1)
+					});
+				});
+			}
 		}
 
 		function populateSatuan() {
@@ -516,12 +664,13 @@
 					});
 				}
 			});
+			$("#table-varian tbody").html("");
 
 			for(var sPop = 0; sPop < populate.length; sPop++) {
 				//Check exists
-				if($("#table-varian tbody tr#varian_satuan_" + populate[sPop].id).length == 0) {
+				if($("#table-varian tbody tr#single_satuan_grouper_" + populate[sPop].id).length == 0) {
 					var newVarianRow = document.createElement("TR");
-					$(newVarianRow).attr("id", "varian_satuan_" + populate[sPop].id).addClass("parent_varians");
+					$(newVarianRow).attr("id", "single_satuan_grouper_" + populate[sPop].id + "_1").addClass("parent_varians child_konversi colled new-class-varian child_konversi_" + populate[sPop].id);
 
 					var newVarianAI = document.createElement("TD");
 					$(newVarianAI).html((sPop + 1));
@@ -545,7 +694,6 @@
 			}
 
 			//Remove not linked
-			
 			$("#table-varian tbody tr.parent_varians").each(function(e){
 				if(!$(this).hasClass("child_konversi")) {
 					var id = $(this).attr("id").split("_");
@@ -644,13 +792,16 @@
 			var grouperSatuan = id[id.length - 2];
 			var singleSatuan = id[id.length - 1];
 			
-			if(!$(this).hasClass("new_varian")) {
+			if(!$("#single_satuan_grouper_" + grouperSatuan + "_" + singleSatuan).hasClass("new-class-varian")) {
 				$("#single_satuan_grouper_" + grouperSatuan + "_" + singleSatuan).remove();
-				$("#table-varian tbody tr#varian_satuan_" + grouperSatuan + " td:eq(0)").attr("rowspan", $(".varian_value_receptor_" + grouperSatuan).length);
-				$("#table-varian tbody tr#varian_satuan_" + grouperSatuan + " td:eq(1)").attr("rowspan", $(".varian_value_receptor_" + grouperSatuan).length);
-			} else {
-				alert($("#single_satuan_grouper_" + grouperSatuan + "_" + singleSatuan).hasClass("new-class-varian"));	
+				$("#table-varian tbody tr#single_satuan_grouper_" + grouperSatuan + "_1 td:eq(0)").attr("rowspan", $(".child_konversi_" + grouperSatuan).length);
+				$("#table-varian tbody tr#single_satuan_grouper_" + grouperSatuan + "_1 td:eq(1)").attr("rowspan", $(".child_konversi_" + grouperSatuan).length);
 			}
+
+			rebaseVarian();
+			load_penjamin();
+			loadGudang();
+
 			return false;
 		});
 
@@ -659,8 +810,20 @@
 			var grouperSatuan = id[id.length - 2];
 			var singleSatuan = id[id.length - 1];
 
-			if($(this).hasClass("new_varian")) {
+			/*$("#single_satuan_grouper_" + grouperSatuan + "_" + singleSatuan).css({
+				"background": "red"
+			});*/
+
+			if(
+				(
+					$("#single_satuan_grouper_" + grouperSatuan + "_" + singleSatuan).hasClass("new-class-varian")
+				)
+				&&
+				$(this).val() != ""
+			) {
 				autoVarian(grouperSatuan, false);
+			} else {
+				console.log($("#single_satuan_grouper_" + grouperSatuan + "_" + singleSatuan).hasClass("new-class-varian"));
 			}
 		});
 
@@ -668,17 +831,21 @@
 			load_penjamin();
 		});
 
-		$("body").on("click", "a[href=\"tab-penjamin\"]", function() {
+		$("body").on("click", "a[href=\"#tab-penjamin\"]", function() {
 			load_penjamin();
 		});
 
-
-
-
+		$("body").on("click", "a[href=\"#tab-monitoring\"]", function() {
+			loadGudang();
+		});
 
 		$("#upload-image").change(function(){
 			readURL(this, basic);
 		});
+
+		function populate_monitoring () {
+			//
+		}
 
 		function populate_varian_data() {
 			var populate_varian = {};
@@ -691,7 +858,7 @@
 					
 					if(populate_varian[grouperSatuan] === undefined) {
 						populate_varian[grouperSatuan] = {};
-						populate_varian[grouperSatuan]["text"] = $("#varian_satuan_" + grouperSatuan).find("td:eq(1)").text();
+						populate_varian[grouperSatuan]["text"] = $("#single_satuan_grouper_" + grouperSatuan + "_1").find("td:eq(1)").text();
 						if(populate_varian[grouperSatuan]["data"] === undefined) {
 							populate_varian[grouperSatuan]["data"] = [];	
 						}
@@ -750,12 +917,96 @@
 			
 			//Halaman 3
 			var populate_harga = [];
+
+			$("#table-penjamin tbody tr").each(function() {
+				$(this).find("td.harga_penjamin_item").each(function(){
+					var varianHarga = $(this).attr("id").split("_");
+					varianHarga = varianHarga[varianHarga.length - 1];
+
+					var satuanHarga = $(this).attr("satuan").split("_");
+					satuanHarga = satuanHarga[satuanHarga.length - 1];
+
+					var penjaminHarga = $(this).attr("penjamin").split("_");
+					penjaminHarga = penjaminHarga[penjaminHarga.length - 1];
+
+					var nilaiHarga = $(this).find("input").inputmask("unmaskedvalue");
+					if(parseFloat(nilaiHarga) > 0) {
+						populate_harga.push({
+							"penjamin":penjaminHarga,
+							"satuan": satuanHarga,
+							"varian": varianHarga,
+							"nilai": nilaiHarga
+						});
+					}
+				});
+			});
 		
 			//Halaman 4
-			var populate_lokasi = [];	
+			var populate_lokasi = [];
+
+			$("#table-lokasi-gudang tbody tr").each(function() {
+
+				var UIDGudang = $(this).attr("id").split("_");
+				UIDGudang = UIDGudang[UIDGudang.length - 1];
+
+				var namaRak = $(this).find("td input").val();
+
+				if(namaRak != "") {
+					populate_lokasi.push({
+						"gudang": UIDGudang,
+						"rak": namaRak
+					});
+				}
+
+			});
+
 
 			//Halaman 5
 			var populate_monitoring = [];
+
+			$("#table-monitoring tbody tr").each(function() {
+				var gudangMonitor = $(this).find("input").attr("gudang-monitor");
+				var satuanMonitor = $(this).find("input").attr("satuan-monitor");
+				var varianMonitor = $(this).find("input").attr("varian-monitor");
+
+				var nilaiMinimum = $("#nilai_minimum_" + gudangMonitor + "_" + satuanMonitor + "_" + varianMonitor).inputmask("unmaskedvalue");
+				var nilaiMaximum = $("#nilai_maksimum_" + gudangMonitor + "_" + satuanMonitor + "_" + varianMonitor).inputmask("unmaskedvalue");
+
+				populate_monitoring.push({
+					"gudang-monitor": gudangMonitor,
+					"satuan-monitor": satuanMonitor,
+					"varian-monitor": varianMonitor,
+					"nilai-minimum": nilaiMinimum,
+					"nilai-maximum": nilaiMaximum
+				});
+			});
+
+			console.log({
+				request: MODE + "_item",
+				uid:uid,
+				save_mode:stay,
+				segment_informasi:{
+					nama:nama,
+					kode:kode,
+					kategori:kategori,
+					satuan_terkecil:satuan_terkecil,
+					manufacture:manufacture,
+					keterangan:keterangan
+				},
+				segment_satuan: {
+					populate_konversi:populate_konversi,
+					populate_varian:populate_varian
+				},
+				segment_harga: {
+					populate_harga: populate_harga
+				},
+				segment_lokasi: {
+					populate_lokasi: populate_lokasi
+				},
+				segment_monitor: {
+					populate_monitoring: populate_monitoring
+				}
+			});
 
 			/*
 			
@@ -764,7 +1015,7 @@
 
 			*/
 
-			//if(nama != "" && kode != "") {
+			if(nama != "" && kode != "") {
 				$.ajax({
 					url:__HOSTAPI__ + "/Inventori",
 					async:false,
@@ -775,32 +1026,45 @@
 						request: MODE + "_item",
 						uid:uid,
 						save_mode:stay,
-						/*segment_informasi:{
+						segment_informasi:{
 							nama:nama,
 							kode:kode,
 							kategori:kategori,
 							satuan_terkecil:satuan_terkecil,
 							manufacture:manufacture,
 							keterangan:keterangan
-						},*/
+						},
 						segment_satuan: {
 							populate_konversi:populate_konversi,
 							populate_varian:populate_varian
+						},
+						segment_harga: {
+							populate_harga: populate_harga
+						},
+						segment_lokasi: {
+							populate_lokasi: populate_lokasi
+						},
+						segment_monitor: {
+							populate_monitoring: populate_monitoring
 						}
 					},
 					type:"POST",
 					success:function(response) {
 						console.log(response);
 						if(stay) {
-							MODE = "edit";
-							$("#mode_item").html("Edit");
 							uid = response.response_package.response_uid;
-							if(response.response_package.response_error == 0) {
-								notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");	
-							} else if(response.response_package.response_error > 0) {
-								notification ("warning", "Terjadi kesalahan data, silahkan cek kembali data yang telah diinput", 3000, "hasil_tambah_error");
+							if(uid !== undefined) {
+								if(response.response_package.response_error == 0) {
+									notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");
+									MODE = "edit";
+									$("#mode_item").html("Edit " + uid);
+								} else if(response.response_package.response_error > 0) {
+									notification ("warning", "Terjadi kesalahan data, silahkan cek kembali data yang telah diinput", 3000, "hasil_tambah_error");
+								} else {
+									notification ("danger", JSON.stringify(response), 3000, "hasil_tambah_dev");
+								}
 							} else {
-								notification ("danger", JSON.stringify(response), 3000, "hasil_tambah_dev");
+								notification ("warning", "UID Gagal Set", 3000, "uid_error");
 							}
 						} else {
 							location.href = __HOSTNAME__ + "/master/inventori";	
@@ -811,18 +1075,20 @@
 						console.log(response);
 					}
 				});
-			//}
+			}
+
+			return MODE;
 		}
 
 
 		//Prepare Saving Data
 		$("#btn_save_data_stay").click(function() {
-			saveItem(__HOSTNAME__, __HOSTAPI__, MODE, true);
+			MODE = saveItem(__HOSTNAME__, __HOSTAPI__, MODE, true);
 			return false;
 		});
 
 		$("#btn_save_data").click(function(){
-			saveItem(__HOSTNAME__, __HOSTAPI__, MODE);
+			MODE = saveItem(__HOSTNAME__, __HOSTAPI__, MODE);
 			return false;
 		});
 

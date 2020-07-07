@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace PondokCoder;
 
@@ -7,7 +7,7 @@ use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Authorization as Authorization;
 
-class Penjamin extends Utility {
+class Lantai extends Utility {
 	static $pdo;
 	static $query;
 
@@ -20,15 +20,16 @@ class Penjamin extends Utility {
 		self::$query = new Query(self::$pdo);
 	}
 
+
 	public function __GET__($parameter = array()) {
 		try {
 			switch($parameter[1]) {
-				case 'penjamin':
-					return self::get_penjamin();
+				case 'lantai':
+					return self::get_lantai();
 					break;
 
-				case 'penjamin-detail':
-					return self::get_penjamin_detail($parameter[2]);
+				case 'lantai-detail':
+					return self::get_lantai_detail($parameter[2]);
 					break;
 
 				default:
@@ -40,14 +41,14 @@ class Penjamin extends Utility {
 		}
 	}
 
-	public function __POST__($parameter = array()){
+	public function __POST__($parameter = array()) {
 		switch ($parameter['request']) {
-			case 'tambah_penjamin':
-				return self::tambah_penjamin($parameter);
+			case 'tambah_lantai':
+				return self::tambah_lantai('master_unit_lantai', $parameter);
 				break;
 
-			case 'edit_penjamin':
-				return self::edit_penjamin($parameter);
+			case 'edit_lantai':
+				return self::edit_lantai('master_unit_lantai', $parameter);
 				break;
 
 			default:
@@ -56,23 +57,24 @@ class Penjamin extends Utility {
 		}
 	}
 
-	public function __DELETE__($parameter = array()){
-		return self::delete_penjamin($parameter);
+	public function __DELETE__($parameter = array()) {
+		return self::delete_lantai('master_unit_lantai', $parameter);
 	}
 
 
-	/*=======================GET FUNCTION======================*/
-	private function get_penjamin(){
+	/*====================== GET FUNCTION =====================*/
+	private function get_lantai(){
 		$data = self::$query
-					->select('master_penjamin', array(
-						'uid',
-						'nama',
-						'created_at',
-						'updated_at'
+					->select('master_unit_lantai', 
+						array(
+							'uid',
+							'nama',
+							'created_at',
+							'updated_at'
 						)
-					)	
+					)
 					->where(array(
-							'master_penjamin.deleted_at' => 'IS NULL'
+							'master_unit_lantai.deleted_at' => 'IS NULL'
 						)
 					)
 					->execute();
@@ -86,19 +88,20 @@ class Penjamin extends Utility {
 		return $data;
 	}
 
-	private function get_penjamin_detail($parameter){
+	private function get_lantai_detail($parameter){
 		$data = self::$query
-				->select('master_penjamin', array(
-						'uid',
-						'nama',
-						'created_at',
-						'updated_at'
-,					)
-				)
-				->where(array(
-							'master_penjamin.deleted_at' => 'IS NULL',
+					->select('master_unit_lantai', 
+						array(
+							'uid',
+							'nama',
+							'created_at',
+							'updated_at'
+						)
+					)
+					->where(array(
+							'master_unit_lantai.deleted_at' => 'IS NULL',
 							'AND',
-							'master_penjamin.uid' => '= ?'
+							'master_unit_lantai.uid' => '= ?'
 						),
 						array($parameter)
 					)
@@ -112,16 +115,16 @@ class Penjamin extends Utility {
 
 		return $data;
 	}
+	/*=========================================================*/
 
 
 	/*====================== CRUD ========================*/
-
-	private function tambah_penjamin($parameter){
+	private function tambah_lantai($table, $parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
 		$check = self::duplicate_check(array(
-			'table'=>'master_penjamin',
+			'table'=>$table,
 			'check'=>$parameter['nama']
 		));
 
@@ -132,18 +135,17 @@ class Penjamin extends Utility {
 			return $check;
 		} else {
 			$uid = parent::gen_uuid();
-			$penjamin = self::$query
-						->insert('master_penjamin', array(
+			$lantai = self::$query
+						->insert($table, array(
 								'uid'=>$uid,
 								'nama'=>$parameter['nama'],
 								'created_at'=>parent::format_date(),
 								'updated_at'=>parent::format_date()
 								)
 						)
-						->returning('uid')
 						->execute();
 
-			if ($penjamin['response_result'] > 0) {
+			if ($lantai['response_result'] > 0){
 				$log = parent::log(array(
 							'type'=>'activity',
 							'column'=>array(
@@ -158,7 +160,7 @@ class Penjamin extends Utility {
 							'value'=>array(
 								$uid,
 								$UserData['data']->uid,
-								'master_penjamin',
+								$table,
 								'I',
 								parent::format_date(),
 								'N',
@@ -169,27 +171,27 @@ class Penjamin extends Utility {
 					);
 			}
 
-			return $penjamin;
+			return $lantai;
 
 		}
 	}
 
-	private function edit_penjamin($parameter) {
+	private function edit_lantai($table, $parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$old = self::get_penjamin_detail($parameter['uid']);
+		$old = self::get_lantai_detail($parameter['uid']);
 
-		$penjamin = self::$query
-				->update('master_penjamin', array(
+		$lantai = self::$query
+				->update($table, array(
 						'nama'=>$parameter['nama'],
 						'updated_at'=>parent::format_date()
 					)
 				)
 				->where(array(
-					'master_penjamin.deleted_at' => 'IS NULL',
+					$table . '.deleted_at' => 'IS NULL',
 					'AND',
-					'master_penjamin.uid' => '= ?'
+					$table . '.uid' => '= ?'
 					),
 					array(
 						$parameter['uid']
@@ -197,7 +199,7 @@ class Penjamin extends Utility {
 				)
 				->execute();
 
-		if ($penjamin['response_result'] > 0){
+		if ($lantai['response_result'] > 0){
 			unset($parameter['access_token']);
 
 			$log = parent::log(array(
@@ -216,7 +218,7 @@ class Penjamin extends Utility {
 					'value'=>array(
 						$parameter['uid'],
 						$UserData['data']->uid,
-						'master_penjamin',
+						$table,
 						'U',
 						json_encode($old['response_data'][0]),
 						json_encode($parameter),
@@ -229,24 +231,24 @@ class Penjamin extends Utility {
 			);
 		}
 
-		return $penjamin;
+		return $lantai;
 	}
 
-	private function delete_penjamin($parameter){
+	private function delete_lantai($table, $parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$penjamin = self::$query
-			->delete($parameter[6])
+		$lantai = self::$query
+			->delete($table)
 			->where(array(
-					$parameter[6] . '.uid' => '= ?'
+					$table . '.uid' => '= ?'
 				), array(
-					$parameter[7]	
+					$parameter[6]	
 				)
 			)
 			->execute();
 
-		if ($penjamin['response_result'] > 0){
+		if ($lantai['response_result'] > 0){
 			$log = parent::log(array(
 					'type'=>'activity',
 					'column'=>array(
@@ -259,9 +261,9 @@ class Penjamin extends Utility {
 						'login_id'
 					),
 					'value'=>array(
-						$parameter[7],
-						$UserData['data']->uid,
 						$parameter[6],
+						$UserData['data']->uid,
+						$table,
 						'D',
 						parent::format_date(),
 						'N',
@@ -272,7 +274,7 @@ class Penjamin extends Utility {
 			);
 		}
 
-		return $penjamin;
+		return $lantai;
 	}
 
 
@@ -291,5 +293,4 @@ class Penjamin extends Utility {
 		))
 		->execute();
 	}
-
 }

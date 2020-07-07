@@ -5,6 +5,7 @@
 	<title><?php echo __APPS_NAME__; ?></title>
 	<meta name="robots" content="noindex">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/simplebar.min.css" rel="stylesheet">
+	<?php require 'plugins/google/font.php'; ?>
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/app.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/app.rtl.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-material-icons.css" rel="stylesheet">
@@ -53,5 +54,6 @@
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/jqvmap.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/croppie-master/croppie.css" rel="stylesheet">
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/css/rSlider.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/custom.css" rel="stylesheet">
 </head>

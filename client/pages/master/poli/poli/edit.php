@@ -25,7 +25,7 @@
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item">Master Poli</li>
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/poli/poli">Poli</a></li>
-					<li class="breadcrumb-item active" aria-current="page">Tambah</li>
+					<li class="breadcrumb-item active" aria-current="page">Edit</li>
 				</ol>
 			</nav>
 		</div>
@@ -67,7 +67,7 @@
 							</div>
 							<hr />
 		                    <ul class="list-inline float-right">
-	                            <li><button type="button" class="btn btn-primary next-step btnNext btnNextInfo" disabled>Simpan dan lanjut</button></li>
+	                            <li><button type="button" class="btn btn-primary next-step btnNext btnNextInfo">Simpan dan lanjut</button></li>
 	                        </ul>
 	                    </div>
 

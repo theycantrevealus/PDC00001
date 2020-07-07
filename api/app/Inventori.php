@@ -835,7 +835,6 @@ class Inventori extends Utility {
 				$check['response_message'] = 'Duplicate data detected';
 				$check['response_result'] = 0;
 				unset($check['response_data']);
-				return $check;
 			} else {
 				$worker = self::$query->insert('master_inv', array(
 					'uid' => $uid,
@@ -849,7 +848,7 @@ class Inventori extends Utility {
 					'updated_at' => parent::format_date()
 				))
 				->execute();
-
+				$worker['response_uid'] = $uid;
 				if($worker['response_result'] > 0) {
 					$log = parent::log(array(
 						'type' => 'activity',
@@ -876,12 +875,11 @@ class Inventori extends Utility {
 				} else {
 					$error_count += 1;
 				}
-
-				if($parameter['save_mode'] == true) {
-					$worker['response_uid'] = $uid;
-				}
-			}	
+			}
 		}
+
+		//Check UID isset
+		$varian_matrix = array();
 
 		if(isset($parameter['segment_satuan'])) {
 
@@ -942,10 +940,12 @@ class Inventori extends Utility {
 
 			//Save Data Varian
 			foreach ($parameter['segment_satuan']['populate_varian'] as $key => $value) {
+				$varian_matrix[$key] = array();
 				//Key = Satuan
 				//Value = array kemasan
 				foreach ($value as $VarianKy => $VarianValue) {
 					$check = self::$query->select('master_inv_satuan_varian', array(
+						'id',
 						'nama'
 					))
 					->where(array(
@@ -959,8 +959,30 @@ class Inventori extends Utility {
 					))
 					->execute();
 
-					if($check['response_result'] > 0) {
-						//update
+					if(count($check['response_data']) > 0) {
+						$worker = self::$query->update('master_inv_satuan_varian', array(
+							'nama' => $VarianValue,
+							'updated_at' => parent::format_date(),
+							'deleted_at' => 'NULL'
+						))
+						->where(array(
+							'master_inv_satuan_varian.barang' => '= ?',
+							'AND',
+							'master_inv_satuan_varian.satuan' => '= ?',
+							'AND',
+							'master_inv_satuan_varian.nama' => '= ?',
+							'AND',
+							'master_inv_satuan_varian.id' => '= ?'
+						), array(
+							$uid, $key, $VarianValue, $check['response_data'][0]['id']
+						))
+						->execute();
+						if($worker['response_result'] > 0) {
+							array_push($varian_matrix[$key], $check['response_data'][0]['id']);
+							//log
+						} else {
+							$error_count += 1;
+						}
 					} else {
 						//insert
 						$worker = self::$query->insert('master_inv_satuan_varian', array(
@@ -970,8 +992,10 @@ class Inventori extends Utility {
 							'created_at' => parent::format_date(),
 							'updated_at' => parent::format_date()
 						))
+						->returning('id')
 						->execute();
 						if($worker['response_result'] > 0) {
+							array_push($varian_matrix[$key], $worker['response_unique']);
 							//log
 						} else {
 							$error_count += 1;
@@ -980,6 +1004,202 @@ class Inventori extends Utility {
 				}
 			}
 		}
+
+		$varianParsed = array();
+
+		foreach ($varian_matrix as $key => $value) {
+			for($az = 0; $az < count($value); $az++) {
+				if(!in_array($value[$az], $varianParsed)) {
+					array_push($varianParsed, $value[$az]);
+				}
+			}
+		}
+
+		if(isset($parameter['segment_harga'])) {
+			foreach ($parameter['segment_harga']['populate_harga'] as $key => $value) {
+				$check = self::$query->select('master_inv_harga', array(
+					'id'
+				))
+				->where(array(
+					'barang' => '= ?',
+					'AND',
+					'penjamin' => '= ?',
+					'AND',
+					'satuan' => '= ?',
+					'AND',
+					'varian' => '= ?',
+					'AND',
+					'deleted_at' => 'IS NULL'
+				), array(
+					$uid, $value['penjamin'], $value['satuan'], $varianParsed[intval($value['varian'])]
+				))
+				->execute();
+
+				if(count($check['response_data']) > 0) {
+					//update
+					$worker = self::$query->update('master_inv_harga', array(
+						'harga' => floatval($value['nilai'])
+					))
+					->where(array(
+						'barang' => '= ?',
+						'AND',
+						'penjamin' => '= ?',
+						'AND',
+						'satuan' => '= ?',
+						'AND',
+						'varian' => '= ?'
+					), array(
+						$uid, $value['penjamin'], $value['satuan'], $varianParsed[intval($value['varian'])]
+					))
+					->execute();
+					
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				} else {
+					//insert
+					$worker = self::$query->insert('master_inv_harga', array(
+						'barang' => $uid,
+						'penjamin' => $value['penjamin'],
+						'satuan' => $value['satuan'],
+						'varian' => $varianParsed[intval($value['varian'])],
+						'harga' => floatval($value['nilai']),
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+					->execute();
+
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				}
+			}
+		}
+
+
+
+		if(isset($parameter['segment_lokasi'])) {
+			foreach ($parameter['segment_lokasi']['populate_lokasi'] as $key => $value) {
+				$check = self::$query->select('master_inv_gudang_rak', array(
+					'id'
+				))
+				->where(array(
+					'barang' => '= ?',
+					'AND',
+					'gudang' => '= ?',
+					'AND',
+					'deleted_at' => 'IS NULL'
+				), array(
+					$uid, $value['gudang']
+				))
+				->execute();
+
+				if(count($check['response_data']) > 0) {
+					//update
+					$worker = self::$query->update('master_inv_gudang_rak', array(
+						'rak' => $value['rak']
+					))
+					->where(array(
+						'barang' => '= ?',
+						'AND',
+						'gudang' => '= ?',
+						'AND',
+						'deleted_at' => 'IS NULL'
+					), array(
+						$uid, $value['gudang']
+					))
+					->execute();
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				} else {
+					//insert
+					$worker = self::$query->insert('master_inv_gudang_rak', array(
+						'barang' => $uid,
+						'rak' => $value['rak'],
+						'gudang' => $value['gudang'],
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+					->execute();
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				}
+			}
+		}
+
+
+		if(isset($parameter['segment_monitor'])) {
+			
+			foreach ($parameter['segment_monitor']['populate_monitoring'] as $key => $value) {
+				$check = self::$query->select('master_inv_monitoring', array(
+					'id'
+				))
+				->where(array(
+					'barang' => '= ?',
+					'AND',
+					'gudang' => '= ?',
+					'AND',
+					'satuan' => '= ?',
+					'AND',
+					'varian' => '= ?'
+				), array(
+					$uid, $value['gudang-monitor'], $value['satuan-monitor'], $varianParsed[intval($value['varian-monitor'])]
+				))
+				->execute();
+
+				if(count($check['response_data']) > 0) {
+					//update
+					$worker = self::$query->update('master_inv_monitoring', array(
+						'min' => $value['nilai-minimum'],
+						'max' => $value['nilai-maximum']
+					))
+					->where(array(
+						'barang' => '= ?',
+						'AND',
+						'gudang' => '= ?',
+						'AND',
+						'satuan' => '= ?',
+						'AND',
+						'varian' => '= ?'
+					), array(
+						$uid, $value['gudang-monitor'], $value['satuan-monitor'], $varianParsed[intval($value['varian-monitor'])]
+					))
+					->execute();
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				} else {
+					//insert
+					$worker = self::$query->insert('master_inv_monitoring', array(
+						'barang' => $uid,
+						'gudang' => $value['gudang-monitor'],
+						'satuan' => $value['satuan-monitor'],
+						'varian' =>  $varianParsed[intval($value['varian-monitor'])],
+						'min' => $value['nilai-minimum'],
+						'max' => $value['nilai-maximum']
+					))
+					->execute();
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				}
+			}
+		}
+		$worker['response_uid'] = $uid;
 		$worker['response_error'] = $error_count;
 		return $worker;
 	}
@@ -1000,20 +1220,22 @@ class Inventori extends Utility {
 				$check['response_message'] = 'Duplicate data detected';
 				$check['response_result'] = 0;
 				unset($check['response_data']);
-				return $check;
 			} else {
 				$worker = self::$query->update('master_inv', array(
 					'nama' => $parameter['segment_informasi']['nama'],
 					'kode_barang' => $parameter['segment_informasi']['kode'],
 					'kategori' => $parameter['segment_informasi']['kategori'],
 					'manufacture' => $parameter['segment_informasi']['manufacture'],
-					'satuan_terkecil' => $parameter['segment_informasi']['satuan_terkecil'],
 					'keterangan' => $parameter['segment_informasi']['keterangan'],
-					'created_at' => parent::format_date(),
+					'satuan_terkecil' => $parameter['segment_informasi']['satuan_terkecil'],
 					'updated_at' => parent::format_date()
 				))
 				->where(array(
-					'uid' => $parameter['uid']
+					'master_inv.uid' => '= ?',
+					'AND',
+					'master_inv.deleted_at' => 'IS NULL'
+				), array(
+					$parameter['uid']
 				))
 				->execute();
 
@@ -1030,10 +1252,10 @@ class Inventori extends Utility {
 							'login_id'
 						),
 						'value' => array(
-							$uid,
+							$parameter['uid'],
 							$UserData['data']->uid,
 							'master_inv',
-							'I',
+							'U',
 							parent::format_date(),
 							'N',
 							$UserData['data']->log_id
@@ -1045,10 +1267,12 @@ class Inventori extends Utility {
 				}
 
 				if($parameter['save_mode'] == true) {
-					$worker['response_uid'] = $uid;
+					
 				}
-			}
+			}	
 		}
+
+		$varian_matrix = array();
 
 		if(isset($parameter['segment_satuan'])) {
 
@@ -1109,10 +1333,12 @@ class Inventori extends Utility {
 
 			//Save Data Varian
 			foreach ($parameter['segment_satuan']['populate_varian'] as $key => $value) {
+				$varian_matrix[$key] = array();
 				//Key = Satuan
 				//Value = array kemasan
 				foreach ($value as $VarianKy => $VarianValue) {
 					$check = self::$query->select('master_inv_satuan_varian', array(
+						'id',
 						'nama'
 					))
 					->where(array(
@@ -1122,25 +1348,30 @@ class Inventori extends Utility {
 						'AND',
 						'master_inv_satuan_varian.nama' => '= ?'
 					), array(
-						$uid, $key, $VarianValue
+						$parameter['uid'], $key, $VarianValue
 					))
 					->execute();
 
-					if($check['response_result'] > 0) {
-						//update
+					if(count($check['response_data']) > 0) {
 						$worker = self::$query->update('master_inv_satuan_varian', array(
 							'nama' => $VarianValue,
-							'updated_at' => parent::format_date()
+							'updated_at' => parent::format_date(),
+							'deleted_at' => NULL
 						))
 						->where(array(
-							'master_inv_satuan_varian.id' => '= ?',
+							'master_inv_satuan_varian.barang' => '= ?',
 							'AND',
-							'master_inv_satuan_varian.deleted_at' => 'IS NULL',
+							'master_inv_satuan_varian.satuan' => '= ?',
+							'AND',
+							'master_inv_satuan_varian.nama' => '= ?',
+							'AND',
+							'master_inv_satuan_varian.id' => '= ?'
 						), array(
-							$check['response_data'][0]['id']
+							$parameter['uid'], $key, $VarianValue, $check['response_data'][0]['id']
 						))
 						->execute();
 						if($worker['response_result'] > 0) {
+							array_push($varian_matrix[$key], $check['response_data'][0]['id']);
 							//log
 						} else {
 							$error_count += 1;
@@ -1148,14 +1379,16 @@ class Inventori extends Utility {
 					} else {
 						//insert
 						$worker = self::$query->insert('master_inv_satuan_varian', array(
-							'barang' => $uid,
+							'barang' => $parameter['uid'],
 							'satuan' => $key,
 							'nama' => $VarianValue,
 							'created_at' => parent::format_date(),
 							'updated_at' => parent::format_date()
 						))
+						->returning('id')
 						->execute();
 						if($worker['response_result'] > 0) {
+							array_push($varian_matrix[$key], $worker['response_unique']);
 							//log
 						} else {
 							$error_count += 1;
@@ -1164,7 +1397,203 @@ class Inventori extends Utility {
 				}
 			}
 		}
+
+		$varianParsed = array();
+
+		foreach ($varian_matrix as $key => $value) {
+			for($az = 0; $az < count($value); $az++) {
+				if(!in_array($value[$az], $varianParsed)) {
+					array_push($varianParsed, $value[$az]);
+				}
+			}
+		}
+
+		if(isset($parameter['segment_harga'])) {
+			foreach ($parameter['segment_harga']['populate_harga'] as $key => $value) {
+				$check = self::$query->select('master_inv_harga', array(
+					'id'
+				))
+				->where(array(
+					'barang' => '= ?',
+					'AND',
+					'penjamin' => '= ?',
+					'AND',
+					'satuan' => '= ?',
+					'AND',
+					'varian' => '= ?',
+					'AND',
+					'deleted_at' => 'IS NULL'
+				), array(
+					$parameter['uid'], $value['penjamin'], $value['satuan'], $varianParsed[intval($value['varian'])]
+				))
+				->execute();
+
+				if(count($check['response_data']) > 0) {
+					//update
+					$worker = self::$query->update('master_inv_harga', array(
+						'harga' => floatval($value['nilai'])
+					))
+					->where(array(
+						'barang' => '= ?',
+						'AND',
+						'penjamin' => '= ?',
+						'AND',
+						'satuan' => '= ?',
+						'AND',
+						'varian' => '= ?'
+					), array(
+						$parameter['uid'], $value['penjamin'], $value['satuan'], $varianParsed[intval($value['varian'])]
+					))
+					->execute();
+					
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				} else {
+					//insert
+					$worker = self::$query->insert('master_inv_harga', array(
+						'barang' => $parameter['uid'],
+						'penjamin' => $value['penjamin'],
+						'satuan' => $value['satuan'],
+						'varian' => $varianParsed[intval($value['varian'])],
+						'harga' => floatval($value['nilai']),
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+					->execute();
+
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				}
+			}
+		}
+
+		if(isset($parameter['segment_lokasi'])) {
+			foreach ($parameter['segment_lokasi']['populate_lokasi'] as $key => $value) {
+				$check = self::$query->select('master_inv_gudang_rak', array(
+					'id'
+				))
+				->where(array(
+					'barang' => '= ?',
+					'AND',
+					'gudang' => '= ?',
+					'AND',
+					'deleted_at' => 'IS NULL'
+				), array(
+					$parameter['uid'], $value['gudang']
+				))
+				->execute();
+
+				if(count($check['response_data']) > 0) {
+					//update
+					$worker = self::$query->update('master_inv_gudang_rak', array(
+						'rak' => $value['rak'],
+						'updated_at' => parent::format_date()
+					))
+					->where(array(
+						'barang' => '= ?',
+						'AND',
+						'gudang' => '= ?',
+						'AND',
+						'deleted_at' => 'IS NULL'
+					), array(
+						$parameter['uid'], $value['gudang']
+					))
+					->execute();
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				} else {
+					//insert
+					$worker = self::$query->insert('master_inv_gudang_rak', array(
+						'barang' => $parameter['uid'],
+						'rak' => $value['rak'],
+						'gudang' => $value['gudang'],
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+					->execute();
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				}
+			}
+		}
+
+		if(isset($parameter['segment_monitor'])) {
+			
+			foreach ($parameter['segment_monitor']['populate_monitoring'] as $key => $value) {
+				$check = self::$query->select('master_inv_monitoring', array(
+					'id'
+				))
+				->where(array(
+					'barang' => '= ?',
+					'AND',
+					'gudang' => '= ?',
+					'AND',
+					'satuan' => '= ?',
+					'AND',
+					'varian' => '= ?'
+				), array(
+					$parameter['uid'], $value['gudang-monitor'], $value['satuan-monitor'], $varianParsed[intval($value['varian-monitor'])]
+				))
+
+				->execute();
+
+				if(count($check['response_data']) > 0) {
+					//update
+					$worker = self::$query->update('master_inv_monitoring', array(
+						'min' => floatval($value['nilai-minimum']),
+						'max' => floatval($value['nilai-maximum'])
+					))
+					->where(array(
+						'barang' => '= ?',
+						'AND',
+						'gudang' => '= ?',
+						'AND',
+						'satuan' => '= ?',
+						'AND',
+						'varian' => '= ?'
+					), array(
+						$parameter['uid'], $value['gudang-monitor'], $value['satuan-monitor'], $varianParsed[intval($value['varian-monitor'])]
+					))
+					->execute();
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				} else {
+					//insert
+					$worker = self::$query->insert('master_inv_monitoring', array(
+						'barang' => $parameter['uid'],
+						'gudang' => $value['gudang-monitor'],
+						'satuan' => $value['satuan-monitor'],
+						'varian' =>  $varianParsed[intval($value['varian-monitor'])],
+						'min' => floatval($value['nilai-minimum']),
+						'max' => floatval($value['nilai-maximum'])
+					))
+					->execute();
+					if($worker['response_result'] > 0) {
+						//
+					} else {
+						//
+					}
+				}
+			}
+		}
+
 		$worker['response_error'] = $error_count;
+		$worker['response_uid'] = $parameter['uid'];
 		return $worker;
 	}
 //===========================================================================================DELETE
