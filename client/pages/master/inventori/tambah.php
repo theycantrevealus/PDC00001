@@ -4,7 +4,7 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/supplier">Master Supplier</a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/supplier">Master Item</a></li>
 					<li class="breadcrumb-item active" aria-current="page" id="mode_item">Tambah</li>
 				</ol>
 			</nav>
@@ -136,25 +136,21 @@
 					<div class="tab-pane show fade" id="tab-satuan">
 						<div class="row">
 							<div class="col-md-12">
-								<table class="table">
+								<table class="table table-bordered">
 									<tr>
-										<td>Kode</td>
-										<td>:</td>
+										<td style="width: 20%;">Kode</td>
 										<td class="label_kode"></td>
 									</tr>
 									<tr>
 										<td>Nama</td>
-										<td>:</td>
 										<td class="label_nama"></td>
 									</tr>
 									<tr>
 										<td>Manufacture</td>
-										<td>:</td>
 										<td class="label_manufacture"></td>
 									</tr>
 									<tr>
 										<td>Kategori</td>
-										<td>:</td>
 										<td class="label_kategori"></td>
 									</tr>
 								</table>
@@ -203,25 +199,21 @@
 					<div class="tab-pane show fade" id="tab-penjamin">
 						<div class="row">
 							<div class="col-md-6">
-								<table class="table">
+								<table class="table table-bordered">
 									<tr>
-										<td>Kode</td>
-										<td>:</td>
+										<td style="width: 20%;">Kode</td>
 										<td class="label_kode"></td>
 									</tr>
 									<tr>
 										<td>Nama</td>
-										<td>:</td>
 										<td class="label_nama"></td>
 									</tr>
 									<tr>
 										<td>Manufacture</td>
-										<td>:</td>
 										<td class="label_manufacture"></td>
 									</tr>
 									<tr>
 										<td>Kategori</td>
-										<td>:</td>
 										<td class="label_kategori"></td>
 									</tr>
 								</table>
@@ -243,7 +235,7 @@
 									<th>No</th>
 									<th>Penjamin</th>
 									<th>Satuan - Varian</th>
-									<th style="width: 30%;">Harga Jual</th>
+									<th style="width: 30%;">Margin Profit Penjualan</th>
 								</tr>
 							</thead>
 							<tbody></tbody>
@@ -252,25 +244,21 @@
 					<div class="tab-pane show fade" id="tab-lokasi">
 						<div class="row">
 							<div class="col-md-12">
-								<table class="table">
+								<table class="table table-bordered">
 									<tr>
-										<td>Kode</td>
-										<td>:</td>
+										<td style="width: 20%;">Kode</td>
 										<td class="label_kode"></td>
 									</tr>
 									<tr>
 										<td>Nama</td>
-										<td>:</td>
 										<td class="label_nama"></td>
 									</tr>
 									<tr>
 										<td>Manufacture</td>
-										<td>:</td>
 										<td class="label_manufacture"></td>
 									</tr>
 									<tr>
 										<td>Kategori</td>
-										<td>:</td>
 										<td class="label_kategori"></td>
 									</tr>
 								</table>
@@ -279,7 +267,7 @@
 						<table class="table table-bordered" id="table-lokasi-gudang">
 							<thead>
 								<tr>
-									<th>No</th>
+									<th style="width: 10%;">No</th>
 									<th>Gudang</th>
 									<th>No Rak</th>
 								</tr>
@@ -290,31 +278,27 @@
 					<div class="tab-pane show fade" id="tab-monitoring">
 						<div class="row">
 							<div class="col-md-12">
-								<table class="table">
+								<table class="table table-bordered">
 									<tr>
-										<td>Kode</td>
-										<td>:</td>
+										<td style="width: 20%;">Kode</td>
 										<td class="label_kode"></td>
 									</tr>
 									<tr>
 										<td>Nama</td>
-										<td>:</td>
 										<td class="label_nama"></td>
 									</tr>
 									<tr>
 										<td>Manufacture</td>
-										<td>:</td>
 										<td class="label_manufacture"></td>
 									</tr>
 									<tr>
 										<td>Kategori</td>
-										<td>:</td>
 										<td class="label_kategori"></td>
 									</tr>
 								</table>
 							</div>
 						</div>
-						<table class="table table-bordered">
+						<table class="table table-bordered" id="table-monitoring">
 							<thead>
 								<tr>
 									<th rowspan="2">No</th>
@@ -322,30 +306,13 @@
 									<th colspan="4">Jumlah</th>
 								</tr>
 								<tr>
-									<th>Minimum</th>
-									<th></th>
-									<th>Maksimum</th>
-									<th></th>
+									<th class="col-md-2">Minimum</th>
+									<th class="col-md-2"></th>
+									<th class="col-md-2">Maksimum</th>
+									<th class="col-md-2"></th>
 								</tr>
 							</thead>
-							<tbody>
-								<tr>
-									<td>1</td>
-									<td>Gudang Dinkes</td>
-									<td>
-										<input type="number"  class="form-control" />
-									</td>
-									<td>
-										<select class="form-control"></select>
-									</td>
-									<td>
-										<input type="number"  class="form-control" />
-									</td>
-									<td>
-										<select class="form-control"></select>
-									</td>
-								</tr>
-							</tbody>
+							<tbody></tbody>
 						</table>
 					</div>
 				</div>

@@ -70,24 +70,22 @@ class Contoh extends Utility {
 					return
 
 						self::$query
-							->select('pegawai_akses', array(
+							->select('log_activity', array(
 								'id AS id_akses'
 							))
 
-							->join('pegawai', array(
-								'uid',
-								'email',
-								'nama AS nama_pegawai'
+							->join('log_login', array(
+								'id',
+								'user_uid'
 							))
 
-							->join('modul', array(
-								'id AS id_modul',
-								'nama AS nama_modul'
+							->join('pegawai', array(
+								'nama'
 							))
 
 							->on(array(
-								array('pegawai_akses.uid_pegawai','=','pegawai.uid'),
-								array('pegawai_akses.modul','=','modul.id')
+								array('log_activity.login_id', '=', 'log_login.id'),
+								array('log_activity.user_uid', '=', 'pegawai.uid')
 							))
 
 							->execute();
