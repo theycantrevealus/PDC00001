@@ -4,10 +4,11 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/supplier">Master Item</a></li>
-					<li class="breadcrumb-item active" aria-current="page" id="mode_item">Tambah</li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/igd">IGD</a></li>
+					<li class="breadcrumb-item active" aria-current="page" id="mode_item">Asesmen Awal</li>
 				</ol>
 			</nav>
+			<h4>IGD - Asesmen Awal</h4>
 		</div>
 	</div>
 </div>
@@ -136,7 +137,7 @@
 	</div>
 	<div class="row">
 		<div class="col-md-12 text-right">
-			<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+			<a  href="<?php echo __HOSTNAME__; ?>/igd" class="btn btn-danger">Kembali</a>
 			<button type="button" class="btn btn-primary" id="btnSubmit">Submit</button>
 		</div>
 	</div>

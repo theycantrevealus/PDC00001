@@ -8,13 +8,11 @@
 					<li class="breadcrumb-item active" aria-current="page">Gudang</li>
 				</ol>
 			</nav>
+			<h1 class="m-0">IGD</h1>
 		</div>
-		<!-- <a href="<?php echo __HOSTNAME__; ?>/master/inventori/gudang/tambah" class="btn btn-info btn-sm ml-3">
-			<i class="fa fa-plus"></i> Tambah Gudang
-		</a> -->
-		<a href="<?php echo __HOSTNAME__; ?>/igd/tambah" class="btn btn-sm btn-info" id="tambah-igd">
+		<button class="btn btn-info" id="tambah-igd">
 			<i class="fa fa-plus"></i> Tambah
-		</a>
+		</button>
 	</div>
 </div>
 

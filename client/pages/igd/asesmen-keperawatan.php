@@ -35,6 +35,16 @@
 	</ul>
 </div>
 <div class="card card-body tab-content">
-	<div class="tab-pane active show fade" id="tab-informasi">
+	<div class="tab-pane active show fade" id="tab-keperawatan-1">
+		<?php require 'asesmen-keperawatan-1.php'; ?>
+	</div>
+	<div class="tab-pane active show fade" id="tab-keperawatan-2">
+		<?php require 'asesmen-keperawatan-1.php'; ?>
+	</div>
+	<div class="tab-pane active show fade" id="tab-keperawatan-3">
+		<?php require 'asesmen-keperawatan-1.php'; ?>
+	</div>
+	<div class="tab-pane active show fade" id="tab-keperawatan-4">
+		<?php require 'asesmen-keperawatan-1.php'; ?>
 	</div>
 </div>
