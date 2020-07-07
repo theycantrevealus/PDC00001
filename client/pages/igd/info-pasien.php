@@ -6,7 +6,11 @@
 			</div>
 			<div class="col-md-10">
 				<b>101-02-11</b><br />
-				John Doe
+				<span>JOHN DOE</span>
+				<br />
+				<span>Laki-laki</span>
+				<br />
+				<span>10 Januari 1989</span>
 			</div>
 		</div>
 	</div>
