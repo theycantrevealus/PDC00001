@@ -46,6 +46,7 @@
 			</div>
 		</div>
 	</div>
+	<div class="notification-container"></div>
 	<!-- <div id="app-settings">
 		<app-settings layout-active="default" :layout-location="{
 	  'default': 'index.html',
@@ -77,7 +78,59 @@
 			}
 		}
 	?>
+	<script type="text/javascript">
+		$(function() {
+			$(".tooltip-custom").each(function() {
+				var data = $(this).attr("data-toggle");
+				$(this).tooltip({
+					placement: "top",
+					title: data
+				});
+			});
+		});
+		
+		function inArray(needle, haystack) {
+			var length = haystack.length;
+			for(var i = 0; i < length; i++) {
+				if(haystack[i] == needle) return true;
+			}
+			return false;
+		}
 
+		function notification (mode, title, time, identifier) {
+			var alertContainer = document.createElement("DIV");
+			var alertTitle = document.createElement("STRONG");
+			var alertDismiss = document.createElement("BUTTON");
+			var alertCloseButton = document.createElement("SPAN");
+
+			$(alertContainer).addClass("alert alert-dismissible fade show alert-" + mode).attr({
+				"role": "alert",
+				"id": identifier
+			});
+
+			$(alertTitle).html(title);
+
+			$(alertDismiss).attr({
+				"type": "button",
+				"data-dismiss": "alert",
+				"aria-label": "Close"
+			}).addClass("close");
+
+			$(alertCloseButton).attr({
+				"aria-hidden": true
+			}).html("&times;");
+
+			$(alertContainer).append(alertTitle);
+			$(alertDismiss).append(alertCloseButton);
+			$(alertContainer).append(alertDismiss);
+
+			$(".notification-container").append(alertContainer);
+
+			setTimeout(function() {
+				$(alertContainer).fadeOut();
+			}, time);
+		}
+	</script>
 </body>
 
 </html>

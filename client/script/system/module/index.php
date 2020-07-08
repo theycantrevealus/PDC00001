@@ -240,7 +240,8 @@
 							classIdentifier = "primary";
 						}
 
-						return 	"<div class=\"text-warning\">" + ((row["excluded"]) ? "<div class=\"badge badge-danger\">perm-excluded</div>" : "<div class=\"badge badge-success\">perm-included</div>") + "&nbsp;&nbsp;<i class=\"fa fa-cube\"></i>&nbsp;&nbsp;" + row["class_name"] + "::<span class=\"text-" + classIdentifier + "\">" + row["methods_name"] + "()</span></div>";
+						return 	"<div class=\"text-warning\">" + ((row["excluded"]) ? "<div class=\"badge badge-danger\">perm-excluded</div>" : "<div class=\"badge badge-success\">perm-included</div>") + "&nbsp;&nbsp;<i class=\"fa fa-cube\"></i>&nbsp;&nbsp;" + row["class_name"] + "::<span class=\"text-" + classIdentifier + "\">" + row["methods_name"] + "()</span></div>" +
+								"<span class=\"method-caption\"><i class=\"fa fa-pencil-alt edit-method\" id=\"edit_method_" + row["id"] + "\"></i>&nbsp;&nbsp;<b id=\"caption_method_" + row["id"] + "\">" + row["caption"] + "</b><p id=\"remark_method_" + row["id"] + "\">" + row["remark"] + "</p></span>";
 					}
 				}
 			]
@@ -248,6 +249,16 @@
 
 		$("#reload-methods").click(function() {
 			methodsLoader.ajax.url(__HOSTAPI__ + "/Modul/methods_reload").load();
+			return false;
+		});
+
+		$("body").on("click", ".edit-method", function(){
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+
+			$("#txt_nama_method").val($("#caption_method_" + id).html());
+			$("#txt_keterangan_method").val($("#remark_method_" + id).html());
+			$("#modal-edit-method").modal("show");
 			return false;
 		});
 
@@ -315,6 +326,38 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
 				<button type="button" class="btn btn-primary" id="btn_submit_modul">Tambah</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+<div id="modal-edit-method" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Edit Akses</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="txt_nama_modul">Nama Akses:</label>
+					<input type="text" class="form-control" id="txt_nama_method" placeholder="Nama Modul">
+				</div>
+				
+				<div class="form-group">
+					<label for="txt_keterangan_modul">Keterangan:</label>
+					<textarea class="form-control" id="txt_keterangan_method" placeholder="Keterangan Akses"></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" id="btn_submit_method">Save</button>
 			</div>
 		</div>
 	</div>

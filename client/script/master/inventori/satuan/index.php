@@ -72,6 +72,7 @@
 			MODE = "edit";
 			$("#txt_nama").val($("#nama_" + uid).html());
 			$("#form-tambah").modal("show");
+			$("#modal-large-title").html("Edit Satuan");
 			return false;
 		});
 
@@ -79,6 +80,7 @@
 
 			$("#form-tambah").modal("show");
 			MODE = "tambah";
+			$("#modal-large-title").html("Tambah Satuan");
 
 		});
 

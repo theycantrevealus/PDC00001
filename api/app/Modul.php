@@ -345,6 +345,8 @@ class Modul extends Utility {
 			$methods = self::$query->select('akses', array(
 				'id',
 				'class_name',
+				'caption',
+				'remark',
 				'methods_name',
 				'created_at',
 				'updated_at'
@@ -371,6 +373,8 @@ class Modul extends Utility {
 			$methods = self::$query->select('akses', array(
 				'id',
 				'class_name',
+				'caption',
+				'remark',
 				'methods_name',
 				'created_at',
 				'updated_at'
