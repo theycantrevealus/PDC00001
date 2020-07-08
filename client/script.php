@@ -23,6 +23,8 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/inputmask/dist/inputmask.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/jstree/jstree.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/croppie-master/croppie.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/js/rSlider.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/select2/select2.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/select2.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
