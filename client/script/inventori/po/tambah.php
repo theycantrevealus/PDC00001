@@ -8,10 +8,18 @@
 		});
 
 		function check_page_1() {
-			if($("#txt_tanggal").val() != "" && $("#table-detail-po tbody tr:not(.last-row)").length > 0) {
+			if($("#txt_tanggal").val() != "" && $("#table-detail-po tbody tr").not(".last-row").length > 1) {
 				$("#status-utama").fadeIn();
 			} else {
 				$("#status-utama").fadeOut();
+			}
+		}
+
+		function check_page_2() {
+			if($("#po_document_table tbody tr").length > 0) {
+				$("#status-dokumen").fadeIn();
+			} else {
+				$("#status-dokumen").fadeOut();
 			}
 		}
 
@@ -368,6 +376,7 @@
 			}
 		});
 		//=============================================================================================================================
+		var fileList = [];
 		function autoDocument(file) {
 			var newDocRow = document.createElement("TR");
 
@@ -420,7 +429,7 @@
 			}
 
 			var newDeleteDoc = document.createElement("button");
-			$(newDeleteDoc).addClass("btn btn-sm btn-danger").html("<span style=\"display: block;\"><i class=\"fa fa-ban\"></i> Hapus</span>");
+			$(newDeleteDoc).addClass("btn btn-sm btn-danger delete_document").html("<span style=\"display: block;\"><i class=\"fa fa-ban\"></i> Hapus</span>");
 			$(newDocCellAct).append(newDeleteDoc);
 
 			$(newDocRow).append(newDocCellNum);
@@ -428,10 +437,20 @@
 			$(newDocRow).append(newDocCellAct);
 
 			$("#po_document_table").append(newDocRow);
+			rebaseDocument();
 		}
 
 		function rebaseDocument() {
-			//
+			$("#po_document_table tbody tr").each(function(e) {
+				var id = (e + 1);
+				$(this).attr({
+					"id": "document_" + id
+				});
+				$(this).find("td:eq(0)").html((e + 1));
+				$(this).find("td:eq(2) button").attr({
+					"id": "delete_document_" + id
+				});
+			});
 		}
 
 		var pdfjsLib = window['pdfjs-dist/build/pdf'];
@@ -486,7 +505,106 @@
 
 		$("#btnSubmitDocument").click(function() {
 			autoDocument(file);
+			fileList.push(file);
+			check_page_2();
 			$("#form-upload-document").modal("hide");
+		});
+
+		$("body").on("click", ".delete_document", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			fileList.splice((id - 1), 1);
+			$("#document_" + id).hide();
+			rebaseDocument();
+			return false;
+		});
+
+		$("#submitPO").submit(function() {
+			var supplier = $("#txt_supplier").val();
+			var tanggal = $("#txt_tanggal").val();
+			var diskonAll = $("#txt_diskon_all").inputmask("unmaskedvalue");
+			var diskonJenisAll = $("#txt_jenis_diskon_all").val();
+			var keteranganAll = $("#txt_keterangan").val();
+
+			var itemList = [];
+			var form_data = new FormData(this);
+
+			form_data.append("request", "tambah_po");
+			form_data.append("supplier", supplier);
+			form_data.append("tanggal", tanggal);
+			form_data.append("diskonAll", diskonAll);
+			form_data.append("diskonJenisAll", diskonJenisAll);
+			form_data.append("keteranganAll", keteranganAll);
+			form_data.append("fileList", fileList);
+
+			$("#table-detail-po tbody tr").each(function(e) {
+				if(!$(this).hasClass("last-row")) {
+					//PRODUCT
+					var item = $(this).find("td:eq(1) select").val();
+
+					//QTY
+					var qty = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+
+					//SATUAN
+					var satuan = $(this).find("td:eq(3) select").val();
+
+					//HARGA
+					var harga = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
+
+					//DISC
+					var diskon = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
+					var jenis_diskon = $(this).find("td:eq(5) select").val();
+
+					itemList.push({
+						item: item,
+						qty: qty,
+						satuan: satuan,
+						harga: harga,
+						diskon: diskon,
+						jenis_diskon: jenis_diskon
+					});
+				}
+			});
+
+			form_data.append("itemList", itemList);
+
+			if(
+				itemList.length > 0 &&
+				tanggal != ""
+			) {
+				$.ajax({
+					url:__HOSTAPI__ + "/PO",
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					type:"POST",
+					processData: false,
+					contentType: false,
+					data: form_data,
+					success: function(resp) {
+						console.log(resp);
+					},
+					error: function(resp) {
+						console.log(resp);
+					}
+				});
+			} else {
+				if(itemList.length == 0) {
+					notification ("warning", "Input item PO", 3000, "warning_item_po");
+					$("a[href=\"#tab-po-1\"]").click();
+				}
+
+				if(tanggal == "") {
+					notification ("warning", "Tanggal PO Kosong", 3000, "warning_tanggal_po");
+					$("a[href=\"#tab-po-1\"]").click().promise().done(function(){
+						setInterval(function(){
+							$("#txt_tanggal").focus();
+						}, 1000);
+					});
+
+				}
+			}
+			return false;
 		});
 	});
 </script>

@@ -40,24 +40,26 @@
 					</li>
 				</ul>
 			</div>
-			<div class="card card-body tab-content">
-				<div class="tab-pane active show fade" id="tab-po-1">
-					<?php
-						require 'form-po-utama.php';
-					?>
+			<form id="submitPO">
+				<div class="card card-body tab-content">
+					<div class="tab-pane active show fade" id="tab-po-1">
+						<?php
+							require 'form-po-utama.php';
+						?>
+					</div>
+					<div class="tab-pane active show fade" id="tab-po-2">
+						<?php
+							require 'form-po-lampiran.php';
+						?>
+					</div>
 				</div>
-				<div class="tab-pane active show fade" id="tab-po-2">
-					<?php
-						require 'form-po-lampiran.php';
-					?>
-				</div>
-			</div>
-			<button class="btn btn-success">
-				<i class="fa fa-save"></i> Simpan
-			</button>
-			<a href="<?php echo __HOSTNAME__; ?>/inventori/po" class="btn btn-danger">
-				<i class="fa fa-ban"></i> Kembali
-			</a>
+				<button class="btn btn-success" id="btnSubmitPO">
+					<i class="fa fa-save"></i> Simpan
+				</button>
+				<a href="<?php echo __HOSTNAME__; ?>/inventori/po" class="btn btn-danger">
+					<i class="fa fa-ban"></i> Kembali
+				</a>
+			</form>
 		</div>
 	</div>
 </div>
