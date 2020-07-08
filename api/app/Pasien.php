@@ -48,7 +48,7 @@ class Pasien extends Utility {
 				break;
 
 			case 'edit-pasien':
-				//return self::edit_pasien('pasien', $parameter);
+				return self::edit_pasien('pasien', $parameter);
 				break;
 
 			default:
@@ -114,6 +114,7 @@ class Pasien extends Utility {
 					->select($table, array(
 						'uid',
 						'no_rm',
+						'nik',
 						'nama',
 						'panggilan',
 						'tanggal_lahir',
@@ -131,8 +132,11 @@ class Pasien extends Utility {
 						'alamat',
 						'alamat_rt',
 						'alamat_rw',
+						'alamat_provinsi',
+						'alamat_kabupaten',
 						'alamat_kecamatan',
 						'alamat_kelurahan',
+						'warganegara',
 						'no_telp',
 						'created_at',
 						'updated_at'
@@ -227,69 +231,80 @@ class Pasien extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-
 		$dataObj = $parameter['dataObj'];
-		$old = self::get_pasien_detail($dataObj['uid']);
+		$old = self::get_pasien_detail($table, $parameter['uid']);
 
 		$allData = [];
-
-		$allData['updated_at'] = parent::format_date();
 
 		foreach ($dataObj as $key => $value) {
 			$allData[$key] = $value;
 		}
 
-		/*$pasien = self::$query
-					->insert($table, $allData
+		$allData['updated_at'] = parent::format_date();
+
+		$pasien = self::$query
+				->update($table, $allData)
+				->where(array(
+					$table . '.deleted_at' => 'IS NULL',
+					'AND',
+					$table . '.uid' => '= ?'
+					),
+					array(
+						$parameter['uid']
 					)
-					->execute();
+				)
+				->execute();
 
 		if ($pasien['response_result'] > 0){
+			unset($parameter['access_token']);
+
 			$log = parent::log(array(
-						'type'=>'activity',
-						'column'=>array(
-							'unique_target',
-							'user_uid',
-							'table_name',
-							'action',
-							'logged_at',
-							'status',
-							'login_id'
-						),
-						'value'=>array(
-							$uid,
-							$UserData['data']->uid,
-							$table,
-							'I',
-							parent::format_date(),
-							'N',
-							$UserData['data']->log_id
-						),
-						'class'=>__CLASS__
-					)
-				);
-		}*/
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'old_value',
+						'new_value',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$parameter['uid'],
+						$UserData['data']->uid,
+						$table,
+						'U',
+						json_encode($old['response_data'][0]),
+						json_encode($parameter),
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				)
+			);
+		}
 
-		return $allData;
-
-		
+		return $pasien;
 	}
 
-	private function delete_pasien($parameter){
+	private function delete_pasien($table, $parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$penjamin = self::$query
-			->delete($parameter[6])
+		$pasien = self::$query
+			->delete($table)
 			->where(array(
-					$parameter[6] . '.uid' => '= ?'
+					$table . '.uid' => '= ?'
 				), array(
-					$parameter[7]	
+					$parameter[6]	
 				)
 			)
 			->execute();
 
-		if ($penjamin['response_result'] > 0){
+		if ($pasien['response_result'] > 0){
 			$log = parent::log(array(
 					'type'=>'activity',
 					'column'=>array(
@@ -302,9 +317,9 @@ class Pasien extends Utility {
 						'login_id'
 					),
 					'value'=>array(
-						$parameter[7],
-						$UserData['data']->uid,
 						$parameter[6],
+						$UserData['data']->uid,
+						$table,
 						'D',
 						parent::format_date(),
 						'N',
@@ -315,7 +330,7 @@ class Pasien extends Utility {
 			);
 		}
 
-		return $penjamin;
+		return $pasien;
 	}
 
 	/*private function get_table_col($table_name){
