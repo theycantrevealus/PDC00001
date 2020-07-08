@@ -33,7 +33,11 @@
 							</div>
 							<div class="form-group">
 								<label for="txt_nama_pegawai">Nama:</label>
-								<input type="text" class="form-control" id="txt_nama_pegawai" placeholder="Enter your email address ..">
+								<input type="text" class="form-control" id="txt_nama_pegawai" placeholder="Nama Pegawai">
+							</div>
+							<div class="form-group">
+								<label for="txt_jabatan">Jabatan:</label>
+								<select class="form-control" id="txt_jabatan"></select>
 							</div>
 							<button type="submit" class="btn btn-primary">Submit</button>
 						</div>
