@@ -73,9 +73,51 @@ class Pegawai extends Utility {
 		}
 	}
 
-	public function __DELETE__($parameter = array()) {
+	/*public function __DELETE__($parameter = array()) {
 		$query = self::$pdo->prepare('UPDATE pegawai SET deleted_at = NOW() WHERE uid = ?');
 		$query->execute(array($parameter));
+	}*/
+	public function __DELETE__($parameter = array()) {
+		return self::delete($parameter);
+	}
+
+	private function delete($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$worker = self::$query
+		->delete($parameter[6])
+		->where(array(
+			$parameter[6] . '.uid' => '= ?'
+		), array(
+			$parameter[7]
+		))
+		->execute();
+		if($worker['response_result'] > 0) {
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter[7],
+					$UserData['data']->uid,
+					$parameter[6],
+					'D',
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+		return $worker;
 	}
 
 //=====================================================================================
@@ -372,7 +414,56 @@ class Pegawai extends Utility {
 
 				->execute();
 	}
-
+	private function tambah_pegawai($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$check = self::duplicate_email(array(
+			'table' => 'pegawai',
+			'check' => $parameter['email']
+		));
+		if(count($check['response_data']) > 0) {
+			$check['response_message'] = 'Duplicate email detected';
+			$check['response_result'] = 0;
+			unset($check['response_data']);
+			return $check;
+		} else {
+			$uid = parent::gen_uuid();
+			$worker = self::$query->insert('pegawai', array(
+				'uid' => $uid,
+				'email' => $parameter['email'],
+				'nama' => $parameter['nama'],
+				'jabatan' => $parameter['jabatan'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->execute();
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type' => 'activity',
+					'column' => array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value' => array(
+						$uid,
+						$UserData['data']->uid,
+						'pegawai',
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class' => __CLASS__
+				));
+			}
+			return $worker;
+		}
+	}
 	private function edit_pegawai($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
@@ -487,6 +578,22 @@ class Pegawai extends Utility {
 			$parameter['table'] . '.deleted_at' => 'IS NULL',
 			'AND',
 			$parameter['table'] . '.nama' => '= ?'
+		), array(
+			$parameter['check']
+		))
+		->execute();
+	}
+
+	private function duplicate_email($parameter) {
+		return self::$query
+		->select($parameter['table'], array(
+			'uid',
+			'email'
+		))
+		->where(array(
+			$parameter['table'] . '.deleted_at' => 'IS NULL',
+			'AND',
+			$parameter['table'] . '.email' => '= ?'
 		), array(
 			$parameter['check']
 		))
