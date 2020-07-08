@@ -57,7 +57,7 @@
 			var conf = confirm("Hapus pegawai?");
 			if(conf) {
 				$.ajax({
-					url:__HOSTAPI__ + "/Pegawai/" + id,
+					url:__HOSTAPI__ + "/Pegawai/pegawai/" + id,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
