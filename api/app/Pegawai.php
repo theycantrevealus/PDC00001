@@ -22,9 +22,15 @@ class Pegawai extends Utility {
 		if($parameter[1] == 'detail') {
 
 			//__HOST__/Pegawai/detail/{uid}
-			return self::get_detail(array(
-				'uid' => $parameter[2]
-			));
+			return self::get_detail($parameter[2]);
+
+		} else if($parameter[1] == 'jabatan') {
+			
+			return self::get_jabatan();
+
+		} else if($parameter[1] == 'jabatan_detail') {
+			
+			return self::get_jabatan_detail($parameter[2]);
 
 		} else if($parameter[1] == 'akses') {
 
@@ -54,6 +60,12 @@ class Pegawai extends Utility {
 				break;
 			case 'update_access':
 				return self::update_access($parameter);
+				break;
+			case 'tambah_jabatan':
+				return self::tambah_jabatan($parameter);
+				break;
+			case 'edit_jabatan':
+				return self::edit_jabatan($parameter);
 				break;
 			default:
 				return array();
@@ -170,6 +182,7 @@ class Pegawai extends Utility {
 				->select('pegawai', array(
 					'uid',
 					'email',
+					'jabatan',
 					'nama',
 					'password',
 					'created_at',
@@ -177,10 +190,167 @@ class Pegawai extends Utility {
 				))
 
 				->where(array(
-					'deleted_at' => 'IS NULL'
+					'pegawai.deleted_at' => 'IS NULL',
+					'AND',
+					'pegawai.uid' => '= ?'
+				), array(
+					$parameter
 				))
 
 				->execute();
+	}
+
+	//JABATAN DETAIL
+	public function get_jabatan_detail($parameter) {
+		$data = self::$query
+		->select('pegawai_jabatan', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'pegawai_jabatan.deleted_at' => 'IS NULL',
+			'AND',
+			'pegawai_jabatan.uid' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+
+	//JABATAN
+	private function get_jabatan() {
+		$data = self::$query->select('pegawai_jabatan', array(
+			'uid', 'nama'
+		))
+		->order(array(
+			'created_at' => 'asc'
+		))
+		->where(array(
+			'pegawai_jabatan.deleted_at' => 'IS NULL'
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $data;
+	}
+
+	//JABATAN TAMBAH
+	private function tambah_jabatan($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$check = self::duplicate_check(array(
+			'table' => 'master_inv_kategori',
+			'check' => $parameter['nama']
+		));
+		if(count($check['response_data']) > 0) {
+			$check['response_message'] = 'Duplicate data detected';
+			$check['response_result'] = 0;
+			unset($check['response_data']);
+			return $check;
+		} else {
+			$uid = parent::gen_uuid();
+			$worker = self::$query->insert('pegawai_jabatan', array(
+				'uid' => $uid,
+				'nama' => $parameter['nama'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->execute();
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type' => 'activity',
+					'column' => array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value' => array(
+						$uid,
+						$UserData['data']->uid,
+						'pegawai_jabatan',
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class' => __CLASS__
+				));
+			}
+			return $worker;
+		}
+	}
+	//JABATAN EDIT
+	private function edit_jabatan($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$old = self::get_jabatan_detail($parameter['uid']);
+
+		$worker = self::$query
+		->update('pegawai_jabatan', array(
+			'nama' => $parameter['nama'],
+			'updated_at' => parent::format_date()
+		))
+		->where(array(
+			'pegawai_jabatan.deleted_at' => 'IS NULL',
+			'AND',
+			'pegawai_jabatan.uid' => '= ?'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
+
+		if($worker['response_result'] > 0) {
+			unset($parameter['access_token']);
+
+			
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'old_value',
+					'new_value',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter['uid'],
+					$UserData['data']->uid,
+					'pegawai_jabatan',
+					'U',
+					json_encode($old['response_data'][0]),
+					json_encode($parameter),
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+
+		return $worker;
 	}
 
 	//AKSES PEGAWAI
@@ -204,16 +374,59 @@ class Pegawai extends Utility {
 	}
 
 	private function edit_pegawai($parameter){
-		$responseBuilder = array();
-		$query = self::$pdo->prepare('UPDATE pegawai SET nama = ?, updated_at = NOW() WHERE uid = ? AND deleted_at IS NULL');
-		$query->execute(array($parameter['nama'], $parameter['uid']));
-		$responseBuilder['response_result'] = $query->rowCount();
-		if($query->rowCount() > 0) {
-			$responseBuilder['response_message'] = 'Berhasil update';	
-		} else {
-			$responseBuilder['response_message'] = 'Gagal update';
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$old = self::get_detail($parameter['uid']);
+
+		$worker = self::$query
+		->update('pegawai', array(
+			'nama' => $parameter['nama'],
+			'jabatan' => $parameter['jabatan'],
+			'updated_at' => parent::format_date()
+		))
+		->where(array(
+			'pegawai.deleted_at' => 'IS NULL',
+			'AND',
+			'pegawai.uid' => '= ?'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
+
+		if($worker['response_result'] > 0) {
+			unset($parameter['access_token']);
+
+			
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'old_value',
+					'new_value',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter['uid'],
+					$UserData['data']->uid,
+					'pegawai',
+					'U',
+					json_encode($old['response_data'][0]),
+					json_encode($parameter),
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
 		}
-		return $responseBuilder;
+
+		return $worker;
 	}
 
 	private function update_access($parameter) {
@@ -261,5 +474,22 @@ class Pegawai extends Utility {
 
 					->execute();
 		}
+	}
+
+
+	private function duplicate_check($parameter) {
+		return self::$query
+		->select($parameter['table'], array(
+			'uid',
+			'nama'
+		))
+		->where(array(
+			$parameter['table'] . '.deleted_at' => 'IS NULL',
+			'AND',
+			$parameter['table'] . '.nama' => '= ?'
+		), array(
+			$parameter['check']
+		))
+		->execute();
 	}
 }

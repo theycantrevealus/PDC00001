@@ -173,7 +173,7 @@
 
 
 
-		let editorKeluhanData, editorSubjectiveData, editorObjectiveData, editorPlanningData;
+		let editorKeluhanData, editorDiagnosaData;
 
 		ClassicEditor
 			.create( document.querySelector( '#txt_keluhan' ), {
@@ -193,7 +193,7 @@
 
 
 		ClassicEditor
-			.create( document.querySelector( '#txt_subjective' ), {
+			.create( document.querySelector( '#txt_diagnosa' ), {
 				extraPlugins: [ MyCustomUploadAdapterPlugin ],
 				placeholder: "Edit subjective(anamnesa) ..."
 				/*ckfinder: {
@@ -201,46 +201,12 @@
 				}*/
 			} )
 			.then( editor => {
-				editorSubjectiveData = editor;
+				editorDiagnosaData = editor;
 				window.editor = editor;
 			} )
 			.catch( err => {
 				//console.error( err.stack );
 			} );
-
-
-		ClassicEditor
-			.create( document.querySelector( '#txt_objective' ), {
-				extraPlugins: [ MyCustomUploadAdapterPlugin ],
-				placeholder: "Edit objective(anamnesa) ..."
-				/*ckfinder: {
-					uploadUrl: __HOSTFRONT__ + "/api/Upload"
-				}*/
-			} )
-			.then( editor => {
-				editorObjectiveData = editor;
-				window.editor = editor;
-			} )
-			.catch( err => {
-				//console.error( err.stack );
-			} );
-
-		ClassicEditor
-			.create( document.querySelector( '#txt_planning' ), {
-				extraPlugins: [ MyCustomUploadAdapterPlugin ],
-				placeholder: "Edit subjective(anamnesa) ..."
-				/*ckfinder: {
-					uploadUrl: __HOSTFRONT__ + "/api/Upload"
-				}*/
-			} )
-			.then( editor => {
-				editorPlanningData = editor;
-				window.editor = editor;
-			} )
-			.catch( err => {
-				//console.error( err.stack );
-			} );
-
 		
 	});
 </script>
