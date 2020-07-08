@@ -47,13 +47,6 @@ class Terminologi extends Utility {
 	public function __POST__($parameter = array()) {
 		try{
 			switch ($parameter['request']) {
-				case 'tambah-terminologi':
-					return self::tambah_terminologi('terminologi', $parameter);
-					break;
-				case 'edit-terminologi':
-					return self::edit_terminologi('terminologi', $parameter);
-					break;
-
 				case 'tambah-terminologi-item':
 					return self::tambah_terminologi_item('terminologi_item', $parameter);
 					break;
@@ -96,12 +89,6 @@ class Terminologi extends Utility {
 					->select($table, array(
 						'id',
 						'nama',
-						'created_at',
-						'updated_at'
-						)
-					)	
-					->where(array(
-							$table . '.deleted_at' => 'IS NULL'
 						)
 					)
 					->execute();
@@ -119,14 +106,10 @@ class Terminologi extends Utility {
 		$data = self::$query
 					->select($table, array(
 						'id',
-						'nama',
-						'created_at',
-						'updated_at'
+						'nama'
 						)
 					)	
 					->where(array(
-							$table . '.deleted_at' => 'IS NULL',
-							'AND',
 							$table . '.id' => '= ?'
 						),
 						array(
@@ -172,149 +155,6 @@ class Terminologi extends Utility {
 		}
 
 		return $data;
-	}
-
-	public function get_detail() {
-		return
-			self::$query
-				->select('terminologi', array(
-					'id',
-					'nama',
-					'created_at',
-					'updated_at'
-				))
-
-				->where(array(
-					'terminologi.deleted_at' => 'IS NULL',
-					'AND',
-					'terminologi.id' => '= ?'
-				), array(
-					$parameter[2]
-				))
-
-				->execute();
-	}
-
-	private function tambah_terminologi($table, $parameter) {
-		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
-		$term_name = $parameter['dataObj']['term_name'];
-		$term_usage = $parameter['dataObj']['term_usage'];
-
-		$check = self::duplicate_check(array(
-			'table'=>$table,
-			'check'=>$term_name
-		));
-
-		if (count($check['response_data']) > 0){
-			$check['response_message'] = 'Duplicate data detected';
-			$check['response_result'] = 0;
-			unset($check['response_data']);
-			return $check;
-		} else {
-			$term = self::$query
-						->insert($table, array(
-							'nama'=>$term_name,
-							'created_at'=>parent::format_date(),
-							'updated_at'=>parent::format_date()
-							)
-						)
-						->returning('id')
-						->execute();
-
-			$last_id = $term['response_unique'];
-
-			if ($term_usage != ""){
-				foreach ($term_usage as $key => $value) {
-					$dataItems = array("nama"=>$value, "id_term"=>$last_id);
-					self::tambah_terminologi_item('terminologi_item', $dataItems);
-				}	
-			}
-
-			if ($term['response_result'] > 0){
-				$log = parent::log(array(
-							'type'=>'activity',
-							'column'=>array(
-								'unique_target',
-								'user_uid',
-								'table_name',
-								'action',
-								'logged_at',
-								'status',
-								'login_id'
-							),
-							'value'=>array(
-								$last_id,
-								$UserData['data']->uid,
-								$table,
-								'I',
-								parent::format_date(),
-								'N',
-								$UserData['data']->log_id
-							),
-							'class'=>__CLASS__
-						)
-					);
-			}
-		}
-
-		return $term;
-	}
-
-	private function edit_terminologi($table, $parameter) {
-		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
-		$old = self::get_terminologi_detail('terminologi', $parameter['id']);
-
-		$term = self::$query
-				->update($table, array(
-					'nama' => $parameter['nama'],
-					'updated_at' => parent::format_date()
-				))
-
-				->where(array(
-						$table . '.deleted_at' => 'IS NULL',
-						'AND',
-						$table . '.id' => '= ?'
-					), array(
-						$parameter['id']
-					)
-				)
-				->execute();
-
-		if ($term['response_result'] > 0){
-				$log = parent::log(array(
-						'type'=>'activity',
-						'column'=>array(
-							'unique_target',
-							'user_uid',
-							'table_name',
-							'action',
-							'old_value',
-							'new_value',
-							'logged_at',
-							'status',
-							'login_id'
-						),
-						'value'=>array(
-							$parameter['uid'],
-							$UserData['data']->uid,
-							'master_penjamin',
-							'U',
-							json_encode($old['response_data'][0]),
-							json_encode($parameter),
-							parent::format_date(),
-							'N',
-							$UserData['data']->log_id
-						),
-						'class'=>__CLASS__
-					)
-				);
-			}
-
-		return $term;
 	}
 
 	private function tambah_terminologi_item($table, $parameter) {
@@ -423,60 +263,6 @@ class Terminologi extends Utility {
 		}
 
 		return $usage;
-	}
-
-	private function delete_terminologi($table, $parameter){
-		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
-		$term = self::$query
-			->delete($table)
-			->where(array(
-					$table . '.id' => '= ?'
-				), array(
-					$parameter
-				)
-			)
-			->execute();
-
-		if ($term['response_result'] > 0){
-			$term = self::$query
-					->delete('terminologi_item')
-					->where(array(
-							'terminologi_item.terminologi' => '= ?'
-						), array(
-							$parameter
-						)
-					)
-					->execute();
-
-
-			$log = parent::log(array(
-					'type'=>'activity',
-					'column'=>array(
-						'unique_target',
-						'user_uid',
-						'table_name',
-						'action',
-						'logged_at',
-						'status',
-						'login_id'
-					),
-					'value'=>array(
-						$parameter[6],
-						$UserData['data']->uid,
-						$table,
-						'D',
-						parent::format_date(),
-						'N',
-						$UserData['data']->log_id
-					),
-					'class'=>__CLASS__
-				)
-			);
-		}
-
-		return $term;
 	}
 
 	private function delete_terminologi_item($table, $parameter){
