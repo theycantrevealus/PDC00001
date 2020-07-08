@@ -3,47 +3,72 @@
 	$(function(){
 		var allData = {};
 
-		loadTermSelectBox('panggilan', 14);
-		loadTermSelectBox('suku', 15);
-		loadTermSelectBox('pendidikan', 16);
-		loadTermSelectBox('pekerjaan', 18);
-		loadTermSelectBox('status_suami_istri', 19);
+		loadTermSelectBox('panggilan', 3);
+		loadTermSelectBox('suku', 6);
+		loadTermSelectBox('pendidikan', 8);
+		loadTermSelectBox('pekerjaan', 9);
+		loadTermSelectBox('status_suami_istri', 10);
 		loadTermSelectBox('alamat_kecamatan', 12);
-		loadRadio('parent_jenkel','col-md-3', 'jenkel', 10);
-		loadRadio('parent_goldar','col-md-2', 'goldar', 17);
-		loadRadio2Step('parent_agama','col-md-4', 'col-md-2', 'agama', 11);
+		loadTermSelectBox('goldar', 4);
+		loadTermSelectBox('agama', 5);
+		loadTermSelectBox('warganegara', 7);
+		loadWilayah('alamat_provinsi', 'provinsi', '', 'Provinsi');
+		loadRadio('parent_jenkel','col-md-6', 'jenkel', 2);
+		/*loadRadio('parent_goldar','col-md-2', 'goldar', 17);
+		loadRadio2Step('parent_agama','col-md-4', 'col-md-2', 'agama', 11);*/
+
+		$("#alamat_provinsi").on('change', function(){
+			var id = $(this).val();
+
+			loadWilayah('alamat_kabupaten', 'kabupaten', id, 'Kabupaten / Kota');
+			resetSelectBox('alamat_kecamatan', "Kecamatan");
+			resetSelectBox('alamat_kelurahan', "Kelurahan");
+		});
+
+		$("#alamat_kabupaten").on('change', function(){
+			var id = $(this).val();
+
+			loadWilayah('alamat_kecamatan', 'kecamatan', id, 'Kecamatan');
+			resetSelectBox('alamat_kelurahan', "Kelurahan");
+		});
 
 		$("#alamat_kecamatan").on('change', function(){
-			var id_kec = $(this).val();
+			var id = $(this).val();
 
-			loadTermItemsRecursiveSelectbox('alamat_kelurahan', id_kec);
+			loadWilayah('alamat_kelurahan', 'kelurahan', id, "Kelurahan");
 		});
 
 		$("#btnSubmit").click(function(){
-			var no_rm = $("#rm_sub_1").val() + "-" + $("#rm_sub_2").val() + "-" + $("#rm_sub_3").val();
-			allData.no_rm = no_rm;
-
-			var agama = $("input[name='agama']:checked").val();
+			/*var agama = $("input[name='agama']:checked").val();
 			var jenkel = $("input[name='jenkel']:checked").val();
-			var goldar = $("input[name='goldar']:checked").val();
+			var goldar = $("input[name='goldar']:checked").val();*/
+
+			var jenkel = $("input[name='jenkel']:checked").val();
+			allData.jenkel = jenkel;
 
 			$(".inputan").each(function(){
 				var value = $(this).val();
 
-				$this = $(this);
-				if ($this.is('input') || $this.is('textarea')){
-					value = value.toUpperCase();
+				if (value != "" && value != null){
+					$this = $(this);
+					if ($this.is('input') || $this.is('textarea')){
+						value = value.toUpperCase();
+					}
+
+					if ($this.is('select')){
+						value = parseInt(value);
+					}
+
+					var name = $(this).attr("name");
+
+					allData[name] = value;
+				} else {
+					value = null;
 				}
-
-				var name = $(this).attr("name");
-
-				allData[name] = value;
+				
 			});
 
-			allData.agama = agama;
-			allData.jenkel = jenkel;
-			allData.goldar = goldar;
-
+			console.log(allData);
 			$.ajax({
 				async: false,
 				url: __HOSTAPI__ + "/Pasien",
@@ -67,16 +92,15 @@
 			return false;
 		});
 
-		$(".no_rm").on('keyup', function(){
-			if (this.getAttribute && this.value.length == this.getAttribute("maxlength")) {
-				var id = $(this).attr("id").split("_");
-				id = id[id.length - 1];
-				id = parseInt(id) + 1;
+		$(".select2").select2({});
 
-				var next = $("#rm_sub_" + id);
-				next.focus();
-			}
-		});
+		$('#no_rm').inputmask('999-999-999');
+
+		$('.numberonly').keypress(function(event){
+            if (event.which < 48 || event.which > 57) {
+                event.preventDefault();
+            }
+        });
 	});
 
 	function loadTermSelectBox(selector, id_term){
@@ -160,7 +184,52 @@
         });
 	}
 
-	function loadRadio2Step(selector, parentcolclass, colclass, name, id){
+	function loadWilayah(selector, parent, id, name){
+		
+		resetSelectBox(selector, name);
+
+		$.ajax({
+            url:__HOSTAPI__ + "/Wilayah/"+ parent +"/" + id,
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                var MetaData = response.response_package.response_data;
+
+                if (MetaData != ""){
+                	for(i = 0; i < MetaData.length; i++){
+	                    var selection = document.createElement("OPTION");
+
+	                    $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+	                    
+	                   // autoSelect(selector, MetaData[i].id , params);
+
+	                    $("#" + selector).append(selection);
+	                }
+                }
+                
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+	}
+
+	function resetSelectBox(selector, name){
+		$("#"+ selector +" option").remove();
+		var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
+        $("#" + selector).append(opti_null);
+	}
+
+	function autoSelect(selector, id, params){
+		if (id == params){
+        	$(selector).val(id);
+        	$(selector).trigger('change');
+        }
+	}
+
+	/*function loadRadio2Step(selector, parentcolclass, colclass, name, id){
 		$.ajax({
             url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + id,
             type: "GET",
@@ -202,6 +271,6 @@
                 console.log(response);
             }
         });
-	}
+	}*/
 
 </script>

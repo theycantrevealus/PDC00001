@@ -87,6 +87,8 @@ class Pasien extends Utility {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 
+			$data['response_data'][$key]['tanggal_lahir'] = parent::dateToIndo($data['response_data'][$key]['tanggal_lahir']);
+
 			$term = new Terminologi(self::$pdo);
 
 			$value = $data['response_data'][$key]['id_panggilan'];
@@ -101,7 +103,7 @@ class Pasien extends Utility {
 			$data['response_data'][$key]['jenkel'] = $get_jenkel['response_data'][0]['nama'];
 
 			$tgl_daftar = date("Y-m-d", strtotime($data['response_data'][$key]['created_at']));
-			$data['response_data'][$key]['tgl_daftar'] = $tgl_daftar;
+			$data['response_data'][$key]['tgl_daftar'] = parent::dateToIndo($tgl_daftar);
 		}
 
 		return $data;
