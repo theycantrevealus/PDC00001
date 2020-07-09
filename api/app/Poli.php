@@ -36,7 +36,9 @@ class Poli extends Utility {
 				case 'poli-view-detail':
 					//return self::get_poli_tindakan_view_detail($parameter[2]);
 					break;
-
+				case 'poli-avail-dokter':
+					return self::get_avail_dokter($parameter[2]);
+					break;
 				default:
 					# code...
 					break;
@@ -228,6 +230,55 @@ class Poli extends Utility {
 		}
 
 		return $data;
+	}
+
+	private function get_avail_dokter($parameter) { //parameter = uid poli
+		$Dokter = self::$query->select('pegawai', array(
+			'uid',
+			'nama AS nama_dokter'
+		))
+		->join('pegawai_jabatan', array(
+			'uid AS uid_jabatan',
+			'nama AS nama_jabatan'
+		))
+		->on(array(
+			array('pegawai.jabatan', '=', 'pegawai_jabatan.uid')
+		))
+		->where(array(
+			'pegawai.deleted_at' => 'IS NULL',
+			'AND',
+			'pegawai_jabatan.nama' => '= ?'
+		), array(
+			'Dokter'
+		))
+		->execute();
+
+		$filterDokter = array();
+		$CheckPoli = self::$query->select('master_poli_dokter', array(
+			'dokter'
+		))
+		->where(array(
+			'deleted_at' => 'IS NULL',
+			'AND',
+			'poli' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		foreach ($CheckPoli['response_data'] as $key => $value) {
+			if(!in_array($value['dokter'], $filterDokter)) {
+				array_push($filterDokter, $value['dokter']);
+			}
+		}
+
+		foreach ($Dokter['response_data'] as $key => $value) {
+			if(in_array($value['uid'], $filterDokter)) {
+				unset($Dokter['response_data'][$key]);
+			}
+		}
+
+		return $Dokter;
 	}
 	
 
