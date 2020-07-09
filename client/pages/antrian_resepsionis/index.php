@@ -17,36 +17,50 @@
 			</nav>
 			<h4 class="m-0">Antrian</h4>
 		</div>
-		<button class="btn btn-info btn-sm ml-3" id="btnTambahAntrian" data-toggle="toastr" data-toastr-type="info" data-toastr-title="Pencarian Selesai" >
+		<button class="btn btn-info btn-sm ml-3" id="btnTambahAntrian">
 			<i class="fa fa-plus"></i> Tambah
 		</button>
 	</div>
 </div>
 
 <div class="container-fluid page__container">
-	<div class="row card-group-row">
-		<div class="col-lg-12 col-md-12 card-group-row__col">
-			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<table class="table table-bordered" id="table-antrian-rawat-jalan" style="height: 100px; overflow: scroll;">
-					<thead>
-						<tr>
-							<th style="width: 20px;">No</th>
-							<th>Waktu Masuk</th>
-							<th>No. RM</th>
-							<th>Pasien</th>
-							<th>Departemen</th>
-							<th>Dokter</th>
-							<th>Penjamin</th>
-							<th>Oleh</th>
-							<th>Aksi</th>
-						</tr>
-					</thead>
-					<tbody>
-						
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-
+    <div class="row">
+        <div class="col-lg">
+            <div class="card">
+            	<div class="card-body">
+            		<!-- <div class="col-md-12 row float-center">
+						<div class="col-md-2">
+							<label>Departemen <span class="red"></span></label>
+						</div>
+						<div class="col-md-4">
+							<select class="form-control" id="select_departemen">
+								<option value="">Semua</option>
+							</select>
+						</div>
+	                </div> -->
+	                <hr />
+					<div class="table-responsive border-bottom">
+						<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+							<thead>
+								<tr>
+									<th width="2%">No</th>
+									<th>Waktu Masuk</th>
+									<th>No. RM</th>
+									<th>Pasien</th>
+									<th>Departemen</th>
+									<th>Dokter</th>
+									<th>Penjamin</th>
+									<th>Oleh</th>
+									<!-- <th>Aksi</th> -->
+								</tr>
+							</thead>
+							<tbody>
+								
+							</tbody>
+						</table>
+					</div>
+            	</div>
+            </div>
+        </div>
+    </div>
 </div>

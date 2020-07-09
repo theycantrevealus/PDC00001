@@ -4,6 +4,7 @@ namespace PondokCoder;
 
 use PondokCoder\Utility as Utility;
 use PondokCoder\Modul as Modul;
+use PondokCoder\Poli as Poli;
 use \Firebase\JWT\JWT;
 
 class Pegawai extends Utility {
@@ -167,10 +168,16 @@ class Pegawai extends Utility {
 
 				
 				$_SESSION['token'] = $jwt;
+				$_SESSION['uid'] = $read[0]['uid'];
 				$_SESSION['email'] = $read[0]['email'];
 				$_SESSION['nama'] = $read[0]['nama'];
 				$_SESSION['password'] = $read[0]['password'];
-
+				$_SESSION['jabatan'] = self::get_jabatan_detail($read[0]['jabatan']);
+				if(strtolower($_SESSION['jabatan']['response_data'][0]['nama']) == 'dokter') {
+					//Load Dokter Data
+					$Poli = new Poli(self::$pdo);
+					$_SESSION['poli'] = $Poli::get_poli_by_dokter($read[0]['uid']);
+				}
 
 				$responseBuilder['response_result'] = $query->rowCount();
 				$responseBuilder['response_message'] = 'Login berhasil';
@@ -178,7 +185,7 @@ class Pegawai extends Utility {
 
 
 				$responseBuilder['response_access'] = array();
-				$Modul = new Modul(self::$pdo);
+				/*$Modul = new Modul(self::$pdo);
 				$accessBuilder = self::get_access(array(
 					'uid' => $read[0]['uid']
 				));
@@ -189,7 +196,7 @@ class Pegawai extends Utility {
 					array_push($responseBuilder['response_access'], $value);
 				}
 
-				$_SESSION['akses'] = $responseBuilder['response_access'];
+				$_SESSION['akses'] = $responseBuilder['response_access'];*/
 
 
 			} else {
@@ -232,15 +239,9 @@ class Pegawai extends Utility {
 				))
 
 				->where(array(
-<<<<<<< HEAD
-					'deleted_at' => 'IS NULL',
-					'AND',
-					'uid' => '= ?'
-=======
 					'pegawai.deleted_at' => 'IS NULL',
 					'AND',
 					'pegawai.uid' => '= ?'
->>>>>>> master
 				), array(
 					$parameter
 				))

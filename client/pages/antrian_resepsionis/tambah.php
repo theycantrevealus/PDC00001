@@ -18,24 +18,25 @@
         <div class="row no-gutters">
             <div class="col-lg-4 card-body">
                 <p><strong class="headings-color">Informasi Pasien</strong></p>
+                <p class="text-muted">Mohon pastikan informasi pasien cocok</p>
             </div>
             <div class="col-lg-8 card-form__body card-body">
                 <div class="form-row">
                     <div class="col-12 col-md-6 mb-3">
                         <label for="">Nama Pasien</label>
-                        <input type="text" autocomplete="off" class="form-control uppercase inputan" id="nama" disabled required>
+                        <input type="text" autocomplete="off" class="form-control uppercase" id="nama" disabled required>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label for="">Jenis Kelamin</label>
-                        <input type="text" autocomplete="off" class="form-control uppercase inputan" id="nama_jenkel" disabled required>
+                        <input type="text" autocomplete="off" class="form-control uppercase" id="nama_jenkel" disabled required>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label for="">Nomor Rekam Medis</label>
-                        <input type="text" autocomplete="off" class="form-control uppercase inputan" id="no_rm" disabled required>
+                        <input type="text" autocomplete="off" class="form-control uppercase" id="no_rm" disabled required>
                     </div>
                      <div class="col-12 col-md-6 mb-3">
                         <label for="">Tanggal Lahir</label>
-                        <input type="text" autocomplete="off" class="form-control uppercase inputan" id="tanggal_lahir" disabled required>
+                        <input type="text" autocomplete="off" class="form-control uppercase" id="tanggal_lahir" disabled required>
                     </div>
                 </div>
             </div>
@@ -51,26 +52,26 @@
                 <div class="form-row">
                     <div class="col-12 col-md-6 mb-3">
                         <label>Penjamin <span class="red">*</span></label>
-                        <select id="penjamin" class="form-control">
-                            <option value="">Pilih Penjamin</option>
+                        <select id="penjamin" class="form-control select2 inputan">
+                            <option value="" disabled selected>Pilih Penjamin</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label>Prioritas <span class="red">*</span></label>
-                        <select id="prioritas" class="form-control">
-                            <option value="">Pilih Prioritas</option>
+                        <select id="prioritas" class="form-control inputan">
+                            <option value="" disabled selected>Pilih Prioritas</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label>Pemeriksaan <span class="red">*</span></label>
-                        <select id="prioritas" class="form-control">
-                            <option value="">Pilih Pemeriksaan</option>
+                        <select id="departemen" class="form-control select2 inputan">
+                            <option value="" disabled selected>Pilih Pemeriksaan</option>
                         </select>
                     </div>
-                     <div class="col-12 col-md-6 mb-3">
+                    <div class="col-12 col-md-6 mb-3">
                         <label>Dokter <span class="red">*</span></label>
-                        <select id="dokter" class="form-control">
-                            <option value="">Pilih Dokter</option>
+                        <select id="dokter" class="form-control select2 inputan">
+                            <option value="" disabled selected>Pilih Dokter</option>
                         </select>
                     </div>
                      <div class="col-lg-8 card-form__body card-body">

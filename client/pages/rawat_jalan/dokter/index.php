@@ -18,8 +18,35 @@
 
 <div class="container-fluid page__container">
 	<div class="row card-group-row">
-		<div class="col-lg-12 col-md-12 card-group-row__col">
-			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
+		<div class="col-lg-12 col-md-12">
+			<div class="card-group">
+				<div class="card card-body">
+					<div class="d-flex flex-row">
+						<div class="col-md-2">
+							<i class="material-icons icon-muted icon-30pt">account_circle</i>
+						</div>
+						<div class="col-md-10">
+							<b><?php echo $_SESSION['nama']; ?></b>
+							<br />
+							<span>Laki-laki</span>
+							<br />
+							<span>10 Januari 1989</span>
+						</div>
+					</div>
+				</div>
+				<div class="card card-body">
+					<div class="d-flex flex-row">
+						<div class="col-md-12">
+							<b>Antrian</b>
+							<h5 class="text-info handy" id="current-poli">
+								<small><i class="fa fa-sync text-success" id="change-poli"></i></small>
+							</h5>
+							<b id="jlh-antrian">0</b> antrian
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card card-body">
 				<table class="table table-bordered" id="table-satuan">
 					<thead>
 						<tr>
