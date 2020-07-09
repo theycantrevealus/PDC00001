@@ -86,9 +86,7 @@ class Pasien extends Utility {
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
-
 			$data['response_data'][$key]['tanggal_lahir'] = parent::dateToIndo($data['response_data'][$key]['tanggal_lahir']);
-
 			$term = new Terminologi(self::$pdo);
 
 			$value = $data['response_data'][$key]['id_panggilan'];
@@ -230,16 +228,12 @@ class Pasien extends Utility {
 	private function edit_pasien($table, $parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
 		$dataObj = $parameter['dataObj'];
 		$old = self::get_pasien_detail($table, $parameter['uid']);
-
 		$allData = [];
-
 		foreach ($dataObj as $key => $value) {
 			$allData[$key] = $value;
 		}
-
 		$allData['updated_at'] = parent::format_date();
 
 		$pasien = self::$query
@@ -304,6 +298,7 @@ class Pasien extends Utility {
 			)
 			->execute();
 
+
 		if ($pasien['response_result'] > 0){
 			$log = parent::log(array(
 					'type'=>'activity',
@@ -329,7 +324,6 @@ class Pasien extends Utility {
 				)
 			);
 		}
-
 		return $pasien;
 	}
 

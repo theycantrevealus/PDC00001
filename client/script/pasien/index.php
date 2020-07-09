@@ -88,7 +88,7 @@
 				});
 			}
 		});
-
+  
 		$("#table-pasien tbody").on('click', '.btn-detail-pasien', function(){
             
         });

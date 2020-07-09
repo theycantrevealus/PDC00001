@@ -3,6 +3,7 @@
 	$(function(){
 		var allData = {};
 
+
 		loadTermSelectBox('panggilan', 3);
 		loadTermSelectBox('suku', 6);
 		loadTermSelectBox('pendidikan', 8);
@@ -88,6 +89,7 @@
 
 			return false;
 		});
+
 
 		$(".select2").select2({});
 
@@ -180,7 +182,7 @@
             }
         });
 	}
-
+           
 	function loadWilayah(selector, parent, id, name){
 		
 		resetSelectBox(selector, name);
@@ -225,49 +227,5 @@
         	$(selector).trigger('change');
         }
 	}
-
-	/*function loadRadio2Step(selector, parentcolclass, colclass, name, id){
-		$.ajax({
-            url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + id,
-            type: "GET",
-            beforeSend: function(request) {
-                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-            },
-            success: function(response){
-                var MetaData = response.response_package.response_data;
-
-                if (MetaData != ""){
-                	var html = "";
-                	for(i = 0; i < MetaData.length; i++){
-                		var mark = i + 1;
-
-                		if (i % 2 == 0){
-                			html += "<div class="+ parentcolclass +">";
-                		}
-
-	                    html += "<div class='"+ colclass +"'>" +
-									"<div class='custom-control custom-radio'>" +
-									  	"<input type='radio' value='"+ MetaData[i].id +"' id='"+ name +"_"+ MetaData[i].id +"' name='"+ name +"' class='custom-control-input' required>" +
-									  	"<label class='custom-control-label' for='"+ name +"_"+ MetaData[i].id +"'>"+ MetaData[i].nama +"</label>" +
-									"</div>" +
-								"</div>";
-
-						if (mark % 2 == 0){
-                			html += "</div>";
-                		}
-	                }
-
-	                if (MetaData.length % 2 != 0){
-	                	html += "</div>";
-	                }
-         
-	                $("#" + selector).html(html);
-            	}
-        	},
-            error: function(response) {
-                console.log(response);
-            }
-        });
-	}*/
 
 </script>
