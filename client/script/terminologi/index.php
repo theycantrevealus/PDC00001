@@ -30,15 +30,9 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<a href=\"" + __HOSTNAME__ + "/terminologi/child/" + row["id"] + "\" class=\"btn btn-warning btn-sm\">" +
-										"<i class=\"fa fa-list\"></i> View Term Items" +
+									"<a href=\"" + __HOSTNAME__ + "/terminologi/child/" + row["id"] + "\" class=\"btn btn-info btn-sm\" data-toggle='tooltip' title='Tampil Term Items'>" +
+										"<i class=\"fa fa-list\"></i>" +
 									"</a>" +
-									"<a href=\"" + __HOSTNAME__ + "/terminologi/edit/" + row["id"] + "\" class=\"btn btn-info btn-sm\">" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
-									"</a>" +
-									"<button id=\"delete_" + row['id'] + "\" class=\"btn btn-danger btn-sm btn-delete-terminologi\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
-									"</button>" +
 								"</div>";
 					}
 				}
