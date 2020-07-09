@@ -437,6 +437,7 @@ class Pegawai extends Utility {
 			$worker = self::$query->insert('pegawai', array(
 				'uid' => $uid,
 				'email' => $parameter['email'],
+				'password' => password_hash('123456', PASSWORD_DEFAULT),
 				'nama' => $parameter['nama'],
 				'jabatan' => $parameter['jabatan'],
 				'created_at' => parent::format_date(),
