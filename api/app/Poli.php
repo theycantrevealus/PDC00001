@@ -103,7 +103,7 @@ class Poli extends Utility {
 		return $data;
 	}
 
-	private function get_poli_detail($parameter){
+	private function get_poli_detail($parameter) {
 		$data = self::$query
 				->select('master_poli', array(
 						'uid',
@@ -133,7 +133,7 @@ class Poli extends Utility {
 		return $data;
 	}
 
-	private function get_poli_tindakan($parameter){
+	private function get_poli_tindakan($parameter) {
 		$data = self::$query
 				->select('master_poli_tindakan_penjamin', array(
 						'id',
@@ -156,6 +156,10 @@ class Poli extends Utility {
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
+			$Penjamin = new Penjamin(self::$pdo);
+			$Tindakan = new Tindakan(self::$pdo);
+			$data['response_data'][$key]['tindakan'] = $Tindakan::get_tindakan_detail($value['uid_tindakan'])['response_data'][0];
+			$data['response_data'][$key]['penjamin'] = $Penjamin::get_penjamin_detail($value['uid_penjamin'])['response_data'][0];
 			$autonum++;
 		}
 
@@ -308,6 +312,27 @@ class Poli extends Utility {
 			$Pegawai = new Pegawai(self::$pdo);
 			$NamaDokter = $Pegawai::get_detail($value['dokter']);
 			$CheckPoli['response_data'][$key]['nama'] = $NamaDokter['response_data'][0]['nama'];
+		}
+
+		return $CheckPoli;
+	}
+  
+	public function get_poli_by_dokter($parameter) {
+		$CheckPoli = self::$query->select('master_poli_dokter', array(
+			'dokter',
+			'poli'
+		))
+		->where(array(
+			'deleted_at' => 'IS NULL',
+			'AND',
+			'dokter' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		foreach ($CheckPoli['response_data'] as $key => $value) {
+			$CheckPoli['response_data'][$key]['poli'] = self::get_poli_detail($value['poli']);
 		}
 
 		return $CheckPoli;
