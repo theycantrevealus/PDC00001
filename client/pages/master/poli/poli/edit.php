@@ -129,19 +129,28 @@
 	                    </div>
 	                    <div class="tab-pane fade tabsContent" id="tab-3">
 	                    	<div class="row">
-		                    	<div class="col-md-6">
-									<div class="col-md-12">
-										<table class="table-bordered table" id="poli-list-dokter">
-											<thead>
-												<tr>
-													<th>No</th>
-													<th>Nama</th>
-													<th class="wrap_content">Aksi</th>
-												</tr>
-											</thead>
-											<tbody></tbody>
-										</table>
-									</div>
+	                    		<div class="col-md-8">
+	                    			<select class="form-control" id="txt_set_dokter"></select>
+	                    		</div>
+	                    		<div class="col-md-4">
+	                    			<button class="btn btn-info" id="btn_tambah_dokter">
+	                    				<i class="fa fa-plus"></i> Tambah
+	                    			</button>
+	                    		</div>
+	                    	</div>
+	                    	<br />
+	                    	<div class="row">
+		                    	<div class="col-md-8">
+									<table class="table-bordered table" id="poli-list-dokter">
+										<thead>
+											<tr>
+												<th class="wrap_content">No</th>
+												<th>Nama</th>
+												<th class="wrap_content">Aksi</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
 								</div>
 							</div>
 							<hr />
