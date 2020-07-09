@@ -12,6 +12,7 @@
 			success:function(resp) {
 				$("#txt_email_pegawai").val(resp.response_package.response_data[0].email);
 				$("#txt_nama_pegawai").val(resp.response_package.response_data[0].nama);
+				reload_jabatan(resp.response_package.response_data[0].jabatan);
 			}
 		});
 
@@ -25,6 +26,7 @@
 				data:{
 					request:"edit_pegawai",
 					nama:$("#txt_nama_pegawai").val(),
+					jabatan:$("#txt_jabatan").val(),
 					uid:targetID
 				},
 				type:"POST",
@@ -41,6 +43,39 @@
 			});	
 			return false;
 		});
+
+
+		function reload_jabatan(selected){
+			var jabatanData;
+			$.ajax({
+				url:__HOSTAPI__ + "/Pegawai/jabatan",
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(resp) {
+					$("#txt_jabatan option").remove();
+					jabatanData = resp.response_package.response_data;
+					for(var a = 0; a < jabatanData.length; a++) {
+						var newOption = document.createElement("OPTION");
+						$(newOption).attr({
+							"value": jabatanData[a].uid
+						}).html(jabatanData[a].nama);
+						if(jabatanData[a].uid == selected) {
+							$(newOption).attr({
+								"selected":"selected"
+							});
+						}
+						$("#txt_jabatan").append(newOption);
+					}
+					$("#txt_jabatan").select2();
+				}
+			});
+			return jabatanData;
+		}
+
+		
 
 
 
