@@ -12,10 +12,10 @@
 		loadTermSelectBox('goldar', 4);
 		loadTermSelectBox('agama', 5);
 		loadTermSelectBox('warganegara', 7);
-		loadWilayah('alamat_provinsi', 'provinsi', '', 'Provinsi');
 		loadRadio('parent_jenkel','col-md-6', 'jenkel', 2);
-		/*loadRadio('parent_goldar','col-md-2', 'goldar', 17);
-		loadRadio2Step('parent_agama','col-md-4', 'col-md-2', 'agama', 11);*/
+
+		var uid_pasien = __PAGES__[2];
+		var dataPasien = loadPasien(uid_pasien);
 
 		$("#alamat_provinsi").on('change', function(){
 			var id = $(this).val();
@@ -39,10 +39,6 @@
 		});
 
 		$("#btnSubmit").click(function(){
-			/*var agama = $("input[name='agama']:checked").val();
-			var jenkel = $("input[name='jenkel']:checked").val();
-			var goldar = $("input[name='goldar']:checked").val();*/
-
 			var jenkel = $("input[name='jenkel']:checked").val();
 			allData.jenkel = jenkel;
 
@@ -65,13 +61,13 @@
 				}
 			});
 
-			console.log(allData);
 			$.ajax({
 				async: false,
 				url: __HOSTAPI__ + "/Pasien",
 				data: {
-					request : "tambah-pasien",
-					dataObj : allData
+					request : "edit-pasien",
+					dataObj : allData,
+					uid: uid_pasien
 				},
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -89,8 +85,19 @@
 			return false;
 		});
 
-		$(".select2").select2({});
+		$(".no_rm").on('keyup', function(){
+			if (this.getAttribute && this.value.length == this.getAttribute("maxlength")) {
+				var id = $(this).attr("id").split("_");
+				id = id[id.length - 1];
+				id = parseInt(id) + 1;
 
+				var next = $("#rm_sub_" + id);
+				next.focus();
+			}
+		});
+
+		$(".select2").select2({});
+		
 		$('#no_rm').inputmask('999-999-999');
 
 		$('.numberonly').keypress(function(event){
@@ -102,6 +109,7 @@
 
 	function loadTermSelectBox(selector, id_term){
 		$.ajax({
+			async: false,
             url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + id_term,
             type: "GET",
             beforeSend: function(request) {
@@ -128,6 +136,7 @@
 
 	function loadTermItemsRecursiveSelectbox(selector, id){
 		$.ajax({
+			async: false,
             url:__HOSTAPI__ + "/Terminologi/terminologi-items-recursive/" + id,
             type: "GET",
             beforeSend: function(request) {
@@ -153,6 +162,7 @@
 
 	function loadRadio(selector, colclass, name, id){
 		$.ajax({
+			async: false,
             url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + id,
             type: "GET",
             beforeSend: function(request) {
@@ -181,6 +191,41 @@
         });
 	}
 
+
+	function loadPasien(uid){
+		var dataPasien = null;
+
+		if (uid != ""){
+			$.ajax({
+				async: false,
+	            url:__HOSTAPI__ + "/Pasien/pasien-detail/" + uid,
+	            type: "GET",
+	            beforeSend: function(request) {
+	                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+	            },
+	            success: function(response){
+	                dataPasien = response.response_package.response_data[0];
+
+	                $.each(dataPasien, function(key, item){
+	                	$("#" + key).val(item);
+	                });
+
+	                loadSelected("alamat_provinsi", 'provinsi', '', dataPasien.alamat_provinsi);
+	                loadSelected("alamat_kabupaten", 'kabupaten', dataPasien.alamat_provinsi, dataPasien.alamat_kabupaten);
+	                loadSelected("alamat_kecamatan", 'kecamatan', dataPasien.alamat_kabupaten, dataPasien.alamat_kecamatan);
+	                loadSelected("alamat_kelurahan", 'kelurahan', dataPasien.alamat_kecamatan, dataPasien.alamat_kelurahan);
+
+	                checkedRadio('jenkel', dataPasien['jenkel']);
+	            },
+	            error: function(response) {
+	                console.log(response);
+	            }
+	        });
+		}
+		
+		return dataPasien;
+	}
+
 	function loadWilayah(selector, parent, id, name){
 		
 		resetSelectBox(selector, name);
@@ -199,8 +244,37 @@
 	                    var selection = document.createElement("OPTION");
 
 	                    $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
-	                    
-	                   // autoSelect(selector, MetaData[i].id , params);
+	                    $("#" + selector).append(selection);
+	                }
+                }
+                
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+	}
+
+	function loadSelected(selector, parent, id, params){
+		$.ajax({
+            url:__HOSTAPI__ + "/Wilayah/"+ parent +"/" + id,
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                var MetaData = response.response_package.response_data;
+
+                if (MetaData != ""){
+                	for(i = 0; i < MetaData.length; i++){
+	                    var selection = document.createElement("OPTION");
+
+	                    $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+	                    if (MetaData[i].id == params) {
+	                    	$(selection).attr("selected",true);
+	                    	$("#" + selector).val(MetaData[i].id);
+	                    	//$("#" + selector).trigger('change');
+	                    };
 
 	                    $("#" + selector).append(selection);
 	                }
@@ -226,48 +300,11 @@
         }
 	}
 
-	/*function loadRadio2Step(selector, parentcolclass, colclass, name, id){
-		$.ajax({
-            url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + id,
-            type: "GET",
-            beforeSend: function(request) {
-                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-            },
-            success: function(response){
-                var MetaData = response.response_package.response_data;
-
-                if (MetaData != ""){
-                	var html = "";
-                	for(i = 0; i < MetaData.length; i++){
-                		var mark = i + 1;
-
-                		if (i % 2 == 0){
-                			html += "<div class="+ parentcolclass +">";
-                		}
-
-	                    html += "<div class='"+ colclass +"'>" +
-									"<div class='custom-control custom-radio'>" +
-									  	"<input type='radio' value='"+ MetaData[i].id +"' id='"+ name +"_"+ MetaData[i].id +"' name='"+ name +"' class='custom-control-input' required>" +
-									  	"<label class='custom-control-label' for='"+ name +"_"+ MetaData[i].id +"'>"+ MetaData[i].nama +"</label>" +
-									"</div>" +
-								"</div>";
-
-						if (mark % 2 == 0){
-                			html += "</div>";
-                		}
-	                }
-
-	                if (MetaData.length % 2 != 0){
-	                	html += "</div>";
-	                }
-         
-	                $("#" + selector).html(html);
-            	}
-        	},
-            error: function(response) {
-                console.log(response);
-            }
-        });
-	}*/
+	function checkedRadio(name, value){
+		var $radios = $('input:radio[name='+ name +']');
+	    if($radios.is(':checked') === false) {
+	        $radios.filter('[value='+ value +']').prop('checked', true);
+	    }
+	}
 
 </script>

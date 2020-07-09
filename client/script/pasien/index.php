@@ -55,11 +55,11 @@
 									/*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
 									 	"<i class=\"fa fa-list\"></i> Detail" +
 									"</button>" +*/
-									"<a href=\"" + __HOSTNAME__ + "/master/pasien/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-pasien\">" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+									"<a href=\"" + __HOSTNAME__ + "/pasien/edit/" + row["uid"] + "\" class=\"btn btn-warning btn-sm btn-edit-pasien\" data-toggle='tooltip' title='Edit'>" +
+										"<i class=\"fa fa-edit\"></i>" +
 									"</a>" +
-									"<button id=\"pasien_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-poli\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+									"<button id=\"pasien_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-pasien\" data-toggle='tooltip' title='Hapus'>" +
+										"<i class=\"fa fa-trash\"></i>" +
 									"</button>" +
 								"</div>";
 					}
@@ -88,8 +88,6 @@
 				});
 			}
 		});
-
-
 
 		$("#table-pasien tbody").on('click', '.btn-detail-pasien', function(){
             

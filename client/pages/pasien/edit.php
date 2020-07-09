@@ -5,10 +5,10 @@
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/pasien">Pasien</a></li>
-					<li class="breadcrumb-item active" aria-current="page">Tambah Pasien Baru</li>
+					<li class="breadcrumb-item active" aria-current="page">Edit Data Pasien</li>
 				</ol>
 			</nav>
-			<h4 class="m-0">Tambah Pasien</h4>
+			<h4 class="m-0">Edit Pasien</h4>
 		</div>
 	</div>
 </div>
@@ -42,7 +42,7 @@
                 <div class="form-row">
                     <div class="col-12 col-md-6 mb-3">
                         <label>NIK <span class="red">*</span></label>
-                        <input type="text" class="form-control text-uppercase inputan numberonly" maxlength="16" placeholder="NIK" value="" required="" name="nik">
+                        <input type="text" class="form-control inputan numberonly" maxlength="16" placeholder="NIK" value="" required="" id="nik" name="nik">
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="txt_nama_pasien">Nama Pasien <span class="red">*</span></label>
@@ -58,11 +58,11 @@
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="tempat_lahir">Tempat Lahir <span class="red">*</span></label>
-						<input type="text" class="form-control uppercase inputan" name="tempat_lahir" placeholder="Tempat Lahir" autocomplete="off">
+						<input type="text" class="form-control uppercase inputan" name="tempat_lahir" id="tempat_lahir" placeholder="Tempat Lahir" autocomplete="off">
                     </div>
                     <div class="col-12 col-md-4 mb-3">
 						<label for="tanggal_lahir">Tanggal Lahir <span class="red">*</span></label>
-						<input type="date" class="form-control inputan" name="tanggal_lahir" required>
+						<input type="date" class="form-control inputan" name="tanggal_lahir" id="tanggal_lahir" required>
                     </div>
                     <div class="col-12 col-md-2 mb-3">
                     </div>
@@ -81,55 +81,55 @@
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="alamat">Alamat <span class="red">*</span></label>
-						<textarea class="form-control uppercase inputan" rows="3" name="alamat"></textarea>
+						<textarea class="form-control uppercase inputan" rows="3" name="alamat" id="alamat"></textarea>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<div class="row">
 							<div class="col-md-3">
 								<label for="rt">RT</label>
-								<input type="text" autocomplete="off" maxlength="3" class="form-control uppercase inputan" name="alamat_rt" placeholder="000">
+								<input type="text" autocomplete="off" maxlength="3" class="form-control uppercase inputan" name="alamat_rt" name="alamat_rt" placeholder="000">
 							</div>
 							<div class="col-md-3">
 								<label for="rw">RW</label>
-								<input type="text" autocomplete="off" maxlength="3" class="form-control uppercase inputan" name="alamat_rw" placeholder="000">
+								<input type="text" autocomplete="off" maxlength="3" class="form-control uppercase inputan" name="alamat_rw" id="alamat_rw" placeholder="000">
 							</div>
 						</div>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="alamat_provinsi">Provinsi <span class="red">*</span></label>
-						<select class="form-control inputan select2" name="alamat_provinsi" id="alamat_provinsi">
+						<select class="form-control inputan select2" name="alamat_provinsi" id="alamat_provinsi" required>
 							<option value="" disabled selected>Pilih Provinsi</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="alamat_kabupaten">Kabupaten / Kota <span class="red">*</span></label>
-						<select class="form-control inputan select2" name="alamat_kabupaten" id="alamat_kabupaten">
+						<select class="form-control inputan select2" name="alamat_kabupaten" id="alamat_kabupaten" required>
 							<option value="" disabled selected>Pilih Kabupaten / Kota</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="alamat_kecamatan">Kecamatan <span class="red">*</span></label>
-						<select class="form-control inputan select2" name="alamat_kecamatan" id="alamat_kecamatan">
+						<select class="form-control inputan select2" name="alamat_kecamatan" id="alamat_kecamatan" required>
 							<option value="" disabled selected>Pilih Kecamatan</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="alamat_kelurahan">Kelurahan <span class="red">*</span></label>
-						<select class="form-control inputan select2" name="alamat_kelurahan" id="alamat_kelurahan">
+						<select class="form-control inputan select2" name="alamat_kelurahan" id="alamat_kelurahan" required>
 							<option value="" disabled selected>Pilih Kelurahan</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="nama_ayah">Nama Ayah</label>
-						<input type="text" class="form-control uppercase inputan" name="nama_ayah" placeholder="Nama Ayah">
+						<input type="text" class="form-control uppercase inputan" name="nama_ayah" id="nama_ayah" placeholder="Nama Ayah">
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="nama_ibu">Nama Ibu</label>
-						<input type="text" class="form-control uppercase inputan" name="nama_ibu" placeholder="Nama Ibu">
+						<input type="text" class="form-control uppercase inputan" name="nama_ibu" id="nama_ibu" placeholder="Nama Ibu">
 					</div> 
 					<div class="col-12 col-md-6 mb-3">
 						<label for="nama_suami_istri">Nama Suami / Istri</label>
-						<input type="text" autocomplete="off" class="form-control uppercase inputan" name="nama_suami_istri" placeholder="Nama Suami / Istri">
+						<input type="text" autocomplete="off" class="form-control uppercase inputan" name="nama_suami_istri" id="nama_suami_istri" placeholder="Nama Suami / Istri">
 					</div> 
 					<div class="col-12 col-md-6 mb-3">
 						<label for="status_suami_istri">Status Hubungan</label>
@@ -151,44 +151,44 @@
                 <div class="form-row">
                     <div class="col-12 col-md-6 mb-3">
 						<label for="no_telp">No. Telp</label>
-						<input type="text" autocomplete="off" maxlength="14" class="form-control numberonly inputan" name="no_telp" placeholder="08xxxxxxxxxx">
+						<input type="text" autocomplete="off" maxlength="14" class="form-control numberonly inputan" name="no_telp" id="no_telp" placeholder="08xxxxxxxxxx">
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                   		<label for="goldar">Golongan Darah</label>	
+                   		<label for="goldar">Golongan Darah <span class="red">*</span></label>	
 						<!-- <div class="row col-md-9" id="parent_goldar">
 
 						</div> -->
-						<select class="form-control inputan" name="goldar" id="goldar">
+						<select class="form-control inputan" name="goldar" id="goldar" required>
 							<option value="" disabled selected>Pilih Golongan Darah</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                    	<label for="agama">Agama</label>
-                    	<select class="form-control inputan" id="agama" name="agama">
+                    	<label for="agama">Agama <span class="red">*</span></label>
+                    	<select class="form-control inputan" id="agama" name="agama" required>
 							<option value="" selected disabled>Pilih Agama</option>
 						</select>	
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                    	<label for="warganegara">Kewarganegaraan</label>
-                    	<select class="form-control inputan" id="warganegara" name="warganegara">
+                    	<label for="warganegara">Kewarganegaraan <span class="red">*</span></label>
+                    	<select class="form-control inputan" id="warganegara" name="warganegara" required>
 							<option value="" selected disabled>Pilih Kewarganegaraan</option>
 						</select>	
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                    	<label for="suku">Suku / Bangsa</label>
-                    	<select class="form-control inputan" name="suku" id="suku">
-							<option value="" disabled selected>Pilih Suku / Bangsa</option>
+                    	<label for="suku">Suku <span class="red">*</span></label>
+                    	<select class="form-control inputan" name="suku" id="suku" required="">
+							<option value="" disabled selected>Pilih Suku</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-						<label for="pendidikan">Pendidikan</label>
-						<select class="form-control inputan" name="pendidikan" id="pendidikan">
+						<label for="pendidikan">Pendidikan <span class="red">*</span></label>
+						<select class="form-control inputan" name="pendidikan" id="pendidikan" required>
 							<option value="" disabled selected>Pilih Pendidikan</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
-						<label for="pekerjaan">Pekerjaan</label>
-						<select class="form-control inputan" name="pekerjaan" id="pekerjaan">
+						<label for="pekerjaan">Pekerjaan <span class="red">*</span></label>
+						<select class="form-control inputan" name="pekerjaan" id="pekerjaan" required>
 							<option value="" disabled selected>Pilih Pekerjaan</option>
 						</select>
 					</div>
