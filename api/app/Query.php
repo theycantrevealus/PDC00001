@@ -195,7 +195,7 @@ class Query {
 				$buildQuery .= ' WHERE ' . implode(' ', $whereBuilder);
 			}
 			$buildQuery = trim($buildQuery);
-			if(isset(self::$limit) && intval(self::$limit) > 0) {
+			if(isset(self::$limit)) {
 				if(isset(self::$offset) && intval(self::$offset) > 0) {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit . ' ' . self::$offset;	
 				} else {
@@ -276,7 +276,7 @@ class Query {
 		try {
 			
 			$responseBuilder = array();
-			//$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
+			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = self::$queryValues;
 			$query = self::$pdo->prepare(self::buildQuery());
 			foreach (self::$queryValues as $key => $value) {
@@ -314,11 +314,11 @@ class Query {
 			$responseBuilder['response_result'] = $query->rowCount();
 			return $responseBuilder;
 		} catch (\PDOException $e) {
-			throw new QueryException($e->getMessage(), 1);
-			/*$responseBuilder = array();
+			//throw new QueryException($e->getMessage(), 1);
+			$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = self::$queryValues;
-			return $responseBuilder;*/
+			return $responseBuilder;
 		}
 	}
 }
