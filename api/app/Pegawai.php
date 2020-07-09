@@ -177,7 +177,11 @@ class Pegawai extends Utility {
 				))
 
 				->where(array(
-					'deleted_at' => 'IS NULL'
+					'deleted_at' => 'IS NULL',
+					'AND',
+					'uid' => '= ?'
+				), array(
+					$parameter
 				))
 
 				->execute();
