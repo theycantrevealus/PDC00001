@@ -8,6 +8,7 @@ use PondokCoder\Utility as Utility;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Tindakan as Tindakan;
+use PondokCoder\Pegawai as Pegawai;
 
 class Poli extends Utility {
 	static $pdo;
@@ -36,7 +37,12 @@ class Poli extends Utility {
 				case 'poli-view-detail':
 					//return self::get_poli_tindakan_view_detail($parameter[2]);
 					break;
-
+				case 'poli-avail-dokter':
+					return self::get_avail_dokter($parameter[2]);
+					break;
+				case 'poli-set-dokter':
+					return self::get_set_dokter($parameter[2]);
+					break;
 				default:
 					# code...
 					break;
@@ -46,7 +52,7 @@ class Poli extends Utility {
 		}
 	}
 
-	public function __POST__($parameter = array()){
+	public function __POST__($parameter = array()) {
 		switch ($parameter['request']) {
 			case 'tambah_poli':
 				return self::tambah_poli('master_poli', $parameter);
@@ -56,6 +62,12 @@ class Poli extends Utility {
 				return self::edit_poli('master_poli', $parameter);
 				break;
 
+			case 'poli_dokter':
+				return self::poli_dokter($parameter);
+				break;
+			case 'poli_dokter_buang':
+				return self::poli_dokter_buang($parameter);
+				break;
 			default:
 				# code...
 				break;
@@ -229,9 +241,219 @@ class Poli extends Utility {
 
 		return $data;
 	}
+
+	private function get_avail_dokter($parameter) { //parameter = uid poli
+		$Dokter = self::$query->select('pegawai', array(
+			'uid',
+			'nama AS nama_dokter'
+		))
+		->join('pegawai_jabatan', array(
+			'uid AS uid_jabatan',
+			'nama AS nama_jabatan'
+		))
+		->on(array(
+			array('pegawai.jabatan', '=', 'pegawai_jabatan.uid')
+		))
+		->where(array(
+			'pegawai.deleted_at' => 'IS NULL',
+			'AND',
+			'pegawai_jabatan.nama' => '= ?'
+		), array(
+			'Dokter'
+		))
+		->execute();
+
+		$filterDokter = array();
+		$CheckPoli = self::$query->select('master_poli_dokter', array(
+			'dokter'
+		))
+		->where(array(
+			'deleted_at' => 'IS NULL',
+			'AND',
+			'poli' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		foreach ($CheckPoli['response_data'] as $key => $value) {
+			if(!in_array($value['dokter'], $filterDokter)) {
+				array_push($filterDokter, $value['dokter']);
+			}
+		}
+
+		foreach ($Dokter['response_data'] as $key => $value) {
+			if(in_array($value['uid'], $filterDokter)) {
+				unset($Dokter['response_data'][$key]);
+			}
+		}
+
+		return $Dokter;
+	}
+
+	private function get_set_dokter($parameter) {
+		$CheckPoli = self::$query->select('master_poli_dokter', array(
+			'dokter'
+		))
+		->where(array(
+			'deleted_at' => 'IS NULL',
+			'AND',
+			'poli' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		foreach ($CheckPoli['response_data'] as $key => $value) {
+			$Pegawai = new Pegawai(self::$pdo);
+			$NamaDokter = $Pegawai::get_detail($value['dokter']);
+			$CheckPoli['response_data'][$key]['nama'] = $NamaDokter['response_data'][0]['nama'];
+		}
+
+		return $CheckPoli;
+	}
 	
 
 	/*====================== CRUD ========================*/
+
+	private function poli_dokter_buang($parameter){
+		$worker = self::$query->update('master_poli_dokter', array(
+			'updated_at' => parent::format_date(),
+			'deleted_at' => parent::format_date()
+		))
+		->where(array(
+			'poli' => '= ?',
+			'AND',
+			'dokter' => '= ?'
+		), array(
+			$parameter['poli'],
+			$parameter['dokter']
+		))
+		->returning('id')
+		->execute();
+
+		if($worker['response_result'] > 0) {
+			$log = parent::log(array(
+				'type'=>'activity',
+				'column'=>array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value'=>array(
+					$worker['response_unique'],
+					$UserData['data']->uid,
+					'master_poli_dokter',
+					'U',
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class'=>__CLASS__
+			));
+		}
+		return $worker;
+	}
+
+	private function poli_dokter($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		
+		$readDokter = self::$query->select('master_poli_dokter', array(
+			'poli',
+			'dokter'
+		))
+		->where(array(
+			'poli' => '= ?',
+			'AND',
+			'dokter' => '= ?'
+		), array(
+			$parameter['poli'],
+			$parameter['dokter']
+		))
+		->execute();
+
+		if(count($readDokter['response_data']) > 0) {
+			$worker = self::$query->update('master_poli_dokter', array(
+				'updated_at' => parent::format_date(),
+				'deleted_at' => ''
+			))
+			->where(array(
+				'poli' => '= ?',
+				'AND',
+				'dokter' => '= ?'
+			), array(
+				$parameter['poli'],
+				$parameter['dokter']
+			))
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$readDokter['response_data'][0]['id'],
+						$UserData['data']->uid,
+						'master_poli_dokter',
+						'U',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		} else {
+			$worker = self::$query->insert('master_poli_dokter', array(
+				'poli' => $parameter['poli'],
+				'dokter' => $parameter['dokter'],
+				'pegawai' => $UserData['data']->uid,
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->returning('id')
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$worker['response_unique'],
+						$UserData['data']->uid,
+						'master_poli_dokter',
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		}
+		return $worker;
+	}
 
 	private function tambah_poli($table_name, $parameter){
 		$Authorization = new Authorization();
