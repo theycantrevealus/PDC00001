@@ -86,7 +86,11 @@ class Query {
 			}
 		}
 		foreach ($values as $key => $value) {
-			array_push(self::$queryValues, $value);
+			if($value == 'NULL'){
+				array_push(self::$queryValues, '');
+			} else {
+				array_push(self::$queryValues, $value);
+			}
 		}
 		return $this;
 	}
@@ -214,15 +218,28 @@ class Query {
 		} else if(self::$queryMode == 'update') {
 			$defineColumn = array();
 			$buildQuery .= $this->tables[0] . ' SET ';
-			
-			$buildQuery .= implode(' = ?, ', self::$queryParams);
+			$nullCol = array();
+			for ($key = 0; $key < count(self::$queryParams); $key++) {
+				if(empty(self::$queryValues[$key])) {
+					$buildQuery .= self::$queryParams[$key] . ' = NULL';
+				} else {
+					$buildQuery .= self::$queryParams[$key] . ' = ?';
+				}
+				
+				if($key == count(self::$queryParams) - 2) {
+					$buildQuery .= ', ';
+				} else {
+					$buildQuery .= '';
+				}
+			}
+			//$buildQuery .= implode(' = ?, ', self::$queryParams);
 			if(count(self::$whereParameter) > 0) {
 				$whereBuilder = array();
 				foreach (self::$whereParameter as $key => $value) {
 					array_push($whereBuilder, $value);
 					array_push($whereBuilder, self::$whereLogic[$key]);
 				}
-				$buildQuery .= '= ? WHERE ' . implode(' ', $whereBuilder);
+				$buildQuery .= ' WHERE ' . implode(' ', $whereBuilder);
 			}
 			$buildQuery = trim($buildQuery);
 
@@ -257,9 +274,16 @@ class Query {
 
 	function execute() {
 		try {
+			
 			$responseBuilder = array();
-			//$responseBuilder['response_query'] = self::buildQuery(); ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
+			//$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
+			$responseBuilder['response_values'] = self::$queryValues;
 			$query = self::$pdo->prepare(self::buildQuery());
+			foreach (self::$queryValues as $key => $value) {
+				if($value == '') {
+					array_splice(self::$queryValues, $key, 1);
+				}
+			}
 			$query->execute(self::$queryValues);
 			
 			if(self::$queryMode == 'select') {
@@ -291,6 +315,10 @@ class Query {
 			return $responseBuilder;
 		} catch (\PDOException $e) {
 			throw new QueryException($e->getMessage(), 1);
+			/*$responseBuilder = array();
+			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
+			$responseBuilder['response_values'] = self::$queryValues;
+			return $responseBuilder;*/
 		}
 	}
 }
