@@ -232,9 +232,15 @@ class Pegawai extends Utility {
 				))
 
 				->where(array(
+<<<<<<< HEAD
+					'deleted_at' => 'IS NULL',
+					'AND',
+					'uid' => '= ?'
+=======
 					'pegawai.deleted_at' => 'IS NULL',
 					'AND',
 					'pegawai.uid' => '= ?'
+>>>>>>> master
 				), array(
 					$parameter
 				))

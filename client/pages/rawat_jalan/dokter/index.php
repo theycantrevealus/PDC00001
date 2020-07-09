@@ -4,12 +4,12 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item" aria-current="page">Master Unit</li>
-					<li class="breadcrumb-item active" aria-current="page">Unit Lantai</li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_jalan">Rawat Jalan</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Antrian Poli</li>
 				</ol>
 			</nav>
 		</div>
-		<button class="btn btn-sm btn-info" id="tambah-lantai">
+		<button class="btn btn-sm btn-info" id="tambah-satuan">
 			<i class="fa fa-plus"></i> Tambah
 		</button>
 	</div>
@@ -20,17 +20,22 @@
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<table class="table table-bordered" id="table-lantai">
+				<table class="table table-bordered" id="table-satuan">
 					<thead>
 						<tr>
 							<th style="width: 20px;">No</th>
-							<th>Nama Lantai</th>
+							<th>Waktu</th>
+							<th>Kategori</th>
+							<th>No. RM</th>
+							<th>Nama</th>
+							<th>Dokter</th>
+							<th>Poli</th>
+							<th>Keterangan</th>
+							<th>Oleh</th>
 							<th>Aksi</th>
 						</tr>
 					</thead>
-					<tbody>
-						
-					</tbody>
+					<tbody></tbody>
 				</table>
 			</div>
 		</div>
