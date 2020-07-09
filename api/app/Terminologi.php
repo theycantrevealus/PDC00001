@@ -35,6 +35,10 @@ class Terminologi extends Utility {
 					return self::get_terminologi_items('terminologi_item',$parameter[2]);
 					break;
 
+				case 'terminologi-items-detail':
+					return self::get_terminologi_items_detail('terminologi_item',$parameter[2]);
+					break;
+
 				default:
 					# code...
 					break;
@@ -65,10 +69,6 @@ class Terminologi extends Utility {
 	public function __DELETE__($parameter = array()) {
 		try{
 			switch ($parameter[6]) {
-				case 'terminologi':
-					return self::delete_terminologi('terminologi', $parameter[7]);
-					break;
-
 				case 'terminologi-item':
 					return self::delete_terminologi_item('terminologi_item', $parameter[7]);
 					break;
@@ -156,6 +156,38 @@ class Terminologi extends Utility {
 
 		return $data;
 	}
+
+	private function get_terminologi_items_detail($table, $parameter){
+		$data = self::$query
+					->select($table, array(
+						'id',
+						'nama',
+						'terminologi',
+						'created_at',
+						'updated_at'
+						)
+					)	
+					->where(array(
+							$table . '.deleted_at' => 'IS NULL',
+							'AND',
+							$table . '.id' => '= ?'
+						),
+						array(
+							$parameter
+						)
+					)
+					->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		return $data;
+	}
+
+	/*======================== CRUD ==========================*/
 
 	private function tambah_terminologi_item($table, $parameter) {
 		$Authorization = new Authorization();
