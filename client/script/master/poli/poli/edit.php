@@ -309,12 +309,12 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             success: function(response){
-                var MetaData = dataTindakan = response.response_package.response_data;
+                dataTindakan = response.response_package.response_data;
 
-                for(i = 0; i < MetaData.length; i++){
+                for(i = 0; i < dataTindakan.length; i++){
                     var selection = document.createElement("OPTION");
 
-                    $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                    $(selection).attr("value", dataTindakan[i].uid).html(dataTindakan[i].nama);
                     $("#tindakan").append(selection);
                 }
             },
@@ -370,6 +370,39 @@
         }
     }
     /*--------------------------------------*/
+    var listDokter = [];
+    function autoDokter() {
+        var newRow = document.createElement("TR");
+        var newCellDokterID = document.createElement("TD");
+        var newCellDokterNama = document.createElement("TD");
+        var newCellDokterAksi = document.createElement("TD");
+
+        var newDokter = document.createElement("SELECT");
+        $(newDokter).addClass("form-control");
+        $(newCellDokterNama).append(newDokter);
+
+        var newDeleteDokter = document.createElement("BUTTON");
+        $(newCellDokterAksi).append(newDeleteDokter);
+
+        $(newRow).append(newCellDokterID);
+        $(newRow).append(newCellDokterNama);
+        $(newRow).append(newCellDokterAksi);
+        $("#poli-list-dokter tbody").append(newRow);
+        rebaseDokter();
+    }
+
+    function rebaseDokter() {
+        $("#poli-list-dokter tbody tr").each(function(e) {
+            var id = (e + 1);
+            $(this).attr({
+                "id": "row_dokter_" + id
+            })
+        });
+    }
+
+    function loadDokter(oldData) {
+        
+    }
 
 
     function getTindakan(params){

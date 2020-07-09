@@ -4,13 +4,14 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item active" aria-current="page">Master Poli</li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/inventori">Master Inventori</a></li>
+					<li class="breadcrumb-item active" aria-current="page">Signa</li>
 				</ol>
 			</nav>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/master/poli/poli/tambah" class="btn btn-info btn-sm ml-3">
-			<i class="fa fa-plus"></i> Tambah Poli
-		</a>
+		<button class="btn btn-sm btn-info" id="tambah-signa">
+			<i class="fa fa-plus"></i> Tambah
+		</button>
 	</div>
 </div>
 
@@ -19,17 +20,15 @@
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<table class="table table-bordered" id="table-poli">
+				<table class="table table-bordered" id="table-signa">
 					<thead>
 						<tr>
 							<th style="width: 20px;">No</th>
-							<th>Nama Poli</th>
-							<th width="40%">Aksi</th>
+							<th>Nama</th>
+							<th>Aksi</th>
 						</tr>
 					</thead>
-					<tbody>
-						
-					</tbody>
+					<tbody></tbody>
 				</table>
 			</div>
 		</div>

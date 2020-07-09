@@ -28,7 +28,7 @@
 							<tr>
 								<th style="width: 20px;">No</th>
 								<th>Item</th>
-								<th>Aksi</th>
+								<th width="30%">Aksi</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
