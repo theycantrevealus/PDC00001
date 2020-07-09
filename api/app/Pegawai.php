@@ -178,7 +178,7 @@ class Pegawai extends Utility {
 
 
 				$responseBuilder['response_access'] = array();
-				$Modul = new Modul(self::$pdo);
+				/*$Modul = new Modul(self::$pdo);
 				$accessBuilder = self::get_access(array(
 					'uid' => $read[0]['uid']
 				));
@@ -189,7 +189,7 @@ class Pegawai extends Utility {
 					array_push($responseBuilder['response_access'], $value);
 				}
 
-				$_SESSION['akses'] = $responseBuilder['response_access'];
+				$_SESSION['akses'] = $responseBuilder['response_access'];*/
 
 
 			} else {
@@ -232,15 +232,9 @@ class Pegawai extends Utility {
 				))
 
 				->where(array(
-<<<<<<< HEAD
-					'deleted_at' => 'IS NULL',
-					'AND',
-					'uid' => '= ?'
-=======
 					'pegawai.deleted_at' => 'IS NULL',
 					'AND',
 					'pegawai.uid' => '= ?'
->>>>>>> master
 				), array(
 					$parameter
 				))
@@ -437,6 +431,7 @@ class Pegawai extends Utility {
 			$worker = self::$query->insert('pegawai', array(
 				'uid' => $uid,
 				'email' => $parameter['email'],
+				'password' => password_hash('123456', PASSWORD_DEFAULT),
 				'nama' => $parameter['nama'],
 				'jabatan' => $parameter['jabatan'],
 				'created_at' => parent::format_date(),
