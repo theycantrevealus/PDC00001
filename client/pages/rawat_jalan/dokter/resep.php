@@ -6,7 +6,7 @@
 			</div>
 			<div class="card-body">
 				<div class="row">
-					<div class="col-md-12" style="margin-top: 20px;">
+					<div class="col-md-12">
 						<table class="table table-bordered" id="table-resep">
 							<thead>
 								<tr>

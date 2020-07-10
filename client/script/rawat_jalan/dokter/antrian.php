@@ -375,6 +375,40 @@
 				//console.error( err.stack );
 			} );
 
+		function load_product_penjamin(target, obat, selectedData = "") {
+			/*var selected = [];
+			$("#table-resep tbody tr").each(function(){
+				var getPenjaminsSelected = $(this).find("td:eq(6) select").val();
+				if(selected.indexOf(getPenjaminsSelected) < 0) {
+					selected.push(getPenjaminsSelected);
+				}
+			});*/
+
+			var penjaminData;
+			$.ajax({
+				url:__HOSTAPI__ + "/Penjamin/get_penjamin_obat/" + obat,
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					$(target).find("option").remove();
+					penjaminData = response.response_package.response_data;
+					for (var a = 0; a < penjaminData.length; a++) {
+						/*if(selected.indexOf(penjaminData[a].penjamin.uid) < 0) {
+							
+						}*/
+						$(target).append("<option " + ((penjaminData[a].penjamin.uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + penjaminData[a].penjamin.uid + "\">" + penjaminData[a].penjamin.nama + "</option>");
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+			return penjaminData;
+		}
+
 		function load_product_resep(target, selectedData = "") {
 			var selected = [];
 			$("#table-resep tbody tr").each(function(){
@@ -427,15 +461,7 @@
 					$("#resep_row_" + id).hasClass("last-resep")
 				) {
 					autoResep();
-				}/* else {
-					console.clear();
-					
-					console.log("Obat : " + obat);
-					console.log("Hari : " + jlh_hari);
-					console.log("Signa : " + signa_konsumsi);
-					console.log("Takar : " + signa_hari);
-					console.log("New : " + $("#resep_row_" + id).hasClass("last-resep"));
-				}*/
+				}
 			}
 		}
 
@@ -500,6 +526,9 @@
 
 				var newPenjamin = document.createElement("SELECT");
 				$(newCellResepPenjamin).append(newPenjamin);
+
+				var penjaminData = load_product_penjamin(newPenjamin, $(newObat).val());
+				
 				$(newPenjamin).addClass("form-control resep_penjamin").select2();
 
 				var newDeleteResep = document.createElement("BUTTON");
