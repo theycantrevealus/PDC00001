@@ -86,7 +86,7 @@ class Tindakan extends Utility {
 		return $data;
 	}
 
-	private function get_tindakan_detail($parameter){
+	public function get_tindakan_detail($parameter){
 		$data = self::$query
 				->select('master_tindakan', array(
 						'uid',
@@ -205,7 +205,7 @@ class Tindakan extends Utility {
 		}
 	}
 
-	private function edit_tindakan($parameter){
+	public function edit_tindakan($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
