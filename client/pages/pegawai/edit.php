@@ -97,6 +97,7 @@
 										</thead>
 										<tbody></tbody>
 									</table>
+<<<<<<< HEAD
                   <div class="card card-body">
                     <div class="row">
                       <div class="col-sm-6">
@@ -127,12 +128,44 @@
                       </div>
                     </div>
                   </div>
+=======
+									<div class="card card-body">
+										<div class="row">
+											<div class="col-sm-6">
+												<h5>Module</h5>
+												<table class="table table-bordered largeDataType" id="module-table">
+													<thead>
+														<tr>
+															<th>Module</th>
+															<th>Methods</th>
+															<th>Access</th>
+														</tr>
+													</thead>
+													<tbody></tbody>
+												</table>
+											</div>
+											<div class="col-sm-6">
+												<h5>Access Manager</h5>
+												<table class="table table-bordered largeDataType" id="access-table">
+													<thead>
+														<tr>
+															<th>Class</th>
+															<th>Methods</th>
+															<th>Access</th>
+														</tr>
+													</thead>
+													<tbody></tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+>>>>>>> c3e3c14d25aa363bf801c5165d8f3898e8706a79
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+			</div>			
 		</div>
-	</div>			
+	</div>
 </div>
