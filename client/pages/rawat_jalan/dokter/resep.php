@@ -6,24 +6,15 @@
 			</div>
 			<div class="card-body">
 				<div class="row">
-					<div class="col-md-8">
-						<select class="form-control" id="txt_tindakan"></select>
-						<br />		
-					</div>
-					<div class="col-md-4">
-						<button class="btn btn-info" id="btnTambahTindakan">
-							<i class="fa fa-plus"></i> Tambah Tindakan
-						</button>
-					</div>
 					<div class="col-md-12" style="margin-top: 20px;">
 						<table class="table table-bordered" id="table-resep">
 							<thead>
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Obat</th>
-									<th>Jlh</th>
-									<th>Signa</th>
-									<th>Penjamin</th>
+									<th style="width: 10%">Jlh Hari</th>
+									<th colspan="3" style="width: 20%;">Signa</th>
+									<th style="width: 25%;">Penjamin</th>
 									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>

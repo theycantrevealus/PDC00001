@@ -183,14 +183,10 @@ class Pegawai extends Utility {
 				$responseBuilder['response_message'] = 'Login berhasil';
 				$responseBuilder['response_token'] = $jwt;
 
-
-<<<<<<< HEAD
 				$responseBuilder['response_access'] = array();
 				/*$Modul = new Modul(self::$pdo);
-=======
 				/*$responseBuilder['response_access'] = array();
 				$Modul = new Modul(self::$pdo);
->>>>>>> c3e3c14d25aa363bf801c5165d8f3898e8706a79
 				$accessBuilder = self::get_access(array(
 					'uid' => $read[0]['uid']
 				));

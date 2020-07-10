@@ -235,7 +235,6 @@ class Pasien extends Utility {
 			$allData[$key] = $value;
 		}
 		$allData['updated_at'] = parent::format_date();
-
 		$pasien = self::$query
 				->update($table, $allData)
 				->where(array(
@@ -297,7 +296,6 @@ class Pasien extends Utility {
 				)
 			)
 			->execute();
-
 
 		if ($pasien['response_result'] > 0){
 			$log = parent::log(array(
