@@ -31,6 +31,10 @@ class Penjamin extends Utility {
 					return self::get_penjamin_detail($parameter[2]);
 					break;
 
+				case 'get_penjamin_obat':
+					return self::get_penjamin_obat($parameter[2]);
+					break;
+
 				default:
 					# code...
 					break;
@@ -109,6 +113,34 @@ class Penjamin extends Utility {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 		}
+
+		return $data;
+	}
+
+	public function get_penjamin_obat($parameter) {
+		$data = self::$query
+		->select('master_inv_harga', array(
+			'barang',
+			'penjamin',
+			'satuan',
+			'harga',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv_harga.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_harga.barang' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		/*$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}*/
 
 		return $data;
 	}
