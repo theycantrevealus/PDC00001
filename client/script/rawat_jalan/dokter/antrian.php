@@ -277,7 +277,7 @@
 
 
 		//Init
-		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding;
+		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep;
 
 		ClassicEditor
 			.create( document.querySelector( '#txt_keluhan_utama' ), {
@@ -359,10 +359,90 @@
 				//console.error( err.stack );
 			} );
 
-		autoResep();
+		ClassicEditor
+			.create( document.querySelector( '#txt_keterangan_reset' ), {
+				extraPlugins: [ MyCustomUploadAdapterPlugin ],
+				placeholder: "Keterangan resep..."
+				/*ckfinder: {
+					uploadUrl: __HOSTFRONT__ + "/api/Upload"
+				}*/
+			} )
+			.then( editor => {
+				editorKeteranganResep = editor;
+				window.editor = editor;
+			} )
+			.catch( err => {
+				//console.error( err.stack );
+			} );
+
+		function load_product_resep(target, selectedData = "") {
+			var selected = [];
+			$("#table-resep tbody tr").each(function(){
+				var getProductSelected = $(this).find("td:eq(1) select").val();
+				if(selected.indexOf(getProductSelected) < 0) {
+					selected.push(getProductSelected);
+				}
+			});
+
+			var productData;
+			$.ajax({
+				url:__HOSTAPI__ + "/Inventori",
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					$(target).find("option").remove();
+					productData = response.response_package.response_data;
+					for (var a = 0; a < productData.length; a++) {
+						if(selected.indexOf(productData[a].uid) < 0) {
+							$(target).append("<option " + ((productData[a].uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + productData[a].uid + "\">" + productData[a].nama + "</option>");
+						}
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+			return (productData.length == selected.length);
+		}
+
+		checkGenerateResep();
+
+		function checkGenerateResep(id = 0) {
+			if($(".last-resep").length == 0) {
+				autoResep();
+			} else {
+				var obat = $("#resep_obat_" + id).val();
+				var jlh_hari = $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue");
+				var signa_konsumsi = $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue");
+				var signa_hari = $("#resep_signa_takar_" + id).inputmask("unmaskedvalue");
+
+				if(
+					parseFloat(jlh_hari) > 0 &&
+					parseFloat(signa_konsumsi) > 0 &&
+					parseFloat(signa_hari) > 0 &&
+					obat != null &&
+					$("#resep_row_" + id).hasClass("last-resep")
+				) {
+					autoResep();
+				}/* else {
+					console.clear();
+					
+					console.log("Obat : " + obat);
+					console.log("Hari : " + jlh_hari);
+					console.log("Signa : " + signa_konsumsi);
+					console.log("Takar : " + signa_hari);
+					console.log("New : " + $("#resep_row_" + id).hasClass("last-resep"));
+				}*/
+			}
+		}
+
 		function autoResep() {
 			$("#table-resep tbody tr").removeClass("last-resep");
 			var newRowResep = document.createElement("TR");
+			$(newRowResep).addClass("last-resep");
 			var newCellResepID = document.createElement("TD");
 			var newCellResepObat = document.createElement("TD");
 			var newCellResepJlh = document.createElement("TD");
@@ -374,45 +454,74 @@
 
 			var newObat = document.createElement("SELECT");
 			$(newCellResepObat).append(newObat);
-			$(newObat).addClass("form-control").select2();
+			var addAnother = load_product_resep(newObat, "");
+			
+			if(!addAnother) {
+				$(newObat).addClass("form-control").select2();
 
-			var newJumlah = document.createElement("INPUT");
-			$(newCellResepJlh).append(newJumlah);
-			$(newJumlah).addClass("form-control");
+				var newJumlah = document.createElement("INPUT");
+				$(newCellResepJlh).append(newJumlah);
+				$(newJumlah).addClass("form-control resep_jlh_hari").inputmask({
+					alias: 'decimal',
+					rightAlign: true,
+					placeholder: "0.00",
+					prefix: "",
+					autoGroup: false,
+					digitsOptional: true
+				});
 
-			var newKonsumsi = document.createElement("INPUT");
-			$(newCellResepSigna1).append(newKonsumsi);
-			$(newKonsumsi).addClass("form-control");
+				var newKonsumsi = document.createElement("INPUT");
+				$(newCellResepSigna1).append(newKonsumsi);
+				$(newKonsumsi).addClass("form-control resep_konsumsi").attr({
+					"placeholder": "3"
+				}).inputmask({
+					alias: 'decimal',
+					rightAlign: true,
+					placeholder: "0.00",
+					prefix: "",
+					autoGroup: false,
+					digitsOptional: true
+				});
 
-			$(newCellResepSigna2).html("<i class=\"fa fa-times\"></i>");
+				$(newCellResepSigna2).html("<i class=\"fa fa-times\"></i>");
 
-			var newTakar = document.createElement("INPUT");
-			$(newCellResepSigna3).append(newTakar);
-			$(newTakar).addClass("form-control");
+				var newTakar = document.createElement("INPUT");
+				$(newCellResepSigna3).append(newTakar);
+				$(newTakar).addClass("form-control resep_takar").attr({
+					"placeholder": "1"
+				}).inputmask({
+					alias: 'decimal',
+					rightAlign: true,
+					placeholder: "0.00",
+					prefix: "",
+					autoGroup: false,
+					digitsOptional: true
+				});
 
-			var newPenjamin = document.createElement("SELECT");
-			$(newCellResepPenjamin).append(newPenjamin);
-			$(newPenjamin).addClass("form-control").select2();
+				var newPenjamin = document.createElement("SELECT");
+				$(newCellResepPenjamin).append(newPenjamin);
+				$(newPenjamin).addClass("form-control resep_penjamin").select2();
 
-			var newDeleteResep = document.createElement("BUTTON");
-			$(newCellResepAksi).append(newDeleteResep);
-			$(newDeleteResep).addClass("btn btn-sm btn-danger").html("<i class=\"fa fa-ban\"></i>");
+				var newDeleteResep = document.createElement("BUTTON");
+				$(newCellResepAksi).append(newDeleteResep);
+				$(newDeleteResep).addClass("btn btn-sm btn-danger resep_delete").html("<i class=\"fa fa-ban\"></i>");
 
-			$(newRowResep).append(newCellResepID);
-			$(newRowResep).append(newCellResepObat);
-			$(newRowResep).append(newCellResepJlh);
-			$(newRowResep).append(newCellResepSigna1);
-			$(newRowResep).append(newCellResepSigna2);
-			$(newRowResep).append(newCellResepSigna3);
-			$(newRowResep).append(newCellResepPenjamin);
-			$(newRowResep).append(newCellResepAksi);
-
-			$("#table-resep").append(newRowResep);
-			rebaseResep();
+				$(newRowResep).append(newCellResepID);
+				$(newRowResep).append(newCellResepObat);
+				$(newRowResep).append(newCellResepSigna1);
+				$(newRowResep).append(newCellResepSigna2);
+				$(newRowResep).append(newCellResepSigna3);
+				$(newRowResep).append(newCellResepJlh);
+				$(newRowResep).append(newCellResepPenjamin);
+				$(newRowResep).append(newCellResepAksi);
+				$("#table-resep").append(newRowResep);
+				
+				rebaseResep();
+			}
 		}
 
 		function rebaseResep() {
-			$("#table-resep").each(function(e) {
+			$("#table-resep tbody tr").each(function(e) {
 				var id = (e + 1);
 
 				$(this).attr({
@@ -422,19 +531,40 @@
 				$(this).find("td:eq(1) select").attr({
 					"id": "resep_obat_" + id
 				});
-				$(this).find("td:eq(2) INPUT").attr({
-					"id": "resep_jlh_" + id
+				$(this).find("td:eq(2) input:eq(0)").attr({
+					"id": "resep_signa_konsumsi_" + id
 				});
-				$(this).find("td:eq(3) select").attr({
-					"id": "resep_signa_" + id
+				$(this).find("td:eq(4) input:eq(0)").attr({
+					"id": "resep_signa_takar_" + id
 				});
-				$(this).find("td:eq(4) select").attr({
+				$(this).find("td:eq(5) input").attr({
+					"id": "resep_jlh_hari_" + id
+				});
+				$(this).find("td:eq(6) select").attr({
 					"id": "resep_penjamin_" + id
 				});
-				$(this).find("td:eq(5) buttton").attr({
+				$(this).find("td:eq(7) buttton").attr({
 					"id": "resep_delete_" + id
 				});
 			});
 		}
+
+		$("body").on("keyup", ".resep_konsumsi", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			checkGenerateResep(id);
+		});
+
+		$("body").on("keyup", ".resep_takar", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			checkGenerateResep(id);
+		});
+
+		$("body").on("keyup", ".resep_jlh_hari", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			checkGenerateResep(id);
+		});
 	});
 </script>

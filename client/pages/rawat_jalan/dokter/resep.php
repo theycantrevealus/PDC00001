@@ -6,14 +6,14 @@
 			</div>
 			<div class="card-body">
 				<div class="row">
-					<div class="col-md-12" style="margin-top: 20px;">
+					<div class="col-md-12" style="margin-top: 10px;">
 						<table class="table table-bordered" id="table-resep">
 							<thead>
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Obat</th>
+									<th colspan="3" style="width: 20%;">Signa/Hari</th>
 									<th style="width: 10%">Jlh Hari</th>
-									<th colspan="3" style="width: 20%;">Signa</th>
 									<th style="width: 25%;">Penjamin</th>
 									<th class="wrap_content">Aksi</th>
 								</tr>
@@ -21,6 +21,10 @@
 							<tbody>
 							</tbody>
 						</table>
+					</div>
+					<div class="col-md-12" style="margin-top: 20px;">
+						<b>Keterangan:</b>
+						<div id="txt_keterangan_reset"></div>
 					</div>
 				</div>
 			</div>
