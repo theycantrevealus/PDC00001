@@ -359,7 +359,7 @@
 				//console.error( err.stack );
 			} );
 
-<<<<<<< Updated upstream
+
 		ClassicEditor
 			.create( document.querySelector( '#txt_keterangan_reset' ), {
 				extraPlugins: [ MyCustomUploadAdapterPlugin ],
@@ -470,12 +470,6 @@
 			$("#table-resep tbody tr").removeClass("last-resep");
 			var newRowResep = document.createElement("TR");
 			$(newRowResep).addClass("last-resep");
-=======
-		autoResep();
-		function autoResep() {
-			$("#table-resep tbody tr").removeClass("last-resep");
-			var newRowResep = document.createElement("TR");
->>>>>>> Stashed changes
 			var newCellResepID = document.createElement("TD");
 			var newCellResepObat = document.createElement("TD");
 			var newCellResepJlh = document.createElement("TD");
@@ -487,7 +481,7 @@
 
 			var newObat = document.createElement("SELECT");
 			$(newCellResepObat).append(newObat);
-<<<<<<< Updated upstream
+			
 			var addAnother = load_product_resep(newObat, "");
 			
 			if(!addAnother) {
@@ -555,69 +549,6 @@
 				
 				rebaseResep();
 			}
-=======
-			$(newObat).addClass("form-control").select2();
-
-			var newJumlah = document.createElement("INPUT");
-			$(newCellResepJlh).append(newJumlah);
-			$(newJumlah).addClass("form-control");
-
-			var newKonsumsi = document.createElement("INPUT");
-			$(newCellResepSigna1).append(newKonsumsi);
-			$(newKonsumsi).addClass("form-control");
-
-			$(newCellResepSigna2).html("<i class=\"fa fa-times\"></i>");
-
-			var newTakar = document.createElement("INPUT");
-			$(newCellResepSigna3).append(newTakar);
-			$(newTakar).addClass("form-control");
-
-			var newPenjamin = document.createElement("SELECT");
-			$(newCellResepPenjamin).append(newPenjamin);
-			$(newPenjamin).addClass("form-control").select2();
-
-			var newDeleteResep = document.createElement("BUTTON");
-			$(newCellResepAksi).append(newDeleteResep);
-			$(newDeleteResep).addClass("btn btn-sm btn-danger").html("<i class=\"fa fa-ban\"></i>");
-
-			$(newRowResep).append(newCellResepID);
-			$(newRowResep).append(newCellResepObat);
-			$(newRowResep).append(newCellResepJlh);
-			$(newRowResep).append(newCellResepSigna1);
-			$(newRowResep).append(newCellResepSigna2);
-			$(newRowResep).append(newCellResepSigna3);
-			$(newRowResep).append(newCellResepPenjamin);
-			$(newRowResep).append(newCellResepAksi);
-
-			$("#table-resep").append(newRowResep);
-			rebaseResep();
-		}
-
-		function rebaseResep() {
-			$("#table-resep").each(function(e) {
-				var id = (e + 1);
-
-				$(this).attr({
-					"id": "resep_row_" + id
-				});
-				$(this).find("td:eq(0)").html(id);
-				$(this).find("td:eq(1) select").attr({
-					"id": "resep_obat_" + id
-				});
-				$(this).find("td:eq(2) INPUT").attr({
-					"id": "resep_jlh_" + id
-				});
-				$(this).find("td:eq(3) select").attr({
-					"id": "resep_signa_" + id
-				});
-				$(this).find("td:eq(4) select").attr({
-					"id": "resep_penjamin_" + id
-				});
-				$(this).find("td:eq(5) buttton").attr({
-					"id": "resep_delete_" + id
-				});
-			});
->>>>>>> Stashed changes
 		}
 
 		function rebaseResep() {
