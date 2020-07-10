@@ -6,9 +6,7 @@
 			</div>
 			<div class="card-body">
 				<div class="row">
-<<<<<<< HEAD
 					<div class="col-md-12" style="margin-top: 10px;">
-=======
 					<div class="col-md-8">
 						<select class="form-control" id="txt_tindakan"></select>
 						<br />		
@@ -19,21 +17,14 @@
 						</button>
 					</div>
 					<div class="col-md-12" style="margin-top: 20px;">
->>>>>>> 5fb85d100e40b7ddfb4dcc09670131051b7f9101
 						<table class="table table-bordered" id="table-resep">
 							<thead>
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Obat</th>
-<<<<<<< HEAD
 									<th colspan="3" style="width: 20%;">Signa/Hari</th>
 									<th style="width: 10%">Jlh Hari</th>
 									<th style="width: 25%;">Penjamin</th>
-=======
-									<th>Jlh</th>
-									<th>Signa</th>
-									<th>Penjamin</th>
->>>>>>> 5fb85d100e40b7ddfb4dcc09670131051b7f9101
 									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
@@ -41,13 +32,10 @@
 							</tbody>
 						</table>
 					</div>
-<<<<<<< HEAD
 					<div class="col-md-12" style="margin-top: 20px;">
 						<b>Keterangan:</b>
 						<div id="txt_keterangan_reset"></div>
 					</div>
-=======
->>>>>>> 5fb85d100e40b7ddfb4dcc09670131051b7f9101
 				</div>
 			</div>
 		</div>

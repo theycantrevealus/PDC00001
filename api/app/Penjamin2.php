@@ -6,9 +6,8 @@ use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Authorization as Authorization;
-use PondokCoder\Terminologi as Terminologi;
 
-class Pasien extends Utility {
+class Penjamin extends Utility {
 	static $pdo;
 	static $query;
 
@@ -24,12 +23,12 @@ class Pasien extends Utility {
 	public function __GET__($parameter = array()) {
 		try {
 			switch($parameter[1]) {
-				case 'pasien':
-					return self::get_pasien('pasien');
+				case 'penjamin':
+					return self::get_penjamin();
 					break;
 
-				case 'pasien-detail':
-					return self::get_pasien_detail('pasien', $parameter[2]);
+				case 'penjamin-detail':
+					return self::get_penjamin_detail($parameter[2]);
 					break;
 
 				default:
@@ -41,14 +40,14 @@ class Pasien extends Utility {
 		}
 	}
 
-	public function __POST__($parameter = array()){ 
+	public function __POST__($parameter = array()){
 		switch ($parameter['request']) {
-			case 'tambah-pasien':
-				return self::tambah_pasien('pasien', $parameter);
+			case 'tambah_penjamin':
+				return self::tambah_penjamin($parameter);
 				break;
 
-			case 'edit-pasien':
-				return self::edit_pasien('pasien', $parameter);
+			case 'edit_penjamin':
+				return self::edit_penjamin($parameter);
 				break;
 
 			default:
@@ -58,26 +57,22 @@ class Pasien extends Utility {
 	}
 
 	public function __DELETE__($parameter = array()){
-		return self::delete_pasien('pasien', $parameter);
+		return self::delete_penjamin($parameter);
 	}
 
 
 	/*=======================GET FUNCTION======================*/
-	private function get_pasien($table){
+	private function get_penjamin(){
 		$data = self::$query
-					->select($table, array(
+					->select('master_penjamin', array(
 						'uid',
-						'no_rm',
 						'nama',
-						'panggilan AS id_panggilan',
-						'tanggal_lahir',
-						'jenkel AS id_jenkel',
 						'created_at',
 						'updated_at'
 						)
 					)	
 					->where(array(
-							$table . '.deleted_at' => 'IS NULL'
+							'master_penjamin.deleted_at' => 'IS NULL'
 						)
 					)
 					->execute();
@@ -86,68 +81,26 @@ class Pasien extends Utility {
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
-			$data['response_data'][$key]['tanggal_lahir'] = parent::dateToIndo($data['response_data'][$key]['tanggal_lahir']);
-			$term = new Terminologi(self::$pdo);
-
-			$value = $data['response_data'][$key]['id_panggilan'];
-			$param = ['','terminologi-items-detail',$value];
-			$get_panggilan = $term->__GET__($param);
-			$data['response_data'][$key]['panggilan'] = $get_panggilan['response_data'][0]['nama'];
-
-
-			$value = $data['response_data'][$key]['id_jenkel'];
-			$param = ['','terminologi-items-detail',$value];
-			$get_jenkel = $term->__GET__($param);
-			$data['response_data'][$key]['jenkel'] = $get_jenkel['response_data'][0]['nama'];
-
-			$tgl_daftar = date("Y-m-d", strtotime($data['response_data'][$key]['created_at']));
-			$data['response_data'][$key]['tgl_daftar'] = parent::dateToIndo($tgl_daftar);
 		}
 
 		return $data;
 	}
 
-	private function get_pasien_detail($table, $parameter){
+	private function get_penjamin_detail($parameter){
 		$data = self::$query
-					->select($table, array(
+				->select('master_penjamin', array(
 						'uid',
-						'no_rm',
-						'nik',
 						'nama',
-						'panggilan',
-						'tanggal_lahir',
-						'tempat_lahir',
-						'jenkel',
-						'agama',
-						'suku',
-						'pendidikan',
-						'goldar',
-						'pekerjaan',
-						'nama_ayah',
-						'nama_ibu',
-						'nama_suami_istri',
-						'status_suami_istri',
-						'alamat',
-						'alamat_rt',
-						'alamat_rw',
-						'alamat_provinsi',
-						'alamat_kabupaten',
-						'alamat_kecamatan',
-						'alamat_kelurahan',
-						'warganegara',
-						'no_telp',
 						'created_at',
 						'updated_at'
-						)
-					)	
-					->where(array(
-							$table . '.deleted_at' => 'IS NULL',
+					)
+				)
+				->where(array(
+							'master_penjamin.deleted_at' => 'IS NULL',
 							'AND',
-							$table . '.uid' => '= ?'
+							'master_penjamin.uid' => '= ?'
 						),
-						array(
-							$parameter
-						)
+						array($parameter)
 					)
 					->execute();
 
@@ -160,18 +113,15 @@ class Pasien extends Utility {
 		return $data;
 	}
 
-	/*==================== CRUD ====================*/
 
-	private function tambah_pasien($table, $parameter){
+	/*====================== CRUD ========================*/
+	private function tambah_penjamin($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$dataObj = $parameter['dataObj'];
-		$allData = [];
-
 		$check = self::duplicate_check(array(
-			'table'=>$table,
-			'check'=>$dataObj['nama']
+			'table'=>'master_penjamin',
+			'check'=>$parameter['nama']
 		));
 
 		if (count($check['response_data']) > 0){
@@ -181,20 +131,17 @@ class Pasien extends Utility {
 			return $check;
 		} else {
 			$uid = parent::gen_uuid();
-
-			$allData['uid'] = $uid;
-			$allData['created_at'] = parent::format_date();
-			$allData['updated_at'] = parent::format_date();
-
-			foreach ($dataObj as $key => $value) {
-				$allData[$key] = $value;
-			}
-
-			$pasien = self::$query
-						->insert($table, $allData)
+			$penjamin = self::$query
+						->insert('master_penjamin', array(
+								'uid'=>$uid,
+								'nama'=>$parameter['nama'],
+								'created_at'=>parent::format_date(),
+								'updated_at'=>parent::format_date()
+								)
+						)
 						->execute();
 
-			if ($pasien['response_result'] > 0){
+			if ($penjamin['response_result'] > 0){
 				$log = parent::log(array(
 							'type'=>'activity',
 							'column'=>array(
@@ -209,7 +156,7 @@ class Pasien extends Utility {
 							'value'=>array(
 								$uid,
 								$UserData['data']->uid,
-								$table,
+								'master_penjamin',
 								'I',
 								parent::format_date(),
 								'N',
@@ -220,27 +167,27 @@ class Pasien extends Utility {
 					);
 			}
 
-			return $pasien;
+			return $penjamin;
 
 		}
 	}
 
-	private function edit_pasien($table, $parameter){
+	private function edit_penjamin($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-		$dataObj = $parameter['dataObj'];
-		$old = self::get_pasien_detail($table, $parameter['uid']);
-		$allData = [];
-		foreach ($dataObj as $key => $value) {
-			$allData[$key] = $value;
-		}
-		$allData['updated_at'] = parent::format_date();
-		$pasien = self::$query
-				->update($table, $allData)
+
+		$old = self::get_penjamin_detail($parameter['uid']);
+
+		$penjamin = self::$query
+				->update('master_penjamin', array(
+						'nama'=>$parameter['nama'],
+						'updated_at'=>parent::format_date()
+					)
+				)
 				->where(array(
-					$table . '.deleted_at' => 'IS NULL',
+					'master_penjamin.deleted_at' => 'IS NULL',
 					'AND',
-					$table . '.uid' => '= ?'
+					'master_penjamin.uid' => '= ?'
 					),
 					array(
 						$parameter['uid']
@@ -248,7 +195,7 @@ class Pasien extends Utility {
 				)
 				->execute();
 
-		if ($pasien['response_result'] > 0){
+		if ($penjamin['response_result'] > 0){
 			unset($parameter['access_token']);
 
 			$log = parent::log(array(
@@ -267,7 +214,7 @@ class Pasien extends Utility {
 					'value'=>array(
 						$parameter['uid'],
 						$UserData['data']->uid,
-						$table,
+						'master_penjamin',
 						'U',
 						json_encode($old['response_data'][0]),
 						json_encode($parameter),
@@ -280,24 +227,24 @@ class Pasien extends Utility {
 			);
 		}
 
-		return $pasien;
+		return $penjamin;
 	}
 
-	private function delete_pasien($table, $parameter){
+	private function delete_penjamin($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$pasien = self::$query
-			->delete($table)
+		$penjamin = self::$query
+			->delete($parameter[6])
 			->where(array(
-					$table . '.uid' => '= ?'
+					$parameter[6] . '.uid' => '= ?'
 				), array(
-					$parameter[6]	
+					$parameter[7]	
 				)
 			)
 			->execute();
 
-		if ($pasien['response_result'] > 0){
+		if ($penjamin['response_result'] > 0){
 			$log = parent::log(array(
 					'type'=>'activity',
 					'column'=>array(
@@ -310,9 +257,9 @@ class Pasien extends Utility {
 						'login_id'
 					),
 					'value'=>array(
-						$parameter[6],
+						$parameter[7],
 						$UserData['data']->uid,
-						$table,
+						$parameter[6],
 						'D',
 						parent::format_date(),
 						'N',
@@ -322,32 +269,9 @@ class Pasien extends Utility {
 				)
 			);
 		}
-		return $pasien;
+
+		return $penjamin;
 	}
-
-	/*private function get_table_col($table_name){
-		$data = self::$query
-					->select('INFORMATION_SCHEMA.COLUMNS', array(
-							'column_name'
-						)
-					)
-					->where(array(
-							'table_name' => '= ?'
-						),
-						array(
-							$table_name
-						)
-					)
-					->execute();
-
-		$autonum = 1;
-		foreach ($data['response_data'] as $key => $value) {
-			$data['response_data'][$key]['autonum'] = $autonum;
-			$autonum++;
-		}
-
-		return $data;
-	}*/
 
 
 	private function duplicate_check($parameter) {
@@ -365,4 +289,5 @@ class Pasien extends Utility {
 		))
 		->execute();
 	}
+
 }
