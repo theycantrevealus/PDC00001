@@ -6,16 +6,6 @@
 			</div>
 			<div class="card-body">
 				<div class="row">
-					<div class="col-md-12" style="margin-top: 10px;">
-					<div class="col-md-8">
-						<select class="form-control" id="txt_tindakan"></select>
-						<br />		
-					</div>
-					<div class="col-md-4">
-						<button class="btn btn-info" id="btnTambahTindakan">
-							<i class="fa fa-plus"></i> Tambah Tindakan
-						</button>
-					</div>
 					<div class="col-md-12" style="margin-top: 20px;">
 						<table class="table table-bordered" id="table-resep">
 							<thead>
