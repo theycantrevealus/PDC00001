@@ -1,0 +1,6 @@
+[27-Jun-2020 10:42:32 UTC] PHP Warning:  require(../config.php): failed to open stream: No such file or directory in /home/pondokco/simrsv2.pondokcoder.com/client/index.php on line 2
+[27-Jun-2020 10:42:32 UTC] PHP Warning:  require(../config.php): failed to open stream: No such file or directory in /home/pondokco/simrsv2.pondokcoder.com/client/index.php on line 2
+[27-Jun-2020 10:42:32 UTC] PHP Fatal error:  require(): Failed opening required '../config.php' (include_path='.:/opt/alt/php72/usr/share/pear') in /home/pondokco/simrsv2.pondokcoder.com/client/index.php on line 2
+[27-Jun-2020 10:42:34 UTC] PHP Warning:  require(../config.php): failed to open stream: No such file or directory in /home/pondokco/simrsv2.pondokcoder.com/client/index.php on line 2
+[27-Jun-2020 10:42:34 UTC] PHP Warning:  require(../config.php): failed to open stream: No such file or directory in /home/pondokco/simrsv2.pondokcoder.com/client/index.php on line 2
+[27-Jun-2020 10:42:34 UTC] PHP Fatal error:  require(): Failed opening required '../config.php' (include_path='.:/opt/alt/php72/usr/share/pear') in /home/pondokco/simrsv2.pondokcoder.com/client/index.php on line 2
