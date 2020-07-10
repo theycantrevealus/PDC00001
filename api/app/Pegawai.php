@@ -177,7 +177,7 @@ class Pegawai extends Utility {
 				$responseBuilder['response_token'] = $jwt;
 
 
-				$responseBuilder['response_access'] = array();
+				/*$responseBuilder['response_access'] = array();
 				$Modul = new Modul(self::$pdo);
 				$accessBuilder = self::get_access(array(
 					'uid' => $read[0]['uid']
@@ -189,7 +189,7 @@ class Pegawai extends Utility {
 					array_push($responseBuilder['response_access'], $value);
 				}
 
-				$_SESSION['akses'] = $responseBuilder['response_access'];
+				$_SESSION['akses'] = $responseBuilder['response_access'];*/
 
 
 			} else {
