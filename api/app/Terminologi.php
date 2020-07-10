@@ -254,7 +254,6 @@ class Terminologi extends Utility {
 		$term = self::$query
 				->update($table, array(
 					'nama' => $parameter['nama'],
-					'terminologi' => $parameter['id_term'],
 					'updated_at' => parent::format_date()
 				))
 
@@ -281,7 +280,7 @@ class Terminologi extends Utility {
 							'login_id'
 						),
 						'value'=>array(
-							$last_id,
+							$parameter['id'],
 							$UserData['data']->uid,
 							$table,
 							'I',
