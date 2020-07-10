@@ -160,7 +160,6 @@ class Poli extends Utility {
 			$Tindakan = new Tindakan(self::$pdo);
 			$data['response_data'][$key]['tindakan'] = $Tindakan::get_tindakan_detail($value['uid_tindakan'])['response_data'][0];
 			$data['response_data'][$key]['penjamin'] = $Penjamin::get_penjamin_detail($value['uid_penjamin'])['response_data'][0];
-			
 			$autonum++;
 		}
 
@@ -317,7 +316,7 @@ class Poli extends Utility {
 
 		return $CheckPoli;
 	}
-
+  
 	public function get_poli_by_dokter($parameter) {
 		$CheckPoli = self::$query->select('master_poli_dokter', array(
 			'dokter',
