@@ -20,7 +20,7 @@
 			<div class="z-0">
 				<ul class="nav nav-tabs nav-tabs-custom" role="tablist">
 					<li class="nav-item">
-						<a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+						<a href="#tab-poli-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								01
 								<b class="inv-tab-status text-success" id="status-1"><i class="fa fa-check-circle"></i></b>
@@ -56,7 +56,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-5" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								05
 								<b class="inv-tab-status text-success" id="status-5"><i class="fa fa-check-circle"></i></b>
@@ -67,7 +67,7 @@
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
-				<div class="tab-pane show fade" id="tab-poli-1">
+				<div class="tab-pane active show fade" id="tab-poli-1">
 					<?php require 'asesmen-awal.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
@@ -79,10 +79,11 @@
 					<?php require 'resep.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane active show fade" id="tab-poli-4">
-					
+				<div class="tab-pane show fade" id="tab-poli-4">
+					<?php require 'review.php'; ?>
+					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane active show fade" id="tab-poli-5">
+				<div class="tab-pane show fade" id="tab-poli-5">
 					<?php require 'review.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>

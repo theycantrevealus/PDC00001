@@ -1,6 +1,6 @@
 <script type="text/javascript">
 	$(function() {
-		var antrianData;
+		var antrianData, asesmen_detail;
 		var UID = __PAGES__[3];
 		$.ajax({
 			url:__HOSTAPI__ + "/Antrian/antrian-detail/" + UID,
@@ -11,7 +11,151 @@
 			type:"GET",
 			success:function(response) {
 				antrianData = response.response_package.response_data[0];
-				console.log(antrianData);
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
+
+		//Init
+		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorPlanning;
+
+		$.ajax({
+			url:__HOSTAPI__ + "/Asesmen/antrian-detail/" + UID,
+			async:false,
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+			},
+			type:"GET",
+			success:function(response) {
+				asesmen_detail = response.response_package.response_data[0];
+
+
+				ClassicEditor
+					.create( document.querySelector( '#txt_keluhan_utama' ), {
+						extraPlugins: [ MyCustomUploadAdapterPlugin ],
+						placeholder: "Keluhan Utama..."
+						/*ckfinder: {
+							uploadUrl: __HOSTFRONT__ + "/api/Upload"
+						}*/
+					} )
+					.then( editor => {
+						editor.setData(asesmen_detail.keluhan_utama);
+						editorKeluhanUtamaData = editor;
+						window.editor = editor;
+					} )
+					.catch( err => {
+						//console.error( err.stack );
+					} );
+
+				ClassicEditor
+					.create( document.querySelector( '#txt_keluhan_tambahan' ), {
+						extraPlugins: [ MyCustomUploadAdapterPlugin ],
+						placeholder: "Keluhan Tambahan..."
+						/*ckfinder: {
+							uploadUrl: __HOSTFRONT__ + "/api/Upload"
+						}*/
+					} )
+					.then( editor => {
+						editor.setData(asesmen_detail.keluhan_tambahan);
+						editorKeluhanTambahanData = editor;
+						window.editor = editor;
+					} )
+					.catch( err => {
+						//console.error( err.stack );
+					} );
+
+				$("#txt_tekanan_darah").val(asesmen_detail.tekanan_darah);
+				$("#txt_suhu").val(asesmen_detail.suhu);
+				$("#txt_nadi").val(asesmen_detail.nadi);
+				$("#txt_pernafasan").val(asesmen_detail.pernafasan);
+				$("#txt_berat_badan").val(asesmen_detail.berat_badan);
+				$("#txt_tinggi_badan").val(asesmen_detail.tinggi_badan);
+				$("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
+
+				ClassicEditor
+					.create( document.querySelector( '#txt_pemeriksaan_fisik' ), {
+						extraPlugins: [ MyCustomUploadAdapterPlugin ],
+						placeholder: "Pemeriksaan Fisik..."
+						/*ckfinder: {
+							uploadUrl: __HOSTFRONT__ + "/api/Upload"
+						}*/
+					} )
+					.then( editor => {
+						editor.setData(asesmen_detail.pemeriksaan_fisik);
+						editorPeriksaFisikData = editor;
+						window.editor = editor;
+					} )
+					.catch( err => {
+						//console.error( err.stack );
+					} );
+
+				ClassicEditor
+					.create( document.querySelector( '#txt_diagnosa_kerja' ), {
+						extraPlugins: [ MyCustomUploadAdapterPlugin ],
+						placeholder: "Diagnosa Kerja..."
+						/*ckfinder: {
+							uploadUrl: __HOSTFRONT__ + "/api/Upload"
+						}*/
+					} )
+					.then( editor => {
+						editor.setData(asesmen_detail.diagnosa_kerja);
+						editorKerja = editor;
+						window.editor = editor;
+					} )
+					.catch( err => {
+						//console.error( err.stack );
+					} );
+
+				ClassicEditor
+					.create( document.querySelector( '#txt_diagnosa_banding' ), {
+						extraPlugins: [ MyCustomUploadAdapterPlugin ],
+						placeholder: "Diagnosa Banding.."
+						/*ckfinder: {
+							uploadUrl: __HOSTFRONT__ + "/api/Upload"
+						}*/
+					} )
+					.then( editor => {
+						editor.setData(asesmen_detail.diagnosa_banding);
+						editorBanding = editor;
+						window.editor = editor;
+					} )
+					.catch( err => {
+						//console.error( err.stack );
+					} );
+
+
+				ClassicEditor
+					.create( document.querySelector( '#txt_keterangan_resep' ), {
+						extraPlugins: [ MyCustomUploadAdapterPlugin ],
+						placeholder: "Keterangan resep..."
+						/*ckfinder: {
+							uploadUrl: __HOSTFRONT__ + "/api/Upload"
+						}*/
+					} )
+					.then( editor => {
+						editorKeteranganResep = editor;
+						window.editor = editor;
+					} )
+					.catch( err => {
+						//console.error( err.stack );
+					} );
+				ClassicEditor
+					.create( document.querySelector( '#txt_planning' ), {
+						extraPlugins: [ MyCustomUploadAdapterPlugin ],
+						placeholder: "Planning Tindakan"
+						/*ckfinder: {
+							uploadUrl: __HOSTFRONT__ + "/api/Upload"
+						}*/
+					} )
+					.then( editor => {
+						editor.setData(asesmen_detail.planning);
+						editorPlanning = editor;
+						window.editor = editor;
+					} )
+					.catch( err => {
+						//console.error( err.stack );
+					} );
 			},
 			error: function(response) {
 				console.log(response);
@@ -147,7 +291,7 @@
 					icd10Data = response.response_package.response_data;
 					$(target).find("option").remove();
 					for(var a = 0; a < icd10Data.length; a++) {
-						$(target).append("<option value=\"" + icd10Data[a].uid + "\">" + icd10Data[a].kode + " - " + icd10Data[a].nama + "</option>");
+						$(target).append("<option value=\"" + icd10Data[a].id + "\">" + icd10Data[a].kode + " - " + icd10Data[a].nama + "</option>");
 					}
 				},
 				error: function(response) {
@@ -290,123 +434,6 @@
 		function hiJackImage(toHi) {
 			imageResultPopulator.push(toHi);
 		}
-
-
-
-		//Init
-		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorPlanning;
-
-		ClassicEditor
-			.create( document.querySelector( '#txt_keluhan_utama' ), {
-				extraPlugins: [ MyCustomUploadAdapterPlugin ],
-				placeholder: "Keluhan Utama..."
-				/*ckfinder: {
-					uploadUrl: __HOSTFRONT__ + "/api/Upload"
-				}*/
-			} )
-			.then( editor => {
-				editorKeluhanUtamaData = editor;
-				window.editor = editor;
-			} )
-			.catch( err => {
-				//console.error( err.stack );
-			} );
-
-		ClassicEditor
-			.create( document.querySelector( '#txt_keluhan_tambahan' ), {
-				extraPlugins: [ MyCustomUploadAdapterPlugin ],
-				placeholder: "Keluhan Tambahan..."
-				/*ckfinder: {
-					uploadUrl: __HOSTFRONT__ + "/api/Upload"
-				}*/
-			} )
-			.then( editor => {
-				editorKeluhanTambahanData = editor;
-				window.editor = editor;
-			} )
-			.catch( err => {
-				//console.error( err.stack );
-			} );
-
-		ClassicEditor
-			.create( document.querySelector( '#txt_pemeriksaan_fisik' ), {
-				extraPlugins: [ MyCustomUploadAdapterPlugin ],
-				placeholder: "Pemeriksaan Fisik..."
-				/*ckfinder: {
-					uploadUrl: __HOSTFRONT__ + "/api/Upload"
-				}*/
-			} )
-			.then( editor => {
-				editorPeriksaFisikData = editor;
-				window.editor = editor;
-			} )
-			.catch( err => {
-				//console.error( err.stack );
-			} );
-
-		ClassicEditor
-			.create( document.querySelector( '#txt_diagnosa_kerja' ), {
-				extraPlugins: [ MyCustomUploadAdapterPlugin ],
-				placeholder: "Pemeriksaan Fisik..."
-				/*ckfinder: {
-					uploadUrl: __HOSTFRONT__ + "/api/Upload"
-				}*/
-			} )
-			.then( editor => {
-				editorKerja = editor;
-				window.editor = editor;
-			} )
-			.catch( err => {
-				//console.error( err.stack );
-			} );
-
-		ClassicEditor
-			.create( document.querySelector( '#txt_diagnosa_banding' ), {
-				extraPlugins: [ MyCustomUploadAdapterPlugin ],
-				placeholder: "Pemeriksaan Fisik..."
-				/*ckfinder: {
-					uploadUrl: __HOSTFRONT__ + "/api/Upload"
-				}*/
-			} )
-			.then( editor => {
-				editorBanding = editor;
-				window.editor = editor;
-			} )
-			.catch( err => {
-				//console.error( err.stack );
-			} );
-
-
-		ClassicEditor
-			.create( document.querySelector( '#txt_keterangan_reset' ), {
-				extraPlugins: [ MyCustomUploadAdapterPlugin ],
-				placeholder: "Keterangan resep..."
-				/*ckfinder: {
-					uploadUrl: __HOSTFRONT__ + "/api/Upload"
-				}*/
-			} )
-			.then( editor => {
-				editorKeteranganResep = editor;
-				window.editor = editor;
-			} )
-			.catch( err => {
-				//console.error( err.stack );
-			} );
-		ClassicEditor
-			.create( document.querySelector( '#txt_planning' ), {
-				extraPlugins: [ MyCustomUploadAdapterPlugin ],
-				placeholder: "Planning Tindakan"
-				/*ckfinder: {
-					uploadUrl: __HOSTFRONT__ + "/api/Upload"
-				}*/
-			} )
-			.then( editor => {
-				editorPlanning = editor;
-				window.editor = editor;
-			} )
-			.catch( err => {
-				//console.error( err.stack );
-			} );
 			
 
 		function load_product_penjamin(target, obat, selectedData = "") {
@@ -690,11 +717,168 @@
 			var keteranganResep = editorKeteranganResep.getData();
 		}
 
+		$("#txt_tekanan_darah").inputmask({
+			alias: 'decimal',
+			rightAlign: true,
+			placeholder: "0.00",
+			prefix: "",
+			autoGroup: false,
+			digitsOptional: true
+		});
+
+		$("#txt_nadi").inputmask({
+			alias: 'decimal',
+			rightAlign: true,
+			placeholder: "0.00",
+			prefix: "",
+			autoGroup: false,
+			digitsOptional: true
+		});
+
+		$("#txt_suhu").inputmask({
+			alias: 'decimal',
+			rightAlign: true,
+			placeholder: "0.00",
+			prefix: "",
+			autoGroup: false,
+			digitsOptional: true
+		});
+
+		$("#txt_pernafasan").inputmask({
+			alias: 'decimal',
+			rightAlign: true,
+			placeholder: "0.00",
+			prefix: "",
+			autoGroup: false,
+			digitsOptional: true
+		});
+
+		$("#txt_berat_badan").inputmask({
+			alias: 'decimal',
+			rightAlign: true,
+			placeholder: "0.00",
+			prefix: "",
+			autoGroup: false,
+			digitsOptional: true
+		});
+
+		$("#txt_tinggi_badan").inputmask({
+			alias: 'decimal',
+			rightAlign: true,
+			placeholder: "0.00",
+			prefix: "",
+			autoGroup: false,
+			digitsOptional: true
+		});
+
+		$("#txt_lingkar_lengan").inputmask({
+			alias: 'decimal',
+			rightAlign: true,
+			placeholder: "0.00",
+			prefix: "",
+			autoGroup: false,
+			digitsOptional: true
+		});
+
 		$("body").on("click", "#btnSelesai", function() {
 			var kunjungan = antrianData.kunjungan;
 			var antrian = UID;
 			var penjamin = antrianData.penjamin;
 			var pasien = antrianData.pasien;
+			var poli = antrianData.departemen;
+
+			//POLI FORM
+			var keluhanUtamaData = editorKeluhanUtamaData.getData();
+			var keluhanTambahanData = editorKeluhanTambahanData.getData();
+			var tekananDarah = $("#txt_tekanan_darah").inputmask("unmaskedvalue");
+			var nadi = $("#txt_nadi").inputmask("unmaskedvalue");
+			var suhu = $("#txt_suhu").inputmask("unmaskedvalue");
+			var pernafasan = $("#txt_pernafasan").inputmask("unmaskedvalue");
+			var beratBadan = $("#txt_berat_badan").inputmask("unmaskedvalue");
+			var tinggiBadan = $("#txt_tinggi_badan").inputmask("unmaskedvalue");
+			var lingkarLengan = $("#txt_lingkar_lengan").inputmask("unmaskedvalue");
+			var pemeriksaanFisikData = editorPeriksaFisikData.getData();
+			var icd10Kerja = $("#txt_icd_10_kerja").val();
+			var icd10Banding = $("#txt_icd_10_banding").val();
+			var diagnosaKerjaData = editorKerja.getData();
+			var diagnosaBandingData = editorBanding.getData();
+			var planningData = editorPlanning.getData();
+
+			var tindakan = [];
+			$("#table-tindakan tbody tr").each(function() {
+				var tindakanItem = $(this).find("td:eq(1)").attr("set-tindakan");
+				var pilihanPenjamin = $(this).find("td:eq(2) select").val();
+				tindakan.push({
+					"item": tindakanItem,
+					"itemName": $(this).find("td:eq(1)").html(),
+					"penjamin": pilihanPenjamin,
+					"penjaminName": $(this).find("td:eq(2) select option:selected").text()
+				});
+			});
+
+			var resep = [];
+			$("#table-resep tbody tr").each(function() {
+				var obat = $(this).find("td:eq(1) select").val();
+				var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+				var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
+				var signaHari = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
+				var penjamin = $(this).find("td:eq(6) select").val();
+
+				resep.push({
+					"obat": obat,
+					"signaKonsumsi": signaKonsumsi,
+					"signaTakar": signaTakar,
+					"signaHari": signaHari,
+					"penjamin": penjamin
+				});
+			});
+
+			var keteranganResep = editorKeteranganResep.getData();
+			var formData = {
+				request: "update_asesmen_medis",
+				kunjungan: kunjungan,
+				antrian: antrian,
+				penjamin: penjamin,
+				pasien: pasien,
+				poli: poli,
+				//==============================
+				keluhan_utama: keluhanUtamaData,
+				keluhan_tambahan: keluhanTambahanData,
+				tekanan_darah: parseFloat(tekananDarah),
+				nadi: parseFloat(nadi),
+				suhu: parseFloat(suhu),
+				pernafasan: parseFloat(pernafasan),
+				berat_badan: parseFloat(beratBadan),
+				tinggi_badan: parseFloat(tinggiBadan),
+				lingkar_lengan_atas: parseFloat(lingkarLengan),
+				pemeriksaan_fisik: pemeriksaanFisikData,
+				icd10_kerja: parseInt(icd10Kerja),
+				diagnosa_kerja: diagnosaKerjaData,
+				icd10_banding: parseInt(icd10Banding),
+				diagnosa_banding: diagnosaBandingData,
+				planning: planningData
+			};
+
+			//Validation
+			$.ajax({
+				async: false,
+				url: __HOSTAPI__ + "/Asesmen",
+				data: formData,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type: "POST",
+				success: function(response){
+					if(response.response_package.response_result > 0) {
+						notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
+					} else {
+						notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
 			
 
 			return false;
