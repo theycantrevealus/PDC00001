@@ -14,7 +14,6 @@
 	</div>
 </div>
 
-
 <div class="container-fluid page__container">
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12">
@@ -30,7 +29,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								02
 								<b class="inv-tab-status text-success" id="status-3"><i class="fa fa-check-circle"></i></b>
@@ -39,7 +38,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-poli-3" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								03
 								<b class="inv-tab-status text-success" id="status-4"><i class="fa fa-check-circle"></i></b>
@@ -63,11 +62,11 @@
 					<?php require 'asesmen-awal.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane active show fade" id="tab-poli-2">
+				<div class="tab-pane show fade" id="tab-poli-2">
 					<?php require 'tindakan.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-poli-3">
+				<div class="tab-pane active show fade" id="tab-poli-3">
 					<?php require 'resep.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>

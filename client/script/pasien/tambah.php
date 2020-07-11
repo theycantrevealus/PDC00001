@@ -2,8 +2,6 @@
 	
 	$(function(){
 		var allData = {};
-
-
 		loadTermSelectBox('panggilan', 3);
 		loadTermSelectBox('suku', 6);
 		loadTermSelectBox('pendidikan', 8);
@@ -89,7 +87,6 @@
 
 			return false;
 		});
-
 
 		$(".select2").select2({});
 
@@ -183,6 +180,7 @@
         });
 	}
            
+
 	function loadWilayah(selector, parent, id, name){
 		
 		resetSelectBox(selector, name);

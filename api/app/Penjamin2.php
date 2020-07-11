@@ -31,10 +31,6 @@ class Penjamin extends Utility {
 					return self::get_penjamin_detail($parameter[2]);
 					break;
 
-				case 'get_penjamin_obat':
-					return self::get_penjamin_obat($parameter[2]);
-					break;
-
 				default:
 					# code...
 					break;
@@ -90,14 +86,14 @@ class Penjamin extends Utility {
 		return $data;
 	}
 
-	public function get_penjamin_detail($parameter){
+	private function get_penjamin_detail($parameter){
 		$data = self::$query
 				->select('master_penjamin', array(
 						'uid',
 						'nama',
 						'created_at',
 						'updated_at'
-,					)
+					)
 				)
 				->where(array(
 							'master_penjamin.deleted_at' => 'IS NULL',
@@ -117,38 +113,8 @@ class Penjamin extends Utility {
 		return $data;
 	}
 
-	public function get_penjamin_obat($parameter) {
-		$data = self::$query
-		->select('master_inv_harga', array(
-			'barang',
-			'penjamin',
-			'satuan',
-			'harga',
-			'created_at',
-			'updated_at'
-		))
-		->where(array(
-			'master_inv_harga.deleted_at' => 'IS NULL',
-			'AND',
-			'master_inv_harga.barang' => '= ?'
-		), array(
-			$parameter
-		))
-		->execute();
-
-		$autonum = 1;
-		foreach ($data['response_data'] as $key => $value) {
-			$data['response_data'][$key]['autonum'] = $autonum;
-			$data['response_data'][$key]['penjamin'] = self::get_penjamin_detail($value['penjamin'])['response_data'][0];
-			$autonum++;
-		}
-
-		return $data;
-	}
-
 
 	/*====================== CRUD ========================*/
-
 	private function tambah_penjamin($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
@@ -173,10 +139,9 @@ class Penjamin extends Utility {
 								'updated_at'=>parent::format_date()
 								)
 						)
-						->returning('uid')
 						->execute();
 
-			if ($penjamin['response_result'] > 0) {
+			if ($penjamin['response_result'] > 0){
 				$log = parent::log(array(
 							'type'=>'activity',
 							'column'=>array(
@@ -207,7 +172,7 @@ class Penjamin extends Utility {
 		}
 	}
 
-	private function edit_penjamin($parameter) {
+	private function edit_penjamin($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
