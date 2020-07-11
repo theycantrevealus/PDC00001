@@ -226,7 +226,7 @@ class Query {
 					$buildQuery .= self::$queryParams[$key] . ' = ?';
 				}
 				
-				if($key == count(self::$queryParams) - 2) {
+				if($key <= count(self::$queryParams) - 2) {
 					$buildQuery .= ', ';
 				} else {
 					$buildQuery .= '';
