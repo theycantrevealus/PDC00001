@@ -136,11 +136,12 @@ class Penjamin extends Utility {
 		))
 		->execute();
 
-		/*$autonum = 1;
+		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['penjamin'] = self::get_penjamin_detail($value['penjamin'])['response_data'][0];
 			$autonum++;
-		}*/
+		}
 
 		return $data;
 	}

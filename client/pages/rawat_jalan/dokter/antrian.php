@@ -14,7 +14,6 @@
 	</div>
 </div>
 
-
 <div class="container-fluid page__container">
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12">
