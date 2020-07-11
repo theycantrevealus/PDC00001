@@ -103,11 +103,12 @@ class Poli extends Utility {
 		return $data;
 	}
 
-	private function get_poli_detail($parameter) {
+	public function get_poli_detail($parameter) {
 		$data = self::$query
 				->select('master_poli', array(
 						'uid',
 						'nama',
+						'poli_asesmen',
 						'created_at',
 						'updated_at'
 					)
