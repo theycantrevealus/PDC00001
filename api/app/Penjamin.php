@@ -130,7 +130,9 @@ class Penjamin extends Utility {
 		->where(array(
 			'master_inv_harga.deleted_at' => 'IS NULL',
 			'AND',
-			'master_inv_harga.barang' => '= ?'
+			'master_inv_harga.barang' => '= ?',
+			'AND',
+			'master_inv_harga.harga' => '> 0',
 		), array(
 			$parameter
 		))

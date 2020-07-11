@@ -1,5 +1,23 @@
 <script type="text/javascript">
 	$(function() {
+		var antrianData;
+		var UID = __PAGES__[3];
+		$.ajax({
+			url:__HOSTAPI__ + "/Antrian/antrian-detail/" + UID,
+			async:false,
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+			},
+			type:"GET",
+			success:function(response) {
+				antrianData = response.response_package.response_data[0];
+				console.log(antrianData);
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
+
 		var poliList = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
 		
 		if(poliList.length > 1) {
@@ -52,7 +70,7 @@
 			autoTindakan(tindakanMeta, {
 				uid: $("#txt_tindakan").val(),
 				nama: $("#txt_tindakan option:selected").text()
-			});
+			}, antrianData);
 			
 			if(usedTindakan.indexOf($("#txt_tindakan").val()) < 0) {
 				usedTindakan.push($("#txt_tindakan").val());
@@ -71,7 +89,7 @@
 			return false;
 		});
 
-		function autoTindakan(penjaminMeta, setTindakan) {
+		function autoTindakan(penjaminMeta, setTindakan, selectedPenjamin) {
 			var newRowTindakan = document.createElement("TR");
 			var newCellTindakanID = document.createElement("TD");
 			var newCellTindakanTindakan = document.createElement("TD");
@@ -81,10 +99,9 @@
 			$(newCellTindakanTindakan).html(setTindakan.nama).attr({
 				"set-tindakan": setTindakan.uid
 			});
-
 			var newPenjamin = document.createElement("SELECT");
 			for(var a = 0; a < penjaminMeta[setTindakan.uid].length; a++) {
-				$(newPenjamin).append("<option value=\"" + penjaminMeta[setTindakan.uid][a].uid + "\">" + penjaminMeta[setTindakan.uid][a].nama + "</option>");
+				$(newPenjamin).append("<option " + ((penjaminMeta[setTindakan.uid][a].uid == selectedPenjamin.penjamin) ? "selected=\"selected\"" : "") + " value=\"" + penjaminMeta[setTindakan.uid][a].uid + "\">" + penjaminMeta[setTindakan.uid][a].nama + "</option>");
 			}
 			$(newCellTindakanPenjamin).append(newPenjamin);
 			$(newPenjamin).addClass("form-control").select2();
@@ -277,7 +294,7 @@
 
 
 		//Init
-		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep;
+		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorPlanning;
 
 		ClassicEditor
 			.create( document.querySelector( '#txt_keluhan_utama' ), {
@@ -375,6 +392,22 @@
 			.catch( err => {
 				//console.error( err.stack );
 			} );
+		ClassicEditor
+			.create( document.querySelector( '#txt_planning' ), {
+				extraPlugins: [ MyCustomUploadAdapterPlugin ],
+				placeholder: "Planning Tindakan"
+				/*ckfinder: {
+					uploadUrl: __HOSTFRONT__ + "/api/Upload"
+				}*/
+			} )
+			.then( editor => {
+				editorPlanning = editor;
+				window.editor = editor;
+			} )
+			.catch( err => {
+				//console.error( err.stack );
+			} );
+			
 
 		function load_product_penjamin(target, obat, selectedData = "") {
 			/*var selected = [];
@@ -481,7 +514,7 @@
 
 			var newObat = document.createElement("SELECT");
 			$(newCellResepObat).append(newObat);
-			
+
 			var addAnother = load_product_resep(newObat, "");
 			
 			if(!addAnother) {
@@ -526,12 +559,12 @@
 					digitsOptional: true
 				});
 
-				var newPenjamin = document.createElement("SELECT");
+				/*var newPenjamin = document.createElement("SELECT");
 				$(newCellResepPenjamin).append(newPenjamin);
 
 				var penjaminData = load_product_penjamin(newPenjamin, $(newObat).val());
-				
-				$(newPenjamin).addClass("form-control resep_penjamin").select2();
+
+				$(newPenjamin).addClass("form-control resep_penjamin").select2();*/
 
 				var newDeleteResep = document.createElement("BUTTON");
 				$(newCellResepAksi).append(newDeleteResep);
@@ -543,9 +576,12 @@
 				$(newRowResep).append(newCellResepSigna2);
 				$(newRowResep).append(newCellResepSigna3);
 				$(newRowResep).append(newCellResepJlh);
-				$(newRowResep).append(newCellResepPenjamin);
+				//$(newRowResep).append(newCellResepPenjamin);
 				$(newRowResep).append(newCellResepAksi);
-				$("#table-resep").append(newRowResep);
+				/*if(penjaminData.length > 0) {
+					$("#table-resep").append(newRowResep);	
+				}*/
+				$("#table-resep").append(newRowResep);	
 				
 				rebaseResep();
 			}
@@ -596,6 +632,72 @@
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
 			checkGenerateResep(id);
+		});
+
+
+
+
+
+
+
+		function populateAllData() {
+			//PREPARE FOR SAVE DATA
+			var keluhanUtamaData = editorKeluhanUtamaData.getData();
+			var keluhanTambahanData = editorKeluhanTambahanData.getData();
+			var tekananDarah = $("#txt_tekanan_darah").val();
+			var nadi = $("#txt_nadi").val();
+			var suhu = $("#txt_suhu").val();
+			var pernafasan = $("#txt_pernafasan").val();
+			var beratBadan = $("#txt_berat_badan").val();
+			var tinggiBadan = $("#txt_tinggi_badan").val();
+			var lingkarLengan = $("#txt_lingkar_lengan").val();
+			var pemeriksaanFisikData = editorPeriksaFisikData.getData();
+			var icd10kerja = $("#txt_icd_10_kerja").val();
+			var icd10Banding = $("#txt_icd_10_banding").val();
+			var icd10KerjaData = editorKerja.getData();
+			var icd10BandingData = editorBanding.getData();
+			var planningData = editorPlanning.getData();
+
+			var tindakan = [];
+			$("#table-tindakan tbody tr").each(function() {
+				var tindakanItem = $(this).find("td:eq(1)").attr("set-tindakan");
+				var pilihanPenjamin = $(this).find("td:eq(2) select").val();
+				tindakan.push({
+					"item": tindakanItem,
+					"itemName": $(this).find("td:eq(1)").html(),
+					"penjamin": pilihanPenjamin,
+					"penjaminName": $(this).find("td:eq(2) select option:selected").text()
+				});
+			});
+
+			var resep = [];
+			$("#table-resep tbody tr").each(function() {
+				var obat = $(this).find("td:eq(1) select").val();
+				var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+				var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
+				var signaHari = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
+				var penjamin = $(this).find("td:eq(6) select").val();
+
+				resep.push({
+					"obat": obat,
+					"signaKonsumsi": signaKonsumsi,
+					"signaTakar": signaTakar,
+					"signaHari": signaHari,
+					"penjamin": penjamin
+				});
+			});
+
+			var keteranganResep = editorKeteranganResep.getData();
+		}
+
+		$("body").on("click", "#btnSelesai", function() {
+			var kunjungan = antrianData.kunjungan;
+			var antrian = UID;
+			var penjamin = antrianData.penjamin;
+			var pasien = antrianData.pasien;
+			
+
+			return false;
 		});
 	});
 </script>

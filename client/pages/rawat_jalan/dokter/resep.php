@@ -13,8 +13,8 @@
 									<th class="wrap_content">No</th>
 									<th>Obat</th>
 									<th colspan="3" style="width: 20%;">Signa/Hari</th>
-									<th style="width: 10%">Jlh Hari</th>
-									<th style="width: 25%;">Penjamin</th>
+									<th style="width: 10%">Jlh Obat</th>
+									<!-- <th style="width: 25%;">Penjamin</th> -->
 									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>

@@ -32,16 +32,16 @@
 						<a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								02
-								<b class="inv-tab-status text-success" id="status-3"><i class="fa fa-check-circle"></i></b>
+								<b class="inv-tab-status text-success" id="status-2"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Tindakan
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-3" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								03
-								<b class="inv-tab-status text-success" id="status-4"><i class="fa fa-check-circle"></i></b>
+								<b class="inv-tab-status text-success" id="status-3"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Resep
 						</a>
@@ -50,6 +50,15 @@
 						<a href="#tab-poli-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								04
+								<b class="inv-tab-status text-success" id="status-4"><i class="fa fa-check-circle"></i></b>
+							</span>
+							CPPT
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="#tab-poli-5" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								05
 								<b class="inv-tab-status text-success" id="status-5"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Review
@@ -66,11 +75,14 @@
 					<?php require 'tindakan.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane active show fade" id="tab-poli-3">
+				<div class="tab-pane show fade" id="tab-poli-3">
 					<?php require 'resep.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-poli-4">
+				<div class="tab-pane active show fade" id="tab-poli-4">
+					
+				</div>
+				<div class="tab-pane active show fade" id="tab-poli-5">
 					<?php require 'review.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>

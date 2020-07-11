@@ -310,6 +310,7 @@ class Query {
 			self::$queryString = '';
 			self::$keyType = '';
 			self::$keyReturn = '';
+			self::$queryStringOrder = '';
 
 			$responseBuilder['response_result'] = $query->rowCount();
 			return $responseBuilder;

@@ -135,6 +135,29 @@ class Antrian extends Utility {
 		return $data;
 	}
 
+	public function get_antrian_detail($table, $params){
+		$data = self::$query
+				->select($table, array(
+						'uid',
+						'pasien',
+						'kunjungan',
+						'departemen',
+						'penjamin',
+						'penjamin'
+					)
+				)
+				->where(array(
+						$table . '.deleted_at' => 'IS NULL',
+						'AND',
+						$table . '.uid' => '= ?'
+					),
+					array($params)
+				)
+				->execute();
+
+		return $data;
+	}
+
 	public function cari_pasien($table, $params){
 		$parameter = strtoupper($params);
 
