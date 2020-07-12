@@ -52,7 +52,7 @@
 								04
 								<b class="inv-tab-status text-success" id="status-4"><i class="fa fa-check-circle"></i></b>
 							</span>
-							CPPT
+							Laboratorium
 						</a>
 					</li>
 					<li class="nav-item">
@@ -60,6 +60,24 @@
 							<span class="nav-link__count">
 								05
 								<b class="inv-tab-status text-success" id="status-5"><i class="fa fa-check-circle"></i></b>
+							</span>
+							Radiologi
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								06
+								<b class="inv-tab-status text-success" id="status-6"><i class="fa fa-check-circle"></i></b>
+							</span>
+							CPPT
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								07
+								<b class="inv-tab-status text-success" id="status-7"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Review
 						</a>
@@ -80,10 +98,18 @@
 					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-4">
-					<?php require 'review.php'; ?>
+					<?php require 'laboratorium.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-5">
+					<?php require 'radiologi.php'; ?>
+					<?php require 'action-panel.php'; ?>
+				</div>
+				<div class="tab-pane show fade" id="tab-poli-6">
+					<?php require 'cppt.php'; ?>
+					<?php require 'action-panel.php'; ?>
+				</div>
+				<div class="tab-pane show fade" id="tab-poli-7">
 					<?php require 'review.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
