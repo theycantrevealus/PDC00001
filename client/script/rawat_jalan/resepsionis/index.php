@@ -1,8 +1,10 @@
 <script type="text/javascript">
-	$(function() {
-		var tablePasien = $("#table_cari_pasien").DataTable({
+	$(function(){
+		var params;
+
+		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/Inventori/gudang",
+				url: __HOSTAPI__ + "/Antrian/antrian",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -12,6 +14,7 @@
 				}
 			},
 			autoWidth: false,
+			"bInfo" : false,
 			aaSorting: [[0, "asc"]],
 			"columnDefs":[
 				{"targets":0, "className":"dt-body-left"}
@@ -24,83 +27,190 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
+						return row["waktu_masuk"];
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "";
+						return row["no_rm"];
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "";
+						return row["pasien"];
 					}
 				},
 				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row["departemen"];
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row["dokter"];
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row["penjamin"];
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row["user_resepsionis"];
+					}
+				},
+				/*{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button class=\"btn btn-info btn-sm btn-edit-gudang\" id=\"gudang_edit_" + row["uid"] + "\">" +
-										"<i class=\"fa fa-input\"></i> <i class=\"fa fa-plus\"></i> Daftar" +
+									"<button id=\"penjamin_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-antrian\">" +
+										"<i class=\"fa fa-trash\"></i>" +
 									"</button>" +
 								"</div>";
 					}
-				}
+				}*/
 			]
 		});
 
-		$('#cari-pasien').on('shown.bs.modal', function () {
-			$('#txt_pasien').focus();
-		});
-		$("body").on("keyup", function(e) {
-			var pressed = e.keyChar||e.which;
 
-			if(pressed == 13) {
-				$("#cari-pasien").modal("show").finish(function(){
-					alert();
-				});;
-			} else if(pressed ==27) {
-				$("#cari-pasien").modal("hide");
-			}
+		/*================== FORM CARI AREA ====================*/
+
+		$('#table-list-pencarian').DataTable({	
+			"bFilter": false,
+			"bInfo" : false
 		});
-		$("#tambah-kunjungan").click(function(){
-			$("#cari-pasien").modal("show");
+
+		$("#txt_cari").on('keyup', function(){
+			params = $("#txt_cari").val();
+
+			$("#table-list-pencarian tbody").html("");
+			$("#pencarian-notif").attr("hidden",true);
+			$("#loader-search").removeAttr("hidden");
+			if (params != ""){
+				setTimeout(function(){
+					$.ajax({
+						async: false,
+						url:__HOSTAPI__ + "/Antrian/cari-pasien/" + params,
+						type: "GET",
+						beforeSend: function(request) {
+							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+						},
+						success: function(response){
+							var MetaData = dataTindakan = response.response_package.response_data;
+
+							var html = "";
+							if (MetaData != ""){
+								$.each(MetaData, function(key, item){
+									var buttonAksi = "<td style='text-align:center;'><a href='"+ __HOSTNAME__ + "/rawat_jalan/resepsionis/tambah/"+ item.uid +"' class='btn btn-sm btn-info' data-toggle='tooltip' title='Tambah ke Antrian'><i class='fa fa-user-plus'></i></a></td>";
+
+									if (item.berobat == true){
+										buttonAksi = "<td style='text-align:center;'><span class='badge badge-warning'>Sedang Berobat</span></td>";
+									}
+
+									html += "<tr disabled>" +
+												"<td>"+ item.autonum  +"</td>" +
+												"<td>"+ item.no_rm +"</td>" +
+												"<td>"+ item.nama +"</td>" +
+												"<td>"+ item.nik +"</td>" +
+												"<td>"+ item.jenkel +"</td>" +
+												buttonAksi +
+											"</tr>";
+								});
+							} else {
+								html += "<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>";
+							}
+							
+							$("#table-list-pencarian tbody").html(html);
+							$("#loader-search").attr("hidden",true);
+						},
+						error: function(response) {
+							console.log(response);
+						}
+					});
+					
+				}, 250);
+			} else {
+				$("#loader-search").attr("hidden",true);
+
+				var html = "<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>";
+				$("#table-list-pencarian tbody").html(html);
+			}
+			
+			$("#btnTambahPasien").fadeIn("fast");
+		});
+
+		$("#btnTambahAntrian").click(function(){
+			$("#btnTambahPasien").fadeOut("false");
+			$("#txt_cari").val("");
+			$("#table-list-pencarian tbody").html("<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>");
+			$("#modal-cari").modal("show");
 		});
 	});
+
 </script>
 
-<div id="cari-pasien" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog modal-lg" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="modal-large-title">Pasien</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<div class="form-group col-md-12">
-					<label for="txt_no_skp">Cari Pasien:</label>
-					<input type="text" class="form-control" id="txt_pasien" placeholder="Cari Nama / KTP / No. RM Pasien" />
+<script src="<?= __HOSTNAME__ ?>/template/assets/vendor/toastr.min.js"></script>
+<script src="<?= __HOSTNAME__ ?>/template/assets/js/toastr.js"></script>
+
+<div id="modal-cari" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modal-large-title">Tambah Antrian</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
 				</div>
-				<div class="col-md-12">
-					<table class="table table-bordered" id="table_cari_pasien">
-						<thead>
-							<tr>
-								<th style="width: 20px;">No</th>
-								<th>No. RM</th>
-								<th>Pasien</th>
-								<th>Jenis Kelamin</th>
-								<th>Aksi</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
+				<div class="modal-body">
+					<div class="form-group col-md-6">
+						<div class="col-md-6">
+							<div class="row">
+								<label for="txt_cari">Cari Pasien</label>
+							</div>
+						</div>
+						<div class="col-md-12">
+							<div class="row">
+								<div class="search-form form-control-rounded search-form--light input-group-lg col-md-10">
+									<input type="text" class="form-control" placeholder="Nama / NIK / No. RM" id="txt_cari">
+								</div>
+								<div class="col-md-12" hidden id="pencarian-notif" style="color: red; font-size: 0.8rem;">
+									Mohon ketikkan kata kunci pencarian
+								</div>
+								<div class="col-md-2">
+									<div class="loader loader-lg loader-primary" id="loader-search" hidden></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="form-group col-md-12" >
+						<!-- style="height: 100px; overflow: scroll;" -->
+						<table class="table table-bordered table-striped" id="table-list-pencarian">
+							<thead>
+								<tr>
+									<th width="2%">No</th>
+									<th>No. RM</th>
+									<th>NIK</th>
+									<th>Nama</th>
+									<th>Jenis Kelamin</th>
+									<th>Aksi</th>
+								</tr>
+							</thead>
+							<tbody>
+								
+							</tbody>
+						</table>
+					</div>
+					
 				</div>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-			</div>
-		</div>
-	</div>
-</div>
+				<div class="modal-footer">
+					<!-- <div id="spanBtnTambahPasien" hidden> -->
+					<a href="<?= __HOSTNAME__ ?>/pasien/tambah" class="btn btn-success" id="btnTambahPasien">
+					<!-- <i class="fa fa-plus"></i>  -->Tambah Pasien Baru
+					</a>
+					<!-- </div> -->
+					
+					<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+				</div>
+			</div> 
+		</div> 
+	</div> 

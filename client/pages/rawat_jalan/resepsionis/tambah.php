@@ -78,7 +78,7 @@
                         <div class="form-row">
                             <button type="submit" class="btn btn-success" id="btnSubmit">Simpan Data</button>
                             &nbsp;
-                            <a href="<?php echo __HOSTNAME__; ?>/antrian_resepsionis/" class="btn btn-danger">Batal</a>
+                            <a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/resepsionis" class="btn btn-danger">Batal</a>
                         </div>
                     </div>
                 </div>

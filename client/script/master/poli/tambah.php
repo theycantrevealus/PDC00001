@@ -206,7 +206,7 @@
                     },
                     type: "POST",
                     success: function(response){
-                        location.href = __HOSTNAME__ + "/master/poli/poli";
+                        location.href = __HOSTNAME__ + "/master/poli";
                     },
                     error: function(response) {
                         console.log(response);

@@ -1,5 +1,5 @@
 <script type="text/javascript">
-	var uid = <?php echo json_encode(__PAGES__[4]); ?>;
+	var uid = <?php echo json_encode(__PAGES__[3]); ?>;
 	$(function(){
 		var dataObject= {}, 
 			hargaPenjamin = {}, 
@@ -34,6 +34,7 @@
 				var nama = temp_nama.replace('Poli ', '');
 
 				var tindakanData = metaData[0].tindakan;
+				console.log(tindakanData);
 
 				dataObject.uid = uid;
 				dataObject.nama = "Poli " + nama;
@@ -181,56 +182,52 @@
 			
 		});
 		/*=============================================================*/
-
+		function findKey(item, key, value) {
+			var found;
+			for(var a in item) {
+				if(item[a][key] == value) {
+					found = item[a];
+				}
+			}
+			return found;
+		}
 		/*========= BTN NEXT TINDAKAN ==========*/
 		$(".btnNextTindakan").on('click', function(){
 			//==== Set table head
-			var html = "<tr>" +
-						"<th style='width: 10px;'>No</th>" +
-						"<th>Tindakan</th>";
-
-
-			$.each(penjamin, function(key, item){
-				html += "<th class='col_"+ item.uid +"'>"+ item.nama +"</th>";
-			});
-
-			html += "</tr>";
-
-			$("#table-konfirmasi thead").html(html);
-			//====
-
-			//==== Set table content
-			var no = 1;
-			var html_content = ""; 
 			
-			//console.log(tindakan);
-			$.each(tindakan, function(key, item){
-
-				if (item.uid in hargaPenjamin){
-					html_content += "<tr>" + 
-									"<td>"+ no +"</td>" +
-									"<td>"+ item.nama +"</td>";
-
-					var parent_uid = item.uid;
-
-					$.each(penjamin, function(key, item){
-						if (item.uid in hargaPenjamin[parent_uid]){
-							html_content += "<td><span class='separated_comma'>Rp. "+ hargaPenjamin[parent_uid][item.uid] +"</span></td>";
-						} else {
-							html_content += "<td> - </td>";
-						}
-					});
-
-					no++;
+			$("#table-konfirmasi tbody").html("");
+			var itemCounter = 1;
+			for(var hargaKey in hargaPenjamin) {
+				var tindakanCounter = 1;
+				var namaTindakan = findKey(tindakan, "uid", hargaKey);
+				var totalPenjamin = 0;
+				for(var penjaminKey in hargaPenjamin[hargaKey]) {
+					totalPenjamin++;
 				}
-				html_content += "</tr>";
-			});
+				for(var penjaminKey in hargaPenjamin[hargaKey]) {
+					var namaPenjamin = findKey(penjamin, "uid", penjaminKey);
 
-			$("#table-konfirmasi tbody").html(html_content);
-			$(".separated_comma").digits();
-			//====
-
-			
+					if(tindakanCounter == 1) {
+						$("#table-konfirmasi tbody").append(
+							"<tr>" +
+								"<td rowspan=\"" + totalPenjamin + "\">" + itemCounter + "</td>" +
+								"<td rowspan=\"" + totalPenjamin + "\">" + namaTindakan.nama + "</td>" +
+								"<td>" + namaPenjamin.nama + "</td>" +
+								"<td class=\"text-right\">" + number_format (hargaPenjamin[hargaKey][penjaminKey], 2, ".", ",") + "</td>" +
+							"</tr>"
+						);
+					} else {
+						$("#table-konfirmasi tbody").append(
+							"<tr>" +
+								"<td>" + namaPenjamin.nama + "</td>" +
+								"<td class=\"text-right\">" + number_format (hargaPenjamin[hargaKey][penjaminKey], 2, ".", ",") + "</td>" +
+							"</tr>"
+						);
+					}
+					tindakanCounter++;
+				}
+				itemCounter++;
+			}
 			$("#title-konfirmasi-poli").html(dataObject.nama);
 			
 		});
@@ -256,7 +253,8 @@
 
 		$("#btnSubmit").on('click', function(){
 			dataObject.tindakan = hargaPenjamin;
-
+			console.log(hargaPenjamin);
+			
 			if (dataObject.nama != "") {
 				$.ajax({
 					url: __HOSTAPI__ + "/Poli",
@@ -269,7 +267,8 @@
 					},
 					type: "POST",
 					success: function(response){
-						location.href = __HOSTNAME__ + "/master/poli/poli";
+						console.log(response);
+						//location.href = __HOSTNAME__ + "/master/poli";
 					},
 					error: function(response) {
 						console.log(response);
