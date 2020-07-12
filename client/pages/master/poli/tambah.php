@@ -24,7 +24,7 @@
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item">Master Poli</li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/poli/poli">Poli</a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/poli">Poli</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Tambah</li>
 				</ol>
 			</nav>

@@ -36,7 +36,7 @@
 									/*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
 									 	"<i class=\"fa fa-list\"></i> Detail" +
 									"</button>" +*/
-									"<a href=\"" + __HOSTNAME__ + "/master/poli/poli/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-poli\">" +
+									"<a href=\"" + __HOSTNAME__ + "/master/poli/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-poli\">" +
 										"<i class=\"fa fa-edit\"></i> Edit" +
 									"</a>" +
 									"<button id=\"poli_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-poli\">" +

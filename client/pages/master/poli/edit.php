@@ -24,7 +24,7 @@
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item">Master Poli</li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/poli/poli">Poli</a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/poli">Poli</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Edit</li>
 				</ol>
 			</nav>
@@ -170,7 +170,15 @@
 								<div class="col-md-12">
 									<table class='table table-bordered table-striped' id="table-konfirmasi">
                         				<thead style="text-transform: uppercase;">
-                        					
+                        					<tr>
+                        						<th rowspan="2">No</th>
+                        						<th rowspan="2">Tindakan</th>
+                        						<th colspan="2">Harga per Penjamin</th>
+                        					</tr>
+                        					<tr>
+                        						<th>Penjamin</th>
+                        						<th>Harga</th>
+                        					</tr>
                         				</thead>
                         				<tbody>
                         					

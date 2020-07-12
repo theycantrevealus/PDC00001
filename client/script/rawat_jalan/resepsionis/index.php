@@ -101,7 +101,7 @@
 							var html = "";
 							if (MetaData != ""){
 								$.each(MetaData, function(key, item){
-									var buttonAksi = "<td style='text-align:center;'><a href='"+ __HOSTNAME__ + "/antrian_resepsionis/tambah/"+ item.uid +"' class='btn btn-sm btn-info' data-toggle='tooltip' title='Tambah ke Antrian'><i class='fa fa-user-plus'></i></a></td>";
+									var buttonAksi = "<td style='text-align:center;'><a href='"+ __HOSTNAME__ + "/rawat_jalan/resepsionis/tambah/"+ item.uid +"' class='btn btn-sm btn-info' data-toggle='tooltip' title='Tambah ke Antrian'><i class='fa fa-user-plus'></i></a></td>";
 
 									if (item.berobat == true){
 										buttonAksi = "<td style='text-align:center;'><span class='badge badge-warning'>Sedang Berobat</span></td>";
