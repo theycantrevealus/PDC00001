@@ -191,10 +191,12 @@
 				}
 
 				if(poliList[key].penjamin != undefined){
-					tindakanMeta[poliList[key].uid_tindakan].push({
-						uid: poliList[key].uid_penjamin,
-						nama: poliList[key].penjamin.nama
-					});
+					if(antrianData.penjamin == poliList[key].uid_penjamin) {
+						tindakanMeta[poliList[key].uid_tindakan].push({
+							uid: poliList[key].uid_penjamin,
+							nama: poliList[key].penjamin.nama
+						});
+					}
 				}
 			}
 
@@ -244,9 +246,13 @@
 				"set-tindakan": setTindakan.uid
 			});
 			var newPenjamin = document.createElement("SELECT");
+			
 			for(var a = 0; a < penjaminMeta[setTindakan.uid].length; a++) {
-				$(newPenjamin).append("<option " + ((penjaminMeta[setTindakan.uid][a].uid == selectedPenjamin.penjamin) ? "selected=\"selected\"" : "") + " value=\"" + penjaminMeta[setTindakan.uid][a].uid + "\">" + penjaminMeta[setTindakan.uid][a].nama + "</option>");
+				if(penjaminMeta[setTindakan.uid][a].uid == antrianData.penjamin) {
+					$(newPenjamin).append("<option " + ((penjaminMeta[setTindakan.uid][a].uid == selectedPenjamin.penjamin) ? "selected=\"selected\"" : "") + " value=\"" + penjaminMeta[setTindakan.uid][a].uid + "\">" + penjaminMeta[setTindakan.uid][a].nama + "</option>");
+				}
 			}
+			
 			$(newCellTindakanPenjamin).append(newPenjamin);
 			$(newPenjamin).addClass("form-control").select2();
 			
@@ -856,7 +862,9 @@
 				diagnosa_kerja: diagnosaKerjaData,
 				icd10_banding: parseInt(icd10Banding),
 				diagnosa_banding: diagnosaBandingData,
-				planning: planningData
+				planning: planningData,
+				//==============================
+				tindakan:tindakan
 			};
 
 			//Validation

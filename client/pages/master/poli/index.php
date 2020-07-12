@@ -8,7 +8,7 @@
 				</ol>
 			</nav>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/master/poli/poli/tambah" class="btn btn-info btn-sm ml-3">
+		<a href="<?php echo __HOSTNAME__; ?>/master/poli/tambah" class="btn btn-info btn-sm ml-3">
 			<i class="fa fa-plus"></i> Tambah Poli
 		</a>
 	</div>

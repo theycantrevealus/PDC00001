@@ -315,12 +315,12 @@ class Query {
 			$responseBuilder['response_result'] = $query->rowCount();
 			return $responseBuilder;
 		} catch (\PDOException $e) {
-			throw new QueryException($e->getMessage(), 1);
-			/*$responseBuilder = array();
+			//throw new QueryException($e->getMessage(), 1);
+			$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = self::$queryValues;
 			$responseBuilder['response_params'] = self::$queryParams;
-			return $responseBuilder;*/
+			return $responseBuilder;
 		}
 	}
 }

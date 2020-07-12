@@ -72,6 +72,15 @@
 					</div>
 				</div>
 			</div> -->
+			<div class="sidebar-heading sidebar-m-t">Main</div>
+			<ul class="sidebar-menu">
+				<li class="sidebar-menu-item">
+					<a class="sidebar-menu-button" href="<?php echo __HOSTNAME__; ?>">
+						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">dvr</i>
+						<span class="sidebar-menu-text">Dashboard</span>
+					</a>
+				</li>
+			</ul>
 			<div class="sidebar-heading sidebar-m-t">Menu</div>
 			<ul class="sidebar-menu">
 				<?php

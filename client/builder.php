@@ -7,7 +7,6 @@
 ?>
 <body class="layout-default">
 	<?php require 'head.php'; ?>
-	<div class="preloader"></div>
 	<div class="mdk-header-layout js-mdk-header-layout">
 		<?php require 'header.php'; ?>
 		<div class="mdk-header-layout__content">
@@ -43,6 +42,20 @@
 					?>
 				</div>
 				<?php require 'sidemenu.php'; ?>
+			</div>
+		</div>
+		<div class="preloader">
+			<div class="sidemenu-shimmer">
+				<?php
+					for($sh = 1; $sh <= 10; $sh++) {
+				?>
+				<div class="shine"></div>
+				<?php
+					}
+				?>
+			</div>
+			<div class="content-shimmer">
+				<span>Loading...</span>
 			</div>
 		</div>
 	</div>

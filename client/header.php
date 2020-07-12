@@ -20,7 +20,7 @@
 
 
 				
-				<ul class="nav navbar-nav d-none d-sm-flex border-left navbar-height align-items-center">
+				<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
 					<li class="nav-item dropdown">
 						<a href="<?php echo __HOSTNAME__; ?>/template/#account_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
 							<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/avatar/demi.png" class="rounded-circle" width="32" alt="Frontted" />

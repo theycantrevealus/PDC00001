@@ -1,7 +1,7 @@
 <script type="text/javascript">
 	$(function(){
 
-		var uid_pasien = __PAGES__[2];
+		var uid_pasien = __PAGES__[3];
 		var dataPasien = loadPasien(uid_pasien);
 
 		loadPenjamin();
@@ -41,7 +41,7 @@
 				type: "POST",
 				success: function(response){
 					//console.log(response);
-					location.href = __HOSTNAME__ + '/antrian_resepsionis';
+					location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
 				},
 				error: function(response) {
 					console.log("Error : ");

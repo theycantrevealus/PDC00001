@@ -43,6 +43,9 @@ class Poli extends Utility {
 				case 'poli-set-dokter':
 					return self::get_set_dokter($parameter[2]);
 					break;
+				case 'get_poli_tindakan':
+					return self::get_poli_tindakan($parameter[2]);
+					break;
 				default:
 					# code...
 					break;
@@ -595,138 +598,166 @@ class Poli extends Utility {
 					)
 					->execute();
 
-		if ($tindakanData != ""){
-
-			/*=== First, set delete for all tindakan in poli ===*/
-			self::$query
-					->delete('master_poli_tindakan_penjamin')
+		if(isset($tindakanData) && $tindakanData != "") {
+			//Reset All Price
+			/*$reset = self::$query->update('master_poli_tindakan_penjamin', array(
+				'deleted_at' => parent::format_date()
+			))
+			->where(array(
+				'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
+				'AND',
+				'master_poli_tindakan_penjamin.uid_poli' => '= ?',
+				'AND',
+				'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
+				'AND',
+				'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
+			), array(
+				$uid_poli,
+				$key,
+				$Tkey
+			))
+			->execute();*/
+			
+			foreach ($tindakanData as $key => $value) {
+				foreach ($value as $Tkey => $Tvalue) {
+					$check = self::$query->select('master_poli_tindakan_penjamin', array(
+						'id'
+					))
 					->where(array(
+						'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
+						'AND',
+						'master_poli_tindakan_penjamin.uid_poli' => '= ?',
+						'AND',
+						'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
+						'AND',
+						'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
+					), array(
+						$uid_poli,
+						$key,
+						$Tkey
+					))
+					->execute();
+					if(count($check['response_data']) > 0) {
+						$worker = self::$query->update('master_poli_tindakan_penjamin', array(
+							'harga' => $Tvalue,
+							'updated_at' => parent::format_date()
+						))
+						->where(array(
 							'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
 							'AND',
-							'master_poli_tindakan_penjamin.uid_poli' => '= ?'
-						),array(
-							$uid_poli
-						)
-					)
-					->execute();
+							'master_poli_tindakan_penjamin.uid_poli' => '= ?',
+							'AND',
+							'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
+							'AND',
+							'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'	
+						), array(
+							$uid_poli,
+							$key,
+							$Tkey
+						))
+						->execute();
 
-
-			foreach ($tindakanData as $key => $values) {
-				$uid_tindakan = $key;
-
-				foreach ($values as $key => $value) {
-					$uid_penjamin = $key;
-					$harga = $value;
-
-					$tindakan = self::$query
-										->update('master_poli_tindakan_penjamin', array(
-												'harga'=>$harga,
-												'updated_at'=>parent::format_date(),
-												'deleted_at'=>NULL
-											)
-										)
-										->where(array(
-											'master_poli_tindakan_penjamin.uid_poli' => '= ?',
-											'AND',
-											'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
-											'AND',
-											'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
-											),
-											array(
-												$uid_poli,
-												$uid_tindakan,
-												$uid_penjamin
-											)
-										)
-										->execute();	
-
-					/*=== Second, try to find the row data if it recorded before ===*/
-					$cek_tindakan = self::get_spesifik_poli_tindakan($uid_poli, $uid_tindakan, $uid_penjamin);
-					$resp_data = $cek_tindakan['response_data'];
-					
-
-					/*=== Check data has recorded before or not ===*/
-					if (intval($cek_tindakan['response_result']) > 0){
-
-						/*=== If row data is has set before, update harga and set null delete ==*/
-						/*foreach ($resp_data as $key => $items) {
-
-							if ($uid_penjamin == $items['uid']){
-
-								$tindakan = self::$query
-										->update('master_poli_tindakan_penjamin', array(
-												'harga'=>$harga,
-												'updated_at'=>parent::format_date(),
-												'deleted_at'=>NULL
-											)
-										)
-										->where(array(
-											'master_poli_tindakan_penjamin.uid_poli' => '= ?',
-											'AND',
-											'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
-											'AND',
-											'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
-											),
-											array(
-												$uid_poli,
-												$uid_tindakan,
-												$uid_penjamin
-											)
-										)
-										->execute();
-							}
-
-						}*/
-					
+						if($worker['response_result'] > 0) {
+							$log = parent::log(array(
+								'type'=>'activity',
+								'column'=>array(
+									'unique_target',
+									'user_uid',
+									'table_name',
+									'action',
+									'old_value',
+									'new_value',
+									'logged_at',
+									'status',
+									'login_id'
+								),
+								'value'=>array(
+									$check['response_data'][0]['id'],
+									$UserData['data']->uid,
+									$table_name,
+									'U',
+									json_encode($check['response_data'][0]),
+									json_encode($tindakanData),
+									parent::format_date(),
+									'N',
+									$UserData['data']->log_id
+								),
+								'class'=>__CLASS__
+							));
+						}
 					} else {
+						$worker = self::$query->insert('master_poli_tindakan_penjamin', array(
+							'uid_poli' => $uid_poli,
+							'uid_tindakan' => $key,
+							'uid_penjamin' => $Tkey,
+							'harga' => $Tvalue,
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						))
+						->returning('id')
+						->execute();
 
-						/*=== If row data is not available, insert new row ===*/
-						$tindakan = self::$query
-							->insert('master_poli_tindakan_penjamin', array(
-									'harga'=>$value,
-									'uid_poli'=>$uid_poli,
-									'uid_tindakan'=>$uid_tindakan,
-									'uid_penjamin'=>$uid_penjamin,
-									'created_at'=>parent::format_date(),
-									'updated_at'=>parent::format_date()
-								)
-							)
-							->execute();
+						if($worker['response_result'] > 0) {
+							$log = parent::log(array(
+								'type'=>'activity',
+								'column'=>array(
+									'unique_target',
+									'user_uid',
+									'table_name',
+									'action',
+									'new_value',
+									'logged_at',
+									'status',
+									'login_id'
+								),
+								'value'=>array(
+									$worker['response_unique'],
+									$UserData['data']->uid,
+									$table_name,
+									'I',
+									json_encode($tindakanData),
+									parent::format_date(),
+									'N',
+									$UserData['data']->log_id
+								),
+								'class'=>__CLASS__
+							));
+						}
 					}
-				
 				}
 			}
+					
 		}
-		
+
 
 		if ($poli['response_result'] > 0){
 			$log = parent::log(array(
-						'type'=>'activity',
-						'column'=>array(
-							'unique_target',
-							'user_uid',
-							'table_name',
-							'action',
-							'old_value',
-							'new_value',
-							'logged_at',
-							'status',
-							'login_id'
-						),
-						'value'=>array(
-							$uid_poli,
-							$UserData['data']->uid,
-							$table_name,
-							'U',
-							json_encode($old_data),
-							json_encode($parameter['dataObject']),
-							parent::format_date(),
-							'N',
-							$UserData['data']->log_id
-						),
-						'class'=>__CLASS__
-					)
-				);
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'old_value',
+						'new_value',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$uid_poli,
+						$UserData['data']->uid,
+						$table_name,
+						'U',
+						json_encode($old_data),
+						json_encode($parameter['dataObject']),
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				)
+			);
 		}
 
 		return $poli;
