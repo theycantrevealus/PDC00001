@@ -290,6 +290,61 @@ class Asesmen extends Utility {
 		}
 	}
 
+	private function set_tindakan_asesment($parameter) {
+		foreach ($parameter['item'] as $key => $value) {
+			//Check
+			$check = self::$query->select('asesmen_tindakan', array(
+				'uid'
+			))
+			->where(array(
+				'asesmen_tindakan.deleted_at' => 'IS NULL',
+				'AND',
+				'asesmen_tindakan.kunjungan' => '= ?',
+				'AND',
+				'asesmen_tindakan.antrian' => '= ?',
+				'AND',
+				'asesmen_tindakan.tindakan' => '= ?',
+				'AND',
+				'asesmen_tindakan.penjamin' => '= ?'
+			), array(
+				$value['kunjungan'],
+				$value['antrian'],
+				$value['tindakan'],
+				$value['penjamin']
+			))
+			->execute();
+			if(count($check['response_data']) > 0) {
+				//update
+				$worker = self::$query->update('asesmen_tindakan', array(
+					'harga' => $value['harga']
+				))
+				->where(array(
+					'asesmen_tindakan.deleted_at' => 'IS NULL',
+					'AND',
+					'asesmen_tindakan.kunjungan' => '= ?',
+					'AND',
+					'asesmen_tindakan.antrian' => '= ?',
+					'AND',
+					'asesmen_tindakan.tindakan' => '= ?',
+					'AND',
+					'asesmen_tindakan.penjamin' => '= ?'
+				), array(
+					$value['kunjungan'],
+					$value['antrian'],
+					$value['tindakan'],
+					$value['penjamin']
+				))
+				->execute();
+				if($worker['response_result'] > 0) {
+					//
+				}
+			} else {
+				//insert
+				$worker
+			}
+		}
+	}
+
 	private function new_asesmen($parameter, $parent, $poli) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);

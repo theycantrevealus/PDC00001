@@ -599,6 +599,25 @@ class Poli extends Utility {
 					->execute();
 
 		if(isset($tindakanData) && $tindakanData != "") {
+			//Reset All Price
+			/*$reset = self::$query->update('master_poli_tindakan_penjamin', array(
+				'deleted_at' => parent::format_date()
+			))
+			->where(array(
+				'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
+				'AND',
+				'master_poli_tindakan_penjamin.uid_poli' => '= ?',
+				'AND',
+				'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
+				'AND',
+				'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
+			), array(
+				$uid_poli,
+				$key,
+				$Tkey
+			))
+			->execute();*/
+			
 			foreach ($tindakanData as $key => $value) {
 				foreach ($value as $Tkey => $Tvalue) {
 					$check = self::$query->select('master_poli_tindakan_penjamin', array(

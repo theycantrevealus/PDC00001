@@ -862,7 +862,9 @@
 				diagnosa_kerja: diagnosaKerjaData,
 				icd10_banding: parseInt(icd10Banding),
 				diagnosa_banding: diagnosaBandingData,
-				planning: planningData
+				planning: planningData,
+				//==============================
+				tindakan:tindakan
 			};
 
 			//Validation
