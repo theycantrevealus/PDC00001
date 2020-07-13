@@ -12,7 +12,7 @@
 		<div class="mdk-header-layout__content">
 
 			<div class="mdk-drawer-layout js-mdk-drawer-layout">
-				<div class="mdk-drawer-layout__content page">
+				<div class="mdk-drawer-layout__content page" id="app-settings">
 					<?php
 						if(empty(__PAGES__[0])) {
 							require 'pages/system/dashboard.php';

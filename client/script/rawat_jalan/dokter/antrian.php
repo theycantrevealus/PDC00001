@@ -1,7 +1,16 @@
 <script type="text/javascript">
 	$(function() {
+		var poliList = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
+		
+		//Init
+		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorPlanning;
+		
 		var antrianData, asesmen_detail;
-		var UID = __PAGES__[3];
+
+		var tindakanMeta = [];
+		var usedTindakan = [];
+
+		var UID = __PAGES__[3];		
 		$.ajax({
 			url:__HOSTAPI__ + "/Antrian/antrian-detail/" + UID,
 			async:false,
@@ -11,159 +20,181 @@
 			type:"GET",
 			success:function(response) {
 				antrianData = response.response_package.response_data[0];
+				$.ajax({
+					url:__HOSTAPI__ + "/Asesmen/antrian-detail/" + UID,
+					async:false,
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					type:"GET",
+					success:function(response) {
+						if(response.response_package.response_data[0] === undefined) {
+							asesmen_detail = {};
+							tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
+						} else {
+							asesmen_detail = response.response_package.response_data[0];
+							if(asesmen_detail.tindakan !== undefined) {
+								for(var tindakanKey in asesmen_detail.tindakan) {
+									if(usedTindakan.indexOf(asesmen_detail.tindakan[tindakanKey].uid) < 0) {
+										usedTindakan.push(asesmen_detail.tindakan[tindakanKey].uid);
+										tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
+
+										autoTindakan(tindakanMeta, {
+											uid: asesmen_detail.tindakan[tindakanKey].uid,
+											nama: asesmen_detail.tindakan[tindakanKey].nama
+										}, antrianData);
+									}
+								}
+							} else {
+								tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
+							}
+						}
+						
+						load_icd_10("#txt_icd_10_kerja", asesmen_detail.icd10_kerja);
+						load_icd_10("#txt_icd_10_banding", asesmen_detail.icd10_banding);
+
+						$("#txt_icd_10_kerja").select2();
+						$("#txt_icd_10_banding").select2();
+						
+						ClassicEditor
+							.create( document.querySelector( '#txt_keluhan_utama' ), {
+								extraPlugins: [ MyCustomUploadAdapterPlugin ],
+								placeholder: "Keluhan Utama..."
+							} )
+							.then( editor => {
+								if(asesmen_detail.keluhan_utama === undefined) {
+									editor.setData("");	
+								} else {
+									editor.setData(asesmen_detail.keluhan_utama);
+								}
+								editorKeluhanUtamaData = editor;
+								window.editor = editor;
+							} )
+							.catch( err => {
+								//console.error( err.stack );
+							} );
+
+						ClassicEditor
+							.create( document.querySelector( '#txt_keluhan_tambahan' ), {
+								extraPlugins: [ MyCustomUploadAdapterPlugin ],
+								placeholder: "Keluhan Tambahan..."
+							} )
+							.then( editor => {
+								if(asesmen_detail.keluhan_tambahan === undefined) {
+									editor.setData("");	
+								} else {
+									editor.setData(asesmen_detail.keluhan_tambahan);
+								}
+								editorKeluhanTambahanData = editor;
+								window.editor = editor;
+							} )
+							.catch( err => {
+								//console.error( err.stack );
+							} );
+
+						$("#txt_tekanan_darah").val(asesmen_detail.tekanan_darah);
+						$("#txt_suhu").val(asesmen_detail.suhu);
+						$("#txt_nadi").val(asesmen_detail.nadi);
+						$("#txt_pernafasan").val(asesmen_detail.pernafasan);
+						$("#txt_berat_badan").val(asesmen_detail.berat_badan);
+						$("#txt_tinggi_badan").val(asesmen_detail.tinggi_badan);
+						$("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
+
+						ClassicEditor
+							.create( document.querySelector( '#txt_pemeriksaan_fisik' ), {
+								extraPlugins: [ MyCustomUploadAdapterPlugin ],
+								placeholder: "Pemeriksaan Fisik..."
+							} )
+							.then( editor => {
+								if(asesmen_detail.pemeriksaan_fisik === undefined) {
+									editor.setData("");	
+								} else {
+									editor.setData(asesmen_detail.pemeriksaan_fisik);
+								}
+								editorPeriksaFisikData = editor;
+								window.editor = editor;
+							} )
+							.catch( err => {
+								//console.error( err.stack );
+							} );
+
+						ClassicEditor
+							.create( document.querySelector( '#txt_diagnosa_kerja' ), {
+								extraPlugins: [ MyCustomUploadAdapterPlugin ],
+								placeholder: "Diagnosa Kerja..."
+							} )
+							.then( editor => {
+								if(asesmen_detail.diagnosa_kerja === undefined) {
+									editor.setData("");	
+								} else {
+									editor.setData(asesmen_detail.diagnosa_kerja);
+								}
+								editorKerja = editor;
+								window.editor = editor;
+							} )
+							.catch( err => {
+								//console.error( err.stack );
+							} );
+
+						ClassicEditor
+							.create( document.querySelector( '#txt_diagnosa_banding' ), {
+								extraPlugins: [ MyCustomUploadAdapterPlugin ],
+							} )
+							.then( editor => {
+								if(asesmen_detail.diagnosa_banding === undefined) {
+									editor.setData("");	
+								} else {
+									editor.setData(asesmen_detail.diagnosa_banding);
+								}
+								editorBanding = editor;
+								window.editor = editor;
+							} )
+							.catch( err => {
+								//console.error( err.stack );
+							} );
+
+
+						ClassicEditor
+							.create( document.querySelector( '#txt_keterangan_resep' ), {
+								extraPlugins: [ MyCustomUploadAdapterPlugin ],
+								placeholder: "Keterangan resep..."
+							} )
+							.then( editor => {
+								editorKeteranganResep = editor;
+								window.editor = editor;
+							} )
+							.catch( err => {
+								//console.error( err.stack );
+							} );
+						ClassicEditor
+							.create( document.querySelector( '#txt_planning' ), {
+								extraPlugins: [ MyCustomUploadAdapterPlugin ],
+								placeholder: "Planning Tindakan"
+							} )
+							.then( editor => {
+								if(asesmen_detail.planning === undefined) {
+									editor.setData("");	
+								} else {
+									editor.setData(asesmen_detail.planning);
+								}
+								editorPlanning = editor;
+								window.editor = editor;
+							} )
+							.catch( err => {
+								//console.error( err.stack );
+							} );
+					},
+					error: function(response) {
+						console.log(response);
+					}
+				});
 			},
 			error: function(response) {
 				console.log(response);
 			}
 		});
+				
 
-		//Init
-		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorPlanning;
-
-		$.ajax({
-			url:__HOSTAPI__ + "/Asesmen/antrian-detail/" + UID,
-			async:false,
-			beforeSend: function(request) {
-				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-			},
-			type:"GET",
-			success:function(response) {
-				asesmen_detail = response.response_package.response_data[0];
-
-
-				ClassicEditor
-					.create( document.querySelector( '#txt_keluhan_utama' ), {
-						extraPlugins: [ MyCustomUploadAdapterPlugin ],
-						placeholder: "Keluhan Utama..."
-						/*ckfinder: {
-							uploadUrl: __HOSTFRONT__ + "/api/Upload"
-						}*/
-					} )
-					.then( editor => {
-						editor.setData(asesmen_detail.keluhan_utama);
-						editorKeluhanUtamaData = editor;
-						window.editor = editor;
-					} )
-					.catch( err => {
-						//console.error( err.stack );
-					} );
-
-				ClassicEditor
-					.create( document.querySelector( '#txt_keluhan_tambahan' ), {
-						extraPlugins: [ MyCustomUploadAdapterPlugin ],
-						placeholder: "Keluhan Tambahan..."
-						/*ckfinder: {
-							uploadUrl: __HOSTFRONT__ + "/api/Upload"
-						}*/
-					} )
-					.then( editor => {
-						editor.setData(asesmen_detail.keluhan_tambahan);
-						editorKeluhanTambahanData = editor;
-						window.editor = editor;
-					} )
-					.catch( err => {
-						//console.error( err.stack );
-					} );
-
-				$("#txt_tekanan_darah").val(asesmen_detail.tekanan_darah);
-				$("#txt_suhu").val(asesmen_detail.suhu);
-				$("#txt_nadi").val(asesmen_detail.nadi);
-				$("#txt_pernafasan").val(asesmen_detail.pernafasan);
-				$("#txt_berat_badan").val(asesmen_detail.berat_badan);
-				$("#txt_tinggi_badan").val(asesmen_detail.tinggi_badan);
-				$("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
-
-				ClassicEditor
-					.create( document.querySelector( '#txt_pemeriksaan_fisik' ), {
-						extraPlugins: [ MyCustomUploadAdapterPlugin ],
-						placeholder: "Pemeriksaan Fisik..."
-						/*ckfinder: {
-							uploadUrl: __HOSTFRONT__ + "/api/Upload"
-						}*/
-					} )
-					.then( editor => {
-						editor.setData(asesmen_detail.pemeriksaan_fisik);
-						editorPeriksaFisikData = editor;
-						window.editor = editor;
-					} )
-					.catch( err => {
-						//console.error( err.stack );
-					} );
-
-				ClassicEditor
-					.create( document.querySelector( '#txt_diagnosa_kerja' ), {
-						extraPlugins: [ MyCustomUploadAdapterPlugin ],
-						placeholder: "Diagnosa Kerja..."
-						/*ckfinder: {
-							uploadUrl: __HOSTFRONT__ + "/api/Upload"
-						}*/
-					} )
-					.then( editor => {
-						editor.setData(asesmen_detail.diagnosa_kerja);
-						editorKerja = editor;
-						window.editor = editor;
-					} )
-					.catch( err => {
-						//console.error( err.stack );
-					} );
-
-				ClassicEditor
-					.create( document.querySelector( '#txt_diagnosa_banding' ), {
-						extraPlugins: [ MyCustomUploadAdapterPlugin ],
-						placeholder: "Diagnosa Banding.."
-						/*ckfinder: {
-							uploadUrl: __HOSTFRONT__ + "/api/Upload"
-						}*/
-					} )
-					.then( editor => {
-						editor.setData(asesmen_detail.diagnosa_banding);
-						editorBanding = editor;
-						window.editor = editor;
-					} )
-					.catch( err => {
-						//console.error( err.stack );
-					} );
-
-
-				ClassicEditor
-					.create( document.querySelector( '#txt_keterangan_resep' ), {
-						extraPlugins: [ MyCustomUploadAdapterPlugin ],
-						placeholder: "Keterangan resep..."
-						/*ckfinder: {
-							uploadUrl: __HOSTFRONT__ + "/api/Upload"
-						}*/
-					} )
-					.then( editor => {
-						editorKeteranganResep = editor;
-						window.editor = editor;
-					} )
-					.catch( err => {
-						//console.error( err.stack );
-					} );
-				ClassicEditor
-					.create( document.querySelector( '#txt_planning' ), {
-						extraPlugins: [ MyCustomUploadAdapterPlugin ],
-						placeholder: "Planning Tindakan"
-						/*ckfinder: {
-							uploadUrl: __HOSTFRONT__ + "/api/Upload"
-						}*/
-					} )
-					.then( editor => {
-						editor.setData(asesmen_detail.planning);
-						editorPlanning = editor;
-						window.editor = editor;
-					} )
-					.catch( err => {
-						//console.error( err.stack );
-					} );
-			},
-			error: function(response) {
-				console.log(response);
-			}
-		});
-
-		var poliList = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
-		
 		if(poliList.length > 1) {
 			$("#change-poli").show();
 			$("#current-poli").addClass("handy");
@@ -174,14 +205,7 @@
 
 		$("#current-poli").prepend(poliList[0]['nama']);
 
-		function load_poli_info() {
-			//
-		}
-
-		var tindakanMeta = generateTindakan(poliList[0].tindakan);
-		var usedTindakan = [];
-
-		function generateTindakan(poliList, selected = []) {
+		function generateTindakan(poliList, antrianData, selected = []) {
 			var tindakanMeta = {};
 			$("#txt_tindakan option").remove();
 			for(var key in poliList) {
@@ -220,7 +244,7 @@
 			
 			if(usedTindakan.indexOf($("#txt_tindakan").val()) < 0) {
 				usedTindakan.push($("#txt_tindakan").val());
-				tindakanMeta = generateTindakan(poliList[0].tindakan, usedTindakan);
+				tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
 			}
 			
 			return false;
@@ -230,8 +254,8 @@
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
 			$("#row_tindakan_" + id).remove();
-			usedTindakan.splice((id - 1), 1);
-			tindakanMeta = generateTindakan(poliList[0].tindakan, usedTindakan);
+			usedTindakan.splice(usedTindakan.indexOf($(this).val()), 1);
+			tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
 			return false;
 		});
 
@@ -284,7 +308,7 @@
 			});
 		}
 
-		function load_icd_10(target) {
+		function load_icd_10(target, selected = "") {
 			var icd10Data;
 			$.ajax({
 				url:__HOSTAPI__ + "/Icd/icd10",
@@ -297,7 +321,7 @@
 					icd10Data = response.response_package.response_data;
 					$(target).find("option").remove();
 					for(var a = 0; a < icd10Data.length; a++) {
-						$(target).append("<option value=\"" + icd10Data[a].id + "\">" + icd10Data[a].kode + " - " + icd10Data[a].nama + "</option>");
+						$(target).append("<option " + ((icd10Data[a].id == selected) ? "selected=\"selected\"" : "") + " value=\"" + icd10Data[a].id + "\">" + icd10Data[a].kode + " - " + icd10Data[a].nama + "</option>");
 					}
 				},
 				error: function(response) {
@@ -308,11 +332,7 @@
 		}
 
 
-		load_icd_10("#txt_icd_10_kerja");
-		load_icd_10("#txt_icd_10_banding");
-
-		$("#txt_icd_10_kerja").select2();
-		$("#txt_icd_10_banding").select2();
+		
 
 
 
@@ -443,14 +463,6 @@
 			
 
 		function load_product_penjamin(target, obat, selectedData = "") {
-			/*var selected = [];
-			$("#table-resep tbody tr").each(function(){
-				var getPenjaminsSelected = $(this).find("td:eq(6) select").val();
-				if(selected.indexOf(getPenjaminsSelected) < 0) {
-					selected.push(getPenjaminsSelected);
-				}
-			});*/
-
 			var penjaminData;
 			$.ajax({
 				url:__HOSTAPI__ + "/Penjamin/get_penjamin_obat/" + obat,
@@ -463,9 +475,6 @@
 					$(target).find("option").remove();
 					penjaminData = response.response_package.response_data;
 					for (var a = 0; a < penjaminData.length; a++) {
-						/*if(selected.indexOf(penjaminData[a].penjamin.uid) < 0) {
-							
-						}*/
 						$(target).append("<option " + ((penjaminData[a].penjamin.uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + penjaminData[a].penjamin.uid + "\">" + penjaminData[a].penjamin.nama + "</option>");
 					}
 				},
@@ -592,13 +601,7 @@
 					digitsOptional: true
 				});
 
-				/*var newPenjamin = document.createElement("SELECT");
-				$(newCellResepPenjamin).append(newPenjamin);
-
-				var penjaminData = load_product_penjamin(newPenjamin, $(newObat).val());
-
-				$(newPenjamin).addClass("form-control resep_penjamin").select2();*/
-
+				
 				var newDeleteResep = document.createElement("BUTTON");
 				$(newCellResepAksi).append(newDeleteResep);
 				$(newDeleteResep).addClass("btn btn-sm btn-danger resep_delete").html("<i class=\"fa fa-ban\"></i>");
@@ -611,9 +614,6 @@
 				$(newRowResep).append(newCellResepJlh);
 				//$(newRowResep).append(newCellResepPenjamin);
 				$(newRowResep).append(newCellResepAksi);
-				/*if(penjaminData.length > 0) {
-					$("#table-resep").append(newRowResep);	
-				}*/
 				$("#table-resep").append(newRowResep);	
 				
 				rebaseResep();
@@ -815,6 +815,10 @@
 				var tindakanItem = $(this).find("td:eq(1)").attr("set-tindakan");
 				var pilihanPenjamin = $(this).find("td:eq(2) select").val();
 				tindakan.push({
+					"kunjungan": kunjungan,
+					"antrian": antrian,
+					"pasien": pasien,
+					"poli": poli,
 					"item": tindakanItem,
 					"itemName": $(this).find("td:eq(1)").html(),
 					"penjamin": pilihanPenjamin,
@@ -877,6 +881,7 @@
 				},
 				type: "POST",
 				success: function(response){
+					console.clear();
 					if(response.response_package.response_result > 0) {
 						notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
 					} else {
@@ -884,6 +889,7 @@
 					}
 				},
 				error: function(response) {
+					console.clear();
 					console.log(response);
 				}
 			});

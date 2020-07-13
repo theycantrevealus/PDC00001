@@ -5,6 +5,8 @@ namespace PondokCoder;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Poli as Poli;
+use PondokCoder\Penjamin as Penjamin;
+use PondokCoder\Tindakan as Tindakan;
 use PondokCoder\Utility as Utility;
 
 
@@ -24,8 +26,8 @@ class Asesmen extends Utility {
 	public function __GET__($parameter = array()) {
 		try {
 			switch($parameter[1]) {
-				case 'select':
-					//
+				case 'antrian-detail':
+					return self::get_asesmen_medis($parameter[2]);
 					break;
 				default:
 					return self::get_asesmen_medis($parameter[2]);
@@ -116,7 +118,30 @@ class Asesmen extends Utility {
 				$antrian['response_data'][0]['dokter']
 			))
 			->execute();
-			return $data;
+			if(count($data['response_data']) > 0) {
+				$tindakan = self::$query->select('asesmen_tindakan', array(
+					'tindakan'
+				))
+				->where(array(
+					'asesmen_tindakan.deleted_at' => 'IS NULL',
+					'AND',
+					'asesmen_tindakan.kunjungan' => '= ?',
+					'AND',
+					'asesmen_tindakan.asesmen' => '= ?'
+				), array(
+					$antrian['response_data'][0]['kunjungan'],	
+					$data['response_data'][0]['asesmen']
+				))
+				->execute();
+				foreach ($tindakan['response_data'] as $key => $value) {
+					$Tindakan = new Tindakan(self::$pdo);
+					$tindakan['response_data'][$key] = $Tindakan::get_tindakan_detail($value['tindakan'])['response_data'][0];
+				}
+				$data['response_data'][0]['tindakan'] = $tindakan['response_data'];
+				return $data;
+			} else {
+				return $antrian;
+			}
 		} else {
 			return $antrian;
 		}
@@ -125,7 +150,7 @@ class Asesmen extends Utility {
 	private function update_asesmen_medis($parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+		$MasterUID = '';
 		//Prepare Poli
 		$Poli = new Poli(self::$pdo);
 		$PoliDetail = $Poli::get_poli_detail($parameter['poli'])['response_data'][0];
@@ -156,6 +181,9 @@ class Asesmen extends Utility {
 		->execute();
 
 		if(count($check['response_data']) > 0) {
+			$MasterUID = $check['response_data'][0]['uid'];
+			$returnResponse = array();
+
 			//Poli Asesmen Check
 			$poli_check = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
 				'uid'
@@ -241,10 +269,11 @@ class Asesmen extends Utility {
 				$worker = self::new_asesmen($parameter, $check['response_data'][0]['uid'], $PoliDetail['poli_asesmen']);
 			}
 
-			return $worker;
+			$returnResponse = $worker;
 		} else {
 			//new asesmen
 			$NewAsesmen = parent::gen_uuid();
+			$MasterUID = $NewAsesmen;
 			$asesmen_poli = self::$query->insert('asesmen', array(
 				'uid' => $NewAsesmen,
 				'poli' => $parameter['poli'],
@@ -283,66 +312,121 @@ class Asesmen extends Utility {
 
 				$worker = self::new_asesmen($parameter, $NewAsesmen, $PoliDetail['poli_asesmen']);
 
-				return $worker;
+				$returnResponse = $worker;
 			} else {
-				return $asesmen_poli;
+				$returnResponse = $asesmen_poli;
 			}
 		}
+
+
+
+
+
+		//Tindakan Management
+		$returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter['tindakan'], $MasterUID);
+		return $returnResponse;
 	}
 
-	private function set_tindakan_asesment($parameter) {
-		foreach ($parameter['item'] as $key => $value) {
-			//Check
-			$check = self::$query->select('asesmen_tindakan', array(
-				'uid'
-			))
-			->where(array(
-				'asesmen_tindakan.deleted_at' => 'IS NULL',
-				'AND',
-				'asesmen_tindakan.kunjungan' => '= ?',
-				'AND',
-				'asesmen_tindakan.antrian' => '= ?',
-				'AND',
-				'asesmen_tindakan.tindakan' => '= ?',
-				'AND',
-				'asesmen_tindakan.penjamin' => '= ?'
-			), array(
-				$value['kunjungan'],
-				$value['antrian'],
-				$value['tindakan'],
-				$value['penjamin']
-			))
-			->execute();
-			if(count($check['response_data']) > 0) {
-				//update
-				$worker = self::$query->update('asesmen_tindakan', array(
-					'harga' => $value['harga']
-				))
-				->where(array(
-					'asesmen_tindakan.deleted_at' => 'IS NULL',
-					'AND',
-					'asesmen_tindakan.kunjungan' => '= ?',
-					'AND',
-					'asesmen_tindakan.antrian' => '= ?',
-					'AND',
-					'asesmen_tindakan.tindakan' => '= ?',
-					'AND',
-					'asesmen_tindakan.penjamin' => '= ?'
-				), array(
-					$value['kunjungan'],
-					$value['antrian'],
-					$value['tindakan'],
-					$value['penjamin']
-				))
-				->execute();
-				if($worker['response_result'] > 0) {
-					//
-				}
+	private function set_tindakan_asesment($parameter, $MasterAsesmen) {
+		$requested = array();
+		foreach ($parameter as $key => $value) {
+			if(!in_array($value['item'], $requested)) {
+				array_push($requested, $value['item']);
 			} else {
-				//insert
-				$worker
+				array_push($requested, $value['item']);
 			}
 		}
+		$returnResponse = array();
+		$registered = array();
+
+		$entry = self::$query->select('asesmen_tindakan', array(
+			'uid',
+			'tindakan'
+		))
+		->where(array(
+			'asesmen_tindakan.asesmen' => '= ?'
+		), array(
+			$MasterAsesmen
+		))
+		->execute();
+
+		foreach ($entry['response_data'] as $key => $value) {
+			if(in_array($value['tindakan'], $requested)) {
+				$activate = self::$query->update('asesmen_tindakan', array(
+					'deleted_at' => NULL
+				))
+				->where(array(
+					'asesmen_tindakan.asesmen' => '= ?',
+					'AND',
+					'asesmen_tindakan.tindakan' => '= ?'
+				), array(
+					$MasterAsesmen,
+					$value['tindakan']
+				))
+				->execute();
+				array_push($returnResponse, $activate);
+			} else {
+				$activate = self::$query->update('asesmen_tindakan', array(
+					'deleted_at' => parent::format_date()
+				))
+				->where(array(
+					'asesmen_tindakan.asesmen' => '= ?',
+					'AND',
+					'asesmen_tindakan.tindakan' => '= ?'
+				), array(
+					$MasterAsesmen,
+					$value['tindakan']
+				))
+				->execute();
+				array_push($returnResponse, $activate);
+			}
+			array_splice($requested, array_search($value['tindakan'], $requested), 1);
+			array_splice($parameter, array_search($value['tindakan'], $requested), 1);
+		}
+
+		foreach ($parameter as $key => $value) {
+			$Penjamin = self::$query
+			->select('master_poli_tindakan_penjamin', array(
+				'id',
+				'harga',
+				'uid_poli',
+				'uid_tindakan',
+				'uid_penjamin',
+				'created_at',
+				'updated_at'
+			))
+			->where(array(
+				'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
+				'AND',
+				'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
+				'AND',
+				'master_poli_tindakan_penjamin.uid_penjamin' => '= ?',
+				'AND',
+				'master_poli_tindakan_penjamin.uid_poli' => '= ?'
+			), array(
+				$value['item'],
+				$value['penjamin'],
+				$value['poli']
+			))
+			->execute();
+
+			$new_asesmen_uid = parent::gen_uuid();
+			$new_asesmen_tindakan = self::$query->insert('asesmen_tindakan', array(
+				'uid' => $new_asesmen_uid,
+				'kunjungan' => $value['kunjungan'],
+				'antrian' => $value['antrian'],
+				'asesmen' => $MasterAsesmen,
+				'tindakan' => $value['item'],
+				'penjamin' => $value['penjamin'],
+				'harga' => $Penjamin['response_data'][0]['harga'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->execute();
+			array_push($returnResponse, $new_asesmen_tindakan);
+		}
+
+		return $returnResponse;
 	}
 
 	private function new_asesmen($parameter, $parent, $poli) {
@@ -385,6 +469,7 @@ class Asesmen extends Utility {
 					'user_uid',
 					'table_name',
 					'action',
+					'new_value',
 					'logged_at',
 					'status',
 					'login_id'
@@ -394,6 +479,7 @@ class Asesmen extends Utility {
 					$UserData['data']->uid,
 					'asesmen_medis_' . $PoliDetail['poli_asesmen'],
 					'I',
+					json_encode($parameter),
 					parent::format_date(),
 					'N',
 					$UserData['data']->log_id
