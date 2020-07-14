@@ -463,8 +463,9 @@
 			
 
 		function load_product_penjamin(target, obat, selectedData = "") {
-			var penjaminData;
+			var productData;
 			$.ajax({
+				/*url:__HOSTAPI__ + "/Penjamin/get_penjamin_obat/" + obat,*/
 				url:__HOSTAPI__ + "/Penjamin/get_penjamin_obat/" + obat,
 				async:false,
 				beforeSend: function(request) {
@@ -473,16 +474,16 @@
 				type:"GET",
 				success:function(response) {
 					$(target).find("option").remove();
-					penjaminData = response.response_package.response_data;
-					for (var a = 0; a < penjaminData.length; a++) {
-						$(target).append("<option " + ((penjaminData[a].penjamin.uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + penjaminData[a].penjamin.uid + "\">" + penjaminData[a].penjamin.nama + "</option>");
+					productData = response.response_package.response_data;
+					for (var a = 0; a < productData.length; a++) {
+						$(target).append("<option " + ((productData[a].penjamin.uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + penjaminData[a].penjamin.uid + "\">" + penjaminData[a].penjamin.nama + "</option>");
 					}
 				},
 				error: function(response) {
 					console.log(response);
 				}
 			});
-			return penjaminData;
+			return productData;
 		}
 
 		function load_product_resep(target, selectedData = "") {
@@ -505,9 +506,10 @@
 				success:function(response) {
 					$(target).find("option").remove();
 					productData = response.response_package.response_data;
+					console.log(productData);
 					for (var a = 0; a < productData.length; a++) {
 						if(selected.indexOf(productData[a].uid) < 0) {
-							$(target).append("<option " + ((productData[a].uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + productData[a].uid + "\">" + productData[a].nama + "</option>");
+							$(target).append("<option satuan-caption=\"" + productData[a].satuan_terkecil.nama + "\" satuan-terkecil=\"" + productData[a].satuan_terkecil.uid + "\" " + ((productData[a].uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + productData[a].uid + "\">" + productData[a].nama.toUpperCase() + "</option>");
 						}
 					}
 				},
@@ -548,6 +550,7 @@
 			var newCellResepID = document.createElement("TD");
 			var newCellResepObat = document.createElement("TD");
 			var newCellResepJlh = document.createElement("TD");
+			var newCellResepSatuan = document.createElement("TD");
 			var newCellResepSigna1 = document.createElement("TD");
 			var newCellResepSigna2 = document.createElement("TD");
 			var newCellResepSigna3 = document.createElement("TD");
@@ -560,7 +563,19 @@
 			var addAnother = load_product_resep(newObat, "");
 			
 			if(!addAnother) {
-				$(newObat).addClass("form-control").select2();
+				$(newCellResepObat).append(
+					"<div class=\"row\" style=\"padding-top: 20px;\">" +
+						"<div class=\"col-md-7 aturan-pakai-container\"><span>Aturan Pakai</span></div>" +
+						"<div class=\"col-md-5 kategori-obat-container\"><span>Kategori Obat</span></div>" +
+					"</div>");
+				var newAturanPakai = document.createElement("SELECT");
+				$(newCellResepObat).find("div.aturan-pakai-container").append(newAturanPakai);
+				$(newAturanPakai).addClass("form-control");
+				$(newAturanPakai).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
+
+				$(newObat).addClass("form-control resep-obat").select2();
+
+				$(newCellResepSatuan).html($(newObat).find("option:selected").attr("satuan-caption"));
 
 				var newJumlah = document.createElement("INPUT");
 				$(newCellResepJlh).append(newJumlah);
@@ -612,7 +627,7 @@
 				$(newRowResep).append(newCellResepSigna2);
 				$(newRowResep).append(newCellResepSigna3);
 				$(newRowResep).append(newCellResepJlh);
-				//$(newRowResep).append(newCellResepPenjamin);
+				$(newRowResep).append(newCellResepSatuan);
 				$(newRowResep).append(newCellResepAksi);
 				$("#table-resep").append(newRowResep);	
 				
@@ -640,8 +655,8 @@
 				$(this).find("td:eq(5) input").attr({
 					"id": "resep_jlh_hari_" + id
 				});
-				$(this).find("td:eq(6) select").attr({
-					"id": "resep_penjamin_" + id
+				$(this).find("td:eq(6)").attr({
+					"id": "resep_satuan_" + id
 				});
 				$(this).find("td:eq(7) buttton").attr({
 					"id": "resep_delete_" + id
@@ -665,6 +680,14 @@
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
 			checkGenerateResep(id);
+		});
+
+		$("body").on("change", ".resep-obat", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+
+			var satuanCaption = $(this).find("option:selected").attr("satuan-caption");
+			$("#resep_satuan_" + id).html(satuanCaption);
 		});
 
 

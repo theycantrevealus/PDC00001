@@ -55,7 +55,11 @@
 				?>
 			</div>
 			<div class="content-shimmer">
-				<span>Loading...</span>
+				<span>
+					<img width="80" height="80" src="<?php echo __HOSTNAME__; ?>/template/assets/images/preloader4.gif" />
+					<br />
+					Loading...
+				</span>
 			</div>
 		</div>
 	</div>
