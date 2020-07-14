@@ -5,14 +5,14 @@
 		var tableAntrianPerawat = $("#table-antrian-perawat").DataTable({
 			"ajax":{
 				async: false,
-				url: __HOSTAPI__ + "/Antrian/antrian",
+				url: __HOSTAPI__ + "/AssesmenRawatJalan/antrian-assesmen",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					antrian_count = response.response_package.response_result;
-					return response.response_package.response_data;
+					antrian_count = response.response_package.length;
+					return response.response_package;
 				}
 			},
 			autoWidth: false,
@@ -64,15 +64,28 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						var button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/tambah/"+ row['uid'] +"' class='btn btn-info btn-sm' data-toggle='tooltip' title='Isi Assesmen Pasien'><i class='fa fa-address-card'></i></a>";
+
+						if (row['status_assesmen'] === true){
+							button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/edit/"+ row['uid_assesmen_rawat_umum'] +"' class='btn btn-warning btn-sm' data-toggle='tooltip' title='Edit Assesmen Pasien'><i class='fa fa-address-card'></i></a>";
+
+							//.addClass("hightlight");
+						}
+
+						return "<div class=\"btn-group \" role=\"group\" aria-label=\"Basic example\">" +
 									/*"<button id=\"penjamin_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-antrian\">" +
 										"<i class=\"fa fa-trash\"></i>" +
 									"</button>" +*/
-									"<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/tambah/"+ row['uid'] +"' class='btn btn-info btn-sm' data-toggle='tooltip' title='Isi Assesmen Pasien'><i class='fa fa-address-card'></i></a>"
+									button
 								"</div>";
 					}
 				}
-			]
+			],
+			rowCallback: function (row, data) {
+				if (data['status_assesmen'] === true){
+					$(row).css({"background-color":"#E0F5E5","color":"#000"});
+				}
+			}
 		});
 
 		$("#jlh-antrian").html(antrian_count);

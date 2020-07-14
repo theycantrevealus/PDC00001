@@ -1,3 +1,9 @@
+<style type="text/css">
+	.highlight {
+	    background-color: #bfe13e !important;
+	}
+</style>
+
 <div class="container-fluid page__heading-container">
 	<div class="page__heading d-flex align-items-center">
 		<div class="flex">
@@ -45,7 +51,7 @@
 			</div>
         	<div class="card card-body">
 				<div class="table-responsive border-bottom">
-					<table class="table table-bordered table-striped" id="table-antrian-perawat" style="font-size: 0.9rem;">
+					<table class="table table-bordered " id="table-antrian-perawat" style="font-size: 0.9rem;">
 						<thead>
 							<tr>
 								<th width="2%">No</th>
