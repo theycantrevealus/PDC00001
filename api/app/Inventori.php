@@ -621,6 +621,23 @@ class Inventori extends Utility {
 		->execute();
 		return $data['response_data'];
 	}
+
+	private function get_kategori_obat_item($parameter) {
+		$data = self::$query->select('master_inv_obat_kategori_item', array(
+			'id',
+			'obat',
+			'kategori'
+		))
+		->where(array(
+			'master_inv_obat_kategori_item.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_obat_kategori_item.obat' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		return $data['response_data'];
+	}
 //===========================================================================================GUDANG
 	private function get_gudang() {
 		$data = self::$query
@@ -994,6 +1011,12 @@ class Inventori extends Utility {
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
+			$kategori_obat = self::get_kategori_obat_item($value['uid']);
+			foreach ($kategori_obat as $KOKey => $KOValue) {
+				$kategori_obat[$KOKey]['kategori'] = self::get_kategori_obat_detail($KOValue['kategori'])['response_data'][0]['nama'];
+			}
+
+			$data['response_data'][$key]['kategori_obat'] = $kategori_obat;
 			$data['response_data'][$key]['satuan_terkecil'] = self::get_satuan_detail($value['satuan_terkecil'])['response_data'][0];
 			$data['response_data'][$key]['kategori'] = self::get_kategori_detail($value['kategori'])['response_data'][0];
 			$data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
@@ -1028,6 +1051,9 @@ class Inventori extends Utility {
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
+
+			//Kategori Obat
+			$data['response_data'][$key]['kategori_obat'] = self::get_kategori_obat_item($value['uid']);
 
 			//Prepare Image File
 			$data['response_data'][$key]['image'] = file_exists('../images/produk/' . $value['uid'] . '.png');
@@ -1858,86 +1884,244 @@ class Inventori extends Utility {
 				}
 			}
 
-			/*//Gudang Rak
+			//Gudang Rak
+			$resetGudangRak = self::$query->update('master_inv_gudang_rak', array(
+				'deleted_at' => parent::format_date()
+			))
+			->where(array(
+				'master_inv_gudang_rak.barang' => '= ?'
+			), array(
+				$uid
+			))
+			->execute();
+
+			$requestGudangRakIDs = array();
+			$oldGudangRakMeta = array();
+			$oldGudangRak = self::$query->select('master_inv_gudang_rak', array(
+				'id',
+				'barang',
+				'gudang',
+				'rak'
+			))
+			->where(array(
+				'master_inv_gudang_rak.barang' => '= ?'
+			), array(
+				$uid
+			))
+			->execute();
+
+			foreach ($oldGudangRak['response_data'] as $key => $value) {
+				if(!in_array($value['id'], $requestGudangRakIDs)) {
+					array_push($requestGudangRakIDs, $value['id']);
+					array_push($oldGudangRakMeta, $value);
+				}
+			}
+
 			foreach ($parameter['gudangMeta'] as $key => $value) {
-				$newGudang = self::$query->insert('master_inv_gudang_rak', array(
-					'barang' => $uid,
-					'gudang' => $value['gudang'],
-					'rak' => $value['lokasi'],
-					'created_at' => parent::format_date(),
-					'updated_at' => parent::format_date()
-				))
-				->execute();
-				if($newGudang['response_result'] > 0) {
-					$log = parent::log(array(
-						'type' => 'activity',
-						'column' => array(
-							'unique_target',
-							'user_uid',
-							'table_name',
-							'action',
-							'new_value',
-							'logged_at',
-							'status',
-							'login_id'
-						),
-						'value' => array(
-							$parameter['uid'],
-							$UserData['data']->uid,
-							'master_inv_gudang_rak',
-							'I',
-							json_encode($parameter['gudangMeta']),
-							parent::format_date(),
-							'N',
-							$UserData['data']->log_id
-						),
-						'class' => __CLASS__
-					));
+				if(isset($requestGudangRakIDs[$key])) {
+					$updateGudangRak = self::$query->update('master_inv_gudang_rak', array(
+						'barang' => $uid,
+						'gudang' => $value['gudang'],
+						'rak' => $value['lokasi'],
+						'updated_at' => parent::format_date(),
+						'deleted_at' => NULL
+					))
+					->where(array(
+						'master_inv_gudang_rak.id' => '= ?'
+					), array(
+						$requestGudangRakIDs[$key]
+					))
+					->execute();
+					if($updateGudangRak['response_result'] > 0) {
+						$log = parent::log(array(
+							'type' => 'activity',
+							'column' => array(
+								'unique_target',
+								'user_uid',
+								'table_name',
+								'action',
+								'old_value',
+								'new_value',
+								'logged_at',
+								'status',
+								'login_id'
+							),
+							'value' => array(
+								$parameter['uid'],
+								$UserData['data']->uid,
+								'master_inv_gudang_rak',
+								'U',
+								json_encode($oldGudangRakMeta[$key]),
+								json_encode($parameter['gudangMeta']),
+								parent::format_date(),
+								'N',
+								$UserData['data']->log_id
+							),
+							'class' => __CLASS__
+						));
+					} else {
+						$error_count++;
+					}
 				} else {
-					$error_count++;
+					$newGudangRak = self::$query->insert('master_inv_gudang_rak', array(
+						'barang' => $uid,
+						'gudang' => $value['gudang'],
+						'rak' => $value['lokasi'],
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+					->execute();
+					if($newGudangRak['response_result'] > 0) {
+						$log = parent::log(array(
+							'type' => 'activity',
+							'column' => array(
+								'unique_target',
+								'user_uid',
+								'table_name',
+								'action',
+								'new_value',
+								'logged_at',
+								'status',
+								'login_id'
+							),
+							'value' => array(
+								$parameter['uid'],
+								$UserData['data']->uid,
+								'master_inv_gudang_rak',
+								'I',
+								json_encode($parameter['gudangMeta']),
+								parent::format_date(),
+								'N',
+								$UserData['data']->log_id
+							),
+							'class' => __CLASS__
+						));
+					} else {
+						$error_count++;
+					}
 				}
 			}
 
 			//Monitoring
-			foreach ($parameter['monitoring'] as $key => $value) {
-				$newMonitoring = self::$query->insert('master_inv_monitoring', array(
-					'barang' => $uid,
-					'gudang' => $value['gudang'],
-					'min' => $value['min'],
-					'max' => $value['max'],
-					'created_at' => parent::format_date(),
-					'updated_at' => parent::format_date()
-				))
-				->execute();
-				if($newMonitoring['response_result'] > 0) {
-					$log = parent::log(array(
-						'type' => 'activity',
-						'column' => array(
-							'unique_target',
-							'user_uid',
-							'table_name',
-							'action',
-							'new_value',
-							'logged_at',
-							'status',
-							'login_id'
-						),
-						'value' => array(
-							$parameter['uid'],
-							$UserData['data']->uid,
-							'master_inv_monitoring',
-							'I',
-							json_encode($parameter['monitoring']),
-							parent::format_date(),
-							'N',
-							$UserData['data']->log_id
-						),
-						'class' => __CLASS__
-					));
-				} else {
-					$error_count++;
+			$resetMonitoring = self::$query->update('master_inv_monitoring', array(
+				'deleted_at' => parent::format_date()
+			))
+			->where(array(
+				'master_inv_monitoring.barang' => '= ?'
+			), array(
+				$uid
+			))
+			->execute();
+
+			$requestMonitoringIDs = array();
+			$oldMonitoringMeta = array();
+			$oldMonitoring = self::$query->select('master_inv_monitoring', array(
+				'id',
+				'barang',
+				'gudang',
+				'min',
+				'max'
+			))
+			->where(array(
+				'master_inv_monitoring.barang' => '= ?'
+			), array(
+				$uid
+			))
+			->execute();
+
+			foreach ($oldMonitoring['response_data'] as $key => $value) {
+				if(!in_array($value['id'], $requestMonitoringIDs)) {
+					array_push($requestMonitoringIDs, $value['id']);
+					array_push($oldMonitoringMeta, $value);
 				}
-			}*/
+			}
+			
+			foreach ($parameter['monitoring'] as $key => $value) {
+				if(isset($requestMonitoringIDs[$key])) {
+					$updateMonitoring = self::$query->update('master_inv_monitoring', array(
+						'barang' => $uid,
+						'gudang' => $value['gudang'],
+						'min' => $value['min'],
+						'max' => $value['max'],
+						'updated_at' => parent::format_date(),
+						'deleted_at' => NULL
+					))
+					->where(array(
+						'master_inv_monitoring.id' => '= ?'
+					), array(
+						$requestMonitoringIDs[$key]
+					))
+					->execute();
+					if($updateMonitoring['response_result'] > 0) {
+						$log = parent::log(array(
+							'type' => 'activity',
+							'column' => array(
+								'unique_target',
+								'user_uid',
+								'table_name',
+								'action',
+								'old_value',
+								'new_value',
+								'logged_at',
+								'status',
+								'login_id'
+							),
+							'value' => array(
+								$parameter['uid'],
+								$UserData['data']->uid,
+								'master_inv_monitoring',
+								'U',
+								json_encode($oldMonitoringMeta[$key]),
+								json_encode($parameter['monitoring']),
+								parent::format_date(),
+								'N',
+								$UserData['data']->log_id
+							),
+							'class' => __CLASS__
+						));
+					} else {
+						$error_count++;
+					}
+				} else {
+					$newMonitoring = self::$query->insert('master_inv_monitoring', array(
+						'barang' => $uid,
+						'gudang' => $value['gudang'],
+						'min' => $value['min'],
+						'max' => $value['max'],
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+					->execute();
+					if($newMonitoring['response_result'] > 0) {
+						$log = parent::log(array(
+							'type' => 'activity',
+							'column' => array(
+								'unique_target',
+								'user_uid',
+								'table_name',
+								'action',
+								'new_value',
+								'logged_at',
+								'status',
+								'login_id'
+							),
+							'value' => array(
+								$parameter['uid'],
+								$UserData['data']->uid,
+								'master_inv_monitoring',
+								'I',
+								json_encode($parameter['monitoring']),
+								parent::format_date(),
+								'N',
+								$UserData['data']->log_id
+							),
+							'class' => __CLASS__
+						));
+					} else {
+						$error_count++;
+					}
+				}
+			}
 		} else {
 			$error_count ++;
 		}

@@ -82,9 +82,9 @@
 						<?php require 'form-monitoring.php'; ?>
 					</div>
 					<div class="col-md-12">
-						<button type="submit" id="btn_save_data" class="btn btn-success"><i class="fa fa-save"></i> Simpan & Keluar</button>
-						<button type="submit" id="btn_save_data_stay" class="btn btn-info"><i class="fa fa-save"></i> Simpan & Tetap Disini</button>
-						<a href="<?php echo __HOSTNAME__; ?>/master/inventori" class="btn btn-danger"><i class="fa fa-ban"></i> Kembali</a>
+						<button type="submit" id="btn_save_data" class="btn btn-success saveData action-panel"><i class="fa fa-save"></i> Simpan & Keluar</button>
+						<button type="submit" id="btn_save_data_stay" class="btn btn-info saveData action-panel stay"><i class="fa fa-save"></i> Simpan & Tetap Disini</button>
+						<a href="<?php echo __HOSTNAME__; ?>/master/inventori" class="btn btn-danger action-panel"><i class="fa fa-ban"></i> Kembali</a>
 					</div>
 				</div>
 			</div>

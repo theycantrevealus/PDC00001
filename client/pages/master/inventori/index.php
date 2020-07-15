@@ -8,6 +8,7 @@
 					<li class="breadcrumb-item active" aria-current="page">Gudang</li>
 				</ol>
 			</nav>
+			<h4><span id="nama-departemen"></span>Inventori</h4>
 		</div>
 		<!-- <a href="<?php echo __HOSTNAME__; ?>/master/inventori/gudang/tambah" class="btn btn-info btn-sm ml-3">
 			<i class="fa fa-plus"></i> Tambah Gudang
@@ -23,12 +24,13 @@
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<table class="table table-bordered" id="table-item">
+				<table class="table table-bordered largeDataType" id="table-item">
 					<thead>
 						<tr>
 							<th style="width: 20px;">No</th>
-							<th>Kode</th>
-							<th>Nama</th>
+							<th>Obat</th>
+							<!-- <th>Kode</th>
+							<th>Nama</th> -->
 							<th>Kategori</th>
 							<th>Manufacture</th>
 							<th>Aksi</th>

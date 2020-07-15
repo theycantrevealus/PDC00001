@@ -1,10 +1,13 @@
 <script type="text/javascript">
 	$(function() {
-		var MODE = "tambah";
+		var MODE = "edit";
 		var UID = __PAGES__[3];
 		var selectedDariSatuanList = [];
 		var invData;
 		let editorKeterangan;
+		var imageResultPopulator = [];
+		var selectedKategoriObat = [];
+
 		$.ajax({
 			url:__HOSTAPI__ + "/Inventori/item_detail/" + UID,
 			async:false,
@@ -25,13 +28,12 @@
 
 				load_kategori("#txt_kategori", invData.kategori);
 				$(".label_kategori").html($("#txt_kategori").find("option:selected").text().toUpperCase());
-
 				load_manufacture("#txt_manufacture", invData.manufacture);
 				load_satuan("#txt_satuan_terkecil", invData.satuan_terkecil);
 				if(selectedDariSatuanList.indexOf($("#txt_satuan_terkecil").val()) < 0) {
 					selectedDariSatuanList.push($("#txt_satuan_terkecil").val());
 				}
-				load_kategori_obat();
+
 				for(var a = 0; a < invData.konversi.length; a++) {
 					autoSatuan(selectedDariSatuanList, {
 						dari:invData.konversi[a].dari_satuan,
@@ -51,6 +53,19 @@
 					}
 				}
 				autoHarga(hargaList);
+
+				for(var c = 0; c < invData.kategori_obat.length; c++) {
+					if(selectedKategoriObat.indexOf(invData.kategori_obat[c].kategori) < 0) {
+						selectedKategoriObat.push(invData.kategori_obat[c].kategori);
+					}
+				}
+				load_kategori_obat(selectedKategoriObat);
+				$(".load-kategori-obat-badge").html("");
+				for(var b = 0; b < selectedKategoriObat.length; b++) {
+					$(".load-kategori-obat-badge").append("<div style=\"margin:5px;\" class=\"badge badge-info\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + $("#label_kategori_obat_" + selectedKategoriObat[b]).html() + "</div>");
+				}
+
+				
 				
 
 				ClassicEditor.create(document.querySelector("#txt_keterangan"), {
@@ -199,9 +214,7 @@
 		    };
 		}
 
-		var imageResultPopulator = [];
-		var selectedKategoriObat = [];
-
+		
 		function hiJackImage(toHi) {
 			imageResultPopulator.push(toHi);
 		}
@@ -285,7 +298,7 @@
 			return satuanData;
 		}
 
-		function load_kategori_obat() {
+		function load_kategori_obat(checkedData = []) {
 			var kategoriObatData;
 			$.ajax({
 				url:__HOSTAPI__ + "/Inventori/kategori_obat",
@@ -296,7 +309,7 @@
 				type:"GET",
 				success:function(response) {
 					kategoriObatData = response.response_package.response_data;
-					render_kategori_obat(kategoriObatData);
+					render_kategori_obat(kategoriObatData, checkedData);
 				},
 				error: function(response) {
 					console.log(response);
@@ -342,7 +355,7 @@
 					manufactureData = response.response_package.response_data;
 					$(target).find("option").remove();
 					for(var a = 0; a < manufactureData.length; a++) {
-						$(target).append("<option value=\"" + manufactureData[a].uid + "\">" + manufactureData[a].nama + "</option>");
+						$(target).append("<option " + ((manufactureData[a].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + manufactureData[a].uid + "\">" + manufactureData[a].nama + "</option>");
 					}
 					$(".label_manufacture").html($(target).find("option:selected").text().toUpperCase());
 				},
@@ -353,12 +366,12 @@
 			return manufactureData;
 		}
 
-		function render_kategori_obat(data, selected = []) {
+		function render_kategori_obat(data, checked = []) {
 			for(var key in data) {
 				var newList =
 				"<li style=\"margin-bottom: 10px;\">" +
 					"<div class=\"custom-control custom-checkbox-toggle custom-control-inline mr-1\">" +
-						"<input type=\"checkbox\" id=\"kategori_obat_" + data[key].uid + "\" class=\"custom-control-input kategori_obat_selection\">" +
+						"<input type=\"checkbox\" " + ((checked.indexOf(data[key].uid) > -1) ? "checked=\"checked\"" : "") + " id=\"kategori_obat_" + data[key].uid + "\" class=\"custom-control-input kategori_obat_selection\">" +
 						"<label class=\"custom-control-label\" for=\"kategori_obat_" + data[key].uid + "\">Yes</label>" +
 					"</div>" +
 					"<label id=\"label_kategori_obat_" + data[key].uid + "\" for=\"kategori_obat_" + data[key].uid + "\" class=\"mb-0\">" + data[key].nama + "</label>" +
@@ -501,7 +514,7 @@
 							prefix: "",
 							autoGroup: false,
 							digitsOptional: true
-						}).val(setData[penjaminData[a].uid].profit);
+						}).val((setData[penjaminData[a].uid] == undefined) ? 0 : setData[penjaminData[a].uid].profit);
 
 						$(newHargaRow).append(newCellPenjaminID);
 						$(newHargaRow).append(newCellPenjaminName);
@@ -703,11 +716,14 @@
 		});
 
 
-		$("#btn_save_data").click(function(){
+		$("body").on("click", ".saveData", function(){
 			var nama = $("#txt_nama").val();
 			var kode = $("#txt_kode").val();
 			if(nama != "" && kode != "") {
-				if(currentTab == "#tab-informasi" || currentTab == "#info-dasar-1") {
+				$(".action-panel").attr({
+					"disabled": "disabled"
+				});
+				if(currentTab == "#tab-informasi" || currentTab == "#info-dasar-1" || currentTab == undefined) {
 					basic.croppie('result', {
 						type: 'canvas',
 						size: 'viewport'
@@ -790,7 +806,8 @@
 								request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 							},
 							data:{
-								request:"tambah_item",
+								request:"edit_item",
+								uid:UID,
 								kode:kode,
 								nama:nama,
 								image:image,
@@ -806,11 +823,15 @@
 							},
 							type:"POST",
 							success:function(response) {
-								if(response.response_package > 0) {
+								if(response.response_package == 0) {
 									notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");
+								} else {
+									console.log(response);
 								}
+								$(".action-panel").removeAttr("disabled");
 							},
 							error: function(response) {
+								$(".action-panel").removeAttr("disabled");
 								console.clear();
 								console.log(response);
 							}
@@ -888,8 +909,6 @@
 						}
 					});
 
-					console.log(penjaminList);
-
 					$.ajax({
 						url:__HOSTAPI__ + "/Inventori",
 						async:false,
@@ -920,14 +939,17 @@
 							} else {
 								notification ("danger", "Data gagal diproses", 3000, "hasil_tambah");
 							}
+							$(".action-panel").removeAttr("disabled");
 						},
 						error: function(response) {
+							$(".action-panel").removeAttr("disabled");
 							console.clear();
 							console.log(response);
 						}
 					});
 				}
 			}
+			$(".action-panel").removeAttr("disabled");
 		});
 
 	});
