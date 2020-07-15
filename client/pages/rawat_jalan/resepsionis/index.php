@@ -1,11 +1,3 @@
-<style type="text/css">
-	.tabelScroll {
-		height: 500px;
-		overflow-x: scroll;
-		overflow: scroll;
-	}
-</style>
-
 <div class="container-fluid page__heading-container">
 	<div class="page__heading d-flex align-items-center">
 		<div class="flex">
@@ -17,28 +9,58 @@
 			</nav>
 			<h4 class="m-0">Antrian</h4>
 		</div>
-		<button class="btn btn-info btn-sm ml-3" id="btnTambahAntrian">
-			<i class="fa fa-plus"></i> Tambah
-		</button>
 	</div>
 </div>
 
 <div class="container-fluid page__container">
     <div class="row">
         <div class="col-lg">
-            <div class="card">
-            	<div class="card-body">
-            		<!-- <div class="col-md-12 row float-center">
-						<div class="col-md-2">
-							<label>Departemen <span class="red"></span></label>
+        	<div class="card">
+				<div class="card-header card-header-large bg-white align-items-center">
+					<div class="row">
+						<div class="col-lg-6">
+							<h4 class="card-header__title flex m-0">
+								Antrian Kunjungan
+							</h4>
 						</div>
-						<div class="col-md-4">
-							<select class="form-control" id="select_departemen">
-								<option value="">Semua</option>
-							</select>
+						<div class="col-lg-3">
+							<select id="txt_loket" class="form-control"></select>
 						</div>
-	                </div> -->
-	                <hr />
+						<div class="col-lg-3">
+							<button class="btn btn-success" id="btnGunakanLoket">
+								<i class="fa fa-check"></i> Gunakan
+							</button>
+							<button class="btn btn-danger" disabled="disabled" id="btnSelesaiGunakan">
+								<i class="fa fa-ban"></i> Selesai
+							</button>
+						</div>
+
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="row">
+						<div class="col-lg-2" style="border-right: solid 1px #cccc;">
+							<h1 class="text-center" id="txt_current_antrian">0</h1>
+						</div>
+						<div class="col-lg-10">
+							<button class="btn btn-info" id="btnPanggil">
+								<i class="fa fa-bullhorn"></i> PANGGIL
+							</button>
+							<button class="btn btn-warning" style="color: #fff;" id="btnNext">
+								<i class="fa fa-caret-square-right"></i> NEXT
+							</button>
+							<button class="btn btn-success" id="btnTambahAntrian">
+								<i class="fa fa-plus"></i> DAFTAR PASIEN
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+        	<div class="card">
+				<div class="card-header card-header-large bg-white d-flex align-items-center">
+					<h5 class="card-header__title flex m-0">Antrian Poli</h5>
+				</div>
+				<div class="card-body">
 					<div class="table-responsive border-bottom">
 						<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
 							<thead>
