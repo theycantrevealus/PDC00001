@@ -4,15 +4,13 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item" aria-current="page">Master Unit</li>
-					<li class="breadcrumb-item active" aria-current="page">Unit Ruangan</li>
+					<li class="breadcrumb-item">Master Radiologi</li>
+					<li class="breadcrumb-item active" aria-current="page">Layanan</li>
 				</ol>
 			</nav>
+			<h4>Jenis Layanan Radiologi</h4>
 		</div>
-		<!-- <a href="<?php echo __HOSTNAME__; ?>/master/unit/ruangan/tambah" class="btn btn-info btn-sm ml-3">
-			<i class="fa fa-plus"></i> Tambah Ruangan
-		</a> -->
-		<button class="btn btn-sm btn-info" id="tambah-ruangan">
+		<button class="btn btn-sm btn-info" id="btnTambah">
 			<i class="fa fa-plus"></i> Tambah
 		</button>
 	</div>
@@ -23,16 +21,12 @@
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<table class="table table-bordered" id="table-ruangan">
+				<table class="table table-bordered" id="table-jenis-layanan">
 					<thead>
 						<tr>
 							<th style="width: 20px;">No</th>
-							<th>Nama Ruangan</th>
-							<th>Kode Ruangan</th>
-							<th>Kelas</th>
-							<th>Kapasitas</th>
-							<th>Lantai</th>
-							<th>Aksi</th>
+							<th>Nama</th>
+							<th width="20%">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -43,5 +37,3 @@
 		</div>
 	</div>
 </div>
-
-
