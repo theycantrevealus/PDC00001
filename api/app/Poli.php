@@ -509,7 +509,8 @@ class Poli extends Utility {
 								'uid'=>$uid_poli,
 								'nama'=>$nama,
 								'created_at'=>parent::format_date(),
-								'updated_at'=>parent::format_date()
+								'updated_at'=>parent::format_date(),
+								'editable'=>TRUE
 								)
 						)->execute();
 
