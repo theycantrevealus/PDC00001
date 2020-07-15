@@ -7,12 +7,19 @@
 ?>
 <body class="layout-default">
 	<?php require 'head.php'; ?>
+	<?php
+		if(__PAGES__[0] == 'anjungan') {
+			require 'pages/anjungan/index.php';
+		} else if(__PAGES__[0] == 'display') {
+			require 'pages/display/index.php';
+		}
+	?>
 	<div class="mdk-header-layout js-mdk-header-layout">
 		<?php require 'header.php'; ?>
 		<div class="mdk-header-layout__content">
 
 			<div class="mdk-drawer-layout js-mdk-drawer-layout">
-				<div class="mdk-drawer-layout__content page">
+				<div class="mdk-drawer-layout__content page" id="app-settings">
 					<?php
 						if(empty(__PAGES__[0])) {
 							require 'pages/system/dashboard.php';
@@ -55,7 +62,11 @@
 				?>
 			</div>
 			<div class="content-shimmer">
-				<span>Loading...</span>
+				<span>
+					<img width="80" height="80" src="<?php echo __HOSTNAME__; ?>/template/assets/images/preloader4.gif" />
+					<br />
+					Loading...
+				</span>
 			</div>
 		</div>
 	</div>
@@ -69,7 +80,6 @@
 	}"></app-settings>
 	</div> -->
 	<?php require 'script.php'; ?>
-
 	<?php
 		if(empty(__PAGES__[0])) {
 			require 'script/system/dashboard.php';

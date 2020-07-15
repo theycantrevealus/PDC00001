@@ -1,6 +1,7 @@
 <script type="text/javascript">
 	$(function(){
 		var params;
+		var MODE = false;
 
 		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
@@ -144,6 +145,182 @@
 			$("#txt_cari").val("");
 			$("#table-list-pencarian tbody").html("<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>");
 			$("#modal-cari").modal("show");
+		});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		//INIT
+		$.ajax({
+			async: false,
+			url:__HOSTAPI__ + "/Anjungan/check_job",
+			type: "GET",
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+			},
+			success: function(response){
+				var dataCheck = response.response_package;
+				if(dataCheck.response_data.length > 0) {
+					//Belum terproses
+					$("#btnGunakanLoket").attr("disabled", "disabled");
+					$("#btnSelesaiGunakan").removeAttr("disabled");
+					
+					$("#txt_loket")
+						.append("<option value=\"" + dataCheck.response_data[0].loket.uid + "\">" + dataCheck.response_data[0].loket.nama_loket + "</option>")
+						.attr("disabled", "disabled");
+					$("#txt_loket").select2();
+					$("#txt_current_antrian").html(dataCheck.response_queue).attr({
+						"current_queue": dataCheck.response_queue_id
+					});
+				} else {
+					//Clear
+					load_loket("#txt_loket");
+					$("#txt_loket").select2();
+				}
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
+
+
+
+
+
+		function load_loket(target) {
+			var loketData;
+			$.ajax({
+				async: false,
+				url:__HOSTAPI__ + "/Anjungan/avail_loket",
+				type: "GET",
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				success: function(response){
+					loketData = response.response_package.response_data;
+					$(target).find("option").remove();
+					for(var a = 0; a < loketData.length; a++) {
+						$(target).append("<option value=\"" + loketData[a].uid + "\">" + loketData[a].nama_loket + "</option>")
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+			return loketData;
+		}
+
+		function reloadPanggilan(loket, currentQueue = "") {
+			if(currentQueue != "") {
+				dataForm = {
+					request:"next_antrian",
+					loket:loket,
+					currentQueue: currentQueue
+				}
+			} else {
+				dataForm = {
+					request:"next_antrian",
+					loket:loket
+				}
+			}
+			var currentQueue;
+			$.ajax({
+				async: false,
+				url:__HOSTAPI__ + "/Anjungan",
+				type: "POST",
+				data:dataForm,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				success: function(response){
+					currentQueue = response.response_package;
+					$("#txt_current_antrian").html(currentQueue.response_queue).attr({
+						"current_queue": currentQueue.response_queue_id
+					});
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+			return currentQueue;
+		}
+
+		$("#btnGunakanLoket").click(function() {
+			$.ajax({
+				async: false,
+				url:__HOSTAPI__ + "/Anjungan",
+				type: "POST",
+				data:{
+					request:"ambil_antrian",
+					loket:$("#txt_loket").val()
+				},
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				success: function(response){
+					if(response.response_package.response_result > 0) {
+						notification ("success", "Loket berhasil digunakan", 3000, "hasil_loket");
+						$("#btnGunakanLoket").attr("disabled", "disabled");
+						reloadPanggilan($("#txt_loket").val());
+						$("#txt_loket").attr("disabled", "disabled");
+						$("#btnSelesaiGunakan").removeAttr("disabled");	
+					} else {
+						notification ("info", "Loket sudah digunakan " + response.response_package.response_loket, 3000, "hasil_loket");
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+		});
+
+		$("#btnSelesaiGunakan").click(function() {
+			$.ajax({
+				async: false,
+				url:__HOSTAPI__ + "/Anjungan",
+				type: "POST",
+				data:{
+					request:"selesai_antrian"
+				},
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				success: function(response){
+					if(response.response_package.response_result > 0) {
+						load_loket("#txt_loket");
+						notification ("success", "Berhasil keluar dari loket", 3000, "hasil_loket");
+						$("#txt_current_antrian").html("0");
+						$("#btnGunakanLoket").removeAttr("disabled");
+						$("#txt_loket").removeAttr("disabled");
+						$("#btnSelesaiGunakan").attr("disabled", "disabled");
+					} else {
+						notification ("warning", "Anda telah keluar loket", 3000, "hasil_loket");
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+		});
+
+		$("#btnNext").click(function() {
+			reloadPanggilan($("#txt_loket").val(), $("#txt_current_antrian").attr("current_queue"));
 		});
 	});
 
