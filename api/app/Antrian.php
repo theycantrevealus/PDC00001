@@ -120,6 +120,11 @@ class Antrian extends Utility {
 							$table . '.deleted_at' => 'IS NULL'
 						)
 					)
+					->order(
+						array(
+							$table . '.waktu_masuk' => 'DESC'
+						)
+					)
 					->execute();
 
 		$autonum = 1;
@@ -143,7 +148,8 @@ class Antrian extends Utility {
 						'kunjungan',
 						'departemen',
 						'penjamin',
-						'penjamin'
+						'dokter',
+						'waktu_masuk'
 					)
 				)
 				->where(array(
