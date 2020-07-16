@@ -24,24 +24,86 @@
 						if(empty(__PAGES__[0])) {
 							require 'pages/system/dashboard.php';
 						} else {
-							if(is_dir('pages/' . implode('/', __PAGES__))) {
-								require 'pages/' . implode('/', __PAGES__) . '/index.php';
+							if(implode('/', __PAGES__) == 'system/logout') {
+								require 'pages/system/logout.php';
 							} else {
-								if(file_exists('pages/' . implode('/', __PAGES__) . '.php')) {
-									require 'pages/' . implode('/', __PAGES__) . '.php';
-								} else {
-									$isFile = 'pages';
+								/*echo '<pre>';
+								print_r($_SESSION['akses_halaman_link']);
+								echo '</pre>';*/
+								if(is_dir('pages/' . implode('/', __PAGES__))) {
+									$isInAccess = '';
+									$allowAccess = false;
 									foreach (__PAGES__ as $key => $value) {
-										if(file_exists($isFile . '/' . $value . '.php')) {
-											$lastExist = $isFile . '/' . $value . '.php';
+										if($key == 0) {
+											$isInAccess .= $value;
+										} else {
+											$isInAccess .= '/' . $value;
 										}
 
-										$isFile .= '/' .$value;
+										if (in_array($isInAccess, $_SESSION['akses_halaman_link'])) {
+											$allowAccess = true;
+											break;
+										} else {
+											if($allowAccess) {
+												$allowAccess = false;
+											}
+										}
 									}
-									if(isset($lastExist)) {
-										require $lastExist;
+
+									if($allowAccess) {
+										require 'pages/' . implode('/', __PAGES__) . '/index.php';
 									} else {
-										require 'pages/system/404.php';	
+										if(!$allowAccess) {
+											require 'pages/system/403.php';	
+										} else {
+											require 'pages/system/404.php';
+										}
+									}
+								} else {
+									if(file_exists('pages/' . implode('/', __PAGES__) . '.php')) {
+										require 'pages/' . implode('/', __PAGES__) . '.php';
+									} else {
+										$isFile = 'pages';
+										$isInAccess = '';
+										$allowAccess = false;
+
+										foreach (__PAGES__ as $key => $value) {
+											if(file_exists($isFile . '/' . $value . '.php')) {
+												$lastExist = $isFile . '/' . $value . '.php';
+											}
+
+											$isFile .= '/' . $value;
+										}
+
+										foreach (__PAGES__ as $key => $value) {
+											if($key == 0) {
+												$isInAccess .= $value;
+											} else {
+												$isInAccess .= '/' . $value;
+											}
+
+											//echo $isInAccess . '<br />';
+
+											if (in_array($isInAccess, $_SESSION['akses_halaman_link'])) {
+												$allowAccess = true;
+												break;
+											} else {
+												if($allowAccess) {
+													$allowAccess = false;
+												}
+											}
+										}
+
+										if(isset($lastExist) && $allowAccess) {
+											//echo $allowAccess;
+											require $lastExist;
+										} else {
+											if(!$allowAccess) {
+												require 'pages/system/403.php';	
+											} else {
+												require 'pages/system/404.php';
+											}
+										}
 									}
 								}
 							}
