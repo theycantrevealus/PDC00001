@@ -1,5 +1,7 @@
 <script type="text/javascript">
 	$(function(){
+		var currentPasien = localStorage.getItem("currentPasien");
+		var currentAntrianID = localStorage.getItem("currentAntrianID");
 
 		var uid_pasien = __PAGES__[3];
 		var dataPasien = loadPasien(uid_pasien);
@@ -15,40 +17,43 @@
 				loadDokter(poli);
 			}
 		});
-
+		console.log(currentAntrianID);
 		$("#btnSubmit").click(function(){
 			var dataObj = {};
+			if(currentAntrianID != undefined || currentAntrianID != null) {
+				$('.inputan').each(function(){
+					var key = $(this).attr("id");
+					var value = $(this).val();
 
-			$('.inputan').each(function(){
-				var key = $(this).attr("id");
-				var value = $(this).val();
+					dataObj[key] = value;
+				});
 
-				dataObj[key] = value;
-			});
+				dataObj.pasien = uid_pasien;
+				dataObj.currentAntrianID = currentAntrianID;
 
-			dataObj.pasien = uid_pasien;
-			
-			$.ajax({
-				async: false,
-				url: __HOSTAPI__ + "/Antrian",
-				data: {
-					request : "tambah-kunjungan",
-					dataObj : dataObj
-				},
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type: "POST",
-				success: function(response){
-					//console.log(response);
-					location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
-				},
-				error: function(response) {
-					console.log("Error : ");
-					console.log(response);
-				}
-			});
-
+				$.ajax({
+					async: false,
+					url: __HOSTAPI__ + "/Antrian",
+					data: {
+						request : "tambah-kunjungan",
+						dataObj : dataObj
+					},
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					type: "POST",
+					success: function(response){
+						if(response.response_package.response_result > 0) {
+							location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+						}
+						//console.log(response);
+					},
+					error: function(response) {
+						console.log("Error : ");
+						console.log(response);
+					}
+				});
+			}
 			return false;
 		});
 

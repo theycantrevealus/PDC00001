@@ -280,12 +280,15 @@ class Query {
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = self::$queryValues;
 			$query = self::$pdo->prepare(self::buildQuery());
+			$usedValues = array();
 			foreach (self::$queryValues as $key => $value) {
-				if(is_null($value)) {
-					array_splice(self::$queryValues, $key, 1);
+				if(!is_null($value)) {
+					array_push($usedValues, $value);
+					//array_splice(self::$queryValues, $key, 1);
 				}
 			}
-			$query->execute(self::$queryValues);
+			//$query->execute(self::$queryValues);
+			$query->execute($usedValues);
 			
 			if(self::$queryMode == 'select') {
 				$read = $query->fetchAll(\PDO::FETCH_ASSOC);
@@ -316,12 +319,12 @@ class Query {
 			$responseBuilder['response_result'] = $query->rowCount();
 			return $responseBuilder;
 		} catch (\PDOException $e) {
-			throw new QueryException($e->getMessage(), 1);
-			/*$responseBuilder = array();
+			//throw new QueryException($e->getMessage(), 1);
+			$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = self::$queryValues;
 			$responseBuilder['response_params'] = self::$queryParams;
-			return $responseBuilder;*/
+			return $responseBuilder;
 		}
 	}
 }

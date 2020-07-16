@@ -9,6 +9,7 @@ composer.json
 *.pem
 *.pub
 images/
+audio/
 client/template/
 client/plugins/
 

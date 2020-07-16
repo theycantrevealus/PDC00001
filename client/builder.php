@@ -7,6 +7,13 @@
 ?>
 <body class="layout-default">
 	<?php require 'head.php'; ?>
+	<?php
+		if(__PAGES__[0] == 'anjungan') {
+			require 'pages/anjungan/index.php';
+		} else if(__PAGES__[0] == 'display') {
+			require 'pages/display/index.php';
+		}
+	?>
 	<div class="mdk-header-layout js-mdk-header-layout">
 		<?php require 'header.php'; ?>
 		<div class="mdk-header-layout__content">
@@ -73,7 +80,6 @@
 	}"></app-settings>
 	</div> -->
 	<?php require 'script.php'; ?>
-
 	<?php
 		if(empty(__PAGES__[0])) {
 			require 'script/system/dashboard.php';
