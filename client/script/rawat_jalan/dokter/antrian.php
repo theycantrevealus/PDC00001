@@ -920,5 +920,40 @@
 
 			return false;
 		});
+
+		
+		loadRadiologiTindakan('tindakan-radiologi');
+		$("#tindakan-radiologi").select2({});
+
+		function loadRadiologiTindakan(selector){
+			var radiologiTindakan;
+
+			$.ajax({
+				url: __HOSTAPI__ + "/Radiologi/tindakan",
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					radiologiTindakan = response.response_package.response_data;
+
+					if (radiologiTindakan != ""){
+						for(i = 0; i < radiologiTindakan.length; i++){
+		                    var selection = document.createElement("OPTION");
+
+		                    $(selection).attr("value", radiologiTindakan[i].uid).html(radiologiTindakan[i].nama);
+		                    $("#" + selector).append(selection);
+		                }
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+
+			return radiologiTindakan;
+		}
 	});
+
 </script>
