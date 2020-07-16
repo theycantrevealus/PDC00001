@@ -8,7 +8,7 @@
 	var __HOSTAPI__ = <?php echo json_encode(__HOSTAPI__); ?>;
 	var __PAGES__ = <?php echo json_encode(__PAGES__); ?>;
 	var __HOST__ = <?php echo json_encode(__HOST__); ?>;
-
+	var __ME__ = <?php echo json_encode($_SESSION['uid']); ?>;
 </script>
 
 <?php

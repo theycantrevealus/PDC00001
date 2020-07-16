@@ -276,7 +276,41 @@ class Antrian extends Utility {
 						)
 					);
 
-				$antrian = self::tambah_antrian('antrian', $parameter, $uid); 
+				//Update antrian kunjungan
+				if($parameter['dataObj']['penjamin'] == '499ed11a-911d-4661-b3b2-783e17615eb7') {
+					$antrianKunjungan = self::$query->update('antrian_nomor', array(
+						'status' => 'K'
+					))
+					->where(array(
+						'antrian_nomor.id' => '= ?',
+						'AND',
+						'antrian_nomor.status' => '= ?'
+					), array(
+						$parameter['dataObj']['currentAntrianID'],
+						'D'
+					))
+					->execute();
+					return $antrianKunjungan;
+				} else {
+					$antrianKunjungan = self::$query->update('antrian_nomor', array(
+						'status' => 'P'
+					))
+					->where(array(
+						'antrian_nomor.id' => '= ?',
+						'AND',
+						'antrian_nomor.status' => '= ?'
+					), array(
+						$parameter['dataObj']['currentAntrianID'],
+						'D'
+					))
+					->execute();
+					if($antrianKunjungan['response_result'] > 0) {
+						$antrian = self::tambah_antrian('antrian', $parameter, $uid);
+						return $antrian;
+					} else {
+						return $antrianKunjungan;
+					}
+				}
 			}
 		
 		/*
@@ -285,7 +319,7 @@ class Antrian extends Utility {
 		return $antrian;
 		*/
 		
-		return $kunjungan;
+		//return $kunjungan;
 	}
 
 	private function tambah_antrian($table, $parameter, $uid_kunjungan){

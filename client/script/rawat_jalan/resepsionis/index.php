@@ -102,10 +102,10 @@
 							var html = "";
 							if (MetaData != ""){
 								$.each(MetaData, function(key, item){
-									var buttonAksi = "<td style='text-align:center;'><a href='"+ __HOSTNAME__ + "/rawat_jalan/resepsionis/tambah/"+ item.uid +"' class='btn btn-sm btn-info' data-toggle='tooltip' title='Tambah ke Antrian'><i class='fa fa-user-plus'></i></a></td>";
+									var buttonAksi = "<td style='text-align:center;'><button id=\"btn_daftar_pasient_" + item.uid + "\" class=\"btn btn-sm btn-info btnDaftarPasien\" data-toggle=\"tooltip\" title=\"Tambah ke Antrian\"><i class=\"fa fa-user-plus\"></i></button></td>";
 
 									if (item.berobat == true){
-										buttonAksi = "<td style='text-align:center;'><span class='badge badge-warning'>Sedang Berobat</span></td>";
+										buttonAksi = "<td style=\"text-align:center;\"><span class=\"badge badge-warning\">Sedang Berobat</span></td>";
 									}
 
 									html += "<tr disabled>" +
@@ -147,6 +147,14 @@
 			$("#modal-cari").modal("show");
 		});
 
+		$("body").on("click", ".btnDaftarPasien", function() {
+			var uid = $(this).attr("id").split("_");
+			uid = uid[uid.length - 1];
+			localStorage.setItem("currentPasien", uid);
+			localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
+			location.href = __HOSTNAME__ + "/rawat_jalan/resepsionis/tambah/" + uid;
+		});
+
 
 
 
@@ -180,7 +188,6 @@
 					//Belum terproses
 					$("#btnGunakanLoket").attr("disabled", "disabled");
 					$("#btnSelesaiGunakan").removeAttr("disabled");
-					
 					$("#txt_loket")
 						.append("<option value=\"" + dataCheck.response_data[0].loket.uid + "\">" + dataCheck.response_data[0].loket.nama_loket + "</option>")
 						.attr("disabled", "disabled");
@@ -189,8 +196,19 @@
 						"current_queue": dataCheck.response_queue_id
 					});
 				} else {
-					//Clear
-					load_loket("#txt_loket");
+					if(dataCheck.response_used != undefined && dataCheck.response_used != "") {
+						load_loket("#txt_loket", dataCheck.response_used);
+						$("#txt_loket").attr("disabled", "disabled");
+						$("#btnSelesaiGunakan").removeAttr("disabled", "disabled");
+						$("#btnGunakanLoket").attr("disabled", "disabled");
+						
+						//Otomatis Panggil
+						//reloadPanggilan($("#txt_loket").val());
+					} else {
+						load_loket("#txt_loket");
+						$("#btnNext").attr("disabled", "disabled");
+						$("#btnTambahAntrian").attr("disabled", "disabled");
+					}
 					$("#txt_loket").select2();
 				}
 			},
@@ -203,7 +221,7 @@
 
 
 
-		function load_loket(target) {
+		function load_loket(target, selected = "") {
 			var loketData;
 			$.ajax({
 				async: false,
@@ -280,8 +298,20 @@
 						reloadPanggilan($("#txt_loket").val());
 						$("#txt_loket").attr("disabled", "disabled");
 						$("#btnSelesaiGunakan").removeAttr("disabled");	
+						$("#btnNext").removeAttr("disabled", "disabled");
+						$("#btnTambahAntrian").removeAttr("disabled");
 					} else {
-						notification ("info", "Loket sudah digunakan " + response.response_package.response_loket, 3000, "hasil_loket");
+						if(response.response_package.response_loket_user == __ME__) {
+							notification ("success", "Loket berhasil digunakan", 3000, "hasil_loket");
+							$("#btnGunakanLoket").attr("disabled", "disabled");
+							reloadPanggilan($("#txt_loket").val());
+							$("#txt_loket").attr("disabled", "disabled");
+							$("#btnSelesaiGunakan").removeAttr("disabled");	
+							$("#btnNext").removeAttr("disabled", "disabled");
+							$("#btnTambahAntrian").removeAttr("disabled");
+						} else {
+							notification ("info", "Loket sudah digunakan " + response.response_package.response_loket, 3000, "hasil_loket");
+						}
 					}
 				},
 				error: function(response) {
@@ -309,6 +339,8 @@
 						$("#btnGunakanLoket").removeAttr("disabled");
 						$("#txt_loket").removeAttr("disabled");
 						$("#btnSelesaiGunakan").attr("disabled", "disabled");
+						$("#btnNext").attr("disabled", "disabled");
+						$("#btnTambahAntrian").attr("disabled", "disabled");
 					} else {
 						notification ("warning", "Anda telah keluar loket", 3000, "hasil_loket");
 					}

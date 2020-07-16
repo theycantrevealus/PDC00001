@@ -4,7 +4,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/antrian_resepsionis">Antrian</a></li>
+                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/resepsionis">Antrian</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Tambah Antrian</li>
                 </ol>
             </nav>
@@ -58,7 +58,7 @@
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label>Prioritas <span class="red">*</span></label>
-                        <select id="prioritas" class="form-control inputan">
+                        <select id="prioritas" class="form-control select2 inputan">
                             <option value="" disabled selected>Pilih Prioritas</option>
                         </select>
                     </div>
