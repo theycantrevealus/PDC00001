@@ -162,8 +162,8 @@ class Penjamin extends Utility {
 		->select('master_inv_harga', array(
 			'barang',
 			'penjamin',
-			'satuan',
-			'harga',
+			'profit',
+			'profit_type',
 			'created_at',
 			'updated_at'
 		))
@@ -172,7 +172,7 @@ class Penjamin extends Utility {
 			'AND',
 			'master_inv_harga.barang' => '= ?',
 			'AND',
-			'master_inv_harga.harga' => '> 0',
+			'master_inv_harga.profit' => '> 0',
 		), array(
 			$parameter
 		))

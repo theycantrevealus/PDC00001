@@ -107,7 +107,7 @@ class Pasien extends Utility {
 		return $data;
 	}
 
-	private function get_pasien_detail($table, $parameter){
+	public function get_pasien_detail($table, $parameter){
 		$data = self::$query
 					->select($table, array(
 						'uid',

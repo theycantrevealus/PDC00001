@@ -5,6 +5,7 @@ namespace PondokCoder;
 use PondokCoder\Query as Query;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\QueryException as QueryException;
+use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Utility as Utility;
 
 class Inventori extends Utility {
@@ -1043,6 +1044,10 @@ class Inventori extends Utility {
 			$data['response_data'][$key]['satuan_terkecil'] = self::get_satuan_detail($value['satuan_terkecil'])['response_data'][0];
 			$data['response_data'][$key]['kategori'] = self::get_kategori_detail($value['kategori'])['response_data'][0];
 			$data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
+
+			//Data Penjamin
+			$PenjaminObat = new Penjamin(self::$pdo);
+			$data['response_data'][$key]['penjamin'] = $PenjaminObat::get_penjamin_obat($value['uid'])['response_data'];
 			$autonum++;
 		}
 		return $data;

@@ -10,6 +10,8 @@
 		var tindakanMeta = [];
 		var usedTindakan = [];
 
+		var pasien_penjamin, pasien_penjamin_uid;
+
 		var UID = __PAGES__[3];		
 		$.ajax({
 			url:__HOSTAPI__ + "/Antrian/antrian-detail/" + UID,
@@ -20,6 +22,18 @@
 			type:"GET",
 			success:function(response) {
 				antrianData = response.response_package.response_data[0];
+				var pasien_nama = antrianData.pasien_info.nama;
+				var pasien_rm = antrianData.pasien_info.no_rm;
+				var pasien_jenkel = antrianData.pasien_info.jenkel_nama;
+				var pasien_tanggal_lahir = antrianData.pasien_info.tanggal_lahir;
+				var pasien_penjamin = antrianData.penjamin_data.nama;
+				pasien_penjamin_uid = antrianData.penjamin_data.uid;
+
+				$(".nama_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
+				$(".jk_pasien").html(pasien_jenkel);
+				$(".tanggal_lahir_pasien").html(pasien_tanggal_lahir);
+				$(".penjamin_pasien").html(pasien_penjamin);
+
 				$.ajax({
 					url:__HOSTAPI__ + "/Asesmen/antrian-detail/" + UID,
 					async:false,
@@ -506,10 +520,17 @@
 				success:function(response) {
 					$(target).find("option").remove();
 					productData = response.response_package.response_data;
-					console.log(productData);
 					for (var a = 0; a < productData.length; a++) {
+						var penjaminList = [];
+						var penjaminListData = productData[a].penjamin;
+						for(var penjaminKey in penjaminListData) {
+							if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
+								penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
+							}
+						}
+
 						if(selected.indexOf(productData[a].uid) < 0) {
-							$(target).append("<option satuan-caption=\"" + productData[a].satuan_terkecil.nama + "\" satuan-terkecil=\"" + productData[a].satuan_terkecil.uid + "\" " + ((productData[a].uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + productData[a].uid + "\">" + productData[a].nama.toUpperCase() + "</option>");
+							$(target).append("<option penjamin-list=\"" + penjaminList.join(",") + "\" satuan-caption=\"" + productData[a].satuan_terkecil.nama + "\" satuan-terkecil=\"" + productData[a].satuan_terkecil.uid + "\" " + ((productData[a].uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + productData[a].uid + "\">" + productData[a].nama.toUpperCase() + "</option>");
 						}
 					}
 				},
@@ -566,6 +587,18 @@
 			return kategoriObat;
 		}
 
+		function checkPenjaminAvail(currentPenjamin, penjaminList, targetRow) {
+			if(penjaminList.length > 0) {
+				if(penjaminList.indexOf(currentPenjamin) > 0) {
+					$("#resep_obat_" + targetRow).parent().find("div.penjamin-container").html("<b class=\"badge badge-success obat-penjamin-notifier\">Ditanggung Penjamin</b>");
+				} else {
+					$("#resep_obat_" + targetRow).parent().find("div.penjamin-container").html("<b class=\"badge badge-danger obat-penjamin-notifier\">Tidak Ditanggung Penjamin</b>");
+				}
+			} else {
+				$("#resep_obat_" + targetRow).parent().find("div.penjamin-container").html("<b class=\"badge badge-danger obat-penjamin-notifier\">Tidak Ditanggung Penjamin</b>");			
+			}
+		}
+
 		function autoResep() {
 			$("#table-resep tbody tr").removeClass("last-resep");
 			var newRowResep = document.createElement("TR");
@@ -587,7 +620,8 @@
 			
 			if(!addAnother) {
 				$(newCellResepObat).append(
-					"<div class=\"row\" style=\"padding-top: 20px;\">" +
+					"<div class=\"row\" style=\"padding-top: 5px;\">" +
+						"<div style=\"position: relative\" class=\"col-md-12 penjamin-container text-right\"></div>" +
 						"<div class=\"col-md-7 aturan-pakai-container\"><span>Aturan Pakai</span></div>" +
 						"<div class=\"col-md-5 kategori-obat-container\"><span>Kategori Obat</span><br /></div>" +
 					"</div>");
@@ -677,6 +711,10 @@
 				$(this).find("td:eq(1) select").attr({
 					"id": "resep_obat_" + id
 				});
+
+				var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
+				checkPenjaminAvail(pasien_penjamin_uid, penjaminAvailable, id);
+
 				$(this).find("td:eq(2) input:eq(0)").attr({
 					"id": "resep_signa_konsumsi_" + id
 				});
@@ -716,6 +754,9 @@
 		$("body").on("change", ".resep-obat", function() {
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
+
+			var penjaminAvailable = $(this).find("option:selected").attr("penjamin-list").split(",");
+			checkPenjaminAvail(pasien_penjamin_uid, penjaminAvailable, id);
 
 			var satuanCaption = $(this).find("option:selected").attr("satuan-caption");
 			$("#resep_satuan_" + id).html(satuanCaption);

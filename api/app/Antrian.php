@@ -160,7 +160,27 @@ class Antrian extends Utility {
 					array($params)
 				)
 				->execute();
+		//More Info
+		foreach ($data['response_data'] as $key => $value) {
+			$Pasien = new Pasien(self::$pdo);
+			$PasienData = $Pasien::get_pasien_detail('pasien', $value['pasien']);
 
+			$Terminologi = new Terminologi(self::$pdo);
+			$Penjamin = new Penjamin(self::$pdo);
+
+			//Format Tanggal Lahir
+			$PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
+			
+			//Terminologi Jenis Kelamin
+			$TerminologiJenkel = $Terminologi::get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
+			$PasienData['response_data'][0]['jenkel_nama'] = $TerminologiJenkel['response_data'][0]['nama'];
+
+			$data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
+
+
+			//Penjamin
+			$data['response_data'][$key]['penjamin_data'] = $Penjamin::get_penjamin_detail($value['penjamin'])['response_data'][0];
+		}
 		return $data;
 	}
 
