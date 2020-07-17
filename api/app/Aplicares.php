@@ -652,13 +652,14 @@ class Aplicares extends Utility {
 	private function duplicate_check($parameter) {
 		return self::$query
 		->select($parameter['table'], array(
-			'uid',
-			'nama'
+			'id',
+			'ruangan',
+			'kodekelas'
 		))
 		->where(array(
 			$parameter['table'] . '.deleted_at' => 'IS NULL',
 			'AND',
-			$parameter['table'] . '.uid' => '= ?'
+			$parameter['table'] . '.ruangan' => '= ?'
 		), array(
 			$parameter['check']
 		))
