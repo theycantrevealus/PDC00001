@@ -3,6 +3,7 @@
 		$query = $pdo->prepare('SELECT * FROM modul WHERE deleted_at IS NULL AND parent = ? AND show_on_menu = ? AND menu_group = ? ORDER BY show_order ASC');
 		$query->execute(array($parent, 'Y', $group));
 		$read = $query->fetchAll(\PDO::FETCH_ASSOC);
+		$availMenu = 0;
 		foreach ($read as $key => $value) {
 			//CHECK Child
 			$child = $pdo->prepare('SELECT * FROM modul WHERE deleted_at IS NULL AND parent = ? AND show_on_menu = ? AND menu_group = ?');
@@ -33,7 +34,7 @@
 					?>
 					<ul class="sidebar-submenu collapse" id="menu-<?php echo $value['id']; ?>">
 						<?php
-							reloadModul($pdo, $value['id'], $group, $access);
+							$availMenu += reloadModul($pdo, $value['id'], $group, $access);
 						?>
 					</ul>
 					<?php
@@ -41,8 +42,10 @@
 					?>
 				</li>
 				<?php
+				$availMenu++;
 			}
 		}
+		return $availMenu;
 	}
 ?>
 <div class="mdk-drawer  js-mdk-drawer" id="default-drawer" data-align="start">
@@ -95,25 +98,25 @@
 					</a>
 				</li>
 			</ul>
-			<div class="sidebar-heading sidebar-m-t">Menu</div>
+			<div class="sidebar-heading sidebar-m-t" id="sidemenu_1">Menu</div>
 			<ul class="sidebar-menu">
 				<?php
-					reloadModul($pdo, 0, 1, $_SESSION['akses_halaman']);
+					$sideMenu1 = reloadModul($pdo, 0, 1, $_SESSION['akses_halaman']);
 				?>
 			</ul>
-			<div class="sidebar-heading sidebar-m-t">Master Data</div>
+			<div class="sidebar-heading sidebar-m-t" id="sidemenu_2">Master Data</div>
 			<div class="sidebar-block p-0">
 				<ul class="sidebar-menu">
 					<?php
-						reloadModul($pdo, 0, 2, $_SESSION['akses_halaman']);
+						$sideMenu2 = reloadModul($pdo, 0, 2, $_SESSION['akses_halaman']);
 					?>	
 				</ul>
 			</div>
-			<div class="sidebar-heading sidebar-m-t">Setting</div>
+			<div class="sidebar-heading sidebar-m-t" id="sidemenu_3">Setting</div>
 			<div class="sidebar-block p-0">
 				<ul class="sidebar-menu">
 					<?php
-						reloadModul($pdo, 0, 3, $_SESSION['akses_halaman']);
+						$sideMenu3 = reloadModul($pdo, 0, 3, $_SESSION['akses_halaman']);
 					?>	
 				</ul>
 

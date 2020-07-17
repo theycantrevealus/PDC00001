@@ -251,6 +251,31 @@
 			}
 			return s.join(dec);
 		}
+
+
+		$(function() {
+			var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
+			var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
+			var sideMenu3 = <?php echo json_encode($sideMenu3); ?>;
+
+			if(sideMenu1 > 0) {
+				$("#sidemenu_1").show();
+			} else {
+				$("#sidemenu_1").hide();
+			}
+
+			if(sideMenu2 > 0) {
+				$("#sidemenu_2").show();
+			} else {
+				$("#sidemenu_2").hide();
+			}
+
+			if(sideMenu3 > 0) {
+				$("#sidemenu_3").show();
+			} else {
+				$("#sidemenu_3").hide();
+			}
+		});
 	</script>
 </body>
 
