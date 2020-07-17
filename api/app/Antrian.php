@@ -328,12 +328,13 @@ class Antrian extends Utility {
 							'D'
 						))
 						->execute();
+
 						if($antrianKunjungan['response_result'] > 0) {
 							unset($parameter['dataObj']['currentPasien']);
 							$antrian = self::tambah_antrian('antrian', $parameter, $uid);
 							return $antrian;
 						} else {
-							return $antrianKunjungan;
+							return $antrian;
 						}
 					} else {
 						$antrianKunjungan = self::$query->update('antrian_nomor', array(
@@ -396,15 +397,23 @@ class Antrian extends Utility {
 		if ($antrian['response_result'] > 0) {
 			$updateNomorAntrian = self::$query->update('antrian_nomor', array(
 				'antrian' => $uid
-			))
-			->where(array(
-				'antrian_nomor.id' => '= ?',
-				'AND',
-				'antrian_nomor.deleted_at' => 'IS NULL'
-			), array(
-				$AntrianID
-			))
-			->execute();
+				))
+				->where(array(
+						'antrian_nomor.pasien' => '= ?',
+						'AND',
+						'antrian_nomor.poli' => '= ?',
+						'AND',
+						'antrian_nomor.dokter' => '= ?',
+						'AND',
+						'antrian_nomor.penjamin' => '= ?'
+					),array(
+						$allData['pasien'],
+						$allData['departemen'],
+						$allData['dokter'],
+						$allData['penjamin']
+					)
+				)
+				->execute();
 
 			if($updateNomorAntrian['response_result'] > 0) {
 				$log = parent::log(array(

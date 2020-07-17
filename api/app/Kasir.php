@@ -262,6 +262,27 @@ class Kasir extends Utility {
 					->execute();
 
 			if ($antrian['response_result'] > 0) {
+				$antrian_nomor = self::$query
+					->update('antrian_nomor', array(
+						'antrian'=>$uid
+					))
+					->where(array(
+							'antrian_nomor.pasien' => '= ?',
+							'AND',
+							'antrian_nomor.poli' => '= ?',
+							'AND',
+							'antrian_nomor.dokter' => '= ?',
+							'AND',
+							'antrian_nomor.penjamin' => '= ?'
+						),array(
+							$parameter['pasien'],
+							$parameter['poli'],
+							$parameter['dokter'],
+							$parameter['penjamin']
+						)
+					)
+					->execute();
+
 				$log = parent::log(array(
 						'type'=>'activity',
 						'column'=>array(
@@ -288,7 +309,7 @@ class Kasir extends Utility {
 			}
 		}
 
-		$result = [$proses, $antrian];
+		$result = [$proses, $antrian, $antrian_nomor];
 
 		return $result;
 	}
