@@ -191,7 +191,7 @@ class Aplicares extends Utility {
 	}
 
 	private function get_ruangan_terdaftar_bpjs(){
-		$url = "/rest/bed/read/" . self::$kodePPK . "/1/10";
+		$url = "/rest/bed/read/" . self::$kodePPK . "/1/100";
 		$result = self::launchUrl($url);
 		$error_count = 1;
 		$error_message = array();

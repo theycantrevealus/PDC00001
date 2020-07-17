@@ -108,6 +108,15 @@
 		$("#btnTambahRuangan").click(function(){
 			var MODE = "tambah";
 			loadRuangan(MODE);
+			$("#ruangan").val("");
+			$("#ruangan").trigger('change');
+			$("#kodekelas").val("");
+			$("#kodekelas").trigger('change');
+			$("#kapasitas").val(0);
+			$("#tersedia").val(0);
+			$("#tersediapria").val(0);
+			$("#tersediawanita").val(0);
+			$("#tersediapriawanita").val(0);
 			$("#form-tambah").modal("show");
 		});
 
