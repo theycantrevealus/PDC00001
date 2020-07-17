@@ -117,7 +117,7 @@
 					?>	
 				</ul>
 
-				<div class="sidebar-p-a sidebar-b-y">
+				<!-- <div class="sidebar-p-a sidebar-b-y">
 					<div class="d-flex align-items-top mb-2">
 						<div class="sidebar-heading m-0 p-0 flex text-body js-text-body">Progress</div>
 						<div class="font-weight-bold text-success">60%</div>
@@ -125,7 +125,7 @@
 					<div class="progress">
 						<div class="progress-bar bg-success" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
 					</div>
-				</div>
+				</div> -->
 			</div>
 		</div>
 	</div>

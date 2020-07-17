@@ -17,7 +17,7 @@
 				loadDokter(poli);
 			}
 		});
-		console.log(currentAntrianID);
+		
 		$("#btnSubmit").click(function(){
 			var dataObj = {};
 			if(currentAntrianID != undefined || currentAntrianID != null) {
@@ -29,6 +29,7 @@
 				});
 
 				dataObj.pasien = uid_pasien;
+				dataObj.currentPasien = currentPasien;
 				dataObj.currentAntrianID = currentAntrianID;
 
 				$.ajax({
@@ -44,9 +45,10 @@
 					type: "POST",
 					success: function(response){
 						if(response.response_package.response_result > 0) {
+							localStorage.getItem("currentPasien");
+							localStorage.getItem("currentAntrianID");
 							location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
 						}
-						//console.log(response);
 					},
 					error: function(response) {
 						console.log("Error : ");
