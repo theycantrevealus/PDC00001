@@ -329,6 +329,7 @@ class Antrian extends Utility {
 						))
 						->execute();
 						if($antrianKunjungan['response_result'] > 0) {
+							unset($parameter['dataObj']['currentPasien']);
 							$antrian = self::tambah_antrian('antrian', $parameter, $uid);
 							return $antrian;
 						} else {
@@ -370,6 +371,8 @@ class Antrian extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+		$AntrianID = $parameter['dataObj']['currentAntrianID'];
+		unset($parameter['dataObj']['currentAntrianID']);
 		$uid = parent::gen_uuid();
 		$no_antrian = self::ambilNomorAntrianPoli($parameter['dataObj']['departemen']); 
 
@@ -391,32 +394,49 @@ class Antrian extends Utility {
 					->execute();
 
 		if ($antrian['response_result'] > 0) {
+			$updateNomorAntrian = self::$query->update('antrian_nomor', array(
+				'antrian' => $uid
+			))
+			->where(array(
+				'antrian_nomor.id' => '= ?',
+				'AND',
+				'antrian_nomor.deleted_at' => 'IS NULL'
+			), array(
+				$AntrianID
+			))
+			->execute();
+
+			if($updateNomorAntrian['response_result'] > 0) {
 				$log = parent::log(array(
-							'type'=>'activity',
-							'column'=>array(
-								'unique_target',
-								'user_uid',
-								'table_name',
-								'action',
-								'logged_at',
-								'status',
-								'login_id'
-							),
-							'value'=>array(
-								$uid,
-								$UserData['data']->uid,
-								$table,
-								'I',
-								parent::format_date(),
-								'N',
-								$UserData['data']->log_id
-							),
-							'class'=>__CLASS__
-						)
-					);
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$uid,
+						$UserData['data']->uid,
+						$table,
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+				return $antrian;
+
+			} else {
+				return $updateNomorAntrian;
+			}
+		} else {
+			return $antrian;
 		}
-		
-		return $antrian;
 	}
 
 	private function cekStatusAntrian($uid_pasien){

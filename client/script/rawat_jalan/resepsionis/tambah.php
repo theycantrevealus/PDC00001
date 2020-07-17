@@ -3,6 +3,9 @@
 		var currentPasien = localStorage.getItem("currentPasien");
 		var currentAntrianID = localStorage.getItem("currentAntrianID");
 
+		alert(currentPasien);
+		alert(currentAntrianID);
+
 		var uid_pasien = __PAGES__[3];
 		var dataPasien = loadPasien(uid_pasien);
 
@@ -44,11 +47,12 @@
 					},
 					type: "POST",
 					success: function(response){
-						if(response.response_package.response_result > 0) {
+						console.log(response);
+						/*if(response.response_package.response_result > 0) {
 							localStorage.getItem("currentPasien");
 							localStorage.getItem("currentAntrianID");
 							location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
-						}
+						}*/
 					},
 					error: function(response) {
 						console.log("Error : ");
