@@ -56,6 +56,9 @@ class Inventori extends Utility {
 				case 'kategori_obat_detail':
 					return self::get_kategori_obat_detail($parameter[2]);
 					break;
+				case 'kategori_per_obat':
+					return self::get_kategori_obat_item_parsed($parameter[2]);
+					break;
 				default:
 					return self::get_item();
 			}
@@ -636,6 +639,26 @@ class Inventori extends Utility {
 			$parameter
 		))
 		->execute();
+		return $data['response_data'];
+	}
+
+	private function get_kategori_obat_item_parsed($parameter) {
+		$data = self::$query->select('master_inv_obat_kategori_item', array(
+			'id',
+			'obat',
+			'kategori'
+		))
+		->where(array(
+			'master_inv_obat_kategori_item.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_obat_kategori_item.obat' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['kategori'] = self::get_kategori_obat_detail($value['kategori'])['response_data'][0];
+		}
 		return $data['response_data'];
 	}
 //===========================================================================================GUDANG

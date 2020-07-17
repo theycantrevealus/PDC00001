@@ -72,6 +72,32 @@ class Ruangan extends Utility {
 
 
 	/*====================== GET FUNCTION =====================*/
+	public function get_ruangan_detail_by_code($parameter) { //Untuk cek kode ruangan dari BPJS
+		$data = self::$query
+					->select('master_unit_ruangan', 
+						array(
+							'uid',
+							'nama',
+							'kode_ruangan',
+							'kelas',
+							'kapasitas',
+							'lantai',
+							'created_at',
+							'updated_at'
+						)
+					)
+					->where(array(
+							'master_unit_ruangan.deleted_at' => 'IS NULL',
+							'AND',
+							'master_unit_ruangan.kode_ruangan' => '= ?'
+						),
+						array($parameter)
+					)
+					->execute();
+
+		return $data['response_data'][0];
+	}
+
 	private function get_ruangan($table){
 		$data = self::$query
 					->select($table, 
@@ -113,7 +139,7 @@ class Ruangan extends Utility {
 		return $data;
 	}
 
-	private function get_ruangan_detail($table, $parameter){
+	public function get_ruangan_detail($table, $parameter){
 		$data = self::$query
 					->select($table, 
 						array(

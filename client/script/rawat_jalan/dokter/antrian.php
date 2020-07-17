@@ -543,6 +543,29 @@
 			}
 		}
 
+		function autoAturanPakai() {
+			//
+		}
+
+		function autoKategoriObat(obat) {
+			var kategoriObat;
+			$.ajax({
+				url:__HOSTAPI__ + "/Inventori/kategori_per_obat/" + obat,
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					kategoriObat = response.response_package;
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+			return kategoriObat;
+		}
+
 		function autoResep() {
 			$("#table-resep tbody tr").removeClass("last-resep");
 			var newRowResep = document.createElement("TR");
@@ -566,12 +589,20 @@
 				$(newCellResepObat).append(
 					"<div class=\"row\" style=\"padding-top: 20px;\">" +
 						"<div class=\"col-md-7 aturan-pakai-container\"><span>Aturan Pakai</span></div>" +
-						"<div class=\"col-md-5 kategori-obat-container\"><span>Kategori Obat</span></div>" +
+						"<div class=\"col-md-5 kategori-obat-container\"><span>Kategori Obat</span><br /></div>" +
 					"</div>");
 				var newAturanPakai = document.createElement("SELECT");
 				$(newCellResepObat).find("div.aturan-pakai-container").append(newAturanPakai);
 				$(newAturanPakai).addClass("form-control");
 				$(newAturanPakai).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
+
+				//============KATEGORI OBAT
+				var dataKategoriPerObat = autoKategoriObat($(newObat).val());
+				var kategoriObatDOM = "";
+				for(var kategoriObatKey in dataKategoriPerObat) {
+					kategoriObatDOM += "<span class=\"badge badge-info\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+				}
+				$(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
 
 				$(newObat).addClass("form-control resep-obat").select2();
 
@@ -689,12 +720,6 @@
 			var satuanCaption = $(this).find("option:selected").attr("satuan-caption");
 			$("#resep_satuan_" + id).html(satuanCaption);
 		});
-
-
-
-
-
-
 
 		function populateAllData() {
 			//PREPARE FOR SAVE DATA

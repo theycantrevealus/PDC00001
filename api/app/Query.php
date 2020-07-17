@@ -24,9 +24,9 @@ class Query {
 	}
 
 	function insert($table, $parameter = array()) {
-		/*$this->tables = array();
+		$this->tables = array();
 		self::$queryValues = array();
-		self::$queryParams = array();*/
+		self::$queryParams = array();
 		self::$queryMode = 'insert';
 		self::$queryString = 'INSERT INTO ';
 		array_push($this->tables, $table);

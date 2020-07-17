@@ -7,13 +7,33 @@
 
 		var tableRuangan = $("#table-ruangan").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/Aplicares/get-ruangan-terdaftar",
+				/*url: __HOSTAPI__ + "/Aplicares/get-ruangan-terdaftar",*/
+				url: __HOSTAPI__ + "/Aplicares/get-ruangan-terdaftar-bpjs",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+					//return response.response_package.response_data;;
+					var data = response.response_package;
+					var autonum = 1;
+					var returnData = [];
+					for(var key in data) {
+						returnData.push({
+							"nama": data[key].nama,
+							"uid_ruangan": data[key].uid_ruangan,
+							"autonum": autonum,
+							"kode_ruangan": data[key].koderuang,
+							"kodekelas": data[key].kodekelas,
+							"kapasitas": data[key].kapasitas,
+							"tersedia": data[key].tersedia,
+							"tersediapria": data[key].tersediapria,
+							"tersediawanita": data[key].tersediawanita,
+							"tersediapriawanita": data[key].tersediapriawanita,
+						});
+						autonum++;
+					}
+					return returnData;
 				}
 			},
 			autoWidth: false,
@@ -34,7 +54,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['ruangan'];
+						return row['nama'];
 					}
 				},
 				{
