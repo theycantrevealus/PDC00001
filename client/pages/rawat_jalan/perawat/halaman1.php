@@ -90,7 +90,7 @@
 							<div class="col-md-12 row">
 								 <div class="form-group col-md-6">
 									<label for="kesadaran">Kesadaran :</label>
-									<select class="form-control inputan" id="kesadaran" name="kesadaran">
+									<select class="form-control inputan select2" id="kesadaran" name="kesadaran">
 										<option value="">Pilih</option>
 										<option value="Compos Mentis">Compos Mentis</option>
 										<option value="Apatis">Apatis</option>
@@ -98,7 +98,7 @@
 			                    </div>
 			                    <div class="form-group col-md-6">
 									<label for="sikap_tubuh">Sikap Tubuh :</label>
-									<select class="form-control inputan" id="sikap_tubuh" name="sikap_tubuh">
+									<select class="form-control inputan select2" id="sikap_tubuh" name="sikap_tubuh">
 										<option value="">Pilih</option>
 										<option value="Normal">Normal</option>
 										<option value="Lordosis">Lordosis</option>
@@ -647,6 +647,7 @@
                     </div>
                     <div class="col-6 col-md-6 mb-3">
                 		<div class="form-group col-md-12">
+
                 			<label for="">HPHT: </label>
 							<input type="text" id="hpht" name="hpht" class="form-control form-control-appended inputan">
                 		</div>
@@ -725,7 +726,7 @@
 						<div class="col-6 col-md-6 mb-3">
 							<label for="program_kb">Keikutsertaan Program KB:</label>
 							<div class="col-md-6">
-								<select class="form-control inputan" id="program_kb">
+								<select class="form-control inputan select2" id="program_kb">
 									<option value="">Pilih</option>
 									<option value="0">Tidak</option>
 									<option value="1">Ya</option>
@@ -934,14 +935,14 @@
 			<div class="card-body">
 				<div class="row">
 					<div class="form-group col-md-2">
-						<select class="form-control inputan" id="ginekologi_status">
+						<select class="form-control inputan select2" id="ginekologi_status">
 							<option value="">Pilih</option>
 							<option value="0">Tidak</option>
 							<option value="1">Ya</option>
 						</select>
 					</div>
 					<div class="form-group col-md-4">
-						<select class="form-control inputan" id="ginekologi">
+						<select class="form-control inputan select2" id="ginekologi">
 							<option value="">Pilih</option>
 							<option value="Infertilitas">Infertilitas</option>
 							<option value="1nfeksi Virus">Infeksi Virus</option>
@@ -985,7 +986,7 @@
 					</div>
 					<div class="form-group col-md-3">
 						<label>Jenis Partus: </label>
-						<select class="form-control inputan" id="jenis_partus" name="jenis_partus">
+						<select class="form-control inputan select2" id="jenis_partus" name="jenis_partus">
 							<option value="">Pilih</option>
 							<option value="Normal">Normal</option>
 							<option value="Cesar">Cesar</option>
@@ -1001,7 +1002,12 @@
 					</div>
 					<div class="form-group col-md-3">
 						<label>Jenis Kelamin Anak: </label>
-						<input type="text" name="jenkel_anak" id="jenkel_anak" class="form-control inputan">
+						<select name="jenkel_anak" id="jenkel_anak" class="form-control inputan select2">
+							<option value="">Pilih</option>
+							<option value="Laki-laki">Laki-laki</option>
+							<option value="Perempuan">Perempuan</option>
+						</select>
+						<!-- <input type="text" name="jenkel_anak" id="jenkel_anak" class="form-control inputan"> -->
 					</div>
 					<div class="form-group col-md-3">
 						<label>Berat Badan Anak: </label>
@@ -1031,7 +1037,7 @@
 				<div class="row">
 					<div class="form-group col-md-3">
 						<label>Nyeri: </label>
-						<select class="form-control inputan" id="nyeri" name="nyeri">
+						<select class="form-control inputan select2" id="nyeri" name="nyeri">
 							<option value="">Pilih</option>
 							<option value="0">Tidak</option>
 							<option value="1">Ya</option>
@@ -1043,7 +1049,7 @@
 					</div>
 					<div class="form-group col-md-3">
 						<label>Frekuensi: </label>
-						<select class="form-control inputan" name="nyeri_frekuensi" id="nyeri_frekuensi">
+						<select class="form-control inputan select2" name="nyeri_frekuensi" id="nyeri_frekuensi">
 							<option value="">Pilih</option>
 							<option value="Sering">Sering</option>
 							<option value="Kadang">Kadang</option>
@@ -1113,7 +1119,7 @@
 					</div>
 					<div class="form-group col-md-3">
 						<label>Tipe: </label>
-						<select class="form-control inputan" name="nyeri_tipe" id="nyeri_tipe">
+						<select class="form-control inputan select2" name="nyeri_tipe" id="nyeri_tipe">
 							<option value="">Pilih</option>
 							<option value="Ringan">Ringan</option>
 							<option value="Sedang">Sedang</option>
@@ -1127,7 +1133,7 @@
 	</div>
 </div>
 
-<script type="text/javascript">
+<!-- <script type="text/javascript">
 	/*var sliderNyeri = new rSlider({
         target: '#skala_nyeri',
         values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -1138,4 +1144,4 @@
             console.log(vals);
         }
     });*/
-</script>
+</script> -->

@@ -102,6 +102,11 @@
 							var html = "";
 							if (MetaData != ""){
 								$.each(MetaData, function(key, item){
+									var nik = item.nik;
+									if (nik == null){
+										nik = '-';
+									}
+
 									var buttonAksi = "<td style='text-align:center;'><button id=\"btn_daftar_pasient_" + item.uid + "\" class=\"btn btn-sm btn-info btnDaftarPasien\" data-toggle=\"tooltip\" title=\"Tambah ke Antrian\"><i class=\"fa fa-user-plus\"></i></button></td>";
 
 									if (item.berobat == true){
@@ -112,7 +117,7 @@
 												"<td>"+ item.autonum  +"</td>" +
 												"<td>"+ item.no_rm +"</td>" +
 												"<td>"+ item.nama +"</td>" +
-												"<td>"+ item.nik +"</td>" +
+												"<td>"+ nik +"</td>" +
 												"<td>"+ item.jenkel +"</td>" +
 												buttonAksi +
 											"</tr>";
@@ -398,8 +403,8 @@
 								<tr>
 									<th width="2%">No</th>
 									<th>No. RM</th>
-									<th>NIK</th>
 									<th>Nama</th>
+									<th>NIK</th>
 									<th>Jenis Kelamin</th>
 									<th>Aksi</th>
 								</tr>

@@ -10,6 +10,8 @@
 			loadPasien(dataAssesmen.antrian);	
 		}
 
+		$(".select2").select2({});
+
 		$("#btnSelesai").on('click', function(){
 
 			$(".inputan").each(function(){
@@ -80,6 +82,12 @@
 	                 $.each(dataAntrian, function(key, item){
 	                	$("#" + key).val(item);
 	                });
+
+	                if (dataPasien.id_jenkel == 2){
+						$(".wanita").attr("hidden",true);
+					} else {
+						$(".pria").attr("hidden",true);
+					}
 	            },
 	            error: function(response) {
 	                console.log(response);

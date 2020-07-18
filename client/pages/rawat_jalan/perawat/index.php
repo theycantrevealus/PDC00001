@@ -1,9 +1,3 @@
-<style type="text/css">
-	.highlight {
-	    background-color: #bfe13e !important;
-	}
-</style>
-
 <div class="container-fluid page__heading-container">
 	<div class="page__heading d-flex align-items-center">
 		<div class="flex">

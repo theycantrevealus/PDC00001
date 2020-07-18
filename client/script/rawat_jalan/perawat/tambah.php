@@ -5,6 +5,8 @@
 
 		loadPasien(uid_antrian);
 
+		$(".select2").select2({});
+
 		$("#btnSelesai").on('click', function(){
 
 			$(".inputan").each(function(){
@@ -67,6 +69,8 @@
 	                dataPasien = response.response_package.pasien;
 	                dataAntrian = response.response_package.antrian;
 
+	                console.log(dataPasien);
+
 	                $.each(dataPasien, function(key, item){
 	                	$("#" + key).html(item)
 	                });
@@ -74,6 +78,12 @@
 	                 $.each(dataAntrian, function(key, item){
 	                	$("#" + key).val(item);
 	                });
+
+					if (dataPasien.id_jenkel == 2){
+						$(".wanita").attr("hidden",true);
+					} else {
+						$(".pria").attr("hidden",true);
+					}
 	            },
 	            error: function(response) {
 	                console.log(response);

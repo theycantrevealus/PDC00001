@@ -98,7 +98,7 @@
 				<div class="row">
 					<div class="col-md-6 form-group">
 						<label>Psikososial:</label>
-						<select class="form-control inputan" id="psikososial" name="psikososial">
+						<select class="form-control inputan select2" id="psikososial" name="psikososial">
 							<option value="">Pilih</option>
 							<option value="Tenang">Tenang</option>
 							<option value="Takut">Takut</option>
@@ -113,15 +113,15 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label>Hubungan pasien keluarga:</label>
-						<select class="form-control inputan" id="psikososial_hub_keluarga" name="psikososial_hub_keluarga">
+						<select class="form-control inputan select2" id="psikososial_hub_keluarga" name="psikososial_hub_keluarga">
 							<option value="">Pilih</option>
 							<option value="Baik">Baik</option>
-							<option value="Ada">Ada</option>
+							<option value="Tidak Baik">Tidak Baik</option>
 						</select>
 					</div>
 					<div class="col-md-6 form-group">
 						<label>Aktifitas Sosial:</label>
-						<select class="form-control inputan" id="psikososial_aktifitas_sosial" name="psikososial_aktifitas_sosial">
+						<select class="form-control inputan select2" id="psikososial_aktifitas_sosial" name="psikososial_aktifitas_sosial">
 							<option value="">Pilih</option>
 							<option value="0">Tidak Ada</option>
 							<option value="1">Ada</option>
@@ -129,7 +129,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label><i>Care Giver </i> (Pelaku Rawat)</label>
-						<select class="form-control inputan" id="psikososial_pelaku_rawat" name="psikososial_pelaku_rawat">
+						<select class="form-control inputan select2" id="psikososial_pelaku_rawat" name="psikososial_pelaku_rawat">
 							<option value="">Pilih</option>
 							<option value="Sendiri">Sendiri</option>
 							<option value="Keluarga">Keluarga</option>
@@ -151,7 +151,7 @@
 				<div class="row">
 					<div class="col-md-6 form-group">
 						<label for="">BAB:</label>						
-						<select id="eliminasi_bab" nama="eliminasi_bab" class="form-control inputan">
+						<select id="eliminasi_bab" nama="eliminasi_bab" class="form-control inputan select2">
 							<option value="">Pilih</option>
 							<option value="Normal">Normal</option>
 							<option value="Gangguang Bicara">Diare</option>
@@ -172,7 +172,7 @@
 					<br />
 					<div class="col-md-6 form-group">
 						<label for="">BAK:</label>						
-						<select id="eliminasi_bak" name="eliminasi_bak" class="form-control inputan">
+						<select id="eliminasi_bak" name="eliminasi_bak" class="form-control inputan select2">
 							<option value="">Pilih</option>
 							<option value="Normal">Normal</option>
 							<option value="Inkontineisia">Inkontinensia</option>
@@ -203,7 +203,7 @@
 				<div class="row">
 					<div class="col-md-12 form-group">
 						<label>1. Penurunan selera makan</label>
-						<select class="form-control inputan" id="skrining_selera_makan">
+						<select class="form-control inputan select2" id="skrining_selera_makan">
 							<option value="">Pilih</option>
 							<option value="0">Tidak Ada</option>
 							<option value="1">Ya / Ada penurunan</option>
@@ -211,7 +211,7 @@
 					</div>
 					<div class="col-md-12 form-group">
 						<label>2. Mengalami penurunan berat badan yang tidak diinginkan dalam 3 bulan terakhir</label>
-						<select class="form-control inputan" id="skrining_turun_berat">
+						<select class="form-control inputan select2" id="skrining_turun_berat">
 							<option value="">Pilih</option>
 							<option value="0">Tidak Ada</option>
 							<option value="1">Ya / Ada penurunan</option>
@@ -219,7 +219,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label>Penurunan berat badan</label>
-						<select class="form-control inputan" id="skrining_nilai_turun_berat">
+						<select class="form-control inputan select2" id="skrining_nilai_turun_berat">
 							<option value="">Pilih</option>
 							<option value="1">1 - 5 kg</option>
 							<option value="2">6 - 10 kg</option>
@@ -240,7 +240,7 @@
 				<div class="row">
 					<div class="col-md-6 form-group">
 						<label for="">Bicara:</label>						
-						<select id="komunikasi_bicara" class="form-control inputan">
+						<select id="komunikasi_bicara" class="form-control inputan select2">
 							<option value="">Pilih</option>
 							<option value="Normal">Normal</option>
 							<option value="Gangguang Bicara">Gangguan Bicara</option>
@@ -253,7 +253,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Hambatan Belajar:</label>
-						<select id="komunikasi_hambatan" name="komunikasi_hambatan" class="form-control inputan">
+						<select id="komunikasi_hambatan" name="komunikasi_hambatan" class="form-control inputan select2">
 							<option value="">Pilih</option>
 							<option value="Tidak Ada">Tidak Ada</option>
 							<option value="Pendengaran">Pendengaran</option>
@@ -270,7 +270,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Potensi Kebutuhan Belajar:</label>
-						<select id="komunikasi_kebutuhan_belajar" name="komunikasi_kebutuhan_belajar" class="form-control inputan">
+						<select id="komunikasi_kebutuhan_belajar" name="komunikasi_kebutuhan_belajar" class="form-control inputan select2">
 							<option value="">Pilih</option>
 							<option value="Proses Penyakit">Proses Penyakit</option>
 							<option value="Pengobatan">Pengobatan</option>
@@ -592,7 +592,7 @@
 				<div class="row">
 					<div class="col-md-4 form-group">
 						<label for="">Rencana Tindak Lanjut</label>	
-						<select class="form-control inputan" id="tindak_lanjut" name="tindak_lanjut">
+						<select class="form-control inputan select2" id="tindak_lanjut" name="tindak_lanjut">
 							<option value="">Pilih</option>
 							<option value="Rawat Inap">Rawat Inap</option>
 							<option value="Rujuk">Rujuk</option>
