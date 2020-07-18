@@ -514,7 +514,7 @@
 			return productData;
 		}
 
-		function load_product_resep(target, selectedData = "") {
+		function load_product_resep(target, selectedData = "", appendData = true) {
 			var selected = [];
 			/*$("#table-resep tbody tr").each(function(){
 				var getProductSelected = $(this).find("td:eq(1) select.resep-obat").val();
@@ -533,6 +533,7 @@
 				type:"GET",
 				success:function(response) {
 					$(target).find("option").remove();
+					$(target).append("<option value=\"none\">Pilih Obat</option>");
 					productData = response.response_package.response_data;
 					for (var a = 0; a < productData.length; a++) {
 						var penjaminList = [];
@@ -543,7 +544,7 @@
 							}
 						}
 
-						if(selected.indexOf(productData[a].uid) < 0) {
+						if(selected.indexOf(productData[a].uid) < 0 && appendData) {
 							$(target).append("<option penjamin-list=\"" + penjaminList.join(",") + "\" satuan-caption=\"" + productData[a].satuan_terkecil.nama + "\" satuan-terkecil=\"" + productData[a].satuan_terkecil.uid + "\" " + ((productData[a].uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + productData[a].uid + "\">" + productData[a].nama.toUpperCase() + "</option>");
 						}
 					}
@@ -552,7 +553,11 @@
 					console.log(response);
 				}
 			});
-			return (productData.length == selected.length);
+			//return (productData.length == selected.length);
+			return {
+				allow: (productData.length == selected.length),
+				data: productData
+			};
 		}
 
 		checkGenerateResep();
@@ -630,9 +635,9 @@
 			var newObat = document.createElement("SELECT");
 			$(newCellResepObat).append(newObat);
 
-			var addAnother = load_product_resep(newObat, "");
+			var addAnother = load_product_resep(newObat, "", false);
 			
-			if(!addAnother) {
+			if(!addAnother.allow) {
 				$(newCellResepObat).append(
 					"<div class=\"row\" style=\"padding-top: 5px;\">" +
 						"<div style=\"position: relative\" class=\"col-md-12 penjamin-container text-right\"></div>" +
@@ -645,14 +650,64 @@
 				$(newAturanPakai).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
 
 				//============KATEGORI OBAT
-				var dataKategoriPerObat = autoKategoriObat($(newObat).val());
-				var kategoriObatDOM = "";
-				for(var kategoriObatKey in dataKategoriPerObat) {
-					kategoriObatDOM += "<span class=\"badge badge-info\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+				if($(newObat).val() != "none") {
+					var dataKategoriPerObat = autoKategoriObat($(newObat).val());
+					var kategoriObatDOM = "";
+					for(var kategoriObatKey in dataKategoriPerObat) {
+						kategoriObatDOM += "<span class=\"badge badge-info\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+					}
+					$(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
+				} else {
+					//
 				}
-				$(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
 
-				$(newObat).addClass("form-control resep-obat").select2();
+				var itemData = addAnother.data;
+				var parsedItemData = [];
+				for(var dataKey in itemData) {
+					var penjaminList = [];
+					var penjaminListData = itemData[dataKey].penjamin;
+					for(var penjaminKey in penjaminListData) {
+						if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
+							penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
+						}
+					}
+					
+					parsedItemData.push({
+						id: itemData[dataKey].uid,
+						"penjamin-list": penjaminList,
+						"satuan-caption": itemData[dataKey].satuan_terkecil.nama,
+						"satuan-terkecil": itemData[dataKey].satuan_terkecil.uid,
+						text: "<div style=\"color:#000;\">" + itemData[dataKey].nama.toUpperCase() + "</div>",
+						html: 	"<div class=\"select2_item_stock\">" +
+									"<div style=\"color:#000\">" + itemData[dataKey].nama.toUpperCase() + "</div>" +
+									"<div>10</div>" +
+								"</div>",
+						title: itemData[dataKey].nama
+					});
+				}
+
+				$(newObat).addClass("form-control resep-obat").select2({
+					data: parsedItemData,
+					placeholder: "Pilih Obat",
+					selectOnClose: true,
+					escapeMarkup: function(markup) {
+						return markup;
+					},
+					templateResult: function(data) {
+						return data.html;
+					},
+					templateSelection: function(data) {
+						return data.text;
+					}
+				}).on("select2:select", function(e) {
+					var data = e.params.data;
+					$(this).children("[value=\""+ data['id'] + "\"]").attr({
+						"data-value": data["data-value"],
+						"penjamin-list": data["penjamin-list"],
+						"satuan-caption": data["satuan-caption"],
+						"satuan-terkecil": data["satuan-terkecil"]
+					});
+				});
 
 				$(newCellResepSatuan).html($(newObat).find("option:selected").attr("satuan-caption"));
 
@@ -670,7 +725,7 @@
 				var newKonsumsi = document.createElement("INPUT");
 				$(newCellResepSigna1).append(newKonsumsi);
 				$(newKonsumsi).addClass("form-control resep_konsumsi").attr({
-					"placeholder": "3"
+					"placeholder": "0"
 				}).inputmask({
 					alias: 'decimal',
 					rightAlign: true,
@@ -685,7 +740,7 @@
 				var newTakar = document.createElement("INPUT");
 				$(newCellResepSigna3).append(newTakar);
 				$(newTakar).addClass("form-control resep_takar").attr({
-					"placeholder": "1"
+					"placeholder": "0"
 				}).inputmask({
 					alias: 'decimal',
 					rightAlign: true,
@@ -727,9 +782,10 @@
 				});
 
 				//load_product_resep($(this).find("td:eq(1) select.resep-obat"), "");
-
-				var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
-				checkPenjaminAvail(pasien_penjamin_uid, penjaminAvailable, id);
+				if($(this).find("td:eq(1) select.resep-obat").val() != "none") {
+					var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
+					checkPenjaminAvail(pasien_penjamin_uid, penjaminAvailable, id);
+				}
 
 				$(this).find("td:eq(2) input:eq(0)").attr({
 					"id": "resep_signa_konsumsi_" + id
@@ -1064,16 +1120,38 @@
 			id = id[id.length - 1];
 			checkGenerateResep(id);
 		});
+		
+		$("body").on("select2:select", ".resep-obat", function(e) {
+			var data = e.params.data;
+			$(this).children("[value=\""+ data['id'] + "\"]").attr({
+				"data-value": data["data-value"],
+				"penjamin-list": data["penjamin-list"],
+				"satuan-caption": data["satuan-caption"],
+				"satuan-terkecil": data["satuan-terkecil"]
+			});
 
-		$("body").on("change", ".resep-obat", function() {
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
 
-			var penjaminAvailable = $(this).find("option:selected").attr("penjamin-list").split(",");
-			checkPenjaminAvail(pasien_penjamin_uid, penjaminAvailable, id);
+			if($(this).val() != "none") {
+				var dataKategoriPerObat = autoKategoriObat($(this).val());
+				var kategoriObatDOM = "";
+				for(var kategoriObatKey in dataKategoriPerObat) {
+					kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+				}
+				$("#resep_row_" + id).find("td:eq(1) div.kategori-obat-container").html("<span>Kategori Obat</span><br />" + kategoriObatDOM);
 
-			var satuanCaption = $(this).find("option:selected").attr("satuan-caption");
-			$("#resep_satuan_" + id).html(satuanCaption);
+				var penjaminAvailable = $(this).find("option:selected").attr("penjamin-list").split(",");
+				checkPenjaminAvail(pasien_penjamin_uid, penjaminAvailable, id);
+
+				var satuanCaption = $(this).find("option:selected").attr("satuan-caption");
+				$("#resep_satuan_" + id).html(satuanCaption);
+				rebaseResep();
+			} else {
+				$("#resep_obat_" + id).parent().find("div.penjamin-container").html("");
+				$("#resep_satuan_" + id).html("");
+				$("#resep_row_" + id).find("td:eq(1) div.kategori-obat-container").html("<span>Kategori Obat</span><br />");
+			}
 		});
 
 		$("body").on("click", ".resep_delete", function() {
