@@ -26,11 +26,12 @@ class Aplicares extends Utility {
 		self::$query = new Query(self::$pdo);
 
 		self::$kodePPK = "0069R035";
-		self::$data_api = base64_decode("MTUxNzQ=");
+		/*self::$data_api = base64_decode("MTUxNzQ=");*/
 		self::$data_api = 32435;
 		/*self::$secretKey_api = base64_decode("NWJDRjJCNEY4Mw==");*/
 		self::$secretKey_api = '2pAB5273E9';
-		self::$base_url = "https://dvlp.bpjs-kesehatan.go.id:8888/aplicaresws";
+		/*self::$base_url = "https://dvlp.bpjs-kesehatan.go.id:8888/aplicaresws";*/
+		self::$base_url = "http://api.bpjs-kesehatan.go.id/aplicaresws";
 	}
 
 	public function __GET__($parameter = array()) {
