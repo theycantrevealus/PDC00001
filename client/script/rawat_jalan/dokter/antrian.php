@@ -3,7 +3,7 @@
 		var poliList = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
 		
 		//Init
-		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorPlanning;
+		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorKeteranganResepRacikan, editorPlanning;
 		
 		var antrianData, asesmen_detail;
 
@@ -180,6 +180,20 @@
 							.catch( err => {
 								//console.error( err.stack );
 							} );
+
+						ClassicEditor
+							.create( document.querySelector( '#txt_keterangan_resep_racikan' ), {
+								extraPlugins: [ MyCustomUploadAdapterPlugin ],
+								placeholder: "Keterangan resep..."
+							} )
+							.then( editor => {
+								editorKeteranganResepRacikan = editor;
+								window.editor = editor;
+							} )
+							.catch( err => {
+								//console.error( err.stack );
+							} );
+
 						ClassicEditor
 							.create( document.querySelector( '#txt_planning' ), {
 								extraPlugins: [ MyCustomUploadAdapterPlugin ],
@@ -502,12 +516,12 @@
 
 		function load_product_resep(target, selectedData = "") {
 			var selected = [];
-			$("#table-resep tbody tr").each(function(){
-				var getProductSelected = $(this).find("td:eq(1) select").val();
+			/*$("#table-resep tbody tr").each(function(){
+				var getProductSelected = $(this).find("td:eq(1) select.resep-obat").val();
 				if(selected.indexOf(getProductSelected) < 0) {
 					selected.push(getProductSelected);
 				}
-			});
+			});*/
 
 			var productData;
 			$.ajax({
@@ -708,9 +722,11 @@
 					"id": "resep_row_" + id
 				});
 				$(this).find("td:eq(0)").html(id);
-				$(this).find("td:eq(1) select").attr({
+				$(this).find("td:eq(1) select.resep-obat").attr({
 					"id": "resep_obat_" + id
 				});
+
+				//load_product_resep($(this).find("td:eq(1) select.resep-obat"), "");
 
 				var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
 				checkPenjaminAvail(pasien_penjamin_uid, penjaminAvailable, id);
@@ -727,12 +743,310 @@
 				$(this).find("td:eq(6)").attr({
 					"id": "resep_satuan_" + id
 				});
-				$(this).find("td:eq(7) buttton").attr({
+				$(this).find("td:eq(7) button").attr({
 					"id": "resep_delete_" + id
 				});
 			});
 		}
 
+
+
+
+
+
+
+
+		checkGenerateRacikan();
+		function checkGenerateRacikan(id = 0) {
+			if($(".last-racikan").length == 0) {
+				autoRacikan();
+			} else {
+				var obat = $("#racikan_nama_" + id).val();
+				var jlh_obat = $("#racikan_jumlah_" + id).inputmask("unmaskedvalue");
+				var signa_konsumsi = $("#racikan_signaA_" + id).inputmask("unmaskedvalue");
+				var signa_hari = $("#racikan_signaB_" + id).inputmask("unmaskedvalue");
+
+				if(
+					parseFloat(jlh_obat) > 0 &&
+					parseFloat(signa_konsumsi) > 0 &&
+					parseFloat(signa_hari) > 0 &&
+					obat != null &&
+					$("#row_racikan_" + id).hasClass("last-racikan")
+				) {
+					autoRacikan();
+				}
+			}
+		}
+
+
+		function autoRacikan() {
+			$("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
+			var newRacikanRow = document.createElement("TR");
+			$(newRacikanRow).addClass("last-racikan");
+
+			var newRacikanCellID = document.createElement("TD");
+			var newRacikanCellNama = document.createElement("TD");
+			var newRacikanCellSignaA = document.createElement("TD");
+			var newRacikanCellSignaX = document.createElement("TD");
+			var newRacikanCellSignaB = document.createElement("TD");
+			var newRacikanCellJlh = document.createElement("TD");
+			var newRacikanCellAksi = document.createElement("TD");
+
+			var newRacikanNama = document.createElement("INPUT");
+			$(newRacikanCellNama).append(newRacikanNama);
+			$(newRacikanNama).addClass("form-control").css({
+				"margin-bottom": "20px"
+			});
+
+			$(newRacikanCellNama).append(
+				"<h6 style=\"padding-bottom: 10px;\">" +
+					"Komposisi:" +
+					"<button class=\"btn btn-sm btn-info tambahKomposisi\"" +
+						"<i class=\"fa fa-plus\"></i> Tambah" +
+					"</button>" +
+				"</h6>" +
+				"<table class=\"table table-bordered largeDataType\" style=\"margin-top: 10px;\">" +
+					"<thead>" +
+						"<tr>" +
+							"<th class=\"wrap_content\">No</th>" +
+							"<th>Obat</th>" +
+							"<th class=\"wrap_content\">@</th>" +
+							"<th>Takaran</th>" +
+							"<th class=\"wrap_content\">Aksi</th>" +
+						"<tr>" +
+					"</thead>" +
+					"<tbody></tbody>" +
+				"</table>"
+			);
+			/*var newRacikanObat = document.createElement("SELECT");
+			var newObatTakar = document.createElement("INPUT");
+			$(newRacikanCellObat).append(newRacikanObat);
+			var addAnother = load_product_resep(newRacikanObat, "");
+			$(newRacikanCellObat).append("<br /><b>Takaran</b>");
+			$(newRacikanCellObat).append(newObatTakar);
+			$(newRacikanObat).addClass("form-control").select2();
+			$(newObatTakar).addClass("form-control");*/
+
+			var newRacikanSignaA = document.createElement("INPUT");
+			$(newRacikanCellSignaA).append(newRacikanSignaA);
+			$(newRacikanSignaA).addClass("form-control racikan_signa_a");
+
+			$(newRacikanCellSignaX).html("<i class=\"fa fa-times\"></i>");
+
+			var newRacikanSignaB = document.createElement("INPUT");
+			$(newRacikanCellSignaB).append(newRacikanSignaB);
+			$(newRacikanSignaB).addClass("form-control racikan_signa_b");
+
+			var newRacikanJlh = document.createElement("INPUT");
+			$(newRacikanCellJlh).append(newRacikanJlh);
+			$(newRacikanJlh).addClass("form-control racikan_signa_jlh");
+
+			var newRacikanDelete = document.createElement("BUTTON");
+			$(newRacikanCellAksi).append(newRacikanDelete);
+			$(newRacikanDelete).addClass("btn btn-danger btn-sm").html("<i class=\"fa fa-ban\"></i>");
+
+			$(newRacikanRow).append(newRacikanCellID);
+			$(newRacikanRow).append(newRacikanCellNama);
+			$(newRacikanRow).append(newRacikanCellSignaA);
+			$(newRacikanRow).append(newRacikanCellSignaX);
+			$(newRacikanRow).append(newRacikanCellSignaB);
+			$(newRacikanRow).append(newRacikanCellJlh);
+			$(newRacikanRow).append(newRacikanCellAksi);
+
+			$("#table-resep-racikan tbody.racikan").append(newRacikanRow);
+			rebaseRacikan();
+		}
+
+		function rebaseRacikan() {
+			$("#table-resep-racikan > tbody.racikan > tr").each(function(e) {
+				var id = (e + 1);
+
+				$(this).attr({
+					"id": "row_racikan_" + id
+				});
+
+				$(this).find("td:eq(0)").html(id);
+
+				$(this).find("td:eq(1) input").attr({
+					"id": "racikan_nama_" + id
+				}).val("RACIKAN " + id);
+
+				$(this).find("td:eq(1) table").attr({
+					"id": "komposisi_" + id
+				});
+
+				$(this).find("td:eq(1) button.tambahKomposisi").attr({
+					"id": "tambah_komposisi_" + id
+				});
+
+				$(this).find("td:eq(2) input").attr({
+					"id": "racikan_signaA_" + id
+				});
+
+				$(this).find("td:eq(4) input").attr({
+					"id": "racikan_signaB_" + id
+				});
+
+				$(this).find("td:eq(5) input").attr({
+					"id": "racikan_jumlah_" + id
+				});
+
+				$(this).find("td:eq(7)").attr({
+					"id": "racikan_satuan_"
+				});
+
+				$(this).find("td:eq(7) button").attr({
+					"id": "racikan_delete_" + id
+				});
+			});
+		}
+
+
+		function autoKomposisi(id) {
+			if($("#komposisi_" + id + " tbody tr").length == 0 || $("#komposisi_" + id + " tbody tr:last-child td:eq(1)").html() != "") {
+				var newKomposisiRow = document.createElement("TR");
+
+				var newKomposisiCellID = document.createElement("TD");
+				var newKomposisiCellObat = document.createElement("TD");
+				var newKomposisiCellJumlah = document.createElement("TD");
+				var newKomposisiCellSatuan = document.createElement("TD");
+				var newKomposisiCellAksi = document.createElement("TD");
+
+				var newKomposisiEdit = document.createElement("BUTTON");
+				$(newKomposisiEdit).addClass("btn btn-sm btn-info btn_edit_komposisi").html("<i class=\"fa fa-pencil-alt\"></i>");
+
+				var newKomposisiDelete = document.createElement("BUTTON");
+				$(newKomposisiDelete).addClass("btn btn-sm btn-danger btn_delete_komposisi").html("<i class=\"fa fa-ban\"></i>");
+
+				$(newKomposisiCellAksi).append("<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\"></div>");
+				$(newKomposisiCellAksi).find("div").append(newKomposisiEdit);
+				$(newKomposisiCellAksi).find("div").append(newKomposisiDelete);
+
+				$(newKomposisiRow).append(newKomposisiCellID);
+				$(newKomposisiRow).append(newKomposisiCellObat);
+				$(newKomposisiRow).append(newKomposisiCellJumlah);
+				$(newKomposisiRow).append(newKomposisiCellSatuan);
+				$(newKomposisiRow).append(newKomposisiCellAksi);
+
+				$("#komposisi_" + id + " tbody").append(newKomposisiRow);
+
+				rebaseKomposisi(id);
+				
+				/*if($("#komposisi_" + id + " tbody tr").length == 1) {
+					//autoModal
+					prepareModal(id);
+				}*/
+				prepareModal(id);
+			}
+		}
+
+		function rebaseKomposisi(id) {
+			$("#komposisi_" + id + " tbody tr").each(function(e) {
+				var cid = (e + 1);
+
+				$(this).find("td:eq(0)").html(cid);
+				$(this).find("td:eq(1)").attr({
+					"id": "obat_komposisi_" + id + "_" + cid
+				});
+				$(this).find("td:eq(2)").attr({
+					"id": "jlh_komposisi_" + id + "_" + cid
+				});
+				$(this).find("td:eq(3)").attr({
+					"id": "takar_komposisi_" + id + "_" + cid
+				});
+				$(this).find("td:eq(4) button:eq(0)").attr({
+					"id": "button_edit_komposisi_" + id + "_" + cid
+				});
+
+				$(this).find("td:eq(4) button:eq(1)").attr({
+					"id": "button_delete_komposisi_" + id + "_" + cid
+				});
+			});
+		}
+
+		function prepareModal(id, setData = {
+			obat: "",
+			jlh: "",
+			takar: ""
+		}) {
+			$("#form-editor-racikan").modal("show");
+			$("#modal-large-title").html($("#racikan_nama_" + id).val());
+
+			$("#txt_racikan_jlh").val(setData.jlh);
+			$("#txt_racikan_takar").val(setData.takar);
+
+			load_product_resep($("#txt_racikan_obat"), setData.obat);
+		}
+
+		$("#txt_racikan_obat").select2();
+		$("#txt_racikan_jlh").inputmask({
+			alias: 'decimal',
+			rightAlign: true,
+			placeholder: "0.00",
+			prefix: "",
+			autoGroup: false,
+			digitsOptional: true
+		});
+
+		var currentRacikID = 1;
+		var currentKomposisiID = $("#komposisi_" + currentRacikID + " tbody tr").length;
+		var komposisiMode = "add";
+
+		$("body").on("click", ".btn_edit_komposisi", function() {
+			var id = $(this).attr("id").split("_");
+			var thisID = id[id.length - 1];
+			var Pid = id[id.length - 2];
+			
+
+			prepareModal(Pid, {
+				obat: $("#obat_komposisi_" + Pid + "_" + thisID).attr("uid-obat"),
+				jlh: $("#jlh_komposisi_" + Pid + "_" + thisID).html(),
+				takar: $("#takar_komposisi_" + Pid + "_" + thisID).html()
+			});
+
+			currentKomposisiID = thisID;
+			currentRacikID = Pid;
+		});
+
+		$("body").on("click", ".tambahKomposisi", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			currentRacikID = id;
+			currentKomposisiID = $("#komposisi_" + currentRacikID + " tbody tr").length + 1;
+
+			autoKomposisi(id);
+		});
+
+		$("body").on("click", "#btnSubmitKomposisi", function() {
+			$("#obat_komposisi_" + currentRacikID + "_" + currentKomposisiID)
+				.html($("#txt_racikan_obat").find("option:selected").text())
+				.attr({
+					"uid-obat": $("#txt_racikan_obat").val()
+				});
+			$("#jlh_komposisi_" + currentRacikID + "_" + currentKomposisiID).html($("#txt_racikan_jlh").inputmask("unmaskedvalue"));
+			$("#takar_komposisi_" + currentRacikID + "_" + currentKomposisiID).html($("#txt_racikan_takar").val());
+
+			$("#form-editor-racikan").modal("hide");
+		});
+
+		$("body").on("keyup", ".racikan_signa_a", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			checkGenerateRacikan(id);
+		});
+
+		$("body").on("keyup", ".racikan_signa_b", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			checkGenerateRacikan(id);
+		});
+
+		$("body").on("keyup", ".racikan_signa_jlh", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			checkGenerateRacikan(id);
+		});
+		//===========================================================================
 		$("body").on("keyup", ".resep_konsumsi", function() {
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
@@ -760,6 +1074,18 @@
 
 			var satuanCaption = $(this).find("option:selected").attr("satuan-caption");
 			$("#resep_satuan_" + id).html(satuanCaption);
+		});
+
+		$("body").on("click", ".resep_delete", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+
+			if(!$("#resep_row_" + id).hasClass("last-resep")) {
+				$("#resep_row_" + id).remove();
+			}
+
+			rebaseResep();
+			//$("#table-resep tbody tr").each(function(e));
 		});
 
 		function populateAllData() {
@@ -1023,3 +1349,39 @@
 	});
 
 </script>
+
+
+<div id="form-editor-racikan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+	<div class="modal-dialog modal-md" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-large-title"></h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group col-md-12">
+					<label for="txt_racikan_obat">Obat:</label>
+					<select class="form-control" id="txt_racikan_obat"></select>
+				</div>
+				<div class="form-group col-md-6">
+					<label for="txt_racikan_jlh">Jumlah:</label>
+					<input type="text" class="form-control" id="txt_racikan_jlh" />
+				</div>
+				<div class="form-group col-md-6">
+					<label for="txt_racikan_takar">Takar:</label>
+					<input type="text" class="form-control" id="txt_racikan_takar" />
+				</div>
+				<!-- <div class="form-group col-md-12">
+					<label for="txt_racikan_satuan">Satuan:</label>
+					<select class="form-control" id="txt_racikan_satuan"></select>
+				</div> -->
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+				<button type="button" class="btn btn-primary" id="btnSubmitKomposisi">Submit</button>
+			</div>
+		</div>
+	</div>
+</div>
