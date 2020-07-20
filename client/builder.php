@@ -275,6 +275,14 @@
 			} else {
 				$("#sidemenu_3").hide();
 			}
+
+			/*$("body").niceScroll({
+				cursorcolor:"#006b4a",
+				cursorwidth: "10px",
+				scrollspeed: 60
+			});
+			
+			$("body").getNiceScroll().resize();*/
 		});
 	</script>
 </body>

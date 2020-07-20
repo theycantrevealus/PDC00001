@@ -274,13 +274,12 @@ class Query {
 
 
 	function execute() {
+		$usedValues = array();
 		try {
-			
 			$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = self::$queryValues;
 			$query = self::$pdo->prepare(self::buildQuery());
-			$usedValues = array();
 			foreach (self::$queryValues as $key => $value) {
 				if(!is_null($value)) {
 					array_push($usedValues, $value);
@@ -322,7 +321,7 @@ class Query {
 			throw new QueryException($e->getMessage(), 1);
 			/*$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
-			$responseBuilder['response_values'] = self::$queryValues;
+			$responseBuilder['response_values'] = $usedValues;
 			$responseBuilder['response_params'] = self::$queryParams;
 			return $responseBuilder;*/
 		}

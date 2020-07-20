@@ -1048,12 +1048,33 @@ class Inventori extends Utility {
 			//Data Penjamin
 			$PenjaminObat = new Penjamin(self::$pdo);
 			$data['response_data'][$key]['penjamin'] = $PenjaminObat::get_penjamin_obat($value['uid'])['response_data'];
+
+			//Cek Ketersediaan Stok
+			$TotalStock = 0;
+			$InventoriStockPopulator = self::get_item_batch($value['uid']);
+			foreach ($InventoriStockPopulator['response_data'] as $key => $value) {
+				$TotalStock += $value['stok_terkini'];
+			}
+			$data['response_data'][$key]['stok'] = $TotalStock;
 			$autonum++;
 		}
 		return $data;
 	}
 
-	private function get_item_detail($parameter) {
+	private function get_item_batch($parameter) {
+		$data = self::$query->select('inventori_stok', array(
+			'batch'
+		))
+		->where(array(
+			'inventori_stok.barang' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		return $data;
+	}
+
+	public function get_item_detail($parameter) {
 		$data = self::$query
 		->select('master_inv', array(
 			'uid',

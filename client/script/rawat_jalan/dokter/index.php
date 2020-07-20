@@ -16,6 +16,22 @@
 			//
 		}
 
+		/*$.ajax({
+			async: false,
+			url: __HOSTAPI__ + "/Antrian/antrian",
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+			},
+			type: "GET",
+			success: function(response){
+				console.log(response);
+			},
+			error: function(response) {
+				console.clear();
+				console.log(response);
+			}
+		});*/
+
 		var params;
 
 		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
