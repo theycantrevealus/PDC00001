@@ -8,9 +8,12 @@
 					<li class="breadcrumb-item active" aria-current="page">Terminologi Item Manager</li>
 				</ol>
 			</nav>
-			<h1 class="m-0">Terminologi Item</h1>
+			<br />
+			<h3 class="m-0"><span class="title-term"></span></h3>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/terminologi/tambah_child/<?php echo __PAGES__[2]; ?>" class="btn btn-info ml-3">Tambah Terminologi Item</a>
+		<button class="btn btn-sm btn-info" id="tambah-item">
+			<i class="fa fa-plus"></i> Tambah <span class="title-term"></span>
+		</button>
 	</div>
 </div>
 
@@ -25,7 +28,7 @@
 							<tr>
 								<th style="width: 20px;">No</th>
 								<th>Item</th>
-								<th>Aksi</th>
+								<th width="30%">Aksi</th>
 							</tr>
 						</thead>
 						<tbody></tbody>

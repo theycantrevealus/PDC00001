@@ -46,7 +46,7 @@
 <div class="mdk-drawer  js-mdk-drawer" id="default-drawer" data-align="start">
 	<div class="mdk-drawer__content">
 		<div class="sidebar sidebar-light sidebar-left simplebar" data-simplebar>
-			<div class="d-flex align-items-center sidebar-p-a border-bottom sidebar-account">
+			<!-- <div class="d-flex align-items-center sidebar-p-a border-bottom sidebar-account">
 				<a href="<?php echo __HOSTNAME__; ?>/template/profile.html" class="flex d-flex align-items-center text-underline-0 text-body">
 					<span class="avatar mr-3">
 						<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/avatar/demi.png" alt="avatar" class="avatar-img rounded-circle">
@@ -71,7 +71,16 @@
 						<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/template/login.html">Logout</a>
 					</div>
 				</div>
-			</div>
+			</div> -->
+			<div class="sidebar-heading sidebar-m-t">Main</div>
+			<ul class="sidebar-menu">
+				<li class="sidebar-menu-item">
+					<a class="sidebar-menu-button" href="<?php echo __HOSTNAME__; ?>">
+						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">dvr</i>
+						<span class="sidebar-menu-text">Dashboard</span>
+					</a>
+				</li>
+			</ul>
 			<div class="sidebar-heading sidebar-m-t">Menu</div>
 			<ul class="sidebar-menu">
 				<?php

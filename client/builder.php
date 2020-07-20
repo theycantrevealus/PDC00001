@@ -7,7 +7,6 @@
 ?>
 <body class="layout-default">
 	<?php require 'head.php'; ?>
-	<div class="preloader"></div>
 	<div class="mdk-header-layout js-mdk-header-layout">
 		<?php require 'header.php'; ?>
 		<div class="mdk-header-layout__content">
@@ -45,7 +44,22 @@
 				<?php require 'sidemenu.php'; ?>
 			</div>
 		</div>
+		<div class="preloader">
+			<div class="sidemenu-shimmer">
+				<?php
+					for($sh = 1; $sh <= 10; $sh++) {
+				?>
+				<div class="shine"></div>
+				<?php
+					}
+				?>
+			</div>
+			<div class="content-shimmer">
+				<span>Loading...</span>
+			</div>
+		</div>
 	</div>
+	<div class="notification-container"></div>
 	<!-- <div id="app-settings">
 		<app-settings layout-active="default" :layout-location="{
 	  'default': 'index.html',
@@ -77,7 +91,95 @@
 			}
 		}
 	?>
+	<script type="text/javascript">
+		$(function() {
+			$(".tooltip-custom").each(function() {
+				var data = $(this).attr("data-toggle");
+				$(this).tooltip({
+					placement: "top",
+					title: data
+				});
+			});
+		});
+		
+		function inArray(needle, haystack) {
+			var length = haystack.length;
+			for(var i = 0; i < length; i++) {
+				if(haystack[i] == needle) return true;
+			}
+			return false;
+		}
 
+		function notification (mode, title, time, identifier) {
+			var alertContainer = document.createElement("DIV");
+			var alertTitle = document.createElement("STRONG");
+			var alertDismiss = document.createElement("BUTTON");
+			var alertCloseButton = document.createElement("SPAN");
+
+			$(alertContainer).addClass("alert alert-dismissible fade show alert-" + mode).attr({
+				"role": "alert",
+				"id": identifier
+			});
+
+			$(alertTitle).html(title);
+
+			$(alertDismiss).attr({
+				"type": "button",
+				"data-dismiss": "alert",
+				"aria-label": "Close"
+			}).addClass("close");
+
+			$(alertCloseButton).attr({
+				"aria-hidden": true
+			}).html("&times;");
+
+			$(alertContainer).append(alertTitle);
+			$(alertDismiss).append(alertCloseButton);
+			$(alertContainer).append(alertDismiss);
+
+			$(".notification-container").append(alertContainer);
+
+			setTimeout(function() {
+				$(alertContainer).fadeOut();
+			}, time);
+		}
+		/*function formatMoney(number, decPlaces, decSep, thouSep) {
+			decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
+			decSep = typeof decSep === "undefined" ? "." : decSep;
+			thouSep = typeof thouSep === "undefined" ? "," : thouSep;
+			var sign = number < 0 ? "-" : "";
+			var i = String(parseInt(number = Math.abs(Number(number) || 0).toFixed(decPlaces)));
+			var j = (j = i.length) > 3 ? j % 3 : 0;
+
+			return sign +
+			(j ? i.substr(0, j) + thouSep : "") +
+			i.substr(j).replace(/(\decSep{3})(?=\decSep)/g, "$1" + thouSep) +
+			(decPlaces ? decSep + Math.abs(number - i).toFixed(decPlaces).slice(2) : "");
+		}*/
+		function number_format (number, decimals, dec_point, thousands_sep) {
+			// Strip all characters but numerical ones.
+			number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
+			var n = !isFinite(+number) ? 0 : +number,
+			prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+			sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+			dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+			s = '',
+			toFixedFix = function (n, prec) {
+				var k = Math.pow(10, prec);
+				return '' + Math.round(n * k) / k;
+			};
+			// Fix for IE parseFloat(0.55).toFixed(0) = 0;
+			s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+			if (s[0].length > 3) {
+				s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+			}
+			if ((s[1] || '').length < prec) {
+				s[1] = s[1] || '';
+				s[1] += new Array(prec - s[1].length + 1).join('0');
+			}
+			return s.join(dec);
+		}
+	</script>
 </body>
 
 </html>
