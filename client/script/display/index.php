@@ -71,7 +71,7 @@
 							$("#antrian_" + a).html(loketStatus[a][b]);
 							if(globalData[a] != loketStatus[a][b] && loketStatus[a][b] > 0) {
 								playlist = [
-									__HOST__ + 'audio/Airport_Bell.mp3',
+									__HOST__ + 'audio/openning.mpeg',
 									__HOST__ + 'audio/antrian.mp3'
 								];
 								forRead = b.split(" ");
@@ -80,6 +80,7 @@
 								}
 								playlist.push(__HOST__ + 'audio/di.mp3');
 								playlist.push(__HOST__ + 'audio/' + ($("#nama_antrian_" + a).html().replace(" ", "").toLowerCase().trim()) + '.mp3');
+								playlist.push(__HOST__ + 'audio/closing.mpeg');
 								globalData[a] = loketStatus[a][b];
 							} else {
 								playlist = [];

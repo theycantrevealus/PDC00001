@@ -26,9 +26,12 @@ class Aplicares extends Utility {
 		self::$query = new Query(self::$pdo);
 
 		self::$kodePPK = "0069R035";
-		self::$data_api = base64_decode("MTUxNzQ=");
-		self::$secretKey_api = base64_decode("NWJDRjJCNEY4Mw==");
-		self::$base_url = "https://dvlp.bpjs-kesehatan.go.id:8888/aplicaresws";
+		/*self::$data_api = base64_decode("MTUxNzQ=");*/
+		self::$data_api = 32435;
+		/*self::$secretKey_api = base64_decode("NWJDRjJCNEY4Mw==");*/
+		self::$secretKey_api = '2pAB5273E9';
+		/*self::$base_url = "https://dvlp.bpjs-kesehatan.go.id:8888/aplicaresws";*/
+		self::$base_url = "http://api.bpjs-kesehatan.go.id/aplicaresws";
 	}
 
 	public function __GET__($parameter = array()) {
@@ -116,11 +119,12 @@ class Aplicares extends Utility {
 			$autonum++;
 
 			$ruangan = new Ruangan(self::$pdo);
-			$params = ['','ruangan-detail', $value['uid']];
-			$get_ruangan = $ruangan->__GET__($params);
-			$data['response_data'][$key]['ruangan'] = $get_ruangan['response_data'][0]['nama'];
-			$data['response_data'][$key]['nama'] = $get_ruangan['response_data'][0]['nama'];
-			$data['response_data'][$key]['kode_ruangan'] = $get_ruangan['response_data'][0]['kode_ruangan']; 
+			/*$params = ['','ruangan-detail', $value['uid']];
+			$get_ruangan = $ruangan->__GET__($params);*/
+			$RuanganDetail = $ruangan::get_ruangan_detail('master_unit_ruangan', $value['uid']);
+			$data['response_data'][$key]['uid_ruangan'] = $RuanganDetail['response_data'][0]['uid'];
+			$data['response_data'][$key]['nama'] = $RuanganDetail['response_data'][0]['nama'];
+			$data['response_data'][$key]['kode_ruangan'] = $RuanganDetail['response_data'][0]['kode_ruangan']; 
 		}
 
 		return $data;
@@ -188,10 +192,64 @@ class Aplicares extends Utility {
 	}
 
 	private function get_ruangan_terdaftar_bpjs(){
-		$url = "/rest/bed/read/" . self::$kodePPK . "/1/10";
+		$url = "/rest/bed/read/" . self::$kodePPK . "/1/100";
 		$result = self::launchUrl($url);
+		$error_count = 1;
+		$error_message = array();
 
-		return $result;
+		$crossCheckData = array();
+
+		foreach ($result['content']['response']['list'] as $key => $value) {
+			$Ruangan = new Ruangan(self::$pdo);
+			$KodeRuangan = $Ruangan::get_ruangan_detail_by_code($value['koderuang']);
+
+			if(isset($KodeRuangan['uid'])) {
+
+				$check = self::$query->select('aplicares_kamar_log', array(
+					'ruangan'
+				))
+				->where(array(
+					'aplicares_kamar_log.ruangan' => '= ?',
+					'AND',
+					'aplicares_kamar_log.deleted_at' => 'IS NULL'
+				), array(
+					$KodeRuangan['uid']
+				))
+				->execute();
+
+
+
+				if(count($check['response_data']) == 0) {
+					$logDataRuangan = self::$query->insert('aplicares_kamar_log', array(
+						'ruangan' => $KodeRuangan['uid'],
+						'kodekelas' => $value['kodekelas'],
+						'kapasitas' => !is_null($value['kapasitas']) ? $value['kapasitas'] : 0,
+						'tersedia' => !is_null($value['tersedia']) ? $value['tersedia'] : 0,
+						'tersediapria' => !is_null($value['tersediapria']) ? $value['tersediapria'] : 0,
+						'tersediawanita' => !is_null($value['tersediawanita']) ? $value['tersediawanita'] : 0,
+						'tersediapriawanita' => !is_null($value['tersediapriawanita']) ? $value['tersediapriawanita'] : 0,
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+					->execute();
+
+					if($logDataRuangan['response_result'] > 0) {
+						//$result['content']['response']['list'][$key]['uid_ruangan'] = $KodeRuangan['uid'];
+						$value['uid_ruangan'] = $KodeRuangan['uid'];
+						$value['nama'] = $KodeRuangan['nama'];
+					} else {
+						array_push($error_message, $logDataRuangan);
+					}
+				} else {
+					//$result['content']['response']['list'][$key]['uid_ruangan'] = $check['response_data'][0]['ruangan'];
+					$value['uid_ruangan'] = $KodeRuangan['uid'];
+					$value['nama'] = $KodeRuangan['nama'];
+				}
+
+				array_push($crossCheckData, $value);
+			}
+		}
+		return $crossCheckData;
 	}
 
 	private function tambah_ruangan($table, $parameter){
@@ -222,7 +280,6 @@ class Aplicares extends Utility {
 			unset($check['response_data']);
 			return $check;
 		} else {
-
 			$allData['ruangan'] = $parameter['uid_ruangan'];
 			$allData['created_at'] = parent::format_date();
 			$allData['updated_at'] = parent::format_date();
@@ -596,13 +653,14 @@ class Aplicares extends Utility {
 	private function duplicate_check($parameter) {
 		return self::$query
 		->select($parameter['table'], array(
-			'uid',
-			'nama'
+			'id',
+			'ruangan',
+			'kodekelas'
 		))
 		->where(array(
 			$parameter['table'] . '.deleted_at' => 'IS NULL',
 			'AND',
-			$parameter['table'] . '.uid' => '= ?'
+			$parameter['table'] . '.ruangan' => '= ?'
 		), array(
 			$parameter['check']
 		))

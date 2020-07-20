@@ -86,30 +86,37 @@
 			</div>
 			<div class="card card-body tab-content">
 				<div class="tab-pane show fade" id="tab-poli-1">
+					<?php require 'info-pasien.php'; ?>
 					<?php require 'asesmen-awal.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-2">
+					<?php require 'info-pasien.php'; ?>
 					<?php require 'tindakan.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane active show fade" id="tab-poli-3">
+					<?php require 'info-pasien.php'; ?>
 					<?php require 'resep.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-4">
+					<?php require 'info-pasien.php'; ?>
 					<?php require 'laboratorium.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-5">
+					<?php require 'info-pasien.php'; ?>
 					<?php require 'radiologi.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-6">
+					<?php require 'info-pasien.php'; ?>
 					<?php require 'cppt.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-7">
+					<?php require 'info-pasien.php'; ?>
 					<?php require 'review.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>

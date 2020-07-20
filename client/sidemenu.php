@@ -1,46 +1,51 @@
 <?php
-	function reloadModul($pdo, $parent, $group) {
+	function reloadModul($pdo, $parent, $group, $access = array()) {
 		$query = $pdo->prepare('SELECT * FROM modul WHERE deleted_at IS NULL AND parent = ? AND show_on_menu = ? AND menu_group = ? ORDER BY show_order ASC');
 		$query->execute(array($parent, 'Y', $group));
 		$read = $query->fetchAll(\PDO::FETCH_ASSOC);
+		$availMenu = 0;
 		foreach ($read as $key => $value) {
 			//CHECK Child
 			$child = $pdo->prepare('SELECT * FROM modul WHERE deleted_at IS NULL AND parent = ? AND show_on_menu = ? AND menu_group = ?');
 			$child->execute(array($value['id'], 'Y', $group));
 			$LinkManager = ($child->rowCount() > 0) ? "#menu-" . $value['id'] : __HOSTNAME__ . '/' .$value['identifier'];
-			?>
-			<li class="sidebar-menu-item">
-				<a class="sidebar-menu-button" <?php echo ($child->rowCount() > 0) ? "data-toggle=\"collapse\"" : ""; ?> href="<?php echo $LinkManager; ?>">
-					<?php
-						if($parent == 0) {
-					?>
-					<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons"><?php echo $value['icon'] ?></i>
-					<?php
-						}
-					?>
-					<span class="sidebar-menu-text"><?php echo $value['nama']; ?></span>
+			if(in_array($value['id'], $access)) {
+				?>
+				<li class="sidebar-menu-item">
+					<a class="sidebar-menu-button" <?php echo ($child->rowCount() > 0) ? "data-toggle=\"collapse\"" : ""; ?> href="<?php echo $LinkManager; ?>">
+						<?php
+							if($parent == 0) {
+						?>
+						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons"><?php echo $value['icon'] ?></i>
+						<?php
+							}
+						?>
+						<span class="sidebar-menu-text"><?php echo $value['nama']; ?></span>
+						<?php
+							if($child->rowCount() > 0) {
+						?>
+						<span class="ml-auto sidebar-menu-toggle-icon"></span>
+						<?php
+							}
+						?>
+					</a>
 					<?php
 						if($child->rowCount() > 0) {
 					?>
-					<span class="ml-auto sidebar-menu-toggle-icon"></span>
+					<ul class="sidebar-submenu collapse" id="menu-<?php echo $value['id']; ?>">
+						<?php
+							$availMenu += reloadModul($pdo, $value['id'], $group, $access);
+						?>
+					</ul>
 					<?php
 						}
 					?>
-				</a>
+				</li>
 				<?php
-					if($child->rowCount() > 0) {
-				?>
-				<ul class="sidebar-submenu collapse" id="menu-<?php echo $value['id']; ?>">
-					<?php
-						reloadModul($pdo, $value['id'], $group);
-					?>
-				</ul>
-				<?php
-					}
-				?>
-			</li>
-			<?php
+				$availMenu++;
+			}
 		}
+		return $availMenu;
 	}
 ?>
 <div class="mdk-drawer  js-mdk-drawer" id="default-drawer" data-align="start">
@@ -93,29 +98,29 @@
 					</a>
 				</li>
 			</ul>
-			<div class="sidebar-heading sidebar-m-t">Menu</div>
+			<div class="sidebar-heading sidebar-m-t" id="sidemenu_1">Menu</div>
 			<ul class="sidebar-menu">
 				<?php
-					reloadModul($pdo, 0, 1);
+					$sideMenu1 = reloadModul($pdo, 0, 1, $_SESSION['akses_halaman']);
 				?>
 			</ul>
-			<div class="sidebar-heading sidebar-m-t">Master Data</div>
+			<div class="sidebar-heading sidebar-m-t" id="sidemenu_2">Master Data</div>
 			<div class="sidebar-block p-0">
 				<ul class="sidebar-menu">
 					<?php
-						reloadModul($pdo, 0, 2);
+						$sideMenu2 = reloadModul($pdo, 0, 2, $_SESSION['akses_halaman']);
 					?>	
 				</ul>
 			</div>
-			<div class="sidebar-heading sidebar-m-t">Setting</div>
+			<div class="sidebar-heading sidebar-m-t" id="sidemenu_3">Setting</div>
 			<div class="sidebar-block p-0">
 				<ul class="sidebar-menu">
 					<?php
-						reloadModul($pdo, 0, 3);
+						$sideMenu3 = reloadModul($pdo, 0, 3, $_SESSION['akses_halaman']);
 					?>	
 				</ul>
 
-				<div class="sidebar-p-a sidebar-b-y">
+				<!-- <div class="sidebar-p-a sidebar-b-y">
 					<div class="d-flex align-items-top mb-2">
 						<div class="sidebar-heading m-0 p-0 flex text-body js-text-body">Progress</div>
 						<div class="font-weight-bold text-success">60%</div>
@@ -123,7 +128,7 @@
 					<div class="progress">
 						<div class="progress-bar bg-success" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
 					</div>
-				</div>
+				</div> -->
 			</div>
 		</div>
 	</div>

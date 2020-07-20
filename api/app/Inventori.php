@@ -5,6 +5,7 @@ namespace PondokCoder;
 use PondokCoder\Query as Query;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\QueryException as QueryException;
+use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Utility as Utility;
 
 class Inventori extends Utility {
@@ -55,6 +56,9 @@ class Inventori extends Utility {
 					break;
 				case 'kategori_obat_detail':
 					return self::get_kategori_obat_detail($parameter[2]);
+					break;
+				case 'kategori_per_obat':
+					return self::get_kategori_obat_item_parsed($parameter[2]);
 					break;
 				default:
 					return self::get_item();
@@ -638,6 +642,26 @@ class Inventori extends Utility {
 		->execute();
 		return $data['response_data'];
 	}
+
+	private function get_kategori_obat_item_parsed($parameter) {
+		$data = self::$query->select('master_inv_obat_kategori_item', array(
+			'id',
+			'obat',
+			'kategori'
+		))
+		->where(array(
+			'master_inv_obat_kategori_item.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_obat_kategori_item.obat' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['kategori'] = self::get_kategori_obat_detail($value['kategori'])['response_data'][0];
+		}
+		return $data['response_data'];
+	}
 //===========================================================================================GUDANG
 	private function get_gudang() {
 		$data = self::$query
@@ -1020,12 +1044,37 @@ class Inventori extends Utility {
 			$data['response_data'][$key]['satuan_terkecil'] = self::get_satuan_detail($value['satuan_terkecil'])['response_data'][0];
 			$data['response_data'][$key]['kategori'] = self::get_kategori_detail($value['kategori'])['response_data'][0];
 			$data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
+
+			//Data Penjamin
+			$PenjaminObat = new Penjamin(self::$pdo);
+			$data['response_data'][$key]['penjamin'] = $PenjaminObat::get_penjamin_obat($value['uid'])['response_data'];
+
+			//Cek Ketersediaan Stok
+			$TotalStock = 0;
+			$InventoriStockPopulator = self::get_item_batch($value['uid']);
+			foreach ($InventoriStockPopulator['response_data'] as $key => $value) {
+				$TotalStock += $value['stok_terkini'];
+			}
+			$data['response_data'][$key]['stok'] = $TotalStock;
 			$autonum++;
 		}
 		return $data;
 	}
 
-	private function get_item_detail($parameter) {
+	private function get_item_batch($parameter) {
+		$data = self::$query->select('inventori_stok', array(
+			'batch'
+		))
+		->where(array(
+			'inventori_stok.barang' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		return $data;
+	}
+
+	public function get_item_detail($parameter) {
 		$data = self::$query
 		->select('master_inv', array(
 			'uid',

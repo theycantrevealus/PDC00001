@@ -135,6 +135,21 @@ class Anjungan extends Utility {
 				$data['response_data'][$key]['loket'] = self::get_loket_detail($value['loket'])['response_data'][0];
 			}
 		}
+		//Get Used Loket
+		$loket = self::$query->select('master_loket', array(
+			'uid'
+		))
+		->where(array(
+			'master_loket.deleted_at' => 'IS NULL',
+			'AND',
+			'master_loket.user_active' => '= ?'
+		), array(
+			$UserData['data']->uid
+		))
+		->execute();
+
+		$data['response_used'] = (count($loket['response_data']) > 0) ? $loket['response_data'][0]['uid'] : "";
+		
 		return $data;
 	}
 
@@ -265,6 +280,9 @@ class Anjungan extends Utility {
 	}
 
 	private function avail_loket() {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
 		$data = self::$query->select('master_loket', array(
 			'uid',
 			'nama_loket'
@@ -272,7 +290,11 @@ class Anjungan extends Utility {
 		->where(array(
 			'master_loket.deleted_at' => 'IS NULL',
 			'AND',
-			'master_loket.user_active' => 'IS NULL'
+			'(master_loket.user_active' => 'IS NULL',
+			'OR',
+			'master_loket.user_active' => '= ?)'
+		), array(
+			$UserData['data']->uid
 		))
 		->order(array(
 			'nama_loket' => 'ASC'
@@ -332,6 +354,7 @@ class Anjungan extends Utility {
 		} else {
 			$data['response_result'] = 0;
 			$Pegawai = new Pegawai(self::$pdo);
+			$data['response_loket_user'] = $data['response_data'][0]['user_active'];
 			$data['response_loket'] = $Pegawai::get_detail($data['response_data'][0]['user_active'])['response_data'][0]['nama'];
 			return $data;
 		}

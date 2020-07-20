@@ -17,7 +17,7 @@
 					</div>
 					<div class="col-md-12" style="margin-top: 20px;">
 						<table class="table table-bordered" id="table-tindakan">
-							<thead>
+							<thead class="thead-dark">
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Tindakan</th>

@@ -24,24 +24,86 @@
 						if(empty(__PAGES__[0])) {
 							require 'pages/system/dashboard.php';
 						} else {
-							if(is_dir('pages/' . implode('/', __PAGES__))) {
-								require 'pages/' . implode('/', __PAGES__) . '/index.php';
+							if(implode('/', __PAGES__) == 'system/logout') {
+								require 'pages/system/logout.php';
 							} else {
-								if(file_exists('pages/' . implode('/', __PAGES__) . '.php')) {
-									require 'pages/' . implode('/', __PAGES__) . '.php';
-								} else {
-									$isFile = 'pages';
+								/*echo '<pre>';
+								print_r($_SESSION['akses_halaman_link']);
+								echo '</pre>';*/
+								if(is_dir('pages/' . implode('/', __PAGES__))) {
+									$isInAccess = '';
+									$allowAccess = false;
 									foreach (__PAGES__ as $key => $value) {
-										if(file_exists($isFile . '/' . $value . '.php')) {
-											$lastExist = $isFile . '/' . $value . '.php';
+										if($key == 0) {
+											$isInAccess .= $value;
+										} else {
+											$isInAccess .= '/' . $value;
 										}
 
-										$isFile .= '/' .$value;
+										if (in_array($isInAccess, $_SESSION['akses_halaman_link'])) {
+											$allowAccess = true;
+											break;
+										} else {
+											if($allowAccess) {
+												$allowAccess = false;
+											}
+										}
 									}
-									if(isset($lastExist)) {
-										require $lastExist;
+
+									if($allowAccess) {
+										require 'pages/' . implode('/', __PAGES__) . '/index.php';
 									} else {
-										require 'pages/system/404.php';	
+										if(!$allowAccess) {
+											require 'pages/system/403.php';	
+										} else {
+											require 'pages/system/404.php';
+										}
+									}
+								} else {
+									if(file_exists('pages/' . implode('/', __PAGES__) . '.php')) {
+										require 'pages/' . implode('/', __PAGES__) . '.php';
+									} else {
+										$isFile = 'pages';
+										$isInAccess = '';
+										$allowAccess = false;
+
+										foreach (__PAGES__ as $key => $value) {
+											if(file_exists($isFile . '/' . $value . '.php')) {
+												$lastExist = $isFile . '/' . $value . '.php';
+											}
+
+											$isFile .= '/' . $value;
+										}
+
+										foreach (__PAGES__ as $key => $value) {
+											if($key == 0) {
+												$isInAccess .= $value;
+											} else {
+												$isInAccess .= '/' . $value;
+											}
+
+											//echo $isInAccess . '<br />';
+
+											if (in_array($isInAccess, $_SESSION['akses_halaman_link'])) {
+												$allowAccess = true;
+												break;
+											} else {
+												if($allowAccess) {
+													$allowAccess = false;
+												}
+											}
+										}
+
+										if(isset($lastExist) && $allowAccess) {
+											//echo $allowAccess;
+											require $lastExist;
+										} else {
+											if(!$allowAccess) {
+												require 'pages/system/403.php';	
+											} else {
+												require 'pages/system/404.php';
+											}
+										}
 									}
 								}
 							}
@@ -189,6 +251,39 @@
 			}
 			return s.join(dec);
 		}
+
+
+		$(function() {
+			var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
+			var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
+			var sideMenu3 = <?php echo json_encode($sideMenu3); ?>;
+
+			if(sideMenu1 > 0) {
+				$("#sidemenu_1").show();
+			} else {
+				$("#sidemenu_1").hide();
+			}
+
+			if(sideMenu2 > 0) {
+				$("#sidemenu_2").show();
+			} else {
+				$("#sidemenu_2").hide();
+			}
+
+			if(sideMenu3 > 0) {
+				$("#sidemenu_3").show();
+			} else {
+				$("#sidemenu_3").hide();
+			}
+
+			/*$("body").niceScroll({
+				cursorcolor:"#006b4a",
+				cursorwidth: "10px",
+				scrollspeed: 60
+			});
+			
+			$("body").getNiceScroll().resize();*/
+		});
 	</script>
 </body>
 
