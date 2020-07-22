@@ -8,10 +8,11 @@ composer.lock
 composer.json
 *.pem
 *.pub
-
+images/*
+audio/
+document/
 client/template/
 client/plugins/
-
 api/index.php
 api/sync.php
 api/constant.php
