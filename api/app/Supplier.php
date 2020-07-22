@@ -72,7 +72,7 @@ class Supplier extends Utility {
 		return $data;
 	}
 
-	private function get_detail($parameter) {
+	public function get_detail($parameter) {
 		$data = self::$query
 		->select('master_supplier', array(
 			'uid',
