@@ -47,7 +47,7 @@
 							require 'form-po-utama.php';
 						?>
 					</div>
-					<div class="tab-pane active show fade" id="tab-po-2">
+					<div class="tab-pane show fade" id="tab-po-2">
 						<?php
 							require 'form-po-lampiran.php';
 						?>

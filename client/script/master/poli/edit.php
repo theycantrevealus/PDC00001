@@ -267,8 +267,8 @@
 					},
 					type: "POST",
 					success: function(response){
-						console.log(response);
-						//location.href = __HOSTNAME__ + "/master/poli";
+						//console.log(response);
+						location.href = __HOSTNAME__ + "/master/poli";
 					},
 					error: function(response) {
 						console.log(response);

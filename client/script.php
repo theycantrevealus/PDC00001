@@ -1,4 +1,5 @@
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jquery.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/jquery.nicescroll/jquery.nicescroll.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/popper.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/bootstrap.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/simplebar.min.js"></script>

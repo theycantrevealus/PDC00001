@@ -120,6 +120,11 @@ class Antrian extends Utility {
 							$table . '.deleted_at' => 'IS NULL'
 						)
 					)
+					->order(
+						array(
+							$table . '.waktu_masuk' => 'DESC'
+						)
+					)
 					->execute();
 
 		$autonum = 1;
@@ -143,7 +148,8 @@ class Antrian extends Utility {
 						'kunjungan',
 						'departemen',
 						'penjamin',
-						'penjamin'
+						'dokter',
+						'waktu_masuk'
 					)
 				)
 				->where(array(
@@ -154,7 +160,27 @@ class Antrian extends Utility {
 					array($params)
 				)
 				->execute();
+		//More Info
+		foreach ($data['response_data'] as $key => $value) {
+			$Pasien = new Pasien(self::$pdo);
+			$PasienData = $Pasien::get_pasien_detail('pasien', $value['pasien']);
 
+			$Terminologi = new Terminologi(self::$pdo);
+			$Penjamin = new Penjamin(self::$pdo);
+
+			//Format Tanggal Lahir
+			$PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
+			
+			//Terminologi Jenis Kelamin
+			$TerminologiJenkel = $Terminologi::get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
+			$PasienData['response_data'][0]['jenkel_nama'] = $TerminologiJenkel['response_data'][0]['nama'];
+
+			$data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
+
+
+			//Penjamin
+			$data['response_data'][$key]['penjamin_data'] = $Penjamin::get_penjamin_detail($value['penjamin'])['response_data'][0];
+		}
 		return $data;
 	}
 
@@ -228,7 +254,7 @@ class Antrian extends Utility {
 		return $dataPasien;
 	}
 
-	private function tambah_kunjungan($table, $parameter){
+	private function tambah_kunjungan($table, $parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
@@ -270,7 +296,87 @@ class Antrian extends Utility {
 						)
 					);
 
-				$antrian = self::tambah_antrian('antrian', $parameter, $uid); 
+				//Update antrian kunjungan
+				if($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__) {
+					$antrianKunjungan = self::$query->update('antrian_nomor', array(
+						'status' => 'K',
+						'kunjungan' => $uid,
+						'poli' => $parameter['dataObj']['departemen'],
+						'pasien' => $parameter['dataObj']['currentPasien'],
+						'penjamin' => $parameter['dataObj']['penjamin'],
+						'dokter' => $parameter['dataObj']['dokter']
+					))
+					->where(array(
+						'antrian_nomor.id' => '= ?',
+						'AND',
+						'antrian_nomor.status' => '= ?'
+					), array(
+						$parameter['dataObj']['currentAntrianID'],
+						'D'
+					))
+					->execute();
+					return $antrianKunjungan;
+				} else {
+					$checkStatusPasien = self::$query->select('antrian', array(
+						'uid'
+					))
+					->where(array(
+						'antrian.pasien' => '= ?',
+						'AND',
+						'antrian.deleted_at' => 'IS NULL'
+					),array(
+						$parameter['dataObj']['currentPasien']
+					))
+					->execute();
+
+
+					if(count($checkStatusPasien['response_data']) > 0) {
+						$antrianKunjungan = self::$query->update('antrian_nomor', array(
+							'status' => 'P',
+							'kunjungan' => $uid,
+							'poli' => $parameter['dataObj']['departemen'],
+							'pasien' => $parameter['dataObj']['currentPasien'],
+							'penjamin' => $parameter['dataObj']['penjamin'],
+							'dokter' => $parameter['dataObj']['dokter']
+						))
+						->where(array(
+							'antrian_nomor.id' => '= ?',
+							'AND',
+							'antrian_nomor.status' => '= ?'
+						), array(
+							$parameter['dataObj']['currentAntrianID'],
+							'D'
+						))
+						->execute();
+
+						if($antrianKunjungan['response_result'] > 0) {
+							unset($parameter['dataObj']['currentPasien']);
+							$antrian = self::tambah_antrian('antrian', $parameter, $uid);
+							return $antrian;
+						} else {
+							return $antrian;
+						}
+					} else {
+						$antrianKunjungan = self::$query->update('antrian_nomor', array(
+							'status' => 'K',
+							'kunjungan' => $uid,
+							'poli' => $parameter['dataObj']['departemen'],
+							'pasien' => $parameter['dataObj']['currentPasien'],
+							'penjamin' => $parameter['dataObj']['penjamin'],
+							'dokter' => $parameter['dataObj']['dokter']
+						))
+						->where(array(
+							'antrian_nomor.id' => '= ?',
+							'AND',
+							'antrian_nomor.status' => '= ?'
+						), array(
+							$parameter['dataObj']['currentAntrianID'],
+							'D'
+						))
+						->execute();
+						return $antrianKunjungan;
+					}
+				}
 			}
 		
 		/*
@@ -279,13 +385,15 @@ class Antrian extends Utility {
 		return $antrian;
 		*/
 		
-		return $kunjungan;
+		//return $kunjungan;
 	}
 
 	private function tambah_antrian($table, $parameter, $uid_kunjungan){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+		$AntrianID = $parameter['dataObj']['currentAntrianID'];
+		unset($parameter['dataObj']['currentAntrianID']);
 		$uid = parent::gen_uuid();
 		$no_antrian = self::ambilNomorAntrianPoli($parameter['dataObj']['departemen']); 
 
@@ -307,32 +415,57 @@ class Antrian extends Utility {
 					->execute();
 
 		if ($antrian['response_result'] > 0) {
+			$updateNomorAntrian = self::$query->update('antrian_nomor', array(
+				'antrian' => $uid
+				))
+				->where(array(
+						'antrian_nomor.pasien' => '= ?',
+						'AND',
+						'antrian_nomor.poli' => '= ?',
+						'AND',
+						'antrian_nomor.dokter' => '= ?',
+						'AND',
+						'antrian_nomor.penjamin' => '= ?'
+					),array(
+						$allData['pasien'],
+						$allData['departemen'],
+						$allData['dokter'],
+						$allData['penjamin']
+					)
+				)
+				->execute();
+
+			if($updateNomorAntrian['response_result'] > 0) {
 				$log = parent::log(array(
-							'type'=>'activity',
-							'column'=>array(
-								'unique_target',
-								'user_uid',
-								'table_name',
-								'action',
-								'logged_at',
-								'status',
-								'login_id'
-							),
-							'value'=>array(
-								$uid,
-								$UserData['data']->uid,
-								$table,
-								'I',
-								parent::format_date(),
-								'N',
-								$UserData['data']->log_id
-							),
-							'class'=>__CLASS__
-						)
-					);
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$uid,
+						$UserData['data']->uid,
+						$table,
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+				return $antrian;
+
+			} else {
+				return $updateNomorAntrian;
+			}
+		} else {
+			return $antrian;
 		}
-		
-		return $antrian;
 	}
 
 	private function cekStatusAntrian($uid_pasien){

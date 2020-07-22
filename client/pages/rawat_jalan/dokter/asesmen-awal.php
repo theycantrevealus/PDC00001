@@ -133,7 +133,7 @@
 			</div>
 			<div class="card-body tab-content">
 				<div class="tab-pane active show fade" id="asesmen-kerja">
-					<div class="form-group col-lg-12">
+					<div class="form-group">
 						<label for="txt_icd_10_kerja">ICD 10</label>
 						<div class="input-group input-group-merge">
 							<select id="txt_icd_10_kerja" class="form-control"></select>
@@ -143,7 +143,7 @@
 					</div>
 				</div>
 				<div class="tab-pane show fade" id="asesmen-banding">
-					<div class="form-group col-lg-12">
+					<div class="form-group">
 						<label for="txt_icd_10_banding">ICD 10</label>
 						<div class="input-group input-group-merge">
 							<select id="txt_icd_10_banding" class="form-control"></select>
@@ -154,8 +154,6 @@
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="col-lg">
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
 				<h5 class="card-header__title flex m-0">Planning : Penatalaksanaan/Pengobatan/Rencana Tindakan/Konsultasi/Edukasi</h5>

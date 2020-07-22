@@ -1,22 +1,3 @@
-<style type="text/css">
-	
-	.not-active {
-		pointer-events: none;
-		cursor: default;
-		text-decoration: none;
-		color: black;
-	}
-
-	.table-not-active {
-		opacity: 50%;
-		pointer-events: none;
-		cursor: default;
-		text-decoration: none;
-		color: black;
-	}
-
-</style>
-
 <div class="container-fluid page__heading-container">
 	<div class="page__heading d-flex align-items-center">
 		<div class="flex">

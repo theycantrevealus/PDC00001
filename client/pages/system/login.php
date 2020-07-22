@@ -156,6 +156,7 @@
 								password:password
 							},
 							success:function(response) {
+								console.log(response);
 								if(response.response_result > 0) {
 									location.reload();
 								} else {
@@ -163,6 +164,7 @@
 								}
 							},
 							error: function(response) {
+								console.log(response);
 								$("#error_message").html(response);
 							}
 						});
