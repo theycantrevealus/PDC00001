@@ -185,7 +185,7 @@ class DeliveryOrder extends Utility {
 		if ($dataPO['response_result'] > 0){
 
 			//load po response_data
-			foreach ($data['response_data'] as $dataKey => $value) {
+			foreach ($dataPO['response_data'] as $dataKey => $value) {
 				$dataPO['response_data'][$key]['items'] = [];
 
 				//get from inv_do where row has inv_po uid
@@ -208,10 +208,9 @@ class DeliveryOrder extends Utility {
 									if ($doItems['barang'] == $poItems['barang']){
 										$selisih = intval($poItems['qty']) - intval($doItems['qty']);
 
-										if ($selisih == 0){
-											
-											//$dataPO['response'][$dataKey]['']
-										} 
+										if ($selisih > 0){
+											array_push($dataPO['response_data'][$dataKey]['items'], $poItems);
+										}
 									}
 								}
 							}
@@ -219,6 +218,9 @@ class DeliveryOrder extends Utility {
 					}
 				}
 
+				if ($dataPO['response_data'][$key]['items'] == ""){
+					unset($dataPO['response_data'][$key]);
+				}
 				//array_push($dataPO['response_data'][$key]['items'], $detailPO['response_data'][0]);
 			}
 		}
