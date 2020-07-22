@@ -10,6 +10,7 @@ composer.json
 *.pub
 images/*
 audio/
+document/
 client/template/
 client/plugins/
 api/index.php

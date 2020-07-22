@@ -569,13 +569,6 @@
 
 		function load_product_resep(target, selectedData = "", appendData = true) {
 			var selected = [];
-			/*$("#table-resep tbody tr").each(function(){
-				var getProductSelected = $(this).find("td:eq(1) select.resep-obat").val();
-				if(selected.indexOf(getProductSelected) < 0) {
-					selected.push(getProductSelected);
-				}
-			});*/
-
 			var productData;
 			$.ajax({
 				url:__HOSTAPI__ + "/Inventori",
