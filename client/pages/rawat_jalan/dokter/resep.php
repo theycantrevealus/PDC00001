@@ -13,7 +13,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<table class="table table-bordered largeDataType" id="table-resep">
-								<thead>
+								<thead class="thead-dark">
 									<tr>
 										<th class="wrap_content">No</th>
 										<th>Obat</th>
@@ -37,7 +37,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<table class="table table-bordered largeDataType" id="table-resep-racikan">
-								<thead>
+								<thead class="thead-dark">
 									<tr>
 										<th class="wrap_content">No</th>
 										<th>Obat</th>
