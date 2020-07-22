@@ -25,46 +25,27 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["waktu_masuk"];
+						return row.supplier.nama;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["no_rm"];
+						return row.tanggal_po;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["pasien"];
+						return "<h6 class=\"text-right\">" + number_format (row.total_after_disc, 2, ".", ",") + "</h6>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["departemen"];
+						return row.pegawai.nama;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["dokter"];
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return row["penjamin"];
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return row["user_resepsionis"];
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<a href=\"" + __HOSTNAME__ + "/rawat_jalan/dokter/antrian/" + row['uid'] + "\" class=\"btn btn-success btn-sm\">" +
-										"<i class=\"fa fa-sign-out-alt\"></i>" +
-									"</a>" +
-								"</div>";
+						return "<a href=\"" + __HOSTNAME__ + "/inventori/po/detail\" class=\"btn btn-info btn-sm\"><i class=\"fa fa-eye\"></i></a>";
 					}
 				}
 			]

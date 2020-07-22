@@ -25,8 +25,10 @@
 					<thead class="thead-dark">
 						<tr>
 							<th style="width: 20px;">No</th>
-							<th>Supplier</th>
-							<th>Pegawai</th>
+							<th>Pemasok</th>
+							<th>Tanggal</th>
+							<th>Total Biaya</th>
+							<th>Oleh</th>
 							<th>Aksi</th>
 						</tr>
 					</thead>
