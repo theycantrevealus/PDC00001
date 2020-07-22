@@ -32,6 +32,7 @@ class PO extends Utility {
 					break;
 				default:
 					return self::get_po();
+					break;
 			}
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
@@ -78,8 +79,89 @@ class PO extends Utility {
 			$data['response_data'][$key]['tanggal_po'] = date("d F Y", strtotime($value['tanggal_po']));
 			$data['response_data'][$key]['pegawai'] = $InfoPegawai['response_data'][0];
 			$data['response_data'][$key]['supplier'] = $InfoSupplier;
+      
+	public function get_po(){
+		$data = self::$query
+			->select('inventori_po', array(
+					'uid',
+					'supplier',
+					'pegawai',
+					'total',
+					'disc',
+					'disc_type',
+					'total_after_disc',
+					'tanggal_po',
+					'created_at',
+					'updated_at',
+					'keterangan'
+				)
+			)
+			->where(array(
+					'deleted_at' => 'IS NULL'
+				), array()
+			)
+			->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 		}
+
+		return $data;
+	}
+
+	public function get_po_detail($parameter){
+		$data = self::$query
+			->select('inventori_po_detail', array(
+					'id',
+					'po as uid_po',
+					'barang as uid_barang',
+					'qty',
+					'satuan',
+					'harga',
+					'disc',
+					'disc_type',
+					'subtotal',
+					'keterangan'
+				)
+			)
+			->where(array(
+					'inventori_po_detail.po' => '= ?'
+				), array(
+					$parameter
+				)
+			)
+			->execute();
+
+		return $data;
+	}
+
+	public function get_po_detail_barang($parameter){
+		$data = self::$query
+			->select('inventori_po_detail', array(
+					'id',
+					'po as uid_po',
+					'barang as uid_barang',
+					'qty',
+					'satuan',
+					'harga',
+					'disc',
+					'disc_type',
+					'subtotal',
+					'keterangan'
+				)
+			)
+			->where(array(
+					'inventori_po_detail.po' => '= ?',
+					'AND',
+					'inventori_po_detail.barang' => '= ?'
+				), array(
+					$parameter[1],
+					$parameter[2]
+				)
+			)
+			->execute();
 
 		return $data;
 	}
