@@ -8,7 +8,7 @@ composer.lock
 composer.json
 *.pem
 *.pub
-images/*
+images/
 audio/
 document/
 client/template/
