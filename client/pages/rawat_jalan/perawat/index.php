@@ -45,7 +45,7 @@
 			</div>
         	<div class="card card-body">
 				<div class="table-responsive border-bottom">
-					<table class="table table-bordered table-striped" id="table-antrian-perawat" style="font-size: 0.9rem;">
+					<table class="table table-bordered " id="table-antrian-perawat" style="font-size: 0.9rem;">
 						<thead>
 							<tr>
 								<th width="2%">No</th>

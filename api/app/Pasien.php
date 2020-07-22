@@ -107,7 +107,7 @@ class Pasien extends Utility {
 		return $data;
 	}
 
-	private function get_pasien_detail($table, $parameter){
+	public function get_pasien_detail($table, $parameter){
 		$data = self::$query
 					->select($table, array(
 						'uid',
@@ -153,6 +153,10 @@ class Pasien extends Utility {
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
+			//Panggilan
+			$Terminologi = new Terminologi(self::$pdo);
+			$TerminologiInfo = $Terminologi::get_terminologi_items_detail('terminologi_item', $value['panggilan']);
+			$data['response_data'][$key]['panggilan_name'] = $TerminologiInfo['response_data'][0];
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 		}

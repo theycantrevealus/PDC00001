@@ -21,7 +21,6 @@ class Pegawai extends Utility {
 
 	public function __GET__($parameter = array()) {
 		if($parameter[1] == 'detail') {
-
 			//__HOST__/Pegawai/detail/{uid}
 			return self::get_detail($parameter[2]);
 
@@ -39,6 +38,9 @@ class Pegawai extends Utility {
 			return self::get_access(array(
 				'uid' => $parameter[2]
 			));
+		} else if($parameter[1] == 'get_module') {
+
+			return self::get_module($parameter[2]);
 
 		} else {
 
@@ -67,6 +69,9 @@ class Pegawai extends Utility {
 				break;
 			case 'edit_jabatan':
 				return self::edit_jabatan($parameter);
+				break;
+			case 'update_pegawai_access':
+				return self::update_pegawai_access($parameter);
 				break;
 			default:
 				return array();
@@ -173,6 +178,12 @@ class Pegawai extends Utility {
 				$_SESSION['nama'] = $read[0]['nama'];
 				$_SESSION['password'] = $read[0]['password'];
 				$_SESSION['jabatan'] = self::get_jabatan_detail($read[0]['jabatan']);
+				
+				$moduleSelectedMeta = self::get_module($read[0]['uid']);
+				$_SESSION['akses_halaman'] = $moduleSelectedMeta['selected'];
+				$_SESSION['akses_halaman_link'] = $moduleSelectedMeta['selected_link'];
+				$_SESSION['akses_halaman_meta'] = $moduleSelectedMeta['selected_meta'];
+
 				if(strtolower($_SESSION['jabatan']['response_data'][0]['nama']) == 'dokter') {
 					//Load Dokter Data
 					$Poli = new Poli(self::$pdo);
@@ -227,27 +238,29 @@ class Pegawai extends Utility {
 
 	//DETAIL PEGAWAI
 	public function get_detail($parameter) {
-		return
-			self::$query
-				->select('pegawai', array(
-					'uid',
-					'email',
-					'jabatan',
-					'nama',
-					'password',
-					'created_at',
-					'updated_at'
-				))
+		$data = self::$query
+		->select('pegawai', array(
+			'uid',
+			'email',
+			'jabatan',
+			'nama',
+			'password',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'pegawai.deleted_at' => 'IS NULL',
+			'AND',
+			'pegawai.uid' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		$modulDataMeta = self::get_module($data['response_data'][0]['uid']);
+		$data['response_module'] = $modulDataMeta['build'];
+		$data['response_selected'] = $modulDataMeta['selected'];
 
-				->where(array(
-					'pegawai.deleted_at' => 'IS NULL',
-					'AND',
-					'pegawai.uid' => '= ?'
-				), array(
-					$parameter
-				))
-
-				->execute();
+		return $data;
 	}
 
 	//JABATAN DETAIL
@@ -422,6 +435,69 @@ class Pegawai extends Utility {
 
 				->execute();
 	}
+
+	public function get_module($parameter) {
+		/*$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);*/
+
+		//Load All Module
+		$Module = new Modul(self::$pdo);
+		$moduleData = $Module::get_all();
+
+
+		//Module setter
+		$setter = self::$query->select('pegawai_module', array(
+			'id',
+			'modul'
+		))
+		->where(array(
+			'pegawai_module.uid_pegawai' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		$settedModule = array();
+		$settedModuleLink = array();
+		$settedModuleMeta = array();
+		foreach ($setter['response_data'] as $key => $value) {
+			if(!in_array($value['modul'], $settedModule)) {
+				array_push($settedModule, $value['modul']);
+				array_push($settedModuleLink, self::get_module_detail($value['modul'])['response_data'][0]['identifier']);
+				array_push($settedModuleMeta, $value);
+			}
+		}
+
+		foreach ($moduleData as $key => $value) {
+			if(in_array($value['id'], $settedModule)) {
+				$moduleData[$key]['checked'] = true;
+			} else {
+				$moduleData[$key]['checked'] = false;
+			}
+		}
+
+		return array(
+			'build' => $moduleData,
+			'selected' => $settedModule,
+			'selected_link' => $settedModuleLink,
+			'selected_meta' => $settedModuleMeta
+		);
+	}
+
+	private function get_module_detail($parameter) {
+		$data = self::$query->select('modul', array(
+			'id',
+			'nama',
+			'identifier'
+		))
+		->where(array(
+			'modul.id' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+		return $data;
+	}
+
 	private function tambah_pegawai($parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
@@ -527,6 +603,76 @@ class Pegawai extends Utility {
 		}
 
 		return $worker;
+	}
+
+	private function update_pegawai_access($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		if($parameter['accessType'] == 'Y') {
+			$check = self::$query
+				->select('pegawai_module', array(
+					'id'
+				))
+
+				->where(array(
+					'pegawai_module.uid_pegawai' => '= ?',
+					'AND',
+					'pegawai_module.modul' => '= ?'
+				), array(
+					$parameter['uid'],
+					$parameter['modul']
+				))
+
+				->execute();
+			if(count($check['response_data']) > 0) {
+				return
+					self::$query
+						->update('pegawai_module', array(
+							'deleted_at' => NULL
+						))
+
+						->where(array(
+							'pegawai_module.uid_pegawai' => '= ?',
+							'AND',
+							'pegawai_module.modul' => '= ?'
+						), array(
+							$parameter['uid'],
+							$parameter['modul']
+						))
+
+						->execute();
+
+			} else {
+				return
+					self::$query
+						->insert('pegawai_module', array(
+							'uid_pegawai' => $parameter['uid'],
+							'modul' => $parameter['modul'],
+							'logged_at' => parent::format_date(),
+							'uid_admin' => $UserData['data']->uid
+						))
+
+						->execute();
+			}
+		} else {
+			return
+				self::$query
+					->update('pegawai_module', array(
+						'deleted_at' => parent::format_date()
+					))
+
+					->where(array(
+						'pegawai_module.uid_pegawai' => '= ?',
+						'AND',
+						'pegawai_module.modul' => '= ?'
+					), array(
+						$parameter['uid'],
+						$parameter['modul']
+					))
+
+					->execute();
+		}
 	}
 
 	private function update_access($parameter) {
