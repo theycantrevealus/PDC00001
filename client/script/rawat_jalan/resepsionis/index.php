@@ -367,64 +367,64 @@
 <script src="<?= __HOSTNAME__ ?>/template/assets/js/toastr.js"></script>
 
 <div id="modal-cari" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
-		<div class="modal-dialog modal-lg" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="modal-large-title">Tambah Antrian</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<div class="form-group col-md-6">
-						<div class="col-md-6">
-							<div class="row">
-								<label for="txt_cari">Cari Pasien</label>
-							</div>
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-large-title">Tambah Antrian</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group col-md-6">
+					<div class="col-md-6">
+						<div class="row">
+							<label for="txt_cari">Cari Pasien</label>
 						</div>
-						<div class="col-md-12">
-							<div class="row">
-								<div class="search-form form-control-rounded search-form--light input-group-lg col-md-10">
-									<input type="text" class="form-control" placeholder="Nama / NIK / No. RM" id="txt_cari">
-								</div>
-								<div class="col-md-12" hidden id="pencarian-notif" style="color: red; font-size: 0.8rem;">
-									Mohon ketikkan kata kunci pencarian
-								</div>
-								<div class="col-md-2">
-									<div class="loader loader-lg loader-primary" id="loader-search" hidden></div>
-								</div>
+					</div>
+					<div class="col-md-12">
+						<div class="row">
+							<div class="search-form form-control-rounded search-form--light input-group-lg col-md-10">
+								<input type="text" class="form-control" placeholder="Nama / NIK / No. RM" id="txt_cari">
+							</div>
+							<div class="col-md-12" hidden id="pencarian-notif" style="color: red; font-size: 0.8rem;">
+								Mohon ketikkan kata kunci pencarian
+							</div>
+							<div class="col-md-2">
+								<div class="loader loader-lg loader-primary" id="loader-search" hidden></div>
 							</div>
 						</div>
 					</div>
-					<div class="form-group col-md-12" >
-						<!-- style="height: 100px; overflow: scroll;" -->
-						<table class="table table-bordered table-striped" id="table-list-pencarian">
-							<thead>
-								<tr>
-									<th width="2%">No</th>
-									<th>No. RM</th>
-									<th>Nama</th>
-									<th>NIK</th>
-									<th>Jenis Kelamin</th>
-									<th>Aksi</th>
-								</tr>
-							</thead>
-							<tbody>
-								
-							</tbody>
-						</table>
-					</div>
-					
 				</div>
-				<div class="modal-footer">
-					<!-- <div id="spanBtnTambahPasien" hidden> -->
-					<a href="<?= __HOSTNAME__ ?>/pasien/tambah" class="btn btn-success" id="btnTambahPasien">
-					<!-- <i class="fa fa-plus"></i>  -->Tambah Pasien Baru
-					</a>
-					<!-- </div> -->
-					
-					<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+				<div class="form-group col-md-12" >
+					<!-- style="height: 100px; overflow: scroll;" -->
+					<table class="table table-bordered table-striped" id="table-list-pencarian">
+						<thead>
+							<tr>
+								<th width="2%">No</th>
+								<th>No. RM</th>
+								<th>Nama</th>
+								<th>NIK</th>
+								<th>Jenis Kelamin</th>
+								<th>Aksi</th>
+							</tr>
+						</thead>
+						<tbody>
+							
+						</tbody>
+					</table>
 				</div>
-			</div> 
+				
+			</div>
+			<div class="modal-footer">
+				<!-- <div id="spanBtnTambahPasien" hidden> -->
+				<a href="<?= __HOSTNAME__ ?>/pasien/tambah" class="btn btn-success" id="btnTambahPasien">
+				<!-- <i class="fa fa-plus"></i>  -->Tambah Pasien Baru
+				</a>
+				<!-- </div> -->
+				
+				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+			</div>
 		</div> 
 	</div> 
+</div> 
