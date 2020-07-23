@@ -3,6 +3,9 @@
 		var no_urut_universal = 1;
         var dataInfo = {};
         var dataItems = {};
+        var using_po = false;
+        var uid_po;
+        var supplier_po = loadFromPo();
 
         loadGudang();
         loadPemasok();
@@ -17,7 +20,7 @@
 			if (stats == true){
 				if ($("#barang_" + id).parent().parent().hasClass("last")) {
                     no_urut_universal++;
-					newColumn(no_urut_universal);
+					newColumn(no_urut_universal, using_po, uid_po);
 					$("#barang_" + id).parent().parent().removeClass("last");
                     //setLastRow('item_' + no_urut_universal);
                     setNomorUrut("table-item-do","no_urut");
@@ -33,7 +36,7 @@
 			if (stats == true){
 				if ($("#barang_" + id).parent().parent().hasClass("last")) {
 					no_urut_universal++;
-                    newColumn(no_urut_universal);
+                    newColumn(no_urut_universal, using_po, uid_po);
 					$("#barang_" + id).parent().parent().removeClass("last");
                     //setLastRow('item_' + no_urut_universal);
                     setNomorUrut("table-item-do","no_urut");
@@ -44,6 +47,71 @@
 		$("#table-item-do tbody").on('click', '.btn-hapus-item', function(){
             $(this).closest("tr").remove();
             setNomorUrut("table-item-do","no_urut");
+        });
+
+        $("#supplier").on('change', function(){
+            //$("#po").val("");
+            //.trigger('change');
+            $("#table-item-do tbody").html("");
+            using_po = false;
+            no_urut_universal = 1;
+            newColumn(no_urut_universal, using_po, uid_po)
+            setNomorUrut("table-item-do","no_urut");
+        });
+
+        $("#po").on('change', function(){
+            uid_po = $(this).val();
+
+            if (uid_po != ""){
+                using_po = true;
+
+                $("#supplier").val(supplier_po[uid_po]).trigger('change');
+                $("#table-item-do tbody").html("");
+                var MetaData = loadPoItems(uid_po);              
+                var opsi = "<option value=''>Pilih Item</option>";
+
+
+                //$("#supplier").val(MetaData[0].uid_supplier).trigger('change');
+
+                for(i = 0; i < MetaData.length; i++){
+                    opsi += "<option value='"+ MetaData[i].uid_barang +"'>"+ MetaData[i].nama_barang + "</option>";
+                }
+                
+                var html = "";
+                let no_urut = 1;
+                for(i = 0; i < MetaData.length; i++){
+                    html = '<tr>' +
+                            '<td class="no_urut"></td>' +
+                            '<td><select class="form-control itemInputanSelect select2 items" id="barang_'+ no_urut +'" nama="barang_'+ no_urut +'">'+ opsi +'</select>' + 
+                                '<div class="input-group">' +
+                                    '<div class="input-group-prepend">' +
+                                        '<span class="input-group-text" id="kedaluarsa_label_'+ no_urut +'">Kedaluarsa</span>' +
+                                    '</div>' +
+                                    '<input type="date" name="kedaluarsa_'+ no_urut +'" id="kedaluarsa_'+ no_urut +'" class="form-control itemInputan items" placeholder="Kedaluarsa" aria-describedby="kedaluarsa_label">' + 
+                                '</div>' + 
+                            '</td>' +
+                            '<td><input type="text" name="kode_batch_'+ no_urut +'" id="kode_batch_'+ no_urut +'" class="form-control itemInputan items" placeholder="Kode Batch"></td>' +
+                            '<td><input type="number" name="qty_'+ no_urut +'" id="qty_'+ no_urut +'" class="form-control itemInputan items" value="0"></td>' +
+                            '<td><span id="satuan_'+ no_urut +'">Satuan</span></td>' + 
+                            '<td><textarea class="form-control items" id="keterangan_'+ no_urut +'" nama="keterangan_'+ no_urut +'"></textarea></td>' + 
+                            '<td><button class="btn btn-sm btn-danger btn-hapus-item" data-toggle="tooltip" title="Hapus"><i class="fa fa-trash"></i></button></td>' +
+                        '</tr>';
+
+                    $("#table-item-do tbody").append(html);
+                    $("#barang_" + no_urut).val(MetaData[i].uid_barang);
+                    no_urut_universal = no_urut;
+                    no_urut++;
+                }
+                setNomorUrut("table-item-do","no_urut");
+                    
+            } else {
+                $("#table-item-do tbody").html("");
+                using_po = false;
+                no_urut_universal = 1;
+                newColumn(no_urut_universal, using_po, uid_po)
+                setNomorUrut("table-item-do","no_urut");
+                $("#supplier").val("").trigger('change');
+            }
         });
 
         $("#btnSubmit").click(function(){
@@ -66,7 +134,6 @@
                     $this = $(this);
                     let row = $(this).attr("id").split("_");
                     let name = row.slice(0, row.length - 1).join("_");
-                    //name.join("_");
                     row = row[row.length - 1];
                     
                     if (row in dataItems){
@@ -77,7 +144,13 @@
                 }
             });
 
-            $.ajax({
+            dataInfo['po'] = uid_po;
+
+            console.log(dataInfo);
+
+            //if (dataInfo[''])
+
+           /* $.ajax({
                 async: false,
                 url: __HOSTAPI__ + "/DeliveryOrder",
                 data: {
@@ -90,14 +163,15 @@
                 },
                 type: "POST",
                 success: function(response){
-                    console.log(response);
-                    //location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+                    //console.log(response);
+                    location.href = __HOSTNAME__ + '/inventori/do';
                 },
                 error: function(response) {
                     console.log("Error : ");
                     console.log(response);
                 }
             });
+            */
 
             return false;
 
@@ -170,13 +244,7 @@
 		return stats;
 	}
 
-	function newColumn(no_urut){
-        /*html = "<tr id='tindakan_" + uid_tindakan + "'>" + 
-                    "<td class='no_urut'></td>" +
-                    "<td><a href='#' class='linkTindakan'>"+ nama_tindakan +"</a></td>" +
-                    "<td><button type='button' rel='tooltip' id='btn_tindakan_"+ uid_tindakan +"' class='btn btn-sm btn-danger btnHapusTindakan' data-toggle='tooltip' data-placement='top' title='' data-original-title='Hapus'><i class='fa fa-trash'></i></button></td>" +
-                "</tr>";*/
-
+	function newColumn(no_urut, using_po, uid_po){
         let html = '<tr>' +
 					'<td class="no_urut"></td>' +
 					'<td><select class="form-control itemInputanSelect select2 items" id="barang_'+ no_urut +'" nama="barang_'+ no_urut +'"><option value="">Pilih Item</option></select>' + 
@@ -196,8 +264,17 @@
 
         $("#table-item-do tbody").append(html);
         setNomorUrut("table-item-do","no_urut");
-        loadItem(no_urut);
-        loadSatuan(no_urut);
+        if (using_po == true){
+            var MetaData = loadPoItems(uid_po);              
+            var opsi = "<option value=''>Pilih Item</option>";
+
+            for(i = 0; i < MetaData.length; i++){
+                opsi += "<option value='"+ MetaData[i].uid_barang +"'>"+ MetaData[i].nama_barang + "</option>";
+            }
+            $("#barang_" + no_urut).html(opsi);
+        } else {
+            loadItem(no_urut);
+        }
     }
 
     function loadItem(selector_id){
@@ -258,30 +335,61 @@
         return dataSatuan;
     }
 
-    function loadFromPo(){
+    function loadFromPo(uid_supplier = null){
+        var supplier_po = [];
+        var url = "";
+
+        if (uid_supplier == null){
+            url = '/load-po-available';
+        } else {
+            url = '/load-po-supplier/' + uid_supplier;
+        }
 
         $.ajax({
             async: false,
-            url:__HOSTAPI__ + "/Inventori/satuan",
+            url:__HOSTAPI__ + "/DeliveryOrder" + url,
             type: "GET",
              beforeSend: function(request) {
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             success: function(response){
-                dataSatuan = response.response_package.response_data;
+                var MetaData = response.response_package.response_data;
 
-                var html = "";
-                 for(i = 0; i < dataSatuan.length; i++){
-                    var selection = document.createElement("OPTION");
-
-                    $(selection).attr("value", dataSatuan[i].uid).html(dataSatuan[i].nama);
-                    //$("#satuan_" + selector_id).append(selection);
+                for(i = 0; i < MetaData.length; i++){
+                    if ($("#po option[value='"+ MetaData[i].po +"']").length == 0){
+                        var selection = document.createElement("OPTION");
+                        $(selection).attr("value", MetaData[i].po).html(MetaData[i].nomor_po);
+                        $("#po").append(selection);
+                        
+                        supplier_po[MetaData[i].po] = MetaData[i].uid_supplier;
+                    }
                 }
             },
             error: function(response) {
                 console.log(response);
             }
         });
+
+        return supplier_po;
+    }
+
+    function loadPoItems(uid_po){
+        $.ajax({
+            async: false,
+            url:__HOSTAPI__ + "/PO/po-items/" + uid_po,
+            type: "GET",
+             beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                MetaData = response.response_package.response_data;
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+
+        return MetaData;
     }
 
 	function setNomorUrut(table_name, no_urut_class){

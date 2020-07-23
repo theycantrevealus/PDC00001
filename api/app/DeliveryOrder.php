@@ -31,8 +31,16 @@ class DeliveryOrder extends Utility {
 				/*case 'get_penjamin_tindakan':
 					return self::get_penjamin_tindakan($parameter[2]);
 					break;*/
-				case 'load-po':
-					return self::load_po();
+				case 'load-po-available':
+					return self::load_po_available();
+					break;
+
+				case 'load-po-supplier':
+					return self::load_po_supplier($parameter[2]);
+					break;
+
+				case 'load-do-po':
+					return self::get_do_where_po($parameter[2]);
 					break;
 
 				default:
@@ -114,7 +122,7 @@ class DeliveryOrder extends Utility {
 		$data = self::$query
 			->select('inventori_do_detail', array(
 					'id',
-					'do',
+					'uid_do',
 					'barang',
 					'kode_batch',
 					'kedaluarsa',
@@ -128,7 +136,7 @@ class DeliveryOrder extends Utility {
 			->where(array(
 					'inventori_do_detail.deleted_at' => 'IS NULL',
 					'AND',
-					'inventori_do_detail.do' => '= ?'
+					'inventori_do_detail.uid_do' => '= ?'
 				), array(
 					$parameter
 				)
@@ -177,16 +185,17 @@ class DeliveryOrder extends Utility {
 		return $data;
 	}	
 
-	private function load_po(){
+	/*private function load_po(){
 		$po = new PO(self::$pdo);
 		$dataPO = $po->get_po();
+		$test = [];
 
 		//check po result
 		if ($dataPO['response_result'] > 0){
 
 			//load po response_data
 			foreach ($dataPO['response_data'] as $dataKey => $value) {
-				$dataPO['response_data'][$key]['items'] = [];
+				//$dataPO['response_data'][$dataKey]['items'] = [];
 
 				//get from inv_do where row has inv_po uid
 				$dataDO = self::get_do_where_po($value['uid']);
@@ -198,33 +207,101 @@ class DeliveryOrder extends Utility {
 						//get inv_do_detail
 						$itemDO = self::get_do_detail($items['uid']);
 
+						$test = [$itemPO['response_data'], $itemDO['response_data']];
 						//if inv_do_detail row has inv_do uid
 						if ($itemDO['response_result'] > 0){
 							//check if itemDO is in itemPO
-							foreach ($itemDO as $key => $doItems) {
+							foreach ($itemDO as $doKey => $doItems) {
 								//load itemPO
-								foreach ($itemPO as $key => $poItems) {
+								foreach ($itemPO as $poKey => $poItems) {
 									
 									if ($doItems['barang'] == $poItems['barang']){
 										$selisih = intval($poItems['qty']) - intval($doItems['qty']);
 
 										if ($selisih > 0){
+											$poItems['selisih'] = 0;
 											array_push($dataPO['response_data'][$dataKey]['items'], $poItems);
+											//$dataPO['response_data'][$dataKey]['items'] = $itemPO['response_data'];
 										}
+									} else {
+										$poItems['selisih'] = 0;
+										array_push($dataPO['response_data'][$dataKey]['items'], $poItems);
 									}
 								}
 							}
+						} else {
+							$dataPO['response_data'][$dataKey]['items'] = $itemPO['response_data'];
 						}
+
+						foreach ($itemPO['response_data'] as $poKey => $poItems) {
+
+							foreach ($itemDO['response_data'] as $doKey => $doItems) {
+								
+								if ($poItems['uid_barang'] == $doItems['barang']){
+									//count difference qty in po and do 
+									$selisih = intval($poItems['qty']) - intval($doItems['qty']);
+
+									if ($selisih > 0){
+										$poItems['selisih'] = $selisih;
+										$dataPO['response_data'][$dataKey]['items'][$poKey] = $poItems;
+									}
+								} else {
+									$poItems['selisih'] = $poItems['qty'];
+									//$dataPO['response_data'][$dataKey]['items'][$poKey] = $poItems;
+								}
+								//$dataPO['response_data'][$dataKey]['items'][$doKey] = $doItems;
+							}
+							//$dataPO['response_data'][$dataKey]['items'][$poKey] = $poItems;
+						}
+						//array_push($test, [$poItems, $doItems]);
+
 					}
+				} else {
+					$dataPO['response_data'][$dataKey]['items'] = $itemPO['response_data'];
 				}
 
-				if ($dataPO['response_data'][$key]['items'] == ""){
-					unset($dataPO['response_data'][$key]);
+				if ($dataPO['response_data'][$dataKey]['items'] == ""){
+					//unset($dataPO['response_data'][$dataKey]);
 				}
 				//array_push($dataPO['response_data'][$key]['items'], $detailPO['response_data'][0]);
 			}
 		}
-		
+
+		return $dataPO;
+		//return $test;
+	}*/
+
+	private function load_po_available(){
+		$po = new PO(self::$pdo);
+		$dataPO = $po->get_po_detail_qty();
+
+		$autonum = 1;
+		foreach ($dataPO['response_data'] as $key => $value) {
+			$dataPO['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+
+			$po_detail = $po->get_po_detail($value['po']);
+			$dataPO['response_data'][$key]['nomor_po'] = $po_detail['response_data'][0]['nomor_po'];
+			$dataPO['response_data'][$key]['uid_supplier'] = $po_detail['response_data'][0]['supplier'];
+		}
+
+		return $dataPO;
+	}
+
+	public function load_po_supplier($parameter){
+		$po = new PO(self::$pdo);
+		$dataPO = $po->get_po_detail_qty();
+
+		$autonum = 1;
+		foreach ($dataPO['response_data'] as $key => $value) {
+			$dataPO['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+
+			$po_detail = $po->get_po_detail($value['po']);
+			$dataPO['response_data'][$key]['nomor_po'] = $po_detail['response_data'][0]['nomor_po'];
+			$dataPO['response_data'][$key]['uid_supplier'] = $po_detail['response_data'][0]['supplier'];
+		}
+
 		return $dataPO;
 	}
 
@@ -245,8 +322,10 @@ class DeliveryOrder extends Utility {
 			->insert('inventori_do', $parameter['dataInfo'])
 			->execute();
 
+		$uid_po = (isset($parameter['dataInfo']['po'])) ? $parameter['dataInfo']['po'] : null;
+
 		if ($do['response_result'] > 0) {
-			$do_items = self::tambah_do_detail($parameter['dataItems'], $uid);
+			$do_items = self::tambah_do_detail($parameter['dataItems'], $uid, $uid_po);
 
 			$log = parent::log(array(
 					'type'=>'activity',
@@ -278,9 +357,9 @@ class DeliveryOrder extends Utility {
 		return $result;
 	}
 
-	private function tambah_do_detail($parameter, $uid_parent){
-		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+	private function tambah_do_detail($parameter, $uid_parent, $uid_po){
+		/*$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);*/
 
 		foreach ($parameter as $key => $value) {
 			$value['uid_do'] = $uid_parent;
@@ -289,9 +368,57 @@ class DeliveryOrder extends Utility {
 			$detail = self::$query
 				->insert('inventori_do_detail', $value)
 				->execute();
+
+			if ($detail['response_result'] > 0){
+				if ($uid_po != ""){
+					$cek_po = self::$query
+						->select('inventori_do_detail', array(
+							'qty', 'barang'))
+						->join('inventori_do', array(
+							'uid as uid_do'))
+						->join('inventori_po', array(
+							'uid as uid_po'))
+						->on(array(
+							array('inventori_do_detail.uid_do', '=', 'inventori_do.uid'),
+							array('inventori_do.po', '=', 'inventori_po.uid')
+						))
+						->where(array(
+								'inventori_do_detail.barang' => '= ?', 
+								'AND',
+								'inventori_po.uid' => '= ?'),
+							array(
+								$value['barang'], 
+								$uid_po)
+						)
+						->execute();
+
+					$qty_calculate = 0;
+					if ($cek_po['response_result'] > 0){
+						foreach ($cek_po['response_data'] as $key => $value) {
+							$qty_calculate += intval($cek_po['response_data'][$key]['qty']);
+						}
+
+						$poUpdate = self::$query
+							->update('inventori_po_detail', array(
+									'qty_sampai' => $qty_calculate
+								)
+							)
+							->where(array(
+									'inventori_po_detail.barang' => '= ?',
+									'AND',
+									'inventori_po_detail.po' => '= ?'
+								), array(
+									$value['barang'],
+									$uid_po
+								)
+							)
+							->execute();
+					}
+				}
+			}
 		}
 
-		return $detail;
+		return ['detail'=>$detail,'poUpdate'=>$poUpdate];
 	}
 
 	/*===============FUNGSI TAMBAHAN================*/

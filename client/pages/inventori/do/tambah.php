@@ -39,7 +39,7 @@
 									</div>
 									<div class="col-md-4 form-group">
 										<label>No. Purchase Order:</label>
-										<select class="form-control select2 informasi" id="po" name="po">
+										<select class="form-control select2" id="po" name="po">
 											<option value="">Tidak PO</option>
 										</select>
 									</div>
