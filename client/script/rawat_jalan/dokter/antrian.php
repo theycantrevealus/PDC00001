@@ -39,8 +39,10 @@
 					},
 					type:"GET",
 					success:function(response) {
-						loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
-						loadPasien(UID);
+						if(response.response_package.response_data[0].asesmen_rawat !== undefined) {
+							loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
+							loadPasien(UID);
+						}
 
 						if(response.response_package.response_data[0] === undefined) {
 							asesmen_detail = {};
@@ -70,49 +72,51 @@
 							var keterangan_resep = "";
 							var keterangan_racikan = "";
 
-							if(response.response_package.response_data[0].resep.length > 0) {
+							if(response.response_package.response_data[0].resep !== undefined) {
+								if(response.response_package.response_data[0].resep.length > 0) {
 
-								var resep_uid = response.response_package.response_data[0].resep[0].uid;
-								var resep_obat_detail = response.response_package.response_data[0].resep[0].resep_detail;
-								
-								keterangan_resep = response.response_package.response_data[0].resep[0].keterangan;
-								keterangan_racikan = response.response_package.response_data[0].resep[0].keterangan_racikan;
+									var resep_uid = response.response_package.response_data[0].resep[0].uid;
+									var resep_obat_detail = response.response_package.response_data[0].resep[0].resep_detail;
+									
+									keterangan_resep = response.response_package.response_data[0].resep[0].keterangan;
+									keterangan_racikan = response.response_package.response_data[0].resep[0].keterangan_racikan;
 
-								for(var resepKey in resep_obat_detail) {
-									autoResep({
-										"obat": resep_obat_detail[resepKey].obat,
-										"aturan_pakai": resep_obat_detail[resepKey].aturan_pakai,
-										"keterangan": resep_obat_detail[resepKey].keterangan,
-										"signaKonsumsi": resep_obat_detail[resepKey].signa_qty,
-										"signaTakar": resep_obat_detail[resepKey].signa_pakai,
-										"signaHari": resep_obat_detail[resepKey].qty,
-										"pasien_penjamin_uid": pasien_penjamin_uid
+									for(var resepKey in resep_obat_detail) {
+										autoResep({
+											"obat": resep_obat_detail[resepKey].obat,
+											"aturan_pakai": resep_obat_detail[resepKey].aturan_pakai,
+											"keterangan": resep_obat_detail[resepKey].keterangan,
+											"signaKonsumsi": resep_obat_detail[resepKey].signa_qty,
+											"signaTakar": resep_obat_detail[resepKey].signa_pakai,
+											"signaHari": resep_obat_detail[resepKey].qty,
+											"pasien_penjamin_uid": pasien_penjamin_uid
+										});
+									}
+
+									if(resep_obat_detail.length > 0) {
+										autoResep();
+									}
+								}
+
+								var racikan_detail = response.response_package.response_data[0].racikan;
+								//console.log(racikan_detail);
+								for(var racikanKey in racikan_detail) {
+									autoRacikan({
+										nama: racikan_detail[racikanKey].kode,
+										keterangan: racikan_detail[racikanKey].keterangan,
+										"signaKonsumsi": racikan_detail[racikanKey].signa_qty,
+										"signaTakar": racikan_detail[racikanKey].signa_pakai,
+										"signaHari": racikan_detail[racikanKey].qty,
+										"item":racikan_detail[racikanKey].item
 									});
+									var itemKomposisi = racikan_detail[racikanKey].item
+									for(var komposisiKey in itemKomposisi) {
+										autoKomposisi((parseInt(racikanKey) + 1), itemKomposisi[komposisiKey]);
+									}
 								}
-
-								if(resep_obat_detail.length > 0) {
-									autoResep();
+								if(racikan_detail.length > 0) {
+									autoRacikan();	
 								}
-							}
-
-							var racikan_detail = response.response_package.response_data[0].racikan;
-							//console.log(racikan_detail);
-							for(var racikanKey in racikan_detail) {
-								autoRacikan({
-									nama: racikan_detail[racikanKey].kode,
-									keterangan: racikan_detail[racikanKey].keterangan,
-									"signaKonsumsi": racikan_detail[racikanKey].signa_qty,
-									"signaTakar": racikan_detail[racikanKey].signa_pakai,
-									"signaHari": racikan_detail[racikanKey].qty,
-									"item":racikan_detail[racikanKey].item
-								});
-								var itemKomposisi = racikan_detail[racikanKey].item
-								for(var komposisiKey in itemKomposisi) {
-									autoKomposisi((parseInt(racikanKey) + 1), itemKomposisi[komposisiKey]);
-								}
-							}
-							if(racikan_detail.length > 0) {
-								autoRacikan();	
 							}
 							checkGenerateRacikan();
 						}
