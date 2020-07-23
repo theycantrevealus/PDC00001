@@ -39,6 +39,8 @@
 					},
 					type:"GET",
 					success:function(response) {
+						loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
+						loadPasien(UID);
 
 						if(response.response_package.response_data[0] === undefined) {
 							asesmen_detail = {};
@@ -93,7 +95,6 @@
 								}
 							}
 
-							console.clear();
 							var racikan_detail = response.response_package.response_data[0].racikan;
 							//console.log(racikan_detail);
 							for(var racikanKey in racikan_detail) {
@@ -1738,6 +1739,93 @@
 
 			return radiologiTindakan;
 		}*/
+
+		function loadPasien(params){
+			if (params != ""){
+				$.ajax({
+					async: false,
+		            url:__HOSTAPI__ + "/AssesmenRawatJalan/pasien-detail/" + params,
+		            type: "GET",
+		            beforeSend: function(request) {
+		                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+		            },
+		            success: function(response){
+		                dataPasien = response.response_package.pasien;
+		                dataAntrian = response.response_package.antrian;
+
+		                $.each(dataPasien, function(key, item){
+		                	$(".perawat #" + key).html(item)
+		                });
+
+		                 $.each(dataAntrian, function(key, item){
+		                	$(".perawat #" + key).val(item);
+		                });
+
+		                if (dataPasien.id_jenkel == 2){
+							$(".perawat .wanita").attr("hidden",true);
+						} else {
+							$(".perawat .pria").attr("hidden",true);
+						}
+		            },
+		            error: function(response) {
+		                console.log(response);
+		            }
+		        });
+			}
+		}
+
+		function loadAssesmen(params){
+			var dataAssesmen;
+
+			if (params != ""){
+				$.ajax({
+					async: false,
+		            url:__HOSTAPI__ + "/AssesmenRawatJalan/assesmen-detail/" + params,
+		            type: "GET",
+		            beforeSend: function(request) {
+		                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+		            },
+		            success: function(response){
+		                dataAssesmen = response.response_package.response_data[0];
+		                var listName = [];
+
+		                if (dataAssesmen != ""){
+		                	$.each(dataAssesmen, function(key, item){
+			                	$("#" + key).val(item);
+			                	checkedRadio(key, item);
+			                	checkedCheckbox(key, item);
+
+			                	listName.push(key);
+			                });
+		                }
+		            },
+		            error: function(response) {
+		                console.log(response);
+		            }
+		        });
+			}
+
+			return dataAssesmen;
+		}
+
+		function checkedRadio(name, value){
+			var $radios = $('input:radio[name='+ name +']');
+
+			if ($radios != ""){
+				if($radios.is(':checked') === false) {
+		       	 $radios.filter('[value="'+ value +'"]').prop('checked', true);
+		    	}
+			}
+		}
+
+		function checkedCheckbox(name, value){
+			var $check = $('input:checkbox[name='+ name +']');
+		    if ($check != ""){
+			    if($check.is(':checked') === false) {
+			        $check.filter('[value="'+ value +'"]').prop('checked', true);
+			    }
+			}		 
+		}
 	});
 
 </script>

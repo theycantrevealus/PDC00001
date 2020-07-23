@@ -77,6 +77,21 @@ class Asesmen extends Utility {
 			$Poli = new Poli(self::$pdo);
 			$PoliDetail = $Poli::get_poli_detail($antrian['response_data'][0]['departemen'])['response_data'][0];
 
+
+			$Rawat = self::$query->select('assesmen_rawat_' . $PoliDetail['poli_asesmen'], array(
+				'uid'
+			))
+			->where(array(
+				'assesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?'
+			), array(
+				$antrian['response_data'][0]['uid']
+			))
+			->execute();
+
+			
+
+
+
 			$data = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
 				'uid',
 				'kunjungan',
@@ -253,7 +268,7 @@ class Asesmen extends Utility {
 
 				$data['response_data'][0]['racikan'] = $racikanData;
 				$data['response_data'][0]['resep'] = $resep['response_data'];
-
+				$data['response_data'][0]['asesmen_rawat'] = $Rawat['response_data'][0]['uid'];
 				return $data;
 			} else {
 				return $antrian;
