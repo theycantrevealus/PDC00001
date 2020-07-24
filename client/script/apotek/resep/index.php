@@ -167,23 +167,42 @@
 				var newObat = document.createElement("SELECT");
 				$(newDetailCellObat).append(newObat);
 				var ObatData = load_product_resep(newObat, data.detail[a].detail.uid, false);
+
+				var newBatchSelector = document.createElement("SELECT");
+				$(newDetailCellObat).append("<b style=\"padding-top: 10px; display: block\">Batch</b>").append(newBatchSelector);
+
 				//$(newDetailCellObat).html(data.detail[a].detail.nama);
+				var batchDataUnique = [];
+				var batchData = [];
 				
 				var itemData = ObatData.data;
+
 				var parsedItemData = [];
 				var obatNavigator = [];
 				for(var dataKey in itemData) {
 					var penjaminList = [];
 					var penjaminListData = itemData[dataKey].penjamin;
+					
+
 					for(var penjaminKey in penjaminListData) {
 						if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
 							penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
 						}
 					}
+
+					var batchListData = itemData[dataKey].batch;
+					for(var batchKey in batchListData) {
+						if(batchDataUnique.indexOf(batchListData[batchKey].batch) < 0) {
+							batchDataUnique.push(batchListData[batchKey].batch);
+							batchData.push(batchListData[batchKey]);
+						}
+					}
 					
 					obatNavigator.push(itemData[dataKey].uid);
+
 					parsedItemData.push({
 						id: itemData[dataKey].uid,
+						"jumlah": data.detail[a].qty,
 						"penjamin-list": penjaminList,
 						"satuan-caption": itemData[dataKey].satuan_terkecil.nama,
 						"satuan-terkecil": itemData[dataKey].satuan_terkecil.uid,
@@ -195,17 +214,21 @@
 						title: itemData[dataKey].nama
 					});
 				}
+				
+				$(newBatchSelector).addClass("form-control batch-loader").select2();
 
 				var newDetailCellQty = document.createElement("TD");
 				$(newDetailCellQty).html("<h6>" + data.detail[a].qty + " <span>" + parsedItemData[obatNavigator.indexOf(itemData[dataKey].uid)]['satuan-caption'] + "</span></h6>");
 
 				var newDetailCellHarga = document.createElement("TD");
+				$(newDetailCellHarga).addClass("text-right");
 				
 				var newDetailCellTotal = document.createElement("TD");
+				$(newDetailCellTotal).addClass("text-right");
 
 				var newDetailCellPenjamin = document.createElement("TD");
 				var PenjaminAvailable = data.detail[a].detail.penjamin;
-				var penjaminList = [];
+				//var penjaminList = [];
 				for(var penjaminKey in PenjaminAvailable) {
 					if(penjaminList.indexOf(PenjaminAvailable[penjaminKey].penjamin) < 0) {
 						penjaminList.push(PenjaminAvailable[penjaminKey].penjamin);
@@ -224,13 +247,38 @@
 				$(newDetailCellAksi).append(newVerifButton);
 				$(newVerifButton).addClass("btn btn-sm btn-success").html("<i class=\"fa fa-check\"></i> Verifikasi");
 
+				for(var batchRKey in batchData) {
+					if(batchData[batchRKey].barang == data.detail[a].detail.uid) {
+						$(newBatchSelector).append("<option harga=\"" + batchData[batchRKey].harga + "\" value=\"" + batchData[batchRKey].batch + "\">" + batchData[batchRKey].kode + "</option>");
+						$(newDetailCellHarga).html(((parseFloat(batchData[batchRKey].harga) > 0) ? number_format(batchData[batchRKey].harga, 2, ".", ",") : 0));
+						$(newDetailCellTotal).html(((parseFloat(data.detail[a].qty * batchData[batchRKey].harga) > 0) ? number_format(data.detail[a].qty * batchData[batchRKey].harga, 2, ".", ",") : 0));
+					}
+				}
+
 				/*var newRevisiButton = document.createElement("BUTTON");
 				$(newDetailCellAksi).append(newRevisiButton);
 				$(newRevisiButton).addClass("btn btn-sm btn-info").html("<i class=\"fa fa-receipt\"></i> Revisi");*/
 
 
 				//=======================================
-				
+				$(newDetailRow).append(newDetailCellID);
+				$(newDetailRow).append(newDetailCellObat);
+				$(newDetailRow).append(newDetailCellQty);
+				$(newDetailRow).append(newDetailCellHarga);
+				$(newDetailRow).append(newDetailCellTotal);
+				$(newDetailRow).append(newDetailCellPenjamin);
+				$(newDetailRow).append(newDetailCellAksi);
+
+				$("#load-detail-resep tbody").append(newDetailRow);
+
+
+
+
+
+
+
+
+
 
 				$(newObat).addClass("form-control resep-obat").select2({
 					data: parsedItemData,
@@ -248,9 +296,11 @@
 					}
 				}).on("select2:select", function(e) {
 					var currentObat = $(this).val();
+
 					var dataObat = e.params.data;
 					$(this).children("[value=\""+ dataObat['id'] + "\"]").attr({
 						"data-value": dataObat["data-value"],
+						"jumlah": dataObat["jumlah"],
 						"penjamin-list": dataObat["penjamin-list"],
 						"satuan-caption": dataObat["satuan-caption"],
 						"satuan-terkecil": dataObat["satuan-terkecil"]
@@ -258,7 +308,7 @@
 
 					var penjaminAvailable = parsedItemData[obatNavigator.indexOf(currentObat)]['penjamin-list'];
 					if(penjaminAvailable.length > 0) {
-						if(penjaminAvailable.indexOf($("#nama-pasien").attr("set-penjamin")) > 0) {
+						if(penjaminAvailable.indexOf($("#nama-pasien").attr("set-penjamin")) >= 0) {
 							$(this).parent().parent().find("td:eq(5)").html("<span class=\"badge badge-success\"><i class=\"fa fa-check\" style=\"margin-right: 5px;\"></i> Ditanggung penjamin</span>");
 						} else {
 							$(this).parent().parent().find("td:eq(5)").html("<span class=\"badge badge-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak ditanggung penjamin</span>");
@@ -267,6 +317,18 @@
 						$(this).parent().parent().find("td:eq(5)").html("<span class=\"badge badge-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak ditanggung penjamin</span>");
 					}
 					$(this).parent().parent().find("td:eq(2) span").html(parsedItemData[obatNavigator.indexOf(currentObat)]['satuan-caption']);
+
+
+					var refreshBatchData = refreshBatch(currentObat);
+					$(this).parent().find("select.batch-loader option").remove();
+					for(var batchKeyD in refreshBatchData) {
+						$(this).parent().find("select.batch-loader").append("<option harga=\"" + refreshBatchData[batchKeyD].harga + "\" value=\"" + refreshBatchData[batchKeyD].batch + "\">[" + refreshBatchData[batchKeyD].gudang.nama + "] - " + refreshBatchData[batchKeyD].kode + "</option>");
+					}
+
+					var setterHarga = $(this).parent().find("select.batch-loader option:selected").attr("harga");
+					var setterQty = parseInt($(this).parent().parent().find("td:eq(2)").text());
+					$(this).parent().parent().find("td:eq(3)").html(number_format(setterHarga, 2, ".", ","));
+					$(this).parent().parent().find("td:eq(4)").html(number_format(setterQty * setterHarga, 2, ".", ","));
 				});
 
 				$(newObat).val([data.detail[a].detail.uid]).trigger("change").trigger({
@@ -277,22 +339,37 @@
 				});
 
 				$(newObat).find("option:selected").attr({
-					//"data-value": parsedItemData[obatNavigator.indexOf(setter.obat)]["data-value"],
+					"data-value": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["data-value"],
+					"jumlah": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["jumlah"],
 					"penjamin-list": penjaminList,
 					"satuan-caption": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["satuan-caption"],
 					"satuan-terkecil": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["satuan-terkecil"]
 				});
-
-				$(newDetailRow).append(newDetailCellID);
-				$(newDetailRow).append(newDetailCellObat);
-				$(newDetailRow).append(newDetailCellQty);
-				$(newDetailRow).append(newDetailCellHarga);
-				$(newDetailRow).append(newDetailCellTotal);
-				$(newDetailRow).append(newDetailCellPenjamin);
-				$(newDetailRow).append(newDetailCellAksi);
-
-				$("#load-detail-resep tbody").append(newDetailRow);
 			}
+		}
+
+		$("body").on("change", ".batch-loader", function() {
+			var hargaSet = $(this).attr("harga");
+			//alert(hargaSet);
+		});
+
+		function refreshBatch(item) {
+			var batchData;
+			$.ajax({
+				url:__HOSTAPI__ + "/Inventori/item_batch/" + item,
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					batchData = response.response_package.response_data;
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+			return batchData;
 		}
 	});
 </script>

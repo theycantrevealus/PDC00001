@@ -114,6 +114,29 @@ class PO extends Utility {
 		return $data;
 	}
 
+	public function get_po_item_price($parameter = array()){
+		$data = self::$query
+			->select('inventori_po_detail', array(
+					'harga',
+					'disc',
+					'disc_type',
+					'subtotal'
+				)
+			)
+			->where(array(
+					'inventori_po_detail.po' => '= ?',
+					'AND',
+					'inventori_po_detail.barang' => '= ?'
+				), array(
+					$parameter[0],
+					$parameter[1]
+				)
+			)
+			->execute();
+
+		return $data;
+	}
+
 	public function get_po_detail_barang($parameter){
 		$data = self::$query
 			->select('inventori_po_detail', array(
