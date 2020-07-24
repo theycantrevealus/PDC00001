@@ -39,9 +39,14 @@
 					},
 					type:"GET",
 					success:function(response) {
-						if(response.response_package.response_data[0].asesmen_rawat !== undefined) {
+						console.clear();
+						if(response.response_package.response_data[0].asesmen_rawat != undefined) {
 							loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
 							loadPasien(UID);
+						} else {
+							console.log(response.response_package.response_data[0]);
+							/*loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
+							loadPasien(UID);*/
 						}
 
 						if(response.response_package.response_data[0] === undefined) {
