@@ -45,8 +45,8 @@
 				},
 				type: "POST",
 				success: function(response){
-					console.log(response);
-					//location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+					//console.log(response);
+					location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
 				},
 				error: function(response) {
 					console.log("Error : ");
