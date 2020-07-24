@@ -1,9 +1,0 @@
-ls -l & exec php index.php > /dev/null 2>&1 & echo $
-ps -l (list all process)
-ps -ef (all full details of process)
-nohup exec php process.php hello world > /dev/null &
-nohup /usr/bin/php get_tweets.php > /dev/null & echo $!
-nohup php filename.php >/dev/null 2>&1 &
-
-firewall-cmd --zone=public --add-port=2888/tcp --permanent
-firewall-cmd --reload
