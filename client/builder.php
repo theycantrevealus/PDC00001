@@ -7,35 +7,103 @@
 ?>
 <body class="layout-default">
 	<?php require 'head.php'; ?>
-	<div class="preloader"></div>
+	<?php
+		if(__PAGES__[0] == 'anjungan') {
+			require 'pages/anjungan/index.php';
+		} else if(__PAGES__[0] == 'display') {
+			require 'pages/display/index.php';
+		}
+	?>
 	<div class="mdk-header-layout js-mdk-header-layout">
 		<?php require 'header.php'; ?>
 		<div class="mdk-header-layout__content">
 
 			<div class="mdk-drawer-layout js-mdk-drawer-layout">
-				<div class="mdk-drawer-layout__content page">
+				<div class="mdk-drawer-layout__content page" id="app-settings">
 					<?php
 						if(empty(__PAGES__[0])) {
 							require 'pages/system/dashboard.php';
 						} else {
-							if(is_dir('pages/' . implode('/', __PAGES__))) {
-								require 'pages/' . implode('/', __PAGES__) . '/index.php';
+							if(implode('/', __PAGES__) == 'system/logout') {
+								require 'pages/system/logout.php';
 							} else {
-								if(file_exists('pages/' . implode('/', __PAGES__) . '.php')) {
-									require 'pages/' . implode('/', __PAGES__) . '.php';
-								} else {
-									$isFile = 'pages';
+								/*echo '<pre>';
+								print_r($_SESSION['akses_halaman_link']);
+								echo '</pre>';*/
+								if(is_dir('pages/' . implode('/', __PAGES__))) {
+									$isInAccess = '';
+									$allowAccess = false;
 									foreach (__PAGES__ as $key => $value) {
-										if(file_exists($isFile . '/' . $value . '.php')) {
-											$lastExist = $isFile . '/' . $value . '.php';
+										if($key == 0) {
+											$isInAccess .= $value;
+										} else {
+											$isInAccess .= '/' . $value;
 										}
 
-										$isFile .= '/' .$value;
+										if (in_array($isInAccess, $_SESSION['akses_halaman_link'])) {
+											$allowAccess = true;
+											break;
+										} else {
+											if($allowAccess) {
+												$allowAccess = false;
+											}
+										}
 									}
-									if(isset($lastExist)) {
-										require $lastExist;
+
+									if($allowAccess) {
+										require 'pages/' . implode('/', __PAGES__) . '/index.php';
 									} else {
-										require 'pages/system/404.php';	
+										if(!$allowAccess) {
+											require 'pages/system/403.php';	
+										} else {
+											require 'pages/system/404.php';
+										}
+									}
+								} else {
+									if(file_exists('pages/' . implode('/', __PAGES__) . '.php')) {
+										require 'pages/' . implode('/', __PAGES__) . '.php';
+									} else {
+										$isFile = 'pages';
+										$isInAccess = '';
+										$allowAccess = false;
+
+										foreach (__PAGES__ as $key => $value) {
+											if(file_exists($isFile . '/' . $value . '.php')) {
+												$lastExist = $isFile . '/' . $value . '.php';
+											}
+
+											$isFile .= '/' . $value;
+										}
+
+										foreach (__PAGES__ as $key => $value) {
+											if($key == 0) {
+												$isInAccess .= $value;
+											} else {
+												$isInAccess .= '/' . $value;
+											}
+
+											//echo $isInAccess . '<br />';
+
+											if (in_array($isInAccess, $_SESSION['akses_halaman_link'])) {
+												$allowAccess = true;
+												break;
+											} else {
+												if($allowAccess) {
+													$allowAccess = false;
+												}
+											}
+										}
+
+										if(isset($lastExist) && $allowAccess) {
+											//echo $allowAccess;
+											require $lastExist;
+										} else {
+											if(!$allowAccess) {
+												require 'pages/system/403.php';	
+											} else {
+												require 'pages/system/404.php';
+											}
+										}
 									}
 								}
 							}
@@ -45,7 +113,28 @@
 				<?php require 'sidemenu.php'; ?>
 			</div>
 		</div>
+		<div class="preloader">
+			<div class="sidemenu-shimmer">
+				<?php
+					for($sh = 1; $sh <= 10; $sh++) {
+				?>
+				<div class="shine"></div>
+				<?php
+					}
+				?>
+			</div>
+			<div class="content-shimmer">
+				<span>
+					<img width="80" height="80" src="<?php echo __HOSTNAME__; ?>/template/assets/images/preloader4.gif" />
+					<br />
+					Loading...
+				</span>
+			</div>
+		</div>
 	</div>
+	<!-- <div class="global-sync-container blinker_dc">
+		<h4 class="text-center">OUT OF SYNC</h4>
+	</div> -->
 	<div class="notification-container"></div>
 	<!-- <div id="app-settings">
 		<app-settings layout-active="default" :layout-location="{
@@ -56,7 +145,6 @@
 	}"></app-settings>
 	</div> -->
 	<?php require 'script.php'; ?>
-
 	<?php
 		if(empty(__PAGES__[0])) {
 			require 'script/system/dashboard.php';
@@ -87,6 +175,54 @@
 					title: data
 				});
 			});
+
+			/*if ("WebSocket" in window) {
+				//var serverTarget = "ws://192.168.99.240:666";
+				var serverTarget = "ws://127.0.0.1:666";
+				
+				var Sync = new WebSocket(serverTarget);
+				Sync.onopen = function() {
+					$(".global-sync-container").fadeOut();
+				}
+
+				Sync.onmessage = function(evt) {
+					var signalData = evt.data;
+					
+				}
+
+				Sync.onclose = function() {
+					$(".global-sync-container").fadeIn();
+					var tryCount = 1;
+					setInterval(function() {
+						console.clear();
+						console.log("CPR..." + tryCount);
+						var checkSocket = SocketCheck(serverTarget);
+						tryCount++;
+					}, 1000);
+				}
+
+				Sync.onerror = function() {
+					$(".global-sync-container").fadeIn();
+					var tryCount = 1;
+					setInterval(function() {
+						console.clear();
+						console.log("CPR..." + tryCount);
+						var checkSocket = SocketCheck(serverTarget);
+						tryCount++;
+					}, 1000);
+				}
+
+				return Sync;
+			} else {
+				console.log("WebSocket Not Supported");
+			}
+
+			function SocketCheck(__HOST__) {
+				var checkSocket = new WebSocket(__HOST__);
+				checkSocket.onopen = function() {
+					location.reload();
+				}
+			}*/
 		});
 		
 		function inArray(needle, haystack) {
@@ -130,19 +266,7 @@
 				$(alertContainer).fadeOut();
 			}, time);
 		}
-		/*function formatMoney(number, decPlaces, decSep, thouSep) {
-			decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
-			decSep = typeof decSep === "undefined" ? "." : decSep;
-			thouSep = typeof thouSep === "undefined" ? "," : thouSep;
-			var sign = number < 0 ? "-" : "";
-			var i = String(parseInt(number = Math.abs(Number(number) || 0).toFixed(decPlaces)));
-			var j = (j = i.length) > 3 ? j % 3 : 0;
 
-			return sign +
-			(j ? i.substr(0, j) + thouSep : "") +
-			i.substr(j).replace(/(\decSep{3})(?=\decSep)/g, "$1" + thouSep) +
-			(decPlaces ? decSep + Math.abs(number - i).toFixed(decPlaces).slice(2) : "");
-		}*/
 		function number_format (number, decimals, dec_point, thousands_sep) {
 			// Strip all characters but numerical ones.
 			number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
@@ -166,6 +290,30 @@
 			}
 			return s.join(dec);
 		}
+
+		$(function() {
+			var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
+			var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
+			var sideMenu3 = <?php echo json_encode($sideMenu3); ?>;
+
+			if(sideMenu1 > 0) {
+				$("#sidemenu_1").show();
+			} else {
+				$("#sidemenu_1").hide();
+			}
+
+			if(sideMenu2 > 0) {
+				$("#sidemenu_2").show();
+			} else {
+				$("#sidemenu_2").hide();
+			}
+
+			if(sideMenu3 > 0) {
+				$("#sidemenu_3").show();
+			} else {
+				$("#sidemenu_3").hide();
+			}
+		});
 	</script>
 </body>
 

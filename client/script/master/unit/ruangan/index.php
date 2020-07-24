@@ -2,7 +2,7 @@
 	$(function(){
 		loadLantai();
 
-		$("#lantai").select2({});
+		$(".select2").select2({});
 
 		var MODE = "tambah", selectedUID;
 
@@ -36,6 +36,21 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
+						return "<span id=\"kode_" + row["uid"] + "\">" + row["kode_ruangan"] + "</span>";
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<span id=\"kelas_" + row["uid"] + "\" data-id=\""+ row['id_kelas'] +"\">" + row["kelas"] + "</span>";
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<span id=\"kapasitas_" + row["uid"] +"\">" + row["kapasitas"] + "</span> orang";
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
 						return "<span id=\"lantai_" + row["uid"] + "\" data-uid=\""+ row['uid_lantai'] +"\">" + row["lantai"] + "</span>";
 					}
 				},
@@ -52,22 +67,9 @@
 					}
 				}
 			],
-			/*"drawCallback": function ( settings ) {
-	            var api = this.api();
-	            var rows = api.rows( {page:'current'} ).nodes();
-	            var last = null;
-	 
-	            api.column(groupColumn, {page:'current'} ).data().each( function ( group, i ) {
-	                if ( last !== group ) {
-	                    $(rows).eq(i).before(
-	                        '<tr class="group" style="background-color: #ddd"><td colspan="5">'+ group.lantai +'</td></tr>'
-	                    );
-	 
-	                    last = group;
-	                }
-	            } );
-	        }*/
 		});
+
+		loadTermSelectBox("kelas", 14, "Kelas");
 
 		$("body").on("click", ".btn-delete-ruangan", function(){
 			var uid = $(this).attr("id").split("_");
@@ -97,14 +99,21 @@
 			uid = uid[uid.length - 1];
 			selectedUID = uid;
 			MODE = "edit";
-			$("#txt_nama").val($("#nama_" + uid).html());
-			
+			$("#nama").val($("#nama_" + uid).html());
+			$("#kode_ruangan").val($("#kode_"+ uid).html());
+			$("#kapasitas").val($("#kapasitas_" + uid).html());
+
+			var kelas = $("#kelas_" + uid).data('id');
+			selectedKelas = kelas;
+			$("#kelas").val(selectedKelas);
+			$("#kelas").trigger('change');
+
 			var lantai = $("#lantai_" + uid).data('uid').split('_');
 			lantai = lantai[lantai.length - 1];
 			selectedLantai = lantai;
 
 			$("#lantai").val(lantai);
-			//$("#lantai").trigger('change');
+			$("#lantai").trigger('change');
 
 			$("#form-tambah").modal("show");
 			return false;
@@ -112,7 +121,9 @@
 
 		
 		$("#tambah-ruangan").click(function() {
-			$("#txt_nama").val("");
+			$("#nama").val("");
+			$("#kode_ruangan").val("");
+			$("#kapasitas").val("");
 			$("#lantai").val("");
 			$("#lantai").trigger('change');
 
@@ -123,7 +134,10 @@
 
 
 		$("#btnSubmit").click(function() {
-			var nama = $("#txt_nama").val();
+			var nama = $("#nama").val();
+			var kode_ruangan = $("#kode_ruangan").val();
+			var kelas = $("#kelas").val();
+			var kapasitas = $("#kapasitas").val();
 			var lantai = $("#lantai").val();
 
 			if(nama != "") {
@@ -132,6 +146,9 @@
 					form_data = {
 						"request": "tambah_ruangan",
 						"nama": nama,
+						"kode_ruangan": kode_ruangan,
+						"kelas": kelas,
+						"kapasitas": kapasitas,
 						"lantai": lantai
 					};
 				} else {
@@ -139,6 +156,9 @@
 						"request": "edit_ruangan",
 						"uid": selectedUID,
 						"nama": nama,
+						"kode_ruangan": kode_ruangan,
+						"kelas": kelas,
+						"kapasitas": kapasitas,
 						"lantai": lantai
 					};
 				}
@@ -152,7 +172,11 @@
 					},
 					type: "POST",
 					success: function(response){
-						$("#txt_nama").val("");
+						console.log(response);
+						$("#nama").val("");
+						$("#kode_ruangan").val("");
+						$("#kelas").val("");
+						$("#kapasitas").val("");
 						$("#lantai").val("");
 						//$("#lantai").trigger('change');
 						$("#form-tambah").modal("hide");
@@ -189,6 +213,40 @@
             }
         });
 	}
+
+	function loadTermSelectBox(selector, id_term, nama){
+		resetSelectBox(selector, nama);
+
+		$.ajax({
+            url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + id_term,
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                var MetaData = response.response_package.response_data;
+
+                if (MetaData != ""){
+                	for(i = 0; i < MetaData.length; i++){
+	                    var selection = document.createElement("OPTION");
+
+	                    $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+	                    $("#" + selector).append(selection);
+	                }
+                }
+                
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+	}
+
+	function resetSelectBox(selector, name){
+		$("#"+ selector +" option").remove();
+		var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
+        $("#" + selector).append(opti_null);
+	}
 </script>
 
 <div id="form-tambah" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -201,20 +259,45 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<div class="form-group col-md-12">
-					<label for="txt_nama">Nama Ruangan:</label>
-					<input type="text" class="form-control" id="txt_nama" />
+				<div class="row">
+					<div class="form-group col-md-12">
+						<label for="nama">Nama Ruangan:</label>
+						<input type="text" autocomplete="off" class="form-control" id="nama" />
+					</div>
+					<div class="form-group col-md-4">
+						<label for="kode_ruangan">Kode Ruangan:</label>
+						<input type="text" autocomplete="off" class="form-control" id="kode_ruangan" />
+					</div>
+					<div class="form-group col-md-4">
+						<label for="kelas">Kelas:</label>
+						<select class="form-control select2" id="kelas">
+							<option value="">Pilih Kelas</option>
+						</select>
+					</div>
+						<div class="form-group col-md-4">
+						<label for="kapasitas">Kapasitas:</label>
+						<div class="input-group input-group-merge">
+							<input type="text" autocomplete="off" class="form-control form-control-appended" id="kapasitas" />
+							<div class="input-group-append">
+								<div class="input-group-text">
+									orang
+								</div>
+							</div>
+						</div>
+						
+					</div>
+					<div class="form-group col-md-12">
+						<label for="lantai">Lantai:</label>
+						<select class="form-control select2" id="lantai">
+							<option value="" disabled selected>Pilih Lantai</option>
+						</select>
+					</div>
 				</div>
-				<div class="form-group col-md-12">
-					<label for="lantai">Lantai:</label>
-					<select class="form-control" id="lantai">
-						<option value="" disabled selected>Pilih Lantai</option>
-					</select>
-				</div>
+				
 			</div>
 			<div class="modal-footer">
+				<button type="button" class="btn btn-success" id="btnSubmit">Submit</button>
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-				<button type="button" class="btn btn-primary" id="btnSubmit">Submit</button>
 			</div>
 		</div>
 	</div>

@@ -86,9 +86,7 @@ class Pasien extends Utility {
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
-
 			$data['response_data'][$key]['tanggal_lahir'] = parent::dateToIndo($data['response_data'][$key]['tanggal_lahir']);
-
 			$term = new Terminologi(self::$pdo);
 
 			$value = $data['response_data'][$key]['id_panggilan'];
@@ -109,7 +107,7 @@ class Pasien extends Utility {
 		return $data;
 	}
 
-	private function get_pasien_detail($table, $parameter){
+	public function get_pasien_detail($table, $parameter){
 		$data = self::$query
 					->select($table, array(
 						'uid',
@@ -155,6 +153,10 @@ class Pasien extends Utility {
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
+			//Panggilan
+			$Terminologi = new Terminologi(self::$pdo);
+			$TerminologiInfo = $Terminologi::get_terminologi_items_detail('terminologi_item', $value['panggilan']);
+			$data['response_data'][$key]['panggilan_name'] = $TerminologiInfo['response_data'][0];
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 		}
@@ -230,18 +232,13 @@ class Pasien extends Utility {
 	private function edit_pasien($table, $parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
 		$dataObj = $parameter['dataObj'];
 		$old = self::get_pasien_detail($table, $parameter['uid']);
-
 		$allData = [];
-
 		foreach ($dataObj as $key => $value) {
 			$allData[$key] = $value;
 		}
-
 		$allData['updated_at'] = parent::format_date();
-
 		$pasien = self::$query
 				->update($table, $allData)
 				->where(array(
@@ -329,7 +326,6 @@ class Pasien extends Utility {
 				)
 			);
 		}
-
 		return $pasien;
 	}
 

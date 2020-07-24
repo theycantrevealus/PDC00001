@@ -45,9 +45,9 @@ class Query {
 	}
 
 	function update($table, $parameter = array()) {
-		$this->tables = array();
+		/*$this->tables = array();
 		self::$queryValues = array();
-		self::$queryParams = array();
+		self::$queryParams = array();*/
 		self::$queryMode = 'update';
 		self::$queryString = 'UPDATE ';
 		array_push($this->tables, $table);
@@ -67,9 +67,9 @@ class Query {
 	}
 
 	function hard_delete($table) {
-		$this->tables = array();
+		/*$this->tables = array();
 		self::$queryValues = array();
-		self::$queryParams = array();
+		self::$queryParams = array();*/
 		self::$queryMode = 'hard_delete';
 		self::$queryString = 'DELETE FROM ' . $table . ' ';
 		array_push($this->tables, $table);
@@ -111,9 +111,9 @@ class Query {
 	}
 
 	function select($table, $parameter = array()) {
-		//$this->tables = array();
+		/*$this->tables = array();
 		self::$queryValues = array();
-		self::$queryParams = array();
+		self::$queryParams = array();*/
 		self::$queryMode = 'select';
 		self::$queryString = 'SELECT ';
 		$this->tables[$table] = array();
@@ -220,13 +220,14 @@ class Query {
 			$buildQuery .= $this->tables[0] . ' SET ';
 			$nullCol = array();
 			for ($key = 0; $key < count(self::$queryParams); $key++) {
-				if(empty(self::$queryValues[$key])) {
+				if(is_null(self::$queryValues[$key])) {
 					$buildQuery .= self::$queryParams[$key] . ' = NULL';
+					//array_splice(self::$queryValues, $key, 1);
 				} else {
 					$buildQuery .= self::$queryParams[$key] . ' = ?';
 				}
 				
-				if($key == count(self::$queryParams) - 2) {
+				if($key <= count(self::$queryParams) - 2) {
 					$buildQuery .= ', ';
 				} else {
 					$buildQuery .= '';
@@ -273,18 +274,20 @@ class Query {
 
 
 	function execute() {
+		$usedValues = array();
 		try {
-			
 			$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = self::$queryValues;
 			$query = self::$pdo->prepare(self::buildQuery());
 			foreach (self::$queryValues as $key => $value) {
-				if($value == '') {
-					array_splice(self::$queryValues, $key, 1);
+				if(!is_null($value)) {
+					array_push($usedValues, $value);
+					//array_splice(self::$queryValues, $key, 1);
 				}
 			}
-			$query->execute(self::$queryValues);
+			//$query->execute(self::$queryValues);
+			$query->execute($usedValues);
 			
 			if(self::$queryMode == 'select') {
 				$read = $query->fetchAll(\PDO::FETCH_ASSOC);
@@ -310,6 +313,7 @@ class Query {
 			self::$queryString = '';
 			self::$keyType = '';
 			self::$keyReturn = '';
+			self::$queryStringOrder = '';
 
 			$responseBuilder['response_result'] = $query->rowCount();
 			return $responseBuilder;
@@ -317,7 +321,8 @@ class Query {
 			//throw new QueryException($e->getMessage(), 1);
 			$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
-			$responseBuilder['response_values'] = self::$queryValues;
+			$responseBuilder['response_values'] = $usedValues;
+			$responseBuilder['response_params'] = self::$queryParams;
 			return $responseBuilder;
 		}
 	}

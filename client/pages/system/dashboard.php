@@ -7,7 +7,7 @@
 					<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
 				</ol>
 			</nav>
-			<h1 class="m-0">Dashboard</h1>
+			<h4 class="m-0">Dashboard</h4>
 		</div>
 		<a href="<?php echo __HOSTNAME__; ?>/template/" class="btn btn-success ml-3">New Report</a>
 	</div>
@@ -22,7 +22,21 @@
 		<i class="material-icons mr-3">error_outline</i>
 		<div class="text-body"><strong>API gateways are now Offline.</strong> Please try the API later. If you want to stay up to date follow our <a href="<?php echo __HOSTNAME__; ?>/template/">Status Page </a></div>
 	</div>
+	<!-- <div class="row card-group-row">
+		<div class="col-md-12 card-group-row__col">
+			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
+				<?php echo json_encode($_SESSION['akses_halaman_link']); ?>
+			</div>
+		</div>
+	</div>
 
+	<div class="row card-group-row">
+		<div class="col-md-12 card-group-row__col">
+			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
+				<?php echo json_encode($_SESSION['akses_halaman']); ?>
+			</div>
+		</div>
+	</div> -->
 	<div class="row card-group-row">
 		<div class="col-lg-4 col-md-6 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
