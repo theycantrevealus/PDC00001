@@ -174,7 +174,8 @@
 				//$(newDetailCellObat).html(data.detail[a].detail.nama);
 				var batchDataUnique = [];
 				var batchData = [];
-				
+				var setDiskon = 0;
+				var setDiskonType = "N";
 				var itemData = ObatData.data;
 
 				var parsedItemData = [];
@@ -187,6 +188,11 @@
 					for(var penjaminKey in penjaminListData) {
 						if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
 							penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
+
+							if(penjaminListData[penjaminKey].penjamin.uid == $("#nama-pasien").attr("set-penjamin")) {
+								setDiskon = penjaminListData[penjaminKey].profit;
+								setDiskonType = penjaminListData[penjaminKey].profit_type;
+							}
 						}
 					}
 
@@ -214,6 +220,11 @@
 						title: itemData[dataKey].nama
 					});
 				}
+
+				$(newDetailCellObat).attr({
+					"disc": setDiskon,
+					"disc-type": setDiskonType
+				});
 				
 				$(newBatchSelector).addClass("form-control batch-loader").select2();
 
@@ -296,7 +307,6 @@
 					}
 				}).on("select2:select", function(e) {
 					var currentObat = $(this).val();
-
 					var dataObat = e.params.data;
 					$(this).children("[value=\""+ dataObat['id'] + "\"]").attr({
 						"data-value": dataObat["data-value"],
@@ -307,8 +317,12 @@
 					});
 
 					var penjaminAvailable = parsedItemData[obatNavigator.indexOf(currentObat)]['penjamin-list'];
+					var diskonNilai = 0;
+					var diskonType = "N";
 					if(penjaminAvailable.length > 0) {
 						if(penjaminAvailable.indexOf($("#nama-pasien").attr("set-penjamin")) >= 0) {
+							var diskonNilai = parseInt($(this).parent().parent().find("td:eq(1)").attr("disc"));
+							var diskonType = $(this).parent().parent().find("td:eq(1)").attr("disc-type");
 							$(this).parent().parent().find("td:eq(5)").html("<span class=\"badge badge-success\"><i class=\"fa fa-check\" style=\"margin-right: 5px;\"></i> Ditanggung penjamin</span>");
 						} else {
 							$(this).parent().parent().find("td:eq(5)").html("<span class=\"badge badge-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak ditanggung penjamin</span>");
@@ -327,8 +341,17 @@
 
 					var setterHarga = $(this).parent().find("select.batch-loader option:selected").attr("harga");
 					var setterQty = parseInt($(this).parent().parent().find("td:eq(2)").text());
-					$(this).parent().parent().find("td:eq(3)").html(number_format(setterHarga, 2, ".", ","));
-					$(this).parent().parent().find("td:eq(4)").html(number_format(setterQty * setterHarga, 2, ".", ","));
+					var setterHargaPenjamin = parseInt(setterHarga);
+					if(setDiskonType == "P") {
+						setterHargaPenjamin = setterHargaPenjamin + (diskonNilai / 100 * setterHargaPenjamin);
+					} else if(setDiskonType == "A") {
+						setterHargaPenjamin += diskonNilai;
+					}
+
+					var totalHargaPenjamin = setterQty * setterHargaPenjamin;
+
+					$(this).parent().parent().find("td:eq(3)").html(number_format(setterHargaPenjamin, 2, ".", ","));
+					$(this).parent().parent().find("td:eq(4)").html(number_format(totalHargaPenjamin, 2, ".", ","));
 				});
 
 				$(newObat).val([data.detail[a].detail.uid]).trigger("change").trigger({

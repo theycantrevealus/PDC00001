@@ -18,6 +18,8 @@
 			},
 			type:"GET",
 			success:function(response) {
+				console.clear();
+				console.log(response);
 				antrianData = response.response_package.response_data[0];
 				var pasien_nama = antrianData.pasien_info.nama;
 				var pasien_rm = antrianData.pasien_info.no_rm;
@@ -39,9 +41,9 @@
 					},
 					type:"GET",
 					success:function(response) {
-						console.clear();
+						
 						if(response.response_package.response_data[0].asesmen_rawat != undefined) {
-							loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
+							//loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
 							loadPasien(UID);
 						} else {
 							console.log(response.response_package.response_data[0]);
@@ -742,6 +744,7 @@
 				}).val(setter.keterangan);
 
 				var itemData = addAnother.data;
+				console.log(itemData);
 				var parsedItemData = [];
 				var obatNavigator = [];
 				for(var dataKey in itemData) {
@@ -757,8 +760,8 @@
 					parsedItemData.push({
 						id: itemData[dataKey].uid,
 						"penjamin-list": penjaminList,
-						"satuan-caption": itemData[dataKey].satuan_terkecil.nama,
-						"satuan-terkecil": itemData[dataKey].satuan_terkecil.uid,
+						"satuan-caption": (itemData[dataKey].satuan_terkecil !== null) ? itemData[dataKey].satuan_terkecil.nama : "",
+						"satuan-terkecil": (itemData[dataKey].satuan_terkecil !== null) ? itemData[dataKey].satuan_terkecil.uid : "",
 						text: "<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + ";\">" + itemData[dataKey].nama.toUpperCase() + "</div>",
 						html: 	"<div class=\"select2_item_stock\">" +
 									"<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + "\">" + itemData[dataKey].nama.toUpperCase() + "</div>" +
@@ -1575,6 +1578,8 @@
 				});
 			});
 
+			console.log(tindakan);
+
 			var resep = [];
 			$("#table-resep tbody tr").each(function() {
 				var obat = $(this).find("td:eq(1) select.resep-obat").val();
@@ -1694,6 +1699,7 @@
 				},
 				type: "POST",
 				success: function(response) {
+					console.log(response);
 					if(response.response_package.response_result > 0) {
 						notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
 					} else {
@@ -1743,63 +1749,45 @@
 		}*/
 
 		function loadPasien(params){
+			var MetaData = null;
+
 			if (params != ""){
 				$.ajax({
 					async: false,
-		            url:__HOSTAPI__ + "/AssesmenRawatJalan/pasien-detail/" + params,
+		            url:__HOSTAPI__ + "/Asesmen/asesmen-rawat-detail/" + params,
 		            type: "GET",
 		            beforeSend: function(request) {
 		                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 		            },
 		            success: function(response){
-		                dataPasien = response.response_package.pasien;
-		                dataAntrian = response.response_package.antrian;
+		            	console.log(response);
+		            	if (response.response_package != ""){
+		            		MetaData = response.response_package;
 
-		                $.each(dataPasien, function(key, item){
-		                	$(".perawat #" + key).html(item)
-		                });
-
-		                 $.each(dataAntrian, function(key, item){
-		                	$(".perawat #" + key).val(item);
-		                });
-
-		                if (dataPasien.id_jenkel == 2){
-							$(".perawat .wanita").attr("hidden",true);
-						} else {
-							$(".perawat .pria").attr("hidden",true);
-						}
-		            },
-		            error: function(response) {
-		                console.log(response);
-		            }
-		        });
-			}
-		}
-
-		function loadAssesmen(params){
-			var dataAssesmen;
-
-			if (params != ""){
-				$.ajax({
-					async: false,
-		            url:__HOSTAPI__ + "/AssesmenRawatJalan/assesmen-detail/" + params,
-		            type: "GET",
-		            beforeSend: function(request) {
-		                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-		            },
-		            success: function(response){
-		                dataAssesmen = response.response_package.response_data[0];
-		                var listName = [];
-
-		                if (dataAssesmen != ""){
-		                	$.each(dataAssesmen, function(key, item){
-			                	$("#" + key).val(item);
-			                	checkedRadio(key, item);
-			                	checkedCheckbox(key, item);
-
-			                	listName.push(key);
+			                $.each(MetaData.pasien, function(key, item){
+			                	$("#" + key).html(item)
 			                });
-		                }
+
+			                $.each(MetaData.antrian, function(key, item){
+			                	$("#" + key).val(item);
+			                });
+
+							if (MetaData.pasien.id_jenkel == 2){
+								$(".wanita").attr("hidden",true);
+							} else {
+								$(".pria").attr("hidden",true);
+							}
+
+							if (MetaData.asesmen_rawat != ""){
+			                	$.each(MetaData.asesmen_rawat, function(key, item){
+				                	$("#" + key).val(item);
+				                	checkedRadio(key, item);
+				                	checkedCheckbox(key, item);
+				                });
+			                }
+		            	}
+
+		            	console.log(MetaData);
 		            },
 		            error: function(response) {
 		                console.log(response);
@@ -1807,7 +1795,7 @@
 		        });
 			}
 
-			return dataAssesmen;
+			return MetaData;
 		}
 
 		function checkedRadio(name, value){
@@ -1815,16 +1803,21 @@
 
 			if ($radios != ""){
 				if($radios.is(':checked') === false) {
-		       	 $radios.filter('[value="'+ value +'"]').prop('checked', true);
+					if (value != null && value != ""){
+		       	 		$radios.filter('[value="'+ value +'"]').prop('checked', true);
+		    		}
 		    	}
 			}
 		}
 
 		function checkedCheckbox(name, value){
 			var $check = $('input:checkbox[name='+ name +']');
+
 		    if ($check != ""){
 			    if($check.is(':checked') === false) {
-			        $check.filter('[value="'+ value +'"]').prop('checked', true);
+			    	if (value != null && value != ""){
+			    		$check.filter('[value="'+ value +'"]').prop('checked', true);
+			    	}
 			    }
 			}		 
 		}

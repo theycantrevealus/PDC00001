@@ -1089,6 +1089,7 @@ class Inventori extends Utility {
 		))
 		->execute();
 		foreach ($data['response_data'] as $key => $value) {
+			//$data['response_data'][$key]['item_detail'] = self::get_item_detail($value['barang'])['response_data'][0];
 			$data['response_data'][$key]['gudang'] = self::get_gudang_detail($value['gudang'])['response_data'][0];
 			$data['response_data'][$key]['kode'] = self::get_batch_detail($value['batch'])['response_data'][0]['batch'];
 			$data['response_data'][$key]['harga'] = self::get_batch_detail($value['batch'])['response_data'][0]['harga'];

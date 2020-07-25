@@ -93,11 +93,11 @@ class Asesmen extends Utility {
 			$PoliDetail = $Poli::get_poli_detail($antrian['response_data'][0]['departemen'])['response_data'][0];
 
 
-			$Rawat = self::$query->select('assesmen_rawat_' . $PoliDetail['poli_asesmen'], array(
+			$Rawat = self::$query->select('asesmen_rawat_' . $PoliDetail['poli_asesmen'], array(
 				'uid'
 			))
 			->where(array(
-				'assesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?'
+				'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?'
 			), array(
 				$antrian['response_data'][0]['uid']
 			))
@@ -282,11 +282,11 @@ class Asesmen extends Utility {
 				$data['response_data'][0]['asesmen_rawat'] = $Rawat['response_data'][0]['uid'];
 				return $data;
 			} else {
-				$Rawat = self::$query->select('assesmen_rawat_' . $PoliDetail['poli_asesmen'], array(
+				$Rawat = self::$query->select('asesmen_rawat_' . $PoliDetail['poli_asesmen'], array(
 					'uid'
 				))
 				->where(array(
-					'assesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?'
+					'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?'
 				), array(
 					$antrian['response_data'][0]['uid']
 				))
@@ -1263,12 +1263,12 @@ class Asesmen extends Utility {
 			$PoliDetail = $Poli::get_poli_detail($value['uid_poli'])['response_data'][0];
 
 			$cek_asesment = self::cek_asesmen_rawat_detail($PoliDetail['poli_asesmen'], $value['uid']);
-			$antrian[$key]['uid_assesmen'] = "";
-			$antrian[$key]['status_assesmen'] = false;
+			$antrian[$key]['uid_asesmen'] = "";
+			$antrian[$key]['status_asesmen'] = false;
 
 			if ($cek_asesment['response_result'] > 0){
-				$antrian[$key]['uid_assesmen_rawat'] = $cek_asesment['response_data'][0]['uid'];
-				$antrian[$key]['status_assesmen'] = true; 
+				$antrian[$key]['uid_asesmen_rawat'] = $cek_asesment['response_data'][0]['uid'];
+				$antrian[$key]['status_asesmen'] = true; 
 			}
 
 			$data['response_data'][$key]['autonum'] = $autonum;
