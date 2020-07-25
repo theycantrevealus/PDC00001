@@ -132,6 +132,9 @@
 			</div>
 		</div>
 	</div>
+	<!-- <div class="global-sync-container blinker_dc">
+		<h4 class="text-center">OUT OF SYNC</h4>
+	</div> -->
 	<div class="notification-container"></div>
 	<!-- <div id="app-settings">
 		<app-settings layout-active="default" :layout-location="{
@@ -172,6 +175,54 @@
 					title: data
 				});
 			});
+
+			/*if ("WebSocket" in window) {
+				//var serverTarget = "ws://192.168.99.240:666";
+				var serverTarget = "ws://127.0.0.1:666";
+				
+				var Sync = new WebSocket(serverTarget);
+				Sync.onopen = function() {
+					$(".global-sync-container").fadeOut();
+				}
+
+				Sync.onmessage = function(evt) {
+					var signalData = evt.data;
+					
+				}
+
+				Sync.onclose = function() {
+					$(".global-sync-container").fadeIn();
+					var tryCount = 1;
+					setInterval(function() {
+						console.clear();
+						console.log("CPR..." + tryCount);
+						var checkSocket = SocketCheck(serverTarget);
+						tryCount++;
+					}, 1000);
+				}
+
+				Sync.onerror = function() {
+					$(".global-sync-container").fadeIn();
+					var tryCount = 1;
+					setInterval(function() {
+						console.clear();
+						console.log("CPR..." + tryCount);
+						var checkSocket = SocketCheck(serverTarget);
+						tryCount++;
+					}, 1000);
+				}
+
+				return Sync;
+			} else {
+				console.log("WebSocket Not Supported");
+			}
+
+			function SocketCheck(__HOST__) {
+				var checkSocket = new WebSocket(__HOST__);
+				checkSocket.onopen = function() {
+					location.reload();
+				}
+			}*/
 		});
 		
 		function inArray(needle, haystack) {
@@ -215,19 +266,7 @@
 				$(alertContainer).fadeOut();
 			}, time);
 		}
-		/*function formatMoney(number, decPlaces, decSep, thouSep) {
-			decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
-			decSep = typeof decSep === "undefined" ? "." : decSep;
-			thouSep = typeof thouSep === "undefined" ? "," : thouSep;
-			var sign = number < 0 ? "-" : "";
-			var i = String(parseInt(number = Math.abs(Number(number) || 0).toFixed(decPlaces)));
-			var j = (j = i.length) > 3 ? j % 3 : 0;
 
-			return sign +
-			(j ? i.substr(0, j) + thouSep : "") +
-			i.substr(j).replace(/(\decSep{3})(?=\decSep)/g, "$1" + thouSep) +
-			(decPlaces ? decSep + Math.abs(number - i).toFixed(decPlaces).slice(2) : "");
-		}*/
 		function number_format (number, decimals, dec_point, thousands_sep) {
 			// Strip all characters but numerical ones.
 			number = (number + '').replace(/[^0-9+\-Ee.]/g, '');
@@ -252,7 +291,6 @@
 			return s.join(dec);
 		}
 
-
 		$(function() {
 			var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
 			var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
@@ -275,14 +313,6 @@
 			} else {
 				$("#sidemenu_3").hide();
 			}
-
-			/*$("body").niceScroll({
-				cursorcolor:"#006b4a",
-				cursorwidth: "10px",
-				scrollspeed: 60
-			});
-			
-			$("body").getNiceScroll().resize();*/
 		});
 	</script>
 </body>
