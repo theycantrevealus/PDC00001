@@ -30,6 +30,10 @@ class Poli extends Utility {
 					return self::get_poli();
 					break;
 
+				case 'poli-available':
+					return self::get_poli_editable();
+					break;
+
 				case 'poli-detail':
 					return self::get_poli_detail($parameter[2]);
 					break;
@@ -94,6 +98,32 @@ class Poli extends Utility {
 					->where(array(
 							'master_poli.deleted_at' => 'IS NULL'
 						)
+					)
+					->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		return $data;
+	}
+
+	public function get_poli_editable(){
+		$data = self::$query
+					->select('master_poli', array(
+						'uid',
+						'nama',
+						'created_at',
+						'updated_at'
+						)
+					)	
+					->where(array(
+							'master_poli.deleted_at' => 'IS NULL',
+							'AND',
+							'master_poli.editable' => '= TRUE'
+						),array()
 					)
 					->execute();
 

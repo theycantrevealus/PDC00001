@@ -69,44 +69,42 @@
 								<h5 class="card-header__title flex m-0">Item Barang Masuk</h5>
 							</div>
 							<div class="card-body">
-								<div class="row">
-									<table class="table table-bordered" id="table-item-do" style="font-size: 0.8rem;">
-										<thead>
-											<tr>
-												<th width="1%">No</th>
-												<th width="20%">Item</th>
-												<th width="10%">Kode Batch</th>
-												<th width="10%">Qty</th>
-												<th width="2%">Satuan</th>
-												<th width="12%">Keterangan</th>
-												<th width="2%">Aksi</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr class="last">
-												<td class="no_urut">1</td>
-												<td>
-													<select class="form-control itemInputanSelect input-sm select2 items" id="barang_1" name="barang_1">
-														<option value="">Pilih Item</option>
-													</select>
-													<div class="input-group">
-												        <div class="input-group-prepend">
-												          <span class="input-group-text" id="kedaluarsa_label_1">Kedaluarsa</span>
-												        </div>
-												        <input type="date" name="kedaluarsa_1" id="kedaluarsa_1" class="form-control itemInputan items" placeholder="Kode Batch" aria-describedby="kedaluarsa_label">
-												    </div>
-												</td>
-												<td><input type="text" name="kode_batch_1" id="kode_batch_1" class="form-control itemInputan items" placeholder="Kode Batch">
-												<td><input type="number" name="qty_1" id="qty_1" class="form-control itemInputan items" value="0"></td>
-												<td>
-													<span id="satuan_1">Satuan</span>
-												</td>
-												<td><textarea class="form-control itemInputan items" id="keterangan_1" nama="keterangan_1"></textarea></td>
-												<td><button class="btn btn-sm btn-danger btn-hapus-item" data-toggle='tooltip' title='Hapus'><i class="fa fa-trash"></i></button></td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
+								<table class="table table-bordered largeDataType" id="table-item-do">
+									<thead class="thead-dark">
+										<tr>
+											<th width="1%">No</th>
+											<th width="20%">Item</th>
+											<th width="10%">Kode Batch</th>
+											<th width="10%">Qty</th>
+											<th width="2%">Satuan</th>
+											<th width="12%">Keterangan</th>
+											<th width="2%">Aksi</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr class="last">
+											<td class="no_urut">1</td>
+											<td>
+												<select class="form-control itemInputanSelect input-sm select2 items" id="barang_1" name="barang_1">
+													<option value="">Pilih Item</option>
+												</select>
+												<div class="input-group">
+											        <div class="input-group-prepend">
+											          <span class="input-group-text" id="kedaluarsa_label_1">Kedaluarsa</span>
+											        </div>
+											        <input type="date" name="kedaluarsa_1" id="kedaluarsa_1" class="form-control itemInputan items" placeholder="Kode Batch" aria-describedby="kedaluarsa_label">
+											    </div>
+											</td>
+											<td><input type="text" name="kode_batch_1" id="kode_batch_1" class="form-control itemInputan items" placeholder="Kode Batch">
+											<td><input type="number" name="qty_1" id="qty_1" class="form-control itemInputan items" value="0"></td>
+											<td>
+												<span id="satuan_1">Satuan</span>
+											</td>
+											<td><textarea class="form-control itemInputan items" id="keterangan_1" nama="keterangan_1"></textarea></td>
+											<td><button class="btn btn-sm btn-danger btn-hapus-item" data-toggle='tooltip' title='Hapus'><i class="fa fa-trash"></i></button></td>
+										</tr>
+									</tbody>
+								</table>
 							</div>
 						</div>
 					</div>

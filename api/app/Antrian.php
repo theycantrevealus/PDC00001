@@ -35,11 +35,11 @@ class Antrian extends Utility {
 					break;
 
 				case 'cari-pasien':
-					return self::cari_pasien('pasien', $parameter[2]);
+					return self::cari_pasien($parameter[2]);
 					break;
 
 				case 'pasien-detail':
-					return self::pasien_detail('pasien', $parameter[2]);
+					return self::pasien_detail($parameter[2]);
 					break;
 
 				case 'cek-status-antrian':
@@ -184,11 +184,11 @@ class Antrian extends Utility {
 		return $data;
 	}
 
-	public function cari_pasien($table, $params){
+	public function cari_pasien($params){
 		$parameter = strtoupper($params);
 
 		$data = self::$query
-				->select($table, array(
+				->select('pasien', array(
 						'uid',
 						'no_rm',
 						'nik',
@@ -199,18 +199,18 @@ class Antrian extends Utility {
 					)
 				)
 				->where(array(
-						$table . '.nik' => 'LIKE \'%'. $parameter . '%\'',
+						'pasien.nik' => 'LIKE \'%'. $parameter . '%\'',
 						'OR',
-						$table . '.no_rm' => 'LIKE \'%'. $parameter . '%\'',
+						'pasien.no_rm' => 'LIKE \'%'. $parameter . '%\'',
 						'OR',
-						$table . '.nama' => 'LIKE \'%'. $parameter . '%\'',
+						'pasien.nama' => 'LIKE \'%'. $parameter . '%\'',
 						'AND',
-						$table . '.deleted_at' => 'IS NULL'
+						'pasien.deleted_at' => 'IS NULL'
 					),
 					array()
 				)
 				->order(array(
-						$table . '.created_at' => 'ASC'
+						'pasien.created_at' => 'ASC'
 					)
 				)
 				->execute();
@@ -236,12 +236,11 @@ class Antrian extends Utility {
 		return $data;
 	}
 
-	public function pasien_detail($table, $params){
+	public function pasien_detail($parameter){
 		$pasien = new Pasien(self::$pdo);
 		$dataPasien = null;
 
-		$param = ['','pasien-detail',$params];
-		$get_pasien = $pasien->__GET__($param);
+		$get_pasien = $pasien->get_pasien_detail('pasien', $parameter);
 		if ($get_pasien['response_data'] != ""){
 			$dataPasien = $get_pasien['response_data'][0];
 
@@ -493,7 +492,7 @@ class Antrian extends Utility {
 			$status_berobat = true;
 		}
 
-		return $status_berobat;
+		return $data;
 	}
 
 	private function ambilNomorAntrianPoli($poli){
