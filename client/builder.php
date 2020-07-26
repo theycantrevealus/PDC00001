@@ -148,6 +148,26 @@
 	<script type="text/javascript">
 		var Sync;
 		$(function() {
+			var idleCheck;
+			function reloadSession() {
+				window.clearTimeout(idleCheck);
+				idleCheck = window.setTimeout(function(){
+					location.href = __HOSTNAME__ + "/system/logout";
+				},30 * 60 * 1000);
+			}
+
+			$("body").on("click", function() {
+				reloadSession();
+			});
+
+			$("body").on("keyup", function() {
+				reloadSession();
+			});
+
+			$("body").on("mousemove", function() {
+				reloadSession();
+			});
+
 			refresh_notification();
 
 			$("body").on("click", "#clear_notif", function() {
