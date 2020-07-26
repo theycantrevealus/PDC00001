@@ -159,7 +159,7 @@
 			localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
 			location.href = __HOSTNAME__ + "/rawat_jalan/resepsionis/tambah/" + uid;
 		});
-		
+
 
 		//SOCKET
 		Sync.onmessage = function(evt) {
@@ -193,14 +193,6 @@
 				//
 			}
 		};
-
-
-
-
-
-
-
-
 
 		//INIT
 		
