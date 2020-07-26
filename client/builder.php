@@ -132,9 +132,9 @@
 			</div>
 		</div>
 	</div>
-	<!-- <div class="global-sync-container blinker_dc">
-		<h4 class="text-center">OUT OF SYNC</h4>
-	</div> -->
+	<div class="global-sync-container blinker_dc">
+		<h4 class="text-center" style="font-family: Courier"><i class="fa fa-signal"></i><br /><br /><small>reconnecting</small></h4>
+	</div>
 	<div class="notification-container"></div>
 	<!-- <div id="app-settings">
 		<app-settings layout-active="default" :layout-location="{
@@ -145,50 +145,85 @@
 	}"></app-settings>
 	</div> -->
 	<?php require 'script.php'; ?>
-	<?php
-		if(empty(__PAGES__[0])) {
-			require 'script/system/dashboard.php';
-		} else {
-			if(is_dir('script/' . implode('/', __PAGES__))) {
-				include 'script/' . implode('/', __PAGES__) . '/index.php';
-			} else {
-				if(file_exists('script/' . implode('/', __PAGES__) . '.php')) {
-					include 'script/' . implode('/', __PAGES__) . '.php';
-				} else {
-					if(isset($lastExist)) {
-						$getScript = explode('/', $lastExist);
-						$getScript[0] = 'script';
-						include implode('/', $getScript);
-					} else {
-						include 'script/system/404.php';	
-					}
-				}
-			}
-		}
-	?>
 	<script type="text/javascript">
+		var Sync;
 		$(function() {
-			$(".tooltip-custom").each(function() {
-				var data = $(this).attr("data-toggle");
-				$(this).tooltip({
-					placement: "top",
-					title: data
+			var idleCheck;
+			function reloadSession() {
+				window.clearTimeout(idleCheck);
+				idleCheck = window.setTimeout(function(){
+					location.href = __HOSTNAME__ + "/system/logout";
+				},30 * 60 * 1000);
+			}
+
+			$("body").on("click", function() {
+				reloadSession();
+			});
+
+			$("body").on("keyup", function() {
+				reloadSession();
+			});
+
+			$("body").on("mousemove", function() {
+				reloadSession();
+			});
+
+			refresh_notification();
+
+			$("body").on("click", "#clear_notif", function() {
+				$.ajax({
+					async: false,
+					url:__HOSTAPI__ + "/Notification",
+					type: "POST",
+					data: {
+						request: "clear_notif"
+					},
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					success: function(response) {
+						refresh_notification();
+					},
+					error: function(response) {
+						console.log(response);
+					}
+				});
+				return false;
+			});
+		
+			$("body").on("click", "a[href=\"#notifications_menu\"]", function() {
+				$.ajax({
+					async: false,
+					url:__HOSTAPI__ + "/Notification",
+					type: "POST",
+					data: {
+						request: "read_notif"
+					},
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					success: function(response) {
+						refresh_notification();
+					},
+					error: function(response) {
+						console.log(response);
+					}
 				});
 			});
 
-			/*if ("WebSocket" in window) {
+			if ("WebSocket" in window) {
 				//var serverTarget = "ws://192.168.99.240:666";
 				var serverTarget = "ws://127.0.0.1:666";
 				
-				var Sync = new WebSocket(serverTarget);
+				Sync = new WebSocket(serverTarget);
 				Sync.onopen = function() {
 					$(".global-sync-container").fadeOut();
 				}
 
-				Sync.onmessage = function(evt) {
+				/*Sync.onmessage = function(evt) {
 					var signalData = evt.data;
 					
-				}
+				}*/
 
 				Sync.onclose = function() {
 					$(".global-sync-container").fadeIn();
@@ -222,9 +257,90 @@
 				checkSocket.onopen = function() {
 					location.reload();
 				}
-			}*/
+			}
 		});
-		
+
+		function refresh_notification() {
+			$.ajax({
+				async: false,
+				url:__HOSTAPI__ + "/Notification",
+				type: "GET",
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				success: function(response){
+					var newCounter = 0;
+					$("#notification-container").html("");
+					var notifData = response.response_package.response_data;
+					for(var notifKey in notifData) {
+						if(notifData[notifKey].status == "N") {
+							newCounter++;
+						}
+						var notifContainer = document.createElement("DIV");
+						var notifSenderContainer = document.createElement("DIV");
+						var notifContentContainter = document.createElement("DIV");
+						$(notifSenderContainer).html(	"<div class=\"avatar avatar-sm\" style=\"width: 32px; height: 32px;\">" +
+															"<img src=\"" + __HOSTNAME__ + "/template/assets/images/avatar/queue.png\" alt=\"Avatar\" class=\"avatar-img rounded-circle\">" +
+														"</div>").addClass("mr-3");
+						if(notifData[notifKey].receiver_type == "group") {
+							$(notifContentContainter).html(notifData[notifKey].notify_content).addClass("flex");
+						} else {
+							$(notifContentContainter).html("<a href=\"\">A.Demian</a> left a comment on <a href=\"\">Stack</a><br>" +
+															"<small class=\"text-muted\">1 minute ago</small>").addClass("flex");
+						}
+							
+						$(notifContainer).addClass("dropdown-item d-flex");
+						$(notifContainer).append(notifSenderContainer);
+						$(notifContainer).append(notifContentContainter);
+
+						$("#notification-container").append(notifContainer);
+					}
+					if(newCounter > 0) {
+						$("#counter-notif-identifier").addClass("navbar-notifications-indicator");
+					} else {
+						$("#counter-notif-identifier").removeClass("navbar-notifications-indicator");
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+		}
+
+		function push_socket(sender, protocols, receiver, parameter, type) {
+			var msg = {
+				protocols: protocols,
+				sender: sender,
+				receiver: receiver,
+				parameter: parameter,
+				type: type
+			};
+
+			Sync.send(JSON.stringify(msg));
+		}
+	</script>
+	<?php
+		if(empty(__PAGES__[0])) {
+			require 'script/system/dashboard.php';
+		} else {
+			if(is_dir('script/' . implode('/', __PAGES__))) {
+				include 'script/' . implode('/', __PAGES__) . '/index.php';
+			} else {
+				if(file_exists('script/' . implode('/', __PAGES__) . '.php')) {
+					include 'script/' . implode('/', __PAGES__) . '.php';
+				} else {
+					if(isset($lastExist)) {
+						$getScript = explode('/', $lastExist);
+						$getScript[0] = 'script';
+						include implode('/', $getScript);
+					} else {
+						include 'script/system/404.php';	
+					}
+				}
+			}
+		}
+	?>
+	<script type="text/javascript">
 		function inArray(needle, haystack) {
 			var length = haystack.length;
 			for(var i = 0; i < length; i++) {
@@ -313,6 +429,15 @@
 			} else {
 				$("#sidemenu_3").hide();
 			}
+
+
+			$(".tooltip-custom").each(function() {
+				var data = $(this).attr("data-toggle");
+				$(this).tooltip({
+					placement: "top",
+					title: data
+				});
+			});
 		});
 	</script>
 </body>

@@ -1,5 +1,5 @@
 <?php
-$host_server = '192.168.99.240';
+$host_server = '127.0.0.1';
 $port_number = '666';
 $null = NULL;
 $takashi = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -20,7 +20,8 @@ while (true) {
 		handshake($header, $new_socket, $host_server, $port_number);
 		socket_getpeername($new_socket, $ip);
 
-		$communicate = mask(json_encode(array('sender' => 'system',
+		$communicate = mask(json_encode(array(
+			'sender' => 'system',
 			'type' => 'info',
 			'protocols' => 'userlist',
 			'receiver' => "*",
@@ -46,60 +47,36 @@ while (true) {
 			$parameter = $data->parameter;
 
 
+			switch ($protocols) {
+				case 'userlogin':
+					if(!isset($user_online[$ip])) {
+						$user_online[$ip] = array(
+							'uid' => '',
+							'email' => '',
+							'nickname' => '',
+							'jabatan' => array(
+								'uid' => '',
+								'nama' => ''
+							)
+						);
 
-
-
-
-			if ($protocols == "userlogin") {
-				$sender_decode = explode("|", $sender);
-
-				$allow_apply = false;
-				if (count($user_online) == 0) {
-					$allow_apply = true;
-				} else {
-					$allow_apply = false;
-					foreach ($user_online as $key => $value) {
-						if ($value["username"] == $sender_decode[0]) {
-							$allow_apply = false;
-							unset($user_online[$key]);
-							if ($ip != $key) {
-								$user_online[$ip]["username"] = $sender_decode[0];
-								$user_online[$ip]["nickname"] = $sender_decode[1];
-								$user_online[$ip]["id_user"] = $sender_decode[2];
-								$user_online[$ip]["otoritas"] = str_replace(" ", "_", strtolower($sender_decode[3]));
-								$user_online[$ip]["via"] = $sender_decode[4];
-							}
-							break;
-						} else {
-							$allow_apply = true;
-						}
+						//Modify protocol
+						$protocols = 'userlist';
+						$parameter = json_encode($user_online);
 					}
-				}
-				if ($allow_apply) {
-					$user_online[$ip]["username"] = $sender_decode[0];
-					$user_online[$ip]["nickname"] = $sender_decode[1];
-					$user_online[$ip]["id_user"] = $sender_decode[2];
-					$user_online[$ip]["otoritas"] = str_replace(" ", "_", strtolower($sender_decode[3]));
-					$user_online[$ip]["via"] = $sender_decode[4];
-				} else {
-					$protocols = "duplicate_login";
-					$receiver = $sender_decode[0];
-				}
-				print_r($user_online);
+					break;
+				case 'anjungan_kunjungan_baru':
+					
+					break;
+				default:
+					# code...
+					break;
 			}
 
 
 
-			if ($protocols == "logout") {
-				foreach ($user_online as $key => $value) {
-					if ($value["username"] == $sender) {
-						unset($user_online[$key]);
-					}
-				}
+			
 
-				$protocols = "userlist";
-				$parameter = json_encode($user_online);
-			}
 
 
 
