@@ -169,7 +169,37 @@
 
 
 
+		//SOCKET
+		Sync.onmessage = function(evt) {
+			var signalData = JSON.parse(evt.data);
+			var command = signalData.protocols;
+			var type = signalData.type;
+			var sender = signalData.sender;
+			var receiver = signalData.receiver;
+			var time = signalData.time;
+			var parameter = signalData.parameter;
 
+			if(command !== undefined && command !== null && command !== "") {
+				protocolLib[command](command, type, parameter, sender, receiver, time);
+			}
+		}
+
+
+
+		var protocolLib = {
+			userlist: function(protocols, type, parameter, sender, receiver, time) {
+				//
+			},
+			userlogin: function(protocols, type, parameter, sender, receiver, time) {
+				//
+			},
+			anjungan_kunjungan_baru: function(protocols, type, parameter, sender, receiver, time) {
+				refresh_notification();
+			},
+			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
+				//
+			}
+		};
 
 
 
@@ -206,7 +236,7 @@
 						$("#txt_loket").attr("disabled", "disabled");
 						$("#btnSelesaiGunakan").removeAttr("disabled", "disabled");
 						$("#btnGunakanLoket").attr("disabled", "disabled");
-						
+						reloadPanggilan($("#txt_loket").val(), dataCheck.response_queue_id);
 						//Otomatis Panggil
 						//reloadPanggilan($("#txt_loket").val());
 					} else {
@@ -239,7 +269,7 @@
 					loketData = response.response_package.response_data;
 					$(target).find("option").remove();
 					for(var a = 0; a < loketData.length; a++) {
-						$(target).append("<option value=\"" + loketData[a].uid + "\">" + loketData[a].nama_loket + "</option>")
+						$(target).append("<option " + (loketData[a].uid == selected ? "selected=\"selected\"" : "") + " value=\"" + loketData[a].uid + "\">" + loketData[a].nama_loket + "</option>")
 					}
 				},
 				error: function(response) {
@@ -273,9 +303,14 @@
 				},
 				success: function(response){
 					currentQueue = response.response_package;
-					$("#txt_current_antrian").html(currentQueue.response_queue).attr({
-						"current_queue": currentQueue.response_queue_id
-					});
+
+					if((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null || currentQueue.response_queue == 0)) {
+						reloadPanggilan(loket, "");
+					} else {
+						$("#txt_current_antrian").html((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null) ? "0" : currentQueue.response_queue).attr({
+							"current_queue": currentQueue.response_queue_id
+						});
+					}
 				},
 				error: function(response) {
 					console.log(response);
@@ -337,7 +372,7 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
-					if(response.response_package.response_result > 0) {
+					/*if(response.response_package.response_result > 0) {
 						load_loket("#txt_loket");
 						notification ("success", "Berhasil keluar dari loket", 3000, "hasil_loket");
 						$("#txt_current_antrian").html("0");
@@ -348,7 +383,15 @@
 						$("#btnTambahAntrian").attr("disabled", "disabled");
 					} else {
 						notification ("warning", "Anda telah keluar loket", 3000, "hasil_loket");
-					}
+					}*/
+					load_loket("#txt_loket");
+					notification ("success", "Berhasil keluar dari loket", 3000, "hasil_loket");
+					$("#txt_current_antrian").html("0");
+					$("#btnGunakanLoket").removeAttr("disabled");
+					$("#txt_loket").removeAttr("disabled");
+					$("#btnSelesaiGunakan").attr("disabled", "disabled");
+					$("#btnNext").attr("disabled", "disabled");
+					$("#btnTambahAntrian").attr("disabled", "disabled");
 				},
 				error: function(response) {
 					console.log(response);
@@ -359,6 +402,12 @@
 		$("#btnNext").click(function() {
 			reloadPanggilan($("#txt_loket").val(), $("#txt_current_antrian").attr("current_queue"));
 		});
+		$("#btnPanggil").click(function() {
+			push_socket($("#txt_loket").val(), "anjungan_kunjungan_panggil", "display_machine", {
+				loket: $("#txt_loket").val(),
+				nomor: $("#txt_current_antrian").html()
+			}, "info");
+		});
 	});
 
 </script>
@@ -367,64 +416,64 @@
 <script src="<?= __HOSTNAME__ ?>/template/assets/js/toastr.js"></script>
 
 <div id="modal-cari" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
-		<div class="modal-dialog modal-lg" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="modal-large-title">Tambah Antrian</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<div class="form-group col-md-6">
-						<div class="col-md-6">
-							<div class="row">
-								<label for="txt_cari">Cari Pasien</label>
-							</div>
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-large-title">Tambah Antrian</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group col-md-6">
+					<div class="col-md-6">
+						<div class="row">
+							<label for="txt_cari">Cari Pasien</label>
 						</div>
-						<div class="col-md-12">
-							<div class="row">
-								<div class="search-form form-control-rounded search-form--light input-group-lg col-md-10">
-									<input type="text" class="form-control" placeholder="Nama / NIK / No. RM" id="txt_cari">
-								</div>
-								<div class="col-md-12" hidden id="pencarian-notif" style="color: red; font-size: 0.8rem;">
-									Mohon ketikkan kata kunci pencarian
-								</div>
-								<div class="col-md-2">
-									<div class="loader loader-lg loader-primary" id="loader-search" hidden></div>
-								</div>
+					</div>
+					<div class="col-md-12">
+						<div class="row">
+							<div class="search-form form-control-rounded search-form--light input-group-lg col-md-10">
+								<input type="text" class="form-control" placeholder="Nama / NIK / No. RM" id="txt_cari">
+							</div>
+							<div class="col-md-12" hidden id="pencarian-notif" style="color: red; font-size: 0.8rem;">
+								Mohon ketikkan kata kunci pencarian
+							</div>
+							<div class="col-md-2">
+								<div class="loader loader-lg loader-primary" id="loader-search" hidden></div>
 							</div>
 						</div>
 					</div>
-					<div class="form-group col-md-12" >
-						<!-- style="height: 100px; overflow: scroll;" -->
-						<table class="table table-bordered table-striped" id="table-list-pencarian">
-							<thead>
-								<tr>
-									<th width="2%">No</th>
-									<th>No. RM</th>
-									<th>Nama</th>
-									<th>NIK</th>
-									<th>Jenis Kelamin</th>
-									<th>Aksi</th>
-								</tr>
-							</thead>
-							<tbody>
-								
-							</tbody>
-						</table>
-					</div>
-					
 				</div>
-				<div class="modal-footer">
-					<!-- <div id="spanBtnTambahPasien" hidden> -->
-					<a href="<?= __HOSTNAME__ ?>/pasien/tambah" class="btn btn-success" id="btnTambahPasien">
-					<!-- <i class="fa fa-plus"></i>  -->Tambah Pasien Baru
-					</a>
-					<!-- </div> -->
-					
-					<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+				<div class="form-group col-md-12" >
+					<!-- style="height: 100px; overflow: scroll;" -->
+					<table class="table table-bordered table-striped" id="table-list-pencarian">
+						<thead>
+							<tr>
+								<th width="2%">No</th>
+								<th>No. RM</th>
+								<th>Nama</th>
+								<th>NIK</th>
+								<th>Jenis Kelamin</th>
+								<th>Aksi</th>
+							</tr>
+						</thead>
+						<tbody>
+							
+						</tbody>
+					</table>
 				</div>
-			</div> 
+				
+			</div>
+			<div class="modal-footer">
+				<!-- <div id="spanBtnTambahPasien" hidden> -->
+				<a href="<?= __HOSTNAME__ ?>/pasien/tambah" class="btn btn-success" id="btnTambahPasien">
+				<!-- <i class="fa fa-plus"></i>  -->Tambah Pasien Baru
+				</a>
+				<!-- </div> -->
+				
+				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+			</div>
 		</div> 
 	</div> 
+</div> 

@@ -86,6 +86,8 @@
 				type: "POST",
 				success: function(response){
 					if(response.response_package.response_result > 0) {
+						push_socket(__ME__, "anjungan_kunjungan_baru", "*", "Antrian Baru dengan nomor " + response.response_package.response_antrian, "warning");
+						
 						$.ajax({
 							async: false,
 							url: __HOSTNAME__ + "/print/antrian_anjungan.php",

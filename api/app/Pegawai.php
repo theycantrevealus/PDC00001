@@ -156,6 +156,7 @@ class Pegawai extends Utility {
 				$aud = 'users_library';
 				$user_arr_data = array(
 					'uid' => $read[0]['uid'],
+					'jabatan' => $read[0]['jabatan'],
 					'email' => $read[0]['email'],
 					'log_id' => $log
 				);

@@ -131,7 +131,7 @@
 
         $.ajax({
             async: false,
-            url:__HOSTAPI__ + "/Poli/poli",
+            url:__HOSTAPI__ + "/Poli/poli-available",
             type: "GET",
              beforeSend: function(request) {
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
