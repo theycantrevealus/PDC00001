@@ -236,7 +236,7 @@
 						$("#txt_loket").attr("disabled", "disabled");
 						$("#btnSelesaiGunakan").removeAttr("disabled", "disabled");
 						$("#btnGunakanLoket").attr("disabled", "disabled");
-						
+						reloadPanggilan($("#txt_loket").val(), dataCheck.response_queue_id);
 						//Otomatis Panggil
 						//reloadPanggilan($("#txt_loket").val());
 					} else {
@@ -269,7 +269,7 @@
 					loketData = response.response_package.response_data;
 					$(target).find("option").remove();
 					for(var a = 0; a < loketData.length; a++) {
-						$(target).append("<option value=\"" + loketData[a].uid + "\">" + loketData[a].nama_loket + "</option>")
+						$(target).append("<option " + (loketData[a].uid == selected ? "selected=\"selected\"" : "") + " value=\"" + loketData[a].uid + "\">" + loketData[a].nama_loket + "</option>")
 					}
 				},
 				error: function(response) {
@@ -302,10 +302,16 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
+					console.clear();
 					currentQueue = response.response_package;
-					$("#txt_current_antrian").html(currentQueue.response_queue).attr({
-						"current_queue": currentQueue.response_queue_id
-					});
+					console.log(currentQueue)
+					if((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null || currentQueue.response_queue == 0)) {
+						reloadPanggilan(loket, "");
+					} else {
+						$("#txt_current_antrian").html((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null) ? "0" : currentQueue.response_queue).attr({
+							"current_queue": currentQueue.response_queue_id
+						});
+					}
 				},
 				error: function(response) {
 					console.log(response);
