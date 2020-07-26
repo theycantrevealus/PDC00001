@@ -269,7 +269,7 @@ class Anjungan extends Utility {
 			$worker['response_queue'] = $data['response_data'][0]['nomor_urut'];
 			return $worker;
 		} else {
-			$data = self::$query->select('antrian_nomor', array(
+			/*$data = self::$query->select('antrian_nomor', array(
 				'id',
 				'nomor_urut',
 				'anjungan',
@@ -290,7 +290,7 @@ class Anjungan extends Utility {
 			->limit(1)
 			->execute();
 			$data['response_queue_id'] = $data['response_data'][0]['id'];
-			$data['response_queue'] = $data['response_data'][0]['nomor_urut'];
+			$data['response_queue'] = $data['response_data'][0]['nomor_urut'];*/
 			return $data;
 		}
 	}

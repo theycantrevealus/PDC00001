@@ -40,9 +40,10 @@
 				<div class="card-body">
 					<div class="row">
 						<div class="col-lg-2" style="border-right: solid 1px #cccc;">
+							<center>Antrian terkini</center>
 							<h1 class="text-center" id="txt_current_antrian">0</h1>
 						</div>
-						<div class="col-lg-10">
+						<div class="col-lg-5">
 							<button class="btn btn-info" id="btnPanggil">
 								<i class="fa fa-bullhorn"></i> PANGGIL
 							</button>
@@ -52,6 +53,10 @@
 							<button class="btn btn-success" id="btnTambahAntrian">
 								<i class="fa fa-plus"></i> DAFTAR PASIEN
 							</button>
+						</div>
+						<div class="col-lg-5">
+							Sisa Antrian<br />
+							<b id="sisa_antrian"></b>
 						</div>
 					</div>
 				</div>

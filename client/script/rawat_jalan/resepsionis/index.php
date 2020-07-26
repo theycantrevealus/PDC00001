@@ -302,9 +302,8 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
-					console.clear();
 					currentQueue = response.response_package;
-					console.log(currentQueue)
+
 					if((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null || currentQueue.response_queue == 0)) {
 						reloadPanggilan(loket, "");
 					} else {
