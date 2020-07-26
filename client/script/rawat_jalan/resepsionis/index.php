@@ -159,15 +159,7 @@
 			localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
 			location.href = __HOSTNAME__ + "/rawat_jalan/resepsionis/tambah/" + uid;
 		});
-
-
-
-
-
-
-
-
-
+		
 
 		//SOCKET
 		Sync.onmessage = function(evt) {
@@ -195,6 +187,7 @@
 			},
 			anjungan_kunjungan_baru: function(protocols, type, parameter, sender, receiver, time) {
 				refresh_notification();
+				reinitAntrianSync();
 			},
 			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
 				//
@@ -210,47 +203,54 @@
 
 
 		//INIT
-		$.ajax({
-			async: false,
-			url:__HOSTAPI__ + "/Anjungan/check_job",
-			type: "GET",
-			beforeSend: function(request) {
-				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-			},
-			success: function(response){
-				var dataCheck = response.response_package;
-				if(dataCheck.response_data.length > 0) {
-					//Belum terproses
-					$("#btnGunakanLoket").attr("disabled", "disabled");
-					$("#btnSelesaiGunakan").removeAttr("disabled");
-					$("#txt_loket")
-						.append("<option value=\"" + dataCheck.response_data[0].loket.uid + "\">" + dataCheck.response_data[0].loket.nama_loket + "</option>")
-						.attr("disabled", "disabled");
-					$("#txt_loket").select2();
-					$("#txt_current_antrian").html(dataCheck.response_queue).attr({
-						"current_queue": dataCheck.response_queue_id
-					});
-				} else {
-					if(dataCheck.response_used != undefined && dataCheck.response_used != "") {
-						load_loket("#txt_loket", dataCheck.response_used);
-						$("#txt_loket").attr("disabled", "disabled");
-						$("#btnSelesaiGunakan").removeAttr("disabled", "disabled");
+		
+		function reinitAntrianSync(argument) {
+			$.ajax({
+				async: false,
+				url:__HOSTAPI__ + "/Anjungan/check_job",
+				type: "GET",
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				success: function(response){
+					var dataCheck = response.response_package;
+					$("#sisa_antrian").html(dataCheck.response_standby);
+					if(dataCheck.response_data.length > 0) {
+						//Belum terproses
 						$("#btnGunakanLoket").attr("disabled", "disabled");
-						reloadPanggilan($("#txt_loket").val(), dataCheck.response_queue_id);
-						//Otomatis Panggil
-						//reloadPanggilan($("#txt_loket").val());
+						$("#btnSelesaiGunakan").removeAttr("disabled");
+						$("#txt_loket")
+							.append("<option value=\"" + dataCheck.response_data[0].loket.uid + "\">" + dataCheck.response_data[0].loket.nama_loket + "</option>")
+							.attr("disabled", "disabled");
+						$("#txt_loket").select2();
+						$("#txt_current_antrian").html(dataCheck.response_queue).attr({
+							"current_queue": dataCheck.response_queue_id
+						});
 					} else {
-						load_loket("#txt_loket");
-						$("#btnNext").attr("disabled", "disabled");
-						$("#btnTambahAntrian").attr("disabled", "disabled");
+						if(dataCheck.response_used != undefined && dataCheck.response_used != "") {
+							load_loket("#txt_loket", dataCheck.response_used);
+							$("#txt_loket").attr("disabled", "disabled");
+							$("#btnSelesaiGunakan").removeAttr("disabled", "disabled");
+							$("#btnGunakanLoket").attr("disabled", "disabled");
+							reloadPanggilan($("#txt_loket").val(), dataCheck.response_queue_id);
+							//Otomatis Panggil
+							//reloadPanggilan($("#txt_loket").val());
+						} else {
+							load_loket("#txt_loket");
+							$("#btnNext").attr("disabled", "disabled");
+							$("#btnTambahAntrian").attr("disabled", "disabled");
+						}
+						$("#txt_loket").select2();
 					}
-					$("#txt_loket").select2();
+				},
+				error: function(response) {
+					console.log(response);
 				}
-			},
-			error: function(response) {
-				console.log(response);
-			}
-		});
+			});
+		}
+
+		reinitAntrianSync();
+			
 
 
 
@@ -302,14 +302,19 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
-					currentQueue = response.response_package;
-
-					if((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null || currentQueue.response_queue == 0)) {
-						reloadPanggilan(loket, "");
-					} else {
-						$("#txt_current_antrian").html((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null) ? "0" : currentQueue.response_queue).attr({
-							"current_queue": currentQueue.response_queue_id
-						});
+					console.clear();
+					console.log(response);
+					if(response.response_package !== undefined && response.response_package !== null) {
+						currentQueue = response.response_package;
+						$("#sisa_antrian").html(currentQueue.response_standby);
+						if((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null || currentQueue.response_queue == 0)) {
+							//reloadPanggilan(loket, "");
+						} else {
+							
+							$("#txt_current_antrian").html((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null) ? "0" : currentQueue.response_queue).attr({
+								"current_queue": currentQueue.response_queue_id
+							});
+						}
 					}
 				},
 				error: function(response) {

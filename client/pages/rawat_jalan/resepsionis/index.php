@@ -55,8 +55,8 @@
 							</button>
 						</div>
 						<div class="col-lg-5">
-							Sisa Antrian<br />
-							<b id="sisa_antrian"></b>
+							<span class="text-secondary">Sisa Antrian</span><br />
+							<h5><b id="sisa_antrian">0</b></h5>
 						</div>
 					</div>
 				</div>

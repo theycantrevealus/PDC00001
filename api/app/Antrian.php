@@ -492,7 +492,7 @@ class Antrian extends Utility {
 			$status_berobat = true;
 		}
 
-		return $data;
+		return $status_berobat;
 	}
 
 	private function ambilNomorAntrianPoli($poli){
