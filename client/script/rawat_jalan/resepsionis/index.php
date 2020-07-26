@@ -169,7 +169,37 @@
 
 
 
+		//SOCKET
+		Sync.onmessage = function(evt) {
+			var signalData = JSON.parse(evt.data);
+			var command = signalData.protocols;
+			var type = signalData.type;
+			var sender = signalData.sender;
+			var receiver = signalData.receiver;
+			var time = signalData.time;
+			var parameter = signalData.parameter;
 
+			if(command !== undefined && command !== null && command !== "") {
+				protocolLib[command](command, type, parameter, sender, receiver, time);
+			}
+		}
+
+
+
+		var protocolLib = {
+			userlist: function(protocols, type, parameter, sender, receiver, time) {
+				//
+			},
+			userlogin: function(protocols, type, parameter, sender, receiver, time) {
+				//
+			},
+			anjungan_kunjungan_baru: function(protocols, type, parameter, sender, receiver, time) {
+				refresh_notification();
+			},
+			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
+				//
+			}
+		};
 
 
 
@@ -337,7 +367,7 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
-					if(response.response_package.response_result > 0) {
+					/*if(response.response_package.response_result > 0) {
 						load_loket("#txt_loket");
 						notification ("success", "Berhasil keluar dari loket", 3000, "hasil_loket");
 						$("#txt_current_antrian").html("0");
@@ -348,7 +378,15 @@
 						$("#btnTambahAntrian").attr("disabled", "disabled");
 					} else {
 						notification ("warning", "Anda telah keluar loket", 3000, "hasil_loket");
-					}
+					}*/
+					load_loket("#txt_loket");
+					notification ("success", "Berhasil keluar dari loket", 3000, "hasil_loket");
+					$("#txt_current_antrian").html("0");
+					$("#btnGunakanLoket").removeAttr("disabled");
+					$("#txt_loket").removeAttr("disabled");
+					$("#btnSelesaiGunakan").attr("disabled", "disabled");
+					$("#btnNext").attr("disabled", "disabled");
+					$("#btnTambahAntrian").attr("disabled", "disabled");
 				},
 				error: function(response) {
 					console.log(response);
@@ -358,6 +396,12 @@
 
 		$("#btnNext").click(function() {
 			reloadPanggilan($("#txt_loket").val(), $("#txt_current_antrian").attr("current_queue"));
+		});
+		$("#btnPanggil").click(function() {
+			push_socket($("#txt_loket").val(), "anjungan_kunjungan_panggil", "display_machine", {
+				loket: $("#txt_loket").val(),
+				nomor: $("#txt_current_antrian").html()
+			}, "info");
 		});
 	});
 
