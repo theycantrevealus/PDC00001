@@ -22,3 +22,5 @@ api/app/Utility.php
 api/vendor/
 api/email_template/
 config.php
+
+*.txt

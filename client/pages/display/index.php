@@ -27,7 +27,7 @@
 					<h1 style="padding: 10px !important; color: yellow; font-weight: bold;">ANTRIAN</h1>
 
 					<div style="background: #000; border-radius: 10px;">
-						<h1 class="blink_me" style="font-size: 80pt; color: #fff">0</h1>
+						<h1 class="blink_me" id="current_antrian" style="font-size: 80pt; color: #fff">0</h1>
 					</div>
 				</center>
 			</div>

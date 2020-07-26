@@ -63,6 +63,9 @@ class Anjungan extends Utility {
 				case 'next_antrian':
 					return self::next_antrian($parameter);
 					break;
+				case 'get_terbilang':
+					return self::get_terbilang($parameter);
+					break;
 				default:
 					return self::get_anjungan();
 			}
@@ -71,7 +74,11 @@ class Anjungan extends Utility {
 		}
 	}
 
-	private function loket_status() {
+	private function get_terbilang($parameter) {
+		return parent::terbilang($parameter['nomor_urut']);
+	}
+
+	/*private function loket_status() {
 		$loketDefine = self::all_loket();
 
 		$data = self::$query->select('antrian_nomor', array(
@@ -79,9 +86,12 @@ class Anjungan extends Utility {
 			'nomor_urut'
 		))
 		->where(array(
-			'antrian_nomor.status' => '= ?'
+			'(antrian_nomor.status' => '= ?',
+			'OR',
+			'antrian_nomor.status' => '= ?)'
 		), array(
-			'D'
+			'D',
+			'C'
 		))
 		->execute();
 		$antrianMeta = array();
@@ -96,7 +106,7 @@ class Anjungan extends Utility {
 		}
 
 		return $antrianMeta;		
-	}
+	}*/
 
 	private function all_loket() {
 		$data = self::$query->select('master_loket', array(
@@ -154,6 +164,9 @@ class Anjungan extends Utility {
 	}
 
 	private function tambah_antrian($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
 		$newUrut = self::$query->select('antrian_nomor', array(
 			'id'
 		))
@@ -171,7 +184,20 @@ class Anjungan extends Utility {
 		))
 		->execute();
 		if($worker['response_result'] > 0) {
-			$worker['response_antrian'] = count($newUrut['response_data']) + 1;	
+			$worker['response_antrian'] = count($newUrut['response_data']) + 1;
+
+			//Add notify
+			$notification = self::$query->insert('notification', array(
+				'sender' => $UserData['data']->uid,
+				'receiver_type' => 'group',
+				'receiver' => __UID_PENDAFTARAN__,
+				'protocols' => 'anjungan_kunjungan_baru',
+				'notify_content' => 'Antrian baru dari anjungan',
+				'type' => 'warning',
+				'created_at' => parent::format_date(),
+				'status' => 'N'
+			))
+			->execute();
 		}
 		
 		return $worker;
@@ -243,6 +269,28 @@ class Anjungan extends Utility {
 			$worker['response_queue'] = $data['response_data'][0]['nomor_urut'];
 			return $worker;
 		} else {
+			/*$data = self::$query->select('antrian_nomor', array(
+				'id',
+				'nomor_urut',
+				'anjungan',
+				'jenis_antrian'
+			))
+			->where(array(
+				'antrian_nomor.status' => '= ?',
+				'AND',
+				'antrian_nomor.created_at' => '>= now()::date + interval \'1h\'',
+				'AND',
+				'antrian_nomor.id' => '> ' . (isset($parameter['currentQueue']) ? $parameter['currentQueue'] : 0)
+			), array(
+				'C'
+			))
+			->order(array(
+				'created_at' => 'ASC'
+			))
+			->limit(1)
+			->execute();
+			$data['response_queue_id'] = $data['response_data'][0]['id'];
+			$data['response_queue'] = $data['response_data'][0]['nomor_urut'];*/
 			return $data;
 		}
 	}
