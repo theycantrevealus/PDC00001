@@ -294,7 +294,6 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
-					console.clear();
 					console.log(response);
 					if(response.response_package !== undefined && response.response_package !== null) {
 						currentQueue = response.response_package;

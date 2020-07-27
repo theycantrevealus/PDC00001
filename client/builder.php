@@ -212,8 +212,8 @@
 			});
 
 			if ("WebSocket" in window) {
-				//var serverTarget = "ws://192.168.99.240:666";
-				var serverTarget = "ws://127.0.0.1:666";
+				var serverTarget = "ws://192.168.100.137:666";
+				//var serverTarget = "ws://127.0.0.1:666";
 				
 				Sync = new WebSocket(serverTarget);
 				Sync.onopen = function() {

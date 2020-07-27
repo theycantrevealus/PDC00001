@@ -3,6 +3,7 @@ database.ini
 
 .git
 config.php
+sync.php
 .htaccess
 composer.lock
 composer.json

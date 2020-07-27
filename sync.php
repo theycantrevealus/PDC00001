@@ -1,5 +1,5 @@
 <?php
-$host_server = '127.0.0.1';
+$host_server = '192.168.100.137';
 $port_number = '666';
 $null = NULL;
 $takashi = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
