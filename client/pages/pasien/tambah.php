@@ -26,7 +26,7 @@
                 <div class="form-row">
                     <div class="col-12 col-md-4 mb-3">
 						<label for="txt_no_rm">Nomor Rekam Medis</label>
-						<input type="text" autocomplete="off" class="form-control uppercase inputan no_rm" id="no_rm" name="no_rm" placeholder="000-000-000" required>
+						<input type="text" autocomplete="off" class="form-control uppercase inputan no_rm" id="no_rm" name="no_rm" placeholder="000-000" required>
                     </div>
                 </div>
             </div>
@@ -74,7 +74,7 @@
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label>Panggilan <span class="red">*</span></label>
-                        <select name="panggilan" class="form-control inputan" id="panggilan" required>
+                        <select name="panggilan" class="form-control inputan select2" id="panggilan" required>
                             <option value="">Pilih Panggilan</option>
                             
                         </select>
@@ -133,7 +133,7 @@
 					</div> 
 					<div class="col-12 col-md-6 mb-3">
 						<label for="status_suami_istri">Status Hubungan</label>
-						<select class="form-control inputan" name="status_suami_istri" id="status_suami_istri">
+						<select class="form-control inputan select2" name="status_suami_istri" id="status_suami_istri">
 							<option value="" selected disabled>Status</option>
 						</select>
 					</div>   
@@ -158,37 +158,37 @@
 						<!-- <div class="row col-md-9" id="parent_goldar">
 
 						</div> -->
-						<select class="form-control inputan" name="goldar" id="goldar">
+						<select class="form-control inputan select2" name="goldar" id="goldar">
 							<option value="" disabled selected>Pilih Golongan Darah</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<label for="agama">Agama</label>
-                    	<select class="form-control inputan" id="agama" name="agama">
+                    	<select class="form-control inputan select2" id="agama" name="agama">
 							<option value="" selected disabled>Pilih Agama</option>
 						</select>	
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<label for="warganegara">Kewarganegaraan</label>
-                    	<select class="form-control inputan" id="warganegara" name="warganegara">
+                    	<select class="form-control inputan select2" id="warganegara" name="warganegara">
 							<option value="" selected disabled>Pilih Kewarganegaraan</option>
 						</select>	
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<label for="suku">Suku / Bangsa</label>
-                    	<select class="form-control inputan" name="suku" id="suku">
+                    	<select class="form-control inputan select2" name="suku" id="suku">
 							<option value="" disabled selected>Pilih Suku / Bangsa</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="pendidikan">Pendidikan</label>
-						<select class="form-control inputan" name="pendidikan" id="pendidikan">
+						<select class="form-control inputan select2" name="pendidikan" id="pendidikan">
 							<option value="" disabled selected>Pilih Pendidikan</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="pekerjaan">Pekerjaan</label>
-						<select class="form-control inputan" name="pekerjaan" id="pekerjaan">
+						<select class="form-control inputan select2" name="pekerjaan" id="pekerjaan">
 							<option value="" disabled selected>Pilih Pekerjaan</option>
 						</select>
 					</div>
@@ -209,7 +209,7 @@
 						&nbsp;
                     <!-- </div>
                     <div class="col-12 col-md-4 mb-3"> -->
-                    	<a href="<?php echo __HOSTNAME__; ?>/master/pasien" class="btn btn-danger">Batal</a>
+                    	<a href="<?php echo __HOSTNAME__; ?>/pasien" class="btn btn-danger">Batal</a>
                    <!--  </div> -->
                 </div>
             </div>

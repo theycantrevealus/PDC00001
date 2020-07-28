@@ -98,7 +98,7 @@
 
 		$(".select2").select2({});
 		
-		$('#no_rm').inputmask('999-999-999');
+		$('#no_rm').inputmask('999-999');
 
 		$('.numberonly').keypress(function(event){
             if (event.which < 48 || event.which > 57) {
