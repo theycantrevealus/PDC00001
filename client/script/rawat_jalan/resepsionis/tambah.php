@@ -47,12 +47,17 @@
 					},
 					type: "POST",
 					success: function(response){
-						//console.log(response);
-						if(response.response_package.response_result > 0) {
-							localStorage.getItem("currentPasien");
-							localStorage.getItem("currentAntrianID");
-							location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+						if(response.response_package.response_notif == 'K') {
+							push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+						} else if(response.response_package.response_notif == 'P') {
+							push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+						} else {
+							console.log("command not found");
 						}
+
+						localStorage.getItem("currentPasien");
+						localStorage.getItem("currentAntrianID");
+						location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
 					},
 					error: function(response) {
 						console.log("Error : ");

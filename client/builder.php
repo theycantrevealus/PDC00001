@@ -145,6 +145,33 @@
 	}"></app-settings>
 	</div> -->
 	<?php require 'script.php'; ?>
+	<!-- <div class="bsod">
+		<div id="page">
+			<div id="container">
+				<h1>:(</h1>
+				<h2>Your PC ran into a problem and needs to restart. We're just collecting some error info, and then we'll restart for you.</h2>
+				<h2>
+					<span id="percentage">0</span>% complete
+				</h2>
+				<div id="details">
+					<div id="qr">
+						<div id="image">
+							<img src="http://xontab.com/experiments/Javascript/BSOD/qr.png" alt="QR Code" />
+						</div>
+					</div>
+					<div id="stopcode">
+						<h4>
+							MAMPOS!!!
+						</h4>
+						<h5>
+							If you call a support person, give them this info:<br/>Stop Code: 404 PAGE NOT FOUND
+						</h5>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div> -->
+
 	<script type="text/javascript">
 		var Sync;
 		$(function() {
@@ -212,8 +239,7 @@
 			});
 
 			if ("WebSocket" in window) {
-				var serverTarget = "ws://192.168.100.137:666";
-				//var serverTarget = "ws://127.0.0.1:666";
+				var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
 				
 				Sync = new WebSocket(serverTarget);
 				Sync.onopen = function() {

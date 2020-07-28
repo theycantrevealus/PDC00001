@@ -338,7 +338,7 @@ class Anjungan extends Utility {
 		return $data;
 	}
 
-	private function get_loket_detail($parameter) {
+	public function get_loket_detail($parameter) {
 		$data = self::$query->select('master_loket', array(
 			'uid',
 			'nama_loket'

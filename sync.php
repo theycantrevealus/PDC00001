@@ -1,6 +1,7 @@
 <?php
-$host_server = '192.168.100.137';
-$port_number = '666';
+require 'config.php';
+$host_server = __SYNC__;
+$port_number = __SYNC_PORT__;
 $null = NULL;
 $takashi = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 socket_set_option($takashi, SOL_SOCKET, SO_REUSEADDR, 1);

@@ -7,7 +7,7 @@
 					<li class="breadcrumb-item active" aria-current="page">Kasir</li>
 				</ol>
 			</nav>
-			<h4 class="m-0">Tagihan Pasien</h4>
+			<h4 class="m-0">Retur Karcis</h4>
 		</div>
 		<!-- <button class="btn btn-info btn-sm ml-3" id="btnTambahAntrian">
 			<i class="fa fa-plus"></i> Tambah
@@ -22,19 +22,21 @@
             	<div class="card-body">
 	                <hr />
 					<div class="table-responsive border-bottom">
-						<table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien" style="font-size: 0.9rem;">
+						<table class="table table-bordered table-striped" id="table-antrian-poli" style="font-size: 0.9rem;">
 							<thead class="thead-dark">
 								<tr>
 									<th class="wrap_content">No</th>
-									<th class="wrap_content">No. Tagihan</th>
+									<th class="wrap_content">No. RM</th>
 									<th>Pasien</th>
-									<th>Poli</th>
+									<th>Poliklinik</th>
 									<th class="wrap_content">Staf Pendaftaran</th>
-									<th>Total Biaya</th>
-									<th>Aksi</th>
+									<th class="wrap_content">Total Biaya</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
-							<tbody></tbody>
+							<tbody>
+								
+							</tbody>
 						</table>
 					</div>
             	</div>

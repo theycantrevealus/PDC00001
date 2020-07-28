@@ -67,8 +67,8 @@
 				</div>
 				<div class="card-body">
 					<div class="table-responsive border-bottom">
-						<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
-							<thead>
+						<table class="table table-bordered table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+							<thead class="thead-dark">
 								<tr>
 									<th width="2%">No</th>
 									<th>Waktu Masuk</th>

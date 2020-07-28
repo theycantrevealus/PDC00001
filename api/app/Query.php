@@ -45,9 +45,9 @@ class Query {
 	}
 
 	function update($table, $parameter = array()) {
-		/*$this->tables = array();
+		$this->tables = array();
 		self::$queryValues = array();
-		self::$queryParams = array();*/
+		self::$queryParams = array();
 		self::$queryMode = 'update';
 		self::$queryString = 'UPDATE ';
 		array_push($this->tables, $table);
@@ -67,9 +67,9 @@ class Query {
 	}
 
 	function hard_delete($table) {
-		/*$this->tables = array();
+		$this->tables = array();
 		self::$queryValues = array();
-		self::$queryParams = array();*/
+		self::$queryParams = array();
 		self::$queryMode = 'hard_delete';
 		self::$queryString = 'DELETE FROM ' . $table . ' ';
 		array_push($this->tables, $table);
@@ -318,12 +318,12 @@ class Query {
 			$responseBuilder['response_result'] = $query->rowCount();
 			return $responseBuilder;
 		} catch (\PDOException $e) {
-			throw new QueryException($e->getMessage(), 1);
-			/*$responseBuilder = array();
+			//throw new QueryException($e->getMessage(), 1);
+			$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = $usedValues;
 			$responseBuilder['response_params'] = self::$queryParams;
-			return $responseBuilder;*/
+			return $responseBuilder;
 		}
 	}
 }

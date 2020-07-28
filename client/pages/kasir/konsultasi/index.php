@@ -23,12 +23,12 @@
 	                <hr />
 					<div class="table-responsive border-bottom">
 						<table class="table table-bordered table-striped" id="table-antrian-biaya-konsul" style="font-size: 0.9rem;">
-							<thead>
+							<thead class="thead-dark">
 								<tr>
 									<th class="wrap_content">No</th>
 									<th class="wrap_content">No. RM</th>
-									<th class="wrap_content">Pasien</th>
-									<th class="wrap_content">Poli</th>
+									<th>Pasien</th>
+									<th>Poli</th>
 									<th class="wrap_content">Staf Pendaftaran</th>
 									<th class="wrap_content">Total Biaya</th>
 									<th class="wrap_content">Aksi</th>
