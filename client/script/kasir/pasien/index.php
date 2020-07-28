@@ -9,7 +9,13 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+					var returnedData = [];
+					for(var InvKeyData in response.response_package.response_data) {
+						if(!response.response_package.response_data[InvKeyData].lunas) {
+							returnedData.push(response.response_package.response_data[InvKeyData]);
+						}
+					}
+					return returnedData;
 				}
 			},
 			autoWidth: false,
@@ -57,12 +63,16 @@
 		});
 
 		var selectedUID;
+		var totalItemPay = 0;
+		var totalItemPayDiscount = 0;
 
 		$("body").on("click", ".btnDetail", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
 			selectedUID = uid;
+			totalItemPay = 0;
+			totalItemPayDiscount = 0;
 
 			$.ajax({
 				url: __HOSTNAME__ + "/pages/kasir/pasien/form.php",
@@ -91,9 +101,15 @@
 							$("#nomor-invoice").html(invoice_detail.nomor_invoice);
 							var invoice_detail_item = invoice_detail.invoice_detail;
 							for(var invKey in invoice_detail_item) {
+								var status_bayar = "";
+								if(invoice_detail_item[invKey].status_bayar == 'N') {
+									status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
+								} else {
+									status_bayar = "<i class=\"fa fa-check text-success\"></i>";
+								}
 								$("#invoice_detail_item").append(
 									"<tr>" +
-										"<td><input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" /></td>" +
+										"<td>" + status_bayar + "</td>" +
 										"<td>" + invoice_detail_item[invKey].autonum + "</td>" +
 										"<td>" + invoice_detail_item[invKey].item.nama + "</td>" +
 										"<td>" + invoice_detail_item[invKey].qty + "</td>" +
@@ -113,10 +129,33 @@
 			});
 		});
 
-		var totalItemPay = 0;
-		var totalItemPayDiscount = 0;
+		
+
+		$("body").on("change", "#bulk-all", function() {
+			if($(this).is(":checked")) {
+				$(".proceedInvoice").prop("checked", true);
+			} else {
+				$(".proceedInvoice").prop("checked", false);
+			}
+		});
 		
 		$("body").on("change", ".proceedInvoice", function() {
+			var allChecked = false;
+			$(".proceedInvoice").each(function(){
+				if(!$(this).is(":checked")) {
+					allChecked = false;
+					return false;
+				} else {
+					allChecked = true;
+				}
+			});
+
+			if(allChecked) {
+				$("#bulk-all").prop("checked", true);
+			} else {
+				$("#bulk-all").prop("checked", false);
+			}
+
 			var diskonAll = $("#txt_diskon_all").val();
 			var diskonTypeAll = $("#txt_diskon_type_all").val();
 

@@ -133,16 +133,16 @@ class Invoice extends Utility {
 		), array(
 			$parameter['invoice']
 		))
-		->where(array(
-			'EXTRACT(month FROM created_at)' => '= ?'
-		), array(
-			intval(date('m'))
-		))
 		->execute();
 
 		//Last Payment
 		$paymentCount = self::$query->select('invoice_payment', array(
 			'uid'
+		))
+		->where(array(
+			'EXTRACT(month FROM created_at)' => '= ?'
+		), array(
+			intval(date('m'))
 		))
 		->execute();
 
@@ -217,6 +217,32 @@ class Invoice extends Utility {
 			$PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
 			$data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
+
+			$statusLunas = false;
+			//Detail Pembayaran
+			$InvoiceDetail = self::$query->select('invoice_detail', array(
+				'status_bayar'
+			))
+			->where(array(
+				'invoice_detail.invoice' => '= ?',
+				'AND',
+				'invoice_detail.deleted_at' => 'IS NULL'
+			), array(
+				$value['uid']
+			))
+			->execute();
+			$IDautonum = 1;
+			foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
+				if($IDValue['status_bayar'] == 'Y') {
+					$statusLunas = true;
+				} else {
+					$statusLunas = false;
+					break;
+				}
+			}
+
+			$data['response_data'][$key]['lunas'] = $statusLunas;
+
 			//Antrian Info
 			$AntrianKunjungan = self::$query->select('antrian_nomor', array(
 				'id',
@@ -265,6 +291,13 @@ class Invoice extends Utility {
 		}
 		return $data;
 	}
+
+
+
+
+
+
+
 
 	private function get_biaya_pasien_detail($parameter) {
 		$data = self::$query->select('invoice', array(
@@ -346,6 +379,7 @@ class Invoice extends Utility {
 				'item',
 				'item_type',
 				'qty',
+				'status_bayar',
 				'harga',
 				'subtotal',
 				'discount',
