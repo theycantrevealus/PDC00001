@@ -29,6 +29,9 @@ class Invoice extends Utility {
 				case 'detail':
 					return self::get_biaya_pasien_detail($parameter[2]);
 					break;
+				case 'payment':
+					return self::get_payment($parameter[2]);
+					break;
 				default:
 					return self::get_biaya_pasien();
 			}
@@ -49,6 +52,80 @@ class Invoice extends Utility {
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
 		}
+	}
+
+	private function get_payment($parameter) {
+		$payment = self::$query->select('invoice_payment', array(
+			'uid',
+			'nomor_kwitansi',
+			'pasien',
+			'invoice',
+			'pegawai',
+			'terbayar',
+			'sisa_bayar',
+			'keterangan',
+			'metode_bayar',
+			'tanggal_bayar'
+		))
+		->where(array(
+			'invoice_payment.deleted_at' => 'IS NULL',
+			'AND',
+			'invoice_payment.uid' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		foreach ($payment['response_data'] as $key => $value) {
+			//get payment detail
+			$payment_detail = self::$query->select('invoice_payment_detail', array(
+				'id',
+				'invoice_payment',
+				'item',
+				'item_type',
+				'qty',
+				'harga',
+				'subtotal',
+				'discount',
+				'discount_type',
+				'keterangan'
+			))
+			->where(array(
+				'invoice_payment_detail.deleted_at' => 'IS NULL',
+				'AND',
+				'invoice_payment_detail.invoice_payment' => '= ?'
+			), array(
+				$parameter
+			))
+			->execute();
+			foreach ($payment_detail['response_data'] as $PDKey => $PDValue) {
+				$Item = self::$query->select($PDValue['item_type'], array(
+					'nama'
+				))
+				->where(array(
+					$PDValue['item_type'] . '.uid' => '= ?'
+				), array(
+					$PDValue['item']
+				))
+				->execute();
+				$payment_detail['response_data'][$PDKey]['item'] = $Item['response_data'][0]['nama'];
+				$payment_detail['response_data'][$PDKey]['qty'] = floatval($PDValue['qty']);
+				$payment_detail['response_data'][$PDKey]['harga'] = floatval($PDValue['harga']);
+				$payment_detail['response_data'][$PDKey]['subtotal'] = floatval($PDValue['subtotal']);
+				$payment_detail['response_data'][$PDKey]['discount'] = floatval($PDValue['discount']);
+			}
+			$payment['response_data'][$key]['detail'] = $payment_detail['response_data'];
+
+			//Info Pegawai
+			$Pegawai = new Pegawai(self::$pdo);
+			$PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+			$payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
+			$payment['response_data'][$key]['tanggal_bayar'] = date("d F Y", strtotime($value['tanggal_bayar']));
+			$payment['response_data'][$key]['terbayar'] = floatval($value['terbayar']);
+			$payment['response_data'][$key]['sisa_bayar'] = floatval($value['sisa_bayar']);
+		}
+
+		return $payment;
 	}
 
 	private function proses_bayar($parameter) {
@@ -179,6 +256,7 @@ class Invoice extends Utility {
 			'uid' => $newPaymentUID,
 			'invoice' => $parameter['invoice'],
 			'nomor_kwitansi' => $nomor_kwitansi,
+			'pasien' => $parameter['pasien'],
 			'pegawai' => $UserData['data']->uid,
 			'terbayar' => $totalPayment,
 			'sisa_bayar' => (floatval($InvoicePre['response_data'][0]['total_after_discount']) - $totalPayment),
@@ -454,6 +532,7 @@ class Invoice extends Utility {
 				'nomor_kwitansi',
 				'invoice',
 				'pegawai',
+				'pasien',
 				'terbayar',
 				'sisa_bayar',
 				'keterangan',
@@ -463,9 +542,9 @@ class Invoice extends Utility {
 			->where(array(
 				'invoice_payment.deleted_at' => 'IS NULL',
 				'AND',
-				'invoice_payment.invoice' => '= ?'
+				'invoice_payment.pasien' => '= ?'
 			), array(
-				$parameter
+				$value['pasien']
 			))
 			->execute();
 			$Hautonum = 1;

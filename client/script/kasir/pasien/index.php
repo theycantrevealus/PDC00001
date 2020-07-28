@@ -56,23 +56,28 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return 	"<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\"><i class=\"fa fa-eye\"></i></button>";
+						return 	"<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\"><i class=\"fa fa-eye\"></i></button>";
 					}
 				}
 			]
 		});
 
 		var selectedUID;
+		var selectedPasien;
 		var totalItemPay = 0;
 		var totalItemPayDiscount = 0;
 		var currentPasienName;
 		var itemMeta = [];
 
+
 		$("body").on("click", ".btnDetail", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
+			var pasien = $(this).attr("pasien");
+
 			selectedUID = uid;
+			selectedPasien = pasien;
 			totalItemPay = 0;
 			totalItemPayDiscount = 0;
 			currentPasienName = "";
@@ -118,10 +123,10 @@
 
 							var history_payment = invoice_detail.history;
 							for(var hisKey in history_payment) {
-								$("#payment_history").append(
+								$("#payment_history tbody").append(
 									"<tr>" +
 										"<td>" + history_payment[hisKey].autonum + "</td>" +
-										"<td>" + history_payment[hisKey].nomor_kwitansi + "</td>" +
+										"<td id=\"kwitansi_" + history_payment[hisKey].uid + "\">" + history_payment[hisKey].nomor_kwitansi + "</td>" +
 										"<td>" + history_payment[hisKey].tanggal_bayar + "</td>" +
 										"<td>" + history_payment[hisKey].metode_bayar + "</td>" +
 										"<td>" + history_payment[hisKey].pegawai.nama + "</td>" +
@@ -254,7 +259,7 @@
 
 		var selectedPay = [];
 
-		$("#btnBukaFaktur").click(function() {
+		$("body").on("click", "#btnBukaFaktur", function() {
 			selectedPay = [];
 			$(".proceedInvoice").each(function() {
 				var id = $(this).attr("item-id");
@@ -289,7 +294,7 @@
 
 						for(var selKey in selectedPay) {
 							totalFaktur += parseFloat(itemMeta[selKey].subtotal);
-							$("#fatur_detail_item").append(
+							$("#fatur_detail_item tbody").append(
 								"<tr>" +
 									"<td>" + itemMeta[selKey].autonum + "</td>" +
 									"<td>" + itemMeta[selKey].item.nama + "</td>" +
@@ -324,6 +329,7 @@
 						invoice: selectedUID,
 						invoice_item: selectedPay,
 						metode: "CASH",
+						pasien:selectedPasien,
 						keterangan:$("#keterangan-faktur").val()
 					},
 					success:function(response) {
@@ -349,16 +355,37 @@
 				url: __HOSTNAME__ + "/pages/kasir/pasien/payment_detail.php",
 				type: "POST",
 				success: function(response) {
-					$("#form-payment").modal("show");
-					$("#payment-loader").html(response);
+					$("#form-payment-detail").modal("show");
+					$("#payment-detail-loader").html(response);
+					$("#nama-pasien-faktur").html($("#nama-pasien").html());
+					$("#nomor-faktur").html($("#kwitansi_" + uid).html());
 					
 					$.ajax({
-						url:__HOSTAPI__ + "/Invoice/detail/" + uid,
+						url:__HOSTAPI__ + "/Invoice/payment/" + uid,
 						beforeSend: function(request) {
 							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 						},
 						type:"GET",
 						success:function(response_data) {
+							var historyData = response_data.response_package.response_data[0];
+							var historyDetail = historyData.detail;
+
+							$("#pegawai-faktur").html("Diterima Oleh : " + historyData.pegawai.nama);
+							$("#tanggal-faktur").html("Tanggal Bayar : " + historyData.tanggal_bayar);
+							$("#total-faktur").html(historyData.terbayar);
+							$("#diskon-faktur").html(0);
+							$("#grand-total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
+							for(var historyKey in historyDetail) {
+								$("#invoice_detail_history tbody").append(
+									"<tr>" +
+										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
+										"<td>" + historyDetail[historyKey].item + "</td>" +
+										"<td>" + historyDetail[historyKey].qty + "</td>" +
+										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
+										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
+									"</tr>"
+								);
+							}
 						}
 					});
 				}
@@ -380,7 +407,6 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Kembali</button>
-				<button type="button" class="btn btn-info" id="btnBukaFaktur"><i class="fa fa-receipt"></i> Buka Faktur</button>
 			</div>
 		</div>
 	</div>
@@ -403,6 +429,28 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Kembali</button>
 				<button type="button" class="btn btn-success" id="btnBayar"><i class="fa fa-check"></i> Proses</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<div id="form-payment-detail" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="nomor-faktur"></h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body" id="payment-detail-loader">
+				
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Kembali</button>
+				<button type="button" class="btn btn-success" id="btnBayar"><i class="fa fa-print"></i> Cetak Faktur</button>
 			</div>
 		</div>
 	</div>
