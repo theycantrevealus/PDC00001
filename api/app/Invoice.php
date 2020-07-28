@@ -55,9 +55,19 @@ class Invoice extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+		$newPaymentUID = parent::gen_uuid();
+
 		$totalPayment = 0;
 		foreach ($parameter['invoice_item'] as $key => $value) { //Update status bayar pada invoice item
 			$getPaymentDetail = self::$query->select('invoice_detail', array(
+				'item',
+				'item_type',
+				'qty',
+				'harga',
+				'subtotal',
+				'discount',
+				'discount_type',
+				'keterangan',
 				'subtotal',
 				'status_bayar'
 			))
@@ -72,6 +82,23 @@ class Invoice extends Utility {
 				$parameter['invoice']
 			))
 			->execute();
+
+			//Payment Detail
+			$paymentDetail = self::$query->insert('invoice_payment_detail', array(
+				'invoice_payment' => $newPaymentUID,
+				'item' => $getPaymentDetail['response_data'][0]['item'],
+				'item_type' => $getPaymentDetail['response_data'][0]['item_type'],
+				'qty' => $getPaymentDetail['response_data'][0]['qty'],
+				'harga' => $getPaymentDetail['response_data'][0]['harga'],
+				'subtotal' => $getPaymentDetail['response_data'][0]['subtotal'],
+				'discount' => $getPaymentDetail['response_data'][0]['discount'],
+				'discount_type' => $getPaymentDetail['response_data'][0]['discount_type'],
+				'keterangan' => $getPaymentDetail['response_data'][0]['keterangan'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->execute();
+
 			$totalPayment += floatval($getPaymentDetail['response_data'][0]['subtotal']);
 
 			$updateInvoiceDetail = self::$query->update('invoice_detail', array(
@@ -146,7 +173,7 @@ class Invoice extends Utility {
 		))
 		->execute();
 
-		$newPaymentUID = parent::gen_uuid();
+		
 		$nomor_kwitansi = 'PBP/' . date('Y/m') . '/' . str_pad(strval(count($paymentCount['response_data']) + 1), 5, '0', STR_PAD_LEFT);
 		$worker = self::$query->insert('invoice_payment', array(
 			'uid' => $newPaymentUID,
@@ -155,7 +182,7 @@ class Invoice extends Utility {
 			'pegawai' => $UserData['data']->uid,
 			'terbayar' => $totalPayment,
 			'sisa_bayar' => (floatval($InvoicePre['response_data'][0]['total_after_discount']) - $totalPayment),
-			'keterangan' => '',
+			'keterangan' => $parameter['keterangan'],
 			'metode_bayar' => $parameter['metode'],
 			'tanggal_bayar' => (isset($parameter['tanggal'])) ? $parameter['tanggal'] : date("Y-m-d"),
 			'created_at' => parent::format_date(),
@@ -418,6 +445,41 @@ class Invoice extends Utility {
 				$IDautonum++;
 			}
 			$data['response_data'][$key]['invoice_detail'] = $InvoiceDetail['response_data'];
+
+
+
+			//History payment
+			$history = self::$query->select('invoice_payment', array(
+				'uid',
+				'nomor_kwitansi',
+				'invoice',
+				'pegawai',
+				'terbayar',
+				'sisa_bayar',
+				'keterangan',
+				'metode_bayar',
+				'tanggal_bayar'
+			))
+			->where(array(
+				'invoice_payment.deleted_at' => 'IS NULL',
+				'AND',
+				'invoice_payment.invoice' => '= ?'
+			), array(
+				$parameter
+			))
+			->execute();
+			$Hautonum = 1;
+			foreach ($history['response_data'] as $HKey => $HValue) {
+				$Pegawai = new Pegawai(self::$pdo);
+				$PegawaiInfo = $Pegawai::get_detail($AKValue['pegawai']);
+
+				$history['response_data'][$HKey]['tanggal_bayar'] = date('d F Y', strtotime($HValue['tanggal_bayar']));
+				$history['response_data'][$HKey]['pegawai'] = $PegawaiInfo['response_data'][0];
+				$history['response_data'][$HKey]['autonum'] = $Hautonum;
+
+				$Hautonum++;
+			}
+			$data['response_data'][$key]['history'] = $history['response_data'];
 
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
