@@ -30,13 +30,12 @@
 						<tbody></tbody>
 						<tfoot>
 							<tr>
-								<td colspan="3" rowspan="3">
-
+								<td colspan="3" rowspan="3" id="keterangan-faktur">
 								</td>
-								<td class="text-right" id="total-faktur">
+								<td class="text-right">
 									Total
 								</td>
-								<td id="text-total" class="text-right">0.00</td>
+								<td id="total-faktur" class="text-right">0.00</td>
 							</tr>
 							<tr>
 								<td class="text-right">Diskon</td>

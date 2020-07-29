@@ -176,6 +176,10 @@ class Invoice extends Utility {
 			))
 			->execute();
 
+			if($paymentDetail['response_result'] > 0) {
+				//
+			}
+
 			$totalPayment += floatval($getPaymentDetail['response_data'][0]['subtotal']);
 
 			$updateInvoiceDetail = self::$query->update('invoice_detail', array(
@@ -225,6 +229,10 @@ class Invoice extends Utility {
 				));
 			}
 		}
+
+		//Update Invoice Discount and Total First
+		//$parameter['discount']
+		//$parameter['discount_type']
 
 		//Invoice before payment
 		$InvoicePre = self::$query->select('invoice', array(

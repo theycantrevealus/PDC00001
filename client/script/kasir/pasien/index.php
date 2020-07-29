@@ -329,6 +329,8 @@
 						invoice: selectedUID,
 						invoice_item: selectedPay,
 						metode: "CASH",
+						discount:$("#txt_diskon_all").val(),
+						discount_type:$("#txt_diskon_type_all").val(),
 						pasien:selectedPasien,
 						keterangan:$("#keterangan-faktur").val()
 					},
@@ -372,7 +374,8 @@
 
 							$("#pegawai-faktur").html("Diterima Oleh : " + historyData.pegawai.nama);
 							$("#tanggal-faktur").html("Tanggal Bayar : " + historyData.tanggal_bayar);
-							$("#total-faktur").html(historyData.terbayar);
+							$("#keterangan-faktur").html(historyData.keterangan);
+							$("#total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
 							$("#diskon-faktur").html(0);
 							$("#grand-total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
 							for(var historyKey in historyDetail) {
