@@ -319,6 +319,15 @@ class Antrian extends Utility {
 					$UserData['data']->log_id
 				), 'class'=>__CLASS__));
 
+
+
+			$SInvoice = new Invoice(self::$pdo);
+			$HargaKartu = $SInvoice::get_harga_tindakan(array(
+				'poli' => $parameter['dataObj']['departemen'],
+				'tindakan' => __UID_KARTU__,
+				'penjamin' => $parameter['dataObj']['penjamin']
+			));
+
 			//Update antrian kunjungan
 			if($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__) { // Jika umum
 				$antrianKunjungan = self::$query->update('antrian_nomor', array(
@@ -358,13 +367,7 @@ class Antrian extends Utility {
 				->execute();
 
 
-				$SInvoice = new Invoice(self::$pdo);
-
-				$HargaKartu = $SInvoice::get_harga_tindakan(array(
-					'poli' => $parameter['dataObj']['departemen'],
-					'tindakan' => __UID_KARTU__,
-					'penjamin' => $parameter['dataObj']['penjamin']
-				));
+				
 
 				if(count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
 					$checkBiayaKartu = self::$query->select('antrian',array( //New Detail. Rekap tagihan
@@ -387,6 +390,8 @@ class Antrian extends Utility {
 							'subtotal' => floatval($HargaKartu['response_data'][0]),
 							'discount' => 0,
 							'discount_type' => 'N',
+							'pasien' => $parameter['dataObj']['currentPasien'],
+							'penjamin' => $parameter['dataObj']['penjamin'],
 							'keterangan' => 'Biaya kartu pasien baru'
 						));
 					}
@@ -408,9 +413,11 @@ class Antrian extends Utility {
 						'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
 						'discount' => 0,
 						'discount_type' => 'N',
+						'pasien' => $parameter['dataObj']['currentPasien'],
+						'penjamin' => $parameter['dataObj']['penjamin'],
 						'keterangan' => 'Biaya konsultasi'
 					));
-				} else {
+				} else { //Belum ada invoice master umum
 					$Invoice = $SInvoice::create_invoice(array(
 						'kunjungan' => $uid,
 						'pasien' => $parameter['dataObj']['pasien'],
@@ -440,6 +447,8 @@ class Antrian extends Utility {
 									'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
 									'discount' => 0,
 									'discount_type' => 'N',
+									'pasien' => $parameter['dataObj']['currentPasien'],
+									'penjamin' => $parameter['dataObj']['penjamin'],
 									'keterangan' => 'Biaya kartu pasien baru'
 								));
 							}
@@ -460,6 +469,8 @@ class Antrian extends Utility {
 							'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
 							'discount' => 0,
 							'discount_type' => 'N',
+							'pasien' => $parameter['dataObj']['currentPasien'],
+							'penjamin' => $parameter['dataObj']['penjamin'],
 							'keterangan' => 'Biaya konsultasi'
 						));
 					} else {
@@ -474,6 +485,71 @@ class Antrian extends Utility {
 				
 			} else { // Jika selain umum
 
+
+
+
+
+
+
+
+
+
+
+				//Invoice Manager
+				$InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
+					'uid'
+				))
+				->where(array(
+					'invoice.deleted_at' => 'IS NULL',
+					'AND',
+					'invoice.kunjungan' => '= ?'
+				), array(
+					$uid
+				))
+				->execute();
+
+
+				if(count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
+				
+					$InvoiceUID = $InvoiceCheck['response_data'][0]['uid'];
+				
+				} else { //Belum ada Invoice Master
+					
+					$Invoice = $SInvoice::create_invoice(array(
+						'kunjungan' => $uid,
+						'pasien' => $parameter['dataObj']['pasien'],
+						'keterangan' => ''
+					));
+
+					$InvoiceUID = $Invoice['response_unique'];
+
+				}
+
+				//Simpan tagihan penjamin
+					
+				$HargaTindakan = $SInvoice::get_harga_tindakan(array(
+					'poli' => $parameter['dataObj']['departemen'],
+					'tindakan' => __UID_KONSULTASI__,
+					'penjamin' => $parameter['dataObj']['penjamin']
+				));
+
+				$Invoice = $SInvoice::append_invoice(array(
+					'invoice' => $InvoiceUID,
+					'item' => __UID_KONSULTASI__,
+					'item_origin' => 'master_tindakan',
+					'qty' => 1,
+					'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
+					'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
+					'status_bayar' => 'Y', //Karena penjamin selain ini otomatis status menjadi terbayar
+					'discount' => 0,
+					'discount_type' => 'N',
+					'pasien' => $parameter['dataObj']['currentPasien'],
+					'penjamin' => $parameter['dataObj']['penjamin'],
+					'keterangan' => 'Biaya konsultasi'
+				));
+
+
+
 				//Cek Pasien Baru?
 				$checkStatusPasien = self::$query->select('antrian', array(
 					'uid'
@@ -487,8 +563,9 @@ class Antrian extends Utility {
 				))
 				->execute();
 
+				if(count($checkStatusPasien['response_data']) > 0) { //Pasien sudah pernah terdaftar
 
-				if(count($checkStatusPasien['response_data']) > 0) {
+					
 					$antrianKunjungan = self::$query->update('antrian_nomor', array(
 						'status' => 'P',
 						'kunjungan' => $uid,
@@ -520,73 +597,32 @@ class Antrian extends Utility {
 						$antrianKunjungan['response_notif'] = 'P';
 						return $antrianKunjungan;
 					}
+
+
+
+
+
+
 				} else {
 
-					//Pasien Baru Non Umum Masok sene
 					
+					//Dikenakan Biaya Kartu Jika Pasien Baru
+
+					$Invoice = $SInvoice::append_invoice(array(
+						'invoice' => $InvoiceUID,
+						'item' => __UID_KARTU__,
+						'item_origin' => 'master_tindakan',
+						'qty' => 1,
+						'harga' => floatval($HargaKartu['response_data'][0]['harga']),
+						'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
+						'discount' => 0,
+						'discount_type' => 'N',
+						'pasien' => $parameter['dataObj']['currentPasien'],
+						'penjamin' => $parameter['dataObj']['penjamin'],
+						'keterangan' => 'Biaya kartu pasien baru'
+					));
 
 
-
-					//Invoice Manager
-					$InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
-						'uid'
-					))
-					->where(array(
-						'invoice.deleted_at' => 'IS NULL',
-						'AND',
-						'invoice.kunjungan' => '= ?'
-					), array(
-						$uid
-					))
-					->execute();
-
-
-					$SInvoice = new Invoice(self::$pdo);
-					if(count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
-						
-						$HargaKartu = $SInvoice::get_harga_tindakan(array(
-							'poli' => $parameter['dataObj']['departemen'],
-							'tindakan' => __UID_KARTU__,
-							'penjamin' => $parameter['dataObj']['penjamin']
-						));
-
-						$Invoice = $SInvoice::append_invoice(array(
-							'invoice' => $InvoiceCheck['response_data'][0]['uid'],
-							'item' => __UID_KARTU__,
-							'item_origin' => 'master_tindakan',
-							'qty' => 1,
-							'harga' => floatval($HargaKartu['response_data'][0]),
-							'subtotal' => floatval($HargaKartu['response_data'][0]),
-							'discount' => 0,
-							'discount_type' => 'N',
-							'keterangan' => 'Biaya kartu pasien baru'
-						));
-
-					} else {
-						$Invoice = $SInvoice::create_invoice(array(
-							'kunjungan' => $uid,
-							'pasien' => $parameter['dataObj']['pasien'],
-							'keterangan' => ''
-						));
-
-						$HargaKartu = $SInvoice::get_harga_tindakan(array(
-							'poli' => $parameter['dataObj']['departemen'],
-							'tindakan' => __UID_KARTU__,
-							'penjamin' => $parameter['dataObj']['penjamin']
-						));
-
-						$Invoice = $SInvoice::append_invoice(array(
-							'invoice' => $Invoice['response_unique'],
-							'item' => __UID_KARTU__,
-							'item_origin' => 'master_tindakan',
-							'qty' => 1,
-							'harga' => floatval($HargaKartu['response_data'][0]['harga']),
-							'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
-							'discount' => 0,
-							'discount_type' => 'N',
-							'keterangan' => 'Biaya kartu pasien baru'
-						));
-					}
 
 					$antrianKunjungan = self::$query->update('antrian_nomor', array(
 						'status' => 'K',
@@ -613,15 +649,24 @@ class Antrian extends Utility {
 					$antrianKunjungan['response_notif'] = 'K';
 					return $antrianKunjungan;
 				}
+
+
+				//Biaya Non Umum
+				
 			}
 		}
 	}
 
-	private function tambah_antrian($table, $parameter, $uid_kunjungan) {
+	public function tambah_antrian($table, $parameter, $uid_kunjungan) {
+		/*dataObj Key
+			kunjungan,
+			poli,
+			dokter,
+		*/
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$AntrianID = $parameter['dataObj']['currentAntrianID'];
+		/*$AntrianID = $parameter['dataObj']['currentAntrianID'];*/
 		unset($parameter['dataObj']['currentAntrianID']);
 		$uid = parent::gen_uuid();
 		$no_antrian = self::ambilNomorAntrianPoli($parameter['dataObj']['departemen']); 
@@ -726,7 +771,7 @@ class Antrian extends Utility {
 		return $status_berobat;
 	}
 
-	private function ambilNomorAntrianPoli($poli){
+	public function ambilNomorAntrianPoli($poli){
 		$waktu = date("Y-m-d", strtotime(parent::format_date()));
 
 		$data = self::$query

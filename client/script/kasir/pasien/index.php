@@ -56,14 +56,17 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return 	"<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\"><i class=\"fa fa-eye\"></i></button>";
+						return 	"<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\"><i class=\"fa fa-eye\"></i></button>";
 					}
 				}
 			]
 		});
 
 		var selectedUID;
+		var selectedPoli;
 		var selectedPasien;
+		var selectedPenjamin;
+		var selectedKunjungan;
 		var totalItemPay = 0;
 		var totalItemPayDiscount = 0;
 		var currentPasienName;
@@ -74,10 +77,16 @@
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
+			var poli = $(this).attr("poli");
 			var pasien = $(this).attr("pasien");
+			var penjamin = $(this).attr("penjamin");
+			var kunjungan = $(this).attr("kunjungan");
 
 			selectedUID = uid;
+			selectedPoli = poli;
 			selectedPasien = pasien;
+			selectedPenjamin = penjamin;
+			selectedKunjungan = kunjungan;
 			totalItemPay = 0;
 			totalItemPayDiscount = 0;
 			currentPasienName = "";
@@ -111,7 +120,7 @@
 									"<tr>" +
 										"<td>" + status_bayar + "</td>" +
 										"<td>" + invoice_detail_item[invKey].autonum + "</td>" +
-										"<td>" + invoice_detail_item[invKey].item.nama + "</td>" +
+										"<td>" + invoice_detail_item[invKey].item.nama + " <span style=\"margin-left: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
 										"<td>" + invoice_detail_item[invKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",") + "</td>" +
@@ -265,8 +274,7 @@
 				var id = $(this).attr("item-id");
 				if($(this).is(":checked")) {
 					if(selectedPay.indexOf(id) < 0) {
-						//
-						selectedPay.push(id);
+						selectedPay.push(parseInt(id));
 					}
 				}
 			});
@@ -292,17 +300,19 @@
 
 						var totalFaktur = 0;
 
-						for(var selKey in selectedPay) {
-							totalFaktur += parseFloat(itemMeta[selKey].subtotal);
-							$("#fatur_detail_item tbody").append(
-								"<tr>" +
-									"<td>" + itemMeta[selKey].autonum + "</td>" +
-									"<td>" + itemMeta[selKey].item.nama + "</td>" +
-									"<td>" + itemMeta[selKey].qty + "</td>" +
-									"<td class=\"text-right\">" + number_format(itemMeta[selKey].harga, 2, ".", ",") + "</td>" +
-									"<td class=\"text-right\">" + number_format(itemMeta[selKey].subtotal, 2, ".", ",") + "</td>" +
-								"</tr>"
-							);
+						for(var selKey in itemMeta) {
+							if(selectedPay.indexOf(itemMeta[selKey].id) >= 0) {
+								totalFaktur += parseFloat(itemMeta[selKey].subtotal);
+								$("#fatur_detail_item tbody").append(
+									"<tr>" +
+										"<td>" + itemMeta[selKey].autonum + "</td>" +
+										"<td>" + itemMeta[selKey].item.nama + "</td>" +
+										"<td>" + itemMeta[selKey].qty + "</td>" +
+										"<td class=\"text-right\">" + number_format(itemMeta[selKey].harga, 2, ".", ",") + "</td>" +
+										"<td class=\"text-right\">" + number_format(itemMeta[selKey].subtotal, 2, ".", ",") + "</td>" +
+									"</tr>"
+								);
+							}
 						}
 
 						$("#text-total").html(number_format(totalFaktur, 2, ".", ","));
@@ -332,6 +342,9 @@
 						discount:$("#txt_diskon_all").val(),
 						discount_type:$("#txt_diskon_type_all").val(),
 						pasien:selectedPasien,
+						penjamin:selectedPenjamin,
+						kunjungan:selectedKunjungan,
+						poli:selectedPoli,
 						keterangan:$("#keterangan-faktur").val()
 					},
 					success:function(response) {
@@ -343,7 +356,7 @@
 						}
 					},
 					error: function(response) {
-						console.log("Error : " + response);
+						console.log(response);
 					}
 				});
 			}
