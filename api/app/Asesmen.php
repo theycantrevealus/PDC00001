@@ -251,7 +251,8 @@ class Asesmen extends Utility {
 							'obat',
 							'ratio',
 							'pembulatan',
-							'satuan',
+							'takar_bulat',
+							'takar_decimal',
 							'harga',
 							'racikan',
 							'penjamin'
@@ -700,8 +701,10 @@ class Asesmen extends Utility {
 						if(in_array($RDIValue['obat'], $usedRacikanDetail)) {
 							$racikanDetailWorker = self::$query->update('racikan_detail', array(
 								'obat' => $RDIValue['obat'],
-								'ratio' => $RDIValue['qty'],
-								'satuan' => $RDIValue['takaran'],
+								'ratio' => $RDIValue['takaran'],
+								'takar_bulat' => $RDIValue['takaranBulat'],
+								'takar_decimal' => $RDIValue['takaranDecimalText'],
+								'pembulatan' => ceil($RDIValue['takaran']),
 								'deleted_at' => NULL
 							))
 							->where(array(
@@ -724,16 +727,16 @@ class Asesmen extends Utility {
 								'asesmen' => $MasterAsesmen,
 								'resep' => $uid,
 								'obat' => $RDIValue['obat'],
-								'ratio' => $RDIValue['qty'],
-								'pembulatan' => 0,
-								'satuan' => $RDIValue['takaran'],
+								'pembulatan' => ceil($RDIValue['takaran']),
+								'takar_bulat' => $RDIValue['takaranBulat'],
+								'takar_decimal' => $RDIValue['takaranDecimalText'],
 								'harga' => 0,
 								'created_at' => parent::format_date(),
 								'updated_at' => parent::format_date(),
-								'racikan' => $value['uid']
+								'racikan' => $value['uid'],
+								'ratio' => $RDIValue['takaran']
 							))
 							->execute();
-							print_r($racikanDetailWorker);
 						}
 					}
 
@@ -771,9 +774,10 @@ class Asesmen extends Utility {
 							'racikan' => $newRacikanUID,
 							'resep' => $uid,
 							'obat' => $RDValue['obat'],
-							'ratio' => $RDValue['qty'],
-							'pembulatan' => 0,
-							'satuan' => $RDValue['takaran'],
+							'ratio' => $RDValue['takaran'],
+							'pembulatan' => ceil($RDValue['takaran']),
+							'takar_bulat' => $RDIValue['takaranBulat'],
+							'takar_decimal' => $RDIValue['takaranDecimalText'],
 							'harga' => 0,
 							'penjamin' => '',
 							'created_at' => parent::format_date(),
@@ -869,9 +873,10 @@ class Asesmen extends Utility {
 								'asesmen' => $MasterAsesmen,
 								'resep' => $uid_racikan,
 								'obat' => $RIValue['obat'],
-								'ratio' => $RIValue['qty'],
-								'pembulatan' => 0,
-								'satuan' => $RIValue['takaran'],
+								'ratio' => $RIValue['takaran'],
+								'pembulatan' => ceil($RIValue['takaran']),
+								'takar_bulat' => $RIValue['takaranBulat'],
+								'takar_decimal' => $RIValue['takaranDecimalText'],
 								'harga' => 0,
 								'racikan' => $uid_racikan,
 								'created_at' => parent::format_date(),
