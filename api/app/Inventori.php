@@ -688,7 +688,7 @@ class Inventori extends Utility {
 		return $data;
 	}
 
-	private function get_gudang_detail($parameter) {
+	public function get_gudang_detail($parameter) {
 		$data = self::$query
 		->select('master_inv_gudang', array(
 			'uid',

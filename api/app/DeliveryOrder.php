@@ -66,11 +66,10 @@ class DeliveryOrder extends Utility {
 		$data = self::$query
 			->select('inventori_do', array(
 					'uid',
+					'po',
 					'gudang',
 					'supplier',
-					'waktu_input',
-					'no_dokumen',
-					'tgl_dokumen',
+					'tgl_do',
 					'no_do',
 					'no_invoice',
 					'tgl_invoice',
@@ -92,19 +91,19 @@ class DeliveryOrder extends Utility {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 
-			$supplier = new Supplier(self::$pdo);
-			$arr = ['','detail', $value['supplier']];
-			$get_supplier = $supplier->__GET__($arr);
-			$data['response_data'][$key]['nama_supplier'] = $get_supplier['nama'];
+			$data['response_data'][$key]['tgl_do'] = date('d F Y', strtotime($value['tgl_do']));
 
-			$inventori = new Inventori(self::$pdo);
-			$arr = ['', 'gudang_detail', $value['gudang']];
-			$get_gudang = $inventori->__GET__($arr);
-			$data['response_data'][$key]['nama_gudang'] = $get_gudang['response_data'][0]['nama'];
+			$Supplier = new Supplier(self::$pdo);
+			$SupplierInfo = $Supplier::get_detail($value['supplier']);
+			$data['response_data'][$key]['supplier'] = $SupplierInfo;
 
-			$pegawai = new Pegawai(self::$pdo);
-			$get_pegawai = $pegawai->get_detail($value['pegawai']);
-			$data['response_data'][$key]['nama_pegawai'] = $get_pegawai['response_data'][0]['nama'];
+			$Inventori = new Inventori(self::$pdo);
+			$InventoriInfo = $Inventori::get_gudang_detail($value['gudang']);
+			$data['response_data'][$key]['gudang'] = $InventoriInfo['response_data'][0];
+
+			$Pegawai = new Pegawai(self::$pdo);
+			$PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+			$data['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
 		}
 
 		return $data;

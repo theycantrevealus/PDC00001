@@ -133,9 +133,10 @@ class Apotek extends Utility {
 					'obat',
 					'ratio',
 					'pembulatan',
-					'satuan',
 					'harga',
 					'racikan',
+					'takar_bulat',
+					'takar_decimal',
 					'penjamin',
 					'created_at',
 					'updated_at'
