@@ -241,10 +241,6 @@
 		}
 
 		$("select").select2();
-
-
-
-
 		function checkAllowAdd(checkID) {
 			var allow = false;
 			if($("#row_" + checkID).hasClass("last-row")) {

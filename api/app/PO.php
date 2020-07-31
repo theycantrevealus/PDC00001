@@ -239,7 +239,7 @@ class PO extends Utility {
 		$result = array();
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+		$ObatDetail = new Inventori(self::$pdo);
 		
 		$latestPO = self::$query->select('inventori_po', array(
 			'uid'
@@ -292,10 +292,10 @@ class PO extends Utility {
 		->execute();
 		if($worker['response_result'] > 0) {
 			$PODetailError = array();
+			
+			
 			//Detail
 			foreach (json_decode($parameter['itemList'], true) as $key => $value) {
-
-				$ObatDetail = new Inventori(self::$pdo);
 				$ObatInfo = $ObatDetail::get_item_detail($value['item'])['response_data'][0];
 				$subtotal = 0;
 
@@ -313,13 +313,15 @@ class PO extends Utility {
 					'qty' => floatval($value['qty']),
 					'satuan' => $ObatInfo['satuan_terkecil'],
 					'harga' => floatval($value['harga']),
-					'disc' => $value['diskon'],
+					'disc' => floatval($value['diskon']),
 					'disc_type' => $value['jenis_diskon'],
 					'subtotal' => floatval($subtotal),
 					'keterangan' => $value['keterangan']
 				))
 				->execute();
-				array_push($PODetailError, $po_detail);
+				if($po_detail['response_result'] <= 0) {
+					array_push($PODetailError, $po_detail);	
+				}
 			}
 
 			$result['po_detail'] = $PODetailError;

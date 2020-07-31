@@ -139,7 +139,7 @@
 
 		function autoPODetail() {
 			//var nextID = $("#table-detail-po tbody tr").length + 1;
-			
+			$("#table-detail-po tbody tr").removeClass("last-row");
 			var newRow = document.createElement("TR");
 			var newCellID = document.createElement("TD");
 			var newCellItem = document.createElement("TD");
@@ -226,7 +226,7 @@
 
 				$(this).attr({
 					"id": "po_detail_" + id
-				}).removeClass("last-row");
+				});
 
 				$(this).find("td:eq(0)").html(id);
 
@@ -241,7 +241,7 @@
 				});
 
 				//SATUAN
-				$(this).find("td:eq(3) select").attr({
+				$(this).find("td:eq(3)").attr({
 					"id": "satuan_" + id
 				});
 
@@ -541,6 +541,13 @@
 			return false;
 		});
 
+		$("body").on("change", ".item", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			var satuanCaption = $(this).find("option:selected").attr("satuan-caption");
+			$("#satuan_" + id).html((satuanCaption != undefined) ? satuanCaption : "-");
+		});
+
 		$("#submitPO").submit(function() {
 			var supplier = $("#txt_supplier").val();
 			var tanggal = $("#txt_tanggal").val();
@@ -613,9 +620,10 @@
 					contentType: false,
 					data: form_data,
 					success: function(resp) {
-						if(resp.response_package.po_master.response_result > 0) {
+						console.log(resp);
+						/*if(resp.response_package.po_master.response_result > 0) {
 							location.href = __HOSTNAME__ + '/inventori/po';
-						}
+						}*/
 					},
 					error: function(resp) {
 						console.clear();
