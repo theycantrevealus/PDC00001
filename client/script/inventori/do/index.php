@@ -9,7 +9,21 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+					//check barang sudah sampai semua atau belum
+					var poData = response.response_package.response_data;
+					for(var CPOKey in poData) {
+						//Check Item
+						var poItem = poData[CPOKey].detail;
+						for(var itemKey in poItem) {
+							if(poItem[itemKey].sampai >= poItem[itemKey].qty) {
+								poItem.splice(itemKey, 1);
+							}
+						}
+						if(poItem.length == 0) {
+							poData.splice(CPOKey, 1);
+						}
+					}
+					return poData;
 				}
 			},
 			autoWidth: false,

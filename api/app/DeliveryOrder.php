@@ -46,10 +46,12 @@ class DeliveryOrder extends Utility {
 
 	public function __POST__($parameter = array()){
 		switch ($parameter['request']) {
-			case 'tambah-do':
+			/*case 'tambah-do':
+				return self::tambah_do($parameter);
+				break;*/
+			case 'tambah_do':
 				return self::tambah_do($parameter);
 				break;
-
 			default:
 				# code...
 				break;
@@ -228,7 +230,7 @@ class DeliveryOrder extends Utility {
 	}
 
 	/*=========================CREATE DO======================*/
-	private function tambah_do($parameter){
+	/*private function tambah_do($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -275,9 +277,9 @@ class DeliveryOrder extends Utility {
 		$result = ['master'=>$do, 'child'=>$do_items];
 
 		return $result;
-	}
+	}*/
 
-	private function tambah_do_detail($parameter, $uid_parent){
+	/*private function tambah_do_detail($parameter, $uid_parent){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -291,7 +293,185 @@ class DeliveryOrder extends Utility {
 		}
 
 		return $detail;
+	}*/
+
+
+
+
+	private function tambah_do($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		//Tambah DO Master
+		/*$latestDO = self::$query->select('inventori_po', array(
+			'uid'
+		))
+		->where(array(
+			'EXTRACT(MONTH FROM created_at)' => '= ?'
+		), array(
+			intval(date('m'))
+		))
+		->execute();*/
+		$uid = parent::gen_uuid();
+		$do = self::$query->insert('inventori_do', array(
+			'uid' => $uid,
+			'po' => $parameter['po'],
+			'gudang' => $parameter['gudang'],
+			'supplier' => $parameter['supplier'],
+			'tgl_do' => $parameter['tgl_dokumen'],
+			'no_do' => $parameter['nomor_do'],
+			'no_invoice' => $parameter['no_invoice'],
+			'tgl_invoice' => $parameter['tgl_invoice'],
+			'keterangan' => isset($parameter['keterangan']) ? $parameter['keterangan'] : '',
+			'status' => 'N',
+			'pegawai' => $UserData['data']->uid,
+			'created_at' => parent::format_date(),
+			'updated_at' => parent::format_date()
+		))
+		->execute();
+
+		//Tambah DO Detail
+		if($do['response_result'] > 0) {
+			$itemReport = array();
+			foreach ($parameter['item'] as $key => $value) {
+				//Cek Batch
+				$cek = self::$query->select('inventori_batch', array(
+					'uid'
+				))
+				->where(array(
+					'inventori_batch.barang' => '= ?',
+					'AND',
+					'inventori_batch.batch' => '= ?',
+					'AND',
+					'inventori_batch.deleted_at' => 'IS NULL'
+				), array(
+					$value['item'],
+					$value['batch']
+				))
+				->execute();
+				
+				$UIDBatch = '';
+				if(count($cek['response_data']) > 0) {
+					$UIDBatch = $cek['response_data'][0]['uid'];
+				} else {
+					$UIDBatch = parent::gen_uuid();
+					$newBatch = self::$query->insert('inventori_batch', array(
+						'uid' => $UIDBatch,
+						'barang' => $value['item'],
+						'batch' => $value['batch'],
+						'po' => $parameter['po'],
+						'do_master' => $uid,
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+					->execute();
+				}
+
+
+				$do_detail = self::$query->insert('inventori_do_detail', array(
+					'do_master' => $uid,
+					'barang' => $value['item'],
+					'batch' => $UIDBatch,
+					'kadaluarsa' => $value['tanggal_exp'],
+					'qty' => $value['qty'],
+					'po' => $parameter['po'],
+					'keterangan' => $value['keterangan'],
+					'created_at' => parent::format_date(),
+					'updated_at' => parent::format_date()
+				))
+				->execute();
+
+				array_push($itemReport, $do_detail);
+
+				//Update Stock
+				if($do_detail['response_result'] > 0) {
+					$cekStok = self::$query->select('inventori_stok', array(
+						'id',
+						'stok_terkini'
+					))
+					->where(array(
+						'inventori_stok.barang' => '= ?',
+						'AND',
+						'inventori_stok.batch' => '= ?',
+						'AND',
+						'inventori_stok.gudang' => '= ?'
+					), array(
+						$value['item'],
+						$UIDBatch,
+						$parameter['gudang']
+					))
+					->execute();
+
+					if(count($cekStok['response_data']) > 0) {
+						//Add Stok
+						$stokWorker = self::$query->update('inventori_stok', array(
+							'stok_terkini' => $cekStok['response_data'][0]['stok_terkini'] + $value['qty']
+						))
+						->where(array(
+							'inventori_stok.barang' => '= ?',
+							'AND',
+							'inventori_stok.batch' => '= ?',
+							'AND',
+							'inventori_stok.gudang' => '= ?'
+						), array(
+							$value['item'],
+							$UIDBatch,
+							$parameter['gudang']
+						))
+						->execute();
+					} else {
+						//New Stok
+						$stokWorker = self::$query->insert('inventori_stok', array(
+							'barang' => $value['item'],
+							'batch' => $UIDBatch,
+							'gudang' => $parameter['gudang'],
+							'stok_terkini' => $value['qty']
+						))
+						->execute();
+					}
+
+					if($stokWorker['response_result'] > 0) {
+						//Saldo Stok
+						$getSaldo = self::$query->select('inventori_stok', array(
+							'stok_terkini'
+						))
+						->where(array(
+							'inventori_stok.barang' => '= ?',
+							'AND',
+							'inventori_stok.batch' => '= ?',
+							'AND',
+							'inventori_stok.gudang' => '= ?'
+						), array(
+							$value['item'],
+							$UIDBatch,
+							$parameter['gudang']
+						))
+						->execute();
+
+						//Stok Log
+						$stokLog = self::$query->insert('inventori_stok_log', array(
+							'barang' => $value['item'],
+							'batch' => $UIDBatch,
+							'gudang' => $parameter['gudang'],
+							'masuk' => $value['qty'],
+							'keluar' => 0,
+							'saldo' => $getSaldo['response_data'][0]['stok_terkini']
+						))
+						->execute();
+					}
+				}
+			}
+		}
+		$do['response_detail'] = $itemReport;
+		return $do;
 	}
+
+
+
+
+
+
+
 
 	/*===============FUNGSI TAMBAHAN================*/
 	private function duplicate_check($parameter) {

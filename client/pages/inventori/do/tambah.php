@@ -28,19 +28,19 @@
 									<div class="col-md-4 form-group">
 										<label>Gudang:</label>
 										<select class="form-control select2 informasi" id="gudang" name="gudang">
-											<option value="">Pilih Gudang</option>
+											<option value="none">Pilih Gudang</option>
 										</select>
 									</div>
 									<div class="col-md-4 form-group">
 										<label>Pemasok:</label>
 										<select class="form-control select2 informasi" id="supplier" name="supplier">
-											<option value="">Pilih Pemasok</option>
+											<option value="none">Pilih Pemasok</option>
 										</select>
 									</div>
 									<div class="col-md-4 form-group">
 										<label>No. Purchase Order:</label>
 										<select class="form-control select2 informasi" id="po" name="po">
-											<option value="">Tidak PO</option>
+											<option value="none">Tidak PO</option>
 										</select>
 									</div>
 									<div class="col-md-3 form-group">

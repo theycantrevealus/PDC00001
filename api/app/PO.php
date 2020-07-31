@@ -72,6 +72,37 @@ class PO extends Utility {
 		->execute();
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
+			//Check Barang sudah sampai atau belum
+			$PODetail = self::get_po_detail($value['uid'])['response_data'];
+			foreach ($PODetail as $POKey => $POValue) {
+				$PODetail[$POKey]['qty'] = floatval($POValue['qty']);
+				$PODetail[$POKey]['harga'] = floatval($POValue['harga']);
+				$PODetail[$POKey]['disc'] = floatval($POValue['disc']);
+				$PODetail[$POKey]['subtotal'] = floatval($POValue['subtotal']);
+
+				//Check DO
+				$countBarang = 0;
+				$checkDO = self::$query->select('inventori_do_detail', array(
+					'qty'
+				))
+				->where(array(
+					'inventori_do_detail.po' => '= ?',
+					'AND',
+					'inventori_do_detail.barang' => '= ?'
+				), array(
+					$value['uid'],
+					$POValue['uid_barang']
+				))
+				->execute();
+
+				foreach ($checkDO['response_data'] as $CDOKey => $CDOValue) {
+					$countBarang += floatval($CDOValue['qty']);
+				}
+
+				$PODetail[$POKey]['sampai'] = $countBarang;
+			}
+			$data['response_data'][$key]['detail'] = $PODetail;
+
 			$Pegawai = new Pegawai(self::$pdo);
 			$InfoPegawai = $Pegawai::get_detail($value['pegawai']);
 

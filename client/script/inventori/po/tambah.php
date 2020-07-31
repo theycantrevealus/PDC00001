@@ -620,10 +620,10 @@
 					contentType: false,
 					data: form_data,
 					success: function(resp) {
-						console.log(resp);
-						/*if(resp.response_package.po_master.response_result > 0) {
+						//console.log(resp);
+						if(resp.response_package.po_master.response_result > 0) {
 							location.href = __HOSTNAME__ + '/inventori/po';
-						}*/
+						}
 					},
 					error: function(resp) {
 						console.clear();

@@ -6,9 +6,11 @@
 		var allowAdd = false;
 		$("#po").attr("disabled", "disabled");
 		if(__PAGES__[3] !== undefined) {
+			allowAdd = true;
 			load_po(__PAGES__[3]);
 			$("#supplier").attr("disabled", "disabled");
 			loadGudang();
+			autoRow();
 			/*loadItem(1);
 			loadSatuan(1);*/
 		} else {
@@ -343,7 +345,63 @@
 
 
 		$("#btnSubmit").click(function() {
-			//
+			var gudang = $("#gudang").val();
+			var supplier = $("#supplier").val();
+			var nomor_po = $("#po").val();
+			var nomor_do = $("#no_do").val();
+			var tgl_dokumen = $("#tgl_dokumen").val();
+			var no_invoice = $("#no_invoice").val();
+			var tgl_invoice = $("#tgl_invoice").val();
+			var itemDetailResult = [];
+			$("#table-item-do tbody tr").each(function() {
+				if(!$(this).hasClass("last-row")) {
+					var item = $(this).find("td:eq(1) select").val();
+					var tanggal_exp = $(this).find("td:eq(1) input").val();
+					var batch = $(this).find("td:eq(2) input").val();
+					var qty = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
+					var keterangan = $(this).find("td:eq(5) textarea").val();
+					if(batch != "" && qty > 0) {
+						itemDetailResult.push({
+							item: item,
+							batch: batch,
+							tanggal_exp:tanggal_exp,
+							qty: qty,
+							keterangan: keterangan
+						});
+					}
+				}
+			});
+
+			if(gudang != "none" && supplier != "none" && tgl_dokumen != "" && itemDetailResult.length > 0) {
+				$.ajax({
+					url: __HOSTAPI__ + "/DeliveryOrder",
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					data:{
+						request:"tambah_do",
+						po:(__PAGES__[3] !== undefined) ? __PAGES__[3] : "none",
+						gudang: gudang,
+						supplier: supplier,
+						nomor_do:nomor_do,
+						tgl_dokumen: tgl_dokumen,
+						no_invoice: no_invoice,
+						tgl_invoice: tgl_invoice,
+						item: itemDetailResult
+					},
+					type: "POST",
+					success: function(response){
+						//console.log(response);
+						if(response.response_package.response_result > 0) {
+							location.href = __HOSTNAME__ + '/inventori/do';
+						}
+					},
+					error: function(response) {
+						console.log("Error : ");
+						console.log(response);
+					}
+				});
+			}
 		});
 	});
 </script>
