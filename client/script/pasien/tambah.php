@@ -37,7 +37,27 @@
 			loadWilayah('alamat_kelurahan', 'kelurahan', id, "Kelurahan");
 		});
 
-		$("#btnSubmit").click(function(){
+		$("#nik").on('keyup', function(){
+			let value = $(this).val();
+
+			if (value.length == 16){
+				if (cekNIK(value) == false){
+					$("#nik").addClass("is-valid").removeClass("is-invalid");
+					$("#error-nik").html("");
+					$("#btnSubmit").removeAttr("disabled");
+				} else {
+					$("#nik").addClass("is-invalid");
+					$("#error-nik").html("NIK tidak tersedia");
+					$("#btnSubmit").attr("disabled", true);
+				}
+			} else {
+				$("#nik").addClass("is-invalid");
+				$("#error-nik").html("NIK harus 16 angka");
+				$("#btnSubmit").attr("disabled", true);
+			}
+		});
+
+		$("#form-add-pasien").submit(function(){
 			/*var agama = $("input[name='agama']:checked").val();
 			var jenkel = $("input[name='jenkel']:checked").val();
 			var goldar = $("input[name='goldar']:checked").val();*/
@@ -64,7 +84,7 @@
 				}
 			});
 
-			console.log(allData);
+			//console.log(allData);
 			$.ajax({
 				async: false,
 				url: __HOSTAPI__ + "/Pasien",
@@ -98,6 +118,27 @@
             }
         });
 	});
+
+	function cekNIK(nik){
+		var result;
+
+		$.ajax({
+			async: false,
+            url:__HOSTAPI__ + "/Pasien/cek-nik/" + nik,
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                result = response.response_package;
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+
+        return result;
+	}
 
 	function loadTermSelectBox(selector, id_term){
 		$.ajax({

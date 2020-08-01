@@ -32,6 +32,10 @@ class Pasien extends Utility {
 					return self::get_pasien_detail('pasien', $parameter[2]);
 					break;
 
+				case 'cek-nik':
+					return self::cekNIK($parameter[2]);
+					break;
+
 				default:
 					# code...
 					break;
@@ -353,6 +357,27 @@ class Pasien extends Utility {
 		return $data;
 	}*/
 
+	public function cekNIK($parameter){
+		$data = self::$query
+			->select('pasien', array('uid', 'nik'))
+			->where(
+				array(
+					'pasien.nik' => '= ?',
+					'AND',
+					'pasien.deleted_at' => 'IS NULL'
+				),
+				array(
+					$parameter
+				))
+			->execute();
+
+		$result = false;
+		if ($data['response_result'] > 0){
+			$result = true;
+		}
+
+		return $result;
+	}
 
 	private function duplicate_check($parameter) {
 		return self::$query

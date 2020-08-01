@@ -581,6 +581,178 @@
 	}
 	/*=============================================================*/
 
+	/*===================== PERAWAT | SAME LIKE DOKTER FUNCTION ====================*/
+	var listPerawat = loadSetPerawat(uid);
+
+	function loadPerawat(target, uid, selected = []) {
+		var perawatData;
+
+		$.ajax({
+			url:__HOSTAPI__ + "/Poli/poli-avail-perawat/" + uid,
+			async:false,
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+			},
+			type:"GET",
+			success:function(response) {
+				perawatData = response.response_package.response_data;
+				$(target).find("option").remove();
+				for(var a = 0; a < perawatData.length; a++) {
+					if(selected.indexOf(perawatData[a].uid) < 0) {
+						$(target).append("<option value=\"" + perawatData[a].uid + "\">" + perawatData[a].nama_perawat + "</option>");
+					}
+				}
+				$(target).select2();
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
+
+		return perawatData;
+	}
+
+	function loadSetPerawat(uid) {
+		var perawatData = [];
+
+		$.ajax({
+			url:__HOSTAPI__ + "/Poli/poli-set-perawat/" + uid,
+			async:false,
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+			},
+			type:"GET",
+			success:function(response) {
+				var dat = response.response_package.response_data;
+				for(var a = 0; a < dat.length; a++) {
+					perawatData.push(dat[a].perawat);
+					autoPerawat({
+						perawatUID: dat[a].perawat,
+						perawatName: dat[a].nama
+					});
+				}
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
+
+		return perawatData;
+	}
+
+	function rebasePerawat() {
+		$("#poli-list-perawat tbody tr").each(function(e) {
+			var id = (e + 1);
+			$(this).attr({
+				"id": "row_perawat_" + id
+			})
+
+			$(this).find("td:eq(0)").html(id);
+			
+			$(this).find("td:eq(1)").attr({
+				"id": "perawat_set_" + id
+			});
+
+			$(this).find("td:eq(2) button").attr({
+				"id": "delete_perawat_" + id
+			});
+		});
+	}
+
+	function autoPerawat(data) {
+		var newRow = document.createElement("TR");
+		var newCellPerawatID = document.createElement("TD");
+		var newCellPerawatNama = document.createElement("TD");
+		var newCellPerawatAksi = document.createElement("TD");
+
+		$(newCellPerawatNama).html(data.perawatName).attr({
+			"perawat-value": data.perawatUID
+		});
+
+		var newDeletePerawat = document.createElement("BUTTON");
+		$(newDeletePerawat).addClass("btn btn-danger btn-sm btn_remove_perawat").html("<i class=\"fa fa-ban\"></i>");
+		$(newCellPerawatAksi).append(newDeletePerawat);
+
+		$(newRow).append(newCellPerawatID);
+		$(newRow).append(newCellPerawatNama);
+		$(newRow).append(newCellPerawatAksi);
+		$("#poli-list-perawat tbody").append(newRow);
+		rebasePerawat();
+	}
+
+	loadPerawat("#txt_set_perawat", uid);
+
+	$("#poli-list-perawat tbody").on("click", ".btn_remove_perawat", function() {
+		var id = $(this).attr("id").split("_");
+		id = id[id.length - 1];
+
+		$.ajax({
+			url:__HOSTAPI__ + "/Poli",
+			async:false,
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+			},
+			data:{
+				request: "poli_perawat_buang",
+				perawat: $("#perawat_set_" + id).attr("perawat-value"),
+				poli: uid
+			},
+			type:"POST",
+			success:function(response) {
+				console.log(response);
+				if(response.response_package.response_result > 0) {
+					$("#row_perawat_" + id).remove();
+					listPerawat.splice(listPerawat.indexOf($("#perawat_set_" + id).attr("perawat-value")), 1);
+					loadPerawat("#txt_set_perawat", uid, listPerawat);
+					notification ("success", "Data tersimpan", 2000, "save_perawat");
+					rebasePerawat();
+				}
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
+		
+		return false;
+	});
+
+	$("#btn_tambah_perawat").click(function() {
+		var perawatSelected = $("#txt_set_perawat").val();
+		var perawatSelectedText = $("#txt_set_perawat option:selected").text();
+				
+		$.ajax({
+			url:__HOSTAPI__ + "/Poli",
+			async:false,
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+			},
+			data:{
+				request: "poli_perawat",
+				perawat: perawatSelected,
+				poli: uid
+			},
+			type:"POST",
+			success:function(response) {
+				console.log(response);
+				if(response.response_package.response_result > 0) {
+					listPerawat.push(perawatSelected);
+					autoPerawat({
+						perawatUID: perawatSelected,
+						perawatName: perawatSelectedText
+					});
+					loadPerawat("#txt_set_perawat", uid, listPerawat);
+					notification ("success", "Data tersimpan", 2000, "save_perawat");
+				}
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
+		
+		return false;
+	});
+	/*=========================================================================*/
+
 	function setBackTindakan(arr_tindakan, uid_tindakan){
 		var name_tindakan;
 
