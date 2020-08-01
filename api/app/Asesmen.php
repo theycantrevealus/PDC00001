@@ -259,12 +259,12 @@ class Asesmen extends Utility {
 						))
 						->where(array(
 							'racikan_detail.deleted_at' => 'IS NULL',
-							'AND',
-							'racikan_detail.resep' => '= ?',
+							/*'AND',
+							'racikan_detail.resep' => '= ?',*/
 							'AND',
 							'racikan_detail.racikan' => '= ?'
 						), array(
-							$value['uid'],
+							//$value['uid'],
 							$RacikanValue['uid']
 						))
 						->execute()['response_data'];

@@ -132,7 +132,6 @@
 										}
 
 										itemKomposisi[komposisiKey].obat_detail.nama += infoPenjamin;
-										
 										autoKomposisi((parseInt(racikanKey) + 1), itemKomposisi[komposisiKey]);
 									}
 								}
