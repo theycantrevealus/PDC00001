@@ -1092,6 +1092,7 @@ class Inventori extends Utility {
 			//$data['response_data'][$key]['item_detail'] = self::get_item_detail($value['barang'])['response_data'][0];
 			$data['response_data'][$key]['gudang'] = self::get_gudang_detail($value['gudang'])['response_data'][0];
 			$data['response_data'][$key]['kode'] = self::get_batch_detail($value['batch'])['response_data'][0]['batch'];
+			$data['response_data'][$key]['expired'] = date('d F Y', strtotime(self::get_batch_detail($value['batch'])['response_data'][0]['expired_date']));
 			$data['response_data'][$key]['harga'] = self::get_batch_detail($value['batch'])['response_data'][0]['harga'];
 		}
 		return $data;
@@ -1102,8 +1103,9 @@ class Inventori extends Utility {
 			'uid',
 			'batch',
 			'barang',
+			'expired_date',
 			'po',
-			'do'
+			'do_master'
 		))
 		->where(array(
 			'inventori_batch.uid' => ' = ?'

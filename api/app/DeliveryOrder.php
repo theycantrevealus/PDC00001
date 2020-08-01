@@ -358,6 +358,7 @@ class DeliveryOrder extends Utility {
 					$newBatch = self::$query->insert('inventori_batch', array(
 						'uid' => $UIDBatch,
 						'barang' => $value['item'],
+						'expired_date' => $value['tanggal_exp'],
 						'batch' => $value['batch'],
 						'po' => $parameter['po'],
 						'do_master' => $uid,
