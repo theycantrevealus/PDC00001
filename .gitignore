@@ -3,11 +3,13 @@ database.ini
 
 .git
 config.php
+sync.php
 .htaccess
 composer.lock
 composer.json
 *.pem
 *.pub
+*.txt
 images/*
 audio/
 document/
@@ -21,3 +23,5 @@ api/app/Utility.php
 api/vendor/
 api/email_template/
 config.php
+
+*.txt

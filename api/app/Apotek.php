@@ -36,6 +36,23 @@ class Apotek extends Utility {
 		}
 	}
 
+	public function __POST__($parameter = array()) {
+		try {
+			switch($parameter['request']) {
+				case 'revisi_resep':
+					return self::revisi_resep($parameter);
+				default:
+					return self::get_resep();
+			}
+		} catch (QueryException $e) {
+			return 'Error => ' . $e;
+		}
+	}
+
+	private function revisi_resep($parameter) {
+		//
+	}
+
 	private function get_resep($status = 'N') {
 		$data = self::$query->select('resep', array(
 			'uid',
@@ -133,21 +150,22 @@ class Apotek extends Utility {
 					'obat',
 					'ratio',
 					'pembulatan',
-					'satuan',
 					'harga',
 					'racikan',
+					'takar_bulat',
+					'takar_decimal',
 					'penjamin',
 					'created_at',
 					'updated_at'
 				))
 				->where(array(
 					'racikan_detail.deleted_at' => 'IS NULL',
-					'AND',
-					'racikan_detail.resep' => '= ?',
+					/*'AND',
+					'racikan_detail.resep' => '= ?',*/
 					'AND',
 					'racikan_detail.racikan' => '= ?'
 				), array(
-					$value['uid'],
+					//$value['uid'],
 					$RDValue['uid']
 				))
 				->execute();

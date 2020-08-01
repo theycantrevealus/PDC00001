@@ -156,6 +156,7 @@ class Pegawai extends Utility {
 				$aud = 'users_library';
 				$user_arr_data = array(
 					'uid' => $read[0]['uid'],
+					'jabatan' => $read[0]['jabatan'],
 					'email' => $read[0]['email'],
 					'log_id' => $log
 				);
@@ -187,7 +188,8 @@ class Pegawai extends Utility {
 				if(strtolower($_SESSION['jabatan']['response_data'][0]['nama']) == 'dokter') {
 					//Load Dokter Data
 					$Poli = new Poli(self::$pdo);
-					$_SESSION['poli'] = $Poli::get_poli_by_dokter($read[0]['uid']);
+					$PoliData = $Poli::get_poli_by_dokter($read[0]['uid']);
+					$_SESSION['poli'] = $PoliData;
 				}
 
 				$responseBuilder['response_result'] = $query->rowCount();

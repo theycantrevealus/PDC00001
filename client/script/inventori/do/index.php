@@ -1,6 +1,72 @@
 <script type="text/javascript">
 	$(function(){
 
+		var tablePo = $("#table-po").DataTable({
+			"ajax":{
+				url: __HOSTAPI__ + "/PO",
+				type: "GET",
+				headers:{
+					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+				},
+				dataSrc:function(response) {
+					//check barang sudah sampai semua atau belum
+					var poData = response.response_package.response_data;
+					for(var CPOKey in poData) {
+						//Check Item
+						var poItem = poData[CPOKey].detail;
+						for(var itemKey in poItem) {
+							if(poItem[itemKey].sampai >= poItem[itemKey].qty) {
+								poItem.splice(itemKey, 1);
+							}
+						}
+						if(poItem.length == 0) {
+							poData.splice(CPOKey, 1);
+						}
+					}
+					return poData;
+				}
+			},
+			autoWidth: false,
+			aaSorting: [[0, "asc"]],
+			"columnDefs":[
+				{"targets":0, "className":"dt-body-left"}
+			],
+			"columns" : [
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.autonum;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.nomor_po;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.supplier.nama;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.pegawai.nama;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<a href=\"" + __HOSTNAME__ + "/inventori/do/tambah/" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail\"><i class=\"fa fa-box-open\"></i></a>";
+					}
+				},
+			]
+		});
+
+
+
+
+
+
+
+
 		var tableDo = $("#table-do").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/DeliveryOrder",
@@ -20,67 +86,44 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+						return row.autonum;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['waktu_input'];
-					}
-				},
-				/*{
-					"data" : null, render: function(data, type, row, meta) {
-						return row['no_dokumen'];
-					}
-				},*/
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return row['tgl_dokumen'];
+						return row.tgl_do;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['nama_supplier'];
+						return row.no_do;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['no_do'];
+						return row.supplier.nama;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['no_invoice'];
+						return row.no_invoice;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['tgl_invoice'];
-					}
-				},
-
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return "";
+						return row.pegawai.nama;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['nama_pegawai'];
+						return row.status;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									/*"<button class=\"btn btn-info btn-sm btn-edit-penjamin\" id=\"penjamin_edit_" + row["uid"] + "\">" +
-										"<i class=\"fa fa-pencil\"></i> Edit" +
-									"</button>" +
-									"<button id=\"penjamin_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-penjamin\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
-									"</button>" +*/
-								"</div>";
+						return "<button class=\"btn btn-info btn-sm btn-detail\"><i class=\"fa fa-eye\"></i></button>";
 					}
-				}
+				},
 			]
 		});
 

@@ -52,9 +52,9 @@
 								<th>Waktu Masuk</th>
 								<th>No. RM</th>
 								<th>Pasien</th>
-								<th>Departemen</th>
+								<th>Poliklinik</th>
 								<th>Dokter</th>
-								<th>Penjamin</th>
+								<th>Jenis Bayar</th>
 								<th>Oleh</th>
 								<th>Aksi</th>
 							</tr>

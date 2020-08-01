@@ -5,6 +5,7 @@ namespace PondokCoder;
 use PondokCoder\Query as Query;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\QueryException as QueryException;
+use PondokCoder\PO as PO;
 use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Utility as Utility;
 
@@ -59,6 +60,9 @@ class Inventori extends Utility {
 					break;
 				case 'kategori_per_obat':
 					return self::get_kategori_obat_item_parsed($parameter[2]);
+					break;
+				case 'item_batch':
+					return self::get_item_batch($parameter[2]);
 					break;
 				default:
 					return self::get_item();
@@ -439,7 +443,7 @@ class Inventori extends Utility {
 		return $data;
 	}
 
-	private function get_satuan_detail($parameter) {
+	public function get_satuan_detail($parameter) {
 		$data = self::$query
 		->select('master_inv_satuan', array(
 			'uid',
@@ -684,7 +688,7 @@ class Inventori extends Utility {
 		return $data;
 	}
 
-	private function get_gudang_detail($parameter) {
+	public function get_gudang_detail($parameter) {
 		$data = self::$query
 		->select('master_inv_gudang', array(
 			'uid',
@@ -1047,15 +1051,25 @@ class Inventori extends Utility {
 
 			//Data Penjamin
 			$PenjaminObat = new Penjamin(self::$pdo);
-			$data['response_data'][$key]['penjamin'] = $PenjaminObat::get_penjamin_obat($value['uid'])['response_data'];
+			$ListPenjaminObat = $PenjaminObat::get_penjamin_obat($value['uid'])['response_data'];
+			foreach ($ListPenjaminObat as $PenjaminKey => $PenjaminValue) {
+				$ListPenjaminObat[$PenjaminKey]['profit'] = floatval($PenjaminValue['profit']);
+			}
+			$data['response_data'][$key]['penjamin'] = $ListPenjaminObat;
 
 			//Cek Ketersediaan Stok
 			$TotalStock = 0;
 			$InventoriStockPopulator = self::get_item_batch($value['uid']);
-			foreach ($InventoriStockPopulator['response_data'] as $key => $value) {
-				$TotalStock += $value['stok_terkini'];
+			if(count($InventoriStockPopulator['response_data']) > 0) {
+				foreach ($InventoriStockPopulator['response_data'] as $TotalKey => $TotalValue) {
+					$TotalStock += floatval($TotalValue['stok_terkini']);
+				}
+				$data['response_data'][$key]['stok'] = $TotalStock;
+				$data['response_data'][$key]['batch'] = $InventoriStockPopulator['response_data'];
+			} else {
+				$data['response_data'][$key]['stok'] = 0;
 			}
-			$data['response_data'][$key]['stok'] = $TotalStock;
+				
 			$autonum++;
 		}
 		return $data;
@@ -1063,14 +1077,56 @@ class Inventori extends Utility {
 
 	private function get_item_batch($parameter) {
 		$data = self::$query->select('inventori_stok', array(
-			'batch'
+			'batch',
+			'barang',
+			'gudang',
+			'stok_terkini'
 		))
 		->where(array(
 			'inventori_stok.barang' => '= ?'
 		), array(
+			$parameter	
+		))
+		->execute();
+		foreach ($data['response_data'] as $key => $value) {
+			//$data['response_data'][$key]['item_detail'] = self::get_item_detail($value['barang'])['response_data'][0];
+			$data['response_data'][$key]['gudang'] = self::get_gudang_detail($value['gudang'])['response_data'][0];
+			$data['response_data'][$key]['kode'] = self::get_batch_detail($value['batch'])['response_data'][0]['batch'];
+			$data['response_data'][$key]['expired'] = date('d F Y', strtotime(self::get_batch_detail($value['batch'])['response_data'][0]['expired_date']));
+			$data['response_data'][$key]['harga'] = self::get_batch_detail($value['batch'])['response_data'][0]['harga'];
+		}
+		return $data;
+	}
+
+	private function get_batch_detail($parameter) {
+		$data = self::$query->select('inventori_batch', array(
+			'uid',
+			'batch',
+			'barang',
+			'expired_date',
+			'po',
+			'do_master'
+		))
+		->where(array(
+			'inventori_batch.uid' => ' = ?'
+		), array(
 			$parameter
 		))
 		->execute();
+		foreach ($data['response_data'] as $key => $value) {
+			//Get Harga dari PO
+			if(isset($value['po'])) {
+				$PO = new PO(self::$pdo);
+				$Price = $PO::get_po_item_price(array(
+					$value['po'],
+					$value['barang']
+				));
+
+				$data['response_data'][$key]['harga'] = floatval($Price['response_data'][0]['harga']);
+			} else {
+				$data['response_data'][$key]['harga'] = 0;
+			}
+		}
 		return $data;
 	}
 

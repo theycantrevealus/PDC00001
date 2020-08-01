@@ -77,27 +77,6 @@
 					</div>
 				</div>
 			</div> -->
-			<div class="sidebar-heading sidebar-m-t">Main</div>
-			<ul class="sidebar-menu">
-				<li class="sidebar-menu-item">
-					<a class="sidebar-menu-button" href="<?php echo __HOSTNAME__; ?>">
-						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">dvr</i>
-						<span class="sidebar-menu-text">Dashboard</span>
-					</a>
-				</li>
-				<li class="sidebar-menu-item">
-					<a class="sidebar-menu-button" href="<?php echo __HOSTNAME__; ?>/anjungan">
-						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">receipt</i>
-						<span class="sidebar-menu-text">Anjungan</span>
-					</a>
-				</li>
-				<li class="sidebar-menu-item">
-					<a class="sidebar-menu-button" href="<?php echo __HOSTNAME__; ?>/display">
-						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">desktop_mac</i>
-						<span class="sidebar-menu-text">Display</span>
-					</a>
-				</li>
-			</ul>
 			<div class="sidebar-heading sidebar-m-t" id="sidemenu_1">Menu</div>
 			<ul class="sidebar-menu">
 				<?php

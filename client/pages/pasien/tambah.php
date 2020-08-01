@@ -15,7 +15,7 @@
 
 
 <div class="container-fluid page__container">
-<form>
+<form id="form-add-pasien">
 	<div class="card card-form">
         <div class="row no-gutters">
             <div class="col-lg-4 card-body">
@@ -26,7 +26,7 @@
                 <div class="form-row">
                     <div class="col-12 col-md-4 mb-3">
 						<label for="txt_no_rm">Nomor Rekam Medis</label>
-						<input type="text" autocomplete="off" class="form-control uppercase inputan no_rm" id="no_rm" name="no_rm" placeholder="000-000-000" required>
+						<input type="text" autocomplete="off" class="form-control uppercase inputan no_rm" id="no_rm" name="no_rm" placeholder="000-000" required>
                     </div>
                 </div>
             </div>
@@ -42,7 +42,8 @@
                 <div class="form-row">
                     <div class="col-12 col-md-6 mb-3">
                         <label>NIK <span class="red">*</span></label>
-                        <input type="text" class="form-control text-uppercase inputan numberonly" maxlength="16" placeholder="NIK" value="" required="" name="nik">
+                        <input type="text" class="form-control text-uppercase inputan numberonly" maxlength="16" placeholder="NIK" value="" required name="nik" id="nik">
+                        <span style="color: #dc3545; font-size: 0.8rem;" id="error-nik"></span>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="txt_nama_pasien">Nama Pasien <span class="red">*</span></label>
@@ -58,7 +59,7 @@
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="tempat_lahir">Tempat Lahir <span class="red">*</span></label>
-						<input type="text" class="form-control uppercase inputan" name="tempat_lahir" placeholder="Tempat Lahir" autocomplete="off">
+						<input type="text" class="form-control uppercase inputan" name="tempat_lahir" placeholder="Tempat Lahir" autocomplete="off" required>
                     </div>
                     <div class="col-12 col-md-4 mb-3">
 						<label for="tanggal_lahir">Tanggal Lahir <span class="red">*</span></label>
@@ -74,14 +75,14 @@
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label>Panggilan <span class="red">*</span></label>
-                        <select name="panggilan" class="form-control inputan" id="panggilan" required>
+                        <select name="panggilan" class="form-control inputan select2" id="panggilan" required>
                             <option value="">Pilih Panggilan</option>
                             
                         </select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-						<label for="alamat">Alamat <span class="red">*</span></label>
-						<textarea class="form-control uppercase inputan" rows="3" name="alamat"></textarea>
+						<label for="alamat">Alamat <span >*</span></label>
+						<textarea class="form-control uppercase inputan" rows="3" name="alamat" required></textarea>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<div class="row">
@@ -97,25 +98,25 @@
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="alamat_provinsi">Provinsi <span class="red">*</span></label>
-						<select class="form-control inputan select2" name="alamat_provinsi" id="alamat_provinsi">
+						<select class="form-control inputan select2" name="alamat_provinsi" id="alamat_provinsi" required>
 							<option value="" disabled selected>Pilih Provinsi</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="alamat_kabupaten">Kabupaten / Kota <span class="red">*</span></label>
-						<select class="form-control inputan select2" name="alamat_kabupaten" id="alamat_kabupaten">
+						<select class="form-control inputan select2" name="alamat_kabupaten" id="alamat_kabupaten" required>
 							<option value="" disabled selected>Pilih Kabupaten / Kota</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="alamat_kecamatan">Kecamatan <span class="red">*</span></label>
-						<select class="form-control inputan select2" name="alamat_kecamatan" id="alamat_kecamatan">
+						<select class="form-control inputan select2" name="alamat_kecamatan" id="alamat_kecamatan" required>
 							<option value="" disabled selected>Pilih Kecamatan</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="alamat_kelurahan">Kelurahan <span class="red">*</span></label>
-						<select class="form-control inputan select2" name="alamat_kelurahan" id="alamat_kelurahan">
+						<select class="form-control inputan select2" name="alamat_kelurahan" id="alamat_kelurahan" required>
 							<option value="" disabled selected>Pilih Kelurahan</option>
 						</select>
 					</div>
@@ -133,7 +134,7 @@
 					</div> 
 					<div class="col-12 col-md-6 mb-3">
 						<label for="status_suami_istri">Status Hubungan</label>
-						<select class="form-control inputan" name="status_suami_istri" id="status_suami_istri">
+						<select class="form-control inputan select2" name="status_suami_istri" id="status_suami_istri">
 							<option value="" selected disabled>Status</option>
 						</select>
 					</div>   
@@ -151,44 +152,44 @@
                 <div class="form-row">
                     <div class="col-12 col-md-6 mb-3">
 						<label for="no_telp">No. Telp</label>
-						<input type="text" autocomplete="off" maxlength="14" class="form-control numberonly inputan" name="no_telp" placeholder="08xxxxxxxxxx">
+						<input type="text" autocomplete="off" maxlength="14" class="form-control numberonly inputan" name="no_telp" placeholder="08xxxxxxxxxx" required>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                    		<label for="goldar">Golongan Darah</label>	
 						<!-- <div class="row col-md-9" id="parent_goldar">
 
 						</div> -->
-						<select class="form-control inputan" name="goldar" id="goldar">
+						<select class="form-control inputan select2" name="goldar" id="goldar" required>
 							<option value="" disabled selected>Pilih Golongan Darah</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<label for="agama">Agama</label>
-                    	<select class="form-control inputan" id="agama" name="agama">
+                    	<select class="form-control inputan select2" id="agama" name="agama" required>
 							<option value="" selected disabled>Pilih Agama</option>
 						</select>	
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<label for="warganegara">Kewarganegaraan</label>
-                    	<select class="form-control inputan" id="warganegara" name="warganegara">
+                    	<select class="form-control inputan select2" id="warganegara" name="warganegara">
 							<option value="" selected disabled>Pilih Kewarganegaraan</option>
 						</select>	
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<label for="suku">Suku / Bangsa</label>
-                    	<select class="form-control inputan" name="suku" id="suku">
+                    	<select class="form-control inputan select2" name="suku" id="suku">
 							<option value="" disabled selected>Pilih Suku / Bangsa</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="pendidikan">Pendidikan</label>
-						<select class="form-control inputan" name="pendidikan" id="pendidikan">
+						<select class="form-control inputan select2" name="pendidikan" id="pendidikan" required>
 							<option value="" disabled selected>Pilih Pendidikan</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="pekerjaan">Pekerjaan</label>
-						<select class="form-control inputan" name="pekerjaan" id="pekerjaan">
+						<select class="form-control inputan select2" name="pekerjaan" id="pekerjaan" required>
 							<option value="" disabled selected>Pilih Pekerjaan</option>
 						</select>
 					</div>
@@ -209,7 +210,7 @@
 						&nbsp;
                     <!-- </div>
                     <div class="col-12 col-md-4 mb-3"> -->
-                    	<a href="<?php echo __HOSTNAME__; ?>/master/pasien" class="btn btn-danger">Batal</a>
+                    	<a href="<?php echo __HOSTNAME__; ?>/pasien" class="btn btn-danger">Batal</a>
                    <!--  </div> -->
                 </div>
             </div>

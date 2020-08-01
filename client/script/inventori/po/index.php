@@ -1,6 +1,6 @@
 <script type="text/javascript">
 	$(function() {
-		var tablePO= $("#table-po").DataTable({
+		var tablePO = $("#table-po").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/PO",
 				type: "GET",
@@ -45,7 +45,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<a href=\"" + __HOSTNAME__ + "/inventori/po/detail\" class=\"btn btn-info btn-sm\"><i class=\"fa fa-eye\"></i></a>";
+						return "<a href=\"" + __HOSTNAME__ + "/inventori/po/detail/" + row["uid"] + "\" class=\"btn btn-info btn-sm\"><i class=\"fa fa-eye\"></i></a>";
 					}
 				}
 			]

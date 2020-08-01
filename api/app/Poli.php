@@ -30,6 +30,10 @@ class Poli extends Utility {
 					return self::get_poli();
 					break;
 
+				case 'poli-available':
+					return self::get_poli_editable();
+					break;
+
 				case 'poli-detail':
 					return self::get_poli_detail($parameter[2]);
 					break;
@@ -40,12 +44,23 @@ class Poli extends Utility {
 				case 'poli-avail-dokter':
 					return self::get_avail_dokter($parameter[2]);
 					break;
+
 				case 'poli-set-dokter':
 					return self::get_set_dokter($parameter[2]);
 					break;
+				
 				case 'get_poli_tindakan':
 					return self::get_poli_tindakan($parameter[2]);
 					break;
+
+				case 'poli-avail-perawat':
+					return self::get_avail_perawat($parameter[2]);
+					break;
+
+				case 'poli-set-perawat':
+					return self::get_set_perawat($parameter[2]);
+					break;
+
 				default:
 					# code...
 					break;
@@ -68,9 +83,19 @@ class Poli extends Utility {
 			case 'poli_dokter':
 				return self::poli_dokter($parameter);
 				break;
+
 			case 'poli_dokter_buang':
 				return self::poli_dokter_buang($parameter);
 				break;
+
+			case 'poli_perawat':
+				return self::poli_perawat($parameter);
+				break;
+
+			case 'poli_perawat_buang':
+				return self::poli_perawat_buang($parameter);
+				break;
+
 			default:
 				# code...
 				break;
@@ -94,6 +119,32 @@ class Poli extends Utility {
 					->where(array(
 							'master_poli.deleted_at' => 'IS NULL'
 						)
+					)
+					->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		return $data;
+	}
+
+	public function get_poli_editable(){
+		$data = self::$query
+					->select('master_poli', array(
+						'uid',
+						'nama',
+						'created_at',
+						'updated_at'
+						)
+					)	
+					->where(array(
+							'master_poli.deleted_at' => 'IS NULL',
+							'AND',
+							'master_poli.editable' => '= TRUE'
+						),array()
 					)
 					->execute();
 
@@ -342,6 +393,220 @@ class Poli extends Utility {
 		return $CheckPoli;
 	}
 	
+
+	/*====================== PERAWAT ======================*/
+
+	private function get_avail_perawat($parameter) { //parameter = uid poli
+		$Perawat = self::$query->select('pegawai', array(
+			'uid',
+			'nama AS nama_perawat'
+		))
+		->join('pegawai_jabatan', array(
+			'uid AS uid_jabatan',
+			'nama AS nama_jabatan'
+		))
+		->on(array(
+			array('pegawai.jabatan', '=', 'pegawai_jabatan.uid')
+		))
+		->where(array(
+			'pegawai.deleted_at' => 'IS NULL',
+			'AND',
+			'pegawai_jabatan.nama' => '= ?'
+		), array(
+			'Perawat'
+		))
+		->execute();
+
+		$filterPerawat = array();
+		$CheckPoli = self::$query->select('master_poli_perawat', array(
+			'perawat'
+		))
+		->where(array(
+			'deleted_at' => 'IS NULL',
+			'AND',
+			'poli' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		foreach ($CheckPoli['response_data'] as $key => $value) {
+			if(!in_array($value['perawat'], $filterPerawat)) {
+				array_push($filterPerawat, $value['perawat']);
+			}
+		}
+
+		foreach ($Perawat['response_data'] as $key => $value) {
+			if(in_array($value['uid'], $filterPerawat)) {
+				unset($Perawat['response_data'][$key]);
+			}
+		}
+
+		return $Perawat;
+	}
+
+	private function get_set_perawat($parameter) {
+		$CheckPoli = self::$query->select('master_poli_perawat', array(
+			'perawat'
+		))
+		->where(array(
+			'deleted_at' => 'IS NULL',
+			'AND',
+			'poli' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		foreach ($CheckPoli['response_data'] as $key => $value) {
+			$Pegawai = new Pegawai(self::$pdo);
+			$NamaPerawat = $Pegawai::get_detail($value['perawat']);
+			$CheckPoli['response_data'][$key]['nama'] = $NamaPerawat['response_data'][0]['nama'];
+		}
+
+		return $CheckPoli;
+	}
+
+	private function poli_perawat($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		
+		$readPerawat = self::$query->select('master_poli_perawat', array(
+			'poli',
+			'perawat'
+		))
+		->where(array(
+			'poli' => '= ?',
+			'AND',
+			'perawat' => '= ?'
+		), array(
+			$parameter['poli'],
+			$parameter['perawat']
+		))
+		->execute();
+
+		if(count($readDokter['response_data']) > 0) {
+			$worker = self::$query->update('master_poli_perawat', array(
+				'updated_at' => parent::format_date(),
+				'deleted_at' => ''
+			))
+			->where(array(
+				'poli' => '= ?',
+				'AND',
+				'perawat' => '= ?'
+			), array(
+				$parameter['poli'],
+				$parameter['perawat']
+			))
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$readDokter['response_data'][0]['id'],
+						$UserData['data']->uid,
+						'master_poli_perawat',
+						'U',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		} else {
+			$worker = self::$query->insert('master_poli_perawat', array(
+				'poli' => $parameter['poli'],
+				'perawat' => $parameter['perawat'],
+				'pegawai' => $UserData['data']->uid,
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->returning('id')
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$worker['response_unique'],
+						$UserData['data']->uid,
+						'master_poli_perawat',
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		}
+		return $worker;
+	}
+
+	private function poli_perawat_buang($parameter){
+		$worker = self::$query->update('master_poli_perawat', array(
+			'updated_at' => parent::format_date(),
+			'deleted_at' => parent::format_date()
+		))
+		->where(array(
+			'poli' => '= ?',
+			'AND',
+			'perawat' => '= ?'
+		), array(
+			$parameter['poli'],
+			$parameter['perawat']
+		))
+		->returning('id')
+		->execute();
+
+		if($worker['response_result'] > 0) {
+			$log = parent::log(array(
+				'type'=>'activity',
+				'column'=>array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value'=>array(
+					$worker['response_unique'],
+					$UserData['data']->uid,
+					'master_poli_perawat',
+					'U',
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class'=>__CLASS__
+			));
+		}
+		return $worker;
+	}
+
+	/*====================================================*/
 
 	/*====================== CRUD ========================*/
 

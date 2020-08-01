@@ -30,6 +30,9 @@ class PO extends Utility {
 				case 'detail':
 					return self::get_po_detail($parameter[2]);
 					break;
+				case 'view':
+					return self::get_po_info($parameter[2]);
+					break;
 				default:
 					return self::get_po();
 					break;
@@ -69,6 +72,37 @@ class PO extends Utility {
 		->execute();
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
+			//Check Barang sudah sampai atau belum
+			$PODetail = self::get_po_detail($value['uid'])['response_data'];
+			foreach ($PODetail as $POKey => $POValue) {
+				$PODetail[$POKey]['qty'] = floatval($POValue['qty']);
+				$PODetail[$POKey]['harga'] = floatval($POValue['harga']);
+				$PODetail[$POKey]['disc'] = floatval($POValue['disc']);
+				$PODetail[$POKey]['subtotal'] = floatval($POValue['subtotal']);
+
+				//Check DO
+				$countBarang = 0;
+				$checkDO = self::$query->select('inventori_do_detail', array(
+					'qty'
+				))
+				->where(array(
+					'inventori_do_detail.po' => '= ?',
+					'AND',
+					'inventori_do_detail.barang' => '= ?'
+				), array(
+					$value['uid'],
+					$POValue['uid_barang']
+				))
+				->execute();
+
+				foreach ($checkDO['response_data'] as $CDOKey => $CDOValue) {
+					$countBarang += floatval($CDOValue['qty']);
+				}
+
+				$PODetail[$POKey]['sampai'] = $countBarang;
+			}
+			$data['response_data'][$key]['detail'] = $PODetail;
+
 			$Pegawai = new Pegawai(self::$pdo);
 			$InfoPegawai = $Pegawai::get_detail($value['pegawai']);
 
@@ -79,32 +113,6 @@ class PO extends Utility {
 			$data['response_data'][$key]['tanggal_po'] = date("d F Y", strtotime($value['tanggal_po']));
 			$data['response_data'][$key]['pegawai'] = $InfoPegawai['response_data'][0];
 			$data['response_data'][$key]['supplier'] = $InfoSupplier;
-      
-	public function get_po(){
-		$data = self::$query
-			->select('inventori_po', array(
-					'uid',
-					'supplier',
-					'pegawai',
-					'total',
-					'disc',
-					'disc_type',
-					'total_after_disc',
-					'tanggal_po',
-					'created_at',
-					'updated_at',
-					'keterangan'
-				)
-			)
-			->where(array(
-					'deleted_at' => 'IS NULL'
-				), array()
-			)
-			->execute();
-
-		$autonum = 1;
-		foreach ($data['response_data'] as $key => $value) {
-			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 		}
 
@@ -130,6 +138,29 @@ class PO extends Utility {
 					'inventori_po_detail.po' => '= ?'
 				), array(
 					$parameter
+				)
+			)
+			->execute();
+
+		return $data;
+	}
+
+	public function get_po_item_price($parameter = array()){
+		$data = self::$query
+			->select('inventori_po_detail', array(
+					'harga',
+					'disc',
+					'disc_type',
+					'subtotal'
+				)
+			)
+			->where(array(
+					'inventori_po_detail.po' => '= ?',
+					'AND',
+					'inventori_po_detail.barang' => '= ?'
+				), array(
+					$parameter[0],
+					$parameter[1]
 				)
 			)
 			->execute();
@@ -166,11 +197,80 @@ class PO extends Utility {
 		return $data;
 	}
 
+	public function get_po_info($parameter) {
+		$po = self::$query->select('inventori_po', array(
+			'uid',
+			'nomor_po',
+			'supplier',
+			'pegawai',
+			'total',
+			'disc',
+			'disc_type',
+			'total_after_disc',
+			'tanggal_po',
+			'keterangan',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'inventori_po.deleted_at' => 'IS NULL',
+			'AND',
+			'inventori_po.uid' => '= ?'
+		), array(
+			$parameter
+		))
+		->execute();
+
+		foreach ($po['response_data'] as $key => $value) {
+			$Pegawai = new Pegawai(self::$pdo);
+			$InfoPegawai = $Pegawai::get_detail($value['pegawai']);
+
+			$Supplier = new Supplier(self::$pdo);
+			$InfoSupplier = $Supplier::get_detail($value['supplier']);
+			
+			$po['response_data'][$key]['autonum'] = $autonum;
+			$po['response_data'][$key]['tanggal_po'] = date("d F Y", strtotime($value['tanggal_po']));
+			$po['response_data'][$key]['pegawai'] = $InfoPegawai['response_data'][0];
+			$po['response_data'][$key]['supplier'] = $InfoSupplier;
+		}
+			
+
+		if(count($po['response_data'])) {
+			$po_detail = self::get_po_detail($parameter);
+			foreach ($po_detail['response_data'] as $key => $value) {
+				$Inventori = new Inventori(self::$pdo);
+				$InventoriInfo = $Inventori::get_item_detail($value['uid_barang'])['response_data'][0];
+				$InventoriSatuan = $Inventori::get_satuan_detail($InventoriInfo['satuan_terkecil'])['response_data'][0];
+				$po_detail['response_data'][$key]['detail'] = $InventoriInfo;
+				$po_detail['response_data'][$key]['detail']['satuan_caption'] = $InventoriSatuan;
+
+			}
+			$po['response_data'][0]['item'] = $po_detail['response_data'];
+
+
+			//getDocument
+			$document = self::$query->select('inventori_po_document', array(
+				'id',
+				'po',
+				'document_name'
+			))
+			->where(array(
+				'inventori_po_document.po' => '= ?'
+			), array(
+				$parameter
+			))
+			->execute();
+			$po['response_data'][0]['document'] = $document['response_data'];
+		}
+
+		return $po;
+	}
+
 	private function tambah_po($parameter) {
 		$result = array();
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+		$ObatDetail = new Inventori(self::$pdo);
 		
 		$latestPO = self::$query->select('inventori_po', array(
 			'uid'
@@ -223,10 +323,10 @@ class PO extends Utility {
 		->execute();
 		if($worker['response_result'] > 0) {
 			$PODetailError = array();
+			
+			
 			//Detail
 			foreach (json_decode($parameter['itemList'], true) as $key => $value) {
-
-				$ObatDetail = new Inventori(self::$pdo);
 				$ObatInfo = $ObatDetail::get_item_detail($value['item'])['response_data'][0];
 				$subtotal = 0;
 
@@ -244,13 +344,15 @@ class PO extends Utility {
 					'qty' => floatval($value['qty']),
 					'satuan' => $ObatInfo['satuan_terkecil'],
 					'harga' => floatval($value['harga']),
-					'disc' => $value['diskon'],
+					'disc' => floatval($value['diskon']),
 					'disc_type' => $value['jenis_diskon'],
 					'subtotal' => floatval($subtotal),
 					'keterangan' => $value['keterangan']
 				))
 				->execute();
-				array_push($PODetailError, $po_detail);
+				if($po_detail['response_result'] <= 0) {
+					array_push($PODetailError, $po_detail);	
+				}
 			}
 
 			$result['po_detail'] = $PODetailError;
