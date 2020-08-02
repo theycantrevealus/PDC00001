@@ -541,7 +541,7 @@
 	                <div class="form-group col-lg-6">
 	                	<div class="col-12 col-md-12 mb-3">
 		                	<label for="hub_keluarga">Hubungan Keluarga</label>
-		                	<input type="text" name="riwayat_hub_keluarga" id="riwayat_hub_keluarga" class="form-control inputan">
+		                	<input type="text" name="riwayat_hub_keluarga" id="riwayat_hub_keluarga" class="form-control inputan" placeholder="-">
 	                	</div>
 	                </div>
 				</div>
@@ -773,13 +773,13 @@
 						<div class="col-6 col-md-6 mb-3">
 	                		<div class="form-group col-md-12">
 	                			<label for="">Lama Pemakaian: </label>
-								<input type="text" id="program_kb_lama_pemakaian" name="program_kb_lama_pemakaian" class="form-control form-control-appended inputan jenis-kb">
+								<input type="text" id="program_kb_lama_pemakaian" name="program_kb_lama_pemakaian" class="form-control form-control-appended inputan jenis-kb" placeholder="-">
 	                		</div>
 	                	</div>
 	                	<div class="col-6 col-md-6 mb-3">
 	                		<div class="form-group col-md-12">
 	                			<label for="">Keluhan: </label>
-								<input type="text" id="program_kb_keluhan" name="program_kb_keluhan" class="form-control form-control-appended inputan jenis-kb">
+								<input type="text" id="program_kb_keluhan" name="program_kb_keluhan" class="form-control form-control-appended inputan jenis-kb" placeholder="-">
 	                		</div>
 	                	</div>
 					</div>
@@ -949,7 +949,7 @@
 						</select>
 					</div>
 					<div class="form-group col-md-6">
-						<input type="text" class="form-control inputan ginekologi" disabled id="ginekologi_lainnya" name="ginekologi_lainnya">
+						<input type="text" class="form-control inputan ginekologi" disabled id="ginekologi_lainnya" name="ginekologi_lainnya" placeholder="-">
 					</div>
 				</div>
 			</div>
@@ -1101,7 +1101,7 @@
 					</div>
 					<div class="form-group col-md-3" id="nyeri_lainnya_ket">
 						<label>Nyeri Lainnya: </label>
-						<input disabled type="text" name="nyeri_lainnya_ket" id="nyeri_lainnya_ket" class="form-control inputan nyeri_lainnya_ket">
+						<input disabled type="text" name="nyeri_lainnya_ket" id="nyeri_lainnya_ket" class="form-control inputan nyeri_lainnya_ket" placeholder="-">
 					</div>
 					<div class="form-group col-md-4">
 						<label>Skala Nyeri NRS ( &gt; 5th - Dewasa)</label>

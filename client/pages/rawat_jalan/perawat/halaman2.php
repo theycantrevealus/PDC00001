@@ -160,7 +160,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Frekuensi BAB / hari:</label>
-						<input type="text" class="form-control inputan" name="eliminasi_frekuensi_bab" id="eliminasi_frekuensi_bab">
+						<input type="text" class="form-control inputan" name="eliminasi_frekuensi_bab" id="eliminasi_frekuensi_bab" placeholder="-">
 					</div>
 					<div class="col-md-12">
 						<div class="form-check">
@@ -184,7 +184,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Lainnya:</label>
-						<input type="text" disabled class="form-control inputan eliminasi_bak_lainnya" name="eliminasi_bak_lainnya" id="eliminasi_bak_lainnya">
+						<input type="text" disabled class="form-control inputan eliminasi_bak_lainnya" name="eliminasi_bak_lainnya" id="eliminasi_bak_lainnya" placeholder="-">
 					</div>
 				</div>
 			</div>
@@ -249,7 +249,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Lainnya:</label>
-						<input type="text" class="form-control inputan komunikasi_bicara_lainnya" name="komunikasi_bicara_lainnya" id="komunikasi_bicara_lainnya" disabled>
+						<input type="text" class="form-control inputan komunikasi_bicara_lainnya" name="komunikasi_bicara_lainnya" id="komunikasi_bicara_lainnya" disabled placeholder="-">
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Hambatan Belajar:</label>
@@ -266,7 +266,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Lainnya:</label>
-						<input type="text" class="form-control inputan komunikasi_hambatan_lainnya" name="komunikasi_hambatan_lainnya" id="komunikasi_hambatan_lainnya" disabled>
+						<input type="text" class="form-control inputan komunikasi_hambatan_lainnya" name="komunikasi_hambatan_lainnya" id="komunikasi_hambatan_lainnya" disabled placeholder="-">
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Potensi Kebutuhan Belajar:</label>
@@ -281,7 +281,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Lainnya:</label>
-						<input disabled type="text" class="form-control inputan komunikasi_kebutuhan_belajar_lainnya" name="komunikasi_kebutuhan_belajar_lainnya" id="komunikasi_kebutuhan_belajar_lainnya">
+						<input disabled type="text" class="form-control inputan komunikasi_kebutuhan_belajar_lainnya" name="komunikasi_kebutuhan_belajar_lainnya" id="komunikasi_kebutuhan_belajar_lainnya" placeholder="-">
 					</div>
 				</div>
 			</div>
@@ -550,7 +550,7 @@
 							</div>
 						</div>
 						<div class="col-md-12">
-							<input type="text" disabled name="tatalaksana_siapkan_obat_ket" id="tatalaksana_siapkan_obat_ket" class="form-control inputan tatalaksana_siapkan_obat_ket">
+							<input type="text" disabled name="tatalaksana_siapkan_obat_ket" id="tatalaksana_siapkan_obat_ket" class="form-control inputan tatalaksana_siapkan_obat_ket" placeholder="-">
 						</div>
 					</div>
 					<div class="col-md-4">
@@ -561,7 +561,7 @@
 							</div>
 						</div>
 						<div class="col-md-12">
-							<input disabled type="text" name="tatalaksana_beri_obat_ket" id="tatalaksana_beri_obat_ket" class="form-control inputan tatalaksana_beri_obat_ket">
+							<input disabled type="text" name="tatalaksana_beri_obat_ket" id="tatalaksana_beri_obat_ket" class="form-control inputan tatalaksana_beri_obat_ket" placeholder="-">
 						</div>
 					</div>
 					<div class="col-md-4">
@@ -572,7 +572,7 @@
 							</div>
 						</div>
 						<div class="col-md-12">
-							<input disabled type="text" name="tatalaksana_konsul_ket" id="tatalaksana_konsul_ket" class="form-control inputan tatalaksana_konsul_ket">
+							<input disabled type="text" name="tatalaksana_konsul_ket" id="tatalaksana_konsul_ket" class="form-control inputan tatalaksana_konsul_ket" placeholder="-">
 						</div>
 					</div>
 				</div>
