@@ -197,6 +197,11 @@
 		                	$("#" + key).val(item);
 		                });
 
+		                if (MetaData.antrian.penjamin != <?= json_encode(__UIDPENJAMINBPJS__) ?>) {
+		                	$(".rujukan-bpjs").attr("hidden", true);
+		                } else {
+		                }
+
 						if (MetaData.pasien.id_jenkel == 2){
 							$(".wanita").attr("hidden",true);
 						} else {

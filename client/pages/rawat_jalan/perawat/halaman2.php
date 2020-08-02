@@ -301,15 +301,15 @@
 						<label for="">1. Perhatikan cara berjalan pasien saat akan duduk di kursi. Apakah pasien tampak tidak seimbang (sempoyongan) ?</label>	
 						<div class="row col-md-12" id="cara_masuk">
 							<div class="col-md-3">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_sempoyongan" value="0" id="kaji_resiko_sempoyongan_0">
-									<label class='custom-control-label' for="kaji_resiko_sempoyongan_0">Tidak</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_sempoyongan" value="0" id="kaji_resiko_sempoyongan_0">
+									<label class='form-check-label' for="kaji_resiko_sempoyongan_0">Tidak</label>
 								</div>
 							</div>
 							<div class="col-md-4">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_sempoyongan" value="1" id="kaji_resiko_sempoyongan_1">
-									<label class='custom-control-label' for="kaji_resiko_sempoyongan_1">Ya</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_sempoyongan" value="1" id="kaji_resiko_sempoyongan_1">
+									<label class='form-check-label' for="kaji_resiko_sempoyongan_1">Ya</label>
 								</div>
 							</div>
 						</div>
@@ -318,15 +318,15 @@
 						<label for="">2. Apakah pasien memegang pinggiran kursi/meja/benda lain sebagai penopang saat akan duduk ?</label>
 						<div class="row col-md-12" id="cara_masuk">
 							<div class="col-md-3	">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_penopang" value="0" id="kaji_resiko_penopang_0">
-									<label class='custom-control-label' for="kaji_resiko_penopang_0">Tidak</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_penopang" value="0" id="kaji_resiko_penopang_0">
+									<label class='form-check-label' for="kaji_resiko_penopang_0">Tidak</label>
 								</div>
 							</div>
 							<div class="col-md-4">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_penopang" value="1" id="kaji_resiko_penopang_1">
-									<label class='custom-control-label' for="kaji_resiko_penopang_1">Ya</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_penopang" value="1" id="kaji_resiko_penopang_1">
+									<label class='form-check-label' for="kaji_resiko_penopang_1">Ya</label>
 								</div>
 							</div>
 						</div>
@@ -335,15 +335,15 @@
 						<label for="">Diberitahukan ke Dokter:</label>
 						<div class="row col-md-12" id="cara_masuk">
 							<div class="col-md-3">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_ke_dokter" value="0" id="kaji_resiko_ke_dokter_0">
-									<label class='custom-control-label' for="kaji_resiko_ke_dokter_0">Tidak</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_ke_dokter" value="0" id="kaji_resiko_ke_dokter_0">
+									<label class='form-check-label' for="kaji_resiko_ke_dokter_0">Tidak</label>
 								</div>
 							</div>
 							<div class="col-md-2">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_ke_dokter" value="1" id="kaji_resiko_ke_dokter_1">
-									<label class='custom-control-label' for="kaji_resiko_ke_dokter_1">Ya, Jam : </label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_ke_dokter" value="1" id="kaji_resiko_ke_dokter_1">
+									<label class='form-check-label' for="kaji_resiko_ke_dokter_1">Ya, Jam : </label>
 								</div>
 							</div>
 							<div class="col-md-3">

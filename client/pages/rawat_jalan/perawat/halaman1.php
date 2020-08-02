@@ -112,41 +112,41 @@
 									<label for="cara_masuk">Cara Masuk :</label>
 									<div class="row col-md-12" id="cara_masuk">
 										<div class="col-md-3">
-											<div class="custom-control custom-radio">
-												<input type="radio" class="custom-control-input" name="cara_masuk" value="Jalan" id="cara_masuk_1">
-												<label class='custom-control-label' for="cara_masuk_1">Jalan</label>
+											<div class="form-check">
+												<input type="radio" class="form-check-input" name="cara_masuk" value="Jalan" id="cara_masuk_1">
+												<label class='form-check-label' for="cara_masuk_1">Jalan</label>
 											</div>
 										</div>
 										<div class="col-md-3">
-											<div class="custom-control custom-radio">
-												<input type="radio" class="custom-control-input" name="cara_masuk" value="Kursi Roda" id="cara_masuk_2">
-												<label class='custom-control-label' for="cara_masuk_2">Kursi Roda</label>
+											<div class="form-check">
+												<input type="radio" class="form-check-input" name="cara_masuk" value="Kursi Roda" id="cara_masuk_2">
+												<label class='form-check-label' for="cara_masuk_2">Kursi Roda</label>
 											</div>
 										</div>
 										<div class="col-md-6">
-											<div class="custom-control custom-radio">
-												<input type="radio" class="custom-control-input" name="cara_masuk" value="Lainnya" id="cara_masuk_3">
-												<label class='custom-control-label' for="cara_masuk_3">Lainnya:</label>
+											<div class="form-check">
+												<input type="radio" class="form-check-input" name="cara_masuk" value="Lainnya" id="cara_masuk_3">
+												<label class='form-check-label' for="cara_masuk_3">Lainnya:</label>
 												<input type="text" class="form-control cara_masuk_lainnya" id="cara_masuk_lainnya" name="cara_masuk_lainnya">
 											</div>
 										</div>
 									</div>
 			                    </div>
 							</div>
-							<div class="form-group col-lg-12">
+							<div class="form-group col-lg-12 rujukan-bpjs">
 								 <div class="col-12 col-md-12 mb-3">
 									<label for="rujukan">Rujukan :</label>
 									<div class="row col-md-12" id="rujukan">
 										<div class="col-md-3">
-											<div class="custom-control custom-radio">
-												<input type="radio" class="custom-control-input" name="rujukan" value="0" id="rujukan_1">
-												<label class='custom-control-label' for="rujukan_1">Tidak</label>
+											<div class="form-check">
+												<input type="radio" class="form-check-input" name="rujukan" value="0" id="rujukan_1">
+												<label class='form-check-label' for="rujukan_1">Tidak</label>
 											</div>
 										</div>
 										<div class="col-md-9 row">
-											<div class="custom-control custom-radio col-md-1">
-												<input type="radio" class="custom-control-input" name="rujukan" value="1" id="rujukan_2">
-												<label class='custom-control-label' for="rujukan_2">Ya</label>
+											<div class="form-check col-md-1">
+												<input type="radio" class="form-check-input" name="rujukan" value="1" id="rujukan_2">
+												<label class='form-check-label' for="rujukan_2">Ya</label>
 											</div>
 											<div class="col-md-10">
 												<input type="text" class="form-control inputan ket_rujukan" id="rujukan_ket" placeholder="-">
@@ -156,7 +156,7 @@
 			                    </div>
 							</div>
 						</div>
-						<div class="col-md-12 row">
+						<div class="col-md-12 row rujukan-bpjs">
 							<div class="form-group col-lg-12">
 								<label for="diagnosa_rujukan">Diagnosa Rujukan: </label>
 								<input type="text" name="rujukan_diagnosa" id="rujukan_diagnosa" class="form-control inputan ket_rujukan">
@@ -589,15 +589,15 @@
 									</div>
 								</div>
 								<div class="col-md-2">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="menarche_stat" value="Teratur" id="menarche_stat_1">
-										<label class='custom-control-label' for="menarche_stat_1">Teratur</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="menarche_stat" value="Teratur" id="menarche_stat_1">
+										<label class='form-check-label' for="menarche_stat_1">Teratur</label>
 									</div>
 								</div>
 								<div class="col-md-3">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="menarche_stat" value="Tidak Teratur" id="menarche_stat_2">
-										<label class='custom-control-label' for="menarche_stat_2">Tidak Teratur</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="menarche_stat" value="Tidak Teratur" id="menarche_stat_2">
+										<label class='form-check-label' for="menarche_stat_2">Tidak Teratur</label>
 									</div>
 								</div>
 							</div>
@@ -625,15 +625,15 @@
 							<label for="">Keluhan Saat Haid: </label>
 							<div class="row col-md-12" id="">
 								<div class="col-md-6">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="keluhan_haid" value="0" id="keluhan_haid_1">
-										<label class='custom-control-label' for="keluhan_haid_1">Tidak ada</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="keluhan_haid" value="0" id="keluhan_haid_1">
+										<label class='form-check-label' for="keluhan_haid_1">Tidak ada</label>
 									</div>
 								</div>
 								<div class="col-md-6">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="keluhan_haid" value="1" id="keluhan_haid_2">
-										<label class='custom-control-label' for="keluhan_haid_2">Ya</label>
+									<div class="form-check col-md-1">
+										<input type="radio" class="form-check-input" name="keluhan_haid" value="1" id="keluhan_haid_2">
+										<label class='cform-check-label' for="keluhan_haid_2">Ya</label>
 									</div>
 								</div>
 							</div>
@@ -671,21 +671,21 @@
 							<label for="rujukan">Wanita: Hamil</label>
 							<div class="row col-md-12" id="">
 								<div class="col-md-3">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="wanita_hamil" value="Tidak" id="wanita_hamil_0">
-										<label class='custom-control-label' for="wanita_hamil_0">Tidak</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="wanita_hamil" value="Tidak" id="wanita_hamil_0">
+										<label class='form-check-label' for="wanita_hamil_0">Tidak</label>
 									</div>
 								</div>
 								<div class="col-md-3 row">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="wanita_hamil" value="Ya" id="wanita_hamil_1">
-										<label class='custom-control-label' for="wanita_hamil_1">Ya</label>
+									<div class="form-check col-md-1">
+										<input type="radio" class="form-check-input" name="wanita_hamil" value="Ya" id="wanita_hamil_1">
+										<label class='form-check-label' for="wanita_hamil_1">Ya</label>
 									</div>
 								</div>
 								<div class="col-md-3 row">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="wanita_hamil" value="Tidak Tahu" id="wanita_hamil_2">
-										<label class='custom-control-label' for="wanita_hamil_2">Tidak Tahu</label>
+									<div class="form-check col-md-1">
+										<input type="radio" class="form-check-input" name="wanita_hamil" value="Tidak Tahu" id="wanita_hamil_2">
+										<label class='form-check-label' for="wanita_hamil_2">Tidak Tahu</label>
 									</div>
 								</div>
 							</div>
@@ -696,21 +696,21 @@
 							<label for="rujukan">Pria: Masalah Prostat</label>
 							<div class="row col-md-12">
 								<div class="col-md-3 ">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="pria_prostat" value="Tidak" id="pria_prostat_0">
-										<label class='custom-control-label' for="pria_prostat_0">Tidak</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="pria_prostat" value="Tidak" id="pria_prostat_0">
+										<label class='form-check-label' for="pria_prostat_0">Tidak</label>
 									</div>
 								</div>
 								<div class="col-md-3 row">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="pria_prostat" value="Ya" id="pria_prostat_1">
-										<label class='custom-control-label' for="pria_prostat_1">Ya</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="pria_prostat" value="Ya" id="pria_prostat_1">
+										<label class='form-check-label' for="pria_prostat_1">Ya</label>
 									</div>
 								</div>
 								<div class="col-md-6 row">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="pria_prostat" value="Tidak Tahu" id="pria_prostat_2">
-										<label class='custom-control-label' for="pria_prostat_2">Tidak Tahu</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="pria_prostat" value="Tidak Tahu" id="pria_prostat_2">
+										<label class='form-check-label' for="pria_prostat_2">Tidak Tahu</label>
 									</div>
 								</div>
 							</div>
