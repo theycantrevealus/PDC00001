@@ -40,6 +40,10 @@ class Asesmen extends Utility {
 					return self::get_antrian_asesmen_rawat();
 					break;
 
+				case 'antrian-asesmen-medis':
+					return self::get_antrian_asesmen_medis();
+					break;
+
 				default:
 					return self::get_asesmen_medis($parameter[2]);
 			}
@@ -1260,7 +1264,32 @@ class Asesmen extends Utility {
 	}
 
 	private function get_antrian_asesmen_rawat(){
-		$antrian = self::get_list_antrian();
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$listPoli = [];
+		$getPoli = self::$query
+			->select('master_poli_perawat', 
+				array(
+					'poli',
+					'perawat'
+				)
+			)
+			->where(array(
+					'perawat' => '= ?',
+					'AND',
+					'deleted_at' => 'IS NULL'
+				), array(
+					$UserData['data']->uid
+				)
+			)
+			->execute();
+
+		foreach ($getPoli['response_data'] as $key => $value) {
+			array_push($listPoli, $value);
+		}
+
+		$antrian = self::get_list_antrian($listPoli);
 
 		$autonum = 1;
 		foreach ($antrian as $key => $value) {
@@ -1268,7 +1297,6 @@ class Asesmen extends Utility {
 			$PoliDetail = $Poli::get_poli_detail($value['uid_poli'])['response_data'][0];
 
 			$cek_asesment = self::cek_asesmen_rawat_detail($PoliDetail['poli_asesmen'], $value['uid']);
-			$antrian[$key]['uid_asesmen'] = "";
 			$antrian[$key]['status_asesmen'] = false;
 
 			if ($cek_asesment['response_result'] > 0){
@@ -1276,24 +1304,90 @@ class Asesmen extends Utility {
 				$antrian[$key]['status_asesmen'] = true; 
 			}
 
-			$data['response_data'][$key]['autonum'] = $autonum;
+			$antrian[$key]['autonum'] = $autonum;
 			$autonum++;
 		}
 
 		return $antrian;
 	}
 
-	private function get_list_antrian(){
+	private function get_list_antrian($parameter){
 		$antrian = new Antrian(self::$pdo);
-		$param = ['','antrian'];
-		$get_antrian = $antrian->__GET__($param);
 
-		return $get_antrian['response_data'];
+		$listPasien = [];
+		foreach ($parameter as $key => $value) {
+			$antrianData = $antrian->get_antrian_by_poli($value['poli'])['response_data'];
+
+			foreach ($antrianData as $key => $value) {				
+				array_push($listPasien, $value);
+			}
+		}
+
+		return $listPasien;
 	}
+
+	private function get_antrian_asesmen_medis(){
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$antrianClass = new Antrian(self::$pdo);
+		$antrian = $antrianClass->get_antrian_by_dokter($UserData['data']->uid);
+
+		$antrianPasien = [];
+
+		$autonum = 1;
+		foreach ($antrian['response_data'] as $key => $value) {
+			$Poli = new Poli(self::$pdo);
+			$PoliDetail = $Poli::get_poli_detail($value['uid_poli'])['response_data'][0];
+
+			$cek_asesment = self::cek_asesmen_medis_detail($PoliDetail['poli_asesmen'], $value['uid']);
+			$antrian['response_data'][$key]['status_asesmen'] = false;
+
+			if ($cek_asesment['response_result'] > 0){
+				$antrian['response_data'][$key]['uid_asesmen_medis'] = $cek_asesment['response_data'][0]['uid'];
+				$antrian['response_data'][$key]['status_asesmen'] = true; 
+			}
+
+			$antrian['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		return $antrian;
+	}
+
+	/*private function get_list_antrian_medis($parameter){
+		$antrian = new Antrian(self::$pdo);
+
+		$listPasien = [];
+		foreach ($parameter as $key => $value) {
+			$antrianData = $antrian->get_antrian_by_dokter($value['poli'])['response_data'];
+
+			foreach ($antrianData as $key => $value) {				
+				array_push($listPasien, $value);
+			}
+		}
+
+		return $listPasien;
+	}*/
 
 	private function cek_asesmen_rawat_detail($poli_prefix, $parameter){
 		$data = self::$query
 				->select('asesmen_rawat_' . $poli_prefix, array('uid','antrian'))
+				->where(array(
+							'deleted_at' => 'IS NULL',
+							'AND',
+							'antrian' => '= ?'
+					),
+					array($parameter)
+				)
+				->execute();
+
+		return $data;
+	}
+
+	private function cek_asesmen_medis_detail($poli_prefix, $parameter){
+		$data = self::$query
+				->select('asesmen_medis_' . $poli_prefix, array('uid','antrian'))
 				->where(array(
 							'deleted_at' => 'IS NULL',
 							'AND',

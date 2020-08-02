@@ -47,6 +47,10 @@ class Antrian extends Utility {
 					return self::cekStatusAntrian($parameter[2]);
 					break;
 
+				case 'get-antrian-by-poli':
+					return self::get_antrian_by_poli($parameter[2]);
+					break;
+
 				/*case 'ambil-antrian-poli':
 					return self::ambilNomorAntrianPoli($parameter[2]);
 					break;*/
@@ -798,5 +802,150 @@ class Antrian extends Utility {
 		}
 
 		return $nomor;
+	}
+
+	public function get_antrian_by_poli($parameter){
+		$data = self::$query
+					->select('antrian', 
+						array(
+							'uid',
+							'pasien as uid_pasien',
+							'dokter as uid_dokter',
+							'departemen as uid_poli',
+							'penjamin as uid_penjamin',
+							'waktu_masuk'
+						)
+					)
+					->join('pasien', array(
+							'nama as pasien',
+							'no_rm'
+						)
+					)
+					->join('master_poli', array(
+							'nama as departemen'
+						)
+					)
+					->join('pegawai', array(
+							'nama as dokter'
+						)
+					)
+					->join('master_penjamin', array(
+							'nama as penjamin'
+						)
+					)
+					->join('kunjungan', array(
+							'pegawai as uid_resepsionis'
+						)
+					)
+					->on(array(
+							array('pasien.uid','=', 'antrian.pasien'),
+							array('master_poli.uid','=', 'antrian.departemen'),
+							array('pegawai.uid','=', 'antrian.dokter'),
+							array('master_penjamin.uid','=', 'antrian.penjamin'),
+							array('kunjungan.uid','=', 'antrian.kunjungan')
+						)
+					)
+					->where(array(
+							'antrian.waktu_keluar' => 'IS NULL',
+							'AND',
+							'antrian.deleted_at' => 'IS NULL',
+							'AND',
+							'antrian.departemen' => '= ?'
+						), array(
+							$parameter
+						)
+					)
+					->order(
+						array(
+							'antrian.waktu_masuk' => 'DESC'
+						)
+					)
+					->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
+			$autonum++;
+
+			$pegawai = new Pegawai(self::$pdo);
+			$get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
+			$data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
+		}
+
+		return $data;
+	}
+
+
+	public function get_antrian_by_dokter($parameter){
+		$data = self::$query
+					->select('antrian', 
+						array(
+							'uid',
+							'pasien as uid_pasien',
+							'dokter as uid_dokter',
+							'departemen as uid_poli',
+							'penjamin as uid_penjamin',
+							'waktu_masuk'
+						)
+					)
+					->join('pasien', array(
+							'nama as pasien',
+							'no_rm'
+						)
+					)
+					->join('master_poli', array(
+							'nama as departemen'
+						)
+					)
+					->join('pegawai', array(
+							'nama as dokter'
+						)
+					)
+					->join('master_penjamin', array(
+							'nama as penjamin'
+						)
+					)
+					->join('kunjungan', array(
+							'pegawai as uid_resepsionis'
+						)
+					)
+					->on(array(
+							array('pasien.uid','=', 'antrian.pasien'),
+							array('master_poli.uid','=', 'antrian.departemen'),
+							array('pegawai.uid','=', 'antrian.dokter'),
+							array('master_penjamin.uid','=', 'antrian.penjamin'),
+							array('kunjungan.uid','=', 'antrian.kunjungan')
+						)
+					)
+					->where(array(
+							'antrian.waktu_keluar' => 'IS NULL',
+							'AND',
+							'antrian.deleted_at' => 'IS NULL',
+							'AND',
+							'antrian.dokter' => '= ?'
+						), array(
+							$parameter
+						)
+					)
+					->order(
+						array(
+							'antrian.waktu_masuk' => 'DESC'
+						)
+					)
+					->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
+			$autonum++;
+
+			$pegawai = new Pegawai(self::$pdo);
+			$get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
+			$data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
+		}
+
+		return $data;
 	}
 }

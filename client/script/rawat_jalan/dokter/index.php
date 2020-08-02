@@ -36,7 +36,7 @@
 
 		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/Antrian/antrian",
+				url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
