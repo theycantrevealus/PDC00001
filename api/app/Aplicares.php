@@ -398,8 +398,8 @@ class Aplicares extends Utility {
 		$rest = self::update_ruangan($forApi);
 
 		$result = array(
-			"local"=>$ruangan,
-			"rest"=>$rest
+			"local" => $ruangan,
+			"rest" => $rest
 		);
 
 		return $result;
