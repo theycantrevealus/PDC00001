@@ -231,7 +231,7 @@ class Asesmen extends Utility {
 					$racikan = self::$query->select('racikan', array(
 						'uid',
 						'asesmen',
-						'resep',
+						//'resep',
 						'kode',
 						'keterangan',
 						'signa_qty',
@@ -240,18 +240,18 @@ class Asesmen extends Utility {
 						'total'
 					))
 					->where(array(
-						'racikan.resep' => '= ?',
+						'racikan.asesmen' => '= ?',
 						'AND',
 						'racikan.deleted_at' => 'IS NULL'
 					), array(
-						$value['uid']
+						$data['response_data'][0]['asesmen']
 					))
 					->execute();
 
 					foreach ($racikan['response_data'] as $RacikanKey => $RacikanValue) {
 						$RacikanValue['item'] = self::$query->select('racikan_detail', array(
 							'asesmen',
-							'resep',
+							//'resep',
 							'obat',
 							'ratio',
 							'pembulatan',
@@ -633,9 +633,9 @@ class Asesmen extends Utility {
 				'uid'
 			))
 			->where(array(
-				'racikan.resep' => '= ?'
+				'racikan.asesmen' => '= ?'
 			), array(
-				$uid
+				$MasterAsesmen
 			))
 			->execute();
 
@@ -662,13 +662,13 @@ class Asesmen extends Utility {
 						'deleted_at' => parent::format_date()
 					))
 					->where(array(
-						'racikan_detail.resep' => '= ?',
-						'AND',
+						/*'racikan_detail.resep' => '= ?',
+						'AND',*/
 						'racikan_detail.racikan' => '= ?',
 						'AND',
 						'racikan_detail.asesmen' => '= ?'
 					), array(
-						$uid,
+						//$uid,
 						$value['uid'],
 						$MasterAsesmen
 					))
@@ -680,13 +680,13 @@ class Asesmen extends Utility {
 						'obat'
 					))
 					->where(array(
-						'racikan_detail.resep' => '= ?',
-						'AND',
+						/*'racikan_detail.resep' => '= ?',
+						'AND',*/
 						'racikan_detail.racikan' => '= ?',
 						'AND',
 						'racikan_detail.asesmen' => '= ?'
 					), array(
-						$uid,
+						//$uid,
 						$value['uid'],
 						$MasterAsesmen
 					))
@@ -712,15 +712,15 @@ class Asesmen extends Utility {
 								'deleted_at' => NULL
 							))
 							->where(array(
-								'racikan_detail.resep' => '= ?',
-								'AND',
+								/*'racikan_detail.resep' => '= ?',
+								'AND',*/
 								'racikan_detail.racikan' => '= ?',
 								'AND',
 								'racikan_detail.asesmen' => '= ?',
 								'AND',
 								'racikan_detail.obat' => '= ?'
 							), array(
-								$uid,
+								//$uid,
 								$value['uid'],
 								$MasterAsesmen,
 								$RDIValue['obat']
@@ -729,7 +729,7 @@ class Asesmen extends Utility {
 						} else {
 							$racikanDetailWorker = self::$query->insert('racikan_detail', array(
 								'asesmen' => $MasterAsesmen,
-								'resep' => $uid,
+								//'resep' => $uid,
 								'obat' => $RDIValue['obat'],
 								'pembulatan' => ceil($RDIValue['takaran']),
 								'takar_bulat' => $RDIValue['takaranBulat'],
@@ -759,7 +759,7 @@ class Asesmen extends Utility {
 				$newRacikan = self::$query->insert('racikan', array(
 					'uid' => $newRacikanUID,
 					'asesmen' => $MasterAsesmen,
-					'resep' => $uid,
+					//'resep' => $uid,
 					'kode' => $value['nama'],
 					'total' => 0,
 					'signa_qty' => $value['signaKonsumsi'],
@@ -776,7 +776,7 @@ class Asesmen extends Utility {
 						$detailRacikan = self::$query->insert('racikan_detail', array(
 							'asesmen' => $MasterAsesmen,
 							'racikan' => $newRacikanUID,
-							'resep' => $uid,
+							//'resep' => $uid,
 							'obat' => $RDValue['obat'],
 							'ratio' => $RDValue['takaran'],
 							'pembulatan' => ceil($RDValue['takaran']),
@@ -845,7 +845,7 @@ class Asesmen extends Utility {
 					$newRacikan = self::$query->insert('racikan', array(
 						'uid' => $uid_racikan,
 						'asesmen' => $MasterAsesmen,
-						'resep' => $uid,
+						//'resep' => $uid,
 						'kode' => $value['nama'],
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
@@ -875,7 +875,7 @@ class Asesmen extends Utility {
 						foreach ($value['item'] as $RIKey => $RIValue) {
 							$newRacikanDetail = self::$query->insert('racikan_detail', array(
 								'asesmen' => $MasterAsesmen,
-								'resep' => $uid_racikan,
+								//'resep' => $uid_racikan,
 								'obat' => $RIValue['obat'],
 								'ratio' => $RIValue['takaran'],
 								'pembulatan' => ceil($RIValue['takaran']),

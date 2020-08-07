@@ -1087,6 +1087,9 @@ class Inventori extends Utility {
 		), array(
 			$parameter	
 		))
+		->order(array(
+			'gudang' => 'DESC'
+		))
 		->execute();
 		foreach ($data['response_data'] as $key => $value) {
 			//$data['response_data'][$key]['item_detail'] = self::get_item_detail($value['barang'])['response_data'][0];
