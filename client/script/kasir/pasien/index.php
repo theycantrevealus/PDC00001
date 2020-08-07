@@ -9,10 +9,13 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+					console.log(response);
 					var returnedData = [];
 					for(var InvKeyData in response.response_package.response_data) {
-						if(!response.response_package.response_data[InvKeyData].lunas) {
-							returnedData.push(response.response_package.response_data[InvKeyData]);
+						if(response.response_package.response_data[InvKeyData].antrian_kunjungan != undefined) {
+							if(!response.response_package.response_data[InvKeyData].lunas) {
+								returnedData.push(response.response_package.response_data[InvKeyData]);
+							}
 						}
 					}
 					return returnedData;

@@ -58,7 +58,7 @@
 
 						localStorage.getItem("currentPasien");
 						localStorage.getItem("currentAntrianID");
-						//location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+						location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
 					},
 					error: function(response) {
 						console.log("Error : ");
