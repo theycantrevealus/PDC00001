@@ -471,8 +471,6 @@
 	$("body").on("click", ".btn_remove_dokter", function() {
 		var id = $(this).attr("id").split("_");
 		id = id[id.length - 1];
-		/*alert($("#dokter_set_" + id).attr("dokter-value"));
-		alert(uid);*/
 		$.ajax({
 			url:__HOSTAPI__ + "/Poli",
 			async:false,
