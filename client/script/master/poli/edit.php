@@ -34,8 +34,7 @@
 				var nama = temp_nama.replace('Poli ', '');
 
 				var tindakanData = metaData[0].tindakan;
-				console.log(tindakanData);
-
+				
 				dataObject.uid = uid;
 				dataObject.nama = "Poli " + nama;
 
@@ -253,7 +252,6 @@
 
 		$("#btnSubmit").on('click', function(){
 			dataObject.tindakan = hargaPenjamin;
-			console.log(hargaPenjamin);
 			
 			if (dataObject.nama != "") {
 				$.ajax({
@@ -267,7 +265,6 @@
 					},
 					type: "POST",
 					success: function(response){
-						//console.log(response);
 						location.href = __HOSTNAME__ + "/master/poli";
 					},
 					error: function(response) {
@@ -489,7 +486,6 @@
 			},
 			type:"POST",
 			success:function(response) {
-				console.log(response);
 				if(response.response_package.response_result > 0) {
 					$("#row_dokter_" + id).remove();
 					listDokter.splice(listDokter.indexOf($("#dokter_set_" + id).attr("dokter-value")), 1);
@@ -523,7 +519,6 @@
 			},
 			type:"POST",
 			success:function(response) {
-				console.log(response);
 				if(response.response_package.response_result > 0) {
 					listDokter.push(dokterSelected);
 					autoDokter({
@@ -623,13 +618,15 @@
 			},
 			type:"GET",
 			success:function(response) {
-				var dat = response.response_package.response_data;
-				for(var a = 0; a < dat.length; a++) {
-					perawatData.push(dat[a].perawat);
-					autoPerawat({
-						perawatUID: dat[a].perawat,
-						perawatName: dat[a].nama
-					});
+				if(response.response_package.response_data != undefined) {
+					var dat = response.response_package.response_data;
+					for(var a = 0; a < dat.length; a++) {
+						perawatData.push(dat[a].perawat);
+						autoPerawat({
+							perawatUID: dat[a].perawat,
+							perawatName: dat[a].nama
+						});
+					}
 				}
 			},
 			error: function(response) {
@@ -699,7 +696,6 @@
 			},
 			type:"POST",
 			success:function(response) {
-				console.log(response);
 				if(response.response_package.response_result > 0) {
 					$("#row_perawat_" + id).remove();
 					listPerawat.splice(listPerawat.indexOf($("#perawat_set_" + id).attr("perawat-value")), 1);
@@ -733,7 +729,6 @@
 			},
 			type:"POST",
 			success:function(response) {
-				console.log(response);
 				if(response.response_package.response_result > 0) {
 					listPerawat.push(perawatSelected);
 					autoPerawat({
@@ -773,7 +768,6 @@
 		$("."+ no_urut_class).html("");
 
 		for (var i = 0, row; i < rowCount; i++) {
-			//console.log()
 			table.find('tr:eq('+ i +')').find('td:eq(0)').html(i);
 		}
 		/*--------*/

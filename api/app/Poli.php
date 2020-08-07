@@ -488,7 +488,7 @@ class Poli extends Utility {
 		if(count($readDokter['response_data']) > 0) {
 			$worker = self::$query->update('master_poli_perawat', array(
 				'updated_at' => parent::format_date(),
-				'deleted_at' => ''
+				'deleted_at' => NULL
 			))
 			->where(array(
 				'poli' => '= ?',
@@ -674,7 +674,7 @@ class Poli extends Utility {
 		if(count($readDokter['response_data']) > 0) {
 			$worker = self::$query->update('master_poli_dokter', array(
 				'updated_at' => parent::format_date(),
-				'deleted_at' => ''
+				'deleted_at' => NULL
 			))
 			->where(array(
 				'poli' => '= ?',
