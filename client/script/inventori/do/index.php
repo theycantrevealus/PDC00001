@@ -12,6 +12,18 @@
 					//check barang sudah sampai semua atau belum
 					var poData = response.response_package.response_data;
 					for(var CPOKey in poData) {
+						if(poData[CPOKey].supplier == undefined || poData[CPOKey].supplier == null) {
+							poData[a].supplier = {
+								nama: "No Data"
+							};
+						}
+
+						if(poData[CPOKey].pegawai == undefined || poData[CPOKey].pegawai == null) {
+							poData[CPOKey].pegawai = {
+								nama: "No Data"
+							};
+						}
+						
 						//Check Item
 						var poItem = poData[CPOKey].detail;
 						for(var itemKey in poItem) {
