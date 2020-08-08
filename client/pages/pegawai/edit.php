@@ -23,7 +23,7 @@
 			<div class="z-0">
 				<ul class="nav nav-tabs nav-tabs-custom" role="tablist">
 					<li class="nav-item">
-						<a href="#tab-awal-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-informasi" >
+						<a href="#tab-awal-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-informasi" >
 							<span class="nav-link__count">
 								01
 								<b class="inv-tab-status text-success" id="status-informasi"><i class="fa fa-check-circle"></i></b>
@@ -32,7 +32,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-awal-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-awal-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								02
 								<b class="inv-tab-status text-success" id="status-keperawatan"><i class="fa fa-check-circle"></i></b>
@@ -43,7 +43,7 @@
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
-				<div class="tab-pane show fade" id="tab-awal-1">
+				<div class="tab-pane active show fade" id="tab-awal-1">
 					<div class="card">
 						<div class="card-header card-header-large bg-white d-flex align-items-center">
 							<h5 class="card-header__title flex m-0">Informasi Pegawai</h5>
@@ -57,7 +57,7 @@
 									<div class="col-sm-9">
 										<div class="form-group">
 											<label for="txt_nama_pegawai">Email:</label>
-											<input type="text" class="form-control" disabled="disabled" id="txt_email_pegawai" placeholder="Enter your email address ..">
+											<input type="text" class="form-control" id="txt_email_pegawai" placeholder="Enter your email address ..">
 										</div>
 										<div class="form-group">
 											<label for="txt_nama_pegawai">Nama:</label>
@@ -75,7 +75,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="tab-pane active show fade" id="tab-awal-2">
+				<div class="tab-pane show fade" id="tab-awal-2">
 					<div class="card">
 						<div class="card-header card-header-large bg-white d-flex align-items-center">
 							<h5 class="card-header__title flex m-0">Akses Pegawai</h5>

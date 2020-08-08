@@ -25,6 +25,7 @@
 				},
 				data:{
 					request:"edit_pegawai",
+					email:$("#txt_email_pegawai").val(),
 					nama:$("#txt_nama_pegawai").val(),
 					jabatan:$("#txt_jabatan").val(),
 					uid:targetID

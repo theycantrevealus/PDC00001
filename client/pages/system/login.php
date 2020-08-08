@@ -78,7 +78,7 @@
 				<div class="form-group">
 					<label class="text-label" for="email_2">Email Address:</label>
 					<div class="input-group input-group-merge">
-						<input id="email_2" type="email" required="" class="form-control form-control-prepended" placeholder="account@<?php echo __SYSTEM_DOMAIN__; ?>">
+						<input id="email_2" type="text" required="" class="form-control form-control-prepended" placeholder="account@<?php echo __SYSTEM_DOMAIN__; ?>">
 						<div class="input-group-prepend">
 							<div class="input-group-text">
 								<span class="far fa-envelope"></span>

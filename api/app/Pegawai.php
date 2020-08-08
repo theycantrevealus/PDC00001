@@ -559,6 +559,7 @@ class Pegawai extends Utility {
 
 		$worker = self::$query
 		->update('pegawai', array(
+			'email' => $parameter['email'],
 			'nama' => $parameter['nama'],
 			'jabatan' => $parameter['jabatan'],
 			'updated_at' => parent::format_date()
