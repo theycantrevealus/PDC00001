@@ -589,12 +589,17 @@
 			type:"GET",
 			success:function(response) {
 				perawatData = response.response_package.response_data;
+				//console.log(perawatData);
 				$(target).find("option").remove();
-				for(var a = 0; a < perawatData.length; a++) {
-					if(selected.indexOf(perawatData[a].uid) < 0) {
-						$(target).append("<option value=\"" + perawatData[a].uid + "\">" + perawatData[a].nama_perawat + "</option>");
+				//for(var a = 0; a < perawatData.length; a++) {
+
+				$.each(perawatData, function(key, item){
+					if(selected.indexOf(item.uid) < 0) {
+						$(target).append("<option value=\"" + item.uid + "\">" + item.nama_perawat + "</option>");
 					}
-				}
+				})
+					
+				//}
 				$(target).select2();
 			},
 			error: function(response) {
@@ -618,13 +623,20 @@
 			success:function(response) {
 				if(response.response_package.response_data != undefined) {
 					var dat = response.response_package.response_data;
-					for(var a = 0; a < dat.length; a++) {
+					$.each(dat, function(key, item){
+						perawatData.push(item.perawat);
+						autoPerawat({
+							perawatUID: item.perawat,
+							perawatName: item.nama
+						});
+					})
+					/*for(var a = 0; a < dat.length; a++) {
 						perawatData.push(dat[a].perawat);
 						autoPerawat({
 							perawatUID: dat[a].perawat,
 							perawatName: dat[a].nama
 						});
-					}
+					}*/
 				}
 			},
 			error: function(response) {
@@ -647,10 +659,6 @@
 			$(this).find("td:eq(1)").attr({
 				"id": "perawat_set_" + id
 			});
-
-			$(this).find("td:eq(2) button").attr({
-				"id": "delete_perawat_" + id
-			});
 		});
 	}
 
@@ -665,7 +673,7 @@
 		});
 
 		var newDeletePerawat = document.createElement("BUTTON");
-		$(newDeletePerawat).addClass("btn btn-danger btn-sm btn_remove_perawat").html("<i class=\"fa fa-ban\"></i>");
+		$(newDeletePerawat).addClass("btn btn-danger btn-sm btn_remove_perawat").html("<i class=\"fa fa-ban\"></i>").attr("id", "btn_perawat_" + data.perawatUID);
 		$(newCellPerawatAksi).append(newDeletePerawat);
 
 		$(newRow).append(newCellPerawatID);
@@ -675,11 +683,11 @@
 		rebasePerawat();
 	}
 
-	loadPerawat("#txt_set_perawat", uid);
+	loadPerawat("#txt_set_perawat", uid, listPerawat);
 
 	$("#poli-list-perawat tbody").on("click", ".btn_remove_perawat", function() {
-		var id = $(this).attr("id").split("_");
-		id = id[id.length - 1];
+		var uid_perawat = $(this).attr("id").split("_");
+		uid_perawat = uid_perawat[uid_perawat.length - 1];
 
 		$.ajax({
 			url:__HOSTAPI__ + "/Poli",
@@ -689,16 +697,17 @@
 			},
 			data:{
 				request: "poli_perawat_buang",
-				perawat: $("#perawat_set_" + id).attr("perawat-value"),
+				perawat: uid_perawat,//$("#perawat_set_" + id).attr("perawat-value"),
 				poli: uid
 			},
 			type:"POST",
 			success:function(response) {
 				if(response.response_package.response_result > 0) {
-					$("#row_perawat_" + id).remove();
-					listPerawat.splice(listPerawat.indexOf($("#perawat_set_" + id).attr("perawat-value")), 1);
+					listPerawat.splice(listPerawat.indexOf(uid_perawat), 1);
 					loadPerawat("#txt_set_perawat", uid, listPerawat);
 					notification ("success", "Data tersimpan", 2000, "save_perawat");
+
+					$("#btn_perawat_" + uid_perawat).parent().parent().remove();
 					rebasePerawat();
 				}
 			},
@@ -735,6 +744,7 @@
 					});
 					loadPerawat("#txt_set_perawat", uid, listPerawat);
 					notification ("success", "Data tersimpan", 2000, "save_perawat");
+					console.log(listPerawat);
 				}
 			},
 			error: function(response) {
