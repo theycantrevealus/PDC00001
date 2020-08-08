@@ -4,12 +4,12 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item active" aria-current="page">Pegawai</li>
+					<li class="breadcrumb-item active" aria-current="page">Pengguna</li>
 				</ol>
 			</nav>
-			<h1 class="m-0">Pegawai</h1>
+			<h1 class="m-0">Pengguna</h1>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/pegawai/tambah" class="btn btn-info ml-3">Tambah Pegawai</a>
+		<a href="<?php echo __HOSTNAME__; ?>/pegawai/tambah" class="btn btn-info ml-3">Tambah Pengguna</a>
 	</div>
 </div>
 
