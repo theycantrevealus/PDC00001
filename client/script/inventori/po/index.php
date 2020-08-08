@@ -9,12 +9,14 @@
 				},
 				dataSrc:function(response) {
 					var data = response.response_package.response_data;
-					for(var a = 0; a < data; a++) {
-						if(data[a].supplier == undefined) {
+					for(var a = 0; a < data.length; a++) {
+						if(data[a].supplier == undefined || data[a].supplier == null) {
 							data[a].supplier = {
 								nama: "No Data"
 							};
+						}
 
+						if(data[a].pegawai == undefined || data[a].pegawai == null) {
 							data[a].pegawai = {
 								nama: "No Data"
 							};
