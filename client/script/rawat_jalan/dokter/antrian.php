@@ -1103,7 +1103,7 @@
 
 			var newRacikanDelete = document.createElement("BUTTON");
 			$(newRacikanCellAksi).append(newRacikanDelete);
-			$(newRacikanDelete).addClass("btn btn-danger btn-sm").html("<i class=\"fa fa-ban\"></i>");
+			$(newRacikanDelete).addClass("btn btn-danger btn-sm btn-delete-racikan").html("<i class=\"fa fa-ban\"></i>");
 
 			$(newRacikanRow).append(newRacikanCellID);
 			$(newRacikanRow).append(newRacikanCellNama);
@@ -1154,11 +1154,7 @@
 					"id": "racikan_jumlah_" + id
 				});
 
-				$(this).find("td:eq(7)").attr({
-					"id": "racikan_satuan_"
-				});
-
-				$(this).find("td:eq(7) button").attr({
+				$(this).find("td:eq(6) button").attr({
 					"id": "racikan_delete_" + id
 				});
 			});
@@ -1338,6 +1334,13 @@
 
 			currentKomposisiID = thisID;
 			currentRacikID = Pid;
+		});
+
+		$("body").on("click", ".btn-delete-racikan", function() {
+			var id = $(this).attr("id").split("_");
+			var thisID = id[id.length - 1];
+			$("#row_racikan_" + thisID).remove();
+			rebaseRacikan();
 		});
 
 		$("body").on("click", ".btn_delete_komposisi", function(){
