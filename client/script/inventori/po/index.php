@@ -8,6 +8,7 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+					console.log(response.response_package.response_data);
 					return response.response_package.response_data;
 				}
 			},
