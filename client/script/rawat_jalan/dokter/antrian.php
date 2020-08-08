@@ -1274,8 +1274,8 @@
 					parsedItemData.push({
 						id: itemData[dataKey].uid,
 						"penjamin-list": penjaminList,
-						"satuan-caption": itemData[dataKey].satuan_terkecil.nama,
-						"satuan-terkecil": itemData[dataKey].satuan_terkecil.uid,
+						"satuan-caption": (itemData[dataKey].satuan_terkecil != undefined) ? itemData[dataKey].satuan_terkecil.nama : "",
+						"satuan-terkecil": (itemData[dataKey].satuan_terkecil != undefined) ? itemData[dataKey].satuan_terkecil.uid : "",
 						text: "<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + ";\">" + itemData[dataKey].nama.toUpperCase() + "</div>",
 						html: 	"<div class=\"select2_item_stock\">" +
 									"<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + "\">" + itemData[dataKey].nama.toUpperCase() + "</div>" +
