@@ -22,7 +22,7 @@
 					<thead>
 						<tr>
 							<th style="width: 20px;">No</th>
-							<th><i class="fa fa-user-circle"></i> Pegawai</th>
+							<th><i class="fa fa-user-circle"></i> Pengguna</th>
 							<th>Aksi</th>
 						</tr>
 					</thead>
