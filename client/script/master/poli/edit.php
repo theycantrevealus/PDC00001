@@ -379,7 +379,8 @@
 		});
 
 		var newDeleteDokter = document.createElement("BUTTON");
-		$(newDeleteDokter).addClass("btn btn-danger btn-sm btn_remove_dokter").html("<i class=\"fa fa-ban\"></i>");
+		//$(newDeleteDokter).addClass("btn btn-danger btn-sm btn_remove_dokter").html("<i class=\"fa fa-ban\"></i>");
+		$(newDeleteDokter).addClass("btn btn-danger btn-sm btn_remove_dokter").html("<i class=\"fa fa-ban\"></i>").attr("id", "btn_dokter_" + data.dokterUID);
 		$(newCellDokterAksi).append(newDeleteDokter);
 
 		$(newRow).append(newCellDokterID);
@@ -407,9 +408,9 @@
 				populateListedDokter.push($(this).find("td:eq(1)").attr("dokter-value"));
 			}*/
 
-			$(this).find("td:eq(2) button").attr({
+			/*$(this).find("td:eq(2) button").attr({
 				"id": "delete_dokter_" + id
-			});
+			});*/
 		});
 	}
 
@@ -427,11 +428,16 @@
 			success:function(response) {
 				dokterData = response.response_package.response_data;
 				$(target).find("option").remove();
-				for(var a = 0; a < dokterData.length; a++) {
+				/*for(var a = 0; a < dokterData.length; a++) {
 					if(selected.indexOf(dokterData[a].uid) < 0) {
 						$(target).append("<option value=\"" + dokterData[a].uid + "\">" + dokterData[a].nama_dokter + "</option>");
 					}
-				}
+				}*/
+				$.each(dokterData, function(key, item){
+					if(selected.indexOf(item.uid) < 0) {
+						$(target).append("<option value=\"" + item.uid + "\">" + item.nama_dokter + "</option>");
+					}
+				})
 				$(target).select2();
 			},
 			error: function(response) {
@@ -452,13 +458,20 @@
 			type:"GET",
 			success:function(response) {
 				var dat = response.response_package.response_data;
-				for(var a = 0; a < dat.length; a++) {
+				$.each(dat, function(key, item){
+					dokterData.push(item.perawat);
+					autoDokter({
+						dokterUID: item.dokter,
+						dokterName: item.nama
+					});
+				});
+				/*for(var a = 0; a < dat.length; a++) {
 					dokterData.push(dat[a].dokter);
 					autoDokter({
 						dokterUID: dat[a].dokter,
 						dokterName: dat[a].nama
 					});
-				}
+				}*/
 			},
 			error: function(response) {
 				console.log(response);
@@ -469,8 +482,11 @@
 	
 
 	$("body").on("click", ".btn_remove_dokter", function() {
-		var id = $(this).attr("id").split("_");
-		id = id[id.length - 1];
+		/*var id = $(this).attr("id").split("_");
+		id = id[id.length - 1];*/
+		var uid_dokter = $(this).attr("id").split("_");
+		uid_dokter = uid_dokter[uid_dokter.length - 1];
+
 		$.ajax({
 			url:__HOSTAPI__ + "/Poli",
 			async:false,
@@ -479,17 +495,24 @@
 			},
 			data:{
 				request: "poli_dokter_buang",
-				dokter: $("#dokter_set_" + id).attr("dokter-value"),
+				dokter: uid_dokter,//$("#dokter_set_" + id).attr("dokter-value"),
 				poli: uid
 			},
 			type:"POST",
 			success:function(response) {
 				if(response.response_package.response_result > 0) {
-					$("#row_dokter_" + id).remove();
+					/*$("#row_dokter_" + id).remove();
 					listDokter.splice(listDokter.indexOf($("#dokter_set_" + id).attr("dokter-value")), 1);
 					loadDokter("#txt_set_dokter", uid, listDokter);
 					notification ("success", "Data tersimpan", 2000, "save_dokter");
-					rebaseDokter();
+					rebaseDokter();*/
+
+					listDokter.splice(listDokter.indexOf(uid_dokter), 1);
+					loadDokter("#txt_set_dokter", uid, listDokter);
+					notification ("success", "Data tersimpan", 2000, "save_dokter");
+
+					$("#btn_dokter_" + uid_dokter).parent().parent().remove();
+					rebasePerawat();
 				}
 			},
 			error: function(response) {
@@ -629,7 +652,7 @@
 							perawatUID: item.perawat,
 							perawatName: item.nama
 						});
-					})
+					});
 					/*for(var a = 0; a < dat.length; a++) {
 						perawatData.push(dat[a].perawat);
 						autoPerawat({
