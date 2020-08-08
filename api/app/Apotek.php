@@ -225,7 +225,6 @@ class Apotek extends Utility {
 			//Cek apakah ada perubahan
 			if(in_array($value['obat'], $checkerObatBiasa)) {
 				//check signa dan jumlah
-				if()
 			} else {
 				//Uda pasti beda (ada tambahan), masukkan ke resep detail
 			}

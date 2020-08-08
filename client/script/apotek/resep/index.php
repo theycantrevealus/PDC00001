@@ -94,7 +94,7 @@
 
 			return obatList;
 		}
-		console.clear();
+		
 		var listResep = load_resep();
 		var requiredItem = populateObat(listResep);
 		for(var requiredItemKey in requiredItem) {
