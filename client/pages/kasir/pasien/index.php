@@ -28,7 +28,7 @@
 									<th class="wrap_content">No</th>
 									<th class="wrap_content">No. Tagihan</th>
 									<th>Pasien</th>
-									<th>Poli</th>
+									<th>Poliklinik</th>
 									<th class="wrap_content">Staf Pendaftaran</th>
 									<th>Total Biaya</th>
 									<th>Aksi</th>

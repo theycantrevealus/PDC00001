@@ -4,8 +4,8 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item">Master Poli</li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/poli">Poli</a></li>
+					<li class="breadcrumb-item">Master Poliklinik</li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/poli">Poliklinik</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Edit</li>
 				</ol>
 			</nav>
@@ -24,7 +24,7 @@
                 </li>
                 <li class="nav-item">
                     <a href="#" id="nav-tab-2" class="nav-link navTabs not-active" data-toggle="tab" role="tab" aria-selected="false">
-                        Tindakan Poli
+                        Tindakan Poliklinik
                     </a>
                 </li>
                 <li class="nav-item">
@@ -49,9 +49,9 @@
 	                    <div class="tab-pane active show fade tabsContent" id="tab-1">
 	                        <div class="col-md-6">
 								<div class="form-group">
-									<label for="txt_nama">Nama Poli:</label>
+									<label for="txt_nama">Nama Poliklinik:</label>
 									<div class="search-form">
-										<span style="margin-left: 4%;" class="text-center bg-light">Poli</span>
+										<span style="margin-left: 4%;" class="text-center bg-light">Poliklinik</span>
 										<input type="text" class="form-control uppercase" id="txt_nama" placeholder="Nama Poli" required>
 									</div>
 								</div>
@@ -182,7 +182,7 @@
 	                    <div class="tab-pane fade tabsContent" id="tab-5">
 	                    	<div class="row">
 		                    	<div class="col-md-12">
-									<p>Nama Poli: &nbsp; <b><span id="title-konfirmasi-poli" style="color: #4a90e2; font-size: 1.5rem;"></span></b></p>
+									<p>Nama Poliklinik: &nbsp; <b><span id="title-konfirmasi-poli" style="color: #4a90e2; font-size: 1.5rem;"></span></b></p>
 									<hr />
 									<span style="text-align: center;"><p>Tabel tindakan</p></span>
 								</div>
