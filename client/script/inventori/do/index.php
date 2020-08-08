@@ -13,7 +13,7 @@
 					var poData = response.response_package.response_data;
 					for(var CPOKey in poData) {
 						if(poData[CPOKey].supplier == undefined || poData[CPOKey].supplier == null) {
-							poData[a].supplier = {
+							poData[CPOKey].supplier = {
 								nama: "No Data"
 							};
 						}
@@ -23,7 +23,7 @@
 								nama: "No Data"
 							};
 						}
-						
+
 						//Check Item
 						var poItem = poData[CPOKey].detail;
 						for(var itemKey in poItem) {
