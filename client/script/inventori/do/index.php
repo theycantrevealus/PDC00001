@@ -75,7 +75,21 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+					var data = response.response_package.response_data;
+					for(var a = 0; a < data.length; a++) {
+						if(data[a].supplier == undefined || data[a].supplier == null) {
+							data[a].supplier = {
+								nama: "No Data"
+							};
+						}
+
+						if(data[a].pegawai == undefined || data[a].pegawai == null) {
+							data[a].pegawai = {
+								nama: "No Data"
+							};
+						}
+					}
+					return data;
 				}
 			},
 			autoWidth: false,
