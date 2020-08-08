@@ -68,15 +68,15 @@
                     <div class="col-12 col-md-2 mb-3">
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-						<label for="jenkel">Jenis Kelamin</label>
+						<label for="jenkel">Jenis Kelamin <span class="red">*</span></label>
 						<div class="row col-md-12" id="parent_jenkel">
 
 						</div>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                        <label>Panggilan <span class="red">*</span></label>
+                        <label>Alias <span class="red">*</span></label>
                         <select name="panggilan" class="form-control inputan select2" id="panggilan" required>
-                            <option value="">Pilih Panggilan</option>
+                            <option value="">Pilih Alias</option>
                             
                         </select>
                     </div>
@@ -151,11 +151,11 @@
             <div class="col-lg-8 card-form__body card-body">
                 <div class="form-row">
                     <div class="col-12 col-md-6 mb-3">
-						<label for="no_telp">No. Telp</label>
+						<label for="no_telp">No. Telp <span class="red">*</span></label>
 						<input type="text" autocomplete="off" maxlength="14" class="form-control numberonly inputan" name="no_telp" placeholder="08xxxxxxxxxx" required>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                   		<label for="goldar">Golongan Darah</label>	
+                   		<label for="goldar">Golongan Darah <span class="red">*</span></label>	
 						<!-- <div class="row col-md-9" id="parent_goldar">
 
 						</div> -->
@@ -164,13 +164,13 @@
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                    	<label for="agama">Agama</label>
+                    	<label for="agama">Agama <span class="red">*</span></label>
                     	<select class="form-control inputan select2" id="agama" name="agama" required>
 							<option value="" selected disabled>Pilih Agama</option>
 						</select>	
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                    	<label for="warganegara">Kewarganegaraan</label>
+                    	<label for="warganegara">Kewarganegaraan </label>
                     	<select class="form-control inputan select2" id="warganegara" name="warganegara">
 							<option value="" selected disabled>Pilih Kewarganegaraan</option>
 						</select>	
@@ -182,13 +182,13 @@
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-						<label for="pendidikan">Pendidikan</label>
+						<label for="pendidikan">Pendidikan <span class="red">*</span></label>
 						<select class="form-control inputan select2" name="pendidikan" id="pendidikan" required>
 							<option value="" disabled selected>Pilih Pendidikan</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
-						<label for="pekerjaan">Pekerjaan</label>
+						<label for="pekerjaan">Pekerjaan <span class="red">*</span></label>
 						<select class="form-control inputan select2" name="pekerjaan" id="pekerjaan" required>
 							<option value="" disabled selected>Pilih Pekerjaan</option>
 						</select>

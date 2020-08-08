@@ -58,7 +58,7 @@
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="tempat_lahir">Tempat Lahir <span class="red">*</span></label>
-						<input type="text" class="form-control uppercase inputan" name="tempat_lahir" id="tempat_lahir" placeholder="Tempat Lahir" autocomplete="off">
+						<input type="text" class="form-control uppercase inputan" name="tempat_lahir" id="tempat_lahir" placeholder="Tempat Lahir" autocomplete="off" required>
                     </div>
                     <div class="col-12 col-md-4 mb-3">
 						<label for="tanggal_lahir">Tanggal Lahir <span class="red">*</span></label>
@@ -67,15 +67,15 @@
                     <div class="col-12 col-md-2 mb-3">
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-						<label for="jenkel">Jenis Kelamin</label>
+						<label for="jenkel">Jenis Kelamin <span class="red">*</span></label>
 						<div class="row col-md-12" id="parent_jenkel">
 
 						</div>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                        <label>Panggilan <span class="red">*</span></label>
+                        <label>Alias <span class="red">*</span></label>
                         <select name="panggilan" class="form-control inputan select2" id="panggilan" required>
-                            <option value="">Pilih Panggilan</option>
+                            <option value="">Pilih Alias</option>
                             
                         </select>
                     </div>
