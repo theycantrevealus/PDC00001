@@ -20,7 +20,7 @@
 							};
 						}
 					}
-					return response.response_package.response_data;
+					return data;
 				}
 			},
 			autoWidth: false,
