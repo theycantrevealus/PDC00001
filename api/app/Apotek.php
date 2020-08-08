@@ -41,6 +41,10 @@ class Apotek extends Utility {
 			switch($parameter['request']) {
 				case 'revisi_resep':
 					return self::revisi_resep($parameter);
+					break;
+				case 'verifikasi_resep':
+					return self::verifikasi_resep($parameter);
+					break;
 				default:
 					return self::get_resep();
 			}
@@ -124,7 +128,7 @@ class Apotek extends Utility {
 			$racikan = self::$query->select('racikan', array(
 				'uid',
 				'asesmen',
-				'resep',
+				//'resep',
 				'kode',
 				'total',
 				'keterangan',
@@ -135,18 +139,18 @@ class Apotek extends Utility {
 				'updated_at'
 			))
 			->where(array(
-				'racikan.resep' => '= ?',
+				'racikan.asesmen' => '= ?',
 				'AND',
 				'racikan.deleted_at' => 'IS NULL'
 			), array(
-				$value['uid']
+				$value['asesmen']
 			))
 			->execute();
 			foreach ($racikan['response_data'] as $RDKey => $RDValue) {
 				$racikan_detail = self::$query->select('racikan_detail', array(
 					'id',
 					'asesmen',
-					'resep',
+					//'resep',
 					'obat',
 					'ratio',
 					'pembulatan',
@@ -184,5 +188,51 @@ class Apotek extends Utility {
 		}
 
 		return $data;
+	}
+
+	private function verifikasi_resep($parameter) {
+		$checkerObatBiasa = array(); //Buat check uid obat lama
+		$obatBiasaMeta = array();	//Buat Meta Data Obat Lama
+		$old_resep_detail = self::$query->select('resep_detail', array(
+			'id',
+			'resep',
+			'obat',
+			'harga',
+			'signa_qty',
+			'signa_pakai',
+			'qty',
+			'satuan',
+			'status'
+		))
+		->where(array(
+			'resep_detail.deleted_at' => 'IS NULL',
+			'AND',
+			'resep_detail.resep' => '= ?'
+		), array(
+			$parameter['resep']
+		))
+		->execute();
+		foreach ($old_resep_detail as $key => $value) {
+			if(!in_array($value['obat'], $checkerObatBiasa)) {
+				array_push($checkerObatBiasa, $value['obat']);
+				$obatBiasaMeta[$value['obat']]['qty'] = $value['qty'];
+				$obatBiasaMeta[$value['obat']]['signa_qty'] = $value['signa_qty'];
+				$obatBiasaMeta[$value['obat']]['signa_pakai'] = $value['signa_pakai'];
+			}
+		}
+
+		foreach ($parameter['detail'] as $key => $value) {
+			//Cek apakah ada perubahan
+			if(in_array($value['obat'], $checkerObatBiasa)) {
+				//check signa dan jumlah
+				if()
+			} else {
+				//Uda pasti beda (ada tambahan), masukkan ke resep detail
+			}
+			//Jika ada tambah permintaan revisi pada dokter bersangkutan
+			//Tidak mungkin menunggu dokter karena kadang dokter sudah pulang atau sudah tidak ditempat
+			//Dapat menunggu proses verifikasi besok karena dokter sudah dikabari melalui telepon
+			//Masukkan ke dalam tagihan langsung
+		}
 	}
 }

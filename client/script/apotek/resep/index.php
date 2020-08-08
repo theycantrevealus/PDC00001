@@ -94,6 +94,7 @@
 
 			return obatList;
 		}
+		console.clear();
 		var listResep = load_resep();
 		var requiredItem = populateObat(listResep);
 		for(var requiredItemKey in requiredItem) {
@@ -699,6 +700,7 @@
 		});*/
 
 		$("#btnProsesResep").click(function() {
+			console.clear();
 			var conf = confirm("Pastikan resep sudah benar sekali lagi. Anda yakin?");
 			if(conf) {
 				var UIDResep = targettedData.uid;
@@ -724,14 +726,54 @@
 					}
 				});
 
+				var racikan = [];
 				//Ambil Resep Racikan
 				$("#load-detail-racikan tbody tr").each(function(e) {
-					var obat_racikan = $(this).find("td:eq(3) select:eq(0)").val();
-					var batch_racikan = $(this).find("td:eq(3) select:eq(1)").val();
-					var harga_racikan = $(this).find("td:eq(3) select:eq(1) option:selected").attr("harga");
+					if(e == 0) {
+						var obat_racikan = $(this).find("td:eq(3) select:eq(0)").val();
+						var batch_racikan = $(this).find("td:eq(3) select:eq(1)").val();
+						var harga_racikan = $(this).find("td:eq(3) select:eq(1) option:selected").attr("harga");
+						var jumlah_racikan = $(this).find("td:eq(4) span").html();
+					} else {
+						var obat_racikan = $(this).find("td:eq(0) select:eq(0)").val();
+						var batch_racikan = $(this).find("td:eq(0) select:eq(1)").val();
+						var harga_racikan = $(this).find("td:eq(0) select:eq(1) option:selected").attr("harga");
+						var jumlah_racikan = $(this).find("td:eq(1) span").html();
+					}
+
+					racikan.push({
+						obat:obat_racikan,
+						batch: batch_racikan,
+						harga: parseFloat(harga_racikan),
+						jumlah: parseFloat(jumlah_racikan)
+					});
 				});
 
-				$("#modal-verifikasi").modal("hide");
+				$.ajax({
+					url:__HOSTAPI__ + "/Apotek",
+					async:false,
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					type:"POST",
+					data:{
+						request: "verifikasi_resep",
+						resep: UIDResep,
+						asesmen:targettedData.asesmen,
+						detail: detail,
+						racikan: racikan
+					},
+					success:function(response) {
+						if(response.response_package.response_result > 0) {
+							$("#modal-verifikasi").modal("hide");
+						} else {
+							console.log(response);
+						}
+					},
+					error: function(response) {
+						console.log(response);
+					}
+				});
 			}
 		});
 

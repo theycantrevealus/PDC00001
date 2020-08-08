@@ -1219,6 +1219,10 @@
 			$("#komposisi_" + id + " tbody tr").each(function(e) {
 				var cid = (e + 1);
 
+				$(this).attr({
+					"id": "single_komposisi_" + cid
+				});
+
 				$(this).find("td:eq(0)").html(cid);
 				$(this).find("td:eq(1)").attr({
 					"id": "obat_komposisi_" + id + "_" + cid
@@ -1264,7 +1268,9 @@
 							penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
 						}
 					}
-					
+
+					console.log(itemData[dataKey]);
+
 					parsedItemData.push({
 						id: itemData[dataKey].uid,
 						"penjamin-list": penjaminList,
@@ -1332,6 +1338,16 @@
 
 			currentKomposisiID = thisID;
 			currentRacikID = Pid;
+		});
+
+		$("body").on("click", ".btn_delete_komposisi", function(){
+			var id = $(this).attr("id").split("_");
+			var thisID = id[id.length - 1];
+			var Pid = id[id.length - 2];
+
+			$("#single_komposisi_" + thisID).remove();
+			rebaseKomposisi(Pid);
+			return false;
 		});
 
 		$("body").on("click", ".tambahKomposisi", function() {
@@ -1605,8 +1621,6 @@
 				});
 			});
 
-			console.log(tindakan);
-
 			var resep = [];
 			$("#table-resep tbody tr").each(function() {
 				var obat = $(this).find("td:eq(1) select.resep-obat").val();
@@ -1733,7 +1747,6 @@
 				},
 				type: "POST",
 				success: function(response) {
-					console.log(response);
 					if(response.response_package.response_result > 0) {
 						notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
 					} else {
@@ -1794,7 +1807,6 @@
 		                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 		            },
 		            success: function(response){
-		            	console.log(response);
 		            	if (response.response_package != ""){
 		            		MetaData = response.response_package;
 
@@ -1820,8 +1832,6 @@
 				                });
 			                }
 		            	}
-
-		            	console.log(MetaData);
 		            },
 		            error: function(response) {
 		                console.log(response);
