@@ -35,6 +35,7 @@
 							poData.splice(CPOKey, 1);
 						}
 					}
+					console.log(poData);
 					return poData;
 				}
 			},
