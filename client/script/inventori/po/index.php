@@ -8,7 +8,18 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.log(response.response_package.response_data);
+					var data = response.response_package.response_data;
+					for(var a = 0; a < data; a++) {
+						if(data[a].supplier == undefined) {
+							data[a].supplier = {
+								nama: "No Data"
+							};
+
+							data[a].pegawai = {
+								nama: "No Data"
+							};
+						}
+					}
 					return response.response_package.response_data;
 				}
 			},
