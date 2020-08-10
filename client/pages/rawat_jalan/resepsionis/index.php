@@ -74,7 +74,7 @@
 									<th>Waktu Masuk</th>
 									<th>No. RM</th>
 									<th>Pasien</th>
-									<th>Departemen</th>
+									<th>Poliklinik</th>
 									<th>Dokter</th>
 									<th>Penjamin</th>
 									<th>Oleh</th>

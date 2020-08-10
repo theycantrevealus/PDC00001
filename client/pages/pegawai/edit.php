@@ -7,11 +7,11 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/pegawai">Pegawai</a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/pegawai">Pengguna</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Edit - <?php echo $targetID; ?></li>
 				</ol>
 			</nav>
-			<h4 class="m-0">Edit Data Pegawai</h4>
+			<h4 class="m-0">Edit Data Pengguna</h4>
 		</div>
 	</div>
 </div>
@@ -46,7 +46,7 @@
 				<div class="tab-pane active show fade" id="tab-awal-1">
 					<div class="card">
 						<div class="card-header card-header-large bg-white d-flex align-items-center">
-							<h5 class="card-header__title flex m-0">Informasi Pegawai</h5>
+							<h5 class="card-header__title flex m-0">Informasi Pengguna</h5>
 						</div>
 						<div class="card-body tab-content">
 							<form>
@@ -78,7 +78,7 @@
 				<div class="tab-pane show fade" id="tab-awal-2">
 					<div class="card">
 						<div class="card-header card-header-large bg-white d-flex align-items-center">
-							<h5 class="card-header__title flex m-0">Akses Pegawai</h5>
+							<h5 class="card-header__title flex m-0">Akses Pengguna</h5>
 						</div>
 						<div class="card-header card-header-tabs-basic nav" role="tablist">
 							<a href="#pegawai-modul" class="active" data-toggle="tab" role="tab" aria-controls="asesmen-kerja" aria-selected="true">Halaman</a>

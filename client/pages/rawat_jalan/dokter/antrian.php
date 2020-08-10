@@ -5,7 +5,7 @@
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_jalan">Rawat Jalan</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/dokter">Antrian Poli</a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/dokter">Antrian Poliklinik</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Pemeriksaan Medis</li>
 				</ol>
 			</nav>
