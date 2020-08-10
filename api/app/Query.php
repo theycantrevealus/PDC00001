@@ -111,9 +111,9 @@ class Query {
 	}
 
 	function select($table, $parameter = array()) {
-		/*$this->tables = array();
+		$this->tables = array();
 		self::$queryValues = array();
-		self::$queryParams = array();*/
+		self::$queryParams = array();
 		self::$queryMode = 'select';
 		self::$queryString = 'SELECT ';
 		$this->tables[$table] = array();

@@ -152,6 +152,8 @@
 
 			$("#modal-verifikasi").modal("show");
 			targettedData = listResep[(dataRow - 1)];
+			console.clear();
+			console.log(targettedData);
 			$("#nama-pasien").attr({
 				"set-penjamin": targettedData.antrian.penjamin_data.uid
 			}).html(targettedData.antrian.pasien_info.panggilan_name.nama + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
@@ -435,6 +437,9 @@
 
 
 					var newRacikanRow = document.createElement("TR");
+					$(newRacikanRow).attr({
+						"id": "racikan_group_" + data.racikan[b].uid + "_" + racDetailKey
+					});
 
 					var newCellRacikanID = document.createElement("TD");
 					var newCellRacikanNama = document.createElement("TD");
@@ -448,7 +453,7 @@
 
 					$(newCellRacikanID).attr("rowspan", racikanDetail.length).html(racikanID);
 					$(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
-					$(newCellRacikanSigna).attr("rowspan", racikanDetail.length).html(data.racikan[b].signa_qty + " &times; " + data.racikan[b].signa_pakai);
+					$(newCellRacikanSigna).attr("rowspan", racikanDetail.length).html("<b>" + data.racikan[b].signa_qty + "</b> &times; <b>" + data.racikan[b].signa_pakai + "</b>");
 					$(newCellRacikanObat).append(newRacikanObat);
 					$(newCellRacikanJlh).html(
 						"<b>" + racikanDetail[racDetailKey].takar_bulat + "</b>" +
@@ -707,21 +712,35 @@
 				var detail = [];
 				//Ambil Resep Biasa
 				$("#load-detail-resep tbody tr").each(function() {
+					var profit = parseFloat($(this).find("td:eq(1)").attr("disc"));
+					var profit_type = $(this).find("td:eq(1)").attr("disc-type");
 					var obat_biasa = $(this).find("td:eq(1) select:eq(0)").val();
 					var batch_biasa = $(this).find("td:eq(1) select:eq(1)").val();
-					var harga_biasa = $(this).find("td:eq(1) select:eq(1) option:selected").attr("harga");
+					var harga_biasa = parseFloat($(this).find("td:eq(1) select:eq(1) option:selected").attr("harga"));
 					var signa_qty_biasa = parseFloat($(this).find("td:eq(2) input:eq(0)").inputmask("unmaskedvalue"));
 					var signa_pakai_biasa = parseFloat($(this).find("td:eq(2) input:eq(1)").inputmask("unmaskedvalue"));
 					var jumlah_biasa = parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
 
 					if(signa_qty_biasa > 0 && signa_pakai_biasa > 0 && jumlah_biasa > 0) {
+						var calculateProfit = 0;
+						if(profit_type == "P") {
+							calculateProfit = harga_biasa + (profit / 100 * harga_biasa);
+						} else if(profit_type == "A") {
+							calculateProfit = harga_biasa + profit;
+						} else {
+							calculateProfit = harga_biasa;
+						}
+
 						detail.push({
 							obat: obat_biasa,
 							batch: batch_biasa,
 							harga: harga_biasa,
+							harga_after_profit: calculateProfit,
 							signa_qty: signa_qty_biasa,
 							signa_pakai: signa_pakai_biasa,
-							jumlah: jumlah_biasa
+							jumlah: jumlah_biasa,
+							profit:profit,
+							profit_type:profit_type
 						});
 					}
 				});
@@ -729,23 +748,46 @@
 				var racikan = [];
 				//Ambil Resep Racikan
 				$("#load-detail-racikan tbody tr").each(function(e) {
+					var racikanIdentifier = $(this).attr("id");
+					var racikanIdentifierID = racikanIdentifier[racikanIdentifier.length - 1];
+					var racikanIdentifierGroup = racikanIdentifier[racikanIdentifier.length - 2];
+
 					if(e == 0) {
 						var obat_racikan = $(this).find("td:eq(3) select:eq(0)").val();
 						var batch_racikan = $(this).find("td:eq(3) select:eq(1)").val();
+						var signa_qty_racikan = $(this).find("td:eq(2) b:eq(0)").html();
+						var signa_pakai_racikan = $(this).find("td:eq(2) b:eq(1)").html();
 						var harga_racikan = $(this).find("td:eq(3) select:eq(1) option:selected").attr("harga");
-						var jumlah_racikan = $(this).find("td:eq(4) span").html();
+						var bulat_racikan = $(this).find("td:eq(4) b:eq(0)").html();
+						var decimal_racikan = $(this).find("td:eq(4) sub").html();
+						var ratio_racikan = $(this).find("td:eq(4) b:eq(1)").html();
+						var pembulatan_racikan = $(this).find("td:eq(4) text").html();
+						var jumlah_racikan = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
+						var total_racikan = $(this).find("td:eq(4) span").html();
 					} else {
 						var obat_racikan = $(this).find("td:eq(0) select:eq(0)").val();
 						var batch_racikan = $(this).find("td:eq(0) select:eq(1)").val();
 						var harga_racikan = $(this).find("td:eq(0) select:eq(1) option:selected").attr("harga");
-						var jumlah_racikan = $(this).find("td:eq(1) span").html();
+						var bulat_racikan = $(this).find("td:eq(1) b:eq(0)").html();
+						var decimal_racikan = $(this).find("td:eq(1) sub").html();
+						var ratio_racikan = $(this).find("td:eq(1) b:eq(1)").html();
+						var pembulatan_racikan = $(this).find("td:eq(1) text").html();
+						var total_racikan = $(this).find("td:eq(1) span").html();
 					}
 
 					racikan.push({
-						obat:obat_racikan,
+						group_racikan: racikanIdentifierGroup,
+						signa_qty:signa_qty_racikan,
+						signa_pakai:signa_pakai_racikan,
+						obat: obat_racikan,
 						batch: batch_racikan,
 						harga: parseFloat(harga_racikan),
-						jumlah: parseFloat(jumlah_racikan)
+						jumlah: parseFloat(jumlah_racikan),
+						bulat: parseFloat(bulat_racikan),
+						pembulatan: pembulatan_racikan,
+						decimal: parseFloat(decimal_racikan),
+						ratio: parseFloat(ratio_racikan),
+						total:total_racikan
 					});
 				});
 
@@ -759,12 +801,19 @@
 					data:{
 						request: "verifikasi_resep",
 						resep: UIDResep,
+						kunjungan:targettedData.kunjungan,
+						pasien:targettedData.pasien,
 						asesmen:targettedData.asesmen,
+						penjamin:targettedData.antrian.penjamin,
 						detail: detail,
 						racikan: racikan
 					},
 					success:function(response) {
 						if(response.response_package.response_result > 0) {
+							//tableResep.ajax.reload();
+							tableResep.clear();
+							tableResep.rows.add(load_resep());
+							tableResep.draw();
 							$("#modal-verifikasi").modal("hide");
 						} else {
 							console.log(response);
