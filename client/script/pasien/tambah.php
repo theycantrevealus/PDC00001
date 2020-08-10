@@ -1,6 +1,9 @@
 <script type="text/javascript">
 	
 	$(function(){
+		var status_antrian = '<?= $_GET['antrian']; ?>';
+		console.log(status_antrian);
+
 		var allData = {};
 		loadTermSelectBox('panggilan', 3);
 		loadTermSelectBox('suku', 6);
@@ -97,7 +100,13 @@
 				},
 				type: "POST",
 				success: function(response){
-					location.href = __HOSTNAME__ + '/pasien';
+					if (status_antrian == 'true'){ 		//redirect to tambah kunjungan
+						if (response.response_package.response_unique != ""){	//check returning uid
+							location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + response.response_package.response_unique;
+						}
+					} else {
+						location.href = __HOSTNAME__ + '/pasien';
+					}
 				},
 				error: function(response) {
 					console.log("Error : ");
