@@ -226,10 +226,11 @@ class Pasien extends Utility {
 							'class'=>__CLASS__
 						)
 					);
+
+				$pasien['response_unique'] = $uid;
 			}
 
 			return $pasien;
-
 		}
 	}
 

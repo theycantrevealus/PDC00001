@@ -463,7 +463,7 @@
 			</div>
 			<div class="modal-footer">
 				<!-- <div id="spanBtnTambahPasien" hidden> -->
-				<a href="<?= __HOSTNAME__ ?>/pasien/tambah" class="btn btn-success" id="btnTambahPasien">
+				<a href="<?= __HOSTNAME__ ?>/pasien/tambah?antrian=true" class="btn btn-success" id="btnTambahPasien">
 				<!-- <i class="fa fa-plus"></i>  -->Tambah Pasien Baru
 				</a>
 				<!-- </div> -->
