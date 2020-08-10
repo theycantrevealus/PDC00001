@@ -110,10 +110,12 @@ class Query {
 		return $this;
 	}
 
-	function select($table, $parameter = array()) {
-		$this->tables = array();
-		self::$queryValues = array();
-		self::$queryParams = array();
+	function select($table, $parameter = array(), $MODE = 1) {
+		if($MODE == 1) {
+			$this->tables = array();
+			self::$queryValues = array();
+			self::$queryParams = array();	
+		}
 		self::$queryMode = 'select';
 		self::$queryString = 'SELECT ';
 		$this->tables[$table] = array();
@@ -130,9 +132,9 @@ class Query {
 		if(isset($this->tables[$table])) {
 			throw new QueryException('Duplicated table defined', 1);
 		} else {
-			self::select($table, $parameter);	
+			self::select($table, $parameter, 2);
 		}
-		
+
 		return $this;
 	}
 
@@ -156,6 +158,7 @@ class Query {
 			foreach ($parameter as $key => $value) {
 				array_push($buildJoin, implode(' ', $value));
 			}
+
 			self::$joinString = $buildJoin;
 			return $this;
 		} else {

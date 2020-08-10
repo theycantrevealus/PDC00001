@@ -878,62 +878,55 @@ class Antrian extends Utility {
 
 
 	public function get_antrian_by_dokter($parameter){
-		$data = self::$query
-					->select('antrian', 
-						array(
-							'uid',
-							'pasien as uid_pasien',
-							'dokter as uid_dokter',
-							'departemen as uid_poli',
-							'penjamin as uid_penjamin',
-							'waktu_masuk'
-						)
-					)
-					->join('pasien', array(
-							'nama as pasien',
-							'no_rm'
-						)
-					)
-					->join('master_poli', array(
-							'nama as departemen'
-						)
-					)
-					->join('pegawai', array(
-							'nama as dokter'
-						)
-					)
-					->join('master_penjamin', array(
-							'nama as penjamin'
-						)
-					)
-					->join('kunjungan', array(
-							'pegawai as uid_resepsionis'
-						)
-					)
-					->on(array(
-							array('pasien.uid','=', 'antrian.pasien'),
-							array('master_poli.uid','=', 'antrian.departemen'),
-							array('pegawai.uid','=', 'antrian.dokter'),
-							array('master_penjamin.uid','=', 'antrian.penjamin'),
-							array('kunjungan.uid','=', 'antrian.kunjungan')
-						)
-					)
-					->where(array(
-							'antrian.waktu_keluar' => 'IS NULL',
-							'AND',
-							'antrian.deleted_at' => 'IS NULL',
-							'AND',
-							'antrian.dokter' => '= ?'
-						), array(
-							$parameter
-						)
-					)
-					->order(
-						array(
-							'antrian.waktu_masuk' => 'DESC'
-						)
-					)
-					->execute();
+		$data = self::$query->select('antrian',  array(
+			'uid',
+			'pasien as uid_pasien',
+			'dokter as uid_dokter',
+			'departemen as uid_poli',
+			'penjamin as uid_penjamin',
+			'waktu_masuk'
+		))
+		->join('pasien', array(
+			'nama as pasien',
+			'no_rm'
+		))
+		->join('master_poli', array(
+			'nama as departemen'
+		))
+		->join('pegawai', array(
+			'nama as dokter'
+		))
+		->join('master_penjamin', array(
+			'nama as penjamin'
+		))
+		->join('kunjungan', array(
+			'pegawai as uid_resepsionis'
+		))
+		->on(array(
+			/*array('pasien.uid','=', 'antrian.pasien'),
+			array('master_poli.uid','=', 'antrian.departemen'),
+			array('pegawai.uid','=', 'antrian.dokter'),
+			array('master_penjamin.uid','=', 'antrian.penjamin'),
+			array('kunjungan.uid','=', 'antrian.kunjungan')*/
+			array('antrian.pasien', '=', 'pasien.uid'),
+			array('antrian.departemen', '=', 'master_poli.uid'),
+			array('antrian.dokter', '=', 'pegawai.uid'),
+			array('antrian.penjamin', '=', 'master_penjamin.uid'),
+			array('antrian.kunjungan', '=', 'kunjungan.uid')
+		))
+		->where(array(
+			'antrian.waktu_keluar' => 'IS NULL',
+			'AND',
+			'antrian.deleted_at' => 'IS NULL',
+			'AND',
+			'antrian.dokter' => '= ?'
+		), array(
+			$parameter
+		))
+		->order(array(
+			'antrian.waktu_masuk' => 'DESC'
+		))
+		->execute();
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
