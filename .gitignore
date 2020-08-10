@@ -9,7 +9,10 @@ composer.lock
 composer.json
 *.pem
 *.pub
+*.key
 *.txt
+*.req
+*.crt
 images/*
 audio/
 document/

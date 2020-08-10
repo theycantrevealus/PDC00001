@@ -876,7 +876,6 @@ class Antrian extends Utility {
 		return $data;
 	}
 
-
 	public function get_antrian_by_dokter($parameter){
 		$data = self::$query->select('antrian',  array(
 			'uid',
