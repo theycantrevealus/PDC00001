@@ -10,10 +10,8 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					if (response.response_result != ""){
-						$("#jlh-antrian").html(response.response_package.response_result);
-						return response.response_package.response_data;
-					}
+					$("#jlh-antrian").html(response.response_package.response_result);
+					return response.response_package.response_data;
 				}
 			},
 			autoWidth: false,
