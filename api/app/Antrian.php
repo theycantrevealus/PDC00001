@@ -940,4 +940,39 @@ class Antrian extends Utility {
 
 		return $data;
 	}
+
+	/*================= GET DATA ANTRIAN FOR ALL CLASS USE ==============*/
+	public function get_data_antrian_detail($parameter){ //$parameter = uid antrian
+		/*-------- GET DATA ANTRIAN ----------*/
+		$antrian = new Antrian(self::$pdo);
+		$param = ['','antrian-detail', $parameter];
+		$get_antrian = $antrian->__GET__($param);
+		$result = array(
+					"uid"=>$get_antrian['response_data'][0]['uid'],
+					"kunjungan"=>$get_antrian['response_data'][0]['kunjungan'],
+					"uid_pasien"=>$get_antrian['response_data'][0]['pasien'],
+					"departemen"=>$get_antrian['response_data'][0]['departemen'],
+					"penjamin"=>$get_antrian['response_data'][0]['penjamin'],
+					"dokter"=>$get_antrian['response_data'][0]['dokter'],
+					"waktu_masuk"=>$get_antrian['response_data'][0]['waktu_masuk']
+				);
+
+		return $result;
+	}
+	/*====================================================================*/
+
+
+	/*================= GET DATA ANTRIAN DAN PASIEN FOR ALL CLASS USE ==============*/
+	public function get_data_pasien_dan_antrian($parameter){	//$parameter = uid_antrian
+		$dataAntrian = self::get_data_antrian_detail($parameter);
+
+		$pasien = new Pasien(self::$pdo);
+		$dataPasien = $pasien->get_data_pasien($dataAntrian['uid_pasien']);
+
+		$result = ['antrian'=>$dataAntrian, 'pasien'=>$dataPasien];
+
+		return $result;
+	}
+	/*====================================================================*/
+
 }
