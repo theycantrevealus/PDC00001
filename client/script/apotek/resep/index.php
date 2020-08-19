@@ -720,6 +720,8 @@
 					var signa_qty_biasa = parseFloat($(this).find("td:eq(2) input:eq(0)").inputmask("unmaskedvalue"));
 					var signa_pakai_biasa = parseFloat($(this).find("td:eq(2) input:eq(1)").inputmask("unmaskedvalue"));
 					var jumlah_biasa = parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
+					//Penjamin List
+					var penjamin = $(this).find("td:eq(1) select:eq(0) option:selected").attr("penjamin-list");
 
 					if(signa_qty_biasa > 0 && signa_pakai_biasa > 0 && jumlah_biasa > 0) {
 						var calculateProfit = 0;
@@ -739,6 +741,7 @@
 							signa_qty: signa_qty_biasa,
 							signa_pakai: signa_pakai_biasa,
 							jumlah: jumlah_biasa,
+							penjamin:penjamin,
 							profit:profit,
 							profit_type:profit_type
 						});

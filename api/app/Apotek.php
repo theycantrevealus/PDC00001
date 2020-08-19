@@ -390,7 +390,7 @@ class Apotek extends Utility {
 			//Assign invoice item
 			//cek Pelunasan penjamin non umum. Status auto bayar jika non umum
 			$invo_detail = $parameter;
-			if($value['penjamin'] == __UIDPENJAMINUMUM__) {
+			if(in_array(__UIDPENJAMINUMUM__, $value['penjamin'])) {
 				$invo_detail['invoice'] = $TargetInvoice;
 				$invo_detail['item'] = $value['obat'];
 				$invo_detail['item_origin'] = 'master_inv';
