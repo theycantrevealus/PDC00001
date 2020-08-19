@@ -14,7 +14,8 @@ composer.json
 *.req
 *.crt
 *.sql
-images/*
+images/produk
+images/igd
 audio/
 document/
 client/template/

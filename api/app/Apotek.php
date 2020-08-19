@@ -257,7 +257,8 @@ class Apotek extends Utility {
 			'signa_pakai',
 			'qty',
 			'satuan',
-			'status'
+			'status',
+			'penjamin'
 		))
 		->where(array(
 			'resep_detail.resep' => '= ?'
@@ -387,22 +388,36 @@ class Apotek extends Utility {
 			}
 
 			//Assign invoice item
-			$invo_detail = $parameter;
-
-			$invo_detail['invoice'] = $TargetInvoice;
-			$invo_detail['item'] = $value['obat'];
-			$invo_detail['item_origin'] = 'master_inv';
-			$invo_detail['qty'] = $value['jumlah'];
-			$invo_detail['harga'] = $value['harga_after_profit'];
-			$invo_detail['status_bayar'] = 'N';
-			$invo_detail['subtotal'] = $value['harga_after_profit'] * $value['jumlah'];
-			$invo_detail['discount'] = 0;
-			$invo_detail['discount_type'] = 'N';
-			$invo_detail['keterangan'] = '';
-
 			//cek Pelunasan penjamin non umum. Status auto bayar jika non umum
+			$invo_detail = $parameter;
+			if($value['penjamin'] == __UIDPENJAMINUMUM__) {
+				$invo_detail['invoice'] = $TargetInvoice;
+				$invo_detail['item'] = $value['obat'];
+				$invo_detail['item_origin'] = 'master_inv';
+				$invo_detail['qty'] = $value['jumlah'];
+				$invo_detail['harga'] = $value['harga_after_profit'];
+				$invo_detail['status_bayar'] = 'N';
+				$invo_detail['subtotal'] = $value['harga_after_profit'] * $value['jumlah'];
+				$invo_detail['discount'] = 0;
+				$invo_detail['discount_type'] = 'N';
+				$invo_detail['keterangan'] = '';
+			} else {
+				$invo_detail['invoice'] = $TargetInvoice;
+				$invo_detail['item'] = $value['obat'];
+				$invo_detail['item_origin'] = 'master_inv';
+				$invo_detail['qty'] = $value['jumlah'];
+				$invo_detail['harga'] = $value['harga_after_profit'];
+				$invo_detail['status_bayar'] = 'Y';
+				$invo_detail['subtotal'] = $value['harga_after_profit'] * $value['jumlah'];
+				$invo_detail['discount'] = 0;
+				$invo_detail['discount_type'] = 'N';
+				$invo_detail['keterangan'] = '';
+			}
+				
+
+			
 			$AppendInvoice = $Invoice::append_invoice($invo_detail);
-		}
+		} // End Loop Resep Biasa
 
 
 
