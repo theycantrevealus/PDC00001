@@ -749,8 +749,12 @@ class Radiologi extends Utility {
 				->select('radiologi_order', 
 					array(
 						'uid',
-						'antrian as uid_antrian',
+						'asesmen as uid_asesmen',
 						'waktu_order'
+					)
+				)
+				->join('asesmen', array(
+						'antrian as uid_antrian'
 					)
 				)
 				->join('antrian', array(
@@ -783,7 +787,8 @@ class Radiologi extends Utility {
 					)
 				)
 				->on(array(
-						array('radiologi_order.antrian','=','antrian.uid'),
+						array('radiologi_order.asesmen', '=', 'asesmen.uid'),
+						array('asesmen.antrian','=','antrian.uid'),
 						array('pasien.uid','=','antrian.pasien'),
 						array('master_poli.uid','=','antrian.departemen'),
 						array('pegawai.uid','=','antrian.dokter'),
@@ -1057,9 +1062,9 @@ class Radiologi extends Utility {
 
 	/*------------------- GET DATA PASIEN and ANTRIAN --------------------*/
 	private function get_data_pasien_antrian($parameter){
-		$get_uid_antrian = self::$query
+		$get_uid_asesmen = self::$query
 			->select('radiologi_order', array(
-					'antrian'
+					'asesmen'
 				)
 			)
 			->where(array(
@@ -1069,12 +1074,22 @@ class Radiologi extends Utility {
 			)
 			->execute();
 
-		$uid_antrian = $get_uid_antrian['response_data'][0]['antrian'];
+		$result = "";
+		if ($get_uid_asesmen['response_result'] > 0){
+			$get_uid_antrian = self::$query
+				->select('asesmen', array('antrian'))
+				->where(array('asesmen.uid' => '= ?'), 
+					array($get_uid_asesmen['response_data'][0]['asesmen']))
+				->execute();
 
-		$antrian = new Antrian(self::$pdo);
-		$result = $antrian->get_data_pasien_dan_antrian($uid_antrian);	//call function for get data antrian and 
-																		//pasien in class antrian
+			$uid_antrian = $get_uid_antrian['response_data'][0]['antrian'];
 
+			$antrian = new Antrian(self::$pdo);
+			$result = $antrian->get_data_pasien_dan_antrian($uid_antrian);	//call function for get data antrian and 
+																			//pasien in class antrian
+
+		}
+		
 		return $result;
 	}
 	/*-------------------------------------------------------*/
