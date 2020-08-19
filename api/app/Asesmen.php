@@ -249,7 +249,7 @@ class Asesmen extends Utility {
 					->execute();
 
 					foreach ($racikan['response_data'] as $RacikanKey => $RacikanValue) {
-						$RacikanValue['item'] = self::$query->select('racikan_detail', array(
+						$RacikanDetailData = self::$query->select('racikan_detail', array(
 							'asesmen',
 							//'resep',
 							'obat',
@@ -271,12 +271,14 @@ class Asesmen extends Utility {
 							//$value['uid'],
 							$RacikanValue['uid']
 						))
-						->execute()['response_data'];
+						->execute();
 
-						foreach ($RacikanValue['item'] as $RVIKey => $RVIValue) {
+						foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
 							$InventoriObat = new Inventori(self::$pdo);
-							$RacikanValue['item'][$RVIKey]['obat_detail'] = $InventoriObat::get_item_detail($RVIValue['obat'])['response_data'][0];
+							$RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat::get_item_detail($RVIValue['obat'])['response_data'][0];
 						}
+
+						$RacikanValue['item'] = $RacikanDetailData['response_data'];
 
 						array_push($racikanData, $RacikanValue);
 					}

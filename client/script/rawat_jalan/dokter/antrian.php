@@ -9,7 +9,7 @@
 		var usedTindakan = [];
 		var pasien_penjamin, pasien_penjamin_uid;
 		var UID = __PAGES__[3];
-
+		$("#info-pasien-perawat").remove();
 		$.ajax({
 			url:__HOSTAPI__ + "/Antrian/antrian-detail/" + UID,
 			async:false,

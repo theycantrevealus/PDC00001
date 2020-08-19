@@ -152,7 +152,7 @@
 
 			$("#modal-verifikasi").modal("show");
 			targettedData = listResep[(dataRow - 1)];
-			console.clear();
+			//console.clear();
 			console.log(targettedData);
 			$("#nama-pasien").attr({
 				"set-penjamin": targettedData.antrian.penjamin_data.uid
@@ -650,7 +650,7 @@
 		});
 
 		$("body").on("keyup", ".qty_resep", function() {
-			console.clear();
+			//console.clear();
 			var hargaSet = $(this).parent().parent().parent().find("td:eq(1) select:eq(1) option:selected").attr("harga");
 			var disc = $(this).parent().parent().parent().find("td:eq(1)").attr("disc");
 			var disc_type = $(this).parent().parent().parent().find("td:eq(1)").attr("disc-type");
@@ -705,7 +705,7 @@
 		});*/
 
 		$("#btnProsesResep").click(function() {
-			console.clear();
+			//console.clear();
 			var conf = confirm("Pastikan resep sudah benar sekali lagi. Anda yakin?");
 			if(conf) {
 				var UIDResep = targettedData.uid;
