@@ -395,4 +395,34 @@ class Pasien extends Utility {
 		))
 		->execute();
 	}
+
+	/*============= GET PASIEN DATA FOR ALL CLASS USE =============*/
+	public function get_data_pasien($parameter){		//$parameter = uid pasien
+		/*--------- GET NO RM --------------- */
+		$pasien = new Pasien(self::$pdo);
+		$param = ['','pasien-detail', $parameter];
+		$get_pasien = $pasien->__GET__($param);
+
+		$term = new Terminologi(self::$pdo);
+		$value = $get_pasien['response_data'][0]['jenkel'];
+		$param = ['','terminologi-items-detail',$value];
+		$get_jenkel = $term->__GET__($param);
+
+		$value = $get_pasien['response_data'][0]['panggilan'];
+		$param = ['','terminologi-items-detail',$value];
+		$get_panggilan = $term->__GET__($param);
+
+		$result = array(
+					'uid'=>$get_pasien['response_data'][0]['uid'],
+					'no_rm'=>$get_pasien['response_data'][0]['no_rm'],
+					'nama'=>$get_pasien['response_data'][0]['nama'],
+					'tanggal_lahir'=>$get_pasien['response_data'][0]['tanggal_lahir'],
+					'jenkel'=>$get_jenkel['response_data'][0]['nama'],
+					'id_jenkel'=>$get_pasien['response_data'][0]['jenkel'],
+					'panggilan'=>$get_panggilan['response_data'][0]['nama']
+				);
+
+		return $result;
+	}
+	/*================================================================*/
 }
