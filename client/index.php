@@ -18,7 +18,11 @@
 <?php
 
 
-	if(isset($_SESSION['token'])) {
+	if(
+		isset($_SESSION['token']) ||
+		__PAGES__[0] == 'anjungan' ||
+		__PAGES__[0] == 'display'
+	) {
 		$params = parse_ini_file('../api/app/database.ini');
 		$conStr = sprintf("pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
 			$params['host'],
@@ -30,7 +34,7 @@
 		$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		require 'builder.php';
 	} else {
-		require 'pages/system/login.php';
+		require 'pages/system/login.php';	
 	}
 
 ?>

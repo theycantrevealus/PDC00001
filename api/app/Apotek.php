@@ -400,6 +400,7 @@ class Apotek extends Utility {
 			$invo_detail['discount_type'] = 'N';
 			$invo_detail['keterangan'] = '';
 
+			//cek Pelunasan penjamin non umum. Status auto bayar jika non umum
 			$AppendInvoice = $Invoice::append_invoice($invo_detail);
 		}
 
