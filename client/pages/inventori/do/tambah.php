@@ -39,13 +39,8 @@
 									</div>
 									<div class="col-md-4 form-group">
 										<label>No. Purchase Order:</label>
-<<<<<<< HEAD
 										<select class="form-control select2 informasi" id="po" name="po">
 											<option value="none">Tidak PO</option>
-=======
-										<select class="form-control select2" id="po" name="po">
-											<option value="">Tidak PO</option>
->>>>>>> 444f66fa28a7c09cf1292601ddfec062146874f8
 										</select>
 									</div>
 									<div class="col-md-3 form-group">
