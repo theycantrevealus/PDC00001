@@ -152,8 +152,6 @@
 
 			$("#modal-verifikasi").modal("show");
 			targettedData = listResep[(dataRow - 1)];
-			//console.clear();
-			console.log(targettedData);
 			$("#nama-pasien").attr({
 				"set-penjamin": targettedData.antrian.penjamin_data.uid
 			}).html(targettedData.antrian.pasien_info.panggilan_name.nama + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
@@ -523,14 +521,14 @@
 						var penjaminRacikanList = [];
 						var penjaminRacikanListData = itemRacikanData[dataRacikanKey].penjamin;
 						
-
 						for(var penjaminRacikanKey in penjaminRacikanListData) {
-							if(penjaminRacikanList.indexOf(penjaminListData[penjaminRacikanKey].penjamin.uid) < 0) {
+							//Penjamin Check
+							if(penjaminRacikanList.indexOf(penjaminRacikanListData[penjaminRacikanKey].penjamin.uid) < 0) {
 								penjaminRacikanList.push(penjaminRacikanListData[penjaminRacikanKey].penjamin.uid);
 
-								if(penjaminListData[penjaminKey].penjamin.uid == $("#nama-pasien").attr("set-penjamin")) {
-									setDiskon = penjaminListData[penjaminKey].profit;
-									setDiskonType = penjaminListData[penjaminKey].profit_type;
+								if(penjaminRacikanListData[penjaminRacikanKey].penjamin.uid == $("#nama-pasien").attr("set-penjamin")) {
+									setDiskon = penjaminRacikanListData[penjaminRacikanKey].profit;
+									setDiskonType = penjaminRacikanListData[penjaminRacikanKey].profit_type;
 								}
 							}
 						}
@@ -563,7 +561,7 @@
 					}
 
 					$(newRacikanObat).addClass("form-control racikan-obat").select2({
-						data: parsedItemData,
+						data: parsedItemRacikanData,
 						placeholder: "Pilih Obat",
 						selectOnClose: true,
 						val: racikanDetail[racDetailKey].obat,
@@ -586,13 +584,35 @@
 						var refreshRacikanBatchData = refreshBatch(currentObatRacikan);
 						$(this).parent().find("select.racikan-batch-loader option").remove();
 						for(var batchKeyDRacikan in refreshRacikanBatchData) {
+							var profitPenjaminRacikan = refreshRacikanBatchData[batchKeyDRacikan].profit;
+							var setterPenjaminRacikanProfit = 0;
+							var setterPenjaminRacikanProfitType = "";
+							for(var profitRacikanKey in profitPenjaminRacikan) {
+								//Jika sama dengan penjamin utama pasien maka tambahkan nilai profit
+								if($("#nama-pasien").attr("set-penjamin") == profitPenjaminRacikan[profitRacikanKey].penjamin) {
+									setterPenjaminRacikanProfit = parseFloat(profitPenjaminRacikan[profitRacikanKey].profit);
+									setterPenjaminRacikanProfitType = profitPenjaminRacikan[profitRacikanKey].profit_type;
+								}
+							}
+							var hargaPraProfit = parseFloat(refreshRacikanBatchData[batchKeyDRacikan].harga);
+							var hargaPascaProfit = 0;
+							if(setterPenjaminRacikanProfitType == "P") {
+								hargaPascaProfit = hargaPraProfit + (setterPenjaminRacikanProfit / 100 * hargaPraProfit);
+							} else if( setterPenjaminRacikanProfitType == "A") {
+								hargaPascaProfit = hargaPraProfit + setterPenjaminRacikanProfit;
+							} else {
+								hargaPascaProfit = hargaPraProfit;
+							}
+
+
+
 							if(refreshRacikanBatchData[batchKeyDRacikan].gudang.uid == __GUDANG_APOTEK__) {
 								$(this).parent().find("select.racikan-batch-loader").append(
-									"<option harga=\"" + refreshRacikanBatchData[batchKeyDRacikan].harga + "\" value=\"" + refreshRacikanBatchData[batchKeyDRacikan].batch + "\">[" + refreshRacikanBatchData[batchKeyDRacikan].gudang.nama + "] - " + refreshRacikanBatchData[batchKeyDRacikan].kode + " [" + refreshRacikanBatchData[batchKeyDRacikan].expired + "]</option>"
+									"<option profit=\"" + setterPenjaminRacikanProfit + "\" profit_type=\"" + setterPenjaminRacikanProfitType + "\" harga=\"" + hargaPascaProfit + "\" value=\"" + refreshRacikanBatchData[batchKeyDRacikan].batch + "\">[" + refreshRacikanBatchData[batchKeyDRacikan].gudang.nama + "] - " + refreshRacikanBatchData[batchKeyDRacikan].kode + " [" + refreshRacikanBatchData[batchKeyDRacikan].expired + "]</option>"
 								);
 							} else {
 								$(this).parent().find("select.racikan-batch-loader").append(
-									"<option harga=\"" + refreshRacikanBatchData[batchKeyDRacikan].harga + "\" value=\"" + refreshRacikanBatchData[batchKeyDRacikan].batch + "\">[" + refreshRacikanBatchData[batchKeyDRacikan].gudang.nama + "] - " + refreshRacikanBatchData[batchKeyDRacikan].kode + " [" + refreshRacikanBatchData[batchKeyDRacikan].expired + "] / AMPRAH</option>"
+									"<option profit=\"" + setterPenjaminRacikanProfit + "\" profit_type=\"" + setterPenjaminRacikanProfitType + "\" harga=\"" + hargaPascaProfit + "\" value=\"" + refreshRacikanBatchData[batchKeyDRacikan].batch + "\">[" + refreshRacikanBatchData[batchKeyDRacikan].gudang.nama + "] - " + refreshRacikanBatchData[batchKeyDRacikan].kode + " [" + refreshRacikanBatchData[batchKeyDRacikan].expired + "] / AMPRAH</option>"
 								);
 							}
 						}
@@ -845,6 +865,7 @@
 				type:"GET",
 				success:function(response) {
 					batchData = response.response_package.response_data;
+					console.log(batchData);
 				},
 				error: function(response) {
 					console.log(response);

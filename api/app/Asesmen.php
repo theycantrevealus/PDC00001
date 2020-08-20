@@ -710,6 +710,7 @@ class Asesmen extends Utility {
 							$racikanDetailWorker = self::$query->update('racikan_detail', array(
 								'obat' => $RDIValue['obat'],
 								'ratio' => $RDIValue['takaran'],
+								'penjamin' => $parameter['penjamin'],
 								'takar_bulat' => $RDIValue['takaranBulat'],
 								'takar_decimal' => $RDIValue['takaranDecimalText'],
 								'pembulatan' => ceil($RDIValue['takaran']),

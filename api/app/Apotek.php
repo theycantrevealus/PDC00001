@@ -177,7 +177,7 @@ class Apotek extends Utility {
 				foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
 					$Inventori = new Inventori(self::$pdo);
 					$InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
-
+					
 					$racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
 				}
 				$racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];

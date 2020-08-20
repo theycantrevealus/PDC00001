@@ -890,7 +890,7 @@
 					digitsOptional: true
 				}).val((setter.signaKonsumsi == 0) ? "" : setter.signaKonsumsi);
 
-				$(newCellResepSigna2).html("<i class=\"fa fa-times\"></i>");
+				$(newCellResepSigna2).html("<i class=\"fa fa-times signa-sign\"></i>");
 
 				var newTakar = document.createElement("INPUT");
 				$(newCellResepSigna3).append(newTakar);
@@ -1054,7 +1054,7 @@
 			
 			$(newAturanPakaiRacikan).addClass("form-control aturan-pakai");
 			var newKeteranganRacikan = document.createElement("TEXTAREA");
-			$(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append(newKeteranganRacikan);
+			$(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<span>Keterangan</span>").append(newKeteranganRacikan);
 			$(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
 			for(var aturanPakaiKey in dataAturanPakai) {
 				$(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
@@ -1085,7 +1085,7 @@
 				digitsOptional: true
 			});
 
-			$(newRacikanCellSignaX).html("<i class=\"fa fa-times\"></i>");
+			$(newRacikanCellSignaX).html("<i class=\"fa fa-times signa-sign\"></i>");
 
 			var newRacikanSignaB = document.createElement("INPUT");
 			$(newRacikanCellSignaB).append(newRacikanSignaB);
