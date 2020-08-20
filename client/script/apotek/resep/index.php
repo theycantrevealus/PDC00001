@@ -770,22 +770,25 @@
 
 				var racikan = [];
 				//Ambil Resep Racikan
+				var jumlah_racikan = 0;
+				var signa_qty_racikan = 0;
+				var signa_pakai_racikan = 0;
 				$("#load-detail-racikan tbody tr").each(function(e) {
 					var racikanIdentifier = $(this).attr("id");
 					var racikanIdentifierID = racikanIdentifier[racikanIdentifier.length - 1];
 					var racikanIdentifierGroup = racikanIdentifier[racikanIdentifier.length - 2];
-
+					
 					if(e == 0) {
 						var obat_racikan = $(this).find("td:eq(3) select:eq(0)").val();
 						var batch_racikan = $(this).find("td:eq(3) select:eq(1)").val();
-						var signa_qty_racikan = $(this).find("td:eq(2) b:eq(0)").html();
-						var signa_pakai_racikan = $(this).find("td:eq(2) b:eq(1)").html();
+						signa_qty_racikan = $(this).find("td:eq(2) b:eq(0)").html();
+						signa_pakai_racikan = $(this).find("td:eq(2) b:eq(1)").html();
 						var harga_racikan = $(this).find("td:eq(3) select:eq(1) option:selected").attr("harga");
 						var bulat_racikan = $(this).find("td:eq(4) b:eq(0)").html();
 						var decimal_racikan = $(this).find("td:eq(4) sub").html();
 						var ratio_racikan = $(this).find("td:eq(4) b:eq(1)").html();
-						var pembulatan_racikan = $(this).find("td:eq(4) text").html();
-						var jumlah_racikan = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
+						var pembulatan_racikan = parseFloat($(this).find("td:eq(4) text").html());
+						jumlah_racikan = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
 						var total_racikan = $(this).find("td:eq(4) span").html();
 					} else {
 						var obat_racikan = $(this).find("td:eq(0) select:eq(0)").val();
@@ -794,7 +797,7 @@
 						var bulat_racikan = $(this).find("td:eq(1) b:eq(0)").html();
 						var decimal_racikan = $(this).find("td:eq(1) sub").html();
 						var ratio_racikan = $(this).find("td:eq(1) b:eq(1)").html();
-						var pembulatan_racikan = $(this).find("td:eq(1) text").html();
+						var pembulatan_racikan = parseFloat($(this).find("td:eq(1) text").html());
 						var total_racikan = $(this).find("td:eq(1) span").html();
 					}
 
