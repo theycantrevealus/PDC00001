@@ -7,7 +7,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/pondokcoder2020/PDC00001">
-    <img src="images/pondokcoder1280.svg" alt="Logo" width="120">
+    <img src="images/pondokcoder1280.svg" alt="Logo" width="240">
   </a>
   
   <h3 align="center">PC-MedShield</h3>
