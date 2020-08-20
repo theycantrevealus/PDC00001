@@ -622,13 +622,12 @@
 						var hargaSet = parseFloat($(this).parent().find("select.racikan-batch-loader option:selected").attr("harga"));
 						var bulatSet = parseFloat($("text[identifier-racikan-bulat=\"" + identifierValue + "\"]").html());
 						var ratioSet = parseFloat($("b[identifier-racikan-ratio=\"" + identifierValue + "\"]").html());
-						var afterRatioSet = jumlahSet * bulatSet;
 
 						/*var jumlahSet = parseFloat($(this).parent().parent().parent().find("td:eq(1) input").inputmask("unmaskedvalue"));
 						var hargaSet = parseFloat($(this).parent().parent().parent().find("td:eq(3) select:eq(1) option:selected").attr("harga"));
 						var ratioSet = parseFloat($(this).parent().parent().parent().find("td:eq(4) b:eq(1)").html());*/
 						
-						var totalHaraSet = jumlahSet * hargaSet * afterRatioSet;
+						var totalHaraSet = jumlahSet * hargaSet * bulatSet;
 						$("span[identifier-racikan-jumlah=\"" + identifierValue + "\"]").html(jumlahSet * bulatSet);
 						$("td[identifier-racikan-harga=\"" + identifierValue + "\"]").html(number_format(hargaSet, 2, ",", "."));
 						$("td[identifier-racikan-total=\"" + identifierValue + "\"]").html(number_format(totalHaraSet, 2, ",", "."));
@@ -687,7 +686,7 @@
 					var harga_racikan = $(this).find("td:eq(0) select:eq(1) option:selected").attr("harga");
 					var total_racikan = $(this).find("td:eq(1) span").html();
 				}
-				var totalHargaItemRacikan = jumlahRacikan * harga_racikan * total_racikan;
+				var totalHargaItemRacikan = jumlahRacikan * harga_racikan;
 				$(this).find("td[identifier-racikan-total=\"" + e + "\"]").html(number_format(totalHargaItemRacikan, 2, ",", "."));
 			});
 		});
