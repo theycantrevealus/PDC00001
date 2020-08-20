@@ -473,7 +473,7 @@
 					$(racikanQty).attr({
 						"identifier-racikan-jumlah-all": racDetailKey,
 						"identifier-racikan-jumlah-group": b,
-					}).addClass("form-control").val(data.racikan[b].qty).inputmask({
+					}).addClass("form-control qty_racikan").val(data.racikan[b].qty).inputmask({
 						alias: 'decimal',
 						rightAlign: true,
 						placeholder: "0.00",
@@ -622,12 +622,13 @@
 						var hargaSet = parseFloat($(this).parent().find("select.racikan-batch-loader option:selected").attr("harga"));
 						var bulatSet = parseFloat($("text[identifier-racikan-bulat=\"" + identifierValue + "\"]").html());
 						var ratioSet = parseFloat($("b[identifier-racikan-ratio=\"" + identifierValue + "\"]").html());
+						var afterRatioSet = jumlahSet * bulatSet;
 
 						/*var jumlahSet = parseFloat($(this).parent().parent().parent().find("td:eq(1) input").inputmask("unmaskedvalue"));
 						var hargaSet = parseFloat($(this).parent().parent().parent().find("td:eq(3) select:eq(1) option:selected").attr("harga"));
 						var ratioSet = parseFloat($(this).parent().parent().parent().find("td:eq(4) b:eq(1)").html());*/
 						
-						var totalHaraSet = jumlahSet * hargaSet * bulatSet;
+						var totalHaraSet = jumlahSet * hargaSet * afterRatioSet;
 						$("span[identifier-racikan-jumlah=\"" + identifierValue + "\"]").html(jumlahSet * bulatSet);
 						$("td[identifier-racikan-harga=\"" + identifierValue + "\"]").html(number_format(hargaSet, 2, ",", "."));
 						$("td[identifier-racikan-total=\"" + identifierValue + "\"]").html(number_format(totalHaraSet, 2, ",", "."));
@@ -667,6 +668,28 @@
 
 		$("body").on("change", ".racikan-batch-loader", function() {
 			//
+		});
+
+		$("body").on("keyup", ".qty_racikan", function() {
+			//Ubah semua harga komposisi racikan
+			var jumlahRacikan = $(this).val();
+			$("#load-detail-racikan tbody tr").each(function(e) {
+				var racikanIdentifier = $(this).attr("id");
+				var racikanIdentifierID = racikanIdentifier[racikanIdentifier.length - 1];
+				var racikanIdentifierGroup = racikanIdentifier[racikanIdentifier.length - 2];
+				
+				if(e == 0) {
+					var batch_racikan = $(this).find("td:eq(3) select:eq(1)").val();
+					var harga_racikan = $(this).find("td:eq(3) select:eq(1) option:selected").attr("harga");
+					var total_racikan = $(this).find("td:eq(4) span").html();
+				} else {
+					var batch_racikan = $(this).find("td:eq(0) select:eq(1)").val();
+					var harga_racikan = $(this).find("td:eq(0) select:eq(1) option:selected").attr("harga");
+					var total_racikan = $(this).find("td:eq(1) span").html();
+				}
+				var totalHargaItemRacikan = jumlahRacikan * harga_racikan * total_racikan;
+				$(this).find("td[identifier-racikan-total=\"" + e + "\"]").html(number_format(totalHargaItemRacikan, 2, ",", "."));
+			});
 		});
 
 		$("body").on("keyup", ".qty_resep", function() {
