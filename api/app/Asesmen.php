@@ -234,6 +234,7 @@ class Asesmen extends Utility {
 						//'resep',
 						'kode',
 						'keterangan',
+						'aturan_pakai',
 						'signa_qty',
 						'signa_pakai',
 						'qty',
@@ -646,6 +647,7 @@ class Asesmen extends Utility {
 			foreach ($racikanOld['response_data'] as $key => $value) {
 				$racikanUpdate = self::$query->update('racikan', array(
 					'kode' => $parameter['racikan'][$key]['nama'],
+					'aturan_pakai' => $parameter['racikan'][$key]['aturanPakai'],
 					'keterangan' => $parameter['racikan'][$key]['keterangan'],
 					'signa_qty' => $parameter['racikan'][$key]['signaKonsumsi'],
 					'signa_pakai' => $parameter['racikan'][$key]['signaTakar'],

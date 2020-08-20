@@ -111,7 +111,8 @@
 										"signaKonsumsi": racikan_detail[racikanKey].signa_qty,
 										"signaTakar": racikan_detail[racikanKey].signa_pakai,
 										"signaHari": racikan_detail[racikanKey].qty,
-										"item":racikan_detail[racikanKey].item
+										"item":racikan_detail[racikanKey].item,
+										"aturan_pakai": racikan_detail[racikanKey].aturan_pakai
 									});
 									var itemKomposisi = racikan_detail[racikanKey].item;
 									for(var komposisiKey in itemKomposisi) {
@@ -995,6 +996,7 @@
 			"signaKonsumsi": "",
 			"signaTakar": "",
 			"signaHari": "",
+			"aturan_pakai": "",
 			"item":[]
 		}) {
 			$("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
@@ -1046,11 +1048,21 @@
 				"</table>"
 			);
 
+			var newAturanPakaiRacikan = document.createElement("SELECT");
+			
+			var dataAturanPakai = autoAturanPakai();
+			
+			$(newAturanPakaiRacikan).addClass("form-control aturan-pakai");
 			var newKeteranganRacikan = document.createElement("TEXTAREA");
-			$(newRacikanCellNama).append(newKeteranganRacikan);
+			$(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append(newKeteranganRacikan);
+			$(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
+			for(var aturanPakaiKey in dataAturanPakai) {
+				$(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
+			}
 			$(newKeteranganRacikan).addClass("form-control").attr({
 				"placeholder": "Keterangan racikan"
 			}).val(setter.keterangan);
+
 			/*var newRacikanObat = document.createElement("SELECT");
 			var newObatTakar = document.createElement("INPUT");
 			$(newRacikanCellObat).append(newRacikanObat);
@@ -1666,14 +1678,17 @@
 					"keterangan": "",
 					"signaKonsumsi": 0,
 					"signaTakar": 0,
-					"signaHari": 0
+					"signaHari": 0,
+					"aturanPakai": 0
 				};
 
 				dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input").val();
+				dataRacikan.aturanPakai = masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val();
 				dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
 				dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
 				dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));
 				dataRacikan.signaHari = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"));
+
 
 
 
