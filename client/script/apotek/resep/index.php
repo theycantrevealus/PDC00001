@@ -865,7 +865,6 @@
 				type:"GET",
 				success:function(response) {
 					batchData = response.response_package.response_data;
-					console.log(batchData);
 				},
 				error: function(response) {
 					console.log(response);
