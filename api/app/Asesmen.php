@@ -647,7 +647,7 @@ class Asesmen extends Utility {
 			foreach ($racikanOld['response_data'] as $key => $value) {
 				$racikanUpdate = self::$query->update('racikan', array(
 					'kode' => $parameter['racikan'][$key]['nama'],
-					'aturan_pakai' => $parameter['racikan'][$key]['aturanPakai'],
+					'aturan_pakai' => intval($parameter['racikan'][$key]['aturanPakai']),
 					'keterangan' => $parameter['racikan'][$key]['keterangan'],
 					'signa_qty' => $parameter['racikan'][$key]['signaKonsumsi'],
 					'signa_pakai' => $parameter['racikan'][$key]['signaTakar'],
@@ -764,11 +764,11 @@ class Asesmen extends Utility {
 				$newRacikan = self::$query->insert('racikan', array(
 					'uid' => $newRacikanUID,
 					'asesmen' => $MasterAsesmen,
-					//'resep' => $uid,
 					'kode' => $value['nama'],
 					'total' => 0,
 					'signa_qty' => $value['signaKonsumsi'],
 					'signa_pakai' => $value['signaTakar'],
+					'aturan_pakai' => intval($value['aturanPakai']),
 					'qty' => $value['signaHari'],
 					'created_at' => parent::format_date(),
 					'updated_at' => parent::format_date()
@@ -854,6 +854,7 @@ class Asesmen extends Utility {
 						'kode' => $value['nama'],
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
+						'aturan_pakai' => intval($value['aturanPakai']),
 						'qty' => $value['signaHari'],
 						'total' => 0,
 						'created_at' => parent::format_date(),
