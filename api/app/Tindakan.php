@@ -31,8 +31,16 @@ class Tindakan extends Utility {
 					return self::get_tindakan_detail($parameter[2]);
 					break;
 
+				case 'get-kelas':
+					return self::get_kelas_tindakan();
+					break;
+
+				case 'get-harga-tindakan':
+					return self::get_harga_tindakan($parameter[2]);
+					break;
+
 				default:
-					# code...
+					return self::get_tindakan();
 					break;
 			}
 		} catch (QueryException $e) {
@@ -80,6 +88,8 @@ class Tindakan extends Utility {
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['harga'] = self::get_harga_join_kelas_by_tindakan($value['uid']);
+
 			$autonum++;
 		}
 
@@ -146,6 +156,95 @@ class Tindakan extends Utility {
 		}
 	}
 
+	public function get_kelas_tindakan(){
+		$data = self::$query
+			->select('master_tindakan_kelas', array(
+					'uid',
+					'nama',
+					'urutan'
+				)
+			)
+			->where(array(
+					'master_tindakan_kelas.deleted_at' => 'IS NULL'
+			))
+			->execute();
+
+		return $data;
+	}
+
+	public function get_kelas_tindakan_detail($parameter){ //uid_kelas
+		$data = self::$query
+			->select('master_tindakan_kelas', array(
+					'uid',
+					'nama',
+					'urutan'
+				)
+			)
+			->where(array(
+					'master_tindakan_kelas.deleted_at' => '= ?',
+					'AND',
+					'master_tindakan_kelas.deleted_at' => 'IS NULL'
+				), array($parameter)
+			)
+			->execute();
+
+		return $data;
+	}
+
+	public function get_harga_tindakan($parameter){		//uid_tindakan
+		$data = self::$query
+			->select('master_tindakan_kelas_harga', array(
+					'id',
+					'tindakan',
+					'kelas',
+					'harga'	
+				)
+			)
+			->where(array(
+					'master_tindakan_kelas_harga.tindakan' => '= ?',
+					'AND',
+					'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+				), array($parameter)
+			)
+			->execute();
+
+		return $data;
+	}
+
+	public function get_harga_join_kelas_by_tindakan($parameter){ //uid_tindakan
+		$result = [];
+
+		$data = self::$query
+			->select('master_tindakan_kelas_harga', array(
+					'id',
+					'kelas',
+					'harga as harga_tindakan'
+				)
+			)
+			->join('master_tindakan_kelas', array(
+					'urutan',
+					'nama as nama_kelas'
+				)
+			)
+			->on(array(
+					array('master_tindakan_kelas_harga.kelas','=', 'master_tindakan_kelas.uid')
+				)
+			)
+			->where(array(
+					'master_tindakan_kelas_harga.tindakan' => '= ?',
+					'AND',
+					'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+				), array($parameter)
+			)
+			->order(array('master_tindakan_kelas.urutan' => 'ASC'))
+			->execute();
+
+		foreach ($data['response_data'] as $key => $value) {
+			$result[$value['urutan']] = $data['response_data'][$key];
+		}
+
+		return $result;
+	}
 
 	/*=====================- CRUD AREA -=======================*/
 
@@ -157,6 +256,8 @@ class Tindakan extends Utility {
 			'table'=>'master_tindakan',
 			'check'=>$parameter['nama']
 		));
+
+		$result = [];
 
 		if (count($check['response_data']) > 0){
 			$check['response_message'] = 'Duplicate data detected';
@@ -198,20 +299,43 @@ class Tindakan extends Utility {
 							'class'=>__CLASS__
 						)
 					);
+
+				if (count($parameter['harga']) > 0) {
+					$harga_result = 0;
+
+					foreach ($parameter['harga'] as $key => $value) {
+						$harga = self::$query
+							->insert('master_tindakan_kelas_harga', array(
+									'tindakan' => $uid,
+									'kelas' => $key,
+									'harga' => $value,
+									'created_at' => parent::format_date(),
+									'updated_at' => parent::format_date()
+								)
+							)
+							->execute();
+
+						if ($harga['response_result'] > 0) {
+							$harga_result += $harga['response_result'];
+						}
+					}
+				}
 			}
-
-			return $tindakan;
-
 		}
+
+		$result = ['tindakan' => $tindakan, 'harga' => $harga];
+
+		return $result;
 	}
 
 	public function edit_tindakan($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$result = [];
 
 		$old = self::get_tindakan_detail($parameter['uid']);
 
-		$penjamin = self::$query
+		$tindakan = self::$query
 				->update('master_tindakan', array(
 						'nama'=>$parameter['nama'],
 						'updated_at'=>parent::format_date()
@@ -228,7 +352,7 @@ class Tindakan extends Utility {
 				)
 				->execute();
 
-		if ($penjamin['response_result'] > 0){
+		if ($tindakan['response_result'] > 0){
 			unset($parameter['access_token']);
 
 			$log = parent::log(array(
@@ -258,16 +382,41 @@ class Tindakan extends Utility {
 					'class'=>__CLASS__
 				)
 			);
+
+			if (count($parameter['harga']) > 0){
+				foreach ($parameter['harga'] as $key => $value) {
+					$harga = self::$query
+						->update('master_tindakan_kelas_harga', array(
+								'harga' => $value,
+								'updated_at' => parent::format_date()
+							)
+						)
+						->where(array(
+								'master_tindakan_kelas_harga.tindakan' => '= ?',
+								'AND',
+								'master_tindakan_kelas_harga.kelas' => '= ?',
+								'AND',
+								'master_tindakan_kelas_harga.deleted_at' => 'IS NULL' 
+							), array(
+								$parameter['uid'],
+								$key
+							)
+						)
+						->execute();
+				}
+			}
 		}
 
-		return $penjamin;
+		$result = ['tindakan' => $tindakan, 'harga' => $harga];
+
+		return $result;
 	}
 
 	private function delete_tindakan($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$penjamin = self::$query
+		$tindakan = self::$query
 			->delete($parameter[6])
 			->where(array(
 					$parameter[6] . '.uid' => '= ?'
@@ -277,7 +426,7 @@ class Tindakan extends Utility {
 			)
 			->execute();
 
-		if ($penjamin['response_result'] > 0){
+		if ($tindakan['response_result'] > 0){
 			$log = parent::log(array(
 					'type'=>'activity',
 					'column'=>array(
@@ -301,11 +450,24 @@ class Tindakan extends Utility {
 					'class'=>__CLASS__
 				)
 			);
+
+			$harga = self::$query
+				->delete('master_tindakan_kelas_harga')
+				->where(array(
+						'master_tindakan_kelas_harga.tindakan' => '= ?',
+						'AND',
+						'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+					), array(
+						$parameter[7]	
+					)
+				)
+				->execute();
 		}
 
-		return $penjamin;
-	}
+		$result = ['tindakan' => $tindakan, 'harga' => $harga];
 
+		return $result;
+	}
 
 	private function duplicate_check($parameter) {
 		return self::$query

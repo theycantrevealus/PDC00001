@@ -23,9 +23,16 @@
 				<table class="table table-bordered" id="table-tindakan">
 					<thead>
 						<tr>
-							<th style="width: 20px;">No</th>
-							<th>Nama Tindakan</th>
-							<th>Aksi</th>
+							<th style="width: 20px;" rowspan="2">No</th>
+							<th rowspan="2">Nama Tindakan</th>
+							<th colspan="4" style="text-align: center;">Harga</th>
+							<th rowspan="2">Aksi</th>
+						</tr>
+						<tr>
+							<th>Kelas III</th>
+							<th>Kelas II</th>
+							<th>Kelas I</th>
+							<th>VIP</th>
 						</tr>
 					</thead>
 					<tbody>
