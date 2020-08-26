@@ -1198,6 +1198,11 @@ class Asesmen extends Utility {
 						),
 						'class'=>__CLASS__
 					));
+
+					$updateAsesmen = self::$query
+						->update('asesmen', array('status' => 'D'))
+						->where(array('asesmen.uid' => '= ?'), array($MasterUID))
+						->execute();
 				}
 			} else {
 				//new asesmen rawat --> sudah oke
@@ -1447,6 +1452,11 @@ class Asesmen extends Utility {
 				),
 				'class'=>__CLASS__
 			));
+
+			$updateAsesmen = self::$query
+				->update('asesmen', array('status' => 'D'))
+				->where(array('asesmen.uid' => '= ?'), array($uid_asesmen))
+				->execute();
 		}
 
 		return $rawat;
