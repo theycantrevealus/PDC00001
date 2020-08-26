@@ -39,6 +39,13 @@ class Tindakan extends Utility {
 					return self::get_harga_tindakan($parameter[2]);
 					break;
 
+				case 'rawat-jalan':
+					return self::get_tindakan_rawat_jalan();
+					break;
+
+				case 'rawat-inap':
+					return self::get_tindakan_rawat_inap();
+
 				default:
 					return self::get_tindakan();
 					break;
@@ -50,12 +57,20 @@ class Tindakan extends Utility {
 
 	public function __POST__($parameter = array()){
 		switch ($parameter['request']) {
-			case 'tambah_tindakan':
-				return self::tambah_tindakan($parameter);
+			case 'tambah_tindakan_rawat_inap':
+				return self::tambah_tindakan_rawat_inap($parameter);
 				break;
 
-			case 'edit_tindakan':
-				return self::edit_tindakan($parameter);
+			case 'edit_tindakan_rawat_inap':
+				return self::edit_tindakan_rawat_inap($parameter);
+				break;
+
+			case 'tambah_tindakan_rawat_jalan':
+				return self::tambah_tindakan_rawat_jalan($parameter);
+				break;
+
+			case 'edit_tindakan_rawat_jalan':
+				return self::edit_tindakan_rawat_jalan($parameter);
 				break;
 
 			default:
@@ -88,7 +103,63 @@ class Tindakan extends Utility {
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
+
+			$autonum++;
+		}
+
+		return $data;
+	}
+
+	public function get_tindakan_rawat_inap(){
+		$data = self::$query
+					->select('master_tindakan', array(
+						'uid',
+						'nama',
+						'created_at',
+						'updated_at'
+						)
+					)	
+					->where(array(
+							'master_tindakan.kelompok' => '= ?',
+							'AND',
+							'master_tindakan.deleted_at' => 'IS NULL'
+						), array('RI')
+					)
+					->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
 			$data['response_data'][$key]['harga'] = self::get_harga_join_kelas_by_tindakan($value['uid']);
+
+			$autonum++;
+		}
+
+		return $data;
+	}
+
+	public function get_tindakan_rawat_jalan(){
+		$data = self::$query
+					->select('master_tindakan', array(
+						'uid',
+						'nama',
+						'kelompok',
+						'created_at',
+						'updated_at'
+						)
+					)	
+					->where(array(
+							'master_tindakan.kelompok' => '= ?',
+							'AND',
+							'master_tindakan.deleted_at' => 'IS NULL'
+						), array('RJ')
+					)
+					->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['harga'] = self::get_harga_rawat_jalan($value['uid'])['response_data'][0]['harga'];
 
 			$autonum++;
 		}
@@ -211,6 +282,25 @@ class Tindakan extends Utility {
 		return $data;
 	}
 
+	public function get_harga_rawat_jalan($parameter){
+		$data = self::$query
+			->select('master_tindakan_kelas_harga', array(
+					'id',
+					'harga',
+					'updated_at'
+				)
+			)
+			->where(array(
+					'master_tindakan_kelas_harga.tindakan' => '= ?',
+					'AND',
+					'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+				), array($parameter)
+			)
+			->execute();
+
+		return $data;
+	}
+
 	public function get_harga_join_kelas_by_tindakan($parameter){ //uid_tindakan
 		$result = [];
 
@@ -247,8 +337,7 @@ class Tindakan extends Utility {
 	}
 
 	/*=====================- CRUD AREA -=======================*/
-
-	private function tambah_tindakan($parameter){
+	private function tambah_tindakan_rawat_jalan($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -268,11 +357,162 @@ class Tindakan extends Utility {
 			$uid = parent::gen_uuid();
 			$tindakan = self::$query
 						->insert('master_tindakan', array(
-								'uid'=>$uid,
-								'nama'=>$parameter['nama'],
-								'created_at'=>parent::format_date(),
-								'updated_at'=>parent::format_date()
+								'uid' => $uid,
+								'nama' => $parameter['nama'],
+								'kelompok' => 'RJ',
+								'created_at' => parent::format_date(),
+								'updated_at' => parent::format_date()
 								)
+						)
+						->execute();
+
+			if ($tindakan['response_result'] > 0){
+				$log = parent::log(array(
+							'type'=>'activity',
+							'column'=>array(
+								'unique_target',
+								'user_uid',
+								'table_name',
+								'action',
+								'logged_at',
+								'status',
+								'login_id'
+							),
+							'value'=>array(
+								$uid,
+								$UserData['data']->uid,
+								'master_tindakan',
+								'I',
+								parent::format_date(),
+								'N',
+								$UserData['data']->log_id
+							),
+							'class'=>__CLASS__
+						)
+					);
+
+				//insert harga
+				$harga = self::$query
+					->insert('master_tindakan_kelas_harga', array(
+							'tindakan' => $uid,
+							'harga' => $parameter['harga'],
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						)
+					)
+					->execute();
+			}
+		}
+
+		$result = ['tindakan' => $tindakan, 'harga' => $harga];
+
+		return $result;
+	}
+
+	private function edit_tindakan_rawat_jalan($parameter){
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$result = [];
+
+		$old = self::get_tindakan_detail($parameter['uid']);
+
+		$tindakan = self::$query
+				->update('master_tindakan', array(
+						'nama' => $parameter['nama'],
+						'updated_at' => parent::format_date()
+					)
+				)
+				->where(array(
+					'master_tindakan.deleted_at' => 'IS NULL',
+					'AND',
+					'master_tindakan.uid' => '= ?'
+					),
+					array(
+						$parameter['uid']
+					)
+				)
+				->execute();
+
+		if ($tindakan['response_result'] > 0){
+			unset($parameter['access_token']);
+
+			$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'old_value',
+						'new_value',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$parameter['uid'],
+						$UserData['data']->uid,
+						'master_tindakan',
+						'U',
+						json_encode($old['response_data'][0]),
+						json_encode($parameter),
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				)
+			);
+
+			$harga = self::$query
+				->update('master_tindakan_kelas_harga', array(
+						'harga' => $parameter['harga'],
+						'updated_at' => parent::format_date()
+					)
+				)
+				->where(array(
+						'master_tindakan_kelas_harga.tindakan' => '= ?',
+						'AND',
+						'master_tindakan_kelas_harga.deleted_at' => 'IS NULL' 
+					), array(
+						$parameter['uid']
+					)
+				)
+				->execute();
+		}
+
+		$result = ['tindakan' => $tindakan, 'harga' => $harga];
+
+		return $result;
+	}
+
+
+	private function tambah_tindakan_rawat_inap($parameter){
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$check = self::duplicate_check(array(
+			'table'=>'master_tindakan',
+			'check'=>$parameter['nama']
+		));
+
+		$result = [];
+
+		if (count($check['response_data']) > 0){
+			$check['response_message'] = 'Duplicate data detected';
+			$check['response_result'] = 0;
+			unset($check['response_data']);
+			return $check;
+		} else {
+			$uid = parent::gen_uuid();
+			$tindakan = self::$query
+						->insert('master_tindakan', array(
+								'uid' => $uid,
+								'nama' => $parameter['nama'],
+								'kelompok' => 'RI',
+								'created_at' => parent::format_date(),
+								'updated_at' => parent::format_date()
+							)
 						)->execute();
 
 			if ($tindakan['response_result'] > 0){
@@ -328,7 +568,7 @@ class Tindakan extends Utility {
 		return $result;
 	}
 
-	public function edit_tindakan($parameter){
+	private function edit_tindakan_rawat_inap($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$result = [];
