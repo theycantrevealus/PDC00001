@@ -36,6 +36,10 @@ class Pasien extends Utility {
 					return self::cekNIK($parameter[2]);
 					break;
 
+				case 'cek-no-rm':
+					return self::cekNoRM($parameter[2]);
+					break;
+
 				default:
 					# code...
 					break;
@@ -377,7 +381,29 @@ class Pasien extends Utility {
 			$result = true;
 		}
 
-		return $result;
+		return $data;
+	}
+
+	public function cekNoRM($parameter){
+		$data = self::$query
+			->select('pasien', array('uid', 'no_rm'))
+			->where(
+				array(
+					'pasien.no_rm' => '= ?',
+					'AND',
+					'pasien.deleted_at' => 'IS NULL'
+				),
+				array(
+					$parameter
+				))
+			->execute();
+
+		$result = false;
+		if ($data['response_result'] > 0){
+			$result = true;
+		}
+
+		return $data;
 	}
 
 	private function duplicate_check($parameter) {

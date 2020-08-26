@@ -60,10 +60,33 @@
 			}
 		});
 
+		$("#no_rm").on('keyup', function(){
+			let value = $(this).inputmask('unmaskedvalue');
+
+			if (value.length == 6){
+				if (cekNoRM(value) == false){
+					$("#no_rm").addClass("is-valid").removeClass("is-invalid");
+					$("#error-no-rm").html("");
+					$("#btnSubmit").removeAttr("disabled");
+				} else {
+					$("#no_rm").addClass("is-invalid");
+					$("#error-no-rm").html("No. RM tidak tersedia");
+					$("#btnSubmit").attr("disabled", true);
+				}
+			} else {
+				$("#no_rm").addClass("is-invalid");
+				$("#error-no-rm").html("No. RM harus 6 angka");
+				$("#btnSubmit").attr("disabled", true);
+			}
+		});
+
 		$("#form-add-pasien").submit(function(){
 			/*var agama = $("input[name='agama']:checked").val();
 			var jenkel = $("input[name='jenkel']:checked").val();
 			var goldar = $("input[name='goldar']:checked").val();*/
+
+			var no_rm = $("#no_rm").inputmask('unmaskedvalue');
+			allData.no_rm = no_rm;
 
 			var jenkel = $("input[name='jenkel']:checked").val();
 			allData.jenkel = jenkel;
@@ -119,7 +142,7 @@
 
 		$(".select2").select2({});
 
-		$('#no_rm').inputmask('999-999');
+		$('#no_rm').inputmask('99-99-99');
 
 		$('.numberonly').keypress(function(event){
             if (event.which < 48 || event.which > 57) {
@@ -128,8 +151,33 @@
         });
 	});
 
+	function cekNoRM(no_rm){
+		var result = false;
+
+		$.ajax({
+			async: false,
+			url: __HOSTAPI__ + "/Pasien/cek-no-rm/" + no_rm,
+			type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+            	if (response.response_package != ""){
+            		if (response.response_package.response_result > 0){
+            			result = true;
+            		}
+            	}
+            },
+            error: function(response) {
+                console.log(response);
+            }
+		});
+
+		return result;
+	}
+
 	function cekNIK(nik){
-		var result;
+		var result = false;
 
 		$.ajax({
 			async: false,
@@ -139,7 +187,11 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             success: function(response){
-                result = response.response_package;
+                if (response.response_package != ""){
+            		if (response.response_package.response_result > 0){
+            			result = true;
+            		}
+            	}
             },
             error: function(response) {
                 console.log(response);
