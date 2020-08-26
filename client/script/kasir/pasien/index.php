@@ -108,7 +108,6 @@
 						},
 						type:"GET",
 						success:function(response_data) {
-							console.log(response_data);
 							var invoice_detail = response_data.response_package.response_data[0];
 							$("#nama-pasien").html(invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]");
 							currentPasienName = invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]";
@@ -430,12 +429,12 @@
 			var conf = confirm("Return Biaya ?");
 			if(conf) {
 				$.ajax({
-					url: __HOSTNAME__ + "/pages/kasir/pasien/payment_detail.php",
+					url: __HOSTAPI__ + "/Invoice",
 					type: "POST",
 					data:{
 						request: "retur_biaya",
 						item:uid,
-						invoice:
+						invoice:selectedUID
 					},
 					success: function(response) {
 						var responseData = response.response_package.response_result;

@@ -47,6 +47,9 @@ class Invoice extends Utility {
 				case 'proses_bayar':
 					return self::proses_bayar($parameter);
 					break;
+				case 'retur_biaya':
+					return self::retur_biaya($parameter);
+					break;
 				default:
 					return self::get_biaya_pasien();
 			}
@@ -419,6 +422,14 @@ class Invoice extends Utility {
 		} else {
 			return $allowAntrian;
 		}
+	}
+
+	private function retur_biaya($parameter){
+		$PaymentUID = parent::gen_uuid();
+		$worker = self::$query->insert('invoice_payment_retur', array(
+			//
+		));
+		return $worker;
 	}
 
 	private function get_biaya_pasien() {
