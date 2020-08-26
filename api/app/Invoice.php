@@ -92,7 +92,8 @@ class Invoice extends Utility {
 				'subtotal',
 				'discount',
 				'discount_type',
-				'keterangan'
+				'keterangan',
+				'status'
 			))
 			->where(array(
 				'invoice_payment_detail.deleted_at' => 'IS NULL',
@@ -112,6 +113,7 @@ class Invoice extends Utility {
 					$PDValue['item']
 				))
 				->execute();
+				$payment_detail['response_data'][$PDKey]['item_uid'] = $PDValue['item'];
 				$payment_detail['response_data'][$PDKey]['item'] = $Item['response_data'][0]['nama'];
 				$payment_detail['response_data'][$PDKey]['qty'] = floatval($PDValue['qty']);
 				$payment_detail['response_data'][$PDKey]['harga'] = floatval($PDValue['harga']);
@@ -426,10 +428,35 @@ class Invoice extends Utility {
 
 	private function retur_biaya($parameter){
 		$PaymentUID = parent::gen_uuid();
-		$worker = self::$query->insert('invoice_payment_retur', array(
-			//
-		));
-		return $worker;
+		//Get Invoice
+		$InvoicePayment = self::$query->select('invoice_payment', array(
+			'uid'
+		))
+		->where(array(
+			'invoice_payment.invoice' => '= ?'
+		), array(
+			$parameter['invoice']
+		))
+		->execute();
+		if(count($InvoicePayment['response_data'])) {
+			$detailUpdate = array();
+			foreach ($parameter['item'] as $key => $value) {
+				$worker = self::$query->update('invoice_payment_detail', array(
+					'status' => 'R'
+				))
+				->where(array(
+					'invoice_payment_detail.invoice_payment' => '= ?',
+					'AND',
+					'invoice_payment_detail.item' => '= ?'
+				), array(
+					$InvoicePayment['response_data'][0]['uid'],
+					$value
+				))
+				->execute();
+				array_push($detailUpdate, $worker);
+			}
+			return $detailUpdate;
+		}
 	}
 
 	private function get_biaya_pasien() {

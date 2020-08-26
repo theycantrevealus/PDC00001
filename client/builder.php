@@ -5,8 +5,9 @@
 <?php
 	$lastExist;
 ?>
+<?php require 'head.php'; ?>
 <body class="layout-default">
-	<?php require 'head.php'; ?>
+	
 	<?php
 		if(__PAGES__[0] == 'anjungan') {
 			require 'pages/anjungan/index.php';

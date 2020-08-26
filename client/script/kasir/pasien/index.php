@@ -100,7 +100,6 @@
 				type: "POST",
 				success: function(response) {
 					$("#form-loader").html(response);
-					console.log(uid);
 					$.ajax({
 						url:__HOSTAPI__ + "/Invoice/detail/" + uid,
 						beforeSend: function(request) {
@@ -114,16 +113,20 @@
 							$("#nomor-invoice").html(invoice_detail.nomor_invoice);
 							var invoice_detail_item = invoice_detail.invoice_detail;
 							for(var invKey in invoice_detail_item) {
-								console.log(invoice_detail_item[invKey]);
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
 									status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
 								} else {
 									if(invoice_detail_item[invKey].item.allow_retur == true) {
-										if(invoice_detail_item[invKey].status_berobat.status == "N") {
-											status_bayar = "<button class=\"btn btn-info btn-sm btn-retur-pembayaran\" id=\"retur_pembayaran_" + invoice_detail_item[invKey].item.uid + "\">Retur</button>";
-										} else {
+										if(invoice_detail_item[invKey].status_berobat == undefined) {
 											status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+										} else {
+											if(invoice_detail_item[invKey].status_berobat.status == "N") {
+												//status_bayar = "<button class=\"btn btn-info btn-sm btn-retur-pembayaran\" id=\"retur_pembayaran_" + invoice_detail_item[invKey].item.uid + "\">Retur</button>";
+												status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+											} else {
+												status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+											}
 										}
 									} else {
 										status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
@@ -395,6 +398,7 @@
 						},
 						type:"GET",
 						success:function(response_data) {
+							console.log(response_data);
 							var historyData = response_data.response_package.response_data[0];
 							var historyDetail = historyData.detail;
 
@@ -407,6 +411,7 @@
 							for(var historyKey in historyDetail) {
 								$("#invoice_detail_history tbody").append(
 									"<tr>" +
+										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
 										"<td>" + historyDetail[historyKey].item + "</td>" +
 										"<td>" + historyDetail[historyKey].qty + "</td>" +
@@ -421,7 +426,7 @@
 			});
 		});
 
-		$("body").on("click", ".btn-retur-pembayaran", function() {
+		/*$("body").on("click", ".btn-retur-pembayaran", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
@@ -440,6 +445,38 @@
 						var responseData = response.response_package.response_result;
 					}
 				});
+			}
+			return false;
+		});*/
+
+		$("#btnProsesRetur").click(function() {
+			var conf = confirm("Retur Transaksi?");
+			if(conf) {
+				var itemList = [];
+				$(".returItem").each(function(e){
+					var item = $(this).val();
+					itemList.push(item);
+				});
+
+				if(itemList.length > 0) {
+					$.ajax({
+						url: __HOSTAPI__ + "/Invoice",
+						type: "POST",
+						beforeSend: function(request) {
+							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+						},
+						data:{
+							request: "retur_biaya",
+							item:itemList,
+							invoice:selectedUID
+						},
+						success: function(response) {
+							console.log(response);
+						}
+					});
+				} else {
+					alert("Pilih item yang akan diretur");
+				}
 			}
 			return false;
 		});
@@ -502,6 +539,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Kembali</button>
+				<button type="button" class="btn btn-warning" id="btnProsesRetur"><i class="fa fa-database"></i> Proses Retur</button>
 				<button type="button" class="btn btn-success" id="btnBayar"><i class="fa fa-print"></i> Cetak Faktur</button>
 			</div>
 		</div>
