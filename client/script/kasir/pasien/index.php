@@ -100,6 +100,7 @@
 				type: "POST",
 				success: function(response) {
 					$("#form-loader").html(response);
+					console.log(uid);
 					$.ajax({
 						url:__HOSTAPI__ + "/Invoice/detail/" + uid,
 						beforeSend: function(request) {
@@ -107,17 +108,27 @@
 						},
 						type:"GET",
 						success:function(response_data) {
+							console.log(response_data);
 							var invoice_detail = response_data.response_package.response_data[0];
 							$("#nama-pasien").html(invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]");
 							currentPasienName = invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]";
 							$("#nomor-invoice").html(invoice_detail.nomor_invoice);
 							var invoice_detail_item = invoice_detail.invoice_detail;
 							for(var invKey in invoice_detail_item) {
+								console.log(invoice_detail_item[invKey]);
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
 									status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
 								} else {
-									status_bayar = "<i class=\"fa fa-check text-success\"></i>";
+									if(invoice_detail_item[invKey].item.allow_retur == true) {
+										if(invoice_detail_item[invKey].status_berobat.status == "N") {
+											status_bayar = "<button class=\"btn btn-info btn-sm btn-retur-pembayaran\" id=\"retur_pembayaran_" + invoice_detail_item[invKey].item.uid + "\">Retur</button>";
+										} else {
+											status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+										}
+									} else {
+										status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+									}
 								}
 								$("#invoice_detail_item").append(
 									"<tr>" +
@@ -409,6 +420,29 @@
 					});
 				}
 			});
+		});
+
+		$("body").on("click", ".btn-retur-pembayaran", function() {
+			var uid = $(this).attr("id").split("_");
+			uid = uid[uid.length - 1];
+
+			//Return Biaya
+			var conf = confirm("Return Biaya ?");
+			if(conf) {
+				$.ajax({
+					url: __HOSTNAME__ + "/pages/kasir/pasien/payment_detail.php",
+					type: "POST",
+					data:{
+						request: "retur_biaya",
+						item:uid,
+						invoice:
+					},
+					success: function(response) {
+						var responseData = response.response_package.response_result;
+					}
+				});
+			}
+			return false;
 		});
 	});
 </script>

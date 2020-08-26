@@ -1,5 +1,5 @@
-<div class="anjungan-container">
-	<div class="container-fluid" style="padding: 0 !important">
+<div class="anjungan-container" style="overflow: hidden;">
+	<div class="container-fluid" style="padding: 0 !important; overflow: hidden;">
 		<div class="row">
 			<div class="col-md-12">
 				<div class="card" style="background: transparent;">
@@ -20,7 +20,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="container-fluid">
+	<div class="container-fluid" style="overflow: hidden;">
 		<div class="row">
 			<div class="col-md-4">
 				<center>
@@ -30,20 +30,25 @@
 						<h1 class="blink_me" id="current_antrian" style="font-size: 80pt; color: #fff">0</h1>
 					</div>
 				</center>
-			</div>
-			<div class="col-md-8">
-			</div>
-		</div>
-	</div>
-	<div class="container-fluid" style="margin-top: 20px;">
-		<div class="row">
-			<div class="col-md-8">
 				<div class="row" id="loket-loader">
 					
 				</div>
 			</div>
-			<div class="col-md-4">
-
+			<div class="col-md-8">
+				<div class="row">
+					<div class="col-md-12">
+						<div id="carousel-slider" class="carousel slide" data-ride="carousel">
+							<div class="carousel-inner">
+							</div>
+						</div>
+					</div>
+					<div class="col-md-12">
+						<div id="info-kamar" class="carousel slide" data-ride="carousel">
+							<div class="carousel-inner">
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -16,6 +16,7 @@ composer.json
 *.sql
 images/produk
 images/igd
+images/slideshow
 audio/
 document/
 client/template/

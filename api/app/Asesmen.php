@@ -402,6 +402,18 @@ class Asesmen extends Utility {
 				->execute();
 
 				if($worker['response_result'] > 0) {
+					//Update asesmen medis
+					
+					$updateAsesmen = self::$query->update('asesmen', array(
+						'status' => 'D'
+					))
+					->where(array(
+						'asesmen.uid' => '= ?'
+					), array(
+						$MasterUID
+					))
+					->execute();
+
 					$log = parent::log(array(
 						'type'=>'activity',
 						'column'=>array(

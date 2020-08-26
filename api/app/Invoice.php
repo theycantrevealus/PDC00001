@@ -530,6 +530,7 @@ class Invoice extends Utility {
 
 
 	private function get_biaya_pasien_detail($parameter) {
+
 		$data = self::$query->select('invoice', array(
 			'uid',
 			'nomor_invoice',
@@ -584,6 +585,18 @@ class Invoice extends Utility {
 				'K'
 			))
 			->execute();
+
+			//Asesmen Information
+			$Asesmen = self::$query->select('asesmen', array(
+				'status'
+			))
+			->where(array(
+				'asesmen.kunjungan' => '= ?'
+			), array(
+				$value['kunjungan']
+			))
+			->execute();
+
 			foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
 				//Info Poliklinik
 				$Poli = new Poli(self::$pdo);
@@ -631,6 +644,7 @@ class Invoice extends Utility {
 			foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
 				//Item parse
 				$Item = self::$query->select($IDValue['item_type'], array(
+					'uid',
 					'nama'
 				))
 				->where(array(
@@ -645,6 +659,8 @@ class Invoice extends Utility {
 				$InvoiceDetail['response_data'][$IDKey]['penjamin'] = $PenjaminInfo['response_data'][0];
 
 				$InvoiceDetail['response_data'][$IDKey]['item'] = $Item['response_data'][0];
+				$InvoiceDetail['response_data'][$IDKey]['item']['allow_retur'] = ($IDValue['item'] == __UID_KARTU__) ? false : true;
+				$InvoiceDetail['response_data'][$IDKey]['status_berobat'] = $Asesmen['response_data'][0];
 				$InvoiceDetail['response_data'][$IDKey]['qty'] = floatval($IDValue['qty']);
 				$InvoiceDetail['response_data'][$IDKey]['harga'] = floatval($IDValue['harga']);
 				$InvoiceDetail['response_data'][$IDKey]['discount'] = floatval($IDValue['discount']);

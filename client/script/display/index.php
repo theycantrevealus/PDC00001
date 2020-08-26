@@ -1,5 +1,8 @@
 <script type="text/javascript">
 	$(function() {
+		$("html,body").css({
+			"overflow": "hidden"
+		});
 		function load_loket() {
 			var loketData;
 			$.ajax({
@@ -22,7 +25,7 @@
 		var loketData = load_loket();
 
 		for(var a = 0; a < loketData.length; a++) {
-			$("#loket-loader").append(	"<div class=\"col-md-4 loket-small-container\">" + 
+			$("#loket-loader").append(	"<div class=\"col-md-6 loket-small-container\">" + 
 											"<div>" +
 												"<center>" +
 													"<h3 style=\"color: yellow\" id=\"nama_antrian_" + loketData[a].uid + "\">" + loketData[a].nama_loket + "</h3>" +
@@ -31,6 +34,112 @@
 											"</div>" +
 										"</div>");
 		}
+
+		for(var b = 0; b <=6; b++) {
+			var singleSlide = document.createElement("DIV");
+			$(singleSlide).addClass("carousel-item");
+			if(b == 0) {
+				$(singleSlide).addClass("active");
+			}
+
+			var newImage = document.createElement("IMG");
+			$(newImage).addClass("d-block w-100")
+				.attr("src", __HOST__ + "/images/slideshow/" + (b + 1) + ".jpg")
+				.css({
+					"height": "350px"
+				});
+
+			var caption = document.createElement("DIV");
+			$(caption).addClass("carousel-caption d-none d-md-block");
+			$(caption).append("<h5></h5>");
+			$(caption).append("<p></p>");
+
+			$(singleSlide).append(newImage);
+			$(singleSlide).append(caption);
+
+			$("#carousel-slider .carousel-inner").append(singleSlide);
+		}
+
+		$.ajax({
+			url: __HOSTAPI__ + "/Aplicares/get-ruangan-terdaftar-bpjs",
+			type: "GET",
+			headers:{
+				Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+			},
+			success: function(response) {
+				console.clear();
+				var data = response.response_package;
+				var ruanganMeta = {};
+				for(var key in data) {
+
+					if(ruanganMeta[data[key].kodekelas] == undefined) {
+						ruanganMeta[data[key].kodekelas] = []
+					}
+
+					ruanganMeta[data[key].kodekelas].push({
+						"nama": data[key].nama,
+						"uid_ruangan": data[key].uid_ruangan,
+						"kode_ruangan": data[key].koderuang,
+						"kodekelas": data[key].kodekelas,
+						"kapasitas": data[key].kapasitas,
+						"tersedia": data[key].tersedia,
+						"tersediapria": data[key].tersediapria,
+						"tersediawanita": data[key].tersediawanita,
+						"tersediapriawanita": data[key].tersediapriawanita,
+					});
+				}
+				var auto = 1;
+				for(var kKey in ruanganMeta) {
+					var singleSlide = document.createElement("DIV");
+					$(singleSlide).addClass("carousel-item").css({
+						"padding": "0px !important",
+						"height": "200px",
+						"vertical-align": "top",
+						"background": "rgba(0, 0, 0, .3)"
+					});
+					if(auto == 1) {
+						$(singleSlide).addClass("active");
+					}
+					
+					var caption = document.createElement("DIV");
+					$(caption).css({
+						"padding": "10px",
+						"color": "#fff",
+						"font-size": "14pt"
+					});
+					$(caption).append("<h5 class=\"text-center\" style=\"font-weight: bolder; font-size: 20pt; color: #fff\">" + kKey + "</h5>");
+					var ruanganList = "";
+					for(var ab = 0; ab < ruanganMeta[kKey].length; ab++) {
+						ruanganList += "<tr>" +
+											"<td style=\"color: #fff; font-size: 16pt; font-weight: bolder\">" + ruanganMeta[kKey][ab]["kode_ruangan"] + "</td>" +
+											"<td style=\"color: #fff; font-size: 16pt; font-weight: bolder\">" + ruanganMeta[kKey][ab].kapasitas + "</td>" +
+											"<td style=\"color: #fff; font-size: 16pt; font-weight: bolder\">" + ruanganMeta[kKey][ab].tersedia + "</td>" +
+										"</tr>";
+					}
+					$(caption).append("<p><table class=\"table\">" +
+						"<tr>" +
+							"<th style=\"color: #fff; font-size: 16pt; font-weight: bolder\">Ruangan</th>" +
+							"<th style=\"color: #fff; font-size: 16pt; font-weight: bolder\">Kapasitas</th>" +
+							"<th style=\"color: #fff; font-size: 16pt; font-weight: bolder\">Tersedia</th>" +
+						"</tr>" +
+						"<thead></thead><tbody>" + ruanganList + "</tbody></table></p>");
+
+					//$(singleSlide).append(newImage);
+					$(singleSlide).append(caption);
+
+					$("#info-kamar .carousel-inner").append(singleSlide);
+					auto++;
+				}
+			}
+		})
+
+		$('.carousel:eq(0)').carousel({
+			interval: 5000
+		});
+
+		$('.carousel:eq(1)').carousel({
+			interval: 7000
+		});
 
 		
 
@@ -123,8 +232,10 @@
 								playlist.push(__HOST__ + "audio/" + forRead[z] + ".MP3");
 							}
 
-							playlist.push(__HOST__ + 'audio/di.mp3');
-							playlist.push(__HOST__ + 'audio/' + ($("#nama_antrian_" + commandParse.loket).html().replace(" ", "").toLowerCase().trim()) + '.mp3');
+							//playlist.push(__HOST__ + 'audio/di.mp3');
+							playlist.push(__HOST__ + 'audio/loket.MP3');
+							//playlist.push(__HOST__ + 'audio/' + ($("#nama_antrian_" + commandParse.loket).html().replace(" ", "").toLowerCase().trim()) + '.mp3');
+							playlist.push(__HOST__ + 'audio/' + ($("#nama_antrian_" + commandParse.loket).html().replace("LOKET ", "").toLowerCase().trim()) + '.MP3');
 							playlist.push(__HOST__ + 'audio/closing.mpeg');
 						}
 							
