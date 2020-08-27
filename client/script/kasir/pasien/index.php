@@ -1,32 +1,47 @@
 <script type="text/javascript">
 	$(function(){
 
-		var rangeKwitansi = $("#range_kwitansi").val().split(" to ");
+		
+
+		function getDateRange() {
+			var rangeKwitansi = $("#range_kwitansi").val().split(" to ");
+			if(rangeKwitansi.length > 1) {
+				return rangeKwitansi;
+			} else {
+				return [rangeKwitansi, rangeKwitansi];
+			}
+			
+		}
 
 		var tableKwitansi = $("#table-kwitansi").DataTable({
-			"processing": true,
-			"serverSide": true,
-			"sPaginationType": "full_numbers",
-			"bPaginate":true,
-			"serverMethod": "POST",
+			processing: true,
+			serverSide: true,
+			sPaginationType: "full_numbers",
+			bPaginate: true,
+			serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Invoice",
 				type: "POST",
-				data:{
-					request:"kwitansi_data",
-					from:rangeKwitansi[0],
-					to:rangeKwitansi[1]
+				data: function(d){
+					d.request = "kwitansi_data";
+					d.from = getDateRange()[0];
+					d.to = getDateRange()[1];
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					/*console.clear();
-					console.log(response);*/
+					console.clear();
+					console.log(response);
+					
 					var dataSet = response.response_package.response_data;
+					if(dataSet == undefined) {
+						dataSet = [];
+					}
+
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = dataSet.length;
-					recordsFiltered = dataSet.length;
+					response.recordsFiltered = dataSet.length;
 					return dataSet;
 				}
 			},
@@ -72,6 +87,12 @@
 					}
 				}
 			]
+		});
+
+		$("#range_kwitansi").change(function() {
+			console.clear();
+			console.log(getDateRange());
+			tableKwitansi.ajax.reload();
 		});
 
 		var tableAntrianBayar = $("#table-biaya-pasien").DataTable({
