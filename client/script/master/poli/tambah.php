@@ -90,7 +90,7 @@
             var nama = $("#txt_nama").val();
 
             if (nama != ""){
-                dataObject.nama = "Poli " + nama;
+                dataObject.nama = "Poliklinik " + nama;
                 $(".btnNextInfo").removeAttr("disabled");
             } else {
                 $(".btnNextInfo").attr("disabled",true);
