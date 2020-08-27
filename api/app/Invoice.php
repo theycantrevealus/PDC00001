@@ -71,11 +71,11 @@ class Invoice extends Utility {
 				'AND',
 				'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
 				'AND',
-				'invoice_payment.nomor_kwitansi' => 'ILIKE ?'
+				'invoice_payment.nomor_kwitansi' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
 			);
 
 			$paramValue = array(
-				$parameter['from'], $parameter['to'], '\'%' . $parameter['search']['value'] . '%\''
+				$parameter['from'], $parameter['to']
 			);
 		} else {
 			$paramData = array(

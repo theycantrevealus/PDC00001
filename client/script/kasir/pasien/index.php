@@ -21,6 +21,8 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+					/*console.clear();
+					console.log(response);*/
 					var dataSet = response.response_package.response_data;
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = dataSet.length;
@@ -29,6 +31,10 @@
 				}
 			},
 			autoWidth: false,
+			language: {
+				search: "",
+				searchPlaceholder: "Cari Nomor Kwitansi"
+			},
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
