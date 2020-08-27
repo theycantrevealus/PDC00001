@@ -33,6 +33,9 @@ class Invoice extends Utility {
 				case 'payment':
 					return self::get_payment($parameter[2]);
 					break;
+				case 'kwitansi':
+					return self::get_kwitansi($parameter);
+					break;
 				default:
 					return self::get_biaya_pasien();
 			}
@@ -50,12 +53,64 @@ class Invoice extends Utility {
 				case 'retur_biaya':
 					return self::retur_biaya($parameter);
 					break;
+				case 'kwitansi_data':
+					return self::get_kwitansi($parameter);
+					break;
 				default:
 					return self::get_biaya_pasien();
 			}
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
 		}
+	}
+
+	private function get_kwitansi($parameter) {
+		if(isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'invoice_payment.deleted_at' => 'IS NULL',
+				'AND',
+				'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
+				'AND',
+				'invoice_payment.nomor_kwitansi' => 'ILIKE ?'
+			);
+
+			$paramValue = array(
+				$parameter['from'], $parameter['to'], '\'%' . $parameter['search']['value'] . '%\''
+			);
+		} else {
+			$paramData = array(
+				'invoice_payment.deleted_at' => 'IS NULL',
+				'AND',
+				'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?'
+			);
+
+			$paramValue = array(
+				$parameter['from'], $parameter['to']
+			);
+		}
+		$payment = self::$query->select('invoice_payment', array(
+			'uid',
+			'nomor_kwitansi',
+			'pasien',
+			'invoice',
+			'pegawai',
+			'terbayar',
+			'sisa_bayar',
+			'keterangan',
+			'metode_bayar',
+			'tanggal_bayar'
+		))
+		->where($paramData, $paramValue)
+		->limit($parameter['length'])
+		->offset($parameter['start'])
+		->execute();
+		$payment['response_draw'] = $parameter['draw'];
+		$autonum = 1;
+		foreach ($payment['response_data'] as $key => $value) {
+			$payment['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+		return $payment;
 	}
 
 	private function get_payment($parameter) {

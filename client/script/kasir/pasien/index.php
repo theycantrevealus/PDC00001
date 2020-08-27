@@ -1,6 +1,73 @@
 <script type="text/javascript">
 	$(function(){
 
+		var rangeKwitansi = $("#range_kwitansi").val().split(" to ");
+
+		var tableKwitansi = $("#table-kwitansi").DataTable({
+			"processing": true,
+			"serverSide": true,
+			"sPaginationType": "full_numbers",
+			"bPaginate":true,
+			"serverMethod": "POST",
+			"ajax":{
+				url: __HOSTAPI__ + "/Invoice",
+				type: "POST",
+				data:{
+					request:"kwitansi_data",
+					from:rangeKwitansi[0],
+					to:rangeKwitansi[1]
+				},
+				headers:{
+					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+				},
+				dataSrc:function(response) {
+					var dataSet = response.response_package.response_data;
+					response.draw = parseInt(response.response_package.response_draw);
+					response.recordsTotal = dataSet.length;
+					recordsFiltered = dataSet.length;
+					return dataSet;
+				}
+			},
+			autoWidth: false,
+			"columns" : [
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.autonum;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.nomor_kwitansi;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.tanggal_bayar;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.metode_bayar;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.pegawai;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.terbayar;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return 	"";
+					}
+				}
+			]
+		});
+
 		var tableAntrianBayar = $("#table-biaya-pasien").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/Invoice",
@@ -9,7 +76,6 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.log(response);
 					var returnedData = [];
 					for(var InvKeyData in response.response_package.response_data) {
 						if(response.response_package.response_data[InvKeyData].antrian_kunjungan != undefined) {
