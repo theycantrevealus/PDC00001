@@ -145,6 +145,11 @@
 			$("#btnTambahPasien").fadeIn("fast");
 		});
 
+		$("#btnTambahPasien").click(function(){
+			//alert($("#txt_current_antrian").attr("current_queue"));
+			localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
+		});
+
 		$("#btnTambahAntrian").click(function(){
 			$("#btnTambahPasien").fadeOut("false");
 			$("#txt_cari").val("");

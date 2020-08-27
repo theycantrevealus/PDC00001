@@ -125,6 +125,11 @@
 				success: function(response){
 					if (status_antrian == 'true'){ 		//redirect to tambah kunjungan
 						if (response.response_package.response_unique != ""){	//check returning uid
+							//Set Current Pasien dan Antrian Data
+							localStorage.setItem("currentPasien", response.response_package.response_unique);
+
+							//Notif loket lain yang sedang aktif pemanggilan yang sama?? Back Log??
+							
 							location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + response.response_package.response_unique;
 						}
 					} else {
