@@ -107,6 +107,7 @@ class Invoice extends Utility {
 		$payment['response_draw'] = $parameter['draw'];
 		$autonum = 1;
 		foreach ($payment['response_data'] as $key => $value) {
+			$payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
 			$payment['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 		}
@@ -184,6 +185,9 @@ class Invoice extends Utility {
 			$payment['response_data'][$key]['tanggal_bayar'] = date("d F Y", strtotime($value['tanggal_bayar']));
 			$payment['response_data'][$key]['terbayar'] = floatval($value['terbayar']);
 			$payment['response_data'][$key]['sisa_bayar'] = floatval($value['sisa_bayar']);
+			$Pasien = new Pasien(self::$pdo);
+			$PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+			$payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 		}
 
 		return $payment;
@@ -488,9 +492,12 @@ class Invoice extends Utility {
 			'uid'
 		))
 		->where(array(
-			'invoice_payment.invoice' => '= ?'
+			'invoice_payment.invoice' => '= ?',
+			'AND',
+			'invoice_payment.uid' => '= ?'
 		), array(
-			$parameter['invoice']
+			$parameter['invoice'],
+			$parameter['payment']
 		))
 		->execute();
 		if(count($InvoicePayment['response_data'])) {
@@ -511,6 +518,8 @@ class Invoice extends Utility {
 				array_push($detailUpdate, $worker);
 			}
 			return $detailUpdate;
+		} else {
+			//
 		}
 	}
 

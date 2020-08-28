@@ -1,6 +1,17 @@
 <script type="text/javascript">
 	$(function(){
 
+		var selectedUID;
+		var selectedUIDKwitansi;
+		var selectedPoli;
+		var selectedPasien;
+		var selectedPenjamin;
+		var selectedKunjungan;
+		var totalItemPay = 0;
+		var totalItemPayDiscount = 0;
+		var currentPasienName;
+		var itemMeta = [];
+
 		
 
 		function getDateRange() {
@@ -31,9 +42,6 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.clear();
-					console.log(response);
-					
 					var dataSet = response.response_package.response_data;
 					if(dataSet == undefined) {
 						dataSet = [];
@@ -83,15 +91,69 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return 	"";
+						return 	"<button class=\"btn btn-info btn-sm btnDetailKwitansi\" invoice_payment=\"" + row.uid + "\" invoice=\"" + row.invoice + "\" id=\"invoice_" + row.uid + "\"><i class=\"fa fa-eye\"></i></button>";
 					}
 				}
 			]
 		});
 
+		$("body").on("click", ".btnDetailKwitansi", function() {
+			var uid = $(this).attr("id").split("_");
+			uid = uid[uid.length - 1];
+
+			selectedUID = $(this).attr("invoice");
+			selectedUIDKwitansi = $(this).attr("invoice_payment");
+
+			$.ajax({
+				url: __HOSTNAME__ + "/pages/kasir/pasien/payment_detail.php",
+				type: "POST",
+				success: function(response) {
+					$("#form-payment-detail").modal("show");
+					$("#payment-detail-loader").html(response);
+					
+					$.ajax({
+						url:__HOSTAPI__ + "/Invoice/payment/" + uid,
+						beforeSend: function(request) {
+							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+						},
+						type:"GET",
+						success:function(response_data) {
+							/*console.clear();
+							console.log(response_data);*/
+							var pasienInfo = response_data.response_package.response_data[0].pasien;
+							$("#nama-pasien-faktur").html(pasienInfo.panggilan_name.nama + " " + pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]");
+							$("#nomor-faktur").html($("#kwitansi_" + uid).html());
+
+							var historyData = response_data.response_package.response_data[0];
+							var historyDetail = historyData.detail;
+
+							$("#pegawai-faktur").html("Diterima Oleh : " + historyData.pegawai.nama);
+							$("#tanggal-faktur").html("Tanggal Bayar : " + historyData.tanggal_bayar);
+							$("#keterangan-faktur").html(historyData.keterangan);
+							$("#total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
+							$("#diskon-faktur").html(0);
+							$("#grand-total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
+							for(var historyKey in historyDetail) {
+								$("#invoice_detail_history tbody").append(
+									"<tr>" +
+										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
+										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
+										"<td>" + historyDetail[historyKey].item + "</td>" +
+										"<td>" + historyDetail[historyKey].qty + "</td>" +
+										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
+										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
+									"</tr>"
+								);
+							}
+						}
+					});
+				}
+			});
+		});
+
 		$("#range_kwitansi").change(function() {
-			console.clear();
-			console.log(getDateRange());
+			/*console.clear();
+			console.log(getDateRange());*/
 			tableKwitansi.ajax.reload();
 		});
 
@@ -158,15 +220,7 @@
 			]
 		});
 
-		var selectedUID;
-		var selectedPoli;
-		var selectedPasien;
-		var selectedPenjamin;
-		var selectedKunjungan;
-		var totalItemPay = 0;
-		var totalItemPayDiscount = 0;
-		var currentPasienName;
-		var itemMeta = [];
+		
 
 
 		$("body").on("click", ".btnDetail", function() {
@@ -491,7 +545,6 @@
 						},
 						type:"GET",
 						success:function(response_data) {
-							console.log(response_data);
 							var historyData = response_data.response_package.response_data[0];
 							var historyDetail = historyData.detail;
 
@@ -544,6 +597,7 @@
 
 		$("#btnProsesRetur").click(function() {
 			var conf = confirm("Retur Transaksi?");
+			
 			if(conf) {
 				var itemList = [];
 				$(".returItem").each(function(e){
@@ -561,10 +615,25 @@
 						data:{
 							request: "retur_biaya",
 							item:itemList,
-							invoice:selectedUID
+							invoice:selectedUID,
+							payment:selectedUIDKwitansi
 						},
 						success: function(response) {
+							console.log(selectedUID);
 							console.log(response);
+							var resultCheck = 0;
+							
+							for(var returnKey in response.response_package) {
+								resultCheck += response.response_package[returnKey].response_result
+							}
+
+							if(resultCheck == $(".returItem:checked").length) {
+								$("#form-payment-detail").modal("hide");
+							} else {
+								console.log("Gagal Retur");
+							}
+							$("#form-payment-detail").modal("hide");
+							tableKwitansi.ajax.reload();
 						}
 					});
 				} else {
