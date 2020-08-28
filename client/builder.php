@@ -176,6 +176,11 @@
 	<script type="text/javascript">
 		var Sync;
 		$(function() {
+			var activeMenu = $(".sidebar-menu-item.active").attr("parent-child");
+			$("a[href=\"#menu-" + activeMenu + "\"]").removeClass("collapsed").parent().addClass("open");
+			$("ul#menu-" + activeMenu).addClass("show");
+			
+
 			var idleCheck;
 			function reloadSession() {
 				window.clearTimeout(idleCheck);
