@@ -87,9 +87,11 @@
 						"tersediapria": data[key].tersediapria,
 						"tersediawanita": data[key].tersediawanita,
 						"tersediapriawanita": data[key].tersediapriawanita,
+						"nama_kelas": data[key].detailRuangan.kelas.nama
 					});
 				}
 				var auto = 1;
+				
 				for(var kKey in ruanganMeta) {
 					var singleSlide = document.createElement("DIV");
 					$(singleSlide).addClass("carousel-item").css({
@@ -108,8 +110,7 @@
 						"color": "#fff",
 						"font-size": "14pt"
 					});
-					var nama_kelas = (ruanganMeta[kKey][ab] != undefined && ruanganMeta[kKey][ab].detailRuangan.kelas != null) ? ruanganMeta[kKey][ab].detailRuangan.kelas.nama : "";
-					$(caption).append("<h5 class=\"text-center\" style=\"font-weight: bolder; font-size: 20pt; color: #fff\">(" + kKey + ") " + nama_kelas + "</h5>");
+					$(caption).append("<h5 class=\"text-center\" style=\"font-weight: bolder; font-size: 20pt; color: #fff\">(" + kKey + ") " + ruanganMeta[kKey][0].nama_kelas + "</h5>");
 					var ruanganList = "";
 					for(var ab = 0; ab < ruanganMeta[kKey].length; ab++) {
 						ruanganList += "<tr>" +
