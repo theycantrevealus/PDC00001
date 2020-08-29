@@ -256,7 +256,7 @@ class Aplicares extends Utility {
 					'AND',
 					'terminologi_item.deleted_at' => 'IS NULL'
 				), array(
-					$KelasDetail['kelas']
+					$KodeRuangan['kelas']
 				))
 				->execute();
 
