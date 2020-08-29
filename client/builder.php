@@ -176,9 +176,25 @@
 	<script type="text/javascript">
 		var Sync;
 		$(function() {
-			var activeMenu = $(".sidebar-menu-item.active").attr("parent-child");
-			$("a[href=\"#menu-" + activeMenu + "\"]").removeClass("collapsed").parent().addClass("open");
-			$("ul#menu-" + activeMenu).addClass("show");
+			var parentList = [];
+
+			$(".sidebar-menu-item.active").each(function(){
+				var activeMenu = $(this).attr("parent-child");
+				$("a[href=\"#menu-" + activeMenu + "\"]").removeClass("collapsed").parent().addClass("open");
+				$("ul#menu-" + activeMenu).addClass("show");
+			});
+
+			$("ul.sidebar-submenu").each(function() {
+				var hasMaster = $(this).attr("master-child");
+				if (typeof hasMaster !== typeof undefined && hasMaster !== false && hasMaster > 0) {
+
+					//$("a[href=\"#menu-" + hasMaster + "\"]").removeClass("collapsed").parent().addClass("open");
+					$("ul#menu-" + hasMaster).addClass("show");
+					
+				}
+			});
+
+			//$("ul[master-child=\"" + activeMenu + "\"").addClass("open");
 			
 
 			var idleCheck;

@@ -37,7 +37,7 @@
 					<?php
 						if($child->rowCount() > 0) {
 					?>
-					<ul class="sidebar-submenu collapse" id="menu-<?php echo $value['id']; ?>">
+					<ul class="sidebar-submenu collapse" id="menu-<?php echo $value['id']; ?>" master-child="<?php echo $parent; ?>">
 						<?php
 							$availMenu += reloadModul($pdo, $value['id'], $group, $access);
 						?>

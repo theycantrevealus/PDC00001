@@ -514,6 +514,7 @@
 						console.log(response);
 						if(response.response_package.response_result > 0) {
 							tableAntrianBayar.ajax.reload();
+							tableKwitansi.ajax.reload();
 							$("#form-invoice").modal("hide");
 							$("#form-payment").modal("hide");
 						}

@@ -68,6 +68,7 @@
 			},
 			success: function(response) {
 				console.clear();
+				console.log(response);
 				var data = response.response_package;
 				var ruanganMeta = {};
 				for(var key in data) {
@@ -107,11 +108,12 @@
 						"color": "#fff",
 						"font-size": "14pt"
 					});
-					$(caption).append("<h5 class=\"text-center\" style=\"font-weight: bolder; font-size: 20pt; color: #fff\">" + kKey + "</h5>");
+					var nama_kelas = (ruanganMeta[kKey][ab] != undefined && ruanganMeta[kKey][ab].detailRuangan.kelas != null) ? ruanganMeta[kKey][ab].detailRuangan.kelas.nama : "";
+					$(caption).append("<h5 class=\"text-center\" style=\"font-weight: bolder; font-size: 20pt; color: #fff\">(" + kKey + ") " + nama_kelas + "</h5>");
 					var ruanganList = "";
 					for(var ab = 0; ab < ruanganMeta[kKey].length; ab++) {
 						ruanganList += "<tr>" +
-											"<td style=\"color: #fff; font-size: 16pt; font-weight: bolder\">" + ruanganMeta[kKey][ab]["kode_ruangan"] + "</td>" +
+											"<td style=\"color: #fff; font-size: 16pt; font-weight: bolder\">(" + ruanganMeta[kKey][ab].kode_ruangan + ") " + ruanganMeta[kKey][ab].nama + "</td>" +
 											"<td style=\"color: #fff; font-size: 16pt; font-weight: bolder\">" + ruanganMeta[kKey][ab].kapasitas + "</td>" +
 											"<td style=\"color: #fff; font-size: 16pt; font-weight: bolder\">" + ruanganMeta[kKey][ab].tersedia + "</td>" +
 										"</tr>";
