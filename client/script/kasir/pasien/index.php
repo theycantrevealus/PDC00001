@@ -66,7 +66,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.nomor_kwitansi;
+						return row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama;
 					}
 				},
 				{
@@ -81,7 +81,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.pegawai;
+						return row.pegawai.nama;
 					}
 				},
 				{

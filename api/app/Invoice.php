@@ -107,6 +107,14 @@ class Invoice extends Utility {
 		$payment['response_draw'] = $parameter['draw'];
 		$autonum = 1;
 		foreach ($payment['response_data'] as $key => $value) {
+			$Pegawai = new Pegawai(self::$pdo);
+			$PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+			$payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
+
+			$Pasien = new Pasien(self::$pdo);
+			$PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+			$payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
+			
 			$payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
 			$payment['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
