@@ -133,8 +133,9 @@ class Pasien extends Utility {
 						'pekerjaan',
 						'nama_ayah',
 						'nama_ibu',
+						'status_pernikahan',
 						'nama_suami_istri',
-						'status_suami_istri',
+						//'status_suami_istri',
 						'alamat',
 						'alamat_rt',
 						'alamat_rw',
@@ -144,6 +145,7 @@ class Pasien extends Utility {
 						'alamat_kelurahan',
 						'warganegara',
 						'no_telp',
+						'email',
 						'created_at',
 						'updated_at'
 						)

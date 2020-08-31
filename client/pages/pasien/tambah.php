@@ -123,22 +123,22 @@
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="nama_ayah">Nama Ayah</label>
-						<input type="text" class="form-control uppercase inputan" name="nama_ayah" placeholder="Nama Ayah">
+						<input type="text" class="form-control uppercase inputan" name="nama_ayah" id="nama_ayah" placeholder="Nama Ayah">
 					</div>
 					<div class="col-12 col-md-6 mb-3">
-						<label for="nama_ibu">Nama Ibu</label>
-						<input type="text" class="form-control uppercase inputan" name="nama_ibu" placeholder="Nama Ibu">
+						<label for="nama_ibu">Nama Ibu <span class="red">*</span></label>
+						<input type="text" class="form-control uppercase inputan" name="nama_ibu" id="nama_ibu" placeholder="Nama Ibu" required>
 					</div> 
+					<div class="col-12 col-md-6 mb-3">
+						<label for="status_suami_istri">Status Pernikahan</label>
+						<select class="form-control inputan select2" name="status_pernikahan" id="status_pernikahan">
+							<option value="" selected disabled>Pilih Status</option>
+						</select>
+					</div>  
 					<div class="col-12 col-md-6 mb-3">
 						<label for="nama_suami_istri">Nama Suami / Istri</label>
 						<input type="text" autocomplete="off" class="form-control uppercase inputan" name="nama_suami_istri" placeholder="Nama Suami / Istri">
 					</div> 
-					<div class="col-12 col-md-6 mb-3">
-						<label for="status_suami_istri">Status Hubungan</label>
-						<select class="form-control inputan select2" name="status_suami_istri" id="status_suami_istri">
-							<option value="" selected disabled>Status</option>
-						</select>
-					</div>   
                 </div>
             </div>
         </div>
@@ -154,6 +154,10 @@
                     <div class="col-12 col-md-6 mb-3">
 						<label for="no_telp">No. Telp <span class="red">*</span></label>
 						<input type="text" autocomplete="off" maxlength="14" class="form-control numberonly inputan" name="no_telp" placeholder="08xxxxxxxxxx" required>
+                    </div>
+                    <div class="col-12 col-md-6 mb-3">
+						<label for="email">Email </label>
+						<input type="text" autocomplete="off" maxlength="100" class="form-control inputan" name="email" placeholder="abc@mail.com" id="email">
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                    		<label for="goldar">Golongan Darah <span class="red">*</span></label>	

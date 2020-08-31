@@ -9,11 +9,12 @@
 		loadTermSelectBox('suku', 6);
 		loadTermSelectBox('pendidikan', 8);
 		loadTermSelectBox('pekerjaan', 9);
-		loadTermSelectBox('status_suami_istri', 10);
+		//loadTermSelectBox('status_suami_istri', 10);
 		loadTermSelectBox('alamat_kecamatan', 12);
 		loadTermSelectBox('goldar', 4);
 		loadTermSelectBox('agama', 5);
 		loadTermSelectBox('warganegara', 7);
+		loadTermSelectBox('status_pernikahan', 16);
 		loadWilayah('alamat_provinsi', 'provinsi', '', 'Provinsi');
 		loadRadio('parent_jenkel','col-md-6', 'jenkel', 2);
 		/*loadRadio('parent_goldar','col-md-2', 'goldar', 17);
@@ -105,6 +106,9 @@
 					}
 
 					var name = $(this).attr("name");
+					if (name == 'email'){
+						value = value.toLowerCase();
+					}
 
 					allData[name] = value;
 				}
