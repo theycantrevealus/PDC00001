@@ -1503,6 +1503,9 @@ class Asesmen extends Utility {
 		$antrian = new Antrian(self::$pdo);
 		$param = ['','antrian-detail', $parameter];
 		$get_antrian = $antrian->__GET__($param);
+
+		$get_kunjungan = $antrian->get_kunjungan_detail($get_antrian['response_data'][0]['kunjungan']);
+
 		$result = array(
 					"uid"=>$get_antrian['response_data'][0]['uid'],
 					"kunjungan"=>$get_antrian['response_data'][0]['kunjungan'],
@@ -1510,7 +1513,9 @@ class Asesmen extends Utility {
 					"departemen"=>$get_antrian['response_data'][0]['departemen'],
 					"penjamin"=>$get_antrian['response_data'][0]['penjamin'],
 					"dokter"=>$get_antrian['response_data'][0]['dokter'],
-					"waktu_masuk"=>$get_antrian['response_data'][0]['waktu_masuk']
+					"waktu_masuk"=>$get_antrian['response_data'][0]['waktu_masuk'],
+					'pj_pasien'=>$get_kunjungan['response_data'][0]['pj_pasien'],
+					'info_didapat_dari'=>$get_kunjungan['response_data'][0]['info_didapat_dari'],
 				);
 
 		return $result;

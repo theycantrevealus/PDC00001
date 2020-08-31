@@ -295,6 +295,8 @@ class Antrian extends Utility {
 						array(
 							'uid'=>$uid,
 							'waktu_masuk'=>parent::format_date(),
+							'pj_pasien'=>$parameter['dataObj']['pj_pasien'],
+							'info_didapat_dari'=>$parameter['dataObj']['info_didapat_dari'],
 							'pegawai'=>$UserData['data']->uid,
 							'created_at'=>parent::format_date(),
 							'updated_at'=>parent::format_date()
@@ -937,6 +939,26 @@ class Antrian extends Utility {
 			$get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
 			$data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
 		}
+
+		return $data;
+	}
+
+	public function get_kunjungan_detail($parameter){
+		$data = self::$query
+			->select('kunjungan', array(
+					'uid',
+					'waktu_masuk',
+					'pj_pasien',
+					'info_didapat_dari'
+				)
+			)
+			->where(array(
+					'kunjungan.uid' => '= ?', 
+					'AND', 
+					'kunjungan.deleted_at' => 'IS NULL'
+				), array($parameter)
+			)
+			->execute();
 
 		return $data;
 	}
