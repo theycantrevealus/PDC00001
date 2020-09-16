@@ -1,7 +1,7 @@
 <script type="text/javascript">
 	$(function(){
 		var MODE = "tambah", selectedUID;
-		var tindakanKelas = "RI";
+		var tindakanKelas = "FIS";
 		var columnBuilder = [];
 		var penjaminBuilder = [];
 		var tindakanBuilder = [];

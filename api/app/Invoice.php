@@ -88,7 +88,62 @@ class Invoice extends Utility {
 				$parameter['from'], $parameter['to']
 			);
 		}
-		$payment = self::$query->select('invoice_payment', array(
+
+		if($parameter['length'] < 0) {
+			$payment = self::$query->select('invoice_payment', array(
+				'uid',
+				'nomor_kwitansi',
+				'pasien',
+				'invoice',
+				'pegawai',
+				'terbayar',
+				'sisa_bayar',
+				'keterangan',
+				'metode_bayar',
+				'tanggal_bayar'
+			))
+			->where($paramData, $paramValue)
+			->execute();
+		} else {
+			$payment = self::$query->select('invoice_payment', array(
+				'uid',
+				'nomor_kwitansi',
+				'pasien',
+				'invoice',
+				'pegawai',
+				'terbayar',
+				'sisa_bayar',
+				'keterangan',
+				'metode_bayar',
+				'tanggal_bayar'
+			))
+			->where($paramData, $paramValue)
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->execute();
+		}
+			
+		$payment['response_draw'] = $parameter['draw'];
+		$autonum = 1;
+		foreach ($payment['response_data'] as $key => $value) {
+			if(!isset($value['pasien']) || !isset($value['pegawai'])) {
+				unset($payment['response_data'][$key]);
+			} else {
+				$Pegawai = new Pegawai(self::$pdo);
+				$PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+				$payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
+
+				$Pasien = new Pasien(self::$pdo);
+				$PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+				$payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
+				
+				$payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
+				$payment['response_data'][$key]['autonum'] = $autonum;
+				$autonum++;
+			}
+		}
+		
+		$paymentTotal = self::$query->select('invoice_payment', array(
 			'uid',
 			'nomor_kwitansi',
 			'pasien',
@@ -101,24 +156,13 @@ class Invoice extends Utility {
 			'tanggal_bayar'
 		))
 		->where($paramData, $paramValue)
-		->limit($parameter['length'])
-		->offset($parameter['start'])
 		->execute();
-		$payment['response_draw'] = $parameter['draw'];
-		$autonum = 1;
-		foreach ($payment['response_data'] as $key => $value) {
-			$Pegawai = new Pegawai(self::$pdo);
-			$PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
-			$payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
 
-			$Pasien = new Pasien(self::$pdo);
-			$PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
-			$payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
-			
-			$payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
-			$payment['response_data'][$key]['autonum'] = $autonum;
-			$autonum++;
-		}
+		$payment['recordsTotal'] = count($paymentTotal['response_data']);
+		$payment['recordsFiltered'] = count($paymentTotal['response_data']);
+		$payment['length'] = intval($parameter['length']);
+		$payment['start'] = intval($parameter['start']);
+
 		return $payment;
 	}
 
@@ -995,7 +1039,7 @@ class Invoice extends Utility {
 	}
 
 	public function get_harga_tindakan($parameter) {
-		$harga = self::$query->select('master_poli_tindakan_penjamin', array(
+		/*$harga = self::$query->select('master_poli_tindakan_penjamin', array(
 			'id',
 			'harga',
 			'uid_poli',
@@ -1017,7 +1061,31 @@ class Invoice extends Utility {
 			$parameter['tindakan'],
 			$parameter['penjamin']
 		))
-		->execute();
+		->execute();*/
+
+		$harga = self::$query->select('master_tindakan_kelas_harga', array(
+			'id',
+			'tindakan as uid_tindakan',
+			'penjamin as uid_penjamin',
+			'kelas',
+			'harga',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
+			'AND',
+			'master_poli_tindakan_penjamin.tindakan' => '= ?',
+			'AND',
+			'master_poli_tindakan_penjamin.penjamin' => '= ?',
+			'AND',
+			'master_poli_tindakan_penjamin.kelas' => '= ?'
+		), array(
+			$parameter['tindakan'],
+			$parameter['penjamin'],
+			$parameter['kelas']
+		))
+		->execute(0);
 		return $harga;
 	}
 }

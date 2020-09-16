@@ -330,6 +330,7 @@ class Antrian extends Utility {
 			$SInvoice = new Invoice(self::$pdo);
 			$HargaKartu = $SInvoice::get_harga_tindakan(array(
 				'poli' => $parameter['dataObj']['departemen'],
+        'kelas' => __UID_KELAS_GENERAL_RJ__,
 				'tindakan' => __UID_KARTU__,
 				'penjamin' => $parameter['dataObj']['penjamin']
 			));
@@ -404,6 +405,7 @@ class Antrian extends Utility {
 
 					$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 						'poli' => $parameter['dataObj']['departemen'],
+            'kelas' => __UID_KELAS_GENERAL_RJ__,
 						'tindakan' => __UID_KONSULTASI__,
 						'penjamin' => $parameter['dataObj']['penjamin']
 					));
@@ -462,6 +464,7 @@ class Antrian extends Utility {
 
 						$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 							'poli' => $parameter['dataObj']['departemen'],
+							'kelas' => __UID_KELAS_GENERAL_RJ__,
 							'tindakan' => __UID_KONSULTASI__,
 							'penjamin' => $parameter['dataObj']['penjamin']
 						));
@@ -490,16 +493,6 @@ class Antrian extends Utility {
 
 				
 			} else { // Jika selain umum
-
-
-
-
-
-
-
-
-
-
 
 				//Invoice Manager
 				$InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
@@ -535,6 +528,7 @@ class Antrian extends Utility {
 					
 				$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 					'poli' => $parameter['dataObj']['departemen'],
+          'kelas' => __UID_KELAS_GENERAL_RJ__,
 					'tindakan' => __UID_KONSULTASI__,
 					'penjamin' => $parameter['dataObj']['penjamin']
 				));
@@ -942,8 +936,8 @@ class Antrian extends Utility {
 
 		return $data;
 	}
-
-	public function get_kunjungan_detail($parameter){
+  
+  public function get_kunjungan_detail($parameter){
 		$data = self::$query
 			->select('kunjungan', array(
 					'uid',
@@ -962,7 +956,7 @@ class Antrian extends Utility {
 
 		return $data;
 	}
-
+  
 	/*================= GET DATA ANTRIAN FOR ALL CLASS USE ==============*/
 	public function get_data_antrian_detail($parameter){ //$parameter = uid antrian
 		/*-------- GET DATA ANTRIAN ----------*/
