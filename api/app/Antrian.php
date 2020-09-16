@@ -295,6 +295,8 @@ class Antrian extends Utility {
 						array(
 							'uid'=>$uid,
 							'waktu_masuk'=>parent::format_date(),
+							'pj_pasien'=>$parameter['dataObj']['pj_pasien'],
+							'info_didapat_dari'=>$parameter['dataObj']['info_didapat_dari'],
 							'pegawai'=>$UserData['data']->uid,
 							'created_at'=>parent::format_date(),
 							'updated_at'=>parent::format_date()
@@ -328,7 +330,7 @@ class Antrian extends Utility {
 			$SInvoice = new Invoice(self::$pdo);
 			$HargaKartu = $SInvoice::get_harga_tindakan(array(
 				'poli' => $parameter['dataObj']['departemen'],
-				'kelas' => __UID_KELAS_GENERAL_RJ__,
+        'kelas' => __UID_KELAS_GENERAL_RJ__,
 				'tindakan' => __UID_KARTU__,
 				'penjamin' => $parameter['dataObj']['penjamin']
 			));
@@ -403,7 +405,7 @@ class Antrian extends Utility {
 
 					$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 						'poli' => $parameter['dataObj']['departemen'],
-						'kelas' => __UID_KELAS_GENERAL_RJ__,
+            'kelas' => __UID_KELAS_GENERAL_RJ__,
 						'tindakan' => __UID_KONSULTASI__,
 						'penjamin' => $parameter['dataObj']['penjamin']
 					));
@@ -492,16 +494,6 @@ class Antrian extends Utility {
 				
 			} else { // Jika selain umum
 
-
-
-
-
-
-
-
-
-
-
 				//Invoice Manager
 				$InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
 					'uid'
@@ -536,7 +528,7 @@ class Antrian extends Utility {
 					
 				$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 					'poli' => $parameter['dataObj']['departemen'],
-					'kelas' => __UID_KELAS_GENERAL_RJ__,
+          'kelas' => __UID_KELAS_GENERAL_RJ__,
 					'tindakan' => __UID_KONSULTASI__,
 					'penjamin' => $parameter['dataObj']['penjamin']
 				));
@@ -944,7 +936,27 @@ class Antrian extends Utility {
 
 		return $data;
 	}
+  
+  public function get_kunjungan_detail($parameter){
+		$data = self::$query
+			->select('kunjungan', array(
+					'uid',
+					'waktu_masuk',
+					'pj_pasien',
+					'info_didapat_dari'
+				)
+			)
+			->where(array(
+					'kunjungan.uid' => '= ?', 
+					'AND', 
+					'kunjungan.deleted_at' => 'IS NULL'
+				), array($parameter)
+			)
+			->execute();
 
+		return $data;
+	}
+  
 	/*================= GET DATA ANTRIAN FOR ALL CLASS USE ==============*/
 	public function get_data_antrian_detail($parameter){ //$parameter = uid antrian
 		/*-------- GET DATA ANTRIAN ----------*/
