@@ -4,8 +4,9 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item" aria-current="page">Master Poli</li>
-					<li class="breadcrumb-item active" aria-current="page">Tindakan</li>
+					<li class="breadcrumb-item" aria-current="page">Master Perobatan</li>
+					<li class="breadcrumb-item" aria-current="page">Tindakan</li>
+					<li class="breadcrumb-item active" aria-current="page">Tindakan Rawat Inap</li>
 				</ol>
 			</nav>
 		</div>

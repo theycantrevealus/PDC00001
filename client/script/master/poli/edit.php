@@ -31,13 +31,13 @@
 				
 				var metaData = response.response_package.response_data;
 				var temp_nama = metaData[0].nama;
-				var nama = temp_nama.replace('Poli ', '');
+				var nama = temp_nama.replace('Poliklinik ', '');
 
 				var tindakanData = metaData[0].tindakan;
 				console.log(tindakanData);
 
 				dataObject.uid = uid;
-				dataObject.nama = "Poli " + nama;
+				dataObject.nama = "Poliklinik " + nama;
 
 				$.each(tindakanData, function(key, item){
 					var uid_tindakan = item.uid_tindakan;

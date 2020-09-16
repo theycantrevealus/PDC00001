@@ -5,7 +5,7 @@
 		var tableTindakan = $("#table-tindakan").DataTable({
 			"ajax":{
 				async: false,
-				url: __HOSTAPI__ + "/Tindakan",
+				url: __HOSTAPI__ + "/Tindakan/rawat-inap",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -163,13 +163,13 @@
 				var form_data = {};
 				if(MODE == "tambah") {
 					form_data = {
-						"request": "tambah_tindakan",
+						"request": "tambah_tindakan_rawat_inap",
 						"nama": nama,
 						"harga": list_harga
 					};
 				} else {
 					form_data = {
-						"request": "edit_tindakan",
+						"request": "edit_tindakan_rawat_inap",
 						"uid": selectedUID,
 						"nama": nama,
 						"harga": list_harga

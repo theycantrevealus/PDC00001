@@ -4,8 +4,9 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item" aria-current="page">Master Poli</li>
-					<li class="breadcrumb-item active" aria-current="page">Tindakan</li>
+					<li class="breadcrumb-item" aria-current="page">Master Perobatan</li>
+					<li class="breadcrumb-item" aria-current="page">Tindakan</li>
+					<li class="breadcrumb-item active" aria-current="page">Tindakan Rawat Jalan</li>
 				</ol>
 			</nav>
 		</div>
@@ -23,16 +24,10 @@
 				<table class="table table-bordered" id="table-tindakan">
 					<thead>
 						<tr>
-							<th style="width: 20px;" rowspan="2">No</th>
-							<th rowspan="2">Nama Tindakan</th>
-							<th colspan="4" style="text-align: center;">Harga</th>
-							<th rowspan="2">Aksi</th>
-						</tr>
-						<tr>
-							<th>Kelas III</th>
-							<th>Kelas II</th>
-							<th>Kelas I</th>
-							<th>VIP</th>
+							<th style="width: 20px;">No</th>
+							<th style="width: 50%;">Nama Tindakan</th>
+							<th>Harga</th>
+							<th style="width: 20%;">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>
