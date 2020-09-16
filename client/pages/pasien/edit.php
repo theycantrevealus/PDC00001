@@ -26,7 +26,8 @@
                 <div class="form-row">
                     <div class="col-12 col-md-4 mb-3">
 						<label for="txt_no_rm">Nomor Rekam Medis</label>
-						<input type="text" autocomplete="off" class="form-control uppercase inputan no_rm" id="no_rm" name="no_rm" placeholder="000-000-000" required>
+						<input type="text" autocomplete="off" class="form-control uppercase inputan no_rm" id="no_rm" name="no_rm" placeholder="00-00-00" required>
+						<span style="color: #dc3545; font-size: 0.8rem;" id="error-no-rm"></span>
                     </div>
                 </div>
             </div>
@@ -43,6 +44,7 @@
                     <div class="col-12 col-md-6 mb-3">
                         <label>NIK <span class="red">*</span></label>
                         <input type="text" class="form-control inputan numberonly" maxlength="16" placeholder="NIK" value="" required="" id="nik" name="nik">
+                        <span style="color: #dc3545; font-size: 0.8rem;" id="error-nik"></span>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="txt_nama_pasien">Nama Pasien <span class="red">*</span></label>
@@ -58,7 +60,7 @@
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="tempat_lahir">Tempat Lahir <span class="red">*</span></label>
-						<input type="text" class="form-control uppercase inputan" name="tempat_lahir" id="tempat_lahir" placeholder="Tempat Lahir" autocomplete="off">
+						<input type="text" class="form-control uppercase inputan" name="tempat_lahir" id="tempat_lahir" placeholder="Tempat Lahir" autocomplete="off" required>
                     </div>
                     <div class="col-12 col-md-4 mb-3">
 						<label for="tanggal_lahir">Tanggal Lahir <span class="red">*</span></label>
@@ -67,15 +69,15 @@
                     <div class="col-12 col-md-2 mb-3">
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-						<label for="jenkel">Jenis Kelamin</label>
+						<label for="jenkel">Jenis Kelamin <span class="red">*</span></label>
 						<div class="row col-md-12" id="parent_jenkel">
 
 						</div>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                        <label>Panggilan <span class="red">*</span></label>
-                        <select name="panggilan" class="form-control inputan" id="panggilan" required>
-                            <option value="">Pilih Panggilan</option>
+                        <label>Alias <span class="red">*</span></label>
+                        <select name="panggilan" class="form-control inputan select2" id="panggilan" required>
+                            <option value="">Pilih Alias</option>
                             
                         </select>
                     </div>
@@ -133,7 +135,7 @@
 					</div> 
 					<div class="col-12 col-md-6 mb-3">
 						<label for="status_suami_istri">Status Hubungan</label>
-						<select class="form-control inputan" name="status_suami_istri" id="status_suami_istri">
+						<select class="form-control inputan select2" name="status_suami_istri" id="status_suami_istri">
 							<option value="" selected disabled>Status</option>
 						</select>
 					</div>   
@@ -158,37 +160,37 @@
 						<!-- <div class="row col-md-9" id="parent_goldar">
 
 						</div> -->
-						<select class="form-control inputan" name="goldar" id="goldar" required>
+						<select class="form-control inputan select2" name="goldar" id="goldar" required>
 							<option value="" disabled selected>Pilih Golongan Darah</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<label for="agama">Agama <span class="red">*</span></label>
-                    	<select class="form-control inputan" id="agama" name="agama" required>
+                    	<select class="form-control inputan select2" id="agama" name="agama" required>
 							<option value="" selected disabled>Pilih Agama</option>
 						</select>	
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<label for="warganegara">Kewarganegaraan <span class="red">*</span></label>
-                    	<select class="form-control inputan" id="warganegara" name="warganegara" required>
+                    	<select class="form-control inputan select2" id="warganegara" name="warganegara" required>
 							<option value="" selected disabled>Pilih Kewarganegaraan</option>
 						</select>	
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                     	<label for="suku">Suku <span class="red">*</span></label>
-                    	<select class="form-control inputan" name="suku" id="suku" required="">
+                    	<select class="form-control inputan select2" name="suku" id="suku" required="">
 							<option value="" disabled selected>Pilih Suku</option>
 						</select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
 						<label for="pendidikan">Pendidikan <span class="red">*</span></label>
-						<select class="form-control inputan" name="pendidikan" id="pendidikan" required>
+						<select class="form-control inputan select2" name="pendidikan" id="pendidikan" required>
 							<option value="" disabled selected>Pilih Pendidikan</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="pekerjaan">Pekerjaan <span class="red">*</span></label>
-						<select class="form-control inputan" name="pekerjaan" id="pekerjaan" required>
+						<select class="form-control inputan select2" name="pekerjaan" id="pekerjaan" required>
 							<option value="" disabled selected>Pilih Pekerjaan</option>
 						</select>
 					</div>
@@ -209,7 +211,7 @@
 						&nbsp;
                     <!-- </div>
                     <div class="col-12 col-md-4 mb-3"> -->
-                    	<a href="<?php echo __HOSTNAME__; ?>/master/pasien" class="btn btn-danger">Batal</a>
+                    	<a href="<?php echo __HOSTNAME__; ?>/pasien" class="btn btn-danger">Batal</a>
                    <!--  </div> -->
                 </div>
             </div>

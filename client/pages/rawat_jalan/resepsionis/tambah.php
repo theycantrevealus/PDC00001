@@ -51,9 +51,9 @@
             <div class="col-lg-8 card-form__body card-body">
                 <div class="form-row">
                     <div class="col-12 col-md-6 mb-3">
-                        <label>Penjamin <span class="red">*</span></label>
+                        <label>Pembayaran <span class="red">*</span></label>
                         <select id="penjamin" class="form-control select2 inputan">
-                            <option value="" disabled selected>Pilih Penjamin</option>
+                            <option value="" disabled selected>Pilih Jenis Pembayaran</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
@@ -63,9 +63,9 @@
                         </select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
-                        <label>Pemeriksaan <span class="red">*</span></label>
+                        <label>Poliklinik <span class="red">*</span></label>
                         <select id="departemen" class="form-control select2 inputan">
-                            <option value="" disabled selected>Pilih Pemeriksaan</option>
+                            <option value="" disabled selected>Pilih Poliklinik</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
