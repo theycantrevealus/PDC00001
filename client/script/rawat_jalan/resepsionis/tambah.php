@@ -50,7 +50,7 @@
 						},
 						type: "POST",
 						success: function(response){
-							console.log(response.response_package)
+							//console.log(response.response_package)
 							if(response.response_package.response_notif == 'K') {
 								push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
 							} else if(response.response_package.response_notif == 'P') {

@@ -1063,29 +1063,28 @@ class Invoice extends Utility {
 		))
 		->execute();*/
 
-		$harga = self::$query->select('master_tindakan_kelas_harga', array(
+		return self::$query->select('master_tindakan_kelas_harga', array(
 			'id',
-			'tindakan as uid_tindakan',
-			'penjamin as uid_penjamin',
+			'tindakan',
+			'penjamin',
 			'kelas',
 			'harga',
 			'created_at',
 			'updated_at'
 		))
 		->where(array(
-			'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
+			'master_tindakan_kelas_harga.deleted_at' => 'IS NULL',
 			'AND',
-			'master_poli_tindakan_penjamin.tindakan' => '= ?',
+			'master_tindakan_kelas_harga.tindakan' => '= ?',
 			'AND',
-			'master_poli_tindakan_penjamin.penjamin' => '= ?',
+			'master_tindakan_kelas_harga.penjamin' => '= ?',
 			'AND',
-			'master_poli_tindakan_penjamin.kelas' => '= ?'
+			'master_tindakan_kelas_harga.kelas' => '= ?'
 		), array(
 			$parameter['tindakan'],
 			$parameter['penjamin'],
 			$parameter['kelas']
 		))
-		->execute(0);
-		return $harga;
+		->execute();;
 	}
 }
