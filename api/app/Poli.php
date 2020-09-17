@@ -189,7 +189,7 @@ class Poli extends Utility {
 	}
 
 	private function get_poli_tindakan($parameter) {
-		$data = self::$query
+		/*$data = self::$query
 				->select('master_poli_tindakan_penjamin', array(
 						'id',
 						'harga',
@@ -216,8 +216,33 @@ class Poli extends Utility {
 			$data['response_data'][$key]['tindakan'] = $Tindakan::get_tindakan_detail($value['uid_tindakan'])['response_data'][0];
 			$data['response_data'][$key]['penjamin'] = $Penjamin::get_penjamin_detail($value['uid_penjamin'])['response_data'][0];
 			$autonum++;
-		}
+		}*/
+		$targetKelas = (!isset($parameter['kelas'])) ? __UID_KELAS_GENERAL_RJ__ : $parameter['kelas'];
+		
+		$data = self::$query->select('master_tindakan_kelas_harga', array(
+			'id',
+			'tindakan as uid_tindakan',
+			'kelas',
+			'harga',
+			'penjamin as uid_penjamin',
+			'created_at',
+			'deleted_at'
+		))
+		->where(array(
+			'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+		), array(
 
+		))
+		->execute();
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$Penjamin = new Penjamin(self::$pdo);
+			$Tindakan = new Tindakan(self::$pdo);
+			$data['response_data'][$key]['tindakan'] = $Tindakan::get_tindakan_detail($value['uid_tindakan'])['response_data'][0];
+			$data['response_data'][$key]['penjamin'] = $Penjamin::get_penjamin_detail($value['uid_penjamin'])['response_data'][0];
+			$autonum++;
+		}
 		return $data;
 	}
 

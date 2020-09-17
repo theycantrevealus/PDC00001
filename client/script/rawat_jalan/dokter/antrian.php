@@ -1,7 +1,16 @@
 <script type="text/javascript">
 	$(function() {
-		var poliList = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
-		
+		var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
+		var poliList = poliListRaw;
+		poliList.tindakan = [];
+		//Filter Rawat Jalan
+		for(var z in poliListRaw.tindakan) {
+			if(poliListRaw.tindakan[z].kelas == __UID_KELAS_GENERAL_RJ__) {
+				poliList.tindakan.push(poliListRaw.tindakan);
+			}
+		}
+
+		console.log(poliList);
 		//Init
 		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorKeteranganResepRacikan, editorPlanning;
 		var antrianData, asesmen_detail;
@@ -315,9 +324,10 @@
 		$("#current-poli").prepend(poliList[0]['nama']);
 
 		function generateTindakan(poliList, antrianData, selected = []) {
+
 			var tindakanMeta = {};
 			$("#txt_tindakan option").remove();
-			var UID_TINDAKAN = <?php echo json_encode(__UID_KONSULTASI__); ?>;
+			var __UID_KONSULTASI__ = <?php echo json_encode(__UID_KONSULTASI__); ?>;
 			var UID_KARTU = <?php echo json_encode(__UID_KARTU__); ?>;
 			for(var key in poliList) {
 				if(tindakanMeta[poliList[key].uid_tindakan] === undefined) {
@@ -336,7 +346,7 @@
 			}
 
 			for(var key in tindakanMeta) {
-				if(selected.indexOf(key) < 0 && tindakanMeta[key].nama != undefined && key != UID_TINDAKAN && key != UID_KARTU) {
+				if(selected.indexOf(key) < 0 && tindakanMeta[key].nama != undefined && key != __UID_KONSULTASI__ && key != UID_KARTU) {
 					$("#txt_tindakan").append(
 						"<option value=\"" + key + "\">" + tindakanMeta[key].nama + "</option>"
 					);
