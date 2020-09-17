@@ -328,10 +328,11 @@
 			var tindakanMeta = {};
 			$("#txt_tindakan option").remove();
 			var __UID_KONSULTASI__ = <?php echo json_encode(__UID_KONSULTASI__); ?>;
-			var UID_KARTU = <?php echo json_encode(__UID_KARTU__); ?>;
+			var __UID_KARTU__ = <?php echo json_encode(__UID_KARTU__); ?>;
 			for(var key in poliList) {
 				if(tindakanMeta[poliList[key].uid_tindakan] === undefined) {
-					tindakanMeta[poliList[key].uid_tindakan] = [];	
+					tindakanMeta[poliList[key].uid_tindakan] = [];
+					tindakanMeta[poliList[key].uid_tindakan].kelas = poliList[key].kelas;
 					tindakanMeta[poliList[key].uid_tindakan].nama = poliList[key].tindakan.nama;
 				}
 
@@ -346,9 +347,9 @@
 			}
 
 			for(var key in tindakanMeta) {
-				if(selected.indexOf(key) < 0 && tindakanMeta[key].nama != undefined && key != __UID_KONSULTASI__ && key != UID_KARTU) {
+				if(selected.indexOf(key) < 0 && tindakanMeta[key].nama != undefined && key != __UID_KONSULTASI__ && key != __UID_KARTU__) {
 					$("#txt_tindakan").append(
-						"<option value=\"" + key + "\">" + tindakanMeta[key].nama + "</option>"
+						"<option value=\"" + key + "\" kelas=\"" + tindakanMeta[key].kelas + "\">" + tindakanMeta[key].nama + "</option>"
 					);
 				}
 			}
@@ -360,7 +361,8 @@
 		$("#btnTambahTindakan").click(function(){
 			autoTindakan(tindakanMeta, {
 				uid: $("#txt_tindakan").val(),
-				nama: $("#txt_tindakan option:selected").text()
+				nama: $("#txt_tindakan option:selected").text(),
+				kelas: $("#txt_tindakan option:selected").attr("kelas"),
 			}, antrianData);
 			
 			if(usedTindakan.indexOf($("#txt_tindakan").val()) < 0) {
@@ -389,7 +391,7 @@
 
 			$(newCellTindakanTindakan).html(setTindakan.nama).attr({
 				"set-tindakan": setTindakan.uid
-			});
+			}).attr("kelas", setTindakan.kelas);
 			var newPenjamin = document.createElement("SELECT");
 			
 			for(var a = 0; a < penjaminMeta[setTindakan.uid].length; a++) {
@@ -1638,6 +1640,7 @@
 					"kunjungan": kunjungan,
 					"antrian": antrian,
 					"pasien": pasien,
+					"kelas": $(this).find("td:eq(1)").attr("kelas"),
 					"poli": poli,
 					"item": tindakanItem,
 					"itemName": $(this).find("td:eq(1)").html(),
@@ -1775,6 +1778,7 @@
 				},
 				type: "POST",
 				success: function(response) {
+					console.log(response);
 					if(response.response_package.response_result > 0) {
 						notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
 					} else {
