@@ -10,9 +10,12 @@
 			</nav>
 			<h4>Layanan Radiologi</h4>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/master/radiologi/layanan/tambah" class="btn btn-info btn-sm ml-3">
+		<!-- <a href="<?php echo __HOSTNAME__; ?>/master/radiologi/layanan/tambah" class="btn btn-info btn-sm ml-3">
 			<i class="fa fa-plus"></i> Tambah
-		</a>
+		</a> -->
+		<button class="btn btn-sm btn-info" id="btnTambahData">
+			<i class="fa fa-plus"></i> Tambah
+		</button>
 	</div>
 </div>
 
