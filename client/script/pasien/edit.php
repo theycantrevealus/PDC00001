@@ -154,7 +154,7 @@
         });
 	});
 
-	function cekNoRM(no_rm, no_rm_lama){
+	function cekNoRM(no_rm, no_rm_lama) {
 		var result = false;
 
 		$.ajax({

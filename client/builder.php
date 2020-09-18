@@ -136,7 +136,6 @@
 	<div class="global-sync-container blinker_dc">
 		<h4 class="text-center" style="font-family: Courier"><i class="fa fa-signal"></i><br /><br /><small>reconnecting</small></h4>
 	</div>
-	<div class="notification-container"></div>
 	<!-- <div id="app-settings">
 		<app-settings layout-active="default" :layout-location="{
 	  'default': 'index.html',
@@ -268,10 +267,46 @@
 					$(".global-sync-container").fadeOut();
 				}
 
-				/*Sync.onmessage = function(evt) {
-					var signalData = evt.data;
-					
-				}*/
+				Sync.onmessage = function(evt) {
+					var signalData = JSON.parse(evt.data);
+					var command = signalData.protocols;
+					var type = signalData.type;
+					var sender = signalData.sender;
+					var receiver = signalData.receiver;
+					var time = signalData.time;
+					var parameter = signalData.parameter;
+
+					if(command !== undefined && command !== null && command !== "") {
+						if(protocolLibGLOBAL[command] !== undefined) {
+							if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
+								protocolLibGLOBAL[command](command, type, parameter, sender, receiver, time);
+							}
+						}
+					}
+				}
+
+				var protocolLibGLOBAL = {
+					akses_update: function(protocols, type, parameter, sender, receiver, time) {
+						if(sender != receiver) {
+							$.ajax({
+								url:__HOSTAPI__ + "/Pegawai",
+								beforeSend: function(request) {
+									request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+								},
+								type:"POST",
+								data: {
+									"request": "refresh_pegawai_access",
+									"uid": __ME__
+								},
+								success:function(resp) {
+									notification ("info", "Hak modul Anda sudah diupdate. Refresh halaman untuk akses baru", 3000, "hasil_modul_update");
+								}
+							});
+						} else {
+							//
+						}
+					}
+				};
 
 				Sync.onclose = function() {
 					$(".global-sync-container").fadeIn();
@@ -488,6 +523,7 @@
 			});
 		});
 	</script>
+	<div class="notification-container"></div>
 </body>
 
 </html>

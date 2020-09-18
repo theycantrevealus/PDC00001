@@ -21,18 +21,11 @@
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
 				<table class="table table-bordered" id="table-tindakan">
-					<thead>
+					<thead class="thead-dark">
 						<tr>
-							<th style="width: 20px;" rowspan="2">No</th>
-							<th rowspan="2">Nama Tindakan</th>
-							<th colspan="4" style="text-align: center;">Harga</th>
-							<th rowspan="2">Aksi</th>
-						</tr>
-						<tr>
-							<th>Kelas III</th>
-							<th>Kelas II</th>
-							<th>Kelas I</th>
-							<th>VIP</th>
+							<th style="width: 20px;">No</th>
+							<th>Nama Tindakan</th>
+							<th>Aksi</th>
 						</tr>
 					</thead>
 					<tbody>
