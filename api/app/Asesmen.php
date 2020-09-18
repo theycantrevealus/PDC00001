@@ -1072,23 +1072,23 @@ class Asesmen extends Utility {
 					'discount_type' => 'N',
 					'pasien' => $parameter['pasien'],
 					'penjamin' => $value['penjamin'],
-					'keterangan' => 'Biaya Tindakan Perobatan'	
+					'keterangan' => 'Biaya Tindakan Perobatan'
 				));
+
 				array_push($returnResponse, $InvoiceDetail);
-				/*
-					'invoice' => $parameter['invoice'],
-					'item' => $parameter['item'],
-					'item_type' => $parameter['item_origin'],
-					'qty' => $parameter['qty'],
-					'harga' => $parameter['harga'],
-					'status_bayar' => isset($parameter['status_bayar']) ? $parameter['status_bayar'] : 'N',
-					'subtotal' => $parameter['subtotal'],
-					'discount' => $parameter['discount'],
-					'discount_type' => $parameter['discount_type'],
-					'pasien' => $parameter['pasien'],
-					'penjamin' => $parameter['penjamin'],
-					'keterangan' => $parameter['keterangan']
-				 */
+				
+				/*'invoice' => $parameter['invoice'],
+				'item' => $parameter['item'],
+				'item_type' => $parameter['item_origin'],
+				'qty' => $parameter['qty'],
+				'harga' => $parameter['harga'],
+				'status_bayar' => isset($parameter['status_bayar']) ? $parameter['status_bayar'] : 'N',
+				'subtotal' => $parameter['subtotal'],
+				'discount' => $parameter['discount'],
+				'discount_type' => $parameter['discount_type'],
+				'pasien' => $parameter['pasien'],
+				'penjamin' => $parameter['penjamin'],
+				'keterangan' => $parameter['keterangan']*/
 			}
 			array_push($returnResponse, $new_asesmen_tindakan);
 		}

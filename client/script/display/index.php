@@ -67,8 +67,6 @@
 				Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 			},
 			success: function(response) {
-				console.clear();
-				console.log(response);
 				var data = response.response_package;
 				var ruanganMeta = {};
 				for(var key in data) {
@@ -148,6 +146,11 @@
 
 
 
+		var audio = new Audio(), i = 0;
+		audio.volume = 0.5;
+		audio.loop = false;
+		var playlist = [];
+		var currentLength = 0;
 
 		Sync.onmessage = function(evt) {
 			var signalData = JSON.parse(evt.data);
@@ -160,39 +163,60 @@
 
 			if(command !== undefined && command !== null && command !== "") {
 				if(protocolLib[command] !== undefined) {
-					protocolLib[command](command, type, parameter, sender, receiver, time);	
+					if(command == "anjungan_kunjungan_panggil") {
+						
+						
+						console.clear();
+						console.log(playlist);
+						if(!audio.paused && !audio.ended && 0 < audio.currentTime) {
+							var listParse = protocolLib[command](command, type, parameter, sender, receiver, time, audio, playlist);
+							playlist = listParse.playlist;
+						} else {
+							var listParse
+							if(playlist.length > 0) {
+								listParse = protocolLib[command](command, type, parameter, sender, receiver, time, audio, playlist, true);
+							} else {
+								listParse = protocolLib[command](command, type, parameter, sender, receiver, time, audio, playlist, false);
+							}
+
+							playlist = listParse.playlist;
+							console.log(playlist);
+							audio.src = playlist[0];
+							audio.play();
+						}
+					} else {
+						protocolLib[command](command, type, parameter, sender, receiver, time);	
+					}
 				}
 			}
 		}
 
+		audio.addEventListener('ended', function () {
+			i++;
+			if(i == playlist.length) {
+				audio.pause();
+				audio.currentTime = 0;
+				i = 0;
+				console.log("Finished");
+			} else {
+				audio.src = playlist[i];
+				audio.play();
+			}
+		});
+		
 
 
 		var protocolLib = {
 			anjungan_kunjungan_baru: function(protocols, type, parameter, sender, receiver, time) {
 				//
 			},
-			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
+			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time, audio, playlist, isReset) {
 				var globalData = {};
-				var audio;
-				var playlist = [];
 				var tracks;
 				var current;
-
 				var commandParse = parameter;
 
-				/*var audio = new Audio(),
-				i = 0;
-				var playlist = [];
-				audio.addEventListener('ended', function () {
-					i++;
-					if(i == playlist.length) {
-						audio.pause();
-						audio.currentTime = 0;
-					} else {
-						audio.src = playlist[i];
-						audio.play();
-					}
-				}, true);*/
+				
 
 				$("#current_antrian").html(commandParse.nomor);
 				$("#antrian_" + commandParse.loket).html(commandParse.nomor);
@@ -208,27 +232,26 @@
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
 					success: function(response){
-						var audio = new Audio(),
-						i = 0;
-						var playlist = [];
-						audio.addEventListener('ended', function () {
-							i++;
-							if(i == playlist.length) {
-								audio.pause();
-								audio.currentTime = 0;
-							} else {
-								audio.src = playlist[i];
-								audio.play();
-							}
-						}, true);
+						
+						
 
 							
 
 						if(response.response_package != "") {
-							playlist = [
+							/*playlist = [
 								__HOST__ + 'audio/openning.mpeg',
 								__HOST__ + 'audio/antrian.mp3'
-							];
+							];*/
+							if(isReset) {
+								playlist = [
+									__HOST__ + 'audio/openning.mpeg',
+									__HOST__ + 'audio/antrian.mp3'
+								];
+							} else {
+								playlist.push(__HOST__ + 'audio/openning.mpeg');
+								playlist.push(__HOST__ + 'audio/antrian.mp3');
+							}
+								
 							
 							forRead = response.response_package.split(" ");
 							for(var z = 0; z < forRead.length; z++) {
@@ -265,25 +288,16 @@
 								}
 							}
 						}*/
-					
-						if(playlist.length > 0) {
-							audio.volume = 0.3;
-							audio.loop = false;
-							audio.src = playlist[0];
-							audio.play();
-						}
 					},
 					error: function(response) {
 						console.log(response);
 					}
 				});
-			
-				if(playlist.length > 0) {
-					audio.volume = 0.3;
-					audio.loop = false;
-					audio.src = playlist[0];
-					audio.play();
-				}
+
+				return {
+					audio: audio,
+					playlist: playlist
+				};
 			}
 		};
 
