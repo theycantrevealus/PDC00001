@@ -10,7 +10,7 @@
 									<img width="120" height="100" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" />			
 								</td>
 								<td>
-									<h3 style="color: #fff">RUMAH SAKIT UMUM DAERAH BINTAN</h3>
+									<h3 style="color: #fff">RUMAH SAKIT UMUM PETALA BUMI</h3>
 									<i class="fa fa-map-marker" style="color: red;"></i> <span style="color: #fff">Jalan Dr. Soetomo No. 65, Sekip, LimaPuluh, Kota Pekanbaru, Riau 28155. Telp. (0761)23024</span>
 								</td>
 							</tr>
