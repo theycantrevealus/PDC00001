@@ -1,15 +1,42 @@
 <script type="text/javascript">
 	$(function(){
 
-		var tableDo = $("#table-do").DataTable({
+		var tablePo = $("#table-po").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/DeliveryOrder",
+				url: __HOSTAPI__ + "/PO",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+					//check barang sudah sampai semua atau belum
+					var poData = response.response_package.response_data;
+					for(var CPOKey in poData) {
+						if(poData[CPOKey].supplier == undefined || poData[CPOKey].supplier == null) {
+							poData[CPOKey].supplier = {
+								nama: "No Data"
+							};
+						}
+
+						if(poData[CPOKey].pegawai == undefined || poData[CPOKey].pegawai == null) {
+							poData[CPOKey].pegawai = {
+								nama: "No Data"
+							};
+						}
+
+						//Check Item
+						var poItem = poData[CPOKey].detail;
+						for(var itemKey in poItem) {
+							if(poItem[itemKey].sampai >= poItem[itemKey].qty) {
+								poItem.splice(itemKey, 1);
+							}
+						}
+						if(poItem.length == 0) {
+							poData.splice(CPOKey, 1);
+						}
+					}
+					console.log(poData);
+					return poData;
 				}
 			},
 			autoWidth: false,
@@ -20,67 +47,110 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+						return row.autonum;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['waktu_input'];
-					}
-				},
-				/*{
-					"data" : null, render: function(data, type, row, meta) {
-						return row['no_dokumen'];
-					}
-				},*/
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return row['tgl_dokumen'];
+						return row.nomor_po;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['nama_supplier'];
+						return row.supplier.nama;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['no_do'];
+						return row.pegawai.nama;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['no_invoice'];
+						return "<a href=\"" + __HOSTNAME__ + "/inventori/do/tambah/" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail\"><i class=\"fa fa-box-open\"></i></a>";
 					}
 				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return row['tgl_invoice'];
-					}
-				},
+			]
+		});
 
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return "";
-					}
+
+
+
+
+
+
+
+		var tableDo = $("#table-do").DataTable({
+			"ajax":{
+				url: __HOSTAPI__ + "/DeliveryOrder",
+				type: "GET",
+				headers:{
+					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return row['nama_pegawai'];
+				dataSrc:function(response) {
+					var data = response.response_package.response_data;
+					for(var a = 0; a < data.length; a++) {
+						if(data[a].supplier == undefined || data[a].supplier == null) {
+							data[a].supplier = {
+								nama: "No Data"
+							};
+						}
+
+						if(data[a].pegawai == undefined || data[a].pegawai == null) {
+							data[a].pegawai = {
+								nama: "No Data"
+							};
+						}
 					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									/*"<button class=\"btn btn-info btn-sm btn-edit-penjamin\" id=\"penjamin_edit_" + row["uid"] + "\">" +
-										"<i class=\"fa fa-pencil\"></i> Edit" +
-									"</button>" +
-									"<button id=\"penjamin_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-penjamin\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
-									"</button>" +*/
-								"</div>";
-					}
+					return data;
 				}
+			},
+			autoWidth: false,
+			aaSorting: [[0, "asc"]],
+			"columnDefs":[
+				{"targets":0, "className":"dt-body-left"}
+			],
+			"columns" : [
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.autonum;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.tgl_do;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.no_do;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.supplier.nama;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.no_invoice;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.pegawai.nama;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.status;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<button class=\"btn btn-info btn-sm btn-detail\"><i class=\"fa fa-eye\"></i></button>";
+					}
+				},
 			]
 		});
 

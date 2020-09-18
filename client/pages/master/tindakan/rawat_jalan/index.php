@@ -19,21 +19,37 @@
 
 <div class="container-fluid page__container">
 	<div class="row card-group-row">
-		<div class="col-lg-12 col-md-12 card-group-row__col">
-			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<table class="table table-bordered" id="table-tindakan">
-					<thead>
-						<tr>
-							<th style="width: 20px;">No</th>
-							<th style="width: 50%;">Nama Tindakan</th>
-							<th>Harga</th>
-							<th style="width: 20%;">Aksi</th>
-						</tr>
-					</thead>
-					<tbody>
-						
-					</tbody>
-				</table>
+		<div class="col-lg-12 col-md-12">
+			<div class="row">
+				<div class="col-lg">
+					<div class="card">
+						<div class="card-header card-header-large bg-white d-flex align-items-center">
+							<h5 class="card-header__title flex m-0">Harga Tindakan</h5>
+						</div>
+						<div class="card-header card-header-tabs-basic nav" role="tablist">
+							<a style="width: 400px;">
+								<select class="form-control" id="filter-penjamin">
+									<option>Pilih Penjamin</option>
+								</select>
+							</a>
+						</div>
+						<div class="card-body tab-content">
+							<div class="tab-pane active show fade" id="resep-biasa">
+								<table class="table table-bordered" id="table-tindakan">
+									<thead class="thead-dark">
+										<tr>
+											<th class="wrap_content">No</th>
+											<th style="width: 50%;">Nama Tindakan</th>
+										</tr>
+									</thead>
+									<tbody>
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

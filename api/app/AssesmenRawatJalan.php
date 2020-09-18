@@ -28,8 +28,8 @@ class AssesmenRawatJalan extends Utility {
 	public function __GET__($parameter = array()) {
 		try {
 			switch($parameter[1]) {
-				case 'antrian-assesmen':
-					return self::get_antrian_assesmen();
+				case 'antrian-asesmen':
+					return self::get_antrian_asesmen();
 					break;
 
 				case 'assesmen-detail':
@@ -70,12 +70,12 @@ class AssesmenRawatJalan extends Utility {
 	}
 
 
-	private function get_antrian_assesmen(){
+	private function get_antrian_asesmen(){
 		$antrian = self::get_list_antrian();
 
 		$autonum = 1;
 		foreach ($antrian as $key => $value) {
-			$cek_assesment = self::cek_assesmen_detail('assesmen_rawat_umum', $value['uid']);
+			$cek_assesment = self::cek_assesmen_detail('asesmen_rawat_umum', $value['uid']);
 			$antrian[$key]['uid_assesmen'] = "";
 			$antrian[$key]['status_assesmen'] = false;
 
@@ -159,7 +159,7 @@ class AssesmenRawatJalan extends Utility {
 			$allData[$key] = $value;
 		}
 
-		$allData['uid'] = $uid;
+		/*$allData['uid'] = $uid;
 		$allData['antrian'] = $parameter['uid_antrian'];
 		$allData['no_rm'] = $dataPasien['no_rm'];
 		$allData['pasien'] = $dataPasien['uid'];
@@ -199,7 +199,8 @@ class AssesmenRawatJalan extends Utility {
 					);
 			}
 		
-		return $assesmen;
+		return $assesmen;*/
+		return $dataObj;
 	}
 
 	private function edit_assesmen($table, $parameter){

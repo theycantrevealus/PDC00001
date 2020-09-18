@@ -9,9 +9,14 @@
 			$child = $pdo->prepare('SELECT * FROM modul WHERE deleted_at IS NULL AND parent = ? AND show_on_menu = ? AND menu_group = ?');
 			$child->execute(array($value['id'], 'Y', $group));
 			$LinkManager = ($child->rowCount() > 0) ? "#menu-" . $value['id'] : __HOSTNAME__ . '/' .$value['identifier'];
+			$activeCheck = false;
+			if(__HOSTNAME__ . '/' . implode('/', __PAGES__) == $LinkManager) {
+				$activeCheck = true;
+			}
+
 			if(in_array($value['id'], $access)) {
 				?>
-				<li class="sidebar-menu-item">
+				<li class="sidebar-menu-item <?php echo ($activeCheck == true) ? "active" : ""; ?>" parent-child="<?php echo $parent; ?>">
 					<a class="sidebar-menu-button" <?php echo ($child->rowCount() > 0) ? "data-toggle=\"collapse\"" : ""; ?> href="<?php echo $LinkManager; ?>">
 						<?php
 							if($parent == 0) {
@@ -32,7 +37,7 @@
 					<?php
 						if($child->rowCount() > 0) {
 					?>
-					<ul class="sidebar-submenu collapse" id="menu-<?php echo $value['id']; ?>">
+					<ul class="sidebar-submenu collapse" id="menu-<?php echo $value['id']; ?>" master-child="<?php echo $parent; ?>">
 						<?php
 							$availMenu += reloadModul($pdo, $value['id'], $group, $access);
 						?>
@@ -77,27 +82,6 @@
 					</div>
 				</div>
 			</div> -->
-			<div class="sidebar-heading sidebar-m-t">Main</div>
-			<ul class="sidebar-menu">
-				<li class="sidebar-menu-item">
-					<a class="sidebar-menu-button" href="<?php echo __HOSTNAME__; ?>">
-						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">dvr</i>
-						<span class="sidebar-menu-text">Dashboard</span>
-					</a>
-				</li>
-				<li class="sidebar-menu-item">
-					<a class="sidebar-menu-button" href="<?php echo __HOSTNAME__; ?>/anjungan">
-						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">receipt</i>
-						<span class="sidebar-menu-text">Anjungan</span>
-					</a>
-				</li>
-				<li class="sidebar-menu-item">
-					<a class="sidebar-menu-button" href="<?php echo __HOSTNAME__; ?>/display">
-						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">desktop_mac</i>
-						<span class="sidebar-menu-text">Display</span>
-					</a>
-				</li>
-			</ul>
 			<div class="sidebar-heading sidebar-m-t" id="sidemenu_1">Menu</div>
 			<ul class="sidebar-menu">
 				<?php
