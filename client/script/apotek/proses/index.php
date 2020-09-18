@@ -172,7 +172,7 @@
 				var ObatData = load_product_resep(newObat, data.detail[a].detail.uid, false);
 
 				var newBatchSelector = document.createElement("SELECT");
-				$(newDetailCellObat).append("<b style=\"padding-top: 10px; display: block\">Batch</b>").append(newBatchSelector);
+				//$(newDetailCellObat).append("<b style=\"padding-top: 10px; display: block\">Batch</b>").append(newBatchSelector);
 
 				//$(newDetailCellObat).html(data.detail[a].detail.nama);
 				var batchDataUnique = [];
@@ -337,6 +337,8 @@
 					templateSelection: function(data) {
 						return data.text;
 					}
+				}).attr({
+					"disabled": "disabled"
 				}).on("select2:select", function(e) {
 					var currentObat = $(this).val();
 					checkRevisi(data);
@@ -502,9 +504,9 @@
 
 					var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
 					var newRacikanBatchSelector = document.createElement("SELECT");
-					$(newCellRacikanObat).css({
+					/*$(newCellRacikanObat).css({
 						"padding-bottom": "50px"
-					}).append("<b style=\"padding-top: 10px; display: block\">Batch</b>").append(newRacikanBatchSelector);
+					}).append("<b style=\"padding-top: 10px; display: block\">Batch</b>").append(newRacikanBatchSelector);*/
 					$(newRacikanBatchSelector).addClass("racikan-batch-loader").select2();
 
 					//$(newDetailCellObat).html(data.detail[a].detail.nama);
@@ -913,7 +915,7 @@
 						<div class="card-header card-header-large bg-white">
 							<div class="row">
 								<div class="col-lg-6">
-									<h5 class="card-header__title flex m-0">Daftar Resep / <span class="text-info" id="nama-pasien"></span>. Total tagihan <span class="text-danger" id="jumlah-tagihan-pasien">0.00</span></h5>
+									<h5 class="card-header__title flex m-0">Daftar Resep / <span class="text-info" id="nama-pasien"></span></h5>
 								</div>
 							</div>
 						</div>
