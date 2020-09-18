@@ -6,8 +6,8 @@ use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Utility as Utility;
-
-
+use PondokCoder\Antrian as Antrian;
+use PondokCoder\Pasien as Pasien;
 
 class Laboratorium extends Utility {
 	static $pdo;
@@ -50,6 +50,19 @@ class Laboratorium extends Utility {
 				case 'lab_detail':
 					return self::get_lab_detail($parameter[2]);
 					break;
+				
+				case 'antrian':					
+					return self::get_antrian();		//-> get antrian labor_order
+					break;
+				
+				case 'get-data-pasien-antrian':
+					return self::get_data_pasien_antrian($parameter[2]);
+					break;
+
+				case 'laboratorium-order-detail-item':
+					return self::get_laboratorium_order_detail_item($parameter[2]);
+					break;
+
 				default:
 					return self::get_lab();
 			}
@@ -1144,6 +1157,196 @@ class Laboratorium extends Utility {
 		return $worker;
 	}
 
+
+	/*==================== FUNCTION FOR PROCCESS LAB DATA =====================*/
+	private function get_antrian(){
+		$data = self::$query
+				->select('lab_order', 
+					array(
+						'uid',
+						'asesmen as uid_asesmen',
+						'waktu_order'
+					)
+				)
+				->join('asesmen', array(
+						'antrian as uid_antrian'
+					)
+				)
+				->join('antrian', array(
+						'pasien as uid_pasien',
+						'dokter as uid_dokter',
+						'departemen as uid_poli',
+						'penjamin as uid_penjamin',
+						'waktu_masuk'
+					)
+				)
+				->join('pasien', array(
+						'nama as pasien',
+						'no_rm'
+					)
+				)
+				->join('master_poli', array(
+						'nama as departemen'
+					)
+				)
+				->join('pegawai', array(
+						'nama as dokter'
+					)
+				)
+				->join('master_penjamin', array(
+						'nama as penjamin'
+					)
+				)
+				->join('kunjungan', array(
+						'pegawai as uid_resepsionis'
+					)
+				)
+				->on(array(
+						array('lab_order.asesmen', '=', 'asesmen.uid'),
+						array('asesmen.antrian','=','antrian.uid'),
+						array('pasien.uid','=','antrian.pasien'),
+						array('master_poli.uid','=','antrian.departemen'),
+						array('pegawai.uid','=','antrian.dokter'),
+						array('master_penjamin.uid','=','antrian.penjamin'),
+						array('kunjungan.uid','=','antrian.kunjungan')
+					)
+				)
+				->where(array(
+						'lab_order.deleted_at' => 'IS NULL'
+					)
+				)
+				->order(
+					array(
+						'lab_order.waktu_order' => 'DESC'
+					)
+				)
+				->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order'])) . ' - [' . date('H:i', strtotime($value['waktu_order'])) . ']';
+			$autonum++;
+		}
+
+		return $data;
+	}
+
+	/*------------------- GET DATA PASIEN and ANTRIAN --------------------*/
+	private function get_data_pasien_antrian($parameter){
+		$get_uid_asesmen = self::$query
+			->select('lab_order', array(
+					'asesmen'
+				)
+			)
+			->where(
+				array(
+					'lab_order.uid' => '= ?'
+				),
+				array($parameter)
+			)
+			->execute();
+
+		$result = "";
+		if ($get_uid_asesmen['response_result'] > 0){
+			$get_uid_antrian = self::$query
+				->select('asesmen', array('antrian'))
+				->where(array('asesmen.uid' => '= ?'), 
+					array($get_uid_asesmen['response_data'][0]['asesmen']))
+				->execute();
+
+			$uid_antrian = $get_uid_antrian['response_data'][0]['antrian'];
+
+			$antrian = new Antrian(self::$pdo);
+			$result = $antrian->get_data_pasien_dan_antrian($uid_antrian);	//call function for get data antrian and 
+																			//pasien in class antrian
+
+		}
+		
+		return $result;
+	}
+
+	private function get_laboratorium_order_detail_item($parameter){
+		$data = self::$query
+			->select('lab_order_detail', array(
+					'id',
+					'lab_order',
+					'tindakan'
+				)
+			)
+			->where(array(
+					'lab_order_detail.lab_order' => '= ?',
+					'AND',
+					'lab_order_detail.deleted_at' => 'IS NULL'
+				), array($parameter)
+			)
+			->execute();
+
+		foreach ($data['response_data'] as $key => $value){
+			$data_lab = self::get_lab_detail_data_only($value['tindakan']);
+			$data['response_data'][$key]['kode'] = $data_lab['response_data'][0]['kode'];
+			$data['response_data'][$key]['nama'] = $data_lab['response_data'][0]['nama'];
+			
+			$data['response_data'][$key]['nilai_item'] = [];
+			$data_nilai = self::get_laboratorium_order_nilai_item($value['tindakan']);
+			$data['response_data'][$key]['nilai_item'] = $data_nilai['response_data'];
+			
+		}
+
+		return $data;
+	}
+
+	public function get_lab_detail_data_only($parameter){
+		$data_lab = self::$query
+			->select('master_lab', array(
+					'uid',
+					'kode',
+					'nama'
+				)
+			)
+			->where(
+				array('master_lab.uid' => '= ?')
+				, array($parameter)
+			)
+			->execute();
+		
+			return $data_lab;
+	}
+
+	private function get_laboratorium_order_nilai_item($parameter){
+		$data = self::$query
+			->select('lab_order_nilai', array(
+					'id',
+					'lab_order as uid_lab_order',
+					'tindakan as uid_tindakan',
+					'id_lab_nilai',
+					'nilai'
+				)
+			)
+			->join('master_lab_nilai', 
+				array(
+					'keterangan',
+					'nilai_min',
+					'nilai_maks',
+					'satuan'
+				)
+			)
+			->on(array(
+					array('master_lab_nilai.id', '=', 'lab_order_nilai.id_lab_nilai')
+				)
+			)
+			->where(array(
+					'lab_order_nilai.tindakan' => '= ?',
+					'AND',
+					'lab_order_nilai.deleted_at' => 'IS NULL'
+				), array($parameter)
+			)
+			->execute();
+
+		return $data;
+	}
+
+	/*===============================================*/
 	private function duplicate_check($parameter) {
 		return self::$query
 		->select($parameter['table'], array(
