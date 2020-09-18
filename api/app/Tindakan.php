@@ -448,8 +448,7 @@ class Tindakan extends Utility {
 					'id',
 					'tindakan',
 					'kelas',
-					'harga',
-					'penjamin'
+					'harga'	
 				)
 			)
 			->where(array(

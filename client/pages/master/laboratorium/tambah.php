@@ -54,7 +54,7 @@
 							Nilai Laboratorium
 						</a>
 					</li>
-					<li class="nav-item">
+					<!-- <li class="nav-item">
 						<a href="#tab-lab-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								05
@@ -62,7 +62,7 @@
 							</span>
 							Penjamin
 						</a>
-					</li>
+					</li> -->
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
@@ -82,10 +82,10 @@
 					<?php require 'nilai-item.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-lab-5">
-					<?php require 'penjamin-item.php'; ?>
-					<?php require 'action-panel.php'; ?>
-				</div>
+				<!-- <div class="tab-pane show fade" id="tab-lab-5">
+					<?php /*require 'penjamin-item.php'; ?>
+					<?php require 'action-panel.php';*/ ?>
+				</div> -->
 			</div>
 		</div>
 	</div>

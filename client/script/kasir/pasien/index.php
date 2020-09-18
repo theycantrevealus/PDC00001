@@ -255,6 +255,7 @@
 						type:"GET",
 						success:function(response_data) {
 							var invoice_detail = response_data.response_package.response_data[0];
+							console.log(invoice_detail);
 							$("#nama-pasien").html(invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]");
 							currentPasienName = invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]";
 							$("#nomor-invoice").html(invoice_detail.nomor_invoice);

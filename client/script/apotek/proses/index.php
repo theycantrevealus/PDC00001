@@ -17,7 +17,6 @@
 					console.log(response);
 				}
 			});
-
 			return resepData;
 		}
 
