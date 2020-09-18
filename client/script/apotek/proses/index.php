@@ -136,7 +136,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
+						return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Proses Resep</button>";
 					}
 				}
 			]

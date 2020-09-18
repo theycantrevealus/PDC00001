@@ -66,8 +66,6 @@
 		tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
 		penjaminBuilder = refresh_penjamin("#txt_penjamin", __UIDPENJAMINUMUM__);
 
-
-
 		function refresh_kelas_data(tindakanKelas) {
 			var columnKelas = {};
 			var dataBuilder;
@@ -125,19 +123,24 @@
 								var kelasTarget = data_harga[key].tindakan;
 								
 								if(DataPopulator[kelasTarget] === undefined) {
-									DataPopulator[kelasTarget] = {
-										uid: kelasTarget,
-										nama: data_harga[key].tindakan_detail.nama
-									};
+									if(data_harga[key].tindakan_detail != undefined) {
+										DataPopulator[kelasTarget] = {
+											uid: kelasTarget,
+											nama: data_harga[key].tindakan_detail.nama
+										};
 
-									if(DataPopulator[kelasTarget].kelas_harga == undefined) {
-										DataPopulator[kelasTarget].kelas_harga = columnKelas;
+										if(DataPopulator[kelasTarget].kelas_harga == undefined) {
+											DataPopulator[kelasTarget].kelas_harga = columnKelas;
+										}
 									}
 								}
 
+								
 								var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
-								if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
-									DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+								if(kelasKey != undefined) {
+									if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
+										DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+									}
 								}
 							}
 							
@@ -240,19 +243,23 @@
 										var kelasTarget = data_harga[key].tindakan;
 										
 										if(DataPopulator[kelasTarget] === undefined) {
-											DataPopulator[kelasTarget] = {
-												uid: kelasTarget,
-												nama: data_harga[key].tindakan_detail.nama
-											};
+											if(data_harga[key].tindakan_detail != undefined) {
+												DataPopulator[kelasTarget] = {
+													uid: kelasTarget,
+													nama: data_harga[key].tindakan_detail.nama
+												};
 
-											if(DataPopulator[kelasTarget].kelas_harga == undefined) {
-												DataPopulator[kelasTarget].kelas_harga = columnKelas;
+												if(DataPopulator[kelasTarget].kelas_harga == undefined) {
+													DataPopulator[kelasTarget].kelas_harga = columnKelas;
+												}
 											}
 										}
 
 										var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
-										if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
-											DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+										if(kelasKey != undefined) {
+											if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
+												DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+											}
 										}
 									}
 									

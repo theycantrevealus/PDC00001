@@ -277,8 +277,9 @@ class Tindakan extends Utility {
 					$TKValue['kelas'] = $KelasDetail['response_data'][0];
 
 					$TKValue['harga'] = floatval($TKValue['harga']);
-					
-					array_push($returnData, $TKValue);
+					if(count($Tindakan['response_data']) > 0) {
+						array_push($returnData, $TKValue);	
+					}
 					
 					$autonum++;	
 				}
