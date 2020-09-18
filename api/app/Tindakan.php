@@ -88,8 +88,8 @@ class Tindakan extends Utility {
 				return self::update_position($parameter);
 				break;
 
-			case 'tambah_tindakan_kelas_harga':
-				return self::tambah_tindakan_kelas_harga($parameter);
+			case 'update_tindakan_kelas_harga':
+				return self::update_tindakan_kelas_harga($parameter);
 				break;
 
 			case 'tambah_master_tindakan':
@@ -782,7 +782,7 @@ class Tindakan extends Utility {
 		return $result;
 	}
 
-	private function tambah_tindakan_kelas_harga($parameter) {
+	private function update_tindakan_kelas_harga($parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$workerList = array();
@@ -933,8 +933,21 @@ class Tindakan extends Utility {
 	private function delete_tindakan($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
-		$tindakan = self::$query
+		if($parameter[6] == 'master_tindakan_kelas_harga') {
+			$tindakan = self::$query
+			->delete($parameter[6])
+			->where(array(
+					$parameter[6] . '.tindakan' => '= ?',
+					'AND',
+					$parameter[6] . '.penjamin' => '= ?'
+				), array(
+					$parameter[7],
+					$parameter[8]
+				)
+			)
+			->execute();	
+		} else {
+			$tindakan = self::$query
 			->delete($parameter[6])
 			->where(array(
 					$parameter[6] . '.uid' => '= ?'
@@ -943,6 +956,7 @@ class Tindakan extends Utility {
 				)
 			)
 			->execute();
+		}
 
 		if ($tindakan['response_result'] > 0){
 			$log = parent::log(array(

@@ -29,6 +29,9 @@ class Apotek extends Utility {
 			switch($parameter[1]) {
 				case 'detail_resep':
 					return self::detail_resep($parameter[2]);
+				case 'lunas':
+					return self::get_resep('L');
+					break;
 				default:
 					return self::get_resep();
 			}

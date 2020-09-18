@@ -13,6 +13,8 @@
 	var __ME__ = <?php echo json_encode($_SESSION['uid']); ?>;
 	var __UIDPENJAMINUMUM__ = <?php echo json_encode(__UIDPENJAMINUMUM__); ?>;
 	var __GUDANG_APOTEK__ = <?php echo json_encode(__GUDANG_APOTEK__); ?>;
+	//Kelas
+	var __UID_KELAS_GENERAL_RJ__ = <?php echo json_encode(__UID_KELAS_GENERAL_RJ__); ?>;
 </script>
 
 <?php
