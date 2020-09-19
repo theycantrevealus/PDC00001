@@ -37,14 +37,13 @@
 					</li>
 				</ul>
 			</div>
-			<form id="formHasilLabor">
+			<form id="formHasilLab">
 				<div class="card card-body tab-content" id="content_list">
 					<div class="tab-pane show fade active" id="tab-laboratorium-1">
 						<?php require 'hasil.php'; ?>
 					</div>
 					<div class="tab-pane show fade " id="tab-laboratorium-2">
-						<?php //require 'gambar.php'; ?>
-						<?php //require 'action_panel.php'; ?>
+						<?php require 'gambar.php'; ?>
 					</div>
 
 					<br />

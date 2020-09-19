@@ -62,6 +62,10 @@ class Laboratorium extends Utility {
 				case 'laboratorium-order-detail-item':
 					return self::get_laboratorium_order_detail_item($parameter[2]);
 					break;
+				
+				case 'get-laboratorium-lampiran':
+					return self::get_laboratorium_lampiran($parameter[2]);
+					break;
 
 				default:
 					return self::get_lab();
@@ -98,6 +102,10 @@ class Laboratorium extends Utility {
 					break;
 				case 'edit_lab':
 					return self::edit_lab($parameter);
+					break;
+
+				case 'update-hasil-lab':
+					return self::update_hasil_lab($parameter);
 					break;
 			}	
 		} catch (QueryException $e) {
@@ -1344,6 +1352,243 @@ class Laboratorium extends Utility {
 			->execute();
 
 		return $data;
+	}
+
+	public function get_laboratorium_order_nilai_per_item($lab_order, $tindakan, $id_nilai){
+		$data = self::$query
+			->select('lab_order_nilai', array(
+					'id',
+					'lab_order',
+					'tindakan',
+					'id_lab_nilai',
+					'nilai'
+				)
+			)
+			->where(array(
+					'lab_order_nilai.lab_order' => '= ?',
+					'AND',
+					'lab_order_nilai.tindakan' => '= ?',
+					'AND',
+					'lab_order_nilai.id_lab_nilai' => '= ?',
+					'AND',
+					'lab_order_nilai.deleted_at' => 'IS NULL'
+				), array(
+					$lab_order,
+					$tindakan,
+					$id_nilai
+				)
+			)
+			->execute();
+
+		return $data;
+	}
+
+	private function get_laboratorium_lampiran($parameter){
+		$data = self::$query
+			->select('lab_order_document', array(
+					'id', 	
+					'lab_order',
+					'lampiran',
+					'created_at'
+				)
+			)
+			->where(array(
+					'lab_order_document.lab_order' => '= ?',
+					'AND',
+					'lab_order_document.deleted_at' => 'IS NULL'
+				), array($parameter)
+			)
+			->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['file_location'] = '../document/laboratorium/' . $parameter . '/' . $value['lampiran'];
+			$autonum++;
+		}
+
+		return $data;
+	}
+
+	private function add_order_lab($parameter){
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		
+	}
+
+	private function update_hasil_lab($parameter){
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$result = [];
+
+		if (isset($parameter['uid_order'])){
+
+			foreach($parameter['data_nilai'] as $key_tindakan => $value_tindakan) {
+
+				foreach($value_tindakan as $key_nilai => $value_nilai){
+					$old = self::get_laboratorium_order_nilai_per_item($parameter['uid_order'], $key_tindakan, $key_nilai);
+					
+					$updateData = self::$query
+						->update('lab_order_nilai', array(
+								'nilai'			=>	$value_nilai,
+								'updated_at'	=>	parent::format_date()
+							)
+						)
+						->where(array(
+								'lab_order_nilai.lab_order' 	=> '= ?',
+								'AND',
+								'lab_order_nilai.tindakan' 		=> '= ?',
+								'AND',
+								'lab_order_nilai.id_lab_nilai'	=> '= ?',
+								'AND',
+								'lab_order_nilai.deleted_at'	=> 'IS NULL'
+							), array(
+								$parameter['uid_order'],
+								$key_tindakan,
+								$key_nilai
+							)
+						)
+						->execute();
+
+					if ($updateData['response_result'] > 0){
+						$log = parent::log(
+							array(
+								'type'=>'activity',
+								'column'=>array(
+									'unique_target',
+									'user_uid',
+									'table_name',
+									'action',
+									'old_value',
+									'new_value',
+									'logged_at',
+									'status',
+									'login_id'
+								),
+								'value'=>array(
+									$parameter['uid_order'],
+									$UserData['data']->uid,
+									'lab_order_nilai',
+									'U',
+									json_encode($old),
+									json_encode($value_tindakan),
+									parent::format_date(),
+									'N',
+									$UserData['data']->log_id
+								),
+								'class'=>__CLASS__
+							)
+						);
+					}
+
+					$result['order_detail'] = $updateData;
+
+				}
+
+			}
+			
+		}
+
+		//create new 
+		$folder_structure = '../document/laboratorium/' . $parameter['uid_order'];
+		if (!is_dir($folder_structure)){
+
+			if (!mkdir($folder_structure, 0777, true)) {
+			    $result['dir_msg'] = 'Failed to create folders...';
+			}
+			//mkdir('../document/laboratorium/' . $parameter['uid_radiologi_order'], 0755);
+		} else {
+			$result['dir_msg'] = 'Dir available...';
+		}
+
+		if(is_writeable($folder_structure)) {
+			$result['response_upload'] = array();
+			//$imageDatas = json_decode($_FILES['fileList'], true);
+
+			//get maximum id
+			$get_max = self::$query
+				->select('lab_order_document', array(
+						'id'
+					)
+				)
+				->order(
+					array(
+						'lab_order_document.created_at' => 'DESC'
+					)
+				)
+				->execute();
+
+			$max = 0; 
+			if ($get_max['response_result'] > 0){
+				$max = $get_max['response_data'][0]['id'];
+			}
+
+			for ($a = 0; $a < count($_FILES['fileList']); $a++) {
+				$max++;
+
+				if(!empty($_FILES['fileList']['tmp_name'][$a])) {
+					$nama_lampiran = 'L_' . str_pad($max, 6, "0", STR_PAD_LEFT);
+
+					if(move_uploaded_file($_FILES['fileList']['tmp_name'][$a], '../document/laboratorium/' . $parameter['uid_order'] . '/' . $nama_lampiran . '.pdf')) {
+						array_push($result['response_upload'], 'Berhasil diupload');
+						$lampiran = self::$query
+							->insert('lab_order_document', array(
+								'lab_order' => $parameter['uid_order'],
+								'lampiran' => $nama_lampiran . '.pdf',
+								'created_at' => parent::format_date()
+							))
+							->execute();
+						
+						$result['response_upload']['response_result'] = 1;
+					} else {
+						array_push($result['response_upload'], 'Gagal diupload : ' . $_FILES['fileList']['tmp_name'][$a] . ' => ' . $set_code . '-' . $a . '.pdf');
+					}
+				}
+			}
+		} else {
+			$result['response_upload']['response_message'] = 'Cant write';
+			$result['response_upload']['response_result'] = 0;
+		}
+
+		if (count($parameter['deletedDocList']) > 0){
+			foreach ($parameter['deletedDocList'] as $key => $value) {
+				$getLampiran = self::$query
+					->select('lab_order_document', array(
+							'lampiran'
+						)
+					)
+					->where(array(
+							'lab_order_document.id' => '= ?'
+						), array($value)
+					)
+					->execute();
+
+				if ($getLampiran['response_result'] > 0){
+					$nama_lampiran_hapus = $getLampiran['response_data'][0]['lampiran'];
+
+					$hapusLampiran = self::$query
+						->delete('lab_order_document')
+						->where(array(
+								'lab_order_document.id' => '= ?'
+							), array($value)
+						)
+						->execute();
+
+					if ($hapusLampiran['response_result'] > 0){
+						unlink('../document/laboratorium/' . $parameter['uid_order'] . '/' . $nama_lampiran_hapus);
+
+						$result['response_delete_doc']['response_result'] = 1;
+					}
+
+					$result['response_delete_doc']['response_data'] = $hapusLampiran;
+				}
+			}
+		}
+		return (is_writable($folder_structure));
+
+		//return count($parameter['deletedDocList']);
+		return $result;
 	}
 
 	/*===============================================*/

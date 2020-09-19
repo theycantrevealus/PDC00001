@@ -1,85 +1,37 @@
 <script type="text/javascript">
 	$(function(){
 		var uid_order = __PAGES__[2];
-		var order_data;
-		var tindakanID;
+		var order_data, tindakanID; 
+		var nilaiItemTindakan = {};
 		var fileList = [];
 		var deletedDocList = [];	//for save all file uploaded
-		var file;		//for upload file
+		var file;					//for upload file
 
-		//loadOrder(uid_order);
         loadPasien(uid_order);
         loadLabOrderItem(uid_order);
-		//loadLampiran(uid_order);
+		loadLampiran(uid_order);
 
-		$("#list-tindakan-labor tbody").on('click','.linkTindakan', function(){
-			let id_tindakan = $(this).parent().parent().attr("id").split("_");
-			tindakanID = id_tindakan[id_tindakan.length - 1];
+		$("#formHasilLab").submit(function(){
 
-			let nama = $(this).html();
-			$(".title-pemeriksaan").html(nama);
+			$(".inputItemTindakan").each(function(){
+				let get_id = $(this).attr("id").split("_");
+				let id_nilai = get_id[get_id.length - 1];
+				let uid_tindakan = get_id[get_id.length - 2];
+				let nilai = $(this).val();
 
-			order_data = loadRadiologiOrderItem(tindakanID);
-			if (order_data != ""){
-				if (order_data[0].keterangan != null){
-					editorKeteranganPeriksa.setData(order_data[0].keterangan);
-				}
+				if (uid_tindakan in nilaiItemTindakan){
+                    nilaiItemTindakan[uid_tindakan][id_nilai] = nilai; 
+                } else {
+                    nilaiItemTindakan[uid_tindakan] = {[id_nilai]: nilai}; 
+                }
+			});
 
-				if (order_data[0].keterangan != null){
-					editorKesimpulanPeriksa.setData(order_data[0].kesimpulan);
-				}
-			}
-		});
+			//console.log(nilaiItemTindakan);
 
-		// ClassicEditor
-		// 	.create( document.querySelector( '.txt_keterangan_pemeriksaan' ), {
-		// 		//plugins : [ Autosave ],
-		// 		extraPlugins: [ MyCustomUploadAdapterPlugin ],
-		// 		placeholder: "Keterangan Pemeriksaan..."
-		// 	} )
-		// 	.then( editor => {
-		// 		editorKeteranganPeriksa = editor;
-		// 		window.editor = editor;
-		// 	} )
-		// 	.catch( err => {
-		// 		//console.error( err.stack );
-		// 	} );
-
-
-		// ClassicEditor
-		// 	.create( document.querySelector( '.txt_kesimpulan_pemeriksaan' ), {
-		// 		extraPlugins: [ MyCustomUploadAdapterPlugin ],
-		// 		placeholder: "Keterangan Pemeriksaan..."
-		// 	} )
-		// 	.then( editor => {
-		// 		editorKesimpulanPeriksa = editor;
-		// 		window.editor = editor;
-		// 	} )
-		// 	.catch( err => {
-		// 		//console.error( err.stack );
-		// 	} );
-		
-
-		$("#formHasilRadiologi").submit(function(){
 			var form_data = new FormData(this);
-			form_data.append("request", "update-hasil-radiologi");
-			form_data.append("uid_radiologi_order", uid_order);
-
-			if (tindakanID !== undefined && tindakanID !== ""){
-				let keteranganPeriksa = editorKeteranganPeriksa.getData();
-				let kesimpulanPeriksa = editorKesimpulanPeriksa.getData();
-
-				/*formData = {
-					request : "update-hasil-radiologi",
-					keteranganPeriksa : keteranganPeriksa,
-					kesimpulanPeriksa : kesimpulanPeriksa,
-					tindakanID : tindakanID
-				};*/
-
-				form_data.append("keteranganPeriksa", keteranganPeriksa);
-				form_data.append("kesimpulanPeriksa", kesimpulanPeriksa);
-				form_data.append("tindakanID", tindakanID);
-			}
+			form_data.append("request", "update-hasil-lab");
+			form_data.append("uid_order", uid_order);
+			form_data.append("data_nilai", nilaiItemTindakan);
 
 			for(var i = 0; i < fileList.length; i++) {
 				form_data.append("fileList[]", fileList[i]);
@@ -89,13 +41,21 @@
 				form_data.append("deletedDocList[]", deletedDocList[i]);
 			}
 
-			/*for (var value of form_data.values()) {
-			   console.log(value); 
-			}*/
+			// for (var value of form_data.values()) {
+			//    console.log(value); 
+			// }
+
+			// let form_data = {
+			// 	request : 'update-hasil-lab',
+			// 	uid_order : uid_order,
+			// 	data_nilai : nilaiItemTindakan
+			// }
+
+			//console.log(form_data);
 
 			$.ajax({
 				async: false,
-				url: __HOSTAPI__ + "/Radiologi",
+				url: __HOSTAPI__ + "/Laboratorium",
 				processData: false,
 				contentType: false,
 				data: form_data,
@@ -104,7 +64,7 @@
 				},
 				type: "POST",
 				success: function(response){
-					//console.log(response);
+					console.log(response);
 					let order_detail = 0;
 					let response_upload = 0;
 					let response_delete_doc = 0;
@@ -146,7 +106,6 @@
 					console.log(response);
 				}
 			});
-			//}
 
 			return false;
 		});
@@ -214,7 +173,7 @@
 			return false;
 		});
 
-		$("#radiologi-lampiran-table tbody").on('click', '.delete_document_registered', function(){
+		$("#labor-lampiran-table tbody").on('click', '.delete_document_registered', function(){
 			var id = $(this).data("id").split("_");
 			id = id[id.length - 1];
 
@@ -224,37 +183,6 @@
 			return false;
 		});
 	});
-
-	function loadOrder(uid_order){		//uid_radiologi_order
-		if (uid_order != ""){
-			$.ajax({
-				async: false,
-	            url:__HOSTAPI__ + "/Radiologi/get-order-detail/" + uid_order,
-	            type: "GET",
-	            beforeSend: function(request) {
-	                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-	            },
-	            success: function(response){
-	                var MetaData = response.response_package.response_data;
-
-	                if (MetaData != ""){
-	                	for(i = 0; i < MetaData.length; i++){
-		                	html = '<tr id="tindakan_'+ MetaData[i].id +'">' + 
-		                   			'<td>'+ (i + 1) +'</td>' +
-		                   			'<td><a href="#" class="linkTindakan">'+ MetaData[i].tindakan +'</a></td>' +
-		                   			'<td>'+ MetaData[i].penjamin +'</td>' +
-								'</tr>';
-
-							$("#list-tindakan-radiologi tbody").append(html);
-		                }
-	                }
-	            },
-	            error: function(response) {
-	                console.log(response);
-	            }
-			});
-		}
-	}
 
 	function loadPasien(uid_order){		//uid_lab_order
 		if (uid_order != ""){
@@ -328,10 +256,11 @@
                                         nilai = "";
                                     }
 
+									// id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
                                     html += '<tr>\
                                         <td>'+ nomor +'</td>\
                                         <td>'+ items.keterangan +'</td>\
-                                        <td><input id="nilai_'+ items.id +'" value="'+ nilai +'" class="form-control"/></td>\
+                                        <td><input id="nilai_'+ items.uid_tindakan + '_'+ items.id +'" value="'+ nilai +'" class="form-control inputItemTindakan" /></td>\
                                         <td>'+ items.satuan +'</td>\
                                         <td>'+ items.nilai_min +'</td>\
                                         <td>'+ items.nilai_maks +'</td>\
@@ -363,7 +292,7 @@
 		if (uid_order != ""){
 			$.ajax({
 				async: false,
-	            url:__HOSTAPI__ + "/Radiologi/get-radiologi-lampiran/" + uid_order,
+	            url:__HOSTAPI__ + "/Laboratorium/get-laboratorium-lampiran/" + uid_order,
 	            type: "GET",
 	            beforeSend: function(request) {
 	                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -371,7 +300,7 @@
 	            success: function(response){
 	            	if (response.response_package != ""){
 	            		dataItem = response.response_package.response_data;
-	            		let baseUrl = __HOST__ + '/document/radiologi/' + uid_order + '/';
+	            		let baseUrl = __HOST__ + '/document/laboratorium/' + uid_order + '/';
 
             			/*var pdfjsLib = window['pdfjs-dist/build/pdf'];
 						pdfjsLib.GlobalWorkerOptions.workerSrc = __HOSTNAME__ + '/plugins/pdfjs/build/pdf.worker.js';
@@ -454,7 +383,7 @@
 		$(newDocRow).append(newDocCellDoc);
 		$(newDocRow).append(newDocCellAct);
 
-		$("#radiologi-lampiran-table").append(newDocRow);
+		$("#labor-lampiran-table").append(newDocRow);
 		rebaseLampiran();
 	}
 
@@ -526,12 +455,12 @@
 		$(newDocRow).append(newDocCellDoc);
 		$(newDocRow).append(newDocCellAct);
 
-		$("#radiologi-lampiran-table").append(newDocRow);
+		$("#labor-lampiran-table").append(newDocRow);
 		rebaseLampiran();
 	}
 
 	function rebaseLampiran() {
-		$("#radiologi-lampiran-table tbody tr").each(function(e) {
+		$("#labor-lampiran-table tbody tr").each(function(e) {
 			var id = (e + 1);
 			$(this).attr({
 				"id": "document_" + id
