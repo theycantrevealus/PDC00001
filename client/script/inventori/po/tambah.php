@@ -98,7 +98,8 @@
 			return satuanData;
 		}
 
-		function load_product(target, selected = "") {
+		function load_product(target, selectedData = "", appendData = true) {
+			var selected = [];
 			var productData;
 			$.ajax({
 				url:__HOSTAPI__ + "/Inventori",
@@ -108,22 +109,37 @@
 				},
 				type:"GET",
 				success:function(response) {
-					productData = response.response_package.response_data;
 					$(target).find("option").remove();
-					for(var a = 0; a < productData.length; a++) {
-						$(target).append("<option " + ((productData[a].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + productData[a].uid + "\">" + productData[a].nama + "</option>");
+					$(target).append("<option value=\"none\">Pilih Obat</option>");
+					productData = response.response_package.response_data;
+					for (var a = 0; a < productData.length; a++) {
+						var penjaminList = [];
+						var penjaminListData = productData[a].penjamin;
+						for(var penjaminKey in penjaminListData) {
+							if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
+								penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
+							}
+						}
+
+						if(selected.indexOf(productData[a].uid) < 0 && appendData) {
+							$(target).append("<option penjamin-list=\"" + penjaminList.join(",") + "\" satuan-caption=\"" + productData[a].satuan_terkecil.nama + "\" satuan-terkecil=\"" + productData[a].satuan_terkecil.uid + "\" " + ((productData[a].uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + productData[a].uid + "\">" + productData[a].nama.toUpperCase() + "</option>");
+						}
 					}
 				},
 				error: function(response) {
 					console.log(response);
 				}
 			});
-			return productData;
+			//return (productData.length == selected.length);
+			return {
+				allow: (productData.length == selected.length),
+				data: productData
+			};
 		}
 
 		function autoPODetail() {
 			//var nextID = $("#table-detail-po tbody tr").length + 1;
-			
+			$("#table-detail-po tbody tr").removeClass("last-row");
 			var newRow = document.createElement("TR");
 			var newCellID = document.createElement("TD");
 			var newCellItem = document.createElement("TD");
@@ -138,6 +154,12 @@
 			load_product(newItem);
 			$(newCellItem).append(newItem);
 			$(newItem).select2().addClass("form-control item");
+
+			var keteranganItem = document.createElement("TEXTAREA");
+			$(newCellItem).append("<br /><br /><b>Keterangan Item</b>").append(keteranganItem);
+			$(keteranganItem).addClass("form-control").attr({
+				"placeholder": "Keterangan Produk"
+			});
 			
 			var newQty = document.createElement("INPUT");
 			$(newQty).inputmask({
@@ -145,22 +167,22 @@
 			}).addClass("form-control qty");
 			$(newCellQty).append(newQty);
 
-			var newSatuan = document.createElement("SELECT");
+			/*var newSatuan = document.createElement("SELECT");
 			load_satuan(newSatuan);
 			$(newCellSatuan).append(newSatuan);
-			$(newSatuan).select2().addClass("form-control satuan");
+			$(newSatuan).select2().addClass("form-control satuan");*/
 
 			var newHarga = document.createElement("INPUT");
 			$(newHarga).inputmask({
 				alias: 'decimal', rightAlign: true, placeholder: "0,00", prefix: "", groupSeparator: ".", autoGroup: false, digitsOptional: true
 			}).addClass("form-control harga");
-			$(newCellHarga).append(newHarga);
+			$(newCellHarga).append("<b>Per satuan terkecil</b>").append(newHarga);
 
 			var newDisc = document.createElement("INPUT");
 			$(newDisc).inputmask({
 				alias: 'currency', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true
 			}).addClass("form-control disc");
-			$(newCellDisc).append(newDisc);
+			$(newCellHarga).append("<br /><b>Diskon</b>").append(newDisc);
 
 			var newDiscType = document.createElement("SELECT");
 			var discTypeLib = {
@@ -175,7 +197,7 @@
 				}).html(discTypeLib[discKey]);
 				$(newDiscType).append(newDiscOption);
 			}
-			$(newCellDisc).append(newDiscType);
+			$(newCellHarga).append("<br /><b>Jenis Diskon</b>").append(newDiscType);
 			$(newDiscType).select2().addClass("form-control disc_type");
 
 			var newSubTotal = document.createElement("H5");
@@ -191,7 +213,7 @@
 			$(newRow).append(newCellQty);
 			$(newRow).append(newCellSatuan);
 			$(newRow).append(newCellHarga);
-			$(newRow).append(newCellDisc);
+			//$(newRow).append(newCellDisc);
 			$(newRow).append(newCellSubtotal);
 
 			$("#table-detail-po tbody").append(newRow);
@@ -204,7 +226,7 @@
 
 				$(this).attr({
 					"id": "po_detail_" + id
-				}).removeClass("last-row");
+				});
 
 				$(this).find("td:eq(0)").html(id);
 
@@ -219,29 +241,29 @@
 				});
 
 				//SATUAN
-				$(this).find("td:eq(3) select").attr({
+				$(this).find("td:eq(3)").attr({
 					"id": "satuan_" + id
 				});
 
 				//HARGA
-				$(this).find("td:eq(4) input").attr({
+				$(this).find("td:eq(4) input:eq(0)").attr({
 					"id": "harga_" + id
 				});
 
 				//DISC
-				$(this).find("td:eq(5) input").attr({
+				$(this).find("td:eq(4) input:eq(1)").attr({
 					"id": "disc_" + id
 				});
 
-				$(this).find("td:eq(5) select").attr({
+				$(this).find("td:eq(4) select").attr({
 					"id": "disc_type_" + id
 				});
 
-				$(this).find("td:eq(6) button").attr({
+				$(this).find("td:eq(5) button").attr({
 					"id": "delete_" + id
 				});
 
-				$(this).find("td:eq(6) h5").attr({
+				$(this).find("td:eq(5) h5").attr({
 					"id": "total_" + id
 				});
 			});
@@ -519,6 +541,13 @@
 			return false;
 		});
 
+		$("body").on("change", ".item", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			var satuanCaption = $(this).find("option:selected").attr("satuan-caption");
+			$("#satuan_" + id).html((satuanCaption != undefined) ? satuanCaption : "-");
+		});
+
 		$("#submitPO").submit(function() {
 			var supplier = $("#txt_supplier").val();
 			var tanggal = $("#txt_tanggal").val();
@@ -535,12 +564,15 @@
 			form_data.append("diskonAll", diskonAll);
 			form_data.append("diskonJenisAll", diskonJenisAll);
 			form_data.append("keteranganAll", keteranganAll);
-			form_data.append("fileList", fileList);
+			//form_data.append("fileList", JSON.stringify(fileList));
 
 			$("#table-detail-po tbody tr").each(function(e) {
 				if(!$(this).hasClass("last-row")) {
 					//PRODUCT
 					var item = $(this).find("td:eq(1) select").val();
+
+					//KETERANGAN
+					var keterangan = $(this).find("td:eq(1) textarea").val();
 
 					//QTY
 					var qty = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
@@ -549,11 +581,11 @@
 					var satuan = $(this).find("td:eq(3) select").val();
 
 					//HARGA
-					var harga = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
+					var harga = $(this).find("td:eq(4) input:eq(0)").inputmask("unmaskedvalue");
 
 					//DISC
-					var diskon = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
-					var jenis_diskon = $(this).find("td:eq(5) select").val();
+					var diskon = $(this).find("td:eq(4) input:eq(1)").inputmask("unmaskedvalue");
+					var jenis_diskon = $(this).find("td:eq(4) select").val();
 
 					itemList.push({
 						item: item,
@@ -561,12 +593,18 @@
 						satuan: satuan,
 						harga: harga,
 						diskon: diskon,
+						keterangan:keterangan,
 						jenis_diskon: jenis_diskon
 					});
 				}
 			});
 
-			form_data.append("itemList", itemList);
+
+			form_data.append("itemList", JSON.stringify(itemList));
+
+			for(var fl = 0; fl < fileList.length; fl++) {
+				form_data.append("fileList[]", fileList[fl]);
+			}
 
 			if(
 				itemList.length > 0 &&
@@ -582,9 +620,13 @@
 					contentType: false,
 					data: form_data,
 					success: function(resp) {
-						console.log(resp);
+						//console.log(resp);
+						if(resp.response_package.po_master.response_result > 0) {
+							location.href = __HOSTNAME__ + '/inventori/po';
+						}
 					},
 					error: function(resp) {
+						console.clear();
 						console.log(resp);
 					}
 				});

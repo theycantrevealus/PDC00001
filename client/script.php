@@ -1,4 +1,5 @@
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jquery.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/jquery.nicescroll/jquery.nicescroll.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/popper.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/bootstrap.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/simplebar.min.js"></script>
@@ -9,13 +10,13 @@
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/dropdown.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/sidebar-mini.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/app.js"></script>
-<script src="<?php echo __HOSTNAME__; ?>/template/assets/js/app-settings.js"></script>
+<!-- <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/app-settings.js"></script> -->
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/flatpickr/flatpickr.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/flatpickr.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/settings.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/Chart.min.js"></script>
-<script src="<?php echo __HOSTNAME__; ?>/template/assets/js/charts.js"></script>
-<script src="<?php echo __HOSTNAME__; ?>/template/assets/js/page.dashboard.js"></script>
+<!-- <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/charts.js"></script> -->
+<!-- <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/page.dashboard.js"></script> -->
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/jquery.vmap.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/maps/jquery.vmap.world.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/vector-maps.js"></script>

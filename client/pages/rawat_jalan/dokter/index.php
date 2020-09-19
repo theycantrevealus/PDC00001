@@ -47,22 +47,23 @@
 				</div>
 			</div>
 			<div class="card card-body">
-				<table class="table table-bordered" id="table-satuan">
-					<thead>
+				<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+					<thead class="thead-dark">
 						<tr>
-							<th style="width: 20px;">No</th>
-							<th>Waktu</th>
-							<th>Kategori</th>
+							<th width="2%">No</th>
+							<th>Waktu Masuk</th>
 							<th>No. RM</th>
-							<th>Nama</th>
+							<th>Pasien</th>
+							<th>Poliklinik</th>
 							<th>Dokter</th>
-							<th>Poli</th>
-							<th>Keterangan</th>
+							<th>Penjamin</th>
 							<th>Oleh</th>
 							<th>Aksi</th>
 						</tr>
 					</thead>
-					<tbody></tbody>
+					<tbody>
+						
+					</tbody>
 				</table>
 			</div>
 		</div>
