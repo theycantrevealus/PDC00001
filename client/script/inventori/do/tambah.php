@@ -353,14 +353,15 @@
 			var no_invoice = $("#no_invoice").val();
 			var tgl_invoice = $("#tgl_invoice").val();
 			var itemDetailResult = [];
-			$("#table-item-do tbody tr").each(function() {
+			var allowSave = false;
+			$("#table-item-do tbody tr").each(function(e) {
 				if(!$(this).hasClass("last-row")) {
 					var item = $(this).find("td:eq(1) select").val();
 					var tanggal_exp = $(this).find("td:eq(1) input").val();
 					var batch = $(this).find("td:eq(2) input").val();
 					var qty = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
 					var keterangan = $(this).find("td:eq(5) textarea").val();
-					if(batch != "" && qty > 0) {
+					if(batch != "" && qty > 0 && tanggal_exp != "") {
 						itemDetailResult.push({
 							item: item,
 							batch: batch,
@@ -368,11 +369,25 @@
 							qty: qty,
 							keterangan: keterangan
 						});
+						allowSave = true;
+						$("#table-item-do tbody tr:eq(" + e + ") td").removeClass("bg-error");
+					} else {
+						$("#table-item-do tbody tr:eq(" + e + ") td").addClass("bg-error");
+						if(batch == "") {
+							$(this).find("td:eq(2) input").focus();
+						} else if(qty <=0) {
+							$(this).find("td:eq(3) input").focus();
+						} else {
+							$(this).find("td:eq(1) input").focus();
+						}
+						
+						allowSave = false;
+						return false;
 					}
 				}
 			});
 
-			if(gudang != "none" && supplier != "none" && tgl_dokumen != "" && itemDetailResult.length > 0) {
+			if(gudang != "none" && supplier != "none" && tgl_dokumen != "" && itemDetailResult.length > 0 && allowSave == true) {
 				$.ajax({
 					url: __HOSTAPI__ + "/DeliveryOrder",
 					beforeSend: function(request) {

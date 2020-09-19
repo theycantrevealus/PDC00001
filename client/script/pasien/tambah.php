@@ -60,16 +60,54 @@
 			}
 		});
 
-		$("#form-add-pasien").submit(function(){
+		$("#no_rm").on('keyup', function() {
+			let value = $(this).inputmask('unmaskedvalue');
+
+			if (value.length == 6){
+				if (cekNoRM(value) == false){
+					$("#no_rm").addClass("is-valid").removeClass("is-invalid");
+					$("#error-no-rm").html("");
+					$("#btnSubmit").removeAttr("disabled");
+				} else {
+					$("#no_rm").addClass("is-invalid");
+					$("#error-no-rm").html("No. RM tidak tersedia");
+					$("#btnSubmit").attr("disabled", true);
+				}
+			} else {
+				$("#no_rm").addClass("is-invalid");
+				$("#error-no-rm").html("No. RM harus 6 angka");
+				$("#btnSubmit").attr("disabled", true);
+			}
+		});
+
+		$("#form-add-pasien").submit(function() {
 			/*var agama = $("input[name='agama']:checked").val();
 			var jenkel = $("input[name='jenkel']:checked").val();
 			var goldar = $("input[name='goldar']:checked").val();*/
 
+			var no_rm = $("#no_rm").inputmask('unmaskedvalue');
+			allData.no_rm = no_rm;
+
 			var jenkel = $("input[name='jenkel']:checked").val();
 			allData.jenkel = jenkel;
+			var requiredItem = [];
 
 			$(".inputan").each(function(){
 				var value = $(this).val();
+				//Cek required UI
+				if($(this).hasClass("required")) {
+					if (value == "" || value == null || value == undefined ) {
+						//console.log(value);
+						//$("#" + $(this).attr("id")).addClass("bg-danger").focus();
+						$("label[for=\"" + $(this).attr("id") + "\"]").addClass("text-danger");
+						requiredItem.push($(this).attr("id"));
+					} else {
+						$("label[for=\"" + $(this).attr("id") + "\"]").removeClass("text-danger");
+						//$("#" + $(this).attr("id")).removeClass("bg-danger");
+					}
+				}
+
+				
 
 				if (value != "" && value != null){
 					$this = $(this);
@@ -87,39 +125,49 @@
 				}
 			});
 
-			//console.log(allData);
-			$.ajax({
-				async: false,
-				url: __HOSTAPI__ + "/Pasien",
-				data: {
-					request : "tambah-pasien",
-					dataObj : allData
-				},
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type: "POST",
-				success: function(response){
-					if (status_antrian == 'true'){ 		//redirect to tambah kunjungan
-						if (response.response_package.response_unique != ""){	//check returning uid
-							location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + response.response_package.response_unique;
+			if(requiredItem.length == 0) {
+				$.ajax({
+					async: false,
+					url: __HOSTAPI__ + "/Pasien",
+					data: {
+						request : "tambah-pasien",
+						dataObj : allData
+					},
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					type: "POST",
+					success: function(response){
+						if (status_antrian == 'true'){ 		//redirect to tambah kunjungan
+							if (response.response_package.response_unique != ""){	//check returning uid
+								//Set Current Pasien dan Antrian Data
+								localStorage.setItem("currentPasien", response.response_package.response_unique);
+
+								//Notif loket lain yang sedang aktif pemanggilan yang sama?? Back Log??
+								
+								location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + response.response_package.response_unique;
+							}
+						} else {
+							location.href = __HOSTNAME__ + '/pasien';
 						}
-					} else {
-						location.href = __HOSTNAME__ + '/pasien';
+					},
+					error: function(response) {
+						console.log("Error : ");
+						console.log(response);
 					}
-				},
-				error: function(response) {
-					console.log("Error : ");
-					console.log(response);
-				}
-			});
+				});
+			} else {
+				$([document.documentElement, document.body]).animate({
+					scrollTop: $("#" + requiredItem[0]).offset().top - 300
+				}, 500);
+			}
 
 			return false;
 		});
 
 		$(".select2").select2({});
 
-		$('#no_rm').inputmask('999-999');
+		$('#no_rm').inputmask('99-99-99');
 
 		$('.numberonly').keypress(function(event){
             if (event.which < 48 || event.which > 57) {
@@ -128,8 +176,33 @@
         });
 	});
 
+	function cekNoRM(no_rm) {
+		var result = false;
+
+		$.ajax({
+			async: false,
+			url: __HOSTAPI__ + "/Pasien/cek-no-rm/" + no_rm,
+			type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+            	if (response.response_package != ""){
+            		if (response.response_package.response_result > 0){
+            			result = true;
+            		}
+            	}
+            },
+            error: function(response) {
+                console.log(response);
+            }
+		});
+
+		return result;
+	}
+
 	function cekNIK(nik){
-		var result;
+		var result = false;
 
 		$.ajax({
 			async: false,
@@ -139,7 +212,11 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             success: function(response){
-                result = response.response_package;
+                if (response.response_package != ""){
+            		if (response.response_package.response_result > 0){
+            			result = true;
+            		}
+            	}
             },
             error: function(response) {
                 console.log(response);
@@ -215,7 +292,7 @@
                 	for(i = 0; i < MetaData.length; i++){
 	                    html += "<div class='"+ colclass +"'>" +
 									"<div class='custom-control custom-radio'>" +
-									  	"<input type='radio' value='"+ MetaData[i].id +"' id='"+ name +"_"+ MetaData[i].id +"' name='"+ name +"' class='custom-control-input' required>" +
+									  	"<input type='radio' value='"+ MetaData[i].id +"' id='"+ name +"_"+ MetaData[i].id +"' name='"+ name +"' class='custom-control-input required'>" +
 									  	"<label class='custom-control-label' for='"+ name +"_"+ MetaData[i].id +"'>"+ MetaData[i].nama +"</label>" +
 									"</div>" +
 								"</div>";

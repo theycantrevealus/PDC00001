@@ -36,6 +36,10 @@ class Pasien extends Utility {
 					return self::cekNIK($parameter[2]);
 					break;
 
+				case 'cek-no-rm':
+					return self::cekNoRM($parameter[2]);
+					break;
+
 				default:
 					# code...
 					break;
@@ -129,8 +133,9 @@ class Pasien extends Utility {
 						'pekerjaan',
 						'nama_ayah',
 						'nama_ibu',
+						'status_pernikahan',
 						'nama_suami_istri',
-						'status_suami_istri',
+						//'status_suami_istri',
 						'alamat',
 						'alamat_rt',
 						'alamat_rw',
@@ -140,6 +145,7 @@ class Pasien extends Utility {
 						'alamat_kelurahan',
 						'warganegara',
 						'no_telp',
+						'email',
 						'created_at',
 						'updated_at'
 						)
@@ -377,7 +383,29 @@ class Pasien extends Utility {
 			$result = true;
 		}
 
-		return $result;
+		return $data;
+	}
+
+	public function cekNoRM($parameter){
+		$data = self::$query
+			->select('pasien', array('uid', 'no_rm'))
+			->where(
+				array(
+					'pasien.no_rm' => '= ?',
+					'AND',
+					'pasien.deleted_at' => 'IS NULL'
+				),
+				array(
+					$parameter
+				))
+			->execute();
+
+		$result = false;
+		if ($data['response_result'] > 0){
+			$result = true;
+		}
+
+		return $data;
 	}
 
 	private function duplicate_check($parameter) {
@@ -395,4 +423,34 @@ class Pasien extends Utility {
 		))
 		->execute();
 	}
+
+	/*============= GET PASIEN DATA FOR ALL CLASS USE =============*/
+	public function get_data_pasien($parameter){		//$parameter = uid pasien
+		/*--------- GET NO RM --------------- */
+		$pasien = new Pasien(self::$pdo);
+		$param = ['','pasien-detail', $parameter];
+		$get_pasien = $pasien->__GET__($param);
+
+		$term = new Terminologi(self::$pdo);
+		$value = $get_pasien['response_data'][0]['jenkel'];
+		$param = ['','terminologi-items-detail',$value];
+		$get_jenkel = $term->__GET__($param);
+
+		$value = $get_pasien['response_data'][0]['panggilan'];
+		$param = ['','terminologi-items-detail',$value];
+		$get_panggilan = $term->__GET__($param);
+
+		$result = array(
+					'uid'=>$get_pasien['response_data'][0]['uid'],
+					'no_rm'=>$get_pasien['response_data'][0]['no_rm'],
+					'nama'=>$get_pasien['response_data'][0]['nama'],
+					'tanggal_lahir'=>$get_pasien['response_data'][0]['tanggal_lahir'],
+					'jenkel'=>$get_jenkel['response_data'][0]['nama'],
+					'id_jenkel'=>$get_pasien['response_data'][0]['jenkel'],
+					'panggilan'=>$get_panggilan['response_data'][0]['nama']
+				);
+
+		return $result;
+	}
+	/*================================================================*/
 }

@@ -92,10 +92,10 @@
 		<div class="layout-login__form bg-white" data-simplebar>
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
 				<a href="<?php echo __HOSTNAME__; ?>/template/index.html" class="navbar-brand" style="min-width: 0">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" width="160" height="120" alt="SIMRS RSUD Petala Bumi">
+					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" width="120" height="120" alt="SIMRS RSUD Petala Bumi">
 				</a>
 			</div>
-			<h4 class="m-0">RSUD Petala Bumi</h4>
+			<h4 class="m-0">RSUD Bintan</h4>
 			<p class="mb-5">SIMRS Integrated System</p>
 			<form>
 				<div class="form-group">

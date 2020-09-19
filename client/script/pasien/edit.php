@@ -7,11 +7,12 @@
 		loadTermSelectBox('suku', 6);
 		loadTermSelectBox('pendidikan', 8);
 		loadTermSelectBox('pekerjaan', 9);
-		loadTermSelectBox('status_suami_istri', 10);
+		//loadTermSelectBox('status_suami_istri', 10);
 		loadTermSelectBox('alamat_kecamatan', 12);
 		loadTermSelectBox('goldar', 4);
 		loadTermSelectBox('agama', 5);
 		loadTermSelectBox('warganegara', 7);
+		loadTermSelectBox('status_pernikahan', 16);
 		loadRadio('parent_jenkel','col-md-6', 'jenkel', 2);
 
 		var uid_pasien = __PAGES__[2];
@@ -39,6 +40,9 @@
 		});
 
 		$("#btnSubmit").click(function(){
+			var no_rm = $("#no_rm").inputmask('unmaskedvalue');
+			allData.no_rm = no_rm;
+
 			var jenkel = $("input[name='jenkel']:checked").val();
 			allData.jenkel = jenkel;
 
@@ -56,6 +60,9 @@
 					}
 
 					var name = $(this).attr("name");
+					if (name == 'email'){
+						value = value.toLowerCase();
+					}
 
 					allData[name] = value;
 				}
@@ -85,7 +92,7 @@
 			return false;
 		});
 
-		$(".no_rm").on('keyup', function(){
+		/*$(".no_rm").on('keyup', function(){
 			if (this.getAttribute && this.value.length == this.getAttribute("maxlength")) {
 				var id = $(this).attr("id").split("_");
 				id = id[id.length - 1];
@@ -94,11 +101,51 @@
 				var next = $("#rm_sub_" + id);
 				next.focus();
 			}
+		});*/
+
+		$("#no_rm").on('keyup', function(){
+			let value = $(this).inputmask('unmaskedvalue');
+
+			if (value.length == 6){
+				if (cekNoRM(value, dataPasien.no_rm) == false){
+					$("#no_rm").addClass("is-valid").removeClass("is-invalid");
+					$("#error-no-rm").html("");
+					$("#btnSubmit").removeAttr("disabled");
+				} else {
+					$("#no_rm").addClass("is-invalid");
+					$("#error-no-rm").html("No. RM tidak tersedia");
+					$("#btnSubmit").attr("disabled", true);
+				}
+			} else {
+				$("#no_rm").addClass("is-invalid");
+				$("#error-no-rm").html("No. RM harus 6 angka");
+				$("#btnSubmit").attr("disabled", true);
+			}
+		});
+
+		$("#nik").on('keyup', function(){
+			let value = $(this).val();
+
+			if (value.length == 16){
+				if (cekNIK(value, dataPasien.nik) == false){
+					$("#nik").addClass("is-valid").removeClass("is-invalid");
+					$("#error-nik").html("");
+					$("#btnSubmit").removeAttr("disabled");
+				} else {
+					$("#nik").addClass("is-invalid");
+					$("#error-nik").html("NIK tidak tersedia");
+					$("#btnSubmit").attr("disabled", true);
+				}
+			} else {
+				$("#nik").addClass("is-invalid");
+				$("#error-nik").html("NIK harus 16 angka");
+				$("#btnSubmit").attr("disabled", true);
+			}
 		});
 
 		$(".select2").select2({});
 		
-		$('#no_rm').inputmask('999-999');
+		$('#no_rm').inputmask('99-99-99');
 
 		$('.numberonly').keypress(function(event){
             if (event.which < 48 || event.which > 57) {
@@ -106,6 +153,60 @@
             }
         });
 	});
+
+	function cekNoRM(no_rm, no_rm_lama) {
+		var result = false;
+
+		$.ajax({
+			async: false,
+			url: __HOSTAPI__ + "/Pasien/cek-no-rm/" + no_rm,
+			type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+            	if (response.response_package != ""){
+            		if (response.response_package.response_result > 0){
+            			if (response.response_package.response_data[0].no_rm != no_rm_lama){
+            				result = true;
+            			}
+            		}
+            	}
+            },
+            error: function(response) {
+                console.log(response);
+            }
+		});
+
+		return result;
+	}
+
+	function cekNIK(nik, nik_lama){
+		var result = false;
+
+		$.ajax({
+			async: false,
+            url:__HOSTAPI__ + "/Pasien/cek-nik/" + nik,
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+               if (response.response_package != ""){
+            		if (response.response_package.response_result > 0){
+            			if (response.response_package.response_data[0].nik != nik_lama){
+            				result = true;
+            			}
+            		}
+            	}
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+
+        return result;
+	}
 
 	function loadTermSelectBox(selector, id_term){
 		$.ajax({

@@ -1,7 +1,16 @@
 <script type="text/javascript">
 	$(function() {
-		var poliList = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
-		
+		var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
+		var poliList = poliListRaw;
+		poliList.tindakan = [];
+		//Filter Rawat Jalan
+		for(var z in poliListRaw.tindakan) {
+			if(poliListRaw.tindakan[z].kelas == __UID_KELAS_GENERAL_RJ__) {
+				poliList.tindakan.push(poliListRaw.tindakan);
+			}
+		}
+
+		console.log(poliList);
 		//Init
 		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorKeteranganResepRacikan, editorPlanning;
 		var antrianData, asesmen_detail;
@@ -9,7 +18,7 @@
 		var usedTindakan = [];
 		var pasien_penjamin, pasien_penjamin_uid;
 		var UID = __PAGES__[3];
-
+		$("#info-pasien-perawat").remove();
 		$.ajax({
 			url:__HOSTAPI__ + "/Antrian/antrian-detail/" + UID,
 			async:false,
@@ -111,7 +120,8 @@
 										"signaKonsumsi": racikan_detail[racikanKey].signa_qty,
 										"signaTakar": racikan_detail[racikanKey].signa_pakai,
 										"signaHari": racikan_detail[racikanKey].qty,
-										"item":racikan_detail[racikanKey].item
+										"item":racikan_detail[racikanKey].item,
+										"aturan_pakai": racikan_detail[racikanKey].aturan_pakai
 									});
 									var itemKomposisi = racikan_detail[racikanKey].item;
 									for(var komposisiKey in itemKomposisi) {
@@ -314,30 +324,34 @@
 		$("#current-poli").prepend(poliList[0]['nama']);
 
 		function generateTindakan(poliList, antrianData, selected = []) {
+
 			var tindakanMeta = {};
 			$("#txt_tindakan option").remove();
-			var UID_TINDAKAN = <?php echo json_encode(__UID_KONSULTASI__); ?>;
-			var UID_KARTU = <?php echo json_encode(__UID_KARTU__); ?>;
+			var __UID_KONSULTASI__ = <?php echo json_encode(__UID_KONSULTASI__); ?>;
+			var __UID_KARTU__ = <?php echo json_encode(__UID_KARTU__); ?>;
 			for(var key in poliList) {
-				if(tindakanMeta[poliList[key].uid_tindakan] === undefined) {
-					tindakanMeta[poliList[key].uid_tindakan] = [];	
-					tindakanMeta[poliList[key].uid_tindakan].nama = poliList[key].tindakan.nama;
-				}
+				if(poliList[key].tindakan != null) {
+					if(tindakanMeta[poliList[key].uid_tindakan] === undefined) {
+						tindakanMeta[poliList[key].uid_tindakan] = [];
+						tindakanMeta[poliList[key].uid_tindakan].kelas = poliList[key].kelas;
+						tindakanMeta[poliList[key].uid_tindakan].nama = poliList[key].tindakan.nama;
+					}
 
-				if(poliList[key].penjamin != undefined){
-					if(antrianData.penjamin == poliList[key].uid_penjamin) {
-						tindakanMeta[poliList[key].uid_tindakan].push({
-							uid: poliList[key].uid_penjamin,
-							nama: poliList[key].penjamin.nama
-						});
+					if(poliList[key].penjamin != undefined){
+						if(antrianData.penjamin == poliList[key].uid_penjamin) {
+							tindakanMeta[poliList[key].uid_tindakan].push({
+								uid: poliList[key].uid_penjamin,
+								nama: poliList[key].penjamin.nama
+							});
+						}
 					}
 				}
 			}
 
 			for(var key in tindakanMeta) {
-				if(selected.indexOf(key) < 0 && tindakanMeta[key].nama != undefined && key != UID_TINDAKAN && key != UID_KARTU) {
+				if(selected.indexOf(key) < 0 && tindakanMeta[key].nama != undefined && key != __UID_KONSULTASI__ && key != __UID_KARTU__) {
 					$("#txt_tindakan").append(
-						"<option value=\"" + key + "\">" + tindakanMeta[key].nama + "</option>"
+						"<option value=\"" + key + "\" kelas=\"" + tindakanMeta[key].kelas + "\">" + tindakanMeta[key].nama + "</option>"
 					);
 				}
 			}
@@ -349,7 +363,8 @@
 		$("#btnTambahTindakan").click(function(){
 			autoTindakan(tindakanMeta, {
 				uid: $("#txt_tindakan").val(),
-				nama: $("#txt_tindakan option:selected").text()
+				nama: $("#txt_tindakan option:selected").text(),
+				kelas: $("#txt_tindakan option:selected").attr("kelas"),
 			}, antrianData);
 			
 			if(usedTindakan.indexOf($("#txt_tindakan").val()) < 0) {
@@ -378,7 +393,7 @@
 
 			$(newCellTindakanTindakan).html(setTindakan.nama).attr({
 				"set-tindakan": setTindakan.uid
-			});
+			}).attr("kelas", setTindakan.kelas);
 			var newPenjamin = document.createElement("SELECT");
 			
 			for(var a = 0; a < penjaminMeta[setTindakan.uid].length; a++) {
@@ -889,7 +904,7 @@
 					digitsOptional: true
 				}).val((setter.signaKonsumsi == 0) ? "" : setter.signaKonsumsi);
 
-				$(newCellResepSigna2).html("<i class=\"fa fa-times\"></i>");
+				$(newCellResepSigna2).html("<i class=\"fa fa-times signa-sign\"></i>");
 
 				var newTakar = document.createElement("INPUT");
 				$(newCellResepSigna3).append(newTakar);
@@ -995,6 +1010,7 @@
 			"signaKonsumsi": "",
 			"signaTakar": "",
 			"signaHari": "",
+			"aturan_pakai": "",
 			"item":[]
 		}) {
 			$("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
@@ -1046,11 +1062,21 @@
 				"</table>"
 			);
 
+			var newAturanPakaiRacikan = document.createElement("SELECT");
+			
+			var dataAturanPakai = autoAturanPakai();
+			
+			$(newAturanPakaiRacikan).addClass("form-control aturan-pakai");
 			var newKeteranganRacikan = document.createElement("TEXTAREA");
-			$(newRacikanCellNama).append(newKeteranganRacikan);
+			$(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<span>Keterangan</span>").append(newKeteranganRacikan);
+			$(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
+			for(var aturanPakaiKey in dataAturanPakai) {
+				$(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
+			}
 			$(newKeteranganRacikan).addClass("form-control").attr({
 				"placeholder": "Keterangan racikan"
 			}).val(setter.keterangan);
+
 			/*var newRacikanObat = document.createElement("SELECT");
 			var newObatTakar = document.createElement("INPUT");
 			$(newRacikanCellObat).append(newRacikanObat);
@@ -1073,7 +1099,7 @@
 				digitsOptional: true
 			});
 
-			$(newRacikanCellSignaX).html("<i class=\"fa fa-times\"></i>");
+			$(newRacikanCellSignaX).html("<i class=\"fa fa-times signa-sign\"></i>");
 
 			var newRacikanSignaB = document.createElement("INPUT");
 			$(newRacikanCellSignaB).append(newRacikanSignaB);
@@ -1616,6 +1642,7 @@
 					"kunjungan": kunjungan,
 					"antrian": antrian,
 					"pasien": pasien,
+					"kelas": $(this).find("td:eq(1)").attr("kelas"),
 					"poli": poli,
 					"item": tindakanItem,
 					"itemName": $(this).find("td:eq(1)").html(),
@@ -1666,14 +1693,17 @@
 					"keterangan": "",
 					"signaKonsumsi": 0,
 					"signaTakar": 0,
-					"signaHari": 0
+					"signaHari": 0,
+					"aturanPakai": 0
 				};
 
 				dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input").val();
+				dataRacikan.aturanPakai = masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val();
 				dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
 				dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
 				dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));
 				dataRacikan.signaHari = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"));
+
 
 
 
@@ -1750,6 +1780,7 @@
 				},
 				type: "POST",
 				success: function(response) {
+					console.log(response);
 					if(response.response_package.response_result > 0) {
 						notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
 					} else {
@@ -1765,12 +1796,11 @@
 		});
 
 		
-		/*loadRadiologiTindakan('tindakan-radiologi');
+		loadRadiologiTindakan('tindakan-radiologi');
+		
 		$("#tindakan-radiologi").select2({});
-
 		function loadRadiologiTindakan(selector){
 			var radiologiTindakan;
-
 			$.ajax({
 				url: __HOSTAPI__ + "/Radiologi/tindakan",
 				async:false,
@@ -1779,24 +1809,23 @@
 				},
 				type:"GET",
 				success:function(response) {
-					radiologiTindakan = response.response_package.response_data;
-
-					if (radiologiTindakan != ""){
-						for(i = 0; i < radiologiTindakan.length; i++){
-		                    var selection = document.createElement("OPTION");
-
-		                    $(selection).attr("value", radiologiTindakan[i].uid).html(radiologiTindakan[i].nama);
-		                    $("#" + selector).append(selection);
-		                }
+					if(response.response_package != null) {
+						radiologiTindakan = response.response_package.response_data;
+						if (radiologiTindakan.length > 0){
+							for(i = 0; i < radiologiTindakan.length; i++){
+			                    var selection = document.createElement("OPTION");
+			                    $(selection).attr("value", radiologiTindakan[i].uid).html(radiologiTindakan[i].nama);
+			                    $("#" + selector).append(selection);
+			                }
+						}
 					}
 				},
 				error: function(response) {
 					console.log(response);
 				}
 			});
-
 			return radiologiTindakan;
-		}*/
+		}
 
 		function loadPasien(params){
 			var MetaData = null;

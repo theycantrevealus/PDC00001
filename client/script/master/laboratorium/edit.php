@@ -761,7 +761,7 @@
 				}
 			});
 
-			var penjamin = [];
+			/*var penjamin = [];
 			$("#penjamin-lab tbody tr").each(function() {
 				var nilaiPenjamin = $(this).find("td:eq(1) select").val();
 				var nilaiPenjaminHarga = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
@@ -771,7 +771,7 @@
 						"harga": nilaiPenjaminHarga
 					});
 				}
-			});
+			});*/
 
 			if(kode != "" && nama != "") {
 				$.ajax({
@@ -787,7 +787,7 @@
 						kategori: kategori,
 						lokasi: lokasi,
 						nilai: nilai,
-						penjamin: penjamin
+						//penjamin: penjamin
 					},
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
