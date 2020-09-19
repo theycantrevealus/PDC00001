@@ -172,7 +172,7 @@
 				var ObatData = load_product_resep(newObat, data.detail[a].detail.uid, false);
 
 				var newBatchSelector = document.createElement("SELECT");
-				//$(newDetailCellObat).append("<b style=\"padding-top: 10px; display: block\">Batch</b>").append(newBatchSelector);
+				$(newDetailCellObat).append("<b style=\"padding-top: 10px; display: block\">Batch</b>").append(newBatchSelector);
 
 				//$(newDetailCellObat).html(data.detail[a].detail.nama);
 				var batchDataUnique = [];
@@ -231,13 +231,15 @@
 					"disc-type": setDiskonType
 				});
 				
-				$(newBatchSelector).addClass("form-control batch-loader").select2();
+				$(newBatchSelector).addClass("form-control batch-loader").select2().attr({
+					"disabled" : "disabled"
+				});
 
 				var newDetailCellSigna = document.createElement("TD");
 				$(newDetailCellSigna).html("<div class=\"input-group mb-3\">" +
 											"<input value=\"" + data.detail[a].signa_qty + "\" type=\"text\" class=\"form-control signa\" placeholder=\"0\" aria-label=\"0\" aria-describedby=\"basic-addon1\" />" +
 											"<div class=\"input-group-prepend\">" +
-												"<span class=\"input-group-text\" id=\"basic-addon1\">&times;</span>" +
+												"<span class=\"input-group-text readonly\" id=\"basic-addon1\">&times;</span>" +
 											"</div>" +
 											"<input type=\"text\" value=\"" + data.detail[a].signa_pakai + "\" class=\"form-control signa\" placeholder=\"0\" aria-label=\"0\" aria-describedby=\"basic-addon1\" />" +
 											"</div>");
@@ -248,7 +250,7 @@
 					prefix: "",
 					autoGroup: false,
 					digitsOptional: true
-				});
+				}).attr("readonly", true);
 					
 				//$(newDetailCellSigna).html(data.detail[a].signa_qty + " &times; " + data.detail[a].signa_pakai);
 
@@ -257,7 +259,7 @@
 				$(newDetailCellQty).html("<div class=\"input-group mb-3\">" +
 											"<input value=\"" + data.detail[a].qty + "\" type=\"text\" class=\"form-control qty_resep\" placeholder=\"0\" aria-label=\"0\" aria-describedby=\"basic-addon1\" />" +
 											"<div class=\"input-group-append\">" +
-												"<span class=\"input-group-text\" id=\"basic-addon1\">" + parsedItemData[obatNavigator.indexOf(itemData[dataKey].uid)]['satuan-caption'] + "</span>" +
+												"<span class=\"input-group-text readonly\" id=\"basic-addon1\">" + parsedItemData[obatNavigator.indexOf(itemData[dataKey].uid)]['satuan-caption'] + "</span>" +
 											"</div>" +
 										"</div>");
 				$(newDetailCellQty).find("input").inputmask({
@@ -267,10 +269,10 @@
 					prefix: "",
 					autoGroup: false,
 					digitsOptional: true
-				});
+				}).attr("readonly", true);
 
-				var newDetailCellHarga = document.createElement("TD");
-				$(newDetailCellHarga).addClass("text-right");
+				/*var newDetailCellHarga = document.createElement("TD");
+				$(newDetailCellHarga).addClass("text-right");*/
 				
 				var newDetailCellTotal = document.createElement("TD");
 				$(newDetailCellTotal).addClass("text-right");
@@ -298,8 +300,9 @@
 
 				for(var batchRKey in batchData) {
 					if(batchData[batchRKey].barang == data.detail[a].detail.uid) {
+						console.log(batchData[batchRKey]);
 						$(newBatchSelector).append("<option harga=\"" + batchData[batchRKey].harga + "\" value=\"" + batchData[batchRKey].batch + "\">" + batchData[batchRKey].kode + "</option>");
-						$(newDetailCellHarga).html(((parseFloat(batchData[batchRKey].harga) > 0) ? number_format(batchData[batchRKey].harga, 2, ".", ",") : 0));
+						//$(newDetailCellHarga).html(((parseFloat(batchData[batchRKey].harga) > 0) ? number_format(batchData[batchRKey].harga, 2, ".", ",") : 0));
 						$(newDetailCellTotal).html(((parseFloat(data.detail[a].qty * batchData[batchRKey].harga) > 0) ? number_format(data.detail[a].qty * batchData[batchRKey].harga, 2, ".", ",") : 0));
 					}
 				}
@@ -314,8 +317,8 @@
 				$(newDetailRow).append(newDetailCellObat);
 				$(newDetailRow).append(newDetailCellSigna);
 				$(newDetailRow).append(newDetailCellQty);
-				$(newDetailRow).append(newDetailCellHarga);
-				$(newDetailRow).append(newDetailCellTotal);
+				//$(newDetailRow).append(newDetailCellHarga);
+				//$(newDetailRow).append(newDetailCellTotal);
 				//$(newDetailRow).append(newDetailCellPenjamin);
 				//$(newDetailRow).append(newDetailCellAksi);
 
@@ -391,8 +394,8 @@
 
 					var totalHargaPenjamin = setterQty * setterHargaPenjamin;
 
-					$(this).parent().parent().find("td:eq(4)").html(number_format(setterHargaPenjamin, 2, ".", ","));
-					$(this).parent().parent().find("td:eq(5)").html("<b>" + number_format(totalHargaPenjamin, 2, ".", ",") + "</b>");
+					/*$(this).parent().parent().find("td:eq(4)").html(number_format(setterHargaPenjamin, 2, ".", ","));
+					$(this).parent().parent().find("td:eq(5)").html("<b>" + number_format(totalHargaPenjamin, 2, ".", ",") + "</b>");*/
 				});
 
 				$(newObat).val([data.detail[a].detail.uid]).trigger("change").trigger({
@@ -445,8 +448,8 @@
 					var newCellRacikanSigna = document.createElement("TD");
 					var newCellRacikanObat = document.createElement("TD");
 					var newCellRacikanJlh = document.createElement("TD");
-					var newCellRacikanHarga = document.createElement("TD");
-					var newCellRacikanTotal = document.createElement("TD");
+					/*var newCellRacikanHarga = document.createElement("TD");
+					var newCellRacikanTotal = document.createElement("TD");*/
 
 					var newRacikanObat = document.createElement("SELECT");
 
@@ -459,19 +462,20 @@
 						"<sub>" + racikanDetail[racDetailKey].takar_decimal + "</sub>" +
 						"<br />" +
 						"(Ratio : <b identifier-racikan-ratio=\"" + racDetailKey + "\">" + racikanDetail[racDetailKey].ratio + "</b> | Dibulatkan : <text identifier-racikan-bulat=\"" + racDetailKey + "\">" + racikanDetail[racDetailKey].pembulatan + "</text>)<br />" +
-						"Pemotongan Stok : <span identifier-racikan-jumlah=\"" + racDetailKey + "\"></span>");
+						"Pemotongan Stok : <h4 identifier-racikan-jumlah=\"" + racDetailKey + "\"></h4>");
 
-					$(newCellRacikanHarga).addClass("text-right").attr({
+					/*$(newCellRacikanHarga).addClass("text-right").attr({
 						"identifier-racikan-harga" : racDetailKey
-					});
+					});*/
 
-					$(newCellRacikanTotal).attr({
+					/*$(newCellRacikanTotal).attr({
 						"identifier-racikan-total": racDetailKey
-					}).addClass("text-right");
+					}).addClass("text-right");*/
 					
 					var racikanQty = document.createElement("INPUT");
 					$(newCellRacikanNama).append("<hr /><h6 style=\"padding-top: 20px; display: block\">Jumlah Racikan</h6>").append(racikanQty);
 					$(racikanQty).attr({
+						"readonly": true,
 						"identifier-racikan-jumlah-all": racDetailKey,
 						"identifier-racikan-jumlah-group": b,
 					}).addClass("form-control qty_racikan").val(data.racikan[b].qty).inputmask({
@@ -490,13 +494,13 @@
 						
 						$(newRacikanRow).append(newCellRacikanObat);
 						$(newRacikanRow).append(newCellRacikanJlh);
-						$(newRacikanRow).append(newCellRacikanHarga);
-						$(newRacikanRow).append(newCellRacikanTotal);
+						/*$(newRacikanRow).append(newCellRacikanHarga);
+						$(newRacikanRow).append(newCellRacikanTotal);*/
 					} else {
 						$(newRacikanRow).append(newCellRacikanObat);
 						$(newRacikanRow).append(newCellRacikanJlh);
-						$(newRacikanRow).append(newCellRacikanHarga);
-						$(newRacikanRow).append(newCellRacikanTotal);
+						/*$(newRacikanRow).append(newCellRacikanHarga);
+						$(newRacikanRow).append(newCellRacikanTotal);*/
 					}
 
 					$("#load-detail-racikan tbody").append(newRacikanRow);
@@ -620,7 +624,7 @@
 
 						//Kalkulasi harga racikan per batch
 						var jumlahSet = parseFloat($("input[identifier-racikan-jumlah-group=\"" + identifierGroup + "\"]").inputmask("unmaskedvalue"));
-						var hargaSet = parseFloat($(this).parent().find("select.racikan-batch-loader option:selected").attr("harga"));
+						//var hargaSet = parseFloat($(this).parent().find("select.racikan-batch-loader option:selected").attr("harga"));
 						var bulatSet = parseFloat($("text[identifier-racikan-bulat=\"" + identifierValue + "\"]").html());
 						var ratioSet = parseFloat($("b[identifier-racikan-ratio=\"" + identifierValue + "\"]").html());
 
@@ -628,10 +632,10 @@
 						var hargaSet = parseFloat($(this).parent().parent().parent().find("td:eq(3) select:eq(1) option:selected").attr("harga"));
 						var ratioSet = parseFloat($(this).parent().parent().parent().find("td:eq(4) b:eq(1)").html());*/
 						
-						var totalHaraSet = jumlahSet * hargaSet * bulatSet;
-						$("span[identifier-racikan-jumlah=\"" + identifierValue + "\"]").html(jumlahSet * bulatSet);
-						$("td[identifier-racikan-harga=\"" + identifierValue + "\"]").html(number_format(hargaSet, 2, ",", "."));
-						$("td[identifier-racikan-total=\"" + identifierValue + "\"]").html(number_format(totalHaraSet, 2, ",", "."));
+						//var totalHaraSet = jumlahSet * hargaSet * bulatSet;
+						$("h4[identifier-racikan-jumlah=\"" + identifierValue + "\"]").html(jumlahSet * bulatSet);
+						//$("td[identifier-racikan-harga=\"" + identifierValue + "\"]").html(number_format(hargaSet, 2, ",", "."));
+						//$("td[identifier-racikan-total=\"" + identifierValue + "\"]").html(number_format(totalHaraSet, 2, ",", "."));
 						/*$(this).parent().parent().parent().find("td:eq(4) span").html(jumlahSet * ratioSet);
 						$(this).parent().parent().parent().find("td:eq(5)").html(number_format(hargaSet, 2, ",", "."));
 						$(this).parent().parent().parent().find("td:eq(6)").html(number_format(totalHaraSet, 2, ",", "."));*/
@@ -747,7 +751,7 @@
 			}
 		});*/
 
-		$("#btnProsesResep").click(function() {
+		$("#btnProsesResep").click(function() { //Pengerjaan Resep
 			//console.clear();
 			var conf = confirm("Pastikan resep sudah benar sekali lagi. Anda yakin?");
 			if(conf) {
@@ -755,38 +759,21 @@
 				var detail = [];
 				//Ambil Resep Biasa
 				$("#load-detail-resep tbody tr").each(function() {
-					var profit = parseFloat($(this).find("td:eq(1)").attr("disc"));
-					var profit_type = $(this).find("td:eq(1)").attr("disc-type");
 					var obat_biasa = $(this).find("td:eq(1) select:eq(0)").val();
 					var batch_biasa = $(this).find("td:eq(1) select:eq(1)").val();
-					var harga_biasa = parseFloat($(this).find("td:eq(1) select:eq(1) option:selected").attr("harga"));
 					var signa_qty_biasa = parseFloat($(this).find("td:eq(2) input:eq(0)").inputmask("unmaskedvalue"));
 					var signa_pakai_biasa = parseFloat($(this).find("td:eq(2) input:eq(1)").inputmask("unmaskedvalue"));
 					var jumlah_biasa = parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
-					//Penjamin List
 					var penjamin = $(this).find("td:eq(1) select:eq(0) option:selected").attr("penjamin-list");
 
 					if(signa_qty_biasa > 0 && signa_pakai_biasa > 0 && jumlah_biasa > 0) {
-						var calculateProfit = 0;
-						if(profit_type == "P") {
-							calculateProfit = harga_biasa + (profit / 100 * harga_biasa);
-						} else if(profit_type == "A") {
-							calculateProfit = harga_biasa + profit;
-						} else {
-							calculateProfit = harga_biasa;
-						}
-
 						detail.push({
 							obat: obat_biasa,
 							batch: batch_biasa,
-							harga: harga_biasa,
-							harga_after_profit: calculateProfit,
 							signa_qty: signa_qty_biasa,
 							signa_pakai: signa_pakai_biasa,
 							jumlah: jumlah_biasa,
-							penjamin:penjamin,
-							profit:profit,
-							profit_type:profit_type
+							penjamin:penjamin
 						});
 					}
 				});
@@ -904,7 +891,7 @@
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="modal-large-title">Verifikasi Resep</h5>
+				<h5 class="modal-title" id="modal-large-title">Pengerjaan Resep</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
@@ -932,8 +919,6 @@
 											<th style="width: 40%;">Obat</th>
 											<th width="15%">Signa</th>
 											<th width="15%">Jumlah</th>
-											<th class="wrap_content">Harga</th>
-											<th class="wrap_content">Total</th>
 										</tr>
 									</thead>
 									<tbody></tbody>
@@ -948,8 +933,6 @@
 											<th>Signa</th>
 											<th>Obat</th>
 											<th>Jumlah (Otomatis)</th>
-											<th>Harga</th>
-											<th>Total</th>
 										</tr>
 									</thead>
 									<tbody></tbody>
@@ -961,7 +944,6 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-success" id="btnProsesResep"><i class="fa fa-check"></i> Proses</button>
-				<button type="button" class="btn btn-info"><i class="fa fa-print"></i> Copy Resep</button>
 				<button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
 			</div>
 		</div>

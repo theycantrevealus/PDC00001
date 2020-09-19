@@ -1095,10 +1095,17 @@ class Inventori extends Utility {
 			//$data['response_data'][$key]['item_detail'] = self::get_item_detail($value['barang'])['response_data'][0];
 			$data['response_data'][$key]['gudang'] = self::get_gudang_detail($value['gudang'])['response_data'][0];
 			$data['response_data'][$key]['kode'] = self::get_batch_detail($value['batch'])['response_data'][0]['batch'];
-			$data['response_data'][$key]['expired'] = date('d F Y', strtotime(self::get_batch_detail($value['batch'])['response_data'][0]['expired_date']));
+			$expired_date = self::get_batch_detail($value['batch'])['response_data'][0]['expired_date'];
+			$data['response_data'][$key]['expired_sort'] = $expired_date;
+			$data['response_data'][$key]['expired'] = date('d F Y', strtotime($expired_date));
 			$data['response_data'][$key]['harga'] = self::get_batch_detail($value['batch'])['response_data'][0]['harga'];
 			$data['response_data'][$key]['profit'] = self::get_batch_detail($value['batch'])['response_data'][0]['profit'];
 		}
+
+		//Sort Batch before return
+		$sorted = $data['response_data'];
+		array_multisort($sorted, SORT_ASC, $data['response_data']);
+		$data['response_data'] = $sorted;
 		return $data;
 	}
 
