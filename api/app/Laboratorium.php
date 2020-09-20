@@ -104,9 +104,14 @@ class Laboratorium extends Utility {
 					return self::edit_lab($parameter);
 					break;
 
+				case 'add-order-lab':
+					return self::add_order_lab($parameter);
+					break;
+
 				case 'update-hasil-lab':
 					return self::update_hasil_lab($parameter);
 					break;
+					
 			}	
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
@@ -322,6 +327,7 @@ class Laboratorium extends Utility {
 			$data['response_data'][$key]['lokasi'] = $LokasiLab['response_data'];
 			//============================================================================
 			$NilaiLab = self::$query->select('master_lab_nilai', array(
+				'id',
 				'satuan',
 				'nilai_min',
 				'nilai_maks',
@@ -1414,7 +1420,304 @@ class Laboratorium extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+		$get_antrian = new Antrian(self::$pdo);
+		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter['uid_antrian']);
 		
+		$result = [];
+		if ($antrian['response_result'] > 0){
+
+			$data_antrian = $antrian['response_data'][0];		//get antrian data
+
+			//get uid asesmmen based by antrian data
+			$get_asesmen = self::$query->select('asesmen', array('uid'))
+				->where(array(
+						'asesmen.deleted_at' => 'IS NULL',
+						'AND',
+						'asesmen.poli' => '= ?',
+						'AND',
+						'asesmen.kunjungan' => '= ?',
+						'AND',
+						'asesmen.antrian' => '= ?',
+						'AND',
+						'asesmen.pasien' => '= ?',
+						'AND',
+						'asesmen.dokter' => '= ?'
+					), array(
+						$data_antrian['departemen'],
+						$data_antrian['kunjungan'],
+						$parameter['uid_antrian'],
+						$data_antrian['pasien'],
+						$data_antrian['dokter']
+					)
+				)
+				->execute();
+			
+			$uidLabOrder = "";
+			$statusOrder = "NEW";	//parameter to set status order, set "NEW" for default
+			if ($get_asesmen['response_result'] > 0){
+				$uidAsesmen = $get_asesmen['response_data'][0]['uid'];
+
+				$checkLabOrder = self::$query
+					->select('lab_order', array('uid'))
+					->where(
+						array(
+							'lab_order.asesmen'		=>	'= ?',
+							'AND',
+							'lab_order.deleted_at'	=>	'IS NULL'
+						)
+						, array($uidAsesmen)
+					)
+					->execute();
+				
+				if ($checkLabOrder['response_result'] > 0){
+					$statusOrder = "OLD";		//$statusOrder will set "OLD" if has ever added
+					$uidLabOrder = $checkLabOrder['response_data'][0]['uid'];
+
+					$result['old_lab_order'] = $checkLabOrder;
+				}
+
+			} else {
+				//new asesmen
+				$uidAsesmen = parent::gen_uuid();
+				$MasterUID = $uidAsesmen;
+				$asesmen_poli = self::$query
+					->insert('asesmen', 
+						array(
+							'uid' => $uidAsesmen,
+							'poli' => $data_antrian['departemen'],
+							'kunjungan' => $data_antrian['kunjungan'],
+							'antrian' => $parameter['uid_antrian'],
+							'pasien' => $data_antrian['pasien'],
+							'dokter' => $data_antrian['dokter'],
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						)
+					)
+					->execute();
+				
+				if($asesmen_poli['response_result'] > 0) {
+
+					$log = parent::log(array(
+						'type'=>'activity',
+						'column'=>array(
+							'unique_target',
+							'user_uid',
+							'table_name',
+							'action',
+							'logged_at',
+							'status',
+							'login_id'
+						),
+						'value'=>array(
+							$uidAsesmen,
+							$UserData['data']->uid,
+							'asesmen',
+							'I',
+							parent::format_date(),
+							'N',
+							$UserData['data']->log_id
+						),
+						'class'=>__CLASS__
+					));
+					
+					$result['new_asesmen'] = $asesmen_poli;
+				}
+			}
+
+			if ($statusOrder == "NEW"){
+
+				$uidLabOrder = parent::gen_uuid();
+				$labOrder = self::$query
+					->insert('lab_order', 
+						array(
+							'uid'			=>	$uidLabOrder,
+							'asesmen'		=>	$uidAsesmen,
+							'waktu_order'	=>	parent::format_date(),
+							'selesai'		=>	'false',
+							'petugas'		=>	$UserData['data']->uid,
+							'created_at'	=>	parent::format_date(),
+							'updated_at'	=>	parent::format_date()
+						)
+					)
+					->execute();
+				
+				if($labOrder['response_result'] > 0) {
+
+					$log = parent::log(array(
+						'type'=>'activity',
+						'column'=>array(
+							'unique_target',
+							'user_uid',
+							'table_name',
+							'action',
+							'logged_at',
+							'status',
+							'login_id'
+						),
+						'value'=>array(
+							$uidLabOrder,
+							$UserData['data']->uid,
+							'lab_order',
+							'I',
+							parent::format_date(),
+							'N',
+							$UserData['data']->log_id
+						),
+						'class'=>__CLASS__
+					));
+					
+					
+				}
+
+				$result['new_lab_order'] = $labOrder;
+			}
+			
+			//check if uid labOrder has no empty and add tindakan
+			if ($uidLabOrder != ""){
+
+				/*	KETERANGAN
+					format json listTindakan:
+					listTindakan : { 
+						uid_tindakan_1 : uid_penjamin_1,
+						uid_tinadkan_2 : uid_penjamin_2 
+					}
+				*/
+				foreach ($parameter['listTindakan'] as $keyTindakan => $valueTindakan) {
+					$checkDetailLabor = self::$query
+						->select('lab_order_detail', array('id'))
+						->where(
+							array(
+								'lab_order_detail.lab_order'	=> '= ?',
+								'AND',
+								'lab_order_detail.tindakan'		=> '= ?',
+								'AND',
+								'lab_order_detail.deleted_at'	=> 'IS NULL'
+							), array(
+								$uidLabOrder,
+								$keyTindakan
+							)
+						)
+						->execute();
+					
+					if ($checkDetailLabor['response_result'] == 0){
+						$addDetailLabor = self::$query
+							->insert('lab_order_detail', 
+								array(
+									'lab_order'		=>	$uidLabOrder,
+									'tindakan'		=>	$keyTindakan,
+									'penjamin'		=>	$valueTindakan,
+									'created_at'	=>	parent::format_date(),
+									'updated_at'	=>	parent::format_date()	
+								)
+							)
+							->execute();
+
+						if ($addDetailLabor['response_result'] > 0){
+							$log = parent::log(array(
+								'type'=>'activity',
+								'column'=>array(
+									'unique_target',
+									'user_uid',
+									'table_name',
+									'action',
+									'logged_at',
+									'status',
+									'login_id'
+								),
+								'value'=>array(
+									$uidLabOrder . "; ". $keyTindakan,
+									$UserData['data']->uid,
+									'lab_order_detail',
+									'I',
+									parent::format_date(),
+									'N',
+									$UserData['data']->log_id
+								),
+								'class'=>__CLASS__
+							));
+							
+							$result['new_lab_detail'] = $addDetailLabor;
+							$getNilaiTindakanLabor = self::get_lab_detail($keyTindakan);
+	
+							if ($getNilaiTindakanLabor['response_result'] > 0){
+								$nilaiLabor = $getNilaiTindakanLabor['response_data'][0]['nilai'];
+								
+								foreach ($nilaiLabor as $keyNilai => $valueNilai) {
+									
+									$getAvailableNilai = self::$query
+										->select('lab_order_nilai', array('id'))
+										->where(
+											array(
+												'lab_order_nilai.lab_order' 	=>	'= ?',
+												'AND',
+												'lab_order_nilai.tindakan'		=>	'= ?',
+												'AND',
+												'lab_order_nilai.id_lab_nilai'	=>	'= ?',
+												'AND',
+												'lab_order_nilai.deleted_at'	=>	'IS NULL'
+											), array(
+												$uidLabOrder,
+												$keyTindakan,
+												$valueNilai['id']
+											)
+										)
+										->execute();
+									
+									//check if nilai_lab never added
+									if ($getAvailableNilai['response_result'] == 0){  
+										$addNilaiLabor = self::$query
+											->insert('lab_order_nilai', 
+												array(
+													'lab_order'		=>	$uidLabOrder,
+													'tindakan'		=>	$keyTindakan,
+													'id_lab_nilai'	=>	$valueNilai['id'],
+													'created_at'	=>	parent::format_date(),
+													'updated_at'	=>	parent::format_date()
+												)
+											)
+											->execute();
+
+										if ($addNilaiLabor['response_result'] > 0){
+											$log = parent::log(array(
+												'type'=>'activity',
+												'column'=>array(
+													'unique_target',
+													'user_uid',
+													'table_name',
+													'action',
+													'logged_at',
+													'status',
+													'login_id'
+												),
+												'value'=>array(
+													$uidLabOrder . "; ". $keyTindakan,
+													$UserData['data']->uid,
+													'lab_order_nilai',
+													'I',
+													parent::format_date(),
+													'N',
+													$UserData['data']->log_id
+												),
+												'class'=>__CLASS__
+											));
+
+											$result['new_lab_nilai'] = $addNilaiLabor;
+										}
+									}
+	
+								}
+	
+							}
+	
+						}
+					}
+
+				}
+				
+			}
+		}
+
+		return $result;
 	}
 
 	private function update_hasil_lab($parameter){
