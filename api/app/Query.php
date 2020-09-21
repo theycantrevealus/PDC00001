@@ -45,9 +45,9 @@ class Query {
 	}
 
 	function update($table, $parameter = array()) {
-		/*$this->tables = array();
+		$this->tables = array();
 		self::$queryValues = array();
-		self::$queryParams = array();*/
+		self::$queryParams = array();
 		self::$queryMode = 'update';
 		self::$queryString = 'UPDATE ';
 		array_push($this->tables, $table);
@@ -67,9 +67,9 @@ class Query {
 	}
 
 	function hard_delete($table) {
-		/*$this->tables = array();
+		$this->tables = array();
 		self::$queryValues = array();
-		self::$queryParams = array();*/
+		self::$queryParams = array();
 		self::$queryMode = 'hard_delete';
 		self::$queryString = 'DELETE FROM ' . $table . ' ';
 		array_push($this->tables, $table);
@@ -110,10 +110,12 @@ class Query {
 		return $this;
 	}
 
-	function select($table, $parameter = array()) {
-		/*$this->tables = array();
-		self::$queryValues = array();
-		self::$queryParams = array();*/
+	function select($table, $parameter = array(), $MODE = 1) {
+		if($MODE == 1) {
+			$this->tables = array();
+			self::$queryValues = array();
+			self::$queryParams = array();	
+		}
 		self::$queryMode = 'select';
 		self::$queryString = 'SELECT ';
 		$this->tables[$table] = array();
@@ -130,9 +132,9 @@ class Query {
 		if(isset($this->tables[$table])) {
 			throw new QueryException('Duplicated table defined', 1);
 		} else {
-			self::select($table, $parameter);	
+			self::select($table, $parameter, 2);
 		}
-		
+
 		return $this;
 	}
 
@@ -156,6 +158,7 @@ class Query {
 			foreach ($parameter as $key => $value) {
 				array_push($buildJoin, implode(' ', $value));
 			}
+
 			self::$joinString = $buildJoin;
 			return $this;
 		} else {
@@ -196,7 +199,7 @@ class Query {
 			}
 			$buildQuery = trim($buildQuery);
 			if(isset(self::$limit)) {
-				if(isset(self::$offset) && intval(self::$offset) > 0) {
+				if(isset(self::$offset) && intval(self::$offset) >= 0) {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit . ' ' . self::$offset;	
 				} else {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit;
@@ -318,12 +321,12 @@ class Query {
 			$responseBuilder['response_result'] = $query->rowCount();
 			return $responseBuilder;
 		} catch (\PDOException $e) {
-			throw new QueryException($e->getMessage(), 1);
-			/*$responseBuilder = array();
+			//throw new QueryException($e->getMessage(), 1);
+			$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = $usedValues;
 			$responseBuilder['response_params'] = self::$queryParams;
-			return $responseBuilder;*/
+			return $responseBuilder;
 		}
 	}
 }
