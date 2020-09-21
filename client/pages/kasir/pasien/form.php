@@ -7,13 +7,14 @@
 			<div class="card-header card-header-tabs-basic nav" role="tablist">
 				<a href="#biaya-terkini" class="active" data-toggle="tab" role="tab" aria-controls="biaya-terkini" aria-selected="true">Tunggakan Tagihan</a>
 				<a href="#biaya-history" data-toggle="tab" role="tab" aria-selected="false">History</a>
+				<a href="#biaya-retur" data-toggle="tab" role="tab" aria-selected="false">Biaya Kembali (Retur)</a>
 			</div>
 			<div class="card-body tab-content">
 				<div class="tab-pane active show fade" id="biaya-terkini">
 					<table class="table table-bordered table-striped largeDataType" id="invoice_detail_item">
 						<thead class="thead-dark">
 							<tr>
-								<th class="wrap_content"><input type="checkbox" id="bulk-all" /></th>
+								<th><input type="checkbox" id="bulk-all" /></th>
 								<th class="wrap_content">No</th>
 								<th>Item</th>
 								<th class="wrap_content">Jlh</th>
@@ -27,6 +28,22 @@
 				</div>
 				<div class="tab-pane show fade" id="biaya-history">
 					<table class="table table-bordered table-striped largeDataType" id="payment_history">
+						<thead class="thead-dark">
+							<tr>
+								<th class="wrap_content">No</th>
+								<th>Kwitansi</th>
+								<th>Tanggal Bayar</th>
+								<th>Metode Bayar</th>
+								<th>Petugas Kasir</th>
+								<th>Total</th>
+								<th>Rincian</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+				<div class="tab-pane show fade" id="biaya-retur">
+					<table class="table table-bordered table-striped largeDataType" id="payment_retur">
 						<thead class="thead-dark">
 							<tr>
 								<th class="wrap_content">No</th>

@@ -145,11 +145,20 @@
 			$("#btnTambahPasien").fadeIn("fast");
 		});
 
+		$("#btnTambahPasien").click(function(){
+			localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
+		});
+
 		$("#btnTambahAntrian").click(function(){
-			$("#btnTambahPasien").fadeOut("false");
-			$("#txt_cari").val("");
-			$("#table-list-pencarian tbody").html("<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>");
-			$("#modal-cari").modal("show");
+			var currentAntrian = $("#txt_current_antrian").attr("current_queue");
+			if(currentAntrian == undefined || currentAntrian == null) {
+				alert("Tidak ada antrian");
+			} else {
+				$("#btnTambahPasien").fadeOut("false");
+				$("#txt_cari").val("");
+				$("#table-list-pencarian tbody").html("<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>");
+				$("#modal-cari").modal("show");
+			}
 		});
 
 		$("body").on("click", ".btnDaftarPasien", function() {

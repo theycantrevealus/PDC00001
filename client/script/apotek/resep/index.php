@@ -152,8 +152,6 @@
 
 			$("#modal-verifikasi").modal("show");
 			targettedData = listResep[(dataRow - 1)];
-			console.clear();
-			console.log(targettedData);
 			$("#nama-pasien").attr({
 				"set-penjamin": targettedData.antrian.penjamin_data.uid
 			}).html(targettedData.antrian.pasien_info.panggilan_name.nama + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
@@ -475,7 +473,7 @@
 					$(racikanQty).attr({
 						"identifier-racikan-jumlah-all": racDetailKey,
 						"identifier-racikan-jumlah-group": b,
-					}).addClass("form-control").val(data.racikan[b].qty).inputmask({
+					}).addClass("form-control qty_racikan").val(data.racikan[b].qty).inputmask({
 						alias: 'decimal',
 						rightAlign: true,
 						placeholder: "0.00",
@@ -523,14 +521,14 @@
 						var penjaminRacikanList = [];
 						var penjaminRacikanListData = itemRacikanData[dataRacikanKey].penjamin;
 						
-
 						for(var penjaminRacikanKey in penjaminRacikanListData) {
-							if(penjaminRacikanList.indexOf(penjaminListData[penjaminRacikanKey].penjamin.uid) < 0) {
+							//Penjamin Check
+							if(penjaminRacikanList.indexOf(penjaminRacikanListData[penjaminRacikanKey].penjamin.uid) < 0) {
 								penjaminRacikanList.push(penjaminRacikanListData[penjaminRacikanKey].penjamin.uid);
 
-								if(penjaminListData[penjaminKey].penjamin.uid == $("#nama-pasien").attr("set-penjamin")) {
-									setDiskon = penjaminListData[penjaminKey].profit;
-									setDiskonType = penjaminListData[penjaminKey].profit_type;
+								if(penjaminRacikanListData[penjaminRacikanKey].penjamin.uid == $("#nama-pasien").attr("set-penjamin")) {
+									setDiskon = penjaminRacikanListData[penjaminRacikanKey].profit;
+									setDiskonType = penjaminRacikanListData[penjaminRacikanKey].profit_type;
 								}
 							}
 						}
@@ -563,7 +561,7 @@
 					}
 
 					$(newRacikanObat).addClass("form-control racikan-obat").select2({
-						data: parsedItemData,
+						data: parsedItemRacikanData,
 						placeholder: "Pilih Obat",
 						selectOnClose: true,
 						val: racikanDetail[racDetailKey].obat,
@@ -586,13 +584,35 @@
 						var refreshRacikanBatchData = refreshBatch(currentObatRacikan);
 						$(this).parent().find("select.racikan-batch-loader option").remove();
 						for(var batchKeyDRacikan in refreshRacikanBatchData) {
+							var profitPenjaminRacikan = refreshRacikanBatchData[batchKeyDRacikan].profit;
+							var setterPenjaminRacikanProfit = 0;
+							var setterPenjaminRacikanProfitType = "";
+							for(var profitRacikanKey in profitPenjaminRacikan) {
+								//Jika sama dengan penjamin utama pasien maka tambahkan nilai profit
+								if($("#nama-pasien").attr("set-penjamin") == profitPenjaminRacikan[profitRacikanKey].penjamin) {
+									setterPenjaminRacikanProfit = parseFloat(profitPenjaminRacikan[profitRacikanKey].profit);
+									setterPenjaminRacikanProfitType = profitPenjaminRacikan[profitRacikanKey].profit_type;
+								}
+							}
+							var hargaPraProfit = parseFloat(refreshRacikanBatchData[batchKeyDRacikan].harga);
+							var hargaPascaProfit = 0;
+							if(setterPenjaminRacikanProfitType == "P") {
+								hargaPascaProfit = hargaPraProfit + (setterPenjaminRacikanProfit / 100 * hargaPraProfit);
+							} else if( setterPenjaminRacikanProfitType == "A") {
+								hargaPascaProfit = hargaPraProfit + setterPenjaminRacikanProfit;
+							} else {
+								hargaPascaProfit = hargaPraProfit;
+							}
+
+
+
 							if(refreshRacikanBatchData[batchKeyDRacikan].gudang.uid == __GUDANG_APOTEK__) {
 								$(this).parent().find("select.racikan-batch-loader").append(
-									"<option harga=\"" + refreshRacikanBatchData[batchKeyDRacikan].harga + "\" value=\"" + refreshRacikanBatchData[batchKeyDRacikan].batch + "\">[" + refreshRacikanBatchData[batchKeyDRacikan].gudang.nama + "] - " + refreshRacikanBatchData[batchKeyDRacikan].kode + " [" + refreshRacikanBatchData[batchKeyDRacikan].expired + "]</option>"
+									"<option profit=\"" + setterPenjaminRacikanProfit + "\" profit_type=\"" + setterPenjaminRacikanProfitType + "\" harga=\"" + hargaPascaProfit + "\" value=\"" + refreshRacikanBatchData[batchKeyDRacikan].batch + "\">[" + refreshRacikanBatchData[batchKeyDRacikan].gudang.nama + "] - " + refreshRacikanBatchData[batchKeyDRacikan].kode + " [" + refreshRacikanBatchData[batchKeyDRacikan].expired + "]</option>"
 								);
 							} else {
 								$(this).parent().find("select.racikan-batch-loader").append(
-									"<option harga=\"" + refreshRacikanBatchData[batchKeyDRacikan].harga + "\" value=\"" + refreshRacikanBatchData[batchKeyDRacikan].batch + "\">[" + refreshRacikanBatchData[batchKeyDRacikan].gudang.nama + "] - " + refreshRacikanBatchData[batchKeyDRacikan].kode + " [" + refreshRacikanBatchData[batchKeyDRacikan].expired + "] / AMPRAH</option>"
+									"<option profit=\"" + setterPenjaminRacikanProfit + "\" profit_type=\"" + setterPenjaminRacikanProfitType + "\" harga=\"" + hargaPascaProfit + "\" value=\"" + refreshRacikanBatchData[batchKeyDRacikan].batch + "\">[" + refreshRacikanBatchData[batchKeyDRacikan].gudang.nama + "] - " + refreshRacikanBatchData[batchKeyDRacikan].kode + " [" + refreshRacikanBatchData[batchKeyDRacikan].expired + "] / AMPRAH</option>"
 								);
 							}
 						}
@@ -649,8 +669,30 @@
 			//
 		});
 
+		$("body").on("keyup", ".qty_racikan", function() {
+			//Ubah semua harga komposisi racikan
+			var jumlahRacikan = $(this).val();
+			$("#load-detail-racikan tbody tr").each(function(e) {
+				var racikanIdentifier = $(this).attr("id");
+				var racikanIdentifierID = racikanIdentifier[racikanIdentifier.length - 1];
+				var racikanIdentifierGroup = racikanIdentifier[racikanIdentifier.length - 2];
+				
+				if(e == 0) {
+					var batch_racikan = $(this).find("td:eq(3) select:eq(1)").val();
+					var harga_racikan = $(this).find("td:eq(3) select:eq(1) option:selected").attr("harga");
+					var total_racikan = $(this).find("td:eq(4) span").html();
+				} else {
+					var batch_racikan = $(this).find("td:eq(0) select:eq(1)").val();
+					var harga_racikan = $(this).find("td:eq(0) select:eq(1) option:selected").attr("harga");
+					var total_racikan = $(this).find("td:eq(1) span").html();
+				}
+				var totalHargaItemRacikan = jumlahRacikan * harga_racikan;
+				$(this).find("td[identifier-racikan-total=\"" + e + "\"]").html(number_format(totalHargaItemRacikan, 2, ",", "."));
+			});
+		});
+
 		$("body").on("keyup", ".qty_resep", function() {
-			console.clear();
+			//console.clear();
 			var hargaSet = $(this).parent().parent().parent().find("td:eq(1) select:eq(1) option:selected").attr("harga");
 			var disc = $(this).parent().parent().parent().find("td:eq(1)").attr("disc");
 			var disc_type = $(this).parent().parent().parent().find("td:eq(1)").attr("disc-type");
@@ -705,7 +747,7 @@
 		});*/
 
 		$("#btnProsesResep").click(function() {
-			console.clear();
+			//console.clear();
 			var conf = confirm("Pastikan resep sudah benar sekali lagi. Anda yakin?");
 			if(conf) {
 				var UIDResep = targettedData.uid;
@@ -720,6 +762,8 @@
 					var signa_qty_biasa = parseFloat($(this).find("td:eq(2) input:eq(0)").inputmask("unmaskedvalue"));
 					var signa_pakai_biasa = parseFloat($(this).find("td:eq(2) input:eq(1)").inputmask("unmaskedvalue"));
 					var jumlah_biasa = parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
+					//Penjamin List
+					var penjamin = $(this).find("td:eq(1) select:eq(0) option:selected").attr("penjamin-list");
 
 					if(signa_qty_biasa > 0 && signa_pakai_biasa > 0 && jumlah_biasa > 0) {
 						var calculateProfit = 0;
@@ -739,6 +783,7 @@
 							signa_qty: signa_qty_biasa,
 							signa_pakai: signa_pakai_biasa,
 							jumlah: jumlah_biasa,
+							penjamin:penjamin,
 							profit:profit,
 							profit_type:profit_type
 						});
@@ -747,22 +792,25 @@
 
 				var racikan = [];
 				//Ambil Resep Racikan
+				var jumlah_racikan = 0;
+				var signa_qty_racikan = 0;
+				var signa_pakai_racikan = 0;
 				$("#load-detail-racikan tbody tr").each(function(e) {
 					var racikanIdentifier = $(this).attr("id");
 					var racikanIdentifierID = racikanIdentifier[racikanIdentifier.length - 1];
 					var racikanIdentifierGroup = racikanIdentifier[racikanIdentifier.length - 2];
-
+					
 					if(e == 0) {
 						var obat_racikan = $(this).find("td:eq(3) select:eq(0)").val();
 						var batch_racikan = $(this).find("td:eq(3) select:eq(1)").val();
-						var signa_qty_racikan = $(this).find("td:eq(2) b:eq(0)").html();
-						var signa_pakai_racikan = $(this).find("td:eq(2) b:eq(1)").html();
+						signa_qty_racikan = $(this).find("td:eq(2) b:eq(0)").html();
+						signa_pakai_racikan = $(this).find("td:eq(2) b:eq(1)").html();
 						var harga_racikan = $(this).find("td:eq(3) select:eq(1) option:selected").attr("harga");
 						var bulat_racikan = $(this).find("td:eq(4) b:eq(0)").html();
 						var decimal_racikan = $(this).find("td:eq(4) sub").html();
 						var ratio_racikan = $(this).find("td:eq(4) b:eq(1)").html();
-						var pembulatan_racikan = $(this).find("td:eq(4) text").html();
-						var jumlah_racikan = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
+						var pembulatan_racikan = parseFloat($(this).find("td:eq(4) text").html());
+						jumlah_racikan = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
 						var total_racikan = $(this).find("td:eq(4) span").html();
 					} else {
 						var obat_racikan = $(this).find("td:eq(0) select:eq(0)").val();
@@ -771,7 +819,7 @@
 						var bulat_racikan = $(this).find("td:eq(1) b:eq(0)").html();
 						var decimal_racikan = $(this).find("td:eq(1) sub").html();
 						var ratio_racikan = $(this).find("td:eq(1) b:eq(1)").html();
-						var pembulatan_racikan = $(this).find("td:eq(1) text").html();
+						var pembulatan_racikan = parseFloat($(this).find("td:eq(1) text").html());
 						var total_racikan = $(this).find("td:eq(1) span").html();
 					}
 
