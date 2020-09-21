@@ -104,7 +104,7 @@
 				},
 				type: "POST",
 				success: function(response){
-					console.log(response);
+					//console.log(response);
 					let order_detail = 0;
 					let response_upload = 0;
 					let response_delete_doc = 0;
@@ -119,12 +119,20 @@
 						response.response_package.response_upload !== ''
 					){
 						response_upload = response.response_package.response_upload.response_result;
+						if (response_upload > 0){
+							fileList = [];
+							$("#radiologi-lampiran-table tbody").empty();
+							loadLampiran(uid_order);
+						}
 					}
 					
 					if (response.response_package.response_delete_doc !== undefined && 
 						response.response_package.response_delete_doc !== ''
 					){
-						response_upload = response.response_package.response_delete_doc.response_result;
+						response_delete_doc = response.response_package.response_delete_doc.response_result;
+						if (response_delete_doc > 0){
+							deletedDocList = [];
+						}
 					}
 
 					if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){

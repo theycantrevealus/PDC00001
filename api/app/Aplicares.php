@@ -191,7 +191,7 @@ class Aplicares extends Utility {
 		return $data;
 	}
 
-	private function get_ruangan_terdaftar_bpjs(){
+	private function get_ruangan_terdaftar_bpjs() {
 		$url = "/rest/bed/read/" . self::$kodePPK . "/1/100";
 		$result = self::launchUrl($url);
 		$error_count = 1;
@@ -220,6 +220,7 @@ class Aplicares extends Utility {
 
 
 				if(count($check['response_data']) == 0) {
+
 					$logDataRuangan = self::$query->insert('aplicares_kamar_log', array(
 						'ruangan' => $KodeRuangan['uid'],
 						'kodekelas' => $value['kodekelas'],
@@ -245,6 +246,22 @@ class Aplicares extends Utility {
 					$value['uid_ruangan'] = $KodeRuangan['uid'];
 					$value['nama'] = $KodeRuangan['nama'];
 				}
+
+				$KelasDetail = self::$query->select('terminologi_item', array(
+					'id',
+					'nama'
+				))
+				->where(array(
+					'terminologi_item.id' => '= ?',
+					'AND',
+					'terminologi_item.deleted_at' => 'IS NULL'
+				), array(
+					$KodeRuangan['kelas']
+				))
+				->execute();
+
+				$KodeRuangan['kelas'] = $KelasDetail['response_data'][0];
+				$value['detailRuangan'] = $KodeRuangan;
 
 				array_push($crossCheckData, $value);
 			}

@@ -67,9 +67,10 @@
 			selectedMenuGroup = data.node.data.menu_group;
 
 			PARENT = selectedID;
+			//alert($(".jstree-container-ul li").width());
 			$(".custom-menu").finish().toggle(100).css({
 				top: (event.pageY - $(".navbar-main").height()) + "px",
-				left: (event.pageX - $(".simplebar-mask").width()) + "px"
+				left: (event.pageX - $(".simplebar-mask").width() - $(".jstree-container-ul li").width() + 100) + "px"
 			});
 		});
 
