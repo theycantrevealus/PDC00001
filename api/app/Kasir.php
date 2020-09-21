@@ -135,7 +135,7 @@ class Kasir extends Utility {
 
 			if ($value['uid_penjamin'] == __UIDPENJAMINUMUM__){
 				$harga = self::get_poli_tindakan_detail(array($value['uid_poli'],__UIDKONSULDOKTER__,__UIDPENJAMINUMUM__));
-				$harga_bayar = intval($harga[response_data][0]['harga']);
+				$harga_bayar = intval($harga['response_data'][0]['harga']);
 			}
 			
 			$cek_pasien_baru = self::cek_pasien_baru($value['uid_pasien']);

@@ -48,13 +48,13 @@
 			</div>
 			<div class="card card-body">
 				<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
-					<thead>
+					<thead class="thead-dark">
 						<tr>
 							<th width="2%">No</th>
 							<th>Waktu Masuk</th>
 							<th>No. RM</th>
 							<th>Pasien</th>
-							<th>Departemen</th>
+							<th>Poliklinik</th>
 							<th>Dokter</th>
 							<th>Penjamin</th>
 							<th>Oleh</th>

@@ -789,7 +789,7 @@ class Laboratorium extends Utility {
 			}
 
 			//Penjamin Item
-			foreach ($parameter['penjamin'] as $key => $value) {
+			/*foreach ($parameter['penjamin'] as $key => $value) {
 				//Tindakan Harga
 				$tindakan_harga = self::$query->insert('master_poli_tindakan_penjamin', array(
 					'harga' => $value['harga'],
@@ -827,12 +827,12 @@ class Laboratorium extends Utility {
 						'class' => __CLASS__
 					));
 				}
-			}
+			}*/
 		}
 	}
 
 	private function edit_lab($parameter) {
-		/*$Authorization = new Authorization();
+		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = $parameter['uid'];
 		$old_value = self::get_lab_detail($uid);
@@ -1009,7 +1009,7 @@ class Laboratorium extends Utility {
 			}
 
 			//Penjamin Item
-			foreach ($parameter['penjamin'] as $key => $value) {
+			/*foreach ($parameter['penjamin'] as $key => $value) {
 				//Tindakan Harga
 				$tindakan_harga = self::$query->insert('master_poli_tindakan_penjamin', array(
 					'harga' => $value['harga'],
@@ -1047,8 +1047,8 @@ class Laboratorium extends Utility {
 						'class' => __CLASS__
 					));
 				}
-			}
-		}*/
+			}*/
+		}
 	}
 
 

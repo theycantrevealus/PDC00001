@@ -40,9 +40,10 @@
 				<div class="card-body">
 					<div class="row">
 						<div class="col-lg-2" style="border-right: solid 1px #cccc;">
+							<center>Antrian terkini</center>
 							<h1 class="text-center" id="txt_current_antrian">0</h1>
 						</div>
-						<div class="col-lg-10">
+						<div class="col-lg-5">
 							<button class="btn btn-info" id="btnPanggil">
 								<i class="fa fa-bullhorn"></i> PANGGIL
 							</button>
@@ -53,6 +54,10 @@
 								<i class="fa fa-plus"></i> DAFTAR PASIEN
 							</button>
 						</div>
+						<div class="col-lg-5">
+							<span class="text-secondary">Sisa Antrian</span><br />
+							<h5><b id="sisa_antrian">0</b></h5>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -62,14 +67,14 @@
 				</div>
 				<div class="card-body">
 					<div class="table-responsive border-bottom">
-						<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
-							<thead>
+						<table class="table table-bordered table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+							<thead class="thead-dark">
 								<tr>
 									<th width="2%">No</th>
 									<th>Waktu Masuk</th>
 									<th>No. RM</th>
 									<th>Pasien</th>
-									<th>Departemen</th>
+									<th>Poliklinik</th>
 									<th>Dokter</th>
 									<th>Penjamin</th>
 									<th>Oleh</th>

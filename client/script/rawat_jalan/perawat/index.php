@@ -67,7 +67,7 @@
 					"data" : null, render: function(data, type, row, meta) {
 						var button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-info btn-sm' data-toggle='tooltip' title='Isi Assesmen Pasien'><i class='fa fa-address-card'></i></a>";
 
-						if (row['status_assesmen'] === true){
+						if (row['status_asesmen'] === true){
 							button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-warning btn-sm' data-toggle='tooltip' title='Edit Assesmen Pasien'><i class='fa fa-address-card'></i></a>";
 						}
 

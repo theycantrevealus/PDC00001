@@ -5,7 +5,7 @@
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_jalan">Rawat Jalan</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/dokter">Antrian Poli</a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/dokter">Antrian Poliklinik</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Pemeriksaan Medis</li>
 				</ol>
 			</nav>
@@ -82,7 +82,7 @@
 							CPPT
 						</a>
 					</li>
-					<li class="nav-item">
+					<!-- <li class="nav-item">
 						<a href="#tab-poli-8" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								08
@@ -90,7 +90,7 @@
 							</span>
 							Review
 						</a>
-					</li>
+					</li> -->
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
@@ -129,11 +129,13 @@
 					<?php require 'cppt.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-poli-8">
-					<?php require 'info-pasien.php'; ?>
-					<?php require 'review.php'; ?>
-					<?php require 'action-panel.php'; ?>
-				</div>
+				<!-- <div class="tab-pane show fade" id="tab-poli-8">
+					<?php
+						/*require 'info-pasien.php';
+						require 'review.php';
+						require 'action-panel.php';*/
+					?>
+				</div> -->
 			</div>
 		</div>
 	</div>

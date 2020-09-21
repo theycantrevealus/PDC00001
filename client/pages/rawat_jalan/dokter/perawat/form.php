@@ -32,7 +32,7 @@
 				<?php //require 'action_panel.php'; ?>
 			</div>
 		</div>
-		<div class="card card-footer">
+		<!-- <div class="card card-footer">
 			<div class="row">
 				<div class="col-md-12">
 					<button type="button" class="btn btn-success" id="btnSelesai">
@@ -43,6 +43,6 @@
 					</a>
 				</div>
 			</div>
-		</div>
+		</div> -->
 	</div>
 </div>
