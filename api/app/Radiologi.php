@@ -837,6 +837,77 @@ class Radiologi extends Utility {
 		return $data;
 	}
 
+	private function get_radiologi_order($parameter){	//uid_antrian
+		$get_antrian = new Antrian(self::$pdo);
+		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter);
+		
+		$dataRadiologiOrder = [];
+
+		$result = [];
+		if ($antrian['response_result'] > 0){
+
+			$data_antrian = $antrian['response_data'][0];		//get antrian data
+
+			//get uid asesmmen based by antrian data
+			$get_asesmen = self::$query->select('asesmen', array('uid'))
+				->where(array(
+						'asesmen.deleted_at' => 'IS NULL',
+						'AND',
+						'asesmen.poli' => '= ?',
+						'AND',
+						'asesmen.kunjungan' => '= ?',
+						'AND',
+						'asesmen.antrian' => '= ?',
+						'AND',
+						'asesmen.pasien' => '= ?',
+						'AND',
+						'asesmen.dokter' => '= ?'
+					), array(
+						$data_antrian['departemen'],
+						$data_antrian['kunjungan'],
+						$parameter,
+						$data_antrian['pasien'],
+						$data_antrian['dokter']
+					)
+				)
+				->execute();
+			
+			if ($get_asesmen['response_result'] > 0){
+				
+				$dataOrder = self::$query
+					->select('radiologi_order', 
+						array(
+							'uid',
+							'asesmen',
+							'waktu_order',
+							'selesai',
+							'petugas'
+						)
+					)
+					->where(
+						array(
+							'radiologi_order.asesmen' 		=> '= ?',
+							'AND',
+							'radiologi_order.deleted_at'	=> 'IS NULL'
+						), array($get_asesmen['response_data'][0]['uid'])
+					)
+					->execute();
+				
+				if ($dataOrder['response_result'] > 0){
+					$dataRadiologiOrder["order_data"] = $dataOrder['response_data'][0];
+
+					$dataDetailOrder = self::get_radiologi_order_detail($dataOrder['response_data'][0]['uid']);
+					if ($dataDetailOrder['response_result'] > 0){
+						$dataRadiologiOrder["detail_order"] = $dataDetailOrder['response_data'];
+					}
+
+				}
+			}
+		}
+
+		return $dataRadiologiOrder;
+	}
+
 	private function get_radiologi_order_detail($parameter){
 		$data = self::$query
 			->select('radiologi_order_detail', array(
