@@ -116,6 +116,9 @@ class Anjungan extends Utility {
 		->where(array(
 			'master_loket.deleted_at' => 'IS NULL'
 		))
+		->order(array(
+			'nama_loket' => 'ASC'
+		))
 		->execute();
 		return $data;
 	}

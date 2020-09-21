@@ -199,7 +199,7 @@ class Query {
 			}
 			$buildQuery = trim($buildQuery);
 			if(isset(self::$limit)) {
-				if(isset(self::$offset) && intval(self::$offset) > 0) {
+				if(isset(self::$offset) && intval(self::$offset) >= 0) {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit . ' ' . self::$offset;	
 				} else {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit;

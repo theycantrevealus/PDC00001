@@ -29,6 +29,9 @@ class Apotek extends Utility {
 			switch($parameter[1]) {
 				case 'detail_resep':
 					return self::detail_resep($parameter[2]);
+				case 'lunas':
+					return self::get_resep('L');
+					break;
 				default:
 					return self::get_resep();
 			}
@@ -177,7 +180,7 @@ class Apotek extends Utility {
 				foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
 					$Inventori = new Inventori(self::$pdo);
 					$InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
-
+					
 					$racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
 				}
 				$racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];
@@ -257,7 +260,8 @@ class Apotek extends Utility {
 			'signa_pakai',
 			'qty',
 			'satuan',
-			'status'
+			'status',
+			'penjamin'
 		))
 		->where(array(
 			'resep_detail.resep' => '= ?'
@@ -387,21 +391,35 @@ class Apotek extends Utility {
 			}
 
 			//Assign invoice item
+			//cek Pelunasan penjamin non umum. Status auto bayar jika non umum
 			$invo_detail = $parameter;
-
-			$invo_detail['invoice'] = $TargetInvoice;
-			$invo_detail['item'] = $value['obat'];
-			$invo_detail['item_origin'] = 'master_inv';
-			$invo_detail['qty'] = $value['jumlah'];
-			$invo_detail['harga'] = $value['harga_after_profit'];
-			$invo_detail['status_bayar'] = 'N';
-			$invo_detail['subtotal'] = $value['harga_after_profit'] * $value['jumlah'];
-			$invo_detail['discount'] = 0;
-			$invo_detail['discount_type'] = 'N';
-			$invo_detail['keterangan'] = '';
-
+			//Cek penjamin utama pasien
+			if($parameter['penjamin'] == __UIDPENJAMINUMUM__) {
+				$invo_detail['invoice'] = $TargetInvoice;
+				$invo_detail['item'] = $value['obat'];
+				$invo_detail['item_origin'] = 'master_inv';
+				$invo_detail['qty'] = $value['jumlah'];
+				$invo_detail['harga'] = $value['harga_after_profit'];
+				$invo_detail['status_bayar'] = 'N';
+				$invo_detail['subtotal'] = $value['harga_after_profit'] * $value['jumlah'];
+				$invo_detail['discount'] = 0;
+				$invo_detail['discount_type'] = 'N';
+				$invo_detail['keterangan'] = 'Biaya obat';
+			} else {
+				$invo_detail['invoice'] = $TargetInvoice;
+				$invo_detail['item'] = $value['obat'];
+				$invo_detail['item_origin'] = 'master_inv';
+				$invo_detail['qty'] = $value['jumlah'];
+				$invo_detail['harga'] = $value['harga_after_profit'];
+				$invo_detail['status_bayar'] = 'Y';
+				$invo_detail['subtotal'] = $value['harga_after_profit'] * $value['jumlah'];
+				$invo_detail['discount'] = 0;
+				$invo_detail['discount_type'] = 'N';
+				$invo_detail['keterangan'] = 'Biaya obat';
+			}
+			
 			$AppendInvoice = $Invoice::append_invoice($invo_detail);
-		}
+		} // End Loop Resep Biasa
 
 
 
@@ -409,7 +427,7 @@ class Apotek extends Utility {
 
 		//Racikan manager
 
-		/*$checkerObatRacikan = array(); //Buat check uid obat lama
+		$checkerObatRacikan = array(); //Buat check uid obat lama
 		$racikanChange = array();
 
 		foreach ($parameter['racikan'] as $key => $value) {
@@ -528,7 +546,7 @@ class Apotek extends Utility {
 			$parameter['keterangan'] = '';
 
 			$AppendInvoice = $Invoice::append_invoice($parameter);
-		}*/
+		}
 
 		//Update resep master menjadi kasir
 		$Resep = self::$query->update('resep', array(

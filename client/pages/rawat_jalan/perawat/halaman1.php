@@ -2,7 +2,7 @@
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0"><i class="material-icons mr-3">info_outline</i> Informasi Pasien</h5>
+				<h5 class="card-header__title flex m-0"><!-- <i class="material-icons mr-3">info_outline</i> --> Informasi Pasien</h5>
 			</div>
 			<div class="card-body ">
 				<div class="col-md-12">
@@ -44,7 +44,7 @@
 							<label>Pendaftaran</label>
 						</div>
 						<div class="col-md-8">
-							<input type="" name="" id="waktu_masuk" disabled class="form-control" value="12 Juli 2020 10:31:36">
+							<input type="" name="" id="waktu_masuk" disabled class="form-control" value="">
 						</div>
 					</div>
 					<div class="col-md-6 row form-group">
@@ -60,7 +60,7 @@
 							<label>Penanggung Jawab Pasien</label>
 						</div>
 						<div class="col-md-8">
-							<input type="" name="pj_pasien" id="pj_pasien" class="form-control inputan" value="">
+							<input type="" name="pj_pasien" id="pj_pasien" disabled class="form-control " value="">
 						</div>
 					</div>
 					<div class="col-md-6 row form-group">
@@ -68,7 +68,7 @@
 							<label>Informasi di Dapat Dari</label>
 						</div>
 						<div class="col-md-8">
-							<input type="" name="info_dari" id="info_dari"  class="form-control inputan" value="">
+							<input type="" name="info_didapat_dari" id="info_didapat_dari" disabled class="form-control " value="">
 						</div>
 					</div>
 				</div>

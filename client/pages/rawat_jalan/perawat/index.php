@@ -46,7 +46,7 @@
         	<div class="card card-body">
 				<div class="table-responsive border-bottom">
 					<table class="table table-bordered " id="table-antrian-perawat" style="font-size: 0.9rem;">
-						<thead>
+						<thead class="thead-dark">
 							<tr>
 								<th width="2%">No</th>
 								<th>Waktu Masuk</th>

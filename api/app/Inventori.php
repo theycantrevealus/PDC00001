@@ -1097,6 +1097,7 @@ class Inventori extends Utility {
 			$data['response_data'][$key]['kode'] = self::get_batch_detail($value['batch'])['response_data'][0]['batch'];
 			$data['response_data'][$key]['expired'] = date('d F Y', strtotime(self::get_batch_detail($value['batch'])['response_data'][0]['expired_date']));
 			$data['response_data'][$key]['harga'] = self::get_batch_detail($value['batch'])['response_data'][0]['harga'];
+			$data['response_data'][$key]['profit'] = self::get_batch_detail($value['batch'])['response_data'][0]['profit'];
 		}
 		return $data;
 	}
@@ -1126,6 +1127,10 @@ class Inventori extends Utility {
 				));
 
 				$data['response_data'][$key]['harga'] = floatval($Price['response_data'][0]['harga']);
+
+				//Tambahkan Keuntungan yang diinginkan dari master inventori
+				$Profit = self::get_penjamin($value['barang']);
+				$data['response_data'][$key]['profit'] = $Profit;
 			} else {
 				$data['response_data'][$key]['harga'] = 0;
 			}

@@ -20,6 +20,7 @@
 					<table class="table table-bordered table-striped largeDataType" id="invoice_detail_history">
 						<thead class="thead-dark">
 							<tr>
+								<th class="wrap_content"></th>
 								<th class="wrap_content">No</th>
 								<th>Item</th>
 								<th class="wrap_content">Jlh</th>
@@ -30,7 +31,7 @@
 						<tbody></tbody>
 						<tfoot>
 							<tr>
-								<td colspan="3" rowspan="3" id="keterangan-faktur">
+								<td colspan="4" rowspan="3" id="keterangan-faktur">
 								</td>
 								<td class="text-right">
 									Total

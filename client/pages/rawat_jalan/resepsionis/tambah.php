@@ -52,27 +52,35 @@
                 <div class="form-row">
                     <div class="col-12 col-md-6 mb-3">
                         <label>Pembayaran <span class="red">*</span></label>
-                        <select id="penjamin" class="form-control select2 inputan">
+                        <select id="penjamin" class="form-control select2 inputan" required>
                             <option value="" disabled selected>Pilih Jenis Pembayaran</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label>Prioritas <span class="red">*</span></label>
-                        <select id="prioritas" class="form-control select2 inputan">
+                        <select id="prioritas" class="form-control select2 inputan" required>
                             <option value="" disabled selected>Pilih Prioritas</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label>Poliklinik <span class="red">*</span></label>
-                        <select id="departemen" class="form-control select2 inputan">
+                        <select id="departemen" class="form-control select2 inputan" required>
                             <option value="" disabled selected>Pilih Poliklinik</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-6 mb-3">
                         <label>Dokter <span class="red">*</span></label>
-                        <select id="dokter" class="form-control select2 inputan">
+                        <select id="dokter" class="form-control select2 inputan" required>
                             <option value="" disabled selected>Pilih Dokter</option>
                         </select>
+                    </div>
+                    <div class="col-12 col-md-6 mb-3">
+                        <label>Penanggung Jawab Pasien <span class="red">*</span></label>
+                        <input type="" name="pj_pasien" id="pj_pasien" maxlength="100" class="form-control inputan" required value="">
+                    </div>
+                    <div class="col-12 col-md-6 mb-3">
+                        <label>Informasi didapat dari <span class="red">*</span></label>
+                        <input type="" name="info_didapat_dari" id="info_didapat_dari" maxlength="100" class="form-control inputan" required value="">
                     </div>
                      <div class="col-lg-8 card-form__body card-body">
                         <div class="form-row">
