@@ -1050,6 +1050,60 @@ class Radiologi extends Utility {
 					$uidRadiologiOrder = $checkRadiologiOrder['response_data'][0]['uid'];
 
 					$result['old_radiologi_order'] = $checkRadiologiOrder;
+
+					if (count($parameter['listTindakanDihapus']) > 0){
+
+						foreach($parameter['listTindakanDihapus'] as $key => $value){
+							$hapusTindakanTerpilih = self::$query
+								->delete('radiologi_order_detail')
+								->where(array(
+										'radiologi_order_detail.radiologi_order' 	=> '= ?',
+										'AND',
+										'radiologi_order_detail.tindakan' 			=> '= ?',
+										'AND',
+										'radiologi_order_detail.keterangan' 		=> 'IS NULL',
+										'AND',
+										'radiologi_order_detail.kesimpulan'			=> 'IS NULL',
+										'AND',
+										'radiologi_order_detail.deleted_at'			=> 'IS NULL'
+									), array(
+										$uidRadiologiOrder,
+										$value
+									)
+								)
+								->execute();
+
+							if ($hapusTindakanTerpilih['response_result'] > 0){
+								$result['delete_tindakan_order'] = $hapusTindakanTerpilih;
+
+								$log = parent::log(array(
+										'type'=>'activity',
+										'column'=>array(
+											'unique_target',
+											'user_uid',
+											'table_name',
+											'action',
+											'logged_at',
+											'status',
+											'login_id'
+										),
+										'value'=>array(
+											'asesmen: ' . $uidAsesmen . "; tindakan: " . $value,
+											$UserData['data']->uid,
+											'radiologi_order_detail',
+											'D',
+											parent::format_date(),
+											'N',
+											$UserData['data']->log_id
+										),
+										'class'=>__CLASS__
+									)
+								);
+							}
+
+						}
+
+					}
 				}
 
 			} else {
