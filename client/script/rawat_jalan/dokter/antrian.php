@@ -194,11 +194,11 @@
 								//console.error( err.stack );
 							} );
 
-						$("#txt_tekanan_darah").val(asesmen_detail.tekanan_darah);
-						$("#txt_suhu").val(asesmen_detail.suhu);
-						$("#txt_nadi").val(asesmen_detail.nadi);
-						$("#txt_pernafasan").val(asesmen_detail.pernafasan);
-						$("#txt_berat_badan").val(asesmen_detail.berat_badan);
+						/*$("#txt_tanda_vital_td").val(asesmen_detail.tekanan_darah);
+						$("#txt_tanda_vital_s").val(asesmen_detail.suhu);
+						$("#txt_tanda_vital_n").val(asesmen_detail.nadi);
+						$("#txt_tanda_vital_rr").val(asesmen_detail.pernafasan);
+						$("#txt_berat_badan").val(asesmen_detail.berat_badan);*/
 						$("#txt_tinggi_badan").val(asesmen_detail.tinggi_badan);
 						$("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
 
@@ -1501,10 +1501,10 @@
 			//PREPARE FOR SAVE DATA
 			var keluhanUtamaData = editorKeluhanUtamaData.getData();
 			var keluhanTambahanData = editorKeluhanTambahanData.getData();
-			var tekananDarah = $("#txt_tekanan_darah").val();
-			var nadi = $("#txt_nadi").val();
-			var suhu = $("#txt_suhu").val();
-			var pernafasan = $("#txt_pernafasan").val();
+			var tekananDarah = $("#txt_tanda_vital_td").val();
+			var nadi = $("#txt_tanda_vital_n").val();
+			var suhu = $("#txt_tanda_vital_s").val();
+			var pernafasan = $("#txt_tanda_vital_rr").val();
 			var beratBadan = $("#txt_berat_badan").val();
 			var tinggiBadan = $("#txt_tinggi_badan").val();
 			var lingkarLengan = $("#txt_lingkar_lengan").val();
@@ -1547,7 +1547,7 @@
 			var keteranganResep = editorKeteranganResep.getData();
 		}
 
-		$("#txt_tekanan_darah").inputmask({
+		$("#txt_tanda_vital_td").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
 			placeholder: "0.00",
@@ -1556,7 +1556,7 @@
 			digitsOptional: true
 		});
 
-		$("#txt_nadi").inputmask({
+		$("#txt_tanda_vital_n").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
 			placeholder: "0.00",
@@ -1565,7 +1565,7 @@
 			digitsOptional: true
 		});
 
-		$("#txt_suhu").inputmask({
+		$("#txt_tanda_vital_s").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
 			placeholder: "0.00",
@@ -1574,7 +1574,7 @@
 			digitsOptional: true
 		});
 
-		$("#txt_pernafasan").inputmask({
+		$("#txt_tanda_vital_rr").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
 			placeholder: "0.00",
@@ -1620,10 +1620,10 @@
 			//POLI FORM
 			var keluhanUtamaData = editorKeluhanUtamaData.getData();
 			var keluhanTambahanData = editorKeluhanTambahanData.getData();
-			var tekananDarah = $("#txt_tekanan_darah").inputmask("unmaskedvalue");
-			var nadi = $("#txt_nadi").inputmask("unmaskedvalue");
-			var suhu = $("#txt_suhu").inputmask("unmaskedvalue");
-			var pernafasan = $("#txt_pernafasan").inputmask("unmaskedvalue");
+			var tekananDarah = $("#txt_tanda_vital_td").inputmask("unmaskedvalue");
+			var nadi = $("#txt_tanda_vital_n").inputmask("unmaskedvalue");
+			var suhu = $("#txt_tanda_vital_s").inputmask("unmaskedvalue");
+			var pernafasan = $("#txt_tanda_vital_rr").inputmask("unmaskedvalue");
 			var beratBadan = $("#txt_berat_badan").inputmask("unmaskedvalue");
 			var tinggiBadan = $("#txt_tinggi_badan").inputmask("unmaskedvalue");
 			var lingkarLengan = $("#txt_lingkar_lengan").inputmask("unmaskedvalue");
@@ -1842,8 +1842,8 @@
 		            	if (response.response_package != ""){
 		            		MetaData = response.response_package;
 
-			                $.each(MetaData.pasien, function(key, item){
-			                	$("#" + key).html(item)
+		            		$.each(MetaData.pasien, function(key, item){
+			                	$("#" + key).html(item);
 			                });
 
 			                $.each(MetaData.antrian, function(key, item){
@@ -1859,6 +1859,9 @@
 							if (MetaData.asesmen_rawat != ""){
 			                	$.each(MetaData.asesmen_rawat, function(key, item){
 				                	$("#" + key).val(item);
+				                	/*alert("#txt_" + key);
+				                	alert(item);*/
+				                	$("#txt_" + key).val(item);
 				                	checkedRadio(key, item);
 				                	checkedCheckbox(key, item);
 				                });

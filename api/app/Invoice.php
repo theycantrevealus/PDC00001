@@ -248,6 +248,7 @@ class Invoice extends Utility {
 	private function proses_bayar($parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$KunjunganUID = $parameter['kunjungan'];
 
 		$newPaymentUID = parent::gen_uuid();
 		$allowAntrian = false;
@@ -261,9 +262,9 @@ class Invoice extends Utility {
 			'AND',
 			'resep.pasien' => '= ?',
 			'AND',
-			'resep.deleted_at' => 'IS NULL',
+			'resep.status_resep' => '= ?',
 			'AND',
-			'resep.status_resep' => '= ?'
+			'resep.deleted_at' => 'IS NULL',
 		), array(
 			$parameter['kunjungan'],
 			$parameter['pasien'],
@@ -579,22 +580,24 @@ class Invoice extends Utility {
 			}
 		} else {// Ada Resep
 			$UpdateResepMaster = self::$query->update('resep', array(
-				'status_resep' => 'L'
+				'status_resep' => 'L',
+				'updated_at' => parent::format_date()
 			))
 			->where(array(
 				'resep.kunjungan' => '= ?',
 				'AND',
 				'resep.pasien' => '= ?',
 				'AND',
-				'resep.deleted_at' => 'IS NULL',
+				'resep.uid' => '= ?',
 				'AND',
-				'resep.uid' => '= ?'
+				'resep.deleted_at' => 'IS NULL'
 			), array(
-				$parameter['kunjungan'],
+				$KunjunganUID,
 				$parameter['pasien'],
 				$ResepMaster['response_data'][0]['uid']
 			))
 			->execute();
+			return $UpdateResepMaster;
 		}
 			
 	}

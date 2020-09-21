@@ -32,7 +32,7 @@
 							<div class="form-group col-lg-6">
 								<label for="txt_tekanan_darah">Tekanan Darah</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_tekanan_darah" class="form-control form-control-appended" placeholder="Tekanan Darah">
+									<input type="text" value="0" id="txt_tanda_vital_td" class="form-control form-control-appended" placeholder="Tekanan Darah">
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>mmHg</span>
@@ -43,7 +43,7 @@
 							<div class="form-group col-lg-6">
 								<label for="txt_nadi">Nadi</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_nadi" class="form-control form-control-appended" placeholder="Nadi">
+									<input type="text" value="0" id="txt_tanda_vital_n" class="form-control form-control-appended" placeholder="Nadi">
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>x/menit</span>
@@ -56,7 +56,7 @@
 							<div class="form-group col-lg-6">
 								<label for="txt_suhu">Suhu</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_suhu" class="form-control form-control-appended" placeholder="Suhu">
+									<input type="text" value="0" id="txt_tanda_vital_s" class="form-control form-control-appended" placeholder="Suhu">
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span><sup>o</sup>C</span>
@@ -67,7 +67,7 @@
 							<div class="form-group col-lg-6">
 								<label for="txt_pernafasan">Pernafasan</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_pernafasan" class="form-control form-control-appended" placeholder="Pernafasan">
+									<input type="text" value="0" id="txt_tanda_vital_rr" class="form-control form-control-appended" placeholder="Pernafasan">
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>x/menit</span>

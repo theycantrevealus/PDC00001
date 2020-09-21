@@ -516,7 +516,7 @@ class Antrian extends Utility {
 					$Invoice = $SInvoice::create_invoice(array(
 						'kunjungan' => $uid,
 						'pasien' => $parameter['dataObj']['pasien'],
-						'keterangan' => ''
+						'keterangan' => 'Kunjungan Penjamin BPJS'
 					));
 
 					$InvoiceUID = $Invoice['response_unique'];
@@ -563,8 +563,6 @@ class Antrian extends Utility {
 				->execute();
 
 				if(count($checkStatusPasien['response_data']) > 0) { //Pasien sudah pernah terdaftar
-
-					
 					$antrianKunjungan = self::$query->update('antrian_nomor', array(
 						'status' => 'P',
 						'kunjungan' => $uid,
@@ -586,7 +584,6 @@ class Antrian extends Utility {
 					$PasienDetail = $Pasien::get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
 					$antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
 
-					
 					if($antrianKunjungan['response_result'] > 0) {
 						unset($parameter['dataObj']['currentPasien']);
 						$antrian['response_notif'] = 'P';
@@ -689,7 +686,6 @@ class Antrian extends Utility {
 					->execute();
 
 		if ($antrian['response_result'] > 0) {
-
 			$updateNomorAntrian = self::$query->update('antrian_nomor', array(
 				'antrian' => $uid
 			))
@@ -771,7 +767,7 @@ class Antrian extends Utility {
 		return $status_berobat;
 	}
 
-	public function ambilNomorAntrianPoli($poli){
+	public function ambilNomorAntrianPoli($poli) {
 		$waktu = date("Y-m-d", strtotime(parent::format_date()));
 
 		$data = self::$query
