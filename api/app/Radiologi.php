@@ -1155,51 +1155,57 @@ class Radiologi extends Utility {
 			}
 
 			if ($statusOrder == "NEW"){
+				$uidRadiologiOrder = "";
 
-				$uidRadiologiOrder = parent::gen_uuid();
-				$radiologiOrder = self::$query
-					->insert('radiologi_order', 
-						array(
-							'uid'			=>	$uidRadiologiOrder,
-							'asesmen'		=>	$uidAsesmen,
-							'waktu_order'	=>	parent::format_date(),
-							'selesai'		=>	'false',
-							'petugas'		=>	$UserData['data']->uid,
-							'created_at'	=>	parent::format_date(),
-							'updated_at'	=>	parent::format_date()
+				if (count($parameter['listTindakan']) > 0){
+					$uidRadiologiOrder = parent::gen_uuid();
+					$radiologiOrder = self::$query
+						->insert('radiologi_order', 
+							array(
+								'uid'			=>	$uidRadiologiOrder,
+								'asesmen'		=>	$uidAsesmen,
+								'waktu_order'	=>	parent::format_date(),
+								'selesai'		=>	'false',
+								'petugas'		=>	$UserData['data']->uid,
+								'created_at'	=>	parent::format_date(),
+								'updated_at'	=>	parent::format_date()
+							)
 						)
-					)
-					->execute();
-				
-				if($radiologiOrder['response_result'] > 0) {
+						->execute();
+					
+					if($radiologiOrder['response_result'] > 0) {
 
-					$log = parent::log(array(
-						'type'=>'activity',
-						'column'=>array(
-							'unique_target',
-							'user_uid',
-							'table_name',
-							'action',
-							'logged_at',
-							'status',
-							'login_id'
-						),
-						'value'=>array(
-							$uidRadiologiOrder,
-							$UserData['data']->uid,
-							'radiologi_order',
-							'I',
-							parent::format_date(),
-							'N',
-							$UserData['data']->log_id
-						),
-						'class'=>__CLASS__
-					));
-					
-					
+						$log = parent::log(array(
+							'type'=>'activity',
+							'column'=>array(
+								'unique_target',
+								'user_uid',
+								'table_name',
+								'action',
+								'logged_at',
+								'status',
+								'login_id'
+							),
+							'value'=>array(
+								$uidRadiologiOrder,
+								$UserData['data']->uid,
+								'radiologi_order',
+								'I',
+								parent::format_date(),
+								'N',
+								$UserData['data']->log_id
+							),
+							'class'=>__CLASS__
+						));
+						
+					}
+
+					$result['new_radiologi_order'] = $radiologiOrder;
+				} else {
+
+					$result['response_message'] = 'Nothing in action';
 				}
-
-				$result['new_radiologi_order'] = $radiologiOrder;
+				
 			}
 			
 			//check if uid labOrder has no empty and add tindakan
