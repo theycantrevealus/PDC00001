@@ -137,10 +137,11 @@ class Anjungan extends Utility {
 			'AND',
 			'antrian_nomor.pegawai' => '= ?',
 			'AND',
-			'antrian_nomor.created_at' => '> current_date - interval \'1 year\''
+			'DATE(antrian_nomor.created_at)' => '= ?'
 		), array(
 			'D',
-			$UserData['data']->uid
+			$UserData['data']->uid,
+			date('Y-m-d')
 		))
 		->execute();
 		if(count($data['response_data']) > 0) {
