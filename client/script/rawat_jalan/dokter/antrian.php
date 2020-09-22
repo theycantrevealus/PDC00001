@@ -194,11 +194,11 @@
 								//console.error( err.stack );
 							} );
 
-						$("#txt_tekanan_darah").val(asesmen_detail.tekanan_darah);
-						$("#txt_suhu").val(asesmen_detail.suhu);
-						$("#txt_nadi").val(asesmen_detail.nadi);
-						$("#txt_pernafasan").val(asesmen_detail.pernafasan);
-						$("#txt_berat_badan").val(asesmen_detail.berat_badan);
+						/*$("#txt_tanda_vital_td").val(asesmen_detail.tekanan_darah);
+						$("#txt_tanda_vital_s").val(asesmen_detail.suhu);
+						$("#txt_tanda_vital_n").val(asesmen_detail.nadi);
+						$("#txt_tanda_vital_rr").val(asesmen_detail.pernafasan);
+						$("#txt_berat_badan").val(asesmen_detail.berat_badan);*/
 						$("#txt_tinggi_badan").val(asesmen_detail.tinggi_badan);
 						$("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
 
@@ -1501,10 +1501,10 @@
 			//PREPARE FOR SAVE DATA
 			var keluhanUtamaData = editorKeluhanUtamaData.getData();
 			var keluhanTambahanData = editorKeluhanTambahanData.getData();
-			var tekananDarah = $("#txt_tekanan_darah").val();
-			var nadi = $("#txt_nadi").val();
-			var suhu = $("#txt_suhu").val();
-			var pernafasan = $("#txt_pernafasan").val();
+			var tekananDarah = $("#txt_tanda_vital_td").val();
+			var nadi = $("#txt_tanda_vital_n").val();
+			var suhu = $("#txt_tanda_vital_s").val();
+			var pernafasan = $("#txt_tanda_vital_rr").val();
 			var beratBadan = $("#txt_berat_badan").val();
 			var tinggiBadan = $("#txt_tinggi_badan").val();
 			var lingkarLengan = $("#txt_lingkar_lengan").val();
@@ -1547,7 +1547,7 @@
 			var keteranganResep = editorKeteranganResep.getData();
 		}
 
-		$("#txt_tekanan_darah").inputmask({
+		$("#txt_tanda_vital_td").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
 			placeholder: "0.00",
@@ -1556,7 +1556,7 @@
 			digitsOptional: true
 		});
 
-		$("#txt_nadi").inputmask({
+		$("#txt_tanda_vital_n").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
 			placeholder: "0.00",
@@ -1565,7 +1565,7 @@
 			digitsOptional: true
 		});
 
-		$("#txt_suhu").inputmask({
+		$("#txt_tanda_vital_s").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
 			placeholder: "0.00",
@@ -1574,7 +1574,7 @@
 			digitsOptional: true
 		});
 
-		$("#txt_pernafasan").inputmask({
+		$("#txt_tanda_vital_rr").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
 			placeholder: "0.00",
@@ -1620,10 +1620,10 @@
 			//POLI FORM
 			var keluhanUtamaData = editorKeluhanUtamaData.getData();
 			var keluhanTambahanData = editorKeluhanTambahanData.getData();
-			var tekananDarah = $("#txt_tekanan_darah").inputmask("unmaskedvalue");
-			var nadi = $("#txt_nadi").inputmask("unmaskedvalue");
-			var suhu = $("#txt_suhu").inputmask("unmaskedvalue");
-			var pernafasan = $("#txt_pernafasan").inputmask("unmaskedvalue");
+			var tekananDarah = $("#txt_tanda_vital_td").inputmask("unmaskedvalue");
+			var nadi = $("#txt_tanda_vital_n").inputmask("unmaskedvalue");
+			var suhu = $("#txt_tanda_vital_s").inputmask("unmaskedvalue");
+			var pernafasan = $("#txt_tanda_vital_rr").inputmask("unmaskedvalue");
 			var beratBadan = $("#txt_berat_badan").inputmask("unmaskedvalue");
 			var tinggiBadan = $("#txt_tinggi_badan").inputmask("unmaskedvalue");
 			var lingkarLengan = $("#txt_lingkar_lengan").inputmask("unmaskedvalue");
@@ -1792,40 +1792,13 @@
 					console.log(response);
 				}
 			});
+			
+
+			orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
+			listTindakanRadiologiDihapus = [];		//set back to empty
+
 			return false;
 		});
-
-		
-		loadRadiologiTindakan('tindakan-radiologi');
-		
-		$("#tindakan-radiologi").select2({});
-		function loadRadiologiTindakan(selector){
-			var radiologiTindakan;
-			$.ajax({
-				url: __HOSTAPI__ + "/Radiologi/tindakan",
-				async:false,
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type:"GET",
-				success:function(response) {
-					if(response.response_package != null) {
-						radiologiTindakan = response.response_package.response_data;
-						if (radiologiTindakan.length > 0){
-							for(i = 0; i < radiologiTindakan.length; i++){
-			                    var selection = document.createElement("OPTION");
-			                    $(selection).attr("value", radiologiTindakan[i].uid).html(radiologiTindakan[i].nama);
-			                    $("#" + selector).append(selection);
-			                }
-						}
-					}
-				},
-				error: function(response) {
-					console.log(response);
-				}
-			});
-			return radiologiTindakan;
-		}
 
 		function loadPasien(params){
 			var MetaData = null;
@@ -1842,8 +1815,8 @@
 		            	if (response.response_package != ""){
 		            		MetaData = response.response_package;
 
-			                $.each(MetaData.pasien, function(key, item){
-			                	$("#" + key).html(item)
+		            		$.each(MetaData.pasien, function(key, item){
+			                	$("#" + key).html(item);
 			                });
 
 			                $.each(MetaData.antrian, function(key, item){
@@ -1859,6 +1832,9 @@
 							if (MetaData.asesmen_rawat != ""){
 			                	$.each(MetaData.asesmen_rawat, function(key, item){
 				                	$("#" + key).val(item);
+				                	/*alert("#txt_" + key);
+				                	alert(item);*/
+				                	$("#txt_" + key).val(item);
 				                	checkedRadio(key, item);
 				                	checkedCheckbox(key, item);
 				                });
@@ -1896,6 +1872,295 @@
 			    	}
 			    }
 			}		 
+		}
+
+		function loadDataPenjamin(){
+			let dataPenjamin;
+
+			$.ajax({
+				url: __HOSTAPI__ + "/Penjamin/penjamin",
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					if(response.response_package != null) {
+						dataPenjamin = response.response_package.response_data;
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+
+			return dataPenjamin;
+		}
+		
+		/*========================= RADIOLOGI SCRIPT AREA START ==========================*/
+		//load order with returning selectedTindakan
+		function loadRadiologiOrder(uid_antrian){
+			let dataOrder;
+			let selectedTindakan = {};
+
+			$.ajax({
+				url: __HOSTAPI__ + "/Radiologi/get-radiologi-order/" + uid_antrian,
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					if(response.response_package != null) {
+						dataOrder = response.response_package.detail_order;
+
+						let no_urut = 1;
+						$.each(dataOrder, function(key_order, item_order){
+							let status_disabled = "disabled";
+
+							//check if order data has inserted, the delete button will disabled
+							if (item_order.keterangan == null && item_order.kesimpulan == null){
+								status_disabled = "";
+							}
+
+							let html = "<tr>\
+									<td class='no_urut_rad'>"+ no_urut +"</td>\
+									<td>"+ item_order.tindakan +"</td>\
+									<td>"+ item_order.penjamin +"</td>\
+									<td><button class='btn btn-danger btn-sm btnHapusTindakanRad' 					data-uid='"+ item_order.uid_tindakan +"' \
+										data-nama='" + item_order.tindakan +"' "+ status_disabled +">\
+										<i class='fa fa-trash'></button></td>\
+								</tr>";
+
+							$("#table_tindakan_radiologi tbody").append(html);
+							no_urut++;
+
+							$('#tindakan_radiologi').val('').trigger('change');
+							selectedTindakan[item_order.uid_tindakan] = item_order.uid_penjamin;
+							$("#tindakan_radiologi option[value='"+ item_order.uid_tindakan +"']").remove();
+						});
+
+					}
+
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+			
+			return selectedTindakan;
+		}
+
+		function loadRadiologiTindakan(){
+			var radiologiTindakan;
+
+			$("#tindakan_radiologi").empty();
+			$("#tindakan_radiologi").append("<option disabled selected value=''>Pilih Tindakan Radiologi</option>");
+
+			$.ajax({
+				url: __HOSTAPI__ + "/Radiologi/get_tindakan_for_dokter",
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					if(response.response_package != null) {
+						radiologiTindakan = response.response_package.response_data;
+						if (radiologiTindakan.length > 0){
+							for(i = 0; i < radiologiTindakan.length; i++){
+								
+			                    var selection = document.createElement("OPTION");
+			                    $(selection).attr("value", radiologiTindakan[i].uid).html(radiologiTindakan[i].nama);
+			                    $("#tindakan_radiologi").append(selection);
+			                }
+						}
+					}
+
+					$("#tindakan_radiologi").select2({});
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+
+			return radiologiTindakan;
+		}
+
+		
+		//initiate radiologi tindakan data
+		var listRadiologiTindakan = loadRadiologiTindakan();
+
+		//variable for collect selected Tindakan
+		var listTindakanRadiologiTerpilih = loadRadiologiOrder(UID);
+
+		//variable for collect deleted Tindakan
+		var listTindakanRadiologiDihapus = [];
+
+		//variable for load penjamin
+		var listPenjamin = loadDataPenjamin();
+		
+		//this variable will be used in action tambahTindakan; default is uid penjamin umum
+		var uid_penjamin_tindakan_rad = __UIDPENJAMINUMUM__;
+
+		$("#tindakan_radiologi").on('select2:select', function(){
+			let uidTindakanRad = $(this).val();
+
+			$("#radiologi_tindakan_notifier").html("");
+			if (pasien_penjamin_uid !== __UIDPENJAMINUMUM__){
+				uid_penjamin_tindakan_rad = __UIDPENJAMINUMUM__;
+
+				let html = '<p><b class="badge badge-warning"><i class="fa fa-exclamation-circle" style="margin-right: 5px;"></i>Akan ditanggung Penjamin Umum</b></p>';
+
+				$.each(listRadiologiTindakan, function(key_tindakan, item_tindakan){
+					let statusLoop = true;
+					
+					if (item_tindakan.uid === uidTindakanRad){
+
+						$.each(item_tindakan.harga, function(key_harga, item_harga){
+
+							if (pasien_penjamin_uid == item_harga.penjamin){
+								html = '<p><b class="badge badge-success"><i class="fa fa-check-circle" style="margin-right: 5px;"></i> Ditanggung Penjamin</b></p>';
+								
+								//setter jika dijamin
+								uid_penjamin_tindakan_rad = pasien_penjamin_uid; 
+								statusLoop = false;	
+								return false;
+							}
+
+							});
+
+							if (statusLoop === false){
+							return false;
+						}
+						
+					}
+
+				});
+
+				$("#radiologi_tindakan_notifier").html(html);
+			}
+
+		});
+		
+		$("#btnTambahTindakanRadiologi").click(function(){
+			let uidTindakanRad = $("#tindakan_radiologi").val();
+			let dataTindakan = $("#tindakan_radiologi").select2('data');
+			let namaPenjamin;
+
+			$.each(listPenjamin, function(key, item){
+				if (item.uid == uid_penjamin_tindakan_rad){
+					namaPenjamin = item.nama;
+
+					return false;
+				}
+			});
+
+			let html = "<tr>\
+					<td class='no_urut_rad'></td>\
+					<td>"+ dataTindakan[0].text +"</td>\
+					<td>"+ namaPenjamin +"</td>\
+					<td><button class='btn btn-danger btn-sm btnHapusTindakanRad'><i class='fa fa-trash'></button></td>\
+				</tr>";
+
+			$("#table_tindakan_radiologi tbody").append(html);
+
+			$('#tindakan_radiologi').val('').trigger('change');
+			listTindakanRadiologiTerpilih[uidTindakanRad] = uid_penjamin_tindakan_rad;
+			$("#tindakan_radiologi option[value='"+ uidTindakanRad +"']").remove();
+
+			setNomorUrut('table_tindakan_radiologi', 'no_urut_rad');
+		});
+		
+		$("#table_tindakan_radiologi").on('click', '.btnHapusTindakanRad', function(){
+			let uid_tindakan = $(this).data("uid");
+			let nama_tindakan = $(this).data("nama");
+
+			delete listTindakanRadiologiTerpilih[uid_tindakan];
+			listTindakanRadiologiDihapus.push(uid_tindakan);
+			$(this).parent().parent().remove();
+
+			//set back to list
+			$("#tindakan_radiologi").append("<option value='"+ uid_tindakan +"'>"+ nama_tindakan +"</option>");
+
+			setNomorUrut('table_tindakan_radiologi', 'no_urut_rad');
+		});
+
+		function orderRadiologi(uid_antrian, listTindakan, listTindakanDihapus){
+			let formData = {
+				'request' : 'add-order-radiologi',
+				'uid_antrian' : uid_antrian,
+				'listTindakan' : listTindakan,
+				'listTindakanDihapus': listTindakanDihapus
+			}
+
+			$.ajax({
+				async: false,
+				url: __HOSTAPI__ + "/Radiologi",
+				data: formData,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type: "POST",
+				success: function(response) {
+					console.log(response);
+					// if(response.response_package.response_result > 0) {
+					// 	notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
+					// } else {
+					// 	notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
+					// }
+				},
+				error: function(response) {
+					console.clear();
+					console.log(response);
+				}
+			});
+		}
+		/*======================= RADIOLOGI SCRIPT AREA STOP ==========================*/
+
+		/*======================= LABORATORIUM SCRIPT AREA START ========================*/
+		function orderLaboratorium(uid_antrian, listTindakan){
+			let formData = {
+				'request' : 'add-order-laboratorium',
+				'uid_antrian' : uid_antrian,
+				'listTindakan' : listTindakan
+			}
+
+			$.ajax({
+				async: false,
+				url: __HOSTAPI__ + "/Laboratorium",
+				data: formData,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type: "POST",
+				success: function(response) {
+					console.log(response);
+					// if(response.response_package.response_result > 0) {
+					// 	notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
+					// } else {
+					// 	notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
+					// }
+				},
+				error: function(response) {
+					console.clear();
+					console.log(response);
+				}
+			});
+		}
+
+		/*==================== UNIVERSAL FUNCTION =====================*/
+		function setNomorUrut(table_name, no_urut_class){
+			/*set dynamic serial number*/
+			var rowCount = $("#"+ table_name +" tr").length;
+			var table = $("#"+ table_name);
+			$("."+ no_urut_class).html("");
+
+			for (var i = 0, row; i < rowCount; i++) {
+				//console.log()
+				table.find('tr:eq('+ i +')').find('td:eq(0)').html(i);
+			}
+			/*--------*/
 		}
 	});
 

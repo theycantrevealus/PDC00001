@@ -65,6 +65,14 @@ class Tindakan extends Utility {
 				return self::tambah_tindakan_rawat_inap($parameter);
 				break;
 
+			/*case 'tambah_tindakan_master':
+				return self::tambah_master_tindakan($parameter);
+				break;
+
+			case 'edit_tindakan_master':
+				return self::edit_master_tindakan($parameter);
+				break;*/
+
 			case 'edit_tindakan_rawat_inap':
 				return self::edit_tindakan_rawat_inap($parameter);
 				break;
@@ -110,18 +118,16 @@ class Tindakan extends Utility {
 	/*============GET TINDAKAN============*/
 	public function get_tindakan(){
 		$data = self::$query
-					->select('master_tindakan', array(
-						'uid',
-						'nama',
-						'created_at',
-						'updated_at'
-						)
-					)	
-					->where(array(
-							'master_tindakan.deleted_at' => 'IS NULL'
-						)
-					)
-					->execute();
+		->select('master_tindakan', array(
+			'uid',
+			'nama',
+			'created_at',
+			'updated_at'
+		))	
+		->where(array(
+			'master_tindakan.deleted_at' => 'IS NULL'
+		))
+		->execute();
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
@@ -159,6 +165,45 @@ class Tindakan extends Utility {
 		}
 
 		return $data;
+	}
+
+	/*public function tambah_master_tindakan($parameter) {
+		$uid = parent::gen_uuid();
+		$check = self::duplicate_check(array(
+			'table' => 'master_tindakan',
+			'check' => $parameter['nama']
+		));
+
+		if (count($check['response_data']) > 0){
+			$check['response_message'] = 'Duplicate data detected';
+			$check['response_result'] = 0;
+			unset($check['response_data']);
+			return $check;
+		} else {
+
+			return self::$query->insert('master_tindakan', array(
+				'uid' => $uid,
+				'nama' => $parameter['nama'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->execute();
+		}
+	}*/
+
+	public function edit_master_tindakan($parameter) {
+		return self::$query->update('master_tindakan', array(
+			'nama' => $parameter['nama'],
+			'updated_at' => parent::format_date()
+		))
+		->where(array(
+			'master_tindakan.uid' => '= ?',
+			'AND',
+			'master_tindakan.deleted_at' => 'IS NULL'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
 	}
 
 	public function tindakan_kelas($parameter) {
@@ -350,6 +395,7 @@ class Tindakan extends Utility {
 	}
 
 	private function tambah_tindakan($parameter) {
+		//
 		$uid = parent::gen_uuid();
 		$data = self::$query->insert('master_tindakan_kelas', array(
 			'uid' => $uid,
@@ -449,7 +495,8 @@ class Tindakan extends Utility {
 					'id',
 					'tindakan',
 					'kelas',
-					'harga'	
+					'harga',
+					'penjamin'
 				)
 			)
 			->where(array(
