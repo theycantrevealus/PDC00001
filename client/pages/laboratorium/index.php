@@ -32,8 +32,8 @@
 					<div class="d-flex flex-row">
 						<div class="col-md-12">
 							<b>Antrian</b>
-							<h5 class="text-info handy" id="current-antrian">
-								<small><i class="fa fa-sync text-success" id="change-antrian"></i></small>
+							<h5 class="text-info handy" id="current-poli">
+								<small><i class="fa fa-sync text-success" id="change-poli"></i></small>
 							</h5>
 							<b id="jlh-antrian">0</b> antrian
 						</div>
@@ -41,17 +41,17 @@
 				</div>
 			</div>
 			<div class="card card-body">
-				<table class="table table-bordered table-striped" id="table-antrian-lab" style="font-size: 0.9rem;">
-					<thead>
+				<table class="table table-bordered table-striped" id="table-antrian-labor" style="font-size: 0.9rem;">
+					<thead class="thead-black">
 						<tr>
 							<th width="2%">No</th>
-							<th>Waktu Masuk</th>
+							<th>Waktu Order</th>
 							<th>No. RM</th>
 							<th>Pasien</th>
 							<th>Poliklinik</th>
 							<th>Dokter</th>
-							<th>Penjamin</th>
-							<th>Oleh</th>
+							<!-- <th>Penjamin</th>
+							<th>Oleh</th> -->
 							<th>Aksi</th>
 						</tr>
 					</thead>

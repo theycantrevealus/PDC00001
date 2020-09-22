@@ -66,8 +66,6 @@
 		tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
 		penjaminBuilder = refresh_penjamin("#txt_penjamin", __UIDPENJAMINUMUM__);
 
-
-
 		function refresh_kelas_data(tindakanKelas) {
 			var columnKelas = {};
 			var dataBuilder;
@@ -125,7 +123,6 @@
 							for(var key = 0; key < data_harga.length; key++) {
 								if(data_harga[key].tindakan_detail != null) {
 									var kelasTarget = data_harga[key].tindakan;
-									
 									if(DataPopulator[kelasTarget] === undefined) {
 										DataPopulator[kelasTarget] = {
 											uid: kelasTarget,
@@ -136,7 +133,6 @@
 											DataPopulator[kelasTarget].kelas_harga = columnKelas;
 										}
 									}
-
 									var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
 									if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
 										DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
