@@ -374,7 +374,7 @@ class Antrian extends Utility {
 					
 
 					if(count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
-						$checkBiayaKartu = self::$query->select('antrian',array( //New Detail. Rekap tagihan
+						$checkBiayaKartu = self::$query->select('antrian', array( //New Detail. Rekap tagihan
 							'uid'
 						))
 						->where(array(
@@ -384,7 +384,7 @@ class Antrian extends Utility {
 						))
 						->execute();
 
-						if(count($checkBiayaKartu['response_data']) < 1) { //Biaya Kartu
+						if(count($checkBiayaKartu['response_data']) <= 0) { //Biaya Kartu
 							$Invoice = $SInvoice::append_invoice(array(
 								'invoice' => $InvoiceCheck['response_data'][0]['uid'],
 								'item' => __UID_KARTU__,
@@ -407,7 +407,7 @@ class Antrian extends Utility {
 							'penjamin' => $parameter['dataObj']['penjamin']
 						));
 
-						print_r($HargaTindakan['response_data']);
+						//print_r($HargaTindakan['response_data']);
 
 						$Invoice = $SInvoice::append_invoice(array(
 							'invoice' => $InvoiceCheck['response_data'][0]['uid'],
@@ -437,12 +437,12 @@ class Antrian extends Utility {
 							->where(array(
 								'antrian.pasien' => '= ?'
 							), array(
-								$parameter
+								$parameter['dataObj']['pasien']
 							))
 							->execute();
 
-							if(count($checkBiayaKartu['response_data']) < 1) { //Biaya Kartu
-								if(isset($HargaKartu['response_data']) && count($HargaKartu['response_data']) > 0) {
+							if(count($checkBiayaKartu['response_data']) == 0) { //Biaya Kartu
+								/*if(isset($HargaKartu['response_data']) && count($HargaKartu['response_data']) > 0) {
 									$Invoice = $SInvoice::append_invoice(array(
 										'invoice' => $NewInvoiceUID,
 										'item' => __UID_KARTU__,
@@ -456,7 +456,20 @@ class Antrian extends Utility {
 										'penjamin' => $parameter['dataObj']['penjamin'],
 										'keterangan' => 'Biaya kartu pasien baru'
 									));
-								}
+								}*/
+								$Invoice = $SInvoice::append_invoice(array(
+									'invoice' => $NewInvoiceUID,
+									'item' => __UID_KARTU__,
+									'item_origin' => 'master_tindakan',
+									'qty' => 1,
+									'harga' => floatval($HargaKartu['response_data'][0]['harga']),
+									'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
+									'discount' => 0,
+									'discount_type' => 'N',
+									'pasien' => $parameter['dataObj']['currentPasien'],
+									'penjamin' => $parameter['dataObj']['penjamin'],
+									'keterangan' => 'Biaya kartu pasien baru'
+								));
 							}
 
 							$HargaTindakan = $SInvoice::get_harga_tindakan(array(
