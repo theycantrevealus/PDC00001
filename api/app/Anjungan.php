@@ -135,7 +135,9 @@ class Anjungan extends Utility {
 		->where(array(
 			'antrian_nomor.status' => '= ?',
 			'AND',
-			'antrian_nomor.pegawai' => '= ?'
+			'antrian_nomor.pegawai' => '= ?',
+			'AND',
+			'antrian_nomor.created_at' => '> current_date - interval \'1 year\''
 		), array(
 			'D',
 			$UserData['data']->uid
