@@ -5,7 +5,7 @@
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item">Laboratorium</li>
-					<li class="breadcrumb-item active" aria-current="page">Hasil Pemeriksaan Lanoratorium</li>
+					<li class="breadcrumb-item active" aria-current="page">Hasil Pemeriksaan Laboratorium</li>
 				</ol>
 			</nav>
 		</div>
@@ -18,7 +18,7 @@
 			<div class="z-0">
 				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="nav_list">
 					<li class="nav-item">
-						<a href="#tab-lab-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-lab-1" >
+						<a href="#tab-laboratorium-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-laboratorium-1" >
 							<span class="nav-link__count">
 								01
 								<b class="inv-tab-status text-success" id="status-1"><i class="fa fa-check-circle"></i></b>
@@ -27,7 +27,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-lab-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-laboratorium-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								02
 								<b class="inv-tab-status text-success" id="status-3"><i class="fa fa-check-circle"></i></b>
@@ -37,14 +37,13 @@
 					</li>
 				</ul>
 			</div>
-			<form id="formHasilRadiologi">
+			<form id="formHasilLab">
 				<div class="card card-body tab-content" id="content_list">
-					<div class="tab-pane show fade active" id="tab-lab-1">
+					<div class="tab-pane show fade active" id="tab-laboratorium-1">
 						<?php require 'hasil.php'; ?>
-						<?php //require 'action_panel.php'; ?>
 					</div>
-					<div class="tab-pane show fade " id="tab-lab-2">
-						<?php //require 'gambar.php'; ?>
+					<div class="tab-pane show fade " id="tab-laboratorium-2">
+						<?php require 'gambar.php'; ?>
 					</div>
 
 					<br />
@@ -53,7 +52,7 @@
 							<button type="submit" class="btn btn-success" id="btnSimpan">
 								<i class="fa fa-check-circle"></i> Simpan
 							</button>
-							<a href="<?php echo __HOSTNAME__; ?>/radiologi" class="btn btn-danger">
+							<a href="<?php echo __HOSTNAME__; ?>/laboratorium" class="btn btn-danger">
 								<i class="fa fa-ban"></i> Kembali
 							</a>
 						</div>

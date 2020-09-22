@@ -95,7 +95,7 @@
 					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" width="120" height="120" alt="SIMRS RSUD Petala Bumi">
 				</a>
 			</div>
-			<h4 class="m-0">RSUD Bintan</h4>
+			<h4 class="m-0">RSUD Petala Bumi</h4>
 			<p class="mb-5">SIMRS Integrated System</p>
 			<form>
 				<div class="form-group">

@@ -138,7 +138,7 @@
 									"<tr>" +
 										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
-										"<td>" + historyDetail[historyKey].item + "</td>" +
+										"<td>" + historyDetail[historyKey].item.toUpperCase() + "</td>" +
 										"<td>" + historyDetail[historyKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
@@ -189,7 +189,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.nomor_invoice;
+						return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
 					}
 				},
 				{
@@ -267,24 +267,24 @@
 								} else {
 									if(invoice_detail_item[invKey].item.allow_retur == true) {
 										if(invoice_detail_item[invKey].status_berobat == undefined) {
-											status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+											status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
 										} else {
 											if(invoice_detail_item[invKey].status_berobat.status == "N") {
 												//status_bayar = "<button class=\"btn btn-info btn-sm btn-retur-pembayaran\" id=\"retur_pembayaran_" + invoice_detail_item[invKey].item.uid + "\">Retur</button>";
-												status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
 											} else {
-												status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
 											}
 										}
 									} else {
-										status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+										status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
 									}
 								}
 								$("#invoice_detail_item").append(
 									"<tr>" +
 										"<td>" + status_bayar + "</td>" +
 										"<td>" + invoice_detail_item[invKey].autonum + "</td>" +
-										"<td>" + invoice_detail_item[invKey].item.nama + " <span style=\"margin-left: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
+										"<td>" + invoice_detail_item[invKey].item.nama.toUpperCase() + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
 										"<td>" + invoice_detail_item[invKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",") + "</td>" +
@@ -514,6 +514,11 @@
 					success:function(response) {
 						console.log(response);
 						if(response.response_package.response_result > 0) {
+							tableAntrianBayar.ajax.reload();
+							tableKwitansi.ajax.reload();
+							$("#form-invoice").modal("hide");
+							$("#form-payment").modal("hide");
+						} else {
 							tableAntrianBayar.ajax.reload();
 							tableKwitansi.ajax.reload();
 							$("#form-invoice").modal("hide");
