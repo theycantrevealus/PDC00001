@@ -1676,9 +1676,11 @@ class Laboratorium extends Utility {
 					}
 	
 					$result['new_lab_order'] = $labOrder;
+				} else {
+					
+					$result['response_message'] = 'Nothing in action';
 				}
 				
-				$result['response_message'] = 'Nothing in action';
 			}
 			
 			//check if uid labOrder has no empty and add tindakan
