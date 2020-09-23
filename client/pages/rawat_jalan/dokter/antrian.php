@@ -20,7 +20,7 @@
 			<div class="z-0">
 				<ul class="nav nav-tabs nav-tabs-custom" role="tablist">
 					<li class="nav-item">
-						<a href="#tab-poli-1" class="active nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+						<a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								01
 								<b class="inv-tab-status text-success" id="status-rawat"><i class="fa fa-check-circle"></i></b>
@@ -29,7 +29,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+						<a href="#tab-poli-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								02
 								<b class="inv-tab-status text-success" id="status-2"><i class="fa fa-check-circle"></i></b>
@@ -94,12 +94,12 @@
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
-				<div class="tab-pane show fade active perawat" id="tab-poli-1">
+				<div class="tab-pane show fade perawat" id="tab-poli-1">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'perawat/form.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-poli-2">
+				<div class="tab-pane show fade active" id="tab-poli-2">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'asesmen-awal.php'; ?>
 					<?php require 'action-panel.php'; ?>

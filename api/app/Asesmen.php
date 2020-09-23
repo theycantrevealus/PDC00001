@@ -11,6 +11,7 @@ use PondokCoder\Inventori as Inventori;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Antrian as Antrian;
 use PondokCoder\Invoice as Invoice;
+use PondokCoder\Icd as Icd;
 
 
 class Asesmen extends Utility {
@@ -151,6 +152,38 @@ class Asesmen extends Utility {
 			))
 			->execute();
 			if(count($data['response_data']) > 0) {
+
+				//Parse ICDData
+				foreach ($data['response_data'] as $ICD10Key => $ICD10Value) {
+					$ICD10KerjaRaw = explode(',', $ICD10Value['icd10_kerja']);
+					$ICD10KerjaJoined = array();
+					foreach ($ICD10KerjaRaw as $ICD10KRKey => $ICD10KRValue) {
+						$ICD10 = new Icd(self::$pdo);
+						$parseICD10 = $ICD10::get_icd_detail('master_icd_10', $ICD10KRValue);
+						if(count($parseICD10['response_data']) > 0) {
+							array_push($ICD10KerjaJoined, array(
+								'id' => $ICD10KRValue,
+								'nama' => $parseICD10['response_data'][0]['kode'] . ' - ' .$parseICD10['response_data'][0]['nama']
+							));
+						}
+					}
+					$data['response_data'][$ICD10Key]['icd10_kerja'] = $ICD10KerjaJoined;
+					
+
+					$ICD10BandingRaw = explode(',', $ICD10Value['icd10_banding']);
+					$ICD10BandingJoined = array();
+					foreach ($ICD10BandingRaw as $ICD10BRKey => $ICD10BRValue) {
+						$ICD10 = new Icd(self::$pdo);
+						$parseICD10 = $ICD10::get_icd_detail('master_icd_10', $ICD10BRValue);
+						if(count($parseICD10['response_data']) > 0) {
+							array_push($ICD10BandingJoined, array(
+								'id' => $ICD10BRValue,
+								'nama' => $parseICD10['response_data'][0]['kode'] . ' - ' .$parseICD10['response_data'][0]['nama']
+							));
+						}
+					}
+					$data['response_data'][$ICD10Key]['icd10_banding'] = $ICD10BandingJoined;
+				}
 				//Tindakan Detail
 				$tindakan = self::$query->select('asesmen_tindakan', array(
 					'tindakan'
@@ -359,7 +392,17 @@ class Asesmen extends Utility {
 			->execute();
 
 			if(count($poli_check['response_data']) > 0) {
-				//update
+				$selectedICD10Kerja = array();
+				$selectedICD10Banding = array();
+				foreach ($parameter['icd10_kerja'] as $ICD10KK => $ICD10KV) {
+					array_push($selectedICD10Kerja, $ICD10KV['id']);
+				}
+
+				foreach ($parameter['icd10_banding'] as $ICD10BK => $ICD10BV) {
+					array_push($selectedICD10Banding, $ICD10BV['id']);
+				}
+
+				//Update
 				$worker = self::$query->update('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
 					'keluhan_utama' => $parameter['keluhan_utama'],
 					'keluhan_tambahan' => $parameter['keluhan_tambahan'],
@@ -371,9 +414,11 @@ class Asesmen extends Utility {
 					'tinggi_badan' => floatval($parameter['tinggi_badan']),
 					'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
 					'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
-					'icd10_kerja' => intval($parameter['icd10_kerja']),
+					//'icd10_kerja' => intval($parameter['icd10_kerja']),
+					'icd10_kerja' => implode(',', $selectedICD10Kerja),
 					'diagnosa_kerja' => $parameter['diagnosa_kerja'],
-					'icd10_banding' => intval($parameter['icd10_banding']),
+					//'icd10_banding' => intval($parameter['icd10_banding']),
+					'icd10_banding' => implode(',', $selectedICD10Banding),
 					'diagnosa_banding' => $parameter['diagnosa_banding'],
 					'planning' => $parameter['planning'],
 					'updated_at' => parent::format_date()

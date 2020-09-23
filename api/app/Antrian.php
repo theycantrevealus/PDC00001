@@ -69,7 +69,9 @@ class Antrian extends Utility {
 			case 'tambah-kunjungan':
 				return self::tambah_kunjungan('kunjungan', $parameter);
 				break;
-
+			case 'ubah_dokter_antrian':
+				return self::ubah_dokter_antrian($parameter);
+				break;
 			default:
 				# code...
 				break;
@@ -1000,4 +1002,17 @@ class Antrian extends Utility {
 	}
 	/*====================================================================*/
 
+	private function ubah_dokter_antrian($parameter) {
+		return self::$query->update('antrian', array(
+			'dokter' => $parameter['dokter']
+		))
+		->where(array(
+			'antrian.deleted_at' => 'IS NULL',
+			'AND',
+			'antrian.uid' => '= ?'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
+	}
 }
