@@ -12,13 +12,9 @@
 
 
 				<!-- Navbar Brand -->
-				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand ">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" width="60" height="40" alt="SIMRS PETALA BUMI">
-					SIMRS PETALA BUMI
-					<span> <small>-Integrated</small></span>
+				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand" style="padding: 10px 60px;">
+					<img class="navbar-brand-icon" style="position: absolute;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="140" height="60" alt="SIMRS PETALA BUMI">
 				</a>
-
-
 				
 				<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
 					<li class="nav-item dropdown">

@@ -17,14 +17,14 @@
 						</button>
 					</div>
 					<div class="col-md-2" style="padding-top: 8px;" id="radiologi_tindakan_notifier"></div>
-					<div class="col-md-12" style="margin-top: 20px;">
+					<div class="col-md-12" style="margin-top: 10px;">
 						<table class="table table-bordered" id="table_tindakan_radiologi">
 							<thead>
 								<tr>
-									<th class="wrap_content">No</th>
-									<th>Tindakan Radiologi</th>
-									<th>Penjamin</th>
-									<th class="wrap_content">Aksi</th>
+									<th width='2%' class="wrap_content">No</th>
+									<th width='25%'>Tindakan Radiologi</th>
+									<th width='25%'>Penjamin</th>
+									<th width='5%' class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody>

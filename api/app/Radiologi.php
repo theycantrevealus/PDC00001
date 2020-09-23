@@ -69,7 +69,7 @@ class Radiologi extends Utility {
 					break;
 
 				case 'get_tindakan_for_dokter':
-					return self::get_tindakan_for_dokter('test');
+					return self::get_tindakan_for_dokter();
 					break;
 
 				default:
@@ -99,6 +99,10 @@ class Radiologi extends Utility {
 				return self::edit_tindakan($parameter);
 				break;
 
+			case 'add-order-radiologi':
+				return self::add_order_radiologi($parameter);
+				break;
+			
 			case 'update-hasil-radiologi':
 				return self::update_hasil_radiologi($parameter); 
 				break;
@@ -833,6 +837,77 @@ class Radiologi extends Utility {
 		return $data;
 	}
 
+	private function get_radiologi_order($parameter){	//uid_antrian
+		$get_antrian = new Antrian(self::$pdo);
+		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter);
+		
+		$dataRadiologiOrder = [];
+
+		$result = [];
+		if ($antrian['response_result'] > 0){
+
+			$data_antrian = $antrian['response_data'][0];		//get antrian data
+
+			//get uid asesmmen based by antrian data
+			$get_asesmen = self::$query->select('asesmen', array('uid'))
+				->where(array(
+						'asesmen.deleted_at' => 'IS NULL',
+						'AND',
+						'asesmen.poli' => '= ?',
+						'AND',
+						'asesmen.kunjungan' => '= ?',
+						'AND',
+						'asesmen.antrian' => '= ?',
+						'AND',
+						'asesmen.pasien' => '= ?',
+						'AND',
+						'asesmen.dokter' => '= ?'
+					), array(
+						$data_antrian['departemen'],
+						$data_antrian['kunjungan'],
+						$parameter,
+						$data_antrian['pasien'],
+						$data_antrian['dokter']
+					)
+				)
+				->execute();
+			
+			if ($get_asesmen['response_result'] > 0){
+				
+				$dataOrder = self::$query
+					->select('radiologi_order', 
+						array(
+							'uid',
+							'asesmen',
+							'waktu_order',
+							'selesai',
+							'petugas'
+						)
+					)
+					->where(
+						array(
+							'radiologi_order.asesmen' 		=> '= ?',
+							'AND',
+							'radiologi_order.deleted_at'	=> 'IS NULL'
+						), array($get_asesmen['response_data'][0]['uid'])
+					)
+					->execute();
+				
+				if ($dataOrder['response_result'] > 0){
+					$dataRadiologiOrder["order_data"] = $dataOrder['response_data'][0];
+
+					$dataDetailOrder = self::get_radiologi_order_detail($dataOrder['response_data'][0]['uid']);
+					if ($dataDetailOrder['response_result'] > 0){
+						$dataRadiologiOrder["detail_order"] = $dataDetailOrder['response_data'];
+					}
+
+				}
+			}
+		}
+
+		return $dataRadiologiOrder;
+	}
+
 	private function get_radiologi_order_detail($parameter){
 		$data = self::$query
 			->select('radiologi_order_detail', array(
@@ -915,6 +990,300 @@ class Radiologi extends Utility {
 		}
 
 		return $data;
+	}
+
+	private function add_order_radiologi($parameter){
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$get_antrian = new Antrian(self::$pdo);
+		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter['uid_antrian']);
+		
+		$result = [];
+		if ($antrian['response_result'] > 0){
+
+			$data_antrian = $antrian['response_data'][0];		//get antrian data
+
+			//get uid asesmmen based by antrian data
+			$get_asesmen = self::$query->select('asesmen', array('uid'))
+				->where(array(
+						'asesmen.deleted_at' => 'IS NULL',
+						'AND',
+						'asesmen.poli' => '= ?',
+						'AND',
+						'asesmen.kunjungan' => '= ?',
+						'AND',
+						'asesmen.antrian' => '= ?',
+						'AND',
+						'asesmen.pasien' => '= ?',
+						'AND',
+						'asesmen.dokter' => '= ?'
+					), array(
+						$data_antrian['departemen'],
+						$data_antrian['kunjungan'],
+						$parameter['uid_antrian'],
+						$data_antrian['pasien'],
+						$data_antrian['dokter']
+					)
+				)
+				->execute();
+			
+			$uidRadiologiOrder = "";
+			$statusOrder = "NEW";	//parameter to set status order, set "NEW" for default
+			if ($get_asesmen['response_result'] > 0){
+				$uidAsesmen = $get_asesmen['response_data'][0]['uid'];
+
+				$checkRadiologiOrder = self::$query
+					->select('radiologi_order', array('uid'))
+					->where(
+						array(
+							'radiologi_order.asesmen'		=>	'= ?',
+							'AND',
+							'radiologi_order.deleted_at'	=>	'IS NULL'
+						)
+						, array($uidAsesmen)
+					)
+					->execute();
+				
+				if ($checkRadiologiOrder['response_result'] > 0){
+					$statusOrder = "OLD";		//$statusOrder will set "OLD" if has ever added
+					$uidRadiologiOrder = $checkRadiologiOrder['response_data'][0]['uid'];
+
+					$result['old_radiologi_order'] = $checkRadiologiOrder;
+
+					if (count($parameter['listTindakanDihapus']) > 0){
+
+						foreach($parameter['listTindakanDihapus'] as $key => $value){
+							$hapusTindakanTerpilih = self::$query
+								->delete('radiologi_order_detail')
+								->where(array(
+										'radiologi_order_detail.radiologi_order' 	=> '= ?',
+										'AND',
+										'radiologi_order_detail.tindakan' 			=> '= ?',
+										'AND',
+										'radiologi_order_detail.keterangan' 		=> 'IS NULL',
+										'AND',
+										'radiologi_order_detail.kesimpulan'			=> 'IS NULL',
+										'AND',
+										'radiologi_order_detail.deleted_at'			=> 'IS NULL'
+									), array(
+										$uidRadiologiOrder,
+										$value
+									)
+								)
+								->execute();
+
+							if ($hapusTindakanTerpilih['response_result'] > 0){
+								$result['delete_tindakan_order'] = $hapusTindakanTerpilih;
+
+								$log = parent::log(array(
+										'type'=>'activity',
+										'column'=>array(
+											'unique_target',
+											'user_uid',
+											'table_name',
+											'action',
+											'logged_at',
+											'status',
+											'login_id'
+										),
+										'value'=>array(
+											'asesmen: ' . $uidAsesmen . "; tindakan: " . $value,
+											$UserData['data']->uid,
+											'radiologi_order_detail',
+											'D',
+											parent::format_date(),
+											'N',
+											$UserData['data']->log_id
+										),
+										'class'=>__CLASS__
+									)
+								);
+							}
+
+						}
+
+					}
+				}
+
+			} else {
+				//new asesmen
+				$uidAsesmen = parent::gen_uuid();
+				$MasterUID = $uidAsesmen;
+				$asesmen_poli = self::$query
+					->insert('asesmen', 
+						array(
+							'uid' => $uidAsesmen,
+							'poli' => $data_antrian['departemen'],
+							'kunjungan' => $data_antrian['kunjungan'],
+							'antrian' => $parameter['uid_antrian'],
+							'pasien' => $data_antrian['pasien'],
+							'dokter' => $data_antrian['dokter'],
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						)
+					)
+					->execute();
+				
+				if($asesmen_poli['response_result'] > 0) {
+
+					$log = parent::log(array(
+						'type'=>'activity',
+						'column'=>array(
+							'unique_target',
+							'user_uid',
+							'table_name',
+							'action',
+							'logged_at',
+							'status',
+							'login_id'
+						),
+						'value'=>array(
+							$uidAsesmen,
+							$UserData['data']->uid,
+							'asesmen',
+							'I',
+							parent::format_date(),
+							'N',
+							$UserData['data']->log_id
+						),
+						'class'=>__CLASS__
+					));
+					
+					$result['new_asesmen'] = $asesmen_poli;
+				}
+			}
+
+			if ($statusOrder == "NEW"){
+				$uidRadiologiOrder = "";
+
+				if (count($parameter['listTindakan']) > 0){
+					$uidRadiologiOrder = parent::gen_uuid();
+					$radiologiOrder = self::$query
+						->insert('radiologi_order', 
+							array(
+								'uid'			=>	$uidRadiologiOrder,
+								'asesmen'		=>	$uidAsesmen,
+								'waktu_order'	=>	parent::format_date(),
+								'selesai'		=>	'false',
+								'petugas'		=>	$UserData['data']->uid,
+								'created_at'	=>	parent::format_date(),
+								'updated_at'	=>	parent::format_date()
+							)
+						)
+						->execute();
+					
+					if($radiologiOrder['response_result'] > 0) {
+
+						$log = parent::log(array(
+							'type'=>'activity',
+							'column'=>array(
+								'unique_target',
+								'user_uid',
+								'table_name',
+								'action',
+								'logged_at',
+								'status',
+								'login_id'
+							),
+							'value'=>array(
+								$uidRadiologiOrder,
+								$UserData['data']->uid,
+								'radiologi_order',
+								'I',
+								parent::format_date(),
+								'N',
+								$UserData['data']->log_id
+							),
+							'class'=>__CLASS__
+						));
+						
+					}
+
+					$result['new_radiologi_order'] = $radiologiOrder;
+				} else {
+
+					$result['response_message'] = 'Nothing in action';
+				}
+				
+			}
+			
+			//check if uid labOrder has no empty and add tindakan
+			if ($uidRadiologiOrder != ""){
+
+				/*	KETERANGAN
+					format json listTindakan:
+					listTindakan : { 
+						uid_tindakan_1 : uid_penjamin_1,
+						uid_tinadkan_2 : uid_penjamin_2 
+					}
+				*/
+				foreach ($parameter['listTindakan'] as $keyTindakan => $valueTindakan) {
+					$checkDetailRadiologi = self::$query
+						->select('radiologi_order_detail', array('id'))
+						->where(
+							array(
+								'radiologi_order_detail.radiologi_order'	=> '= ?',
+								'AND',
+								'radiologi_order_detail.tindakan'			=> '= ?',
+								'AND',
+								'radiologi_order_detail.deleted_at'			=> 'IS NULL'
+							), array(
+								$uidRadiologiOrder,
+								$keyTindakan
+							)
+						)
+						->execute();
+					
+					if ($checkDetailRadiologi['response_result'] == 0){
+						$addDetailRadiologi = self::$query
+							->insert('radiologi_order_detail', 
+								array(
+									'radiologi_order'	=>	$uidRadiologiOrder,
+									'tindakan'			=>	$keyTindakan,
+									'penjamin'			=>	$valueTindakan,
+									'created_at'		=>	parent::format_date(),
+									'updated_at'		=>	parent::format_date()	
+								)
+							)
+							->execute();
+
+						if ($addDetailRadiologi['response_result'] > 0){
+							$log = parent::log(array(
+								'type'=>'activity',
+								'column'=>array(
+									'unique_target',
+									'user_uid',
+									'table_name',
+									'action',
+									'logged_at',
+									'status',
+									'login_id'
+								),
+								'value'=>array(
+									$uidRadiologiOrder . "; ". $keyTindakan,
+									$UserData['data']->uid,
+									'radiologi_order_detail',
+									'I',
+									parent::format_date(),
+									'N',
+									$UserData['data']->log_id
+								),
+								'class'=>__CLASS__
+							));
+							
+							$result['new_radiologi_detail'] = $addDetailRadiologi;
+	
+						}
+					}
+
+				}
+				
+			}
+
+		}
+
+		return $result;
 	}
 
 	private function update_hasil_radiologi($parameter){
@@ -1111,7 +1480,7 @@ class Radiologi extends Utility {
 	/*-------------------------------------------------------*/
 
 	/*------------------- GET TINDAKAN RADIOLOGI FOR DOKTER --------------------*/
-	private function get_tindakan_for_dokter($penjamin){
+	private function get_tindakan_for_dokter(){
 		$dataTindakan = self::get_tindakan();
 
 		$tindakan = new Tindakan(self::$pdo);
