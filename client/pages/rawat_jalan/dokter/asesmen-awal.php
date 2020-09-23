@@ -135,9 +135,29 @@
 				<div class="tab-pane active show fade" id="asesmen-kerja">
 					<div class="form-group">
 						<label for="txt_icd_10_kerja">ICD 10</label>
-						<div class="input-group input-group-merge">
-							<select id="txt_icd_10_kerja" class="form-control"></select>
+						<div class="row">
+							<div class="col-lg-8">
+								<div class="input-group input-group-merge">
+									<select id="txt_icd_10_kerja" class="form-control"></select>
+								</div>
+							</div>
+							<div class="col-lg-4">
+								<button class="btn btn-info" id="btn_tambah_icd10_kerja">
+									<i class="fa fa-plus"></i> Tambah ICD10
+								</button>
+							</div>
 						</div>
+						<br />
+						<table class="table" id="txt_diagnosa_kerja_list">
+							<thead class="thead-dark">
+								<tr>
+									<th class="wrap_content">No</th>
+									<th>ICD</th>
+									<th>Aksi</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
 						<br />
 						<div id="txt_diagnosa_kerja"></div>
 					</div>
@@ -145,9 +165,29 @@
 				<div class="tab-pane show fade" id="asesmen-banding">
 					<div class="form-group">
 						<label for="txt_icd_10_banding">ICD 10</label>
-						<div class="input-group input-group-merge">
-							<select id="txt_icd_10_banding" class="form-control"></select>
+						<div class="row">
+							<div class="col-lg-8">
+								<div class="input-group input-group-merge">
+									<select id="txt_icd_10_banding" class="form-control"></select>
+								</div>
+							</div>
+							<div class="col-lg-4">
+								<button class="btn btn-info" id="btn_tambah_icd10_banding">
+									<i class="fa fa-plus"></i> Tambah ICD10
+								</button>
+							</div>
 						</div>
+						<br />
+						<table class="table" id="txt_diagnosa_banding_list">
+							<thead class="thead-dark">
+								<tr>
+									<th class="wrap_content">No</th>
+									<th>ICD</th>
+									<th>Aksi</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
 						<br />
 						<div id="txt_diagnosa_banding"></div>
 					</div>

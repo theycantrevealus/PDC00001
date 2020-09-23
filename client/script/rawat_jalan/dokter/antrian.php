@@ -2,6 +2,8 @@
 	$(function() {
 		var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
 		var poliList = poliListRaw;
+		var allICD10 = load_icd_10();
+		var selectedICD10Kerja = [], selectedICD10Banding = [];
 		poliList.tindakan = [];
 		//Filter Rawat Jalan
 		for(var z in poliListRaw.tindakan) {
@@ -11,6 +13,7 @@
 		}
 
 		console.log(poliList);
+
 		//Init
 		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorKeteranganResepRacikan, editorPlanning;
 		var antrianData, asesmen_detail;
@@ -152,8 +155,33 @@
 							checkGenerateRacikan();
 						}
 						
-						load_icd_10("#txt_icd_10_kerja", asesmen_detail.icd10_kerja);
-						load_icd_10("#txt_icd_10_banding", asesmen_detail.icd10_banding);
+						/*load_icd_10("#txt_icd_10_kerja", asesmen_detail.icd10_kerja);
+						load_icd_10("#txt_icd_10_banding", asesmen_detail.icd10_banding);*/
+
+						var icd10KerjaDataParse = asesmen_detail.icd10_kerja;
+						for(var icd10KerjaKey in icd10KerjaDataParse) {
+							$("#txt_diagnosa_kerja_list tbody").append(
+								"<tr targetICD=\"" + parseInt(icd10KerjaDataParse[icd10KerjaKey].id) + "\">" +
+									"<td>" + ($("#txt_diagnosa_kerja_list tbody tr").length + 1) + "</td>" +
+									"<td>" + icd10KerjaDataParse[icd10KerjaKey].nama + "</td>" +
+									"<td><button class=\"btn btn-sm btn-danger btn_delete_icd_kerja\" targetICD=\"" + parseInt(icd10KerjaDataParse[icd10KerjaKey].id) + "\"><i class=\"fa fa-trash\"></i></button></td>" +
+								"</tr>"
+							);
+						}
+
+						var icd10BandingDataParse = asesmen_detail.icd10_banding;
+						for(var icd10BandinKey in icd10BandingDataParse) {
+							$("#txt_diagnosa_kerja_list tbody").append(
+								"<tr targetICD=\"" + parseInt(icd10BandingDataParse[icd10BandinKey].id) + "\">" +
+									"<td>" + ($("#txt_diagnosa_kerja_list tbody tr").length + 1) + "</td>" +
+									"<td>" + icd10BandingDataParse[icd10BandinKey].nama + "</td>" +
+									"<td><button class=\"btn btn-sm btn-danger btn_delete_icd_kerja\" targetICD=\"" + parseInt(icd10BandingDataParse[icd10BandinKey].id) + "\"><i class=\"fa fa-trash\"></i></button></td>" +
+								"</tr>"
+							);
+						}
+						
+						parse_icd_10("#txt_icd_10_kerja", allICD10);
+						parse_icd_10("#txt_icd_10_banding", allICD10);
 
 						$("#txt_icd_10_kerja").select2();
 						$("#txt_icd_10_banding").select2();
@@ -321,6 +349,108 @@
 			$("#current-poli").removeClass("handy");
 		}
 
+		$("#btn_tambah_icd10_kerja").click(function() {
+			var allowAdd = false;
+			if(selectedICD10Kerja.length > 0) {
+				for(var selectedKeyKerja in selectedICD10Kerja) {
+					if(selectedICD10Kerja[selectedKeyKerja].id != parseInt($("#txt_icd_10_kerja").val())) {
+						allowAdd = true;
+					} else {
+						allowAdd = false;
+						break;
+					}
+				}
+			} else {
+				allowAdd = true;
+			}
+
+			if(allowAdd) {
+				$("#txt_diagnosa_kerja_list tbody").append(
+					"<tr targetICD=\"" + parseInt($("#txt_icd_10_kerja").val()) + "\">" +
+						"<td>" + ($("#txt_diagnosa_kerja_list tbody tr").length + 1) + "</td>" +
+						"<td>" + $("#txt_icd_10_kerja option:selected").text() + "</td>" +
+						"<td><button class=\"btn btn-sm btn-danger btn_delete_icd_kerja\" targetICD=\"" + parseInt($("#txt_icd_10_kerja").val()) + "\"><i class=\"fa fa-trash\"></i></button></td>" +
+					"</tr>"
+				);
+				
+				selectedICD10Kerja.push({
+					id: parseInt($("#txt_icd_10_kerja").val()),
+					nama: $("#txt_icd_10_kerja option[value=\"" + parseInt($("#txt_icd_10_kerja").val()) + "\"]").text()
+				});
+
+				$("#txt_icd_10_kerja option[value=\"" + parseInt($("#txt_icd_10_kerja").val()) + "\"]").remove();
+				rebaseICD("#txt_diagnosa_kerja_list");
+			}
+			//parse_icd_10("#txt_icd_10_banding", allICD10, selectedICD10Kerja);
+		});
+
+		$("body").on("click", ".btn_delete_icd_kerja", function() {
+			var id = $(this).attr("targetICD");
+			for(var selectedKeyKerja in selectedICD10Kerja) {
+				if(selectedICD10Kerja[selectedKeyKerja].id == id) {
+					$("#txt_diagnosa_kerja_list tbody tr[targetICD=\"" + selectedICD10Kerja[selectedKeyKerja].id +"\"]").remove();
+					$("#txt_icd_10_kerja").prepend("<option value=\"" + selectedICD10Kerja[selectedKeyKerja].id + "\">" + selectedICD10Kerja[selectedKeyKerja].nama + "</option>");
+					selectedICD10Kerja.splice(selectedKeyKerja, 1);
+				}
+			}
+			rebaseICD("#txt_diagnosa_kerja_list");
+		});
+
+		function rebaseICD(target) {
+			$(target + " tbody tr").each(function(e) {
+				$(this).find("td:eq(0)").html((e + 1));
+			});
+		}
+
+
+		$("#btn_tambah_icd10_banding").click(function() {
+			var allowAdd = false;
+			if(selectedICD10Banding.length > 0) {
+				for(var selectedKeyBanding in selectedICD10Banding) {
+					if(selectedICD10Banding[selectedKeyBanding].id != parseInt($("#txt_icd_10_banding").val())) {
+						allowAdd = true;
+					} else {
+						allowAdd = false;
+						break;
+					}
+				}
+			} else {
+				allowAdd = true;
+			}
+
+			if(allowAdd) {
+				$("#txt_diagnosa_banding_list tbody").append(
+					"<tr targetICD=\"" + parseInt($("#txt_icd_10_banding").val()) + "\">" +
+						"<td>" + ($("#txt_diagnosa_banding_list tbody tr").length + 1) + "</td>" +
+						"<td>" + $("#txt_icd_10_banding option:selected").text() + "</td>" +
+						"<td><button class=\"btn btn-sm btn-danger btn_delete_icd_banding\" targetICD=\"" + parseInt($("#txt_icd_10_banding").val()) + "\"><i class=\"fa fa-trash\"></i></button></td>" +
+					"</tr>"
+				);
+				
+				selectedICD10Banding.push({
+					id: parseInt($("#txt_icd_10_banding").val()),
+					nama: $("#txt_icd_10_banding option[value=\"" + parseInt($("#txt_icd_10_banding").val()) + "\"]").text()
+				});
+
+				$("#txt_icd_10_banding option[value=\"" + parseInt($("#txt_icd_10_banding").val()) + "\"]").remove();
+				rebaseICD("#txt_diagnosa_banding_list");
+			}
+		});
+
+		$("body").on("click", ".btn_delete_icd_banding", function() {
+			var id = $(this).attr("targetICD");
+			for(var selectedKeyBanding in selectedICD10Banding) {
+				if(selectedICD10Banding[selectedKeyBanding].id == id) {
+					$("#txt_diagnosa_banding_list tbody tr[targetICD=\"" + selectedICD10Banding[selectedKeyBanding].id +"\"]").remove();
+					$("#txt_icd_10_banding").prepend("<option value=\"" + selectedICD10Banding[selectedKeyBanding].id + "\">" + selectedICD10Banding[selectedKeyBanding].nama + "</option>");
+					selectedICD10Banding.splice(selectedKeyBanding, 1);
+				}
+			}
+			rebaseICD("#txt_diagnosa_banding_list");
+		});
+
+		
+
 		$("#current-poli").prepend(poliList[0]['nama']);
 
 		function generateTindakan(poliList, antrianData, selected = []) {
@@ -433,7 +563,7 @@
 			});
 		}
 
-		function load_icd_10(target, selected = "") {
+		function load_icd_10() {
 			var icd10Data;
 			$.ajax({
 				url:__HOSTAPI__ + "/Icd/icd10",
@@ -444,16 +574,20 @@
 				type:"GET",
 				success:function(response) {
 					icd10Data = response.response_package.response_data;
-					$(target).find("option").remove();
-					for(var a = 0; a < icd10Data.length; a++) {
-						$(target).append("<option " + ((icd10Data[a].id == selected) ? "selected=\"selected\"" : "") + " value=\"" + icd10Data[a].id + "\">" + icd10Data[a].kode + " - " + icd10Data[a].nama + "</option>");
-					}
 				},
 				error: function(response) {
 					console.log(response);
 				}
 			});
 			return icd10Data;
+		}
+
+		function parse_icd_10(target, icd10Data) {
+			$(target + " option").remove();
+
+			for(var a = 0; a < icd10Data.length; a++) {
+				$(target).append("<option value=\"" + icd10Data[a].id + "\">" + icd10Data[a].kode + " - " + icd10Data[a].nama + "</option>");
+			}
 		}
 
 
@@ -1628,8 +1762,10 @@
 			var tinggiBadan = $("#txt_tinggi_badan").inputmask("unmaskedvalue");
 			var lingkarLengan = $("#txt_lingkar_lengan").inputmask("unmaskedvalue");
 			var pemeriksaanFisikData = editorPeriksaFisikData.getData();
-			var icd10Kerja = $("#txt_icd_10_kerja").val();
-			var icd10Banding = $("#txt_icd_10_banding").val();
+			
+			/*var icd10Kerja = $("#txt_icd_10_kerja").val();
+			var icd10Banding = $("#txt_icd_10_banding").val();*/
+			
 			var diagnosaKerjaData = editorKerja.getData();
 			var diagnosaBandingData = editorBanding.getData();
 			var planningData = editorPlanning.getData();
@@ -1757,9 +1893,11 @@
 				tinggi_badan: parseFloat(tinggiBadan),
 				lingkar_lengan_atas: parseFloat(lingkarLengan),
 				pemeriksaan_fisik: pemeriksaanFisikData,
-				icd10_kerja: parseInt(icd10Kerja),
+				//icd10_kerja: parseInt(icd10Kerja),
+				icd10_kerja: selectedICD10Kerja,
 				diagnosa_kerja: diagnosaKerjaData,
-				icd10_banding: parseInt(icd10Banding),
+				//icd10_banding: parseInt(icd10Banding),
+				icd10_banding: selectedICD10Banding,
 				diagnosa_banding: diagnosaBandingData,
 				planning: planningData,
 				//==============================
