@@ -30,3 +30,4 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/pdfjs/build/pdf.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.all.min.js"></script>

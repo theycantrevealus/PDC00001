@@ -157,31 +157,41 @@
 						
 						/*load_icd_10("#txt_icd_10_kerja", asesmen_detail.icd10_kerja);
 						load_icd_10("#txt_icd_10_banding", asesmen_detail.icd10_banding);*/
+						selectedICD10Kerja = asesmen_detail.icd10_kerja;
+						selectedICD10Banding = asesmen_detail.icd10_banding;
+						var rawSelectedKerja = [];
+						var rawSelectedBanding = [];
 
 						var icd10KerjaDataParse = asesmen_detail.icd10_kerja;
 						for(var icd10KerjaKey in icd10KerjaDataParse) {
-							$("#txt_diagnosa_kerja_list tbody").append(
-								"<tr targetICD=\"" + parseInt(icd10KerjaDataParse[icd10KerjaKey].id) + "\">" +
-									"<td>" + ($("#txt_diagnosa_kerja_list tbody tr").length + 1) + "</td>" +
-									"<td>" + icd10KerjaDataParse[icd10KerjaKey].nama + "</td>" +
-									"<td><button class=\"btn btn-sm btn-danger btn_delete_icd_kerja\" targetICD=\"" + parseInt(icd10KerjaDataParse[icd10KerjaKey].id) + "\"><i class=\"fa fa-trash\"></i></button></td>" +
-								"</tr>"
-							);
+							if(rawSelectedKerja.indexOf(parseInt(icd10KerjaDataParse[icd10KerjaKey].id)) < 0) {
+								rawSelectedKerja.push(parseInt(icd10KerjaDataParse[icd10KerjaKey].id));
+								$("#txt_diagnosa_kerja_list tbody").append(
+									"<tr targetICD=\"" + parseInt(icd10KerjaDataParse[icd10KerjaKey].id) + "\">" +
+										"<td>" + ($("#txt_diagnosa_kerja_list tbody tr").length + 1) + "</td>" +
+										"<td>" + icd10KerjaDataParse[icd10KerjaKey].nama + "</td>" +
+										"<td><button class=\"btn btn-sm btn-danger btn_delete_icd_kerja\" targetICD=\"" + parseInt(icd10KerjaDataParse[icd10KerjaKey].id) + "\"><i class=\"fa fa-trash\"></i></button></td>" +
+									"</tr>"
+								);
+							}
 						}
 
 						var icd10BandingDataParse = asesmen_detail.icd10_banding;
-						for(var icd10BandinKey in icd10BandingDataParse) {
-							$("#txt_diagnosa_kerja_list tbody").append(
-								"<tr targetICD=\"" + parseInt(icd10BandingDataParse[icd10BandinKey].id) + "\">" +
-									"<td>" + ($("#txt_diagnosa_kerja_list tbody tr").length + 1) + "</td>" +
-									"<td>" + icd10BandingDataParse[icd10BandinKey].nama + "</td>" +
-									"<td><button class=\"btn btn-sm btn-danger btn_delete_icd_kerja\" targetICD=\"" + parseInt(icd10BandingDataParse[icd10BandinKey].id) + "\"><i class=\"fa fa-trash\"></i></button></td>" +
-								"</tr>"
-							);
+						for(var icd10BandingKey in icd10BandingDataParse) {
+							if(rawSelectedBanding.indexOf(parseInt(icd10BandingDataParse[icd10BandingKey].id)) < 0) {
+								rawSelectedBanding.push(parseInt(icd10BandingDataParse[icd10BandingKey].id));
+								$("#txt_diagnosa_banding_list tbody").append(
+									"<tr targetICD=\"" + parseInt(icd10BandingDataParse[icd10BandingKey].id) + "\">" +
+										"<td>" + ($("#txt_diagnosa_banding_list tbody tr").length + 1) + "</td>" +
+										"<td>" + icd10BandingDataParse[icd10BandingKey].nama + "</td>" +
+										"<td><button class=\"btn btn-sm btn-danger btn_delete_icd_banding\" targetICD=\"" + parseInt(icd10BandingDataParse[icd10BandingKey].id) + "\"><i class=\"fa fa-trash\"></i></button></td>" +
+									"</tr>"
+								);
+							}
 						}
 						
-						parse_icd_10("#txt_icd_10_kerja", allICD10);
-						parse_icd_10("#txt_icd_10_banding", allICD10);
+						parse_icd_10("#txt_icd_10_kerja", allICD10, rawSelectedKerja);
+						parse_icd_10("#txt_icd_10_banding", allICD10, rawSelectedBanding);
 
 						$("#txt_icd_10_kerja").select2();
 						$("#txt_icd_10_banding").select2();
@@ -381,7 +391,6 @@
 				$("#txt_icd_10_kerja option[value=\"" + parseInt($("#txt_icd_10_kerja").val()) + "\"]").remove();
 				rebaseICD("#txt_diagnosa_kerja_list");
 			}
-			//parse_icd_10("#txt_icd_10_banding", allICD10, selectedICD10Kerja);
 		});
 
 		$("body").on("click", ".btn_delete_icd_kerja", function() {
@@ -582,18 +591,15 @@
 			return icd10Data;
 		}
 
-		function parse_icd_10(target, icd10Data) {
+		function parse_icd_10(target, icd10Data, selectedData = []) {
 			$(target + " option").remove();
 
 			for(var a = 0; a < icd10Data.length; a++) {
-				$(target).append("<option value=\"" + icd10Data[a].id + "\">" + icd10Data[a].kode + " - " + icd10Data[a].nama + "</option>");
+				if(selectedData.indexOf(parseInt(icd10Data[a].id)) < 0) {
+					$(target).append("<option value=\"" + icd10Data[a].id + "\">" + icd10Data[a].kode + " - " + icd10Data[a].nama + "</option>");
+				}
 			}
 		}
-
-
-		
-
-
 
 		class MyUploadAdapter {
 			static loader;
@@ -1188,7 +1194,8 @@
 							"<th class=\"wrap_content\">No</th>" +
 							"<th>Obat</th>" +
 							/*"<th class=\"wrap_content\">@</th>" +*/
-							"<th>Takaran</th>" +
+							/*"<th>Takaran</th>" +*/
+							"<th>Kekuatan</th>" +
 							"<th class=\"wrap_content\">Aksi</th>" +
 						"<tr>" +
 					"</thead>" +
@@ -1402,8 +1409,9 @@
 		function prepareModal(id, setData = {
 			obat: "",
 			jlh: "",
-			takarBulat: 0,
-			takarDesimal: ""
+			takarBulat: 1,
+			takarDesimal: "",
+			kekuatan: ""
 		}) {
 			$("#form-editor-racikan").modal("show");
 			$("#modal-large-title").html($("#racikan_nama_" + id).val());
@@ -1412,6 +1420,7 @@
 			//$("#txt_racikan_takar").val(setData.takar);
 			$("#txt_racikan_takar").val(setData.takarDesimal);
 			$("#txt_racikan_takar_bulat").val(setData.takarBulat);
+			$("#txt_racikan_kekuatan").val(setData.kekuatan);
 
 			var modalProduct = load_product_resep($("#txt_racikan_obat"), setData.obat, false);
 			var itemData = modalProduct.data;
@@ -1489,7 +1498,8 @@
 				obat: $("#obat_komposisi_" + Pid + "_" + thisID).attr("uid-obat"),
 				//jlh: $("#jlh_komposisi_" + Pid + "_" + thisID).html(),
 				takarBulat: $("#takar_komposisi_" + Pid + "_" + thisID).find("b").html(),
-				takarDesimal: $("#takar_komposisi_" + Pid + "_" + thisID).find("sub").html()
+				takarDesimal: $("#takar_komposisi_" + Pid + "_" + thisID).find("sub").html(),
+				kekuatan: $("#takar_komposisi_" + Pid + "_" + thisID).find("h6").html()
 			});
 
 			currentKomposisiID = thisID;
@@ -1544,10 +1554,10 @@
 			}
 
 			//$("#jlh_komposisi_" + currentRacikID + "_" + currentKomposisiID).html($("#txt_racikan_jlh").val());
-			$("#takar_komposisi_" + currentRacikID + "_" + currentKomposisiID).html("<b style=\"font-size: 15pt\">" + $("#txt_racikan_takar_bulat").val() + "</b><sub nilaiExact=\"" + eval($("#txt_racikan_takar").val()) + "\">" + $("#txt_racikan_takar").val() + "</sub>");
-			if(/*$("#txt_racikan_jlh").val() != "" && */$("#txt_racikan_takar").val()) {
+			$("#takar_komposisi_" + currentRacikID + "_" + currentKomposisiID).html("<b style=\"font-size: 15pt; display: none\">" + $("#txt_racikan_takar_bulat").val() + "</b><sub nilaiExact=\"" + eval($("#txt_racikan_takar").val()) + "\">" + $("#txt_racikan_takar").val() + "</sub><h6>" + $("#txt_racikan_kekuatan").val() + "</h6>");
+			//if($("#txt_racikan_jlh").val() != "" && $("#txt_racikan_takar").val()) {
 				$("#form-editor-racikan").modal("hide");	
-			}
+			//}
 		});
 
 		$("body").on("keyup", ".racikan_signa_a", function() {
@@ -1849,6 +1859,7 @@
 					var takaranBulat = $(this).find("td:eq(2) b").html();
 					var takaranDecimal = $(this).find("td:eq(2) sub").attr("nilaiExact");
 					var takaranDecimalText = $(this).find("td:eq(2) sub").html();
+					var takaranKekuatan = $(this).find("td:eq(2) h6").html();
 					var takaran = parseFloat(takaranBulat) + parseFloat(takaranDecimal);
 					
 					if(obat != undefined) {
@@ -1858,7 +1869,8 @@
 							"takaranBulat": takaranBulat,
 							"takaranDecimal": takaranDecimal,
 							"takaranDecimalText": takaranDecimalText,
-							"takaran": takaran
+							"takaran": (isNaN(takaran) ? 1 : takaran),
+							"kekuatan": takaranKekuatan
 						});
 					}
 				});
@@ -1908,33 +1920,45 @@
 				racikan: racikan
 			};
 
-			//Validation
-			$.ajax({
-				async: false,
-				url: __HOSTAPI__ + "/Asesmen",
-				data: formData,
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type: "POST",
-				success: function(response) {
-					console.log(response);
-					if(response.response_package.response_result > 0) {
-						notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-					} else {
-						notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
-					}
-				},
-				error: function(response) {
-					console.clear();
-					console.log(response);
+			Swal.fire({
+				title: 'Selesai isi asesmen rawat?',
+				showDenyButton: true,
+				//showCancelButton: true,
+				confirmButtonText: `Ya`,
+				denyButtonText: `Belum`,
+			}).then((result) => {
+				if (result.isConfirmed) {
+					//Validation
+					$.ajax({
+						async: false,
+						url: __HOSTAPI__ + "/Asesmen",
+						data: formData,
+						beforeSend: function(request) {
+							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+						},
+						type: "POST",
+						success: function(response) {
+							console.log(response);
+							if(response.response_package.response_result > 0) {
+								notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
+								location.href = __HOSTNAME__ + "/rawat_jalan/dokter";
+							} else {
+								notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
+							}
+						},
+						error: function(response) {
+							console.clear();
+							console.log(response);
+						}
+					});
+					
+
+					orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
+					listTindakanRadiologiDihapus = [];		//set back to empty
+				} else if (result.isDenied) {
+					//Swal.fire('Changes are not saved', '', 'info')
 				}
 			});
-			
-
-			orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
-			listTindakanRadiologiDihapus = [];		//set back to empty
-
 			return false;
 		});
 
@@ -2324,19 +2348,30 @@
 					<input type="text" class="form-control" id="txt_racikan_jlh" />
 				</div> -->
 				<div class="form-group col-md-12">
-					<label for="txt_racikan_takar">Takar:</label>
-					<div class="row">
-						<div class="col-md-4">
-							<input type="text" class="form-control" id="txt_racikan_takar_bulat" placeholder="0" />
+					<div class="kolom_kekuatan">
+						<label for="txt_racikan_kekuatan">Kekuatan:</label>
+						<div class="row">
+							<div class="col-md-12">
+								<input type="text" class="form-control" id="txt_racikan_kekuatan" placeholder="0" />
+							</div>
 						</div>
-						<div class="col-md-1">
-							<i class="fa fa-plus" style="margin-top: 10px;"></i>
-						</div>
-						<div class="col-md-4">
-							<input type="text" class="form-control" id="txt_racikan_takar" placeholder="a/b" />
-						</div>
-						<div class="col-md-3">
-							<small>Cth:<br />2 + 1/2</small>
+					</div>
+					<hr />
+					<div class="kolom_takar" style="display: none">
+						<label for="txt_racikan_takar">Takar:</label>
+						<div class="row">
+							<div class="col-md-4">
+								<input type="text" value="1" class="form-control" id="txt_racikan_takar_bulat" placeholder="0" />
+							</div>
+							<div class="col-md-1">
+								<i class="fa fa-plus" style="margin-top: 10px;"></i>
+							</div>
+							<div class="col-md-4">
+								<input type="text" class="form-control" id="txt_racikan_takar" placeholder="a/b" />
+							</div>
+							<div class="col-md-3">
+								<small>Cth:<br />2 + 1/2</small>
+							</div>
 						</div>
 					</div>
 				</div>

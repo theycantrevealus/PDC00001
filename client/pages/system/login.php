@@ -84,10 +84,10 @@
 
 	<body class="layout-login">
 		<div class="layout-login__overlay"></div>
-		<div class="layout-login__form bg-white" data-simplebar style="padding-top: 150px;">
+		<div class="layout-login__form bg-white" data-simplebar style="padding-top: 120px;">
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
 				<a href="<?php echo __HOSTNAME__; ?>/template/index.html" class="navbar-brand" style="min-width: 0">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" width="240" height="100" alt="SIMRS RSUD Petala Bumi">
+					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" width="280" height="280" alt="SIMRS RSUD Petala Bumi">
 				</a>
 			</div>
 			<!-- <h4 class="m-0">RSUD Petala Bumi</h4>
