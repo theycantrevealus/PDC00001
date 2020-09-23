@@ -994,6 +994,19 @@ class Tindakan extends Utility {
 				)
 			)
 			->execute();	
+		} else if($parameter[5] == 'master_tindakan_kelas_harga') {
+			$tindakan = self::$query
+			->delete($parameter[5])
+			->where(array(
+					$parameter[5] . '.tindakan' => '= ?',
+					'AND',
+					$parameter[5] . '.penjamin' => '= ?'
+				), array(
+					$parameter[6],
+					$parameter[7]
+				)
+			)
+			->execute();	
 		} else {
 			$tindakan = self::$query
 			->delete($parameter[6])
