@@ -135,10 +135,13 @@ class Anjungan extends Utility {
 		->where(array(
 			'antrian_nomor.status' => '= ?',
 			'AND',
-			'antrian_nomor.pegawai' => '= ?'
+			'antrian_nomor.pegawai' => '= ?',
+			'AND',
+			'DATE(antrian_nomor.created_at)' => '= ?'
 		), array(
 			'D',
-			$UserData['data']->uid
+			$UserData['data']->uid,
+			date('Y-m-d')
 		))
 		->execute();
 		if(count($data['response_data']) > 0) {

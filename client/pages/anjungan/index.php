@@ -11,7 +11,7 @@
 							<table>
 								<tr>
 									<td>
-										<img width="120" height="100" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" />			
+										<img width="200" height="200" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" />			
 									</td>
 									<td>
 										<h3>RUMAH SAKIT UMUM DAERAH PETALA BUMI</h3>

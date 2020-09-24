@@ -1,7 +1,7 @@
 <script type="text/javascript">
 	$(function(){
 
-		var tableAntrianLab = $("#table-antrian-lab").DataTable({
+		var tableAntrianLabor = $("#table-antrian-labor").DataTable({
 			"ajax":{
 				async: false,
 				url: __HOSTAPI__ + "/Laboratorium/antrian",
@@ -28,7 +28,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["waktu_request"];
+						return row["waktu_order"];
 					}
 				},
 				{
@@ -54,16 +54,16 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
-										"<i class=\"fa fa-sign-out-alt\"></i>" +
-									"</a>" +
-									"<a href=\"" + __HOSTNAME__ + "/laboratorium/cetak/" + row['uid'] + "\" target='_blank' class=\"btn btn-primary btn-sm\">" +
-										"<i class=\"fa fa-print\"></i>" +
-									"</a>" +
-									"<button type='button' class=\"btn btn-success btn-sm\" data-toggle='tooltip' title='Tandai selesai'>" +
-										"<i class=\"fa fa-check\"></i>" +
-									"</a>" +
-								"</div>";
+                                "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
+                                    "<i class=\"fa fa-sign-out-alt\"></i>" +
+                                "</a>" +
+                                "<a href=\"" + __HOSTNAME__ + "/laboratorium/cetak/" + row['uid'] + "\" target='_blank' class=\"btn btn-primary btn-sm\">" +
+                                    "<i class=\"fa fa-print\"></i>" +
+                                "</a>" +
+                                "<button type='button' class=\"btn btn-success btn-sm\" data-toggle='tooltip' title='Tandai selesai'>" +
+                                    "<i class=\"fa fa-check\"></i>" +
+                                "</a>" +
+                            "</div>";
 					}
 				}
 			]

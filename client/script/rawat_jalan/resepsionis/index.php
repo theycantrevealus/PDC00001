@@ -76,7 +76,7 @@
 
 		/*================== FORM CARI AREA ====================*/
 
-		$('#table-list-pencarian').DataTable({	
+		$('#table-list-pencarian').DataTable({
 			"bFilter": false,
 			"bInfo" : false
 		});
