@@ -439,7 +439,7 @@
 					</div>
 					<div class="col-md-12">
 						<div class="row">
-							<div class="search-form form-control-rounded search-form--light input-group-lg col-md-10">
+							<div class="search-form search-form--light input-group-lg col-md-10">
 								<input type="text" class="form-control" placeholder="Nama / NIK / No. RM" id="txt_cari">
 							</div>
 							<div class="col-md-12" hidden id="pencarian-notif" style="color: red; font-size: 0.8rem;">
@@ -454,7 +454,7 @@
 				<div class="form-group col-md-12" >
 					<!-- style="height: 100px; overflow: scroll;" -->
 					<table class="table table-bordered table-striped" id="table-list-pencarian">
-						<thead>
+						<thead class="thead-dark">
 							<tr>
 								<th width="2%">No</th>
 								<th>No. RM</th>
@@ -482,4 +482,4 @@
 			</div>
 		</div> 
 	</div> 
-</div> 
+</div>
