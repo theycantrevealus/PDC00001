@@ -4,10 +4,10 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item active" aria-current="page">Anjungan</li>
+					<li class="breadcrumb-item active" aria-current="page">Jenis Anjungan</li>
 				</ol>
 			</nav>
-			<h4><span id="nama-anjungan"></span>Anjungan</h4>
+			<h4><span id="nama-anjungan"></span>Jenis Anjungan</h4>
 		</div>
 		<button class="btn btn-sm btn-info" id="tambah-anjungan">
 			<i class="fa fa-plus"></i> Tambah
@@ -20,12 +20,12 @@
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<table class="table table-bordered largeDataType" id="table-anjungan">
+				<table class="table table-bordered" id="table-anjungan">
 					<thead class="thead-dark">
 						<tr>
 							<th class="wrap_content">No</th>
-							<th>Mesin Anjungan</th>
 							<th>Jenis Anjungan</th>
+							<th>Kode</th>
 							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>
