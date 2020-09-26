@@ -809,8 +809,20 @@ class Anjungan extends Utility {
 				'class' => __CLASS__
 			));
 
-			$oldAntrian = self::get_jenis_antrian_item($parameter['uid']);
 
+
+			//Reset Status
+			$JMAntrianWorker = self::$query->update('antrian_jenis_item', array(
+				'deleted_at' => parent::format_date()
+			))
+			->where(array(
+				'antrian_jenis_item.anjungan' => '= ?'
+			), array(
+				$parameter['uid']
+			))
+			->execute();
+
+			$oldAntrian = self::get_jenis_antrian_item($parameter['uid']);
 			//Save Jenis Mesin
 			foreach ($parameter['jenis_mesin'] as $key => $value) {
 				$JMAntrianChecker = self::$query->select('antrian_jenis_item', array(
