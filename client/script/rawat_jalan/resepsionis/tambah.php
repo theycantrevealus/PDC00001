@@ -40,6 +40,7 @@
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 					if(dataObj.penjamin == __UIDPENJAMINBPJS__) {
 						$("#modal-sep").modal("show");
+						$("#btnProsesPasien").hide();
 						$("#hasil_bpjs").hide();
 					} else {
 						$.ajax({
@@ -82,37 +83,49 @@
 		});
 
 		$("#btnProsesPasien").click(function() {
-			$.ajax({
-				async: false,
-				url: __HOSTAPI__ + "/Antrian",
-				data: {
-					request : "tambah-kunjungan",
-					dataObj : dataObj
-				},
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type: "POST",
-				success: function(response){
-					console.log(response)
-					if(response.response_package.response_notif == 'K') {
-						push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-					} else if(response.response_package.response_notif == 'P') {
-						push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-					} else {
-						console.log("command not found");
-					}
+			var dataObj = {};
+			$('.inputan').each(function(){
+				var key = $(this).attr("id");
+				var value = $(this).val();
 
-					localStorage.getItem("currentPasien");
-					localStorage.getItem("currentAntrianID");
-					//console.log(response.response_package);
-					location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
-				},
-				error: function(response) {
-					console.log("Error : ");
-					console.log(response);
-				}
+				dataObj[key] = value;
 			});
+
+			dataObj.pasien = uid_pasien;
+			dataObj.currentPasien = currentPasien;
+			dataObj.currentAntrianID = currentAntrianID;
+			if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
+				$.ajax({
+					async: false,
+					url: __HOSTAPI__ + "/Antrian",
+					data: {
+						request : "tambah-kunjungan",
+						dataObj : dataObj
+					},
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					type: "POST",
+					success: function(response){
+						//console.log(response)
+						if(response.response_package.response_notif == 'K') {
+							push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+						} else if(response.response_package.response_notif == 'P') {
+							push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+						} else {
+							console.log("command not found");
+						}
+
+						localStorage.getItem("currentPasien");
+						localStorage.getItem("currentAntrianID");
+						location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+					},
+					error: function(response) {
+						console.log("Error : ");
+						console.log(response);
+					}
+				});
+			}
 		});
 
 		$(".select2").select2({});
@@ -344,7 +357,7 @@
 					<div class="col-md-12">
 						<div class="row">
 							<div class="search-form search-form--light input-group-lg col-md-10">
-								<input type="text" class="form-control" placeholder="Nama / NIK / No. RM" id="txt_no_bpjs">
+								<input type="text" class="form-control" placeholder="No. BPJS" id="txt_no_bpjs" />
 							</div>
 							<div class="col-md-2">
 								<button class="btn btn-success" id="btnCariPasien">
