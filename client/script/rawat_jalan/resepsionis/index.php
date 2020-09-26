@@ -196,7 +196,7 @@
 			},
 			anjungan_kunjungan_baru: function(protocols, type, parameter, sender, receiver, time) {
 				refresh_notification();
-				reinitAntrianSync();
+				reinitAntrianSync($("#txt_loket").val());
 			},
 			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
 				//
@@ -208,7 +208,7 @@
 		function reinitAntrianSync(argument) {
 			$.ajax({
 				async: false,
-				url:__HOSTAPI__ + "/Anjungan/check_job",
+				url:__HOSTAPI__ + "/Anjungan/check_job/" + argument,
 				type: "GET",
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -250,7 +250,7 @@
 			});
 		}
 
-		reinitAntrianSync();
+		reinitAntrianSync($("#txt_loket").val());
 			
 
 
@@ -258,6 +258,7 @@
 
 
 		function load_loket(target, selected = "") {
+			//
 			var loketData;
 			$.ajax({
 				async: false,

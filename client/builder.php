@@ -117,11 +117,11 @@
 		<div class="preloader">
 			<div class="sidemenu-shimmer">
 				<?php
-					for($sh = 1; $sh <= 10; $sh++) {
+					/*for($sh = 1; $sh <= 10; $sh++) {
 				?>
 				<div class="shine"></div>
 				<?php
-					}
+					}*/
 				?>
 			</div>
 			<div class="content-shimmer">
@@ -519,6 +519,14 @@
 				$(this).tooltip({
 					placement: "top",
 					title: data
+				});
+			});
+			
+			$(".sidebar-menu").each(function(e) {
+				$(this).find("li.sidebar-menu-item").each(function(f) {
+					var shimmer = document.createElement("DIV");
+					$(shimmer).addClass("shine");
+					$(".sidemenu-shimmer").append(shimmer);
 				});
 			});
 		});

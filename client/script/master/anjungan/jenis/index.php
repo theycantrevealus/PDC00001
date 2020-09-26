@@ -1,10 +1,11 @@
 <script type="text/javascript">
 	$(function(){
 		var MODE = "tambah", selectedUID;
-		var localJenisAnjunganData = {};
-		function reload_jenis(currentLoket = []) {
+		load_jalur_loket();
+		var localMetaData = {};
+		function load_jalur_loket(currentLoket = []) {
 			$.ajax({
-				url:__HOSTAPI__ + "/Anjungan/anjungan_jenis",
+				url:__HOSTAPI__ + "/Anjungan/all_loket",
 				async: false,
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -12,7 +13,7 @@
 				type:"GET",
 				success:function(response) {
 					var data = response.response_package.response_data;
-					$("#table-jenis-anjungan tbody tr").remove();
+					$("#jalur_loket tbody tr").remove();
 					for(var key in data) {
 						var autonum = (parseInt(key) + 1);
 						var newRow = document.createElement("TR");
@@ -22,14 +23,14 @@
 
 						//var allowJalur = data[key].allow_jalur.split(",");
 						$(newLoketNum).html(autonum);
-						$(newLoketName).html(data[key].nama);
-						$(newLoketJalur).html("<input value=\"" + data[key].uid + "\" " + ((currentLoket.indexOf(data[key].uid) < 0) ? "" : "checked=\"checked\"") + " type=\"checkbox\" class=\"form-control jenis-anjungan\" />");
+						$(newLoketName).html(data[key].nama_loket);
+						$(newLoketJalur).html("<input value=\"" + data[key].uid + "\" " + ((currentLoket.indexOf(data[key].uid) < 0) ? "" : "checked=\"checked\"") + " type=\"checkbox\" class=\"form-control allow-jalur\" />");
 
 						$(newRow).append(newLoketNum);
 						$(newRow).append(newLoketName);
 						$(newRow).append(newLoketJalur);
 
-						$("#table-jenis-anjungan tbody").append(newRow);
+						$("#jalur_loket tbody").append(newRow);
 					}
 				},
 				error: function(response) {
@@ -38,11 +39,16 @@
 			});
 		}
 
-		reload_jenis();
+
+		$("body").on("change", ".allow-jalur", function() {
+			//
+		});
+
 
 		var tableAnjungan = $("#table-anjungan").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/Anjungan",
+				url: __HOSTAPI__ + "/Anjungan/anjungan_jenis",
+				async: false,
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -50,17 +56,23 @@
 				dataSrc:function(response) {
 					var data = response.response_package.response_data;
 					for(var key in data) {
-						for(var KKey in data[key].jenis) {
-							if(localJenisAnjunganData[data[key].uid] === undefined) {
-								localJenisAnjunganData[data[key].uid] = [];
-							}
-
-							if(localJenisAnjunganData[data[key].uid].indexOf(data[key].jenis[KKey].uid) < 0) {
-								localJenisAnjunganData[data[key].uid].push(data[key].jenis[KKey].uid);
-							}
+						if(localMetaData[data[key].uid] != undefined) {
+							localMetaData[data[key].uid] = {
+								"autonum" : data[key].autonum,
+								"nama" : data[key].nama,
+								"kode" : data[key].kode,
+								"allow_jalur" : data[key].allow_jalur
+							};
 						}
+
+						localMetaData[data[key].uid] = {
+							"autonum" : data[key].autonum,
+							"nama" : data[key].nama,
+							"kode" : data[key].kode,
+							"allow_jalur" : data[key].allow_jalur
+						};
 					}
-					return data;
+					return response.response_package.response_data;
 				}
 			},
 			autoWidth: false,
@@ -76,26 +88,21 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"nama_" + row["uid"] + "\">" + row["kode_anjungan"] + "</span>";
+						return "<span id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						var jenis = row["jenis"];
-						var jenisBuilder = "";
-						for(var key in jenis) {
-							jenisBuilder += "<span class=\"badge badge-info\" style=\"margin-right: 5px;\">" + jenis[key].nama + "</span>";
-						}
-						return jenisBuilder;
+						return "<span id=\"kode_" + row["uid"] + "\">" + ((row["kode"] == undefined) ? "-" : row["kode"]) + "</span>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button class=\"btn btn-info btn-sm btn-edit-mesin\" id=\"mesin_edit_" + row["uid"] + "\">" +
-										"<i class=\"fa fa-pencil\"></i> Edit" +
+									"<button class=\"btn btn-info btn-sm btn-edit-anjungan\" id=\"anjungan_edit_" + row["uid"] + "\">" +
+										"<i class=\"fa fa-pencil-alt\"></i> Edit" +
 									"</button>" +
-									"<button id=\"mesin_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-mesin\">" +
+									"<button id=\"anjungan_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-anjungan\">" +
 										"<i class=\"fa fa-trash\"></i> Hapus" +
 									"</button>" +
 								"</div>";
@@ -104,20 +111,20 @@
 			]
 		});
 
-		$("body").on("click", ".btn-delete-mesin", function(){
+		$("body").on("click", ".btn-delete-anjungan", function(){
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
-			var conf = confirm("Hapus mesin?");
+			var conf = confirm("Hapus jenis anjungan?");
 			if(conf) {
 				$.ajax({
-					url:__HOSTAPI__ + "/Anjungan/master_anjungan/" + uid,
+					url:__HOSTAPI__ + "/Anjungan/antrian_jenis/" + uid,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
 					type:"DELETE",
 					success:function(response) {
-						tableGudang.ajax.reload();
+						tableAnjungan.ajax.reload();
 					},
 					error: function(response) {
 						console.log(response);
@@ -126,50 +133,60 @@
 			}
 		});
 
-		$("body").on("click", ".btn-edit-mesin", function() {
+		$("body").on("click", ".btn-edit-anjungan", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 			selectedUID = uid;
 			MODE = "edit";
+
 			$("#txt_nama").val($("#nama_" + uid).html());
+			$("#txt_kode").val($("#kode_" + uid).html());
+			if(localMetaData[uid].allow_jalur == undefined) {
+				load_jalur_loket();
+			} else {
+				load_jalur_loket(localMetaData[uid].allow_jalur.split(","));
+			}
+
 			$("#form-tambah").modal("show");
-			reload_jenis(localJenisAnjunganData[uid]);
-			$("#modal-large-title").html("Edit Mesin Anjungan");
+			$("#modal-large-title").html("Edit Anjungan");
 			return false;
 		});
 
-		$("#tambah-mesin").click(function() {
-
+		$("#tambah-anjungan").click(function() {
 			$("#form-tambah").modal("show");
 			MODE = "tambah";
-			$("#modal-large-title").html("Tambah Mesin Anjungan");
+			$("#modal-large-title").html("Tambah Anjungan");
 
 		});
 
 		$("#btnSubmit").click(function() {
 			var nama = $("#txt_nama").val();
-			var jenis_mesin = [];
-			if(nama != "") {
-				var form_data = {};
-				$("#table-jenis-anjungan tbody tr").each(function() {
-					var selectedJenis = $(this).find("td:eq(2) input").val();
-					if(jenis_mesin.indexOf(selectedJenis) < 0) {
-						jenis_mesin.push(selectedJenis);
+			var kode = $("#txt_kode").val();
+			var allow_jalur = [];
+			if(nama != "" && kode != "") {
+				$("#jalur_loket tbody tr").each(function() {
+					if($(this).find("td:eq(2) input").is(":checked")) {
+						if(allow_jalur.indexOf($(this).find("td:eq(2) input").val()) < 0) {
+							allow_jalur.push($(this).find("td:eq(2) input").val());
+						}
 					}
 				});
 
+				var form_data = {};
 				if(MODE == "tambah") {
 					form_data = {
-						"request": "master_tambah_mesin_anjungan",
+						"request": "master_tambah_jenis_antrian",
+						"kode": kode,
 						"nama": nama,
-						"jenis_mesin": jenis_mesin
+						"allow_jalur": allow_jalur
 					};
 				} else {
 					form_data = {
-						"request": "master_edit_mesin_anjungan",
+						"request": "master_edit_jenis_antrian",
 						"uid": selectedUID,
+						"kode": kode,
 						"nama": nama,
-						"jenis_mesin": jenis_mesin
+						"allow_jalur": allow_jalur
 					};
 				}
 
@@ -200,28 +217,37 @@
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="modal-large-title">Tambah Gudang</h5>
+				<h5 class="modal-title" id="modal-large-title">Jenis Antrian</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
 			<div class="modal-body">
-				<div class="form-group col-md-12">
-					<label for="txt_no_skp">Kode Mesin:</label>
-					<input type="text" class="form-control" id="txt_nama" />
-				</div>
-				<div class="form-group col-md-12">
-					<label for="txt_no_skp">Jenis Antrian:</label>
-					<table class="table table-bordered" id="table-jenis-anjungan">
-						<thead class="thead-dark">
-							<tr>
-								<th class="wrap_content">No</th>
-								<th>Jenis</th>
-								<th class="wrap_content">Pilih</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group col-md-12">
+							<label for="txt_no_skp">Nama Jenis Antrian:</label>
+							<input type="text" class="form-control" id="txt_nama" />
+						</div>
+						<div class="form-group col-md-6">
+							<label for="txt_no_skp">Kode Antrian (Hanya Kode):</label>
+							<input type="text" class="form-control" id="txt_kode" />
+							<br />
+							<i>[KODE_ANTRIAN]-[ANTRIAN].<br />Ex : "A-0001"</i>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<table class="table table-bordered" id="jalur_loket">
+							<thead class="thead-dark">
+								<tr>
+									<th class="wrap_content">No</th>
+									<th>Loket</th>
+									<th class="wrap_content">Jalur</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 			<div class="modal-footer">

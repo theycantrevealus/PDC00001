@@ -6,6 +6,7 @@
 	<meta name="robots" content="noindex">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/simplebar.min.css" rel="stylesheet">
 	<?php require 'plugins/google/font.php'; ?>
+	<link rel="icon" href="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.ico" type="image/ico" sizes="16x16" />
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/app.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/app.rtl.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-material-icons.css" rel="stylesheet">
