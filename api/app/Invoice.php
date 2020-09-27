@@ -56,6 +56,9 @@ class Invoice extends Utility {
 				case 'kwitansi_data':
 					return self::get_kwitansi($parameter);
 					break;
+				case 'biaya_pasien':
+					return self::get_biaya_pasien_back_end($parameter);
+					break;
 				default:
 					return self::get_biaya_pasien();
 			}
@@ -164,6 +167,159 @@ class Invoice extends Utility {
 		$payment['start'] = intval($parameter['start']);
 
 		return $payment;
+	}
+
+	private function get_biaya_pasien_back_end($parameter) {
+		if(isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'invoice.deleted_at' => 'IS NULL',
+				'AND',
+				'invoice.created_at' => 'BETWEEN ? AND ?',
+				'AND',
+				'invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+			);
+
+			$paramValue = array(
+				$parameter['from'], $parameter['to']
+			);
+		} else {
+			$paramData = array(
+				'invoice.deleted_at' => 'IS NULL',
+				'AND',
+				'invoice.created_at' => 'BETWEEN ? AND ?'
+			);
+
+			$paramValue = array(
+				$parameter['from'], $parameter['to']
+			);
+		}
+
+
+
+		if($parameter['length'] < 0) {
+			$data = self::$query->select('invoice', array(
+				'uid',
+				'nomor_invoice',
+				'kunjungan',
+				'pasien',
+				'total_pre_discount',
+				'discount',
+				'discount_type',
+				'total_after_discount',
+				'keterangan',
+				'created_at',
+				'updated_at'
+			))
+			->where($paramData, $paramValue)
+			->execute();
+		} else {
+			$data = self::$query->select('invoice', array(
+				'uid',
+				'nomor_invoice',
+				'kunjungan',
+				'pasien',
+				'total_pre_discount',
+				'discount',
+				'discount_type',
+				'total_after_discount',
+				'keterangan',
+				'created_at',
+				'updated_at'
+			))
+			->where($paramData, $paramValue)
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->execute();
+		}
+		$data['response_draw'] = $parameter['draw'];
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+
+			$Pasien = new Pasien(self::$pdo);
+			$PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+			$data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
+
+
+			$statusLunas = false;
+			//Detail Pembayaran
+			$InvoiceDetail = self::$query->select('invoice_detail', array(
+				'status_bayar'
+			))
+			->where(array(
+				'invoice_detail.invoice' => '= ?',
+				'AND',
+				'invoice_detail.deleted_at' => 'IS NULL'
+			), array(
+				$value['uid']
+			))
+			->execute();
+			$IDautonum = 1;
+			foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
+				if($IDValue['status_bayar'] == 'Y') {
+					$statusLunas = true;
+				} else {
+					$statusLunas = false;
+					break;
+				}
+			}
+
+			$data['response_data'][$key]['lunas'] = $statusLunas;
+
+			//Antrian Info
+			$AntrianKunjungan = self::$query->select('antrian_nomor', array(
+				'id',
+				'nomor_urut',
+				'loket',
+				'pegawai',
+				'kunjungan',
+				'antrian',
+				'pasien',
+				'poli',
+				'status',
+				'anjungan',
+				'jenis_antrian',
+				'dokter',
+				'penjamin'
+			))
+			->where(array(
+				'antrian_nomor.kunjungan' => '= ?',
+				'AND',
+				'antrian_nomor.status' => '= ?'
+			), array(
+				$value['kunjungan'],
+				'K'
+			))
+			->execute();
+			
+			foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
+				//Info Poliklinik
+				$Poli = new Poli(self::$pdo);
+				$PoliInfo = $Poli::get_poli_detail($AKValue['poli']);
+				$AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
+
+				//Info Pegawai
+				$Pegawai = new Pegawai(self::$pdo);
+				$PegawaiInfo = $Pegawai::get_detail($AKValue['pegawai']);
+				$AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
+
+				//Info Loket
+				$Anjungan = new Anjungan(self::$pdo);
+				$AnjunganInfo = $Anjungan::get_loket_detail($AKValue['loket']);
+				$AntrianKunjungan['response_data'][$AKKey]['loket'] = $AnjunganInfo['response_data'][0];
+			}
+			$data['response_data'][$key]['antrian_kunjungan'] = $AntrianKunjungan['response_data'][0];
+
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+
+		$data['recordsTotal'] = count($data['response_data']);
+		$data['recordsFiltered'] = count($data['response_data']);
+		$data['length'] = intval($parameter['length']);
+		$data['start'] = intval($parameter['start']);
+
+		return $data;
 	}
 
 	private function get_payment($parameter) {
