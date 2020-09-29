@@ -10,7 +10,16 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+					var rawData = response.response_package.response_data;
+					var returnData = [];
+					for(var dataKey in rawData) {
+						if(rawData[dataKey].kategori != null) {
+							returnData.push(rawData[dataKey]);
+						} else {
+							returnData.push(rawData[dataKey]);
+						}
+					}
+					return returnData;
 				}
 			},
 			autoWidth: false,
@@ -54,12 +63,20 @@
 				},*/
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"nama_" + row["uid"] + "\">" + row["kategori"].nama.toUpperCase() + "</span>";
+						if(row["kategori"] == undefined) {
+							return "-";
+						} else {
+							return "<span id=\"nama_" + row["uid"] + "\">" + row["kategori"].nama.toUpperCase() + "</span>";
+						}
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"nama_" + row["uid"] + "\">" + row["manufacture"].nama + "</span>";
+						if(row["manufacture"] == undefined) {
+							return "-";
+						} else {
+							return "<span id=\"nama_" + row["uid"] + "\">" + row["manufacture"].nama + "</span>";
+						}
 					}
 				},
 				{

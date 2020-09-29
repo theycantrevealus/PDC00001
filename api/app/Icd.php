@@ -105,7 +105,7 @@ class Icd extends Utility {
     }
 
 
-    private function get_icd_detail($table_name, $parameter){
+    public function get_icd_detail($table_name, $parameter){
 		$data = self::$query
 				->select($table_name, array(
 						'id',

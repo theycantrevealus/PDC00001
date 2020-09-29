@@ -14,7 +14,9 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					//return response.response_package.response_data;;
+					//return response.response_package.response_data;
+					console.clear();
+					console.log(response);
 					var data = response.response_package;
 					var autonum = 1;
 					var returnData = [];
@@ -91,7 +93,7 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
 									/*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
-									 	"<i class=\"fa fa-list\"></i> Detail" +
+										"<i class=\"fa fa-list\"></i> Detail" +
 									"</button>" +*/
 									"<button id=\"ruangan_edit_" + row['uid_ruangan'] + "\" class=\"btn btn-info btn-sm btn-edit-ruangan\" data-toggle='tooltip' title='Edit'>" +
 										"<i class=\"fa fa-edit\"></i>" +
@@ -133,7 +135,8 @@
 					dataObj[name] = value;
 				}
 			});
-			
+
+
 			if(MODE == "tambah") {
 				form_data = {
 					request : "tambah-ruangan",
@@ -152,7 +155,7 @@
 			if (dataObj != ""){
 				$.ajax({
 					async: false,
-					url: __HOSTAPI__ + "/Aplicares/tambah-ruangan",
+					url: __HOSTAPI__ + "/Aplicares",
 					data: form_data,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -206,13 +209,15 @@
 
 		$("body").on("click", ".btn-edit-ruangan", function() {
 			MODE = "edit";
-			loadRuangan(MODE);
+			var uid = $(this).attr("id").split("_");
+			uid = uid[uid.length - 1];
+			loadRuangan(MODE, uid);
 			var title = MODE[0].toUpperCase() + MODE.substring(1, MODE.length);
 
 			$("#title-form").html(title);
 
-			var uid = $(this).attr("id").split("_");
-			uid = uid[uid.length - 1];
+			
+			
 			selectedUID = uid;
 
 			$("#ruangan").val(uid);
@@ -240,20 +245,20 @@
 			ajax: {
 				url: function (params) {
 					var url = __HOSTAPI__ + "/Aplicares/get-ruangan/" + params.term;
-			    	return url;
-			    },
-		    	processResults: function (data, page) {
-		    		console.log(data);
-	              	return {
-	                	results: data
-	            	}
-	            }
+					return url;
+				},
+				processResults: function (data, page) {
+					console.log(data);
+					return {
+						results: data
+					}
+				}
 			}
 		});
 		*/
 	});
 
-	function loadRuangan(params){
+	function loadRuangan(params, selected = ""){
 
 		var url = "";
 		if (params == "tambah") {
@@ -270,59 +275,62 @@
 		}
 
 		$.ajax({
-            url: __HOSTAPI__ + "/Aplicares/" + url,
-            type: "GET",
-            beforeSend: function(request) {
+			url: __HOSTAPI__ + "/Aplicares/" + url,
+			type: "GET",
+			beforeSend: function(request) {
 				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 			},
-            success: function(response){
-                var MetaData = response.response_package.response_data;
+			success: function(response){
+				console.log(response);
+				var MetaData = response.response_package.response_data;
 
-                for(i = 0; i < MetaData.length; i++){
-                    var selection = document.createElement("OPTION");
+				for(i = 0; i < MetaData.length; i++){
+					var selection = document.createElement("OPTION");
 
-                    $(selection).attr("value", MetaData[i].uid).html(MetaData[i].kode_ruangan +" - "+ MetaData[i].nama);
-                    $("#ruangan").append(selection);
-                }
-                console.log(response);
-            },
-            error: function(response) {
-                console.log(response);
-            }
-        });
+					$(selection).attr("value", MetaData[i].uid).html(MetaData[i].kode_ruangan +" - "+ MetaData[i].nama);
+					if(MetaData[i].uid == selected) {
+						$(selection).attr("selected", "selected");
+					}
+					$("#ruangan").append(selection);
+				}
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
 	}
 
 	function loadKelas(){
 		resetSelectBox("kodekelas", "Kelas");
 
 		$.ajax({
-            url:__HOSTAPI__ + "/Aplicares/get-kelas-kamar",
+			url:__HOSTAPI__ + "/Aplicares/get-kelas-kamar",
 			type: "GET",
 			beforeSend: function(request) {
 				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 			},
-            success: function(response){
-            	var MetaData = response.response_package;
+			success: function(response){
+				var MetaData = response.response_package;
 
-            	if (MetaData.length > 0){
-            		 for(i = 0; i < MetaData.length; i++){
-	                    var selection = document.createElement("OPTION");
+				if (MetaData.length > 0){
+					 for(i = 0; i < MetaData.length; i++){
+						var selection = document.createElement("OPTION");
 
-	                    $(selection).attr("value", MetaData[i].kodekelas).html(MetaData[i].namakelas);
-	                    $("#kodekelas").append(selection);
-	                }
-            	}  
-            },
-            error: function(response) {
-                console.log(response);
-            }
-        });
+						$(selection).attr("value", MetaData[i].kodekelas).html(MetaData[i].namakelas);
+						$("#kodekelas").append(selection);
+					}
+				}  
+			},
+			error: function(response) {
+				console.log(response);
+			}
+		});
 	}
 
 	function resetSelectBox(selector, name){
 		$("#"+ selector +" option").remove();
 		var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
-        $("#" + selector).append(opti_null);
+		$("#" + selector).append(opti_null);
 	}
 </script>
 
@@ -339,10 +347,7 @@
 				<div class="row">
 					<div class="form-group col-md-12">
 						<label for="ruangan">Ruangan:</label>
-						<select class="form-control ruangan select2
-						" id="ruangan">
-
-						</select>
+						<select class="form-control ruangan select2" id="ruangan"></select>
 					</div>
 					<div class="form-group col-md-6">
 						<label for="kodekelas">Kelas:</label>

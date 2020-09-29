@@ -55,8 +55,8 @@
 							</button>
 						</div>
 						<div class="col-lg-5">
-							Sisa Antrian<br />
-							<b id="sisa_antrian"></b>
+							<span class="text-secondary">Sisa Antrian</span><br />
+							<h5><b id="sisa_antrian">0</b></h5>
 						</div>
 					</div>
 				</div>
@@ -67,14 +67,14 @@
 				</div>
 				<div class="card-body">
 					<div class="table-responsive border-bottom">
-						<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
-							<thead>
+						<table class="table table-bordered table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+							<thead class="thead-dark">
 								<tr>
 									<th width="2%">No</th>
 									<th>Waktu Masuk</th>
 									<th>No. RM</th>
 									<th>Pasien</th>
-									<th>Departemen</th>
+									<th>Poliklinik</th>
 									<th>Dokter</th>
 									<th>Penjamin</th>
 									<th>Oleh</th>
