@@ -55,6 +55,14 @@
 										<input type="text" class="form-control uppercase" id="txt_nama" placeholder="Nama Poli" required>
 									</div>
 								</div>
+								<div class="form-group">
+									<label for="txt_nama">Tindakan Konsultasi:</label>
+									<div class="search-form">
+										<select class="form-control" id="tindakan_konsultasi">
+											<option value="" disabled>Pilih Tindakan</option>
+										</select>
+									</div>
+								</div>
 							</div>
 							<hr />
 		                    <ul class="list-inline float-right">

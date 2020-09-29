@@ -24,15 +24,28 @@
 								<td> : </td>
 								<td><b><span id="jenkel"></span></b></td>
 							</tr>
-							<!-- <tr>
-								<td>Pemeriksaan</td>
-								<td> : </td>
-								<td colspan="4"><b><span id="pemeriksaan"></span> <span id="nama"></span> </b></td>
-							</tr> -->
 						</tbody>
 					</table>
 				</div>
 			</div>
 		</div>
 	</div>
+</div>
+<div class="row">
+	<div class="col-md-12">
+		<div class="card">
+			<div class="card-header card-header-large bg-white d-flex align-items-center">
+				<h5 class="card-header__title flex m-0">Hasil Pemeriksaan Lab <span class="title-pemeriksaan"></span></h5>
+			</div>
+            <div class="card-body">
+                <div id="hasil_pemeriksaan" class="hasil_pemeriksaan col-md-12">
+                
+                </div>
+            </div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	
 </div>

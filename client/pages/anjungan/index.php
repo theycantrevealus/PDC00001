@@ -8,10 +8,10 @@
 							
 						</select>
 						<center>
-							<table>
+							<table style="margin-top: 50px;">
 								<tr>
 									<td>
-										<img width="120" height="100" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" />			
+										<img width="150" height="150" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.png" />
 									</td>
 									<td>
 										<h3>RUMAH SAKIT UMUM DAERAH PETALA BUMI</h3>

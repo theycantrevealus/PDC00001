@@ -14,14 +14,13 @@
 
 		
 
-		function getDateRange() {
-			var rangeKwitansi = $("#range_kwitansi").val().split(" to ");
+		function getDateRange(target) {
+			var rangeKwitansi = $(target).val().split(" to ");
 			if(rangeKwitansi.length > 1) {
 				return rangeKwitansi;
 			} else {
 				return [rangeKwitansi, rangeKwitansi];
-			}
-			
+			}	
 		}
 
 		var tableKwitansi = $("#table-kwitansi").DataTable({
@@ -36,8 +35,8 @@
 				type: "POST",
 				data: function(d){
 					d.request = "kwitansi_data";
-					d.from = getDateRange()[0];
-					d.to = getDateRange()[1];
+					d.from = getDateRange("#range_kwitansi")[0];
+					d.to = getDateRange("#range_kwitansi")[1];
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -49,7 +48,7 @@
 					}
 
 					response.draw = parseInt(response.response_package.response_draw);
-					console.log(response);
+					//console.log(response);
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = response.response_package.recordsFiltered;
 					return dataSet;
@@ -138,7 +137,7 @@
 									"<tr>" +
 										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
-										"<td>" + historyDetail[historyKey].item + "</td>" +
+										"<td>" + historyDetail[historyKey].item.toUpperCase() + "</td>" +
 										"<td>" + historyDetail[historyKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
@@ -157,30 +156,52 @@
 			tableKwitansi.ajax.reload();
 		});
 
+		
 		var tableAntrianBayar = $("#table-biaya-pasien").DataTable({
+			processing: true,
+			serverSide: true,
+			sPaginationType: "full_numbers",
+			bPaginate: true,
+			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+			serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Invoice",
-				type: "GET",
+				type: "POST",
+				data: function(d) {
+					d.request = "biaya_pasien";
+					d.from = getDateRange("#range_invoice")[0];
+					d.to = getDateRange("#range_invoice")[1];
+				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
 					var returnedData = [];
+					if(returnedData == undefined || returnedData.response_package == undefined) {
+						returnedData = [];
+					}
 					for(var InvKeyData in response.response_package.response_data) {
 						if(response.response_package.response_data[InvKeyData].antrian_kunjungan != undefined) {
 							if(!response.response_package.response_data[InvKeyData].lunas) {
 								returnedData.push(response.response_package.response_data[InvKeyData]);
 							}
+						} else {
+							alert();
 						}
 					}
+
+					response.draw = parseInt(response.response_package.response_draw);
+					response.recordsTotal = response.response_package.recordsTotal;
+					response.recordsFiltered = response.response_package.recordsFiltered;
+					
 					return returnedData;
 				}
 			},
 			autoWidth: false,
-			aaSorting: [[0, "asc"]],
-			"columnDefs":[
-				{"targets":0, "className":"dt-body-left"}
-			],
+			language: {
+				search: "",
+				searchPlaceholder: "Cari Nomor Invoice"
+			},
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
@@ -189,7 +210,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.nomor_invoice;
+						return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
 					}
 				},
 				{
@@ -218,6 +239,13 @@
 					}
 				}
 			]
+		});
+
+
+		$("#range_invoice").change(function() {
+			/*console.clear();
+			console.log(getDateRange());*/
+			tableAntrianBayar.ajax.reload();
 		});
 
 		
@@ -267,24 +295,24 @@
 								} else {
 									if(invoice_detail_item[invKey].item.allow_retur == true) {
 										if(invoice_detail_item[invKey].status_berobat == undefined) {
-											status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+											status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
 										} else {
 											if(invoice_detail_item[invKey].status_berobat.status == "N") {
 												//status_bayar = "<button class=\"btn btn-info btn-sm btn-retur-pembayaran\" id=\"retur_pembayaran_" + invoice_detail_item[invKey].item.uid + "\">Retur</button>";
-												status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
 											} else {
-												status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
 											}
 										}
 									} else {
-										status_bayar = "<span class=\"text-success\"><i class=\"fa fa-check\"></i> Lunas</span>";
+										status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
 									}
 								}
 								$("#invoice_detail_item").append(
 									"<tr>" +
 										"<td>" + status_bayar + "</td>" +
 										"<td>" + invoice_detail_item[invKey].autonum + "</td>" +
-										"<td>" + invoice_detail_item[invKey].item.nama + " <span style=\"margin-left: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
+										"<td>" + invoice_detail_item[invKey].item.nama.toUpperCase() + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
 										"<td>" + invoice_detail_item[invKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",") + "</td>" +
@@ -514,6 +542,11 @@
 					success:function(response) {
 						console.log(response);
 						if(response.response_package.response_result > 0) {
+							tableAntrianBayar.ajax.reload();
+							tableKwitansi.ajax.reload();
+							$("#form-invoice").modal("hide");
+							$("#form-payment").modal("hide");
+						} else {
 							tableAntrianBayar.ajax.reload();
 							tableKwitansi.ajax.reload();
 							$("#form-invoice").modal("hide");

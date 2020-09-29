@@ -8,6 +8,30 @@
 
 		loadTermSelectBox('riwayat_transfusi_golongan_darah', 4);
 
+		$("input[type=\"radio\"][name=\"rokok_yes\"]").change(function() {
+			if($(this).val() == "y") {
+				$("#riwayat_merokok").removeAttr("disabled");
+			} else {
+				$("#riwayat_merokok").attr("disabled", "disabled");
+			}
+		});
+
+		$("input[type=\"radio\"][name=\"miras_yes\"]").change(function() {
+			if($(this).val() == "y") {
+				$("#riwayat_miras").removeAttr("disabled");
+			} else {
+				$("#riwayat_miras").attr("disabled", "disabled");
+			}
+		});
+
+		$("input[type=\"radio\"][name=\"obt_terlarang_yes\"]").change(function() {
+			if($(this).val() == "y") {
+				$("#riwayat_obt_terlarang").removeAttr("disabled");
+			} else {
+				$("#riwayat_obt_terlarang").attr("disabled", "disabled");
+			}
+		});
+
 		$("#btnSelesai").on('click', function(){
 
 			$(".inputan").each(function(){
