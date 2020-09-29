@@ -9,9 +9,12 @@
 				</ol>
 			</nav>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/master/inventori/kategori/tambah" class="btn btn-info btn-sm ml-3">
+		<!-- <a href="<?php echo __HOSTNAME__; ?>/master/inventori/kategori/tambah" class="btn btn-info btn-sm ml-3">
 			<i class="fa fa-plus"></i> Tambah Kategori
-		</a>
+		</a> -->
+		<button class="btn btn-sm btn-info" id="tambah-kategori">
+			<i class="fa fa-plus"></i> Tambah
+		</button>
 	</div>
 </div>
 
