@@ -160,7 +160,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Frekuensi BAB / hari:</label>
-						<input type="text" class="form-control inputan" name="eliminasi_frekuensi_bab" id="eliminasi_frekuensi_bab">
+						<input type="text" class="form-control inputan" name="eliminasi_frekuensi_bab" id="eliminasi_frekuensi_bab" placeholder="-">
 					</div>
 					<div class="col-md-12">
 						<div class="form-check">
@@ -184,7 +184,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Lainnya:</label>
-						<input type="text" disabled class="form-control inputan eliminasi_bak_lainnya" name="eliminasi_bak_lainnya" id="eliminasi_bak_lainnya">
+						<input type="text" disabled class="form-control inputan eliminasi_bak_lainnya" name="eliminasi_bak_lainnya" id="eliminasi_bak_lainnya" placeholder="-">
 					</div>
 				</div>
 			</div>
@@ -249,7 +249,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Lainnya:</label>
-						<input type="text" class="form-control inputan komunikasi_bicara_lainnya" name="komunikasi_bicara_lainnya" id="komunikasi_bicara_lainnya" disabled>
+						<input type="text" class="form-control inputan komunikasi_bicara_lainnya" name="komunikasi_bicara_lainnya" id="komunikasi_bicara_lainnya" disabled placeholder="-">
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Hambatan Belajar:</label>
@@ -266,7 +266,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Lainnya:</label>
-						<input type="text" class="form-control inputan komunikasi_hambatan_lainnya" name="komunikasi_hambatan_lainnya" id="komunikasi_hambatan_lainnya" disabled>
+						<input type="text" class="form-control inputan komunikasi_hambatan_lainnya" name="komunikasi_hambatan_lainnya" id="komunikasi_hambatan_lainnya" disabled placeholder="-">
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Potensi Kebutuhan Belajar:</label>
@@ -281,7 +281,7 @@
 					</div>
 					<div class="col-md-6 form-group">
 						<label for="">Lainnya:</label>
-						<input disabled type="text" class="form-control inputan komunikasi_kebutuhan_belajar_lainnya" name="komunikasi_kebutuhan_belajar_lainnya" id="komunikasi_kebutuhan_belajar_lainnya">
+						<input disabled type="text" class="form-control inputan komunikasi_kebutuhan_belajar_lainnya" name="komunikasi_kebutuhan_belajar_lainnya" id="komunikasi_kebutuhan_belajar_lainnya" placeholder="-">
 					</div>
 				</div>
 			</div>
@@ -301,15 +301,15 @@
 						<label for="">1. Perhatikan cara berjalan pasien saat akan duduk di kursi. Apakah pasien tampak tidak seimbang (sempoyongan) ?</label>	
 						<div class="row col-md-12" id="cara_masuk">
 							<div class="col-md-3">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_sempoyongan" value="0" id="kaji_resiko_sempoyongan_0">
-									<label class='custom-control-label' for="kaji_resiko_sempoyongan_0">Tidak</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_sempoyongan" value="0" id="kaji_resiko_sempoyongan_0">
+									<label class='form-check-label' for="kaji_resiko_sempoyongan_0">Tidak</label>
 								</div>
 							</div>
 							<div class="col-md-4">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_sempoyongan" value="1" id="kaji_resiko_sempoyongan_1">
-									<label class='custom-control-label' for="kaji_resiko_sempoyongan_1">Ya</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_sempoyongan" value="1" id="kaji_resiko_sempoyongan_1">
+									<label class='form-check-label' for="kaji_resiko_sempoyongan_1">Ya</label>
 								</div>
 							</div>
 						</div>
@@ -318,15 +318,15 @@
 						<label for="">2. Apakah pasien memegang pinggiran kursi/meja/benda lain sebagai penopang saat akan duduk ?</label>
 						<div class="row col-md-12" id="cara_masuk">
 							<div class="col-md-3	">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_penopang" value="0" id="kaji_resiko_penopang_0">
-									<label class='custom-control-label' for="kaji_resiko_penopang_0">Tidak</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_penopang" value="0" id="kaji_resiko_penopang_0">
+									<label class='form-check-label' for="kaji_resiko_penopang_0">Tidak</label>
 								</div>
 							</div>
 							<div class="col-md-4">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_penopang" value="1" id="kaji_resiko_penopang_1">
-									<label class='custom-control-label' for="kaji_resiko_penopang_1">Ya</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_penopang" value="1" id="kaji_resiko_penopang_1">
+									<label class='form-check-label' for="kaji_resiko_penopang_1">Ya</label>
 								</div>
 							</div>
 						</div>
@@ -335,15 +335,15 @@
 						<label for="">Diberitahukan ke Dokter:</label>
 						<div class="row col-md-12" id="cara_masuk">
 							<div class="col-md-3">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_ke_dokter" value="0" id="kaji_resiko_ke_dokter_0">
-									<label class='custom-control-label' for="kaji_resiko_ke_dokter_0">Tidak</label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_ke_dokter" value="0" id="kaji_resiko_ke_dokter_0">
+									<label class='form-check-label' for="kaji_resiko_ke_dokter_0">Tidak</label>
 								</div>
 							</div>
 							<div class="col-md-2">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_ke_dokter" value="1" id="kaji_resiko_ke_dokter_1">
-									<label class='custom-control-label' for="kaji_resiko_ke_dokter_1">Ya, Jam : </label>
+								<div class="form-check">
+									<input type="radio" class="form-check-input" name="kaji_resiko_ke_dokter" value="1" id="kaji_resiko_ke_dokter_1">
+									<label class='form-check-label' for="kaji_resiko_ke_dokter_1">Ya, Jam : </label>
 								</div>
 							</div>
 							<div class="col-md-3">
@@ -550,7 +550,7 @@
 							</div>
 						</div>
 						<div class="col-md-12">
-							<input type="text" disabled name="tatalaksana_siapkan_obat_ket" id="tatalaksana_siapkan_obat_ket" class="form-control inputan tatalaksana_siapkan_obat_ket">
+							<input type="text" disabled name="tatalaksana_siapkan_obat_ket" id="tatalaksana_siapkan_obat_ket" class="form-control inputan tatalaksana_siapkan_obat_ket" placeholder="-">
 						</div>
 					</div>
 					<div class="col-md-4">
@@ -561,7 +561,7 @@
 							</div>
 						</div>
 						<div class="col-md-12">
-							<input disabled type="text" name="tatalaksana_beri_obat_ket" id="tatalaksana_beri_obat_ket" class="form-control inputan tatalaksana_beri_obat_ket">
+							<input disabled type="text" name="tatalaksana_beri_obat_ket" id="tatalaksana_beri_obat_ket" class="form-control inputan tatalaksana_beri_obat_ket" placeholder="-">
 						</div>
 					</div>
 					<div class="col-md-4">
@@ -572,7 +572,7 @@
 							</div>
 						</div>
 						<div class="col-md-12">
-							<input disabled type="text" name="tatalaksana_konsul_ket" id="tatalaksana_konsul_ket" class="form-control inputan tatalaksana_konsul_ket">
+							<input disabled type="text" name="tatalaksana_konsul_ket" id="tatalaksana_konsul_ket" class="form-control inputan tatalaksana_konsul_ket" placeholder="-">
 						</div>
 					</div>
 				</div>

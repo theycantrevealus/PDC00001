@@ -8,7 +8,7 @@
 
 		<!-- Prevent the demo from appearing in search engines -->
 		<meta name="robots" content="noindex">
-
+		<link rel="icon" href="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.ico" type="image/ico" sizes="16x16" />
 		<!-- Simplebar -->
 		<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/simplebar.min.css" rel="stylesheet">
 
@@ -23,6 +23,29 @@
 		<!-- Font Awesome FREE Icons -->
 		<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-fontawesome-free.css" rel="stylesheet">
 		<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-fontawesome-free.rtl.css" rel="stylesheet">
+		<style type="text/css">
+			.layout-login__form {
+				position: relative;
+			}
+
+			.copyright-panel {
+				position: absolute;
+				bottom: 80px;
+				left: 10%;
+				height: auto;
+				width: 80%;
+			}
+			.copyright-panel small {
+				opacity: 0;
+				font-style: italic;
+				font-size: 8pt !important;
+			}
+			.copyright-panel img {
+				position: absolute;
+				opacity: 0;
+				left: 50px;
+			}
+		</style>
 
 
 		<!-- Global site tag (gtag.js) - Google Analytics -->
@@ -60,25 +83,20 @@
 	</head>
 
 	<body class="layout-login">
-
-
-
-
-
 		<div class="layout-login__overlay"></div>
-		<div class="layout-login__form bg-white" data-simplebar>
+		<div class="layout-login__form bg-white" data-simplebar style="padding-top: 120px;">
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
 				<a href="<?php echo __HOSTNAME__; ?>/template/index.html" class="navbar-brand" style="min-width: 0">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" width="160" height="120" alt="SIMRS RSUD Petala Bumi">
+					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" width="280" height="280" alt="SIMRS RSUD Petala Bumi">
 				</a>
 			</div>
-			<h4 class="m-0">RSUD Petala Bumi</h4>
-			<p class="mb-5">SIMRS Integrated System</p>
+			<!-- <h4 class="m-0">RSUD Petala Bumi</h4>
+			<p class="mb-5 text-muted">SIMRS Integrated System</p> -->
 			<form>
 				<div class="form-group">
 					<label class="text-label" for="email_2">Email Address:</label>
 					<div class="input-group input-group-merge">
-						<input id="email_2" type="email" required="" class="form-control form-control-prepended" placeholder="account@<?php echo __SYSTEM_DOMAIN__; ?>">
+						<input id="email_2" type="text" required="" class="form-control form-control-prepended" placeholder="account@<?php echo __SYSTEM_DOMAIN__; ?>">
 						<div class="input-group-prepend">
 							<div class="input-group-text">
 								<span class="far fa-envelope"></span>
@@ -110,6 +128,10 @@
 					Don't have an account? <a class="text-body text-underline" href="<?php echo __HOSTNAME__; ?>/template/signup.html">Sign up!</a> -->
 				</div>
 			</form>
+			<div class="copyright-panel">
+				<small class="text-secondary">Powered By</small><br />
+				<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/pondokcoder1280.svg" width="120" />
+			</div>
 		</div>
 
 
@@ -142,6 +164,10 @@
 
 		<script type="text/javascript">
 			$(function(){
+				$(".copyright-panel img, small").animate({
+					"opacity": 1,
+					"left": "0"
+				}, 1500);
 
 				$("form").submit(function(){
 					var email = $("#email_2").val();
