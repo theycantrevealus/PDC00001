@@ -7,7 +7,7 @@ use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Authorization as Authorization;
 
-class Penjamin extends Utility {
+class Penjamin2 extends Utility {
 	static $pdo;
 	static $query;
 

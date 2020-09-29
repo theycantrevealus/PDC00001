@@ -19,7 +19,7 @@
 					<div class="col-md-2" style="padding-top: 8px;" id="radiologi_tindakan_notifier"></div>
 					<div class="col-md-12" style="margin-top: 10px;">
 						<table class="table table-bordered" id="table_tindakan_radiologi">
-							<thead>
+							<thead class="thead-dark">
 								<tr>
 									<th width='2%' class="wrap_content">No</th>
 									<th width='25%'>Tindakan Radiologi</th>

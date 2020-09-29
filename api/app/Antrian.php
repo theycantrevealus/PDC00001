@@ -10,6 +10,7 @@ use PondokCoder\Terminologi as Terminologi;
 use PondokCoder\Invoice as Invoice;
 use PondokCoder\Pasien as Pasien;
 use PondokCoder\Pegawai as Pegawai;
+use PondokCoder\Poli as Poli;
 
 class Antrian extends Utility {
 	static $pdo;
@@ -168,6 +169,34 @@ class Antrian extends Utility {
 				__UIDPENJAMINUMUM__))
 			->execute();
 
+
+
+			//Cek Penjamin. Jika BPJS maka cek status SEP pada lokal
+			if($value['uid_penjamin'] == __UIDPENJAMINBPJS__) {
+				//Cek tabel SEP
+				$SEP = self::$query->select('penjamin_sep', array(
+					'id',
+					'bpjs_no_sep'
+				))
+				->where(array(
+					'penjamin_sep.pasien' => '= ?',
+					'AND',
+					'penjamin_sep.created_at' => '>= now()::date',
+					'AND',
+					'penjamin_sep.deleted_at' => 'IS NULL'
+				), array(
+					$value['uid_pasien']
+				))
+				->execute();
+
+				if(count($SEP['response_data']) == 0) {
+					$data['response_data'][$key]['sep'] = 0;
+				} else {
+					$data['response_data'][$key]['sep'] = $SEP['response_data'][0]['bpjs_no_sep'];
+				}
+			}
+
+
 			$data['response_data'][$key]['harga'] = $harga['response_data'][0];
 		}
 
@@ -292,6 +321,10 @@ class Antrian extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
 
+		//Tentukan tindakan untuk poli bersangkutan
+		$PoliTindakan = new Poli(self::$pdo);
+		$PoliTindakanInfo = $PoliTindakan::get_poli_detail($parameter['dataObj']['departemen'])['response_data'][0];
+
 		$kunjungan = self::$query->insert($table, array(
 			'uid'=>$uid,
 			'waktu_masuk'=>parent::format_date(),
@@ -405,7 +438,7 @@ class Antrian extends Utility {
 						$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 							'poli' => $parameter['dataObj']['departemen'],
 	            			'kelas' => __UID_KELAS_GENERAL_RJ__,
-							'tindakan' => __UID_KONSULTASI__,
+							'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
 							'penjamin' => $parameter['dataObj']['penjamin']
 						));
 
@@ -413,7 +446,7 @@ class Antrian extends Utility {
 
 						$Invoice = $SInvoice::append_invoice(array(
 							'invoice' => $InvoiceCheck['response_data'][0]['uid'],
-							'item' => __UID_KONSULTASI__,
+							'item' => $PoliTindakanInfo['tindakan_konsultasi'],
 							'item_origin' => 'master_tindakan',
 							'qty' => 1,
 							'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
@@ -477,13 +510,13 @@ class Antrian extends Utility {
 							$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 								'poli' => $parameter['dataObj']['departemen'],
 								'kelas' => __UID_KELAS_GENERAL_RJ__,
-								'tindakan' => __UID_KONSULTASI__,
+								'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
 								'penjamin' => $parameter['dataObj']['penjamin']
 							));
 
 							$Invoice = $SInvoice::append_invoice(array(
 								'invoice' => $NewInvoiceUID,
-								'item' => __UID_KONSULTASI__,
+								'item' => $PoliTindakanInfo['tindakan_konsultasi'],
 								'item_origin' => 'master_tindakan',
 								'qty' => 1,
 								'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
@@ -543,13 +576,13 @@ class Antrian extends Utility {
 				$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 					'poli' => $parameter['dataObj']['departemen'],
           			'kelas' => __UID_KELAS_GENERAL_RJ__,
-					'tindakan' => __UID_KONSULTASI__,
+					'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
 					'penjamin' => $parameter['dataObj']['penjamin']
 				));
 
 				$Invoice = $SInvoice::append_invoice(array(
 					'invoice' => $InvoiceUID,
-					'item' => __UID_KONSULTASI__,
+					'item' => $PoliTindakanInfo['tindakan_konsultasi'],
 					'item_origin' => 'master_tindakan',
 					'qty' => 1,
 					'harga' => floatval($HargaTindakan['response_data'][0]['harga']),

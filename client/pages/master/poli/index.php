@@ -22,9 +22,10 @@
 				<table class="table table-bordered" id="table-poli">
 					<thead class="thead-dark">
 						<tr>
-							<th style="width: 20px;">No</th>
+							<th class="wrap_content">No</th>
 							<th>Nama Poli</th>
-							<th width="40%">Aksi</th>
+							<th>Tindakan Konsultasi</th>
+							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>

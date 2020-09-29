@@ -55,7 +55,7 @@
 ?>
 <div class="mdk-drawer  js-mdk-drawer" id="default-drawer" data-align="start">
 	<div class="mdk-drawer__content">
-		<div class="sidebar sidebar-light sidebar-left simplebar" data-simplebar>
+		<div class="sidebar sidebar-light sidebar-left simplebar" style="padding-top: 50px" data-simplebar>
 			<!-- <div class="d-flex align-items-center sidebar-p-a border-bottom sidebar-account">
 				<a href="<?php echo __HOSTNAME__; ?>/template/profile.html" class="flex d-flex align-items-center text-underline-0 text-body">
 					<span class="avatar mr-3">

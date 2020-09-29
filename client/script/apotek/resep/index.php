@@ -2,7 +2,7 @@
 	$(function() {
 		function load_resep() {
 			var selected = [];
-			var resepData;
+			var resepData = [];
 			$.ajax({
 				url:__HOSTAPI__ + "/Apotek",
 				async:false,
@@ -11,7 +11,14 @@
 				},
 				type:"GET",
 				success:function(response) {
-					resepData = response.response_package.response_data;
+					var resepDataRaw = response.response_package.response_data;
+					for(var resepKey in resepDataRaw) {
+						if(
+							resepDataRaw[resepKey].antrian.departemen != null
+						) {
+							resepData.push(resepDataRaw[resepKey]);
+						}
+					}
 				},
 				error: function(response) {
 					console.log(response);
@@ -63,31 +70,33 @@
 		function populateObat(data) {
 			var obatList = {};
 			for(var a = 0; a < data.length; a++) {
-				var listBiasa = data[a].detail;
-				for(var b = 0; b < listBiasa.length; b++) {
-					if(obatList[listBiasa[b].obat] == undefined) {
-						obatList[listBiasa[b].obat] = {
-							nama: "",
-							counter: 0
-						};
-					}
-
-					obatList[listBiasa[b].obat]['nama'] = listBiasa[b].detail.nama;
-					obatList[listBiasa[b].obat]['counter'] += 1;
-				}
-
-				var listRacikan = data[a].racikan;
-				for(var c = 0; c < listRacikan.length; c++) {
-					for(var d = 0; d < listRacikan[c].detail.length; d++) {
-						if(obatList[listRacikan[c].detail[d].obat] == undefined) {
-							obatList[listRacikan[c].detail[d].obat] = {
+				if(data[a].detail != undefined) {
+					var listBiasa = data[a].detail;
+					for(var b = 0; b < listBiasa.length; b++) {
+						if(obatList[listBiasa[b].obat] == undefined) {
+							obatList[listBiasa[b].obat] = {
 								nama: "",
 								counter: 0
 							};
 						}
 
-						obatList[listRacikan[c].detail[d].obat]['nama'] = listRacikan[c].detail[d].detail.nama;
-						obatList[listRacikan[c].detail[d].obat]['counter'] += 1;
+						obatList[listBiasa[b].obat]['nama'] = listBiasa[b].detail.nama;
+						obatList[listBiasa[b].obat]['counter'] += 1;
+					}
+
+					var listRacikan = data[a].racikan;
+					for(var c = 0; c < listRacikan.length; c++) {
+						for(var d = 0; d < listRacikan[c].detail.length; d++) {
+							if(obatList[listRacikan[c].detail[d].obat] == undefined) {
+								obatList[listRacikan[c].detail[d].obat] = {
+									nama: "",
+									counter: 0
+								};
+							}
+
+							obatList[listRacikan[c].detail[d].obat]['nama'] = listRacikan[c].detail[d].detail.nama;
+							obatList[listRacikan[c].detail[d].obat]['counter'] += 1;
+						}
 					}
 				}
 			}
@@ -185,46 +194,48 @@
 				var parsedItemData = [];
 				var obatNavigator = [];
 				for(var dataKey in itemData) {
-					var penjaminList = [];
-					var penjaminListData = itemData[dataKey].penjamin;
-					
+					if(itemData[dataKey].satuan_terkecil != undefined) {
+						var penjaminList = [];
+						var penjaminListData = itemData[dataKey].penjamin;
+						
 
-					for(var penjaminKey in penjaminListData) {
-						if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
-							penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
+						for(var penjaminKey in penjaminListData) {
+							if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
+								penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
 
-							if(penjaminListData[penjaminKey].penjamin.uid == $("#nama-pasien").attr("set-penjamin")) {
-								setDiskon = penjaminListData[penjaminKey].profit;
-								setDiskonType = penjaminListData[penjaminKey].profit_type;
+								if(penjaminListData[penjaminKey].penjamin.uid == $("#nama-pasien").attr("set-penjamin")) {
+									setDiskon = penjaminListData[penjaminKey].profit;
+									setDiskonType = penjaminListData[penjaminKey].profit_type;
+								}
 							}
 						}
-					}
 
-					var batchListData = itemData[dataKey].batch;
-					for(var batchKey in batchListData) {
-						if(batchDataUnique.indexOf(batchListData[batchKey].batch) < 0) {
-							batchDataUnique.push(batchListData[batchKey].batch);
-							batchData.push(batchListData[batchKey]);
+						var batchListData = itemData[dataKey].batch;
+						for(var batchKey in batchListData) {
+							if(batchDataUnique.indexOf(batchListData[batchKey].batch) < 0) {
+								batchDataUnique.push(batchListData[batchKey].batch);
+								batchData.push(batchListData[batchKey]);
+							}
 						}
-					}
-					
-					obatNavigator.push(itemData[dataKey].uid);
+						
+						obatNavigator.push(itemData[dataKey].uid);
 
-					parsedItemData.push({
-						id: itemData[dataKey].uid,
-						"jumlah": data.detail[a].qty,
-						"penjamin-list": penjaminList,
-						"satuan-caption": itemData[dataKey].satuan_terkecil.nama,
-						"satuan-terkecil": itemData[dataKey].satuan_terkecil.uid,
-						"signa-qty": data.detail[a].signa_qty,
-						"signa-pakai": data.detail[a].signa_pakai,
-						text: "<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + ";\">" + itemData[dataKey].nama.toUpperCase() + "</div>",
-						html: 	"<div class=\"select2_item_stock\">" +
-									"<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + "\">" + itemData[dataKey].nama.toUpperCase() + "</div>" +
-									"<div>" + itemData[dataKey].stok + "</div>" +
-								"</div>",
-						title: itemData[dataKey].nama
-					});
+						parsedItemData.push({
+							id: itemData[dataKey].uid,
+							"jumlah": data.detail[a].qty,
+							"penjamin-list": penjaminList,
+							"satuan-caption": itemData[dataKey].satuan_terkecil.nama,
+							"satuan-terkecil": itemData[dataKey].satuan_terkecil.uid,
+							"signa-qty": data.detail[a].signa_qty,
+							"signa-pakai": data.detail[a].signa_pakai,
+							text: "<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + ";\">" + itemData[dataKey].nama.toUpperCase() + "</div>",
+							html: 	"<div class=\"select2_item_stock\">" +
+										"<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + "\">" + itemData[dataKey].nama.toUpperCase() + "</div>" +
+										"<div>" + itemData[dataKey].stok + "</div>" +
+									"</div>",
+							title: itemData[dataKey].nama
+						});
+					}
 				}
 
 				$(newDetailCellObat).attr({

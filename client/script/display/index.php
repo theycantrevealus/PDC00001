@@ -215,6 +215,9 @@
 				var tracks;
 				var current;
 				var commandParse = parameter;
+				var getUrutParse = commandParse.nomor.split("-");
+				var getHurufParse = getUrutParse[0];
+				var getNomorParse = getUrutParse[1];
 
 				
 
@@ -226,7 +229,8 @@
 					type: "POST",
 					data:{
 						request: "get_terbilang",
-						nomor_urut: commandParse.nomor
+						//nomor_urut: commandParse.nomor
+						nomor_urut: getNomorParse,
 					},
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -251,7 +255,7 @@
 								playlist.push(__HOST__ + 'audio/openning.mpeg');
 								playlist.push(__HOST__ + 'audio/antrian.mp3');
 							}
-								
+							playlist.push(__HOST__ + 'audio/' + getHurufParse.toUpperCase() + '.mp3');	
 							
 							forRead = response.response_package.split(" ");
 							for(var z = 0; z < forRead.length; z++) {

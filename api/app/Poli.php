@@ -112,6 +112,7 @@ class Poli extends Utility {
 					->select('master_poli', array(
 						'uid',
 						'nama',
+						'tindakan_konsultasi',
 						'created_at',
 						'updated_at'
 						)
@@ -124,7 +125,10 @@ class Poli extends Utility {
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
+			$Tindakan = new Tindakan(self::$pdo);
+			$TindakanDetail = $Tindakan::get_tindakan_detail($value['tindakan_konsultasi']);
 			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['tindakan_konsultasi'] = $TindakanDetail['response_data'][0]['nama'];
 			$autonum++;
 		}
 
@@ -162,6 +166,7 @@ class Poli extends Utility {
 				->select('master_poli', array(
 						'uid',
 						'nama',
+						'tindakan_konsultasi',
 						'poli_asesmen',
 						'created_at',
 						'updated_at'
@@ -780,6 +785,7 @@ class Poli extends Utility {
 
 		//$objData = $parameter['dataObject'];
 		$nama = $parameter['dataObject']['nama'];
+		$tindakan_konsultasi = $parameter['dataObject']['tindakan_konsultasi'];
 		$tindakanData = $parameter['dataObject']['tindakan'];
 
 		$check = self::duplicate_check(array(
@@ -796,11 +802,12 @@ class Poli extends Utility {
 			$uid_poli = parent::gen_uuid();
 			$poli = self::$query
 						->insert($table_name, array(
-								'uid'=>$uid_poli,
-								'nama'=>$nama,
-								'created_at'=>parent::format_date(),
-								'updated_at'=>parent::format_date(),
-								'editable'=>TRUE
+								'uid' => $uid_poli,
+								'nama' => $nama,
+								'tindakan_konsultasi' => $tindakan_konsultasi,
+								'created_at' => parent::format_date(),
+								'updated_at' => parent::format_date(),
+								'editable' => TRUE
 								)
 						)->execute();
 
@@ -865,6 +872,7 @@ class Poli extends Utility {
 
 		$uid_poli = $parameter['dataObject']['uid'];
 		$nama = $parameter['dataObject']['nama'];
+		$tindakan_konsultasi = $parameter['dataObject']['tindakan_konsultasi'];
 		$tindakanData = $parameter['dataObject']['tindakan'];
 
 		$old = self::get_poli_detail($uid_poli);
@@ -874,8 +882,9 @@ class Poli extends Utility {
 
 		$poli = self::$query
 					->update($table_name, array(
-						'nama'=>$nama,
-						'updated_at'=>parent::format_date()
+						'nama' => $nama,
+						'tindakan_konsultasi' => $tindakan_konsultasi,
+						'updated_at' => parent::format_date()
 						)
 					)
 					->where(array(
