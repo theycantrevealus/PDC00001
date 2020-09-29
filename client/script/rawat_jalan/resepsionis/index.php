@@ -3,6 +3,11 @@
 		var params;
 		var MODE = false;
 
+		var dataFaskes = bpjs_load_faskes();
+		for(var faskesKey in dataFaskes) {
+			$("#txt_bpjs_faskes").append("<option></option>");
+		}
+
 		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/Antrian/antrian",
@@ -11,6 +16,7 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+					console.log(response.response_package.response_data);
 					return response.response_package.response_data;
 				}
 			},
@@ -53,7 +59,15 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["penjamin"];
+						if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
+							if(parseInt(row['sep']) > 0) {
+								return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row["sep"] + "</h6>";
+							} else {
+								return row["penjamin"] + " <button class=\"btn btn-info btn-sm daftar_sep\" id=\"" + row["uid_pasien"] + "\"><i class=\"fa fa-plus\"></i> Daftar SEP</button>";
+							}
+						} else {
+							return row["penjamin"];
+						}
 					}
 				},
 				{
@@ -71,6 +85,16 @@
 					}
 				}*/
 			]
+		});
+
+		var targettedPasienSEP = "";
+
+		$("body").on("click", ".daftar_sep", function() {
+			var id = $(this).attr("id");
+			targettedPasienSEP = id;
+			if(targettedPasienSEP != "" && targettedPasienSEP != undefined) {
+				$("#modal-sep").modal("show");
+			}
 		});
 
 
@@ -304,7 +328,6 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
-					console.log(response);
 					if(response.response_package !== undefined && response.response_package !== null) {
 						currentQueue = response.response_package;
 						$("#sisa_antrian").html(currentQueue.response_standby);
@@ -439,7 +462,7 @@
 					</div>
 					<div class="col-md-12">
 						<div class="row">
-							<div class="search-form form-control-rounded search-form--light input-group-lg col-md-10">
+							<div class="search-form search-form--light input-group-lg col-md-10">
 								<input type="text" class="form-control" placeholder="Nama / NIK / No. RM" id="txt_cari">
 							</div>
 							<div class="col-md-12" hidden id="pencarian-notif" style="color: red; font-size: 0.8rem;">
@@ -454,7 +477,7 @@
 				<div class="form-group col-md-12" >
 					<!-- style="height: 100px; overflow: scroll;" -->
 					<table class="table table-bordered table-striped" id="table-list-pencarian">
-						<thead>
+						<thead class="thead-dark">
 							<tr>
 								<th width="2%">No</th>
 								<th>No. RM</th>
@@ -482,4 +505,91 @@
 			</div>
 		</div> 
 	</div> 
-</div> 
+</div>
+
+
+
+<div id="modal-sep" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-large-title">Daftar SEP</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="col-lg-12">
+					<div class="form-row">
+						<div class="col-12 col-md-4 mb-7 form-group">
+							<label for="">No Kartu</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nomor" readonly>
+						</div>
+						<div class="col-12 col-md-6 mb-6 form-group">
+							<label for="">NIK Pasien</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nik" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Nama Pasien</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Tanggal SEP</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Faskes</label>
+							<select class="form-control" id="txt_bpjs_faskes">
+							</select>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Jenis Pelayanan</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Kelas Rawat</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Nomor Medical Record (MR)</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Asal Rujukan</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Tanggal Rujukan</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Nomor Rujukan</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Catatan</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Diagnosa Awal</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+						<div class="col-12 col-md-8 mb-4 form-group">
+							<label for="">Poli Tujuan</label>
+							<input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<!-- <div id="spanBtnTambahPasien" hidden> -->
+				<a href="<?= __HOSTNAME__ ?>/pasien/tambah?antrian=true" class="btn btn-success" id="btnTambahPasien">
+				<!-- <i class="fa fa-plus"></i>  -->Tambah Pasien Baru
+				</a>
+				<!-- </div> -->
+				
+				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+			</div>
+		</div> 
+	</div> 
+</div>

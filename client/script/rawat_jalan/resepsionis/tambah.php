@@ -38,37 +38,43 @@
 				console.log(dataObj);
 
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
-					$.ajax({
-						async: false,
-						url: __HOSTAPI__ + "/Antrian",
-						data: {
-							request : "tambah-kunjungan",
-							dataObj : dataObj
-						},
-						beforeSend: function(request) {
-							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-						},
-						type: "POST",
-						success: function(response){
-							console.log(response)
-							if(response.response_package.response_notif == 'K') {
-								push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-							} else if(response.response_package.response_notif == 'P') {
-								push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-							} else {
-								console.log("command not found");
-							}
+					if(dataObj.penjamin == __UIDPENJAMINBPJS__) {
+						$("#modal-sep").modal("show");
+						$("#btnProsesPasien").hide();
+						$("#hasil_bpjs").hide();
+					} else {
+						$.ajax({
+							async: false,
+							url: __HOSTAPI__ + "/Antrian",
+							data: {
+								request : "tambah-kunjungan",
+								dataObj : dataObj
+							},
+							beforeSend: function(request) {
+								request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+							},
+							type: "POST",
+							success: function(response){
+								console.log(response)
+								if(response.response_package.response_notif == 'K') {
+									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+								} else if(response.response_package.response_notif == 'P') {
+									push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+								} else {
+									console.log("command not found");
+								}
 
-							localStorage.getItem("currentPasien");
-							localStorage.getItem("currentAntrianID");
-							//console.log(response.response_package);
-							location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
-						},
-						error: function(response) {
-							console.log("Error : ");
-							console.log(response);
-						}
-					});
+								localStorage.getItem("currentPasien");
+								localStorage.getItem("currentAntrianID");
+								//console.log(response.response_package);
+								location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+							},
+							error: function(response) {
+								console.log("Error : ");
+								console.log(response);
+							}
+						});
+					}
 				} else {
 					alert("Data belum lengkap");
 				}
@@ -76,10 +82,118 @@
 			return false;
 		});
 
+		$("#btnProsesPasien").click(function() {
+			var dataObj = {};
+			$('.inputan').each(function(){
+				var key = $(this).attr("id");
+				var value = $(this).val();
+
+				dataObj[key] = value;
+			});
+
+			dataObj.pasien = uid_pasien;
+			dataObj.currentPasien = currentPasien;
+			dataObj.currentAntrianID = currentAntrianID;
+			if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
+				$.ajax({
+					async: false,
+					url: __HOSTAPI__ + "/Antrian",
+					data: {
+						request : "tambah-kunjungan",
+						dataObj : dataObj
+					},
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					type: "POST",
+					success: function(response){
+						//console.log(response)
+						if(response.response_package.response_notif == 'K') {
+							push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+						} else if(response.response_package.response_notif == 'P') {
+							push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+						} else {
+							console.log("command not found");
+						}
+
+						localStorage.getItem("currentPasien");
+						localStorage.getItem("currentAntrianID");
+						location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+					},
+					error: function(response) {
+						console.log("Error : ");
+						console.log(response);
+					}
+				});
+			}
+		});
+
 		$(".select2").select2({});
+
+		$("#hasil_bpjs").hide();
+		$("#btnProsesPasien").hide();
+
+		$("#btnCariPasien").click(function() {
+			$("#hasil_bpjs").hide();
+			$("#btnProsesPasien").hide();
+			$.ajax({
+				async: false,
+				url: __HOSTAPI__ + "/BPJS",
+				data: {
+					request : "cek_peserta",
+					no_bpjs: $("#txt_no_bpjs").val()
+				},
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type: "POST",
+				success: function(response){
+					var data = response.response_package;
+					if(data.metaData.code == 200) {
+
+						$("#hasil_bpjs").fadeIn();
+						var pasienData = data.response.peserta;
+						if(pasienData.statusPeserta.keterangan == "AKTIF") {
+							if(pasienData.nik != dataPasien.nik) { //Cek NIK
+								$("#status_bpjs").addClass("text-danger").removeClass("text-success");
+								$("#status_bpjs").html("NIK tidak sama");
+							} else {
+								$("#status_bpjs").addClass("text-success").removeClass("text-danger");
+								$("#btnProsesPasien").show();
+								$("#status_bpjs").html(pasienData.statusPeserta.keterangan);
+							}
+						} else {
+							$("#status_bpjs").addClass("text-danger").removeClass("text-success");
+						}
+						$("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
+						$("#nama_pasien").html(pasienData.nama);
+						$("#nik_pasien").html(pasienData.nik);
+						$("#nomor_peserta").html(pasienData.noKartu);
+						$("#tll_pasien").html(pasienData.tglLahir);
+						//$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
+						$("#faskes_pasien").html(pasienData.provUmum.nmProvider);
+						$("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
+						$("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
+						
+						$("#tanggal_kartu").html(pasienData.tglCetakKartu);
+
+						//TAT Tanggal Akhir Kartu
+						//TMT Tanggal Mulai Kartu
+
+					} else if(data.metaData.code == 201) {
+						//Tidak tidak ditemukan
+					}
+				},
+				error: function(response) {
+					console.log("Error : ");
+					console.log(response);
+				}
+			});
+		});
 	});
 
 	function loadPasien(uid){
+
 		var dataPasien = null;
 
 		if (uid != ""){
@@ -91,9 +205,8 @@
 	                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 	            },
 	            success: function(response){
-	                dataPasien = response.response_package;
-
-	                $.each(dataPasien, function(key, item){
+	            	dataPasien = response.response_package;
+	            	$.each(dataPasien, function(key, item){
 	                	$("#" + key).val(item);
 	                });
 	            },
@@ -109,7 +222,7 @@
 
 
 	/*========== FUNC FOR LOAD PENJAMIN ==========*/
-    function loadPenjamin(){
+    function loadPenjamin() {
         var dataPenjamin = null;
 
         $.ajax({
@@ -231,3 +344,58 @@
         $("#" + selector).append(opti_null);
 	}
 </script>
+<div id="modal-sep" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
+	<div class="modal-dialog modal-md" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-large-title">Pengecekan SEP</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group col-md-12">
+					<div class="col-md-12">
+						<div class="row">
+							<label for="txt_cari">Cek Peserta BPJS</label>
+						</div>
+					</div>
+					<div class="col-md-12">
+						<div class="row">
+							<div class="search-form search-form--light input-group-lg col-md-10">
+								<input type="text" class="form-control" placeholder="No. BPJS" id="txt_no_bpjs" />
+							</div>
+							<div class="col-md-2">
+								<button class="btn btn-success" id="btnCariPasien">
+									<i class="fa fa-search"></i>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group col-md-12" >
+					<table class="table table-striped" id="hasil_bpjs">
+						<tr><td width="120px">No. Peserta</td><td width="10px">:</td><td id="nomor_peserta"><?php echo $bpjs_nomor;?></td></tr>
+						<tr><td>NIK</td><td>:</td><td id="nik_pasien"></td></tr>
+						<tr><td>Nama</td><td>:</td><td id="nama_pasien"></td></tr>
+						<tr><td>Tanggal Lahir</td><td>:</td><td id="tll_pasien"></td></tr>
+						<tr><td>Usia</td><td>:</td><td id="usia_pasien"></td></tr>
+						<tr><td>Jenis Kelamin</td><td>:</td><td id="kelamin_pasien"></td></tr>
+						<tr><td>Pekerjaan</td><td>:</td><td id="pekerjaan_pasien"></td></tr>
+						<tr><td>Faskes Pertama</td><td>:</td><td id="faskes_pasien"></td></tr>
+						<tr><td>Tanggal Kartu</td><td>:</td><td id="tanggal_kartu"></td></tr>
+						<tr><td>Status</td><td>:</td><td id="status_bpjs"></td></tr>
+					</table>
+				</div>
+				
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-success" id="btnProsesPasien">
+					<i class="fa fa-check"></i> Proses
+				</button>
+				
+				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+			</div>
+		</div> 
+	</div> 
+</div>

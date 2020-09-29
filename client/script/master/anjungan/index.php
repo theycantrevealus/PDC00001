@@ -126,6 +126,15 @@
 			}
 		});
 
+		$("#tambah-anjungan").click(function() {
+			MODE = "tambah";
+			$("#txt_nama").val("");
+			$("#form-tambah").modal("show");
+			reload_jenis();
+			$("#modal-large-title").html("Tambah Mesin Anjungan");
+			return false;
+		});
+
 		$("body").on("click", ".btn-edit-mesin", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
@@ -153,7 +162,7 @@
 				var form_data = {};
 				$("#table-jenis-anjungan tbody tr").each(function() {
 					var selectedJenis = $(this).find("td:eq(2) input").val();
-					if(jenis_mesin.indexOf(selectedJenis) < 0) {
+					if(jenis_mesin.indexOf(selectedJenis) < 0 && $(this).find("td:eq(2) input").is(":checked")) {
 						jenis_mesin.push(selectedJenis);
 					}
 				});

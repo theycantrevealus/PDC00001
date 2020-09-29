@@ -597,6 +597,7 @@
 				},
 				type: "POST",
 				success: function(response){
+					console.log(response);
 					metaData = {};
 					dataBuilder = refresh_kelas_data(tindakanKelas);
 					tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
