@@ -32,7 +32,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<span id=\"konsul_" + row["uid"] + "\">" + ((row["tindakan_konsultasi"] == undefined) ? "-" : row["tindakan_konsultasi"]) + "</span>";
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									/*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
 									 	"<i class=\"fa fa-list\"></i> Detail" +
 									"</button>" +*/

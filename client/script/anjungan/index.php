@@ -26,7 +26,7 @@
 					$("#loader-jenis").html("");
 					for(var b = 0; b < jenis[a].jenis.length; b++) {
 						var newJenis = document.createElement("BUTTON");
-						$(newJenis).html("<h2 style=\"color: #f2f2f2\">" + jenis[a].jenis[b].nama + "</h2>").attr({
+						$(newJenis).html("<h2>" + jenis[a].jenis[b].nama + "</h2>").attr({
 							"id": "antrian_jenis_" + jenis[a].jenis[b].uid
 						}).addClass("btn btn-lg btn-info btn-antrian").css({
 							"min-height": "150px",

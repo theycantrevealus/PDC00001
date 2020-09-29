@@ -2,7 +2,7 @@
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0"><i class="material-icons mr-3">info_outline</i> Informasi Pasien</h5>
+				<h5 class="card-header__title flex m-0"><!-- <i class="material-icons mr-3">info_outline</i> --> Informasi Pasien</h5>
 			</div>
 			<div class="card-body ">
 				<div class="col-md-12">
@@ -44,7 +44,7 @@
 							<label>Pendaftaran</label>
 						</div>
 						<div class="col-md-8">
-							<input type="" name="" id="waktu_masuk" disabled class="form-control" value="12 Juli 2020 10:31:36">
+							<input type="" name="" id="waktu_masuk" disabled class="form-control" value="">
 						</div>
 					</div>
 					<div class="col-md-6 row form-group">
@@ -60,7 +60,7 @@
 							<label>Penanggung Jawab Pasien</label>
 						</div>
 						<div class="col-md-8">
-							<input type="" name="pj_pasien" id="pj_pasien" class="form-control inputan" value="">
+							<input type="" name="pj_pasien" id="pj_pasien" disabled class="form-control " value="">
 						</div>
 					</div>
 					<div class="col-md-6 row form-group">
@@ -68,7 +68,7 @@
 							<label>Informasi di Dapat Dari</label>
 						</div>
 						<div class="col-md-8">
-							<input type="" name="info_dari" id="info_dari"  class="form-control inputan" value="">
+							<input type="" name="info_didapat_dari" id="info_didapat_dari" disabled class="form-control " value="">
 						</div>
 					</div>
 				</div>
@@ -112,41 +112,41 @@
 									<label for="cara_masuk">Cara Masuk :</label>
 									<div class="row col-md-12" id="cara_masuk">
 										<div class="col-md-3">
-											<div class="custom-control custom-radio">
-												<input type="radio" class="custom-control-input" name="cara_masuk" value="Jalan" id="cara_masuk_1">
-												<label class='custom-control-label' for="cara_masuk_1">Jalan</label>
+											<div class="form-check">
+												<input type="radio" class="form-check-input" name="cara_masuk" value="Jalan" id="cara_masuk_1">
+												<label class='form-check-label' for="cara_masuk_1">Jalan</label>
 											</div>
 										</div>
 										<div class="col-md-3">
-											<div class="custom-control custom-radio">
-												<input type="radio" class="custom-control-input" name="cara_masuk" value="Kursi Roda" id="cara_masuk_2">
-												<label class='custom-control-label' for="cara_masuk_2">Kursi Roda</label>
+											<div class="form-check">
+												<input type="radio" class="form-check-input" name="cara_masuk" value="Kursi Roda" id="cara_masuk_2">
+												<label class='form-check-label' for="cara_masuk_2">Kursi Roda</label>
 											</div>
 										</div>
 										<div class="col-md-6">
-											<div class="custom-control custom-radio">
-												<input type="radio" class="custom-control-input" name="cara_masuk" value="Lainnya" id="cara_masuk_3">
-												<label class='custom-control-label' for="cara_masuk_3">Lainnya:</label>
-												<input type="text" class="form-control cara_masuk_lainnya" id="cara_masuk_lainnya" name="cara_masuk_lainnya">
+											<div class="form-check">
+												<input type="radio" class="form-check-input" name="cara_masuk" value="Lainnya" id="cara_masuk_3">
+												<label class='form-check-label' for="cara_masuk_3">Lainnya:</label>
+												<input type="text" disabled="disabled" class="form-control cara_masuk_lainnya" id="cara_masuk_lainnya" name="cara_masuk_lainnya">
 											</div>
 										</div>
 									</div>
 			                    </div>
 							</div>
-							<div class="form-group col-lg-12">
+							<div class="form-group col-lg-12 rujukan-bpjs">
 								 <div class="col-12 col-md-12 mb-3">
 									<label for="rujukan">Rujukan :</label>
 									<div class="row col-md-12" id="rujukan">
 										<div class="col-md-3">
-											<div class="custom-control custom-radio">
-												<input type="radio" class="custom-control-input" name="rujukan" value="0" id="rujukan_1">
-												<label class='custom-control-label' for="rujukan_1">Tidak</label>
+											<div class="form-check">
+												<input type="radio" class="form-check-input" name="rujukan" value="0" id="rujukan_1">
+												<label class='form-check-label' for="rujukan_1">Tidak</label>
 											</div>
 										</div>
 										<div class="col-md-9 row">
-											<div class="custom-control custom-radio col-md-1">
-												<input type="radio" class="custom-control-input" name="rujukan" value="1" id="rujukan_2">
-												<label class='custom-control-label' for="rujukan_2">Ya</label>
+											<div class="form-check col-md-1">
+												<input type="radio" class="form-check-input" name="rujukan" value="1" id="rujukan_2">
+												<label class='form-check-label' for="rujukan_2">Ya</label>
 											</div>
 											<div class="col-md-10">
 												<input type="text" class="form-control inputan ket_rujukan" id="rujukan_ket" placeholder="-">
@@ -156,7 +156,7 @@
 			                    </div>
 							</div>
 						</div>
-						<div class="col-md-12 row">
+						<div class="col-md-12 row rujukan-bpjs">
 							<div class="form-group col-lg-12">
 								<label for="diagnosa_rujukan">Diagnosa Rujukan: </label>
 								<input type="text" name="rujukan_diagnosa" id="rujukan_diagnosa" class="form-control inputan ket_rujukan">
@@ -266,40 +266,35 @@
 			<div class="card-body">
 				<div class="row">
 					<div class="form-group col-lg-12">
-						 <div class="col-12 col-md-12 mb-3">
+						<div class="col-md-10">
 							<label for="rujukan">Riwayat Penyakit Sebelumnya :</label>
-							<div class="row col-md-12" id="">
-								<div class="col-md-10">
-									<div class="input-group">
-										<input type="text" class="form-control inputan" id="riwayat_sakit_sebelumnya" placeholder="-">
-									</div>
-								</div>
+							<div class="input-group">
+								<input type="text" class="form-control inputan" id="riwayat_sakit_sebelumnya" placeholder="-">
 							</div>
-	                    </div>
+						</div>
 					</div>
 					<div class="form-group col-lg-12">
 						 <div class="col-12 col-md-12 mb-3">
-							<label for="">Riwayat Operasi:</label>
 							<div class="row col-md-12" id="">
+								<label for="">Riwayat Operasi:</label>
+								<textarea class="form-control inputan" id="riwayat_operasi" placeholder="-"></textarea>
+								<div class="input-group">
+									<div class="input-group-prepended">
+										<span class="input-group-text">
+											<span>Kapan</span>
+										</span>
+									</div>
+									<input type="date" class="form-control inputan" id="riwayat_waktu_operasi">
+								</div>
 								<div class="col-md-5">
-									<div class="input-group">
+									<!-- <div class="input-group">
 										<div class="input-group-prepended">
 											<span class="input-group-text">
-												<span>Operasi</span>
+												<span>Operasi</span>		
 											</span>
 										</div>
 										<input type="text" class="form-control inputan" id="riwayat_operasi" placeholder="-">
-									</div>
-								</div>
-								<div class="col-md-5">
-									<div class="input-group">
-										<div class="input-group-prepended">
-											<span class="input-group-text">
-												<span>Kapan</span>
-											</span>
-										</div>
-										<input type="date" class="form-control inputan" id="riwayat_waktu_operasi">
-									</div>
+									</div> -->
 								</div>
 							</div>
 	                    </div>
@@ -307,18 +302,19 @@
 					<div class="form-group col-lg-12">
 						 <div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Dirawat:</label>
-							<div class="row col-md-12" id="">
-								<div class="col-md-5">
-									<div class="input-group">
-										<div class="input-group-prepended">
-											<span class="input-group-text">
-												<span>Kapan</span>
-											</span>
-										</div>
-										<input type="date" class="form-control inputan" id="riwayat_waktu_dirawat" name="riwayat_waktu_dirawat">
+								<div class="input-group">
+									<div class="input-group-prepended">
+										<span class="input-group-text">
+											<span>Kapan</span>
+										</span>
 									</div>
+									<input type="date" class="form-control inputan" id="riwayat_waktu_dirawat" name="riwayat_waktu_dirawat">
 								</div>
-								<div class="col-md-5">
+								<br />
+								<span>Diagnosa:</span>
+								<textarea class="form-control inputan" id="riwayat_diagnosa_dirawat" name="riwayat_diagnosa_dirawat" placeholder="-"></textarea>
+							<div class="row col-md-12" id="">
+								<!-- <div class="col-md-5">
 									<div class="input-group">
 										<div class="input-group-prepended">
 											<span class="input-group-text">
@@ -327,15 +323,15 @@
 										</div>
 										<input type="text" class="form-control inputan" id="riwayat_diagnosa_dirawat" name="riwayat_diagnosa_dirawat" placeholder="-">
 									</div>
-								</div>
+								</div> -->
 							</div>
 	                    </div>
 					</div>
 					<div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
-							<label for="">Riwayat Pengobatan Dirumah:</label>
+							<b for="">Riwayat Pengobatan Dirumah:</b>
 							<div class="row col-md-12" id="">
-								<div class="col-md-10">
+								<!-- <div class="col-md-10">
 									<div class="input-group">
 										<div class="input-group-prepended">
 											<span class="input-group-text">
@@ -344,67 +340,62 @@
 										</div>
 										<input type="text" class="form-control inputan" id="riwayat_pengobatan_dirumah_nama_obat" placeholder="-">
 									</div>
-								</div>
+								</div> -->
+								<span>Nama Obat:</span>
+								<textarea class="form-control inputan" id="riwayat_pengobatan_dirumah_nama_obat" placeholder="-"></textarea>
 							</div>
 	                    </div>
 					</div>
 					<div class="form-group col-lg-12">
 						 <div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Alergi:</label>
-							<div class="row col-md-12" id="">
-								<div class="col-md-10">
-									<div class="input-group">
-										<div class="input-group-prepended">
-											<span class="input-group-text">
-												<span>Alergi</span>
-											</span>
-										</div>
-										<input type="text" class="form-control inputan" id="riwayat_alergi" placeholder="-">
-									</div>
+							<!-- <div class="input-group">
+								<div class="input-group-prepended">
+									<span class="input-group-text">
+										<span>Alergi</span>
+									</span>
 								</div>
-							</div>
+								<input type="text" class="form-control inputan" id="riwayat_alergi" placeholder="-">
+							</div> -->
+							<textarea class="form-control inputan" id="riwayat_alergi" placeholder="-"></textarea>
 	                    </div>
 					</div>
 					<div class="form-group col-lg-12">
-						<div class="col-12 col-md-12 mb-3">
+						<div class="col-6">
 							<label for="">Riwayat Transfusi Darah: </label>
-							<div class="row col-md-12" id="">
-								<div class="col-md-5">
-									<select  class="form-control inputan select2" id="riwayat_transfusi_golongan_darah">
-										<option value="">Pilih</option>
-									</select>
-								</div>
-							</div>
+							<select  class="form-control inputan select2" id="riwayat_transfusi_golongan_darah">
+								<option value="">Pilih</option>
+							</select>
 	                    </div>
 	                </div>
 	                <div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Merokok: </label>
-							<div class="row col-md-12" id="">
-								<div class="col-md-10">
-									<input type="text" class="form-control inputan" id="riwayat_merokok" placeholder="-">
-								</div>
-							</div>
+							<br />
+							<input type="radio" name="rokok_yes" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
+							<input type="radio" name="rokok_yes" value="y" /> Ya
+							<br />
+							<input type="text" class="form-control inputan" disabled="disabled" id="riwayat_merokok" placeholder="Riwayat Merokok" />
 	                    </div>
 	                </div>
 	                <div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Minuman Keras: </label>
-							<div class="row col-md-12" id="">
-								<div class="col-md-10">
-									<input type="text" class="form-control inputan" id="riwayat_miras" placeholder="-">
-								</div>
-							</div>
+							<br />
+							<input type="radio" name="miras_yes" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
+							<input type="radio" name="miras_yes" value="y" /> Ya
+							<br />
+							<input type="text" disabled="disabled" class="form-control inputan" id="riwayat_miras" placeholder="Riwayat Minuman Keras" />
 	                    </div>
 	                </div>
 	                <div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Obat Terlarang: </label>
-							<div class="row col-md-12" id="">
-								<div class="col-md-10">
-									<input type="text" class="form-control inputan" id="riwayat_obt_terlarang" placeholder="-">
-								</div>
-							</div>
+							<br />
+							<input type="radio" name="obt_terlarang_yes" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
+							<input type="radio" name="obt_terlarang_yes" value="y" /> Ya
+							<br />
+							<input type="text" disabled="disabled" class="form-control inputan" id="riwayat_obt_terlarang" placeholder="Riwayat Obat Terlarang" />
 	                    </div>
 	                </div>
 	                <div class="form-group col-lg-12">
@@ -541,7 +532,7 @@
 	                <div class="form-group col-lg-6">
 	                	<div class="col-12 col-md-12 mb-3">
 		                	<label for="hub_keluarga">Hubungan Keluarga</label>
-		                	<input type="text" name="riwayat_hub_keluarga" id="riwayat_hub_keluarga" class="form-control inputan">
+		                	<input type="text" name="riwayat_hub_keluarga" id="riwayat_hub_keluarga" class="form-control inputan" placeholder="-">
 	                	</div>
 	                </div>
 				</div>
@@ -589,15 +580,15 @@
 									</div>
 								</div>
 								<div class="col-md-2">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="menarche_stat" value="Teratur" id="menarche_stat_1">
-										<label class='custom-control-label' for="menarche_stat_1">Teratur</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="menarche_stat" value="Teratur" id="menarche_stat_1">
+										<label class='form-check-label' for="menarche_stat_1">Teratur</label>
 									</div>
 								</div>
 								<div class="col-md-3">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="menarche_stat" value="Tidak Teratur" id="menarche_stat_2">
-										<label class='custom-control-label' for="menarche_stat_2">Tidak Teratur</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="menarche_stat" value="Tidak Teratur" id="menarche_stat_2">
+										<label class='form-check-label' for="menarche_stat_2">Tidak Teratur</label>
 									</div>
 								</div>
 							</div>
@@ -625,15 +616,15 @@
 							<label for="">Keluhan Saat Haid: </label>
 							<div class="row col-md-12" id="">
 								<div class="col-md-6">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="keluhan_haid" value="0" id="keluhan_haid_1">
-										<label class='custom-control-label' for="keluhan_haid_1">Tidak ada</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="keluhan_haid" value="0" id="keluhan_haid_1">
+										<label class='form-check-label' for="keluhan_haid_1">Tidak ada</label>
 									</div>
 								</div>
 								<div class="col-md-6">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="keluhan_haid" value="1" id="keluhan_haid_2">
-										<label class='custom-control-label' for="keluhan_haid_2">Ya</label>
+									<div class="form-check col-md-1">
+										<input type="radio" class="form-check-input" name="keluhan_haid" value="1" id="keluhan_haid_2">
+										<label class='cform-check-label' for="keluhan_haid_2">Ya</label>
 									</div>
 								</div>
 							</div>
@@ -671,21 +662,21 @@
 							<label for="rujukan">Wanita: Hamil</label>
 							<div class="row col-md-12" id="">
 								<div class="col-md-3">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="wanita_hamil" value="Tidak" id="wanita_hamil_0">
-										<label class='custom-control-label' for="wanita_hamil_0">Tidak</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="wanita_hamil" value="Tidak" id="wanita_hamil_0">
+										<label class='form-check-label' for="wanita_hamil_0">Tidak</label>
 									</div>
 								</div>
 								<div class="col-md-3 row">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="wanita_hamil" value="Ya" id="wanita_hamil_1">
-										<label class='custom-control-label' for="wanita_hamil_1">Ya</label>
+									<div class="form-check col-md-1">
+										<input type="radio" class="form-check-input" name="wanita_hamil" value="Ya" id="wanita_hamil_1">
+										<label class='form-check-label' for="wanita_hamil_1">Ya</label>
 									</div>
 								</div>
 								<div class="col-md-3 row">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="wanita_hamil" value="Tidak Tahu" id="wanita_hamil_2">
-										<label class='custom-control-label' for="wanita_hamil_2">Tidak Tahu</label>
+									<div class="form-check col-md-1">
+										<input type="radio" class="form-check-input" name="wanita_hamil" value="Tidak Tahu" id="wanita_hamil_2">
+										<label class='form-check-label' for="wanita_hamil_2">Tidak Tahu</label>
 									</div>
 								</div>
 							</div>
@@ -696,21 +687,21 @@
 							<label for="rujukan">Pria: Masalah Prostat</label>
 							<div class="row col-md-12">
 								<div class="col-md-3 ">
-									<div class="custom-control custom-radio">
-										<input type="radio" class="custom-control-input" name="pria_prostat" value="Tidak" id="pria_prostat_0">
-										<label class='custom-control-label' for="pria_prostat_0">Tidak</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="pria_prostat" value="Tidak" id="pria_prostat_0">
+										<label class='form-check-label' for="pria_prostat_0">Tidak</label>
 									</div>
 								</div>
 								<div class="col-md-3 row">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="pria_prostat" value="Ya" id="pria_prostat_1">
-										<label class='custom-control-label' for="pria_prostat_1">Ya</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="pria_prostat" value="Ya" id="pria_prostat_1">
+										<label class='form-check-label' for="pria_prostat_1">Ya</label>
 									</div>
 								</div>
 								<div class="col-md-6 row">
-									<div class="custom-control custom-radio col-md-1">
-										<input type="radio" class="custom-control-input" name="pria_prostat" value="Tidak Tahu" id="pria_prostat_2">
-										<label class='custom-control-label' for="pria_prostat_2">Tidak Tahu</label>
+									<div class="form-check">
+										<input type="radio" class="form-check-input" name="pria_prostat" value="Tidak Tahu" id="pria_prostat_2">
+										<label class='form-check-label' for="pria_prostat_2">Tidak Tahu</label>
 									</div>
 								</div>
 							</div>
@@ -773,13 +764,13 @@
 						<div class="col-6 col-md-6 mb-3">
 	                		<div class="form-group col-md-12">
 	                			<label for="">Lama Pemakaian: </label>
-								<input type="text" id="program_kb_lama_pemakaian" name="program_kb_lama_pemakaian" class="form-control form-control-appended inputan jenis-kb">
+								<input type="text" id="program_kb_lama_pemakaian" name="program_kb_lama_pemakaian" class="form-control form-control-appended inputan jenis-kb" placeholder="-">
 	                		</div>
 	                	</div>
 	                	<div class="col-6 col-md-6 mb-3">
 	                		<div class="form-group col-md-12">
 	                			<label for="">Keluhan: </label>
-								<input type="text" id="program_kb_keluhan" name="program_kb_keluhan" class="form-control form-control-appended inputan jenis-kb">
+								<input type="text" id="program_kb_keluhan" name="program_kb_keluhan" class="form-control form-control-appended inputan jenis-kb" placeholder="-">
 	                		</div>
 	                	</div>
 					</div>
@@ -949,7 +940,7 @@
 						</select>
 					</div>
 					<div class="form-group col-md-6">
-						<input type="text" class="form-control inputan ginekologi" disabled id="ginekologi_lainnya" name="ginekologi_lainnya">
+						<input type="text" class="form-control inputan ginekologi" disabled id="ginekologi_lainnya" name="ginekologi_lainnya" placeholder="-">
 					</div>
 				</div>
 			</div>
@@ -1101,7 +1092,7 @@
 					</div>
 					<div class="form-group col-md-3" id="nyeri_lainnya_ket">
 						<label>Nyeri Lainnya: </label>
-						<input disabled type="text" name="nyeri_lainnya_ket" id="nyeri_lainnya_ket" class="form-control inputan nyeri_lainnya_ket">
+						<input disabled type="text" name="nyeri_lainnya_ket" id="nyeri_lainnya_ket" class="form-control inputan nyeri_lainnya_ket" placeholder="-">
 					</div>
 					<div class="form-group col-md-4">
 						<label>Skala Nyeri NRS ( &gt; 5th - Dewasa)</label>
