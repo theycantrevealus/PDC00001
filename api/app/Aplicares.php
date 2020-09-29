@@ -24,14 +24,10 @@ class Aplicares extends Utility {
 	public function __construct($connection) {
 		self::$pdo = $connection;
 		self::$query = new Query(self::$pdo);
-
-		self::$kodePPK = "0069R035";
-		/*self::$data_api = base64_decode("MTUxNzQ=");*/
-		self::$data_api = 32435;
-		/*self::$secretKey_api = base64_decode("NWJDRjJCNEY4Mw==");*/
-		self::$secretKey_api = '2pAB5273E9';
-		/*self::$base_url = "https://dvlp.bpjs-kesehatan.go.id:8888/aplicaresws";*/
-		self::$base_url = "http://api.bpjs-kesehatan.go.id/aplicaresws";
+		self::$kodePPK = __KODE_PPK__;
+		self::$data_api = __DATA_API_LIVE__;
+		self::$secretKey_api = __SECRET_KEY_LIVE_BPJS__;
+		self::$base_url = __BASE_LIVE_BPJS__;
 	}
 
 	public function __GET__($parameter = array()) {
@@ -191,7 +187,7 @@ class Aplicares extends Utility {
 		return $data;
 	}
 
-	private function get_ruangan_terdaftar_bpjs(){
+	private function get_ruangan_terdaftar_bpjs() {
 		$url = "/rest/bed/read/" . self::$kodePPK . "/1/100";
 		$result = self::launchUrl($url);
 		$error_count = 1;
@@ -220,6 +216,7 @@ class Aplicares extends Utility {
 
 
 				if(count($check['response_data']) == 0) {
+
 					$logDataRuangan = self::$query->insert('aplicares_kamar_log', array(
 						'ruangan' => $KodeRuangan['uid'],
 						'kodekelas' => $value['kodekelas'],
@@ -245,6 +242,22 @@ class Aplicares extends Utility {
 					$value['uid_ruangan'] = $KodeRuangan['uid'];
 					$value['nama'] = $KodeRuangan['nama'];
 				}
+
+				$KelasDetail = self::$query->select('terminologi_item', array(
+					'id',
+					'nama'
+				))
+				->where(array(
+					'terminologi_item.id' => '= ?',
+					'AND',
+					'terminologi_item.deleted_at' => 'IS NULL'
+				), array(
+					$KodeRuangan['kelas']
+				))
+				->execute();
+
+				$KodeRuangan['kelas'] = $KelasDetail['response_data'][0];
+				$value['detailRuangan'] = $KodeRuangan;
 
 				array_push($crossCheckData, $value);
 			}
@@ -476,18 +489,10 @@ class Aplicares extends Utility {
 	private function launchUrl($extended_url){
 		$url = self::$base_url . $extended_url;
 
-		// Computes the timestamp
 		date_default_timezone_set('UTC');
 		$tStamp = strval(time()-strtotime('1970-01-01 00:00:00'));
-
-		// Computes the signature by hashing the salt with the secret key as the key
 		$signature = hash_hmac('sha256', self::$data_api ."&". $tStamp , self::$secretKey_api, true);
-
-		// base64 encode…
 		$encodedSignature = base64_encode($signature);
-
-		// urlencode…
-		// $encodedSignature = urlencode($encodedSignature);
 		$headers = array(
 			"X-cons-id: " . self::$data_api ." ",
 			"X-timestamp: " .$tStamp ." ",

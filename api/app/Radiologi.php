@@ -9,6 +9,7 @@ use PondokCoder\Authorization as Authorization;
 use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Antrian as Antrian;
 use PondokCoder\Pasien as Pasien;
+use PondokCoder\Tindakan as Tindakan;
 
 class Radiologi extends Utility {
 	static $pdo;
@@ -36,7 +37,7 @@ class Radiologi extends Utility {
 					break;
 
 				case 'tindakan':
-					return self::get_tindakan('master_radiologi_jenis');
+					return self::get_tindakan();
 					break;
 
 				case 'tindakan-detail':
@@ -67,6 +68,10 @@ class Radiologi extends Utility {
 					return self::get_radiologi_lampiran($parameter[2]);
 					break;
 
+				case 'get_tindakan_for_dokter':
+					return self::get_tindakan_for_dokter();
+					break;
+
 				default:
 					# code...
 					break;
@@ -87,13 +92,17 @@ class Radiologi extends Utility {
 				break;
 
 			case 'tambah-tindakan':
-				return self::tambah_tindakan('master_radiologi_tindakan', $parameter);
+				return self::tambah_tindakan($parameter);
 				break;
 
 			case 'edit-tindakan':
 				return self::edit_tindakan($parameter);
 				break;
 
+			case 'add-order-radiologi':
+				return self::add_order_radiologi($parameter);
+				break;
+			
 			case 'update-hasil-radiologi':
 				return self::update_hasil_radiologi($parameter); 
 				break;
@@ -170,14 +179,21 @@ class Radiologi extends Utility {
 		return $data;
 	}
 
-	private function get_tindakan($parameter){
+	private function get_tindakan(){
 		$data = self::$query
-				->select('master_radiologi_tindakan', array(
-						'uid','nama','jenis as uid_jenis','created_at','updated_at'
+				->select('master_tindakan', array(
+						'uid','nama', 'created_at','updated_at'
 					)
 				)
+				->join('master_radiologi_tindakan', array(
+						'jenis as uid_jenis'
+					)
+				)
+				->on(array(
+					array('master_radiologi_tindakan.uid_tindakan', '=', 'master_tindakan.uid'))
+				)
 				->where(array(
-						'master_radiologi_tindakan.deleted_at' => 'IS NULL'
+						'master_tindakan.deleted_at' => 'IS NULL'
 					)
 				)
 				->order(array('nama'=>'ASC'))
@@ -196,36 +212,36 @@ class Radiologi extends Utility {
 
 	private function get_tindakan_detail($parameter){
 		$data = self::$query
-					->select('master_radiologi_tindakan', 
-						array(
-							'uid',
-							'nama',
-							'jenis',
-							'created_at',
-							'updated_at'
-						)
-					)
-					->where(array(
-							'master_radiologi_tindakan.deleted_at' => 'IS NULL',
-							'AND',
-							'master_radiologi_tindakan.uid' => '= ?'
-						),
-						array($parameter)
-					)
-					->execute();
+			->select('master_tindakan', array(
+				'uid','nama', 'created_at','updated_at'
+				)
+			)
+			->join('master_radiologi_tindakan', array(
+					'jenis'
+				)
+			)
+			->on(array(
+				array('master_radiologi_tindakan.uid_tindakan', '=', 'master_tindakan.uid'))
+			)
+			->where(array(
+					'master_tindakan.deleted_at' => 'IS NULL',
+					'AND',
+					'master_tindakan.uid' => '= ?'
+				),
+				array($parameter)
+			)
+			->execute();
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 
-			$temp = self::get_tindakan_penjamin(array(
-										'departemen'=>__UIDRADIOLOGI__,
-										'tindakan'=>$value['uid']
-									));
-			
-
-			$data['response_data'][$key]['penjamin'] = $temp['response_data'];
+			// $temp = self::get_tindakan_penjamin(array(
+			// 	'departemen'=>__UIDRADIOLOGI__,
+			// 	'tindakan'=>$value['uid']
+			// ));
+			//$data['response_data'][$key]['penjamin'] = $temp['response_data'];
 		}
 
 		return $data;
@@ -293,8 +309,6 @@ class Radiologi extends Utility {
 		return $data;
 	}
 	/*=========================================================*/
-
-
 
 
 	/*====================== CRUD ========================*/
@@ -411,15 +425,13 @@ class Radiologi extends Utility {
 		return $jenis;
 	}
 
-	private function tambah_tindakan($table, $parameter){
+	private function tambah_tindakan($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$dataObj = $parameter['dataObj'];
-
 		$check = self::duplicate_check(array(
-			'table'=>$table,
-			'check'=>$dataObj['nama']
+			'table'=>'master_tindakan',
+			'check'=>$parameter['nama']
 		));
 
 		if (count($check['response_data']) > 0){
@@ -431,42 +443,42 @@ class Radiologi extends Utility {
 			$uid = parent::gen_uuid();
 
 			$layanan = self::$query
-					->insert($table, array(
-							"uid"=>$uid,
-							"nama"=>$dataObj['nama'],
-							"jenis"=>$dataObj['jenis'],
-							"created_at"=>parent::format_date(),
-							"updated_at"=>parent::format_date()
+				->insert('master_tindakan', array(
+						"uid"=>$uid,
+						"nama"=>$parameter['nama'],
+						"kelompok"=>'RAD',
+						"created_at"=>parent::format_date(),
+						"updated_at"=>parent::format_date()
+					)
+				)
+				->execute();
+
+			if ($layanan['response_result'] > 0){
+				$tindakan = self::$query
+					->insert('master_radiologi_tindakan', array(
+							'uid_tindakan'=>$uid,
+							'jenis'=>$parameter['jenis'],
+							'created_at'=>parent::format_date(),
+							'updated_at'=>parent::format_date()
 						)
 					)
 					->execute();
 
-			if ($layanan['response_result'] > 0){
-				$tindakan = self::$query
-						->insert('master_tindakan', array(
-								'uid'=>$uid,
-								'nama'=>"Radiologi " . $dataObj['nama'],
-								'created_at'=>parent::format_date(),
-								'updated_at'=>parent::format_date()
-							)
-						)
-						->execute();
-
-				if ($tindakan['response_result'] > 0){
-					foreach ($dataObj['penjamin'] as $key => $value) {
-						$penjamin = self::$query
-								->insert('master_poli_tindakan_penjamin', array(
-										'harga'=>$value,
-										'uid_poli'=>__UIDRADIOLOGI__,
-										'uid_tindakan'=>$uid,
-										'uid_penjamin'=>$key,
-										'created_at'=>parent::format_date(),
-										'updated_at'=>parent::format_date()
-									)
-								)
-								->execute();
-					}
-				}
+				// if ($tindakan['response_result'] > 0){
+				// 	foreach ($dataObj['penjamin'] as $key => $value) {
+				// 		$penjamin = self::$query
+				// 				->insert('master_poli_tindakan_penjamin', array(
+				// 						'harga'=>$value,
+				// 						'uid_poli'=>__UIDRADIOLOGI__,
+				// 						'uid_tindakan'=>$uid,
+				// 						'uid_penjamin'=>$key,
+				// 						'created_at'=>parent::format_date(),
+				// 						'updated_at'=>parent::format_date()
+				// 					)
+				// 				)
+				// 				->execute();
+				// 	}
+				// }
 
 				$log = parent::log(array(
 						'type'=>'activity',
@@ -482,7 +494,7 @@ class Radiologi extends Utility {
 						'value'=>array(
 							$uid,
 							$UserData['data']->uid,
-							$table . ", master_tindakan, master_poli_tindakan_penjamin",
+							"master_tindakan, master_radiologi_tindakan",
 							'I',
 							parent::format_date(),
 							'N',
@@ -496,8 +508,7 @@ class Radiologi extends Utility {
 
 		$result = array(
 				"layanan"=>$layanan,
-				"tindakan"=>$tindakan,
-				"penjamin"=>$penjamin
+				"tindakan"=>$tindakan
 			);
 
 		return $result;
@@ -508,85 +519,83 @@ class Radiologi extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
 		$old = self::get_tindakan_detail($parameter['uid']);
-		$dataObj = $parameter['dataObj'];
 
 		$layanan = self::$query
-					->update('master_radiologi_tindakan', array(
-							"nama"=>$dataObj['nama'],
-							"jenis"=>$dataObj['jenis'],
-							"updated_at"=>parent::format_date()		
-						)
-					)
-					->where(array(
-							'master_radiologi_tindakan.uid' => '= ?',
-							'AND',
-							'master_radiologi_tindakan.deleted_at' => 'IS NULL'
-						),array(
-							$parameter['uid']
-						)
-					)
-					->execute();
+			->update('master_tindakan', array(
+					"nama"=>$parameter['nama'],
+					"updated_at"=>parent::format_date()		
+				)
+			)
+			->where(array(
+					'master_tindakan.uid' => '= ?',
+					'AND',
+					'master_tindakan.deleted_at' => 'IS NULL'
+				),array(
+					$parameter['uid']
+				)
+			)
+			->execute();
 		
 		if ($layanan['response_result'] > 0){
 			$tindakan = self::$query
-					->update('master_tindakan', array(
-							"nama"=>$dataObj['nama'],
-							"updated_at"=>parent::format_date()		
-						)
+				->update('master_radiologi_tindakan', array(
+						"jenis"=>$parameter['jenis'],
+						"updated_at"=>parent::format_date()		
 					)
-					->where(array(
-							'master_tindakan.uid' => '= ?',
-							'AND',
-							'master_tindakan.deleted_at' => 'IS NULL'
-						),array(
-							$parameter['uid']
-						)
+				)
+				->where(array(
+						'master_radiologi_tindakan.uid_tindakan' => '= ?',
+						'AND',
+						'master_radiologi_tindakan.deleted_at' => 'IS NULL'
+					),array(
+						$parameter['uid']
 					)
-					->execute();
+				)
+				->execute();
 
-			if ($tindakan['response_result'] > 0){
-				foreach ($dataObj['penjamin'] as $key => $value) {
-					$cek = self::get_tindakan_penjamin_detail(array(
-							'departemen'=>__UIDRADIOLOGI__,
-							'tindakan'=>$parameter['uid'],
-							'penjamin'=>$key
-						));
+			// if ($tindakan['response_result'] > 0){
+			// 	foreach ($dataObj['penjamin'] as $key => $value) {
+			// 		$cek = self::get_tindakan_penjamin_detail(array(
+			// 				'departemen'=>__UIDRADIOLOGI__,
+			// 				'tindakan'=>$parameter['uid'],
+			// 				'penjamin'=>$key
+			// 			));
 
-					if ($cek['response_result'] > 0){
-						$penjamin = self::$query
-							->update('master_poli_tindakan_penjamin', array(
-									'harga'=>$value,
-									'updated_at'=>parent::format_date()
-								)
-							)
-							->where(array(
-									'master_poli_tindakan_penjamin.uid_poli' => '= ?',
-									'AND',
-									'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
-									'AND',
-									'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
-								),array(
-									__UIDRADIOLOGI__,
-									$parameter['uid'],
-									$key,
-								)
-							)
-							->execute();
-					} else {
-						$penjamin = self::$query
-							->insert('master_poli_tindakan_penjamin', array(
-									'harga'=>$value,
-									'uid_poli'=>__UIDRADIOLOGI__,
-									'uid_tindakan'=>$parameter['uid'],
-									'uid_penjamin'=>$key,
-									'created_at'=>parent::format_date(),
-									'updated_at'=>parent::format_date()
-								)
-							)
-							->execute();
-					}
-				}
-			}
+			// 		if ($cek['response_result'] > 0){
+			// 			$penjamin = self::$query
+			// 				->update('master_poli_tindakan_penjamin', array(
+			// 						'harga'=>$value,
+			// 						'updated_at'=>parent::format_date()
+			// 					)
+			// 				)
+			// 				->where(array(
+			// 						'master_poli_tindakan_penjamin.uid_poli' => '= ?',
+			// 						'AND',
+			// 						'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
+			// 						'AND',
+			// 						'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
+			// 					),array(
+			// 						__UIDRADIOLOGI__,
+			// 						$parameter['uid'],
+			// 						$key,
+			// 					)
+			// 				)
+			// 				->execute();
+			// 		} else {
+			// 			$penjamin = self::$query
+			// 				->insert('master_poli_tindakan_penjamin', array(
+			// 						'harga'=>$value,
+			// 						'uid_poli'=>__UIDRADIOLOGI__,
+			// 						'uid_tindakan'=>$parameter['uid'],
+			// 						'uid_penjamin'=>$key,
+			// 						'created_at'=>parent::format_date(),
+			// 						'updated_at'=>parent::format_date()
+			// 					)
+			// 				)
+			// 				->execute();
+			// 		}
+			// 	}
+			// }
 
 			$log = parent::log(array(
 					'type'=>'activity',
@@ -604,7 +613,7 @@ class Radiologi extends Utility {
 					'value'=>array(
 						$parameter['uid'],
 						$UserData['data']->uid,
-						$table,
+						'master_tindakan, master_radiologi_tindakan',
 						'U',
 						json_encode($old),
 						json_encode($parameter),
@@ -619,8 +628,7 @@ class Radiologi extends Utility {
 		
 		$result = array(
 				"layanan"=>$layanan,
-				"tindakan"=>$tindakan,
-				"penjamin"=>$penjamin
+				"tindakan"=>$tindakan
 			);
 
 		return $result;
@@ -715,6 +723,18 @@ class Radiologi extends Utility {
 				->execute();
 
 		if ($data['response_result'] > 0){
+			if ($parameter[6] == 'master_tindakan'){
+				$delete_child = self::$query
+					->delete('master_radiologi_tindakan')
+					->where(array(
+							'master_radiologi_tindakan.uid_tindakan' => '= ?'
+						), array(
+							$parameter[7]	
+						)
+					)
+					->execute();
+			}
+
 			$log = parent::log(array(
 					'type'=>'activity',
 					'column'=>array(
@@ -817,6 +837,77 @@ class Radiologi extends Utility {
 		return $data;
 	}
 
+	private function get_radiologi_order($parameter){	//uid_antrian
+		$get_antrian = new Antrian(self::$pdo);
+		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter);
+		
+		$dataRadiologiOrder = [];
+
+		$result = [];
+		if ($antrian['response_result'] > 0){
+
+			$data_antrian = $antrian['response_data'][0];		//get antrian data
+
+			//get uid asesmmen based by antrian data
+			$get_asesmen = self::$query->select('asesmen', array('uid'))
+				->where(array(
+						'asesmen.deleted_at' => 'IS NULL',
+						'AND',
+						'asesmen.poli' => '= ?',
+						'AND',
+						'asesmen.kunjungan' => '= ?',
+						'AND',
+						'asesmen.antrian' => '= ?',
+						'AND',
+						'asesmen.pasien' => '= ?',
+						'AND',
+						'asesmen.dokter' => '= ?'
+					), array(
+						$data_antrian['departemen'],
+						$data_antrian['kunjungan'],
+						$parameter,
+						$data_antrian['pasien'],
+						$data_antrian['dokter']
+					)
+				)
+				->execute();
+			
+			if ($get_asesmen['response_result'] > 0){
+				
+				$dataOrder = self::$query
+					->select('radiologi_order', 
+						array(
+							'uid',
+							'asesmen',
+							'waktu_order',
+							'selesai',
+							'petugas'
+						)
+					)
+					->where(
+						array(
+							'radiologi_order.asesmen' 		=> '= ?',
+							'AND',
+							'radiologi_order.deleted_at'	=> 'IS NULL'
+						), array($get_asesmen['response_data'][0]['uid'])
+					)
+					->execute();
+				
+				if ($dataOrder['response_result'] > 0){
+					$dataRadiologiOrder["order_data"] = $dataOrder['response_data'][0];
+
+					$dataDetailOrder = self::get_radiologi_order_detail($dataOrder['response_data'][0]['uid']);
+					if ($dataDetailOrder['response_result'] > 0){
+						$dataRadiologiOrder["detail_order"] = $dataDetailOrder['response_data'];
+					}
+
+				}
+			}
+		}
+
+		return $dataRadiologiOrder;
+	}
+
 	private function get_radiologi_order_detail($parameter){
 		$data = self::$query
 			->select('radiologi_order_detail', array(
@@ -899,6 +990,300 @@ class Radiologi extends Utility {
 		}
 
 		return $data;
+	}
+
+	private function add_order_radiologi($parameter){
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$get_antrian = new Antrian(self::$pdo);
+		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter['uid_antrian']);
+		
+		$result = [];
+		if ($antrian['response_result'] > 0){
+
+			$data_antrian = $antrian['response_data'][0];		//get antrian data
+
+			//get uid asesmmen based by antrian data
+			$get_asesmen = self::$query->select('asesmen', array('uid'))
+				->where(array(
+						'asesmen.deleted_at' => 'IS NULL',
+						'AND',
+						'asesmen.poli' => '= ?',
+						'AND',
+						'asesmen.kunjungan' => '= ?',
+						'AND',
+						'asesmen.antrian' => '= ?',
+						'AND',
+						'asesmen.pasien' => '= ?',
+						'AND',
+						'asesmen.dokter' => '= ?'
+					), array(
+						$data_antrian['departemen'],
+						$data_antrian['kunjungan'],
+						$parameter['uid_antrian'],
+						$data_antrian['pasien'],
+						$data_antrian['dokter']
+					)
+				)
+				->execute();
+			
+			$uidRadiologiOrder = "";
+			$statusOrder = "NEW";	//parameter to set status order, set "NEW" for default
+			if ($get_asesmen['response_result'] > 0){
+				$uidAsesmen = $get_asesmen['response_data'][0]['uid'];
+
+				$checkRadiologiOrder = self::$query
+					->select('radiologi_order', array('uid'))
+					->where(
+						array(
+							'radiologi_order.asesmen'		=>	'= ?',
+							'AND',
+							'radiologi_order.deleted_at'	=>	'IS NULL'
+						)
+						, array($uidAsesmen)
+					)
+					->execute();
+				
+				if ($checkRadiologiOrder['response_result'] > 0){
+					$statusOrder = "OLD";		//$statusOrder will set "OLD" if has ever added
+					$uidRadiologiOrder = $checkRadiologiOrder['response_data'][0]['uid'];
+
+					$result['old_radiologi_order'] = $checkRadiologiOrder;
+
+					if (count($parameter['listTindakanDihapus']) > 0){
+
+						foreach($parameter['listTindakanDihapus'] as $key => $value){
+							$hapusTindakanTerpilih = self::$query
+								->delete('radiologi_order_detail')
+								->where(array(
+										'radiologi_order_detail.radiologi_order' 	=> '= ?',
+										'AND',
+										'radiologi_order_detail.tindakan' 			=> '= ?',
+										'AND',
+										'radiologi_order_detail.keterangan' 		=> 'IS NULL',
+										'AND',
+										'radiologi_order_detail.kesimpulan'			=> 'IS NULL',
+										'AND',
+										'radiologi_order_detail.deleted_at'			=> 'IS NULL'
+									), array(
+										$uidRadiologiOrder,
+										$value
+									)
+								)
+								->execute();
+
+							if ($hapusTindakanTerpilih['response_result'] > 0){
+								$result['delete_tindakan_order'] = $hapusTindakanTerpilih;
+
+								$log = parent::log(array(
+										'type'=>'activity',
+										'column'=>array(
+											'unique_target',
+											'user_uid',
+											'table_name',
+											'action',
+											'logged_at',
+											'status',
+											'login_id'
+										),
+										'value'=>array(
+											'asesmen: ' . $uidAsesmen . "; tindakan: " . $value,
+											$UserData['data']->uid,
+											'radiologi_order_detail',
+											'D',
+											parent::format_date(),
+											'N',
+											$UserData['data']->log_id
+										),
+										'class'=>__CLASS__
+									)
+								);
+							}
+
+						}
+
+					}
+				}
+
+			} else {
+				//new asesmen
+				$uidAsesmen = parent::gen_uuid();
+				$MasterUID = $uidAsesmen;
+				$asesmen_poli = self::$query
+					->insert('asesmen', 
+						array(
+							'uid' => $uidAsesmen,
+							'poli' => $data_antrian['departemen'],
+							'kunjungan' => $data_antrian['kunjungan'],
+							'antrian' => $parameter['uid_antrian'],
+							'pasien' => $data_antrian['pasien'],
+							'dokter' => $data_antrian['dokter'],
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						)
+					)
+					->execute();
+				
+				if($asesmen_poli['response_result'] > 0) {
+
+					$log = parent::log(array(
+						'type'=>'activity',
+						'column'=>array(
+							'unique_target',
+							'user_uid',
+							'table_name',
+							'action',
+							'logged_at',
+							'status',
+							'login_id'
+						),
+						'value'=>array(
+							$uidAsesmen,
+							$UserData['data']->uid,
+							'asesmen',
+							'I',
+							parent::format_date(),
+							'N',
+							$UserData['data']->log_id
+						),
+						'class'=>__CLASS__
+					));
+					
+					$result['new_asesmen'] = $asesmen_poli;
+				}
+			}
+
+			if ($statusOrder == "NEW"){
+				$uidRadiologiOrder = "";
+
+				if (count($parameter['listTindakan']) > 0){
+					$uidRadiologiOrder = parent::gen_uuid();
+					$radiologiOrder = self::$query
+						->insert('radiologi_order', 
+							array(
+								'uid'			=>	$uidRadiologiOrder,
+								'asesmen'		=>	$uidAsesmen,
+								'waktu_order'	=>	parent::format_date(),
+								'selesai'		=>	'false',
+								'petugas'		=>	$UserData['data']->uid,
+								'created_at'	=>	parent::format_date(),
+								'updated_at'	=>	parent::format_date()
+							)
+						)
+						->execute();
+					
+					if($radiologiOrder['response_result'] > 0) {
+
+						$log = parent::log(array(
+							'type'=>'activity',
+							'column'=>array(
+								'unique_target',
+								'user_uid',
+								'table_name',
+								'action',
+								'logged_at',
+								'status',
+								'login_id'
+							),
+							'value'=>array(
+								$uidRadiologiOrder,
+								$UserData['data']->uid,
+								'radiologi_order',
+								'I',
+								parent::format_date(),
+								'N',
+								$UserData['data']->log_id
+							),
+							'class'=>__CLASS__
+						));
+						
+					}
+
+					$result['new_radiologi_order'] = $radiologiOrder;
+				} else {
+
+					$result['response_message'] = 'Nothing in action';
+				}
+				
+			}
+			
+			//check if uid labOrder has no empty and add tindakan
+			if ($uidRadiologiOrder != ""){
+
+				/*	KETERANGAN
+					format json listTindakan:
+					listTindakan : { 
+						uid_tindakan_1 : uid_penjamin_1,
+						uid_tinadkan_2 : uid_penjamin_2 
+					}
+				*/
+				foreach ($parameter['listTindakan'] as $keyTindakan => $valueTindakan) {
+					$checkDetailRadiologi = self::$query
+						->select('radiologi_order_detail', array('id'))
+						->where(
+							array(
+								'radiologi_order_detail.radiologi_order'	=> '= ?',
+								'AND',
+								'radiologi_order_detail.tindakan'			=> '= ?',
+								'AND',
+								'radiologi_order_detail.deleted_at'			=> 'IS NULL'
+							), array(
+								$uidRadiologiOrder,
+								$keyTindakan
+							)
+						)
+						->execute();
+					
+					if ($checkDetailRadiologi['response_result'] == 0){
+						$addDetailRadiologi = self::$query
+							->insert('radiologi_order_detail', 
+								array(
+									'radiologi_order'	=>	$uidRadiologiOrder,
+									'tindakan'			=>	$keyTindakan,
+									'penjamin'			=>	$valueTindakan,
+									'created_at'		=>	parent::format_date(),
+									'updated_at'		=>	parent::format_date()	
+								)
+							)
+							->execute();
+
+						if ($addDetailRadiologi['response_result'] > 0){
+							$log = parent::log(array(
+								'type'=>'activity',
+								'column'=>array(
+									'unique_target',
+									'user_uid',
+									'table_name',
+									'action',
+									'logged_at',
+									'status',
+									'login_id'
+								),
+								'value'=>array(
+									$uidRadiologiOrder . "; ". $keyTindakan,
+									$UserData['data']->uid,
+									'radiologi_order_detail',
+									'I',
+									parent::format_date(),
+									'N',
+									$UserData['data']->log_id
+								),
+								'class'=>__CLASS__
+							));
+							
+							$result['new_radiologi_detail'] = $addDetailRadiologi;
+	
+						}
+					}
+
+				}
+				
+			}
+
+		}
+
+		return $result;
 	}
 
 	private function update_hasil_radiologi($parameter){
@@ -1091,6 +1476,27 @@ class Radiologi extends Utility {
 		}
 		
 		return $result;
+	}
+	/*-------------------------------------------------------*/
+
+	/*------------------- GET TINDAKAN RADIOLOGI FOR DOKTER --------------------*/
+	private function get_tindakan_for_dokter(){
+		$dataTindakan = self::get_tindakan();
+
+		$tindakan = new Tindakan(self::$pdo);
+		$autonum = 1;
+		foreach ($dataTindakan['response_data'] as $key => $value) {
+			$dataTindakan['response_data'][$key]['autonum'] = $autonum;
+			$dataTindakan['response_data'][$key]['id'] = $value['uid'];
+			$dataTindakan['response_data'][$key]['text'] = $value['nama'];
+
+			$autonum++;
+
+			$harga = $tindakan->get_harga_tindakan($value['uid']);
+			$dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
+		}
+
+		return $dataTindakan;
 	}
 	/*-------------------------------------------------------*/
 

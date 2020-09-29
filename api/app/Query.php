@@ -78,6 +78,7 @@ class Query {
 
 	function where($parameter = array(), $values = array()) {
 		self::$whereParameter = array();
+		self::$whereLogic = array();
 		foreach ($parameter as $key => $value) {
 			if(is_int($key)) {
 				array_push(self::$whereLogic, $value);
@@ -199,7 +200,7 @@ class Query {
 			}
 			$buildQuery = trim($buildQuery);
 			if(isset(self::$limit)) {
-				if(isset(self::$offset) && intval(self::$offset) > 0) {
+				if(isset(self::$offset) && intval(self::$offset) >= 0) {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit . ' ' . self::$offset;	
 				} else {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit;

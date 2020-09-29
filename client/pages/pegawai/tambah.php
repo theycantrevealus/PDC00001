@@ -26,7 +26,6 @@
 						<a href="#tab-awal-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-informasi" >
 							<span class="nav-link__count">
 								01
-								<b class="inv-tab-status text-success" id="status-informasi"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Data Diri
 						</a>
@@ -35,7 +34,6 @@
 						<a href="#tab-awal-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								02
-								<b class="inv-tab-status text-success" id="status-keperawatan"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Akses
 						</a>

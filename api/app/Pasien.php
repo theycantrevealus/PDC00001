@@ -36,6 +36,10 @@ class Pasien extends Utility {
 					return self::cekNIK($parameter[2]);
 					break;
 
+				case 'cek-no-rm':
+					return self::cekNoRM($parameter[2]);
+					break;
+
 				default:
 					# code...
 					break;
@@ -129,8 +133,9 @@ class Pasien extends Utility {
 						'pekerjaan',
 						'nama_ayah',
 						'nama_ibu',
+						'status_pernikahan',
 						'nama_suami_istri',
-						'status_suami_istri',
+						//'status_suami_istri',
 						'alamat',
 						'alamat_rt',
 						'alamat_rw',
@@ -140,6 +145,7 @@ class Pasien extends Utility {
 						'alamat_kelurahan',
 						'warganegara',
 						'no_telp',
+						'email',
 						'created_at',
 						'updated_at'
 						)
@@ -377,7 +383,29 @@ class Pasien extends Utility {
 			$result = true;
 		}
 
-		return $result;
+		return $data;
+	}
+
+	public function cekNoRM($parameter){
+		$data = self::$query
+			->select('pasien', array('uid', 'no_rm'))
+			->where(
+				array(
+					'pasien.no_rm' => '= ?',
+					'AND',
+					'pasien.deleted_at' => 'IS NULL'
+				),
+				array(
+					$parameter
+				))
+			->execute();
+
+		$result = false;
+		if ($data['response_result'] > 0){
+			$result = true;
+		}
+
+		return $data;
 	}
 
 	private function duplicate_check($parameter) {

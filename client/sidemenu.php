@@ -9,9 +9,14 @@
 			$child = $pdo->prepare('SELECT * FROM modul WHERE deleted_at IS NULL AND parent = ? AND show_on_menu = ? AND menu_group = ?');
 			$child->execute(array($value['id'], 'Y', $group));
 			$LinkManager = ($child->rowCount() > 0) ? "#menu-" . $value['id'] : __HOSTNAME__ . '/' .$value['identifier'];
+			$activeCheck = false;
+			if(__HOSTNAME__ . '/' . implode('/', __PAGES__) == $LinkManager) {
+				$activeCheck = true;
+			}
+
 			if(in_array($value['id'], $access)) {
 				?>
-				<li class="sidebar-menu-item">
+				<li class="sidebar-menu-item <?php echo ($activeCheck == true) ? "active" : ""; ?>" parent-child="<?php echo $parent; ?>">
 					<a class="sidebar-menu-button" <?php echo ($child->rowCount() > 0) ? "data-toggle=\"collapse\"" : ""; ?> href="<?php echo $LinkManager; ?>">
 						<?php
 							if($parent == 0) {
@@ -32,7 +37,7 @@
 					<?php
 						if($child->rowCount() > 0) {
 					?>
-					<ul class="sidebar-submenu collapse" id="menu-<?php echo $value['id']; ?>">
+					<ul class="sidebar-submenu collapse" id="menu-<?php echo $value['id']; ?>" master-child="<?php echo $parent; ?>">
 						<?php
 							$availMenu += reloadModul($pdo, $value['id'], $group, $access);
 						?>
@@ -50,7 +55,7 @@
 ?>
 <div class="mdk-drawer  js-mdk-drawer" id="default-drawer" data-align="start">
 	<div class="mdk-drawer__content">
-		<div class="sidebar sidebar-light sidebar-left simplebar" data-simplebar>
+		<div class="sidebar sidebar-light sidebar-left simplebar" style="padding-top: 50px" data-simplebar>
 			<!-- <div class="d-flex align-items-center sidebar-p-a border-bottom sidebar-account">
 				<a href="<?php echo __HOSTNAME__; ?>/template/profile.html" class="flex d-flex align-items-center text-underline-0 text-body">
 					<span class="avatar mr-3">

@@ -1038,6 +1038,8 @@ class Inventori extends Utility {
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
+
+			
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$kategori_obat = self::get_kategori_obat_item($value['uid']);
 			foreach ($kategori_obat as $KOKey => $KOValue) {
@@ -1095,10 +1097,18 @@ class Inventori extends Utility {
 			//$data['response_data'][$key]['item_detail'] = self::get_item_detail($value['barang'])['response_data'][0];
 			$data['response_data'][$key]['gudang'] = self::get_gudang_detail($value['gudang'])['response_data'][0];
 			$data['response_data'][$key]['kode'] = self::get_batch_detail($value['batch'])['response_data'][0]['batch'];
-			$data['response_data'][$key]['expired'] = date('d F Y', strtotime(self::get_batch_detail($value['batch'])['response_data'][0]['expired_date']));
-			$data['response_data'][$key]['harga'] = self::get_batch_detail($value['batch'])['response_data'][0]['harga'];
-			$data['response_data'][$key]['profit'] = self::get_batch_detail($value['batch'])['response_data'][0]['profit'];
+			$batch_info = self::get_batch_detail($value['batch'])['response_data'][0];
+			$data['response_data'][$key]['expired'] = date('d F Y', strtotime($batch_info['expired_date']));
+			$data['response_data'][$key]['stok_terkini'] = floatval($value['stok_terkini']);
+			$data['response_data'][$key]['expired_sort'] = $batch_info['expired_date'];
+			$data['response_data'][$key]['harga'] = $batch_info['harga'];
+			$data['response_data'][$key]['profit'] = $batch_info['profit'];
 		}
+
+		//Sort Batch before return
+		$sorted = $data['response_data'];
+		array_multisort($sorted, SORT_ASC, $data['response_data']);
+		$data['response_data'] = $sorted;
 		return $data;
 	}
 
@@ -1134,6 +1144,25 @@ class Inventori extends Utility {
 			} else {
 				$data['response_data'][$key]['harga'] = 0;
 			}
+
+			//Get Stock Information
+			$Stock = self::$query->select('inventori_stok', array(
+				'barang',
+				'batch',
+				'gudang',
+				'stok_terkini'
+			))
+			->where(array(
+				'inventori_stok.batch' => '= ?',
+				'AND',
+				'inventori_stok.barang' => '= ?'
+			), array(
+				$value['batch'],
+				$value['barang']
+			))
+			->execute();
+
+			$data['response_data'][$key]['stok'] = (count($Stok['response_data']) > 0) ? $Stok['response_data'][0]['stok_terkini'] : 0;
 		}
 		return $data;
 	}

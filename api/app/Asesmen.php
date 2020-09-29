@@ -10,6 +10,8 @@ use PondokCoder\Tindakan as Tindakan;
 use PondokCoder\Inventori as Inventori;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Antrian as Antrian;
+use PondokCoder\Invoice as Invoice;
+use PondokCoder\Icd as Icd;
 
 
 class Asesmen extends Utility {
@@ -150,6 +152,38 @@ class Asesmen extends Utility {
 			))
 			->execute();
 			if(count($data['response_data']) > 0) {
+
+				//Parse ICDData
+				foreach ($data['response_data'] as $ICD10Key => $ICD10Value) {
+					$ICD10KerjaRaw = explode(',', $ICD10Value['icd10_kerja']);
+					$ICD10KerjaJoined = array();
+					foreach ($ICD10KerjaRaw as $ICD10KRKey => $ICD10KRValue) {
+						$ICD10 = new Icd(self::$pdo);
+						$parseICD10 = $ICD10::get_icd_detail('master_icd_10', $ICD10KRValue);
+						if(count($parseICD10['response_data']) > 0) {
+							array_push($ICD10KerjaJoined, array(
+								'id' => $ICD10KRValue,
+								'nama' => $parseICD10['response_data'][0]['kode'] . ' - ' .$parseICD10['response_data'][0]['nama']
+							));
+						}
+					}
+					$data['response_data'][$ICD10Key]['icd10_kerja'] = $ICD10KerjaJoined;
+					
+
+					$ICD10BandingRaw = explode(',', $ICD10Value['icd10_banding']);
+					$ICD10BandingJoined = array();
+					foreach ($ICD10BandingRaw as $ICD10BRKey => $ICD10BRValue) {
+						$ICD10 = new Icd(self::$pdo);
+						$parseICD10 = $ICD10::get_icd_detail('master_icd_10', $ICD10BRValue);
+						if(count($parseICD10['response_data']) > 0) {
+							array_push($ICD10BandingJoined, array(
+								'id' => $ICD10BRValue,
+								'nama' => $parseICD10['response_data'][0]['kode'] . ' - ' .$parseICD10['response_data'][0]['nama']
+							));
+						}
+					}
+					$data['response_data'][$ICD10Key]['icd10_banding'] = $ICD10BandingJoined;
+				}
 				//Tindakan Detail
 				$tindakan = self::$query->select('asesmen_tindakan', array(
 					'tindakan'
@@ -256,6 +290,7 @@ class Asesmen extends Utility {
 							'obat',
 							'ratio',
 							'pembulatan',
+							'kekuatan',
 							'takar_bulat',
 							'takar_decimal',
 							'harga',
@@ -358,7 +393,17 @@ class Asesmen extends Utility {
 			->execute();
 
 			if(count($poli_check['response_data']) > 0) {
-				//update
+				$selectedICD10Kerja = array();
+				$selectedICD10Banding = array();
+				foreach ($parameter['icd10_kerja'] as $ICD10KK => $ICD10KV) {
+					array_push($selectedICD10Kerja, $ICD10KV['id']);
+				}
+
+				foreach ($parameter['icd10_banding'] as $ICD10BK => $ICD10BV) {
+					array_push($selectedICD10Banding, $ICD10BV['id']);
+				}
+
+				//Update
 				$worker = self::$query->update('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
 					'keluhan_utama' => $parameter['keluhan_utama'],
 					'keluhan_tambahan' => $parameter['keluhan_tambahan'],
@@ -370,9 +415,11 @@ class Asesmen extends Utility {
 					'tinggi_badan' => floatval($parameter['tinggi_badan']),
 					'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
 					'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
-					'icd10_kerja' => intval($parameter['icd10_kerja']),
+					//'icd10_kerja' => intval($parameter['icd10_kerja']),
+					'icd10_kerja' => implode(',', $selectedICD10Kerja),
 					'diagnosa_kerja' => $parameter['diagnosa_kerja'],
-					'icd10_banding' => intval($parameter['icd10_banding']),
+					//'icd10_banding' => intval($parameter['icd10_banding']),
+					'icd10_banding' => implode(',', $selectedICD10Banding),
 					'diagnosa_banding' => $parameter['diagnosa_banding'],
 					'planning' => $parameter['planning'],
 					'updated_at' => parent::format_date()
@@ -402,6 +449,18 @@ class Asesmen extends Utility {
 				->execute();
 
 				if($worker['response_result'] > 0) {
+					//Update asesmen medis
+					
+					$updateAsesmen = self::$query->update('asesmen', array(
+						'status' => 'D'
+					))
+					->where(array(
+						'asesmen.uid' => '= ?'
+					), array(
+						$MasterUID
+					))
+					->execute();
+
 					$log = parent::log(array(
 						'type'=>'activity',
 						'column'=>array(
@@ -483,7 +542,7 @@ class Asesmen extends Utility {
 
 
 		//Tindakan Management
-		$returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter['tindakan'], $MasterUID);
+		$returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter, $MasterUID);
 
 		//Resep dan Racikan
 		$returnResponse['resep_response'] = self::set_resep_asesment($parameter, $MasterUID);
@@ -647,7 +706,7 @@ class Asesmen extends Utility {
 			foreach ($racikanOld['response_data'] as $key => $value) {
 				$racikanUpdate = self::$query->update('racikan', array(
 					'kode' => $parameter['racikan'][$key]['nama'],
-					'aturan_pakai' => $parameter['racikan'][$key]['aturanPakai'],
+					'aturan_pakai' => intval($parameter['racikan'][$key]['aturanPakai']),
 					'keterangan' => $parameter['racikan'][$key]['keterangan'],
 					'signa_qty' => $parameter['racikan'][$key]['signaKonsumsi'],
 					'signa_pakai' => $parameter['racikan'][$key]['signaTakar'],
@@ -710,6 +769,7 @@ class Asesmen extends Utility {
 							$racikanDetailWorker = self::$query->update('racikan_detail', array(
 								'obat' => $RDIValue['obat'],
 								'ratio' => $RDIValue['takaran'],
+								'kekuatan' => $RDIValue['kekuatan'],
 								'penjamin' => $parameter['penjamin'],
 								'takar_bulat' => $RDIValue['takaranBulat'],
 								'takar_decimal' => $RDIValue['takaranDecimalText'],
@@ -737,6 +797,7 @@ class Asesmen extends Utility {
 								//'resep' => $uid,
 								'obat' => $RDIValue['obat'],
 								'pembulatan' => ceil($RDIValue['takaran']),
+								'kekuatan' => $RDIValue['kekuatan'],
 								'takar_bulat' => $RDIValue['takaranBulat'],
 								'takar_decimal' => $RDIValue['takaranDecimalText'],
 								'harga' => 0,
@@ -764,11 +825,11 @@ class Asesmen extends Utility {
 				$newRacikan = self::$query->insert('racikan', array(
 					'uid' => $newRacikanUID,
 					'asesmen' => $MasterAsesmen,
-					//'resep' => $uid,
 					'kode' => $value['nama'],
 					'total' => 0,
 					'signa_qty' => $value['signaKonsumsi'],
 					'signa_pakai' => $value['signaTakar'],
+					'aturan_pakai' => intval($value['aturanPakai']),
 					'qty' => $value['signaHari'],
 					'created_at' => parent::format_date(),
 					'updated_at' => parent::format_date()
@@ -785,6 +846,7 @@ class Asesmen extends Utility {
 							'obat' => $RDValue['obat'],
 							'ratio' => $RDValue['takaran'],
 							'pembulatan' => ceil($RDValue['takaran']),
+							'kekuatan' => $RDValue['kekuatan'],
 							'takar_bulat' => $RDIValue['takaranBulat'],
 							'takar_decimal' => $RDIValue['takaranDecimalText'],
 							'harga' => 0,
@@ -854,6 +916,7 @@ class Asesmen extends Utility {
 						'kode' => $value['nama'],
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
+						'aturan_pakai' => intval($value['aturanPakai']),
 						'qty' => $value['signaHari'],
 						'total' => 0,
 						'created_at' => parent::format_date(),
@@ -884,6 +947,7 @@ class Asesmen extends Utility {
 								'obat' => $RIValue['obat'],
 								'ratio' => $RIValue['takaran'],
 								'pembulatan' => ceil($RIValue['takaran']),
+								'kekuatan' => $RIValue['kekuatan'],
 								'takar_bulat' => $RIValue['takaranBulat'],
 								'takar_decimal' => $RIValue['takaranDecimalText'],
 								'harga' => 0,
@@ -902,7 +966,7 @@ class Asesmen extends Utility {
 
 	private function set_tindakan_asesment($parameter, $MasterAsesmen) {
 		$requested = array();
-		foreach ($parameter as $key => $value) {
+		foreach ($parameter['tindakan'] as $key => $value) {
 			if(!in_array($value['item'], $requested)) {
 				array_push($requested, $value['item']);
 			} else {
@@ -911,6 +975,33 @@ class Asesmen extends Utility {
 		}
 		$returnResponse = array();
 		$registered = array();
+
+
+		//Check Invoice
+		$Invoice = new Invoice(self::$pdo);
+		$InvoiceCheck = self::$query->select('invoice', array(
+			'uid'
+		))
+		->where(array(
+			'invoice.kunjungan' => '= ?',
+			'AND',
+			'invoice.deleted_at' => 'IS NULL'
+		), array(
+			$parameter['kunjungan']
+		))
+		->execute();
+
+		if(count($InvoiceCheck['response_data']) > 0) {
+			$TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+		} else {
+			$InvMasterParam = array(
+				'kunjungan' => $parameter['kunjungan'],
+				'pasien' => $parameter['pasien'],
+				'keterangan' => 'Tagihan tindakan perobatan'
+			);
+			$NewInvoice = $Invoice::create_invoice($InvMasterParam);
+			$TargetInvoice = $NewInvoice['response_unique'];
+		}
 
 		$entry = self::$query->select('asesmen_tindakan', array(
 			'uid',
@@ -954,12 +1045,11 @@ class Asesmen extends Utility {
 				array_push($returnResponse, $activate);
 			}
 			array_splice($requested, array_search($value['tindakan'], $requested), 1);
-			array_splice($parameter, array_search($value['tindakan'], $requested), 1);
+			array_splice($parameter['tindakan'], array_search($value['tindakan'], $requested), 1);
 		}
 
-		foreach ($parameter as $key => $value) {
-			$Penjamin = self::$query
-			->select('master_poli_tindakan_penjamin', array(
+		foreach ($parameter['tindakan'] as $key => $value) {
+			/*$Penjamin = self::$query->select('master_poli_tindakan_penjamin', array(
 				'id',
 				'harga',
 				'uid_poli',
@@ -981,6 +1071,28 @@ class Asesmen extends Utility {
 				$value['penjamin'],
 				$value['poli']
 			))
+			->execute();*/
+
+			$HargaTindakan = self::$query->select('master_tindakan_kelas_harga', array(
+				'id',
+				'tindakan',
+				'kelas',
+				'penjamin',
+				'harga'
+			))
+			->where(array(
+				'master_tindakan_kelas_harga.penjamin' => '= ?',
+				'AND',
+				'master_tindakan_kelas_harga.kelas' => '= ?',
+				'AND',
+				'master_tindakan_kelas_harga.tindakan' => '= ?',
+				'AND',
+				'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+			), array(
+				$value['penjamin'],
+				$value['kelas'],
+				$value['item']
+			))
 			->execute();
 
 			$new_asesmen_uid = parent::gen_uuid();
@@ -991,11 +1103,43 @@ class Asesmen extends Utility {
 				'asesmen' => $MasterAsesmen,
 				'tindakan' => $value['item'],
 				'penjamin' => $value['penjamin'],
-				'harga' => $Penjamin['response_data'][0]['harga'],
+				'kelas' => $value['kelas'],
+				'harga' => $HargaTindakan['response_data'][0]['harga'],
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))
 			->execute();
+			if($new_asesmen_tindakan['response_result'] > 0) {
+				$InvoiceDetail = $Invoice::append_invoice(array(
+					'invoice' => $TargetInvoice,
+					'item' => $value['item'],
+					'item_origin' => 'master_tindakan',
+					'qty' => 1,
+					'harga' => $HargaTindakan['response_data'][0]['harga'],
+					'status_bayar' => 'N',
+					'subtotal' => $HargaTindakan['response_data'][0]['harga'],
+					'discount' => 0,
+					'discount_type' => 'N',
+					'pasien' => $parameter['pasien'],
+					'penjamin' => $value['penjamin'],
+					'keterangan' => 'Biaya Tindakan Perobatan'
+				));
+
+				array_push($returnResponse, $InvoiceDetail);
+				
+				/*'invoice' => $parameter['invoice'],
+				'item' => $parameter['item'],
+				'item_type' => $parameter['item_origin'],
+				'qty' => $parameter['qty'],
+				'harga' => $parameter['harga'],
+				'status_bayar' => isset($parameter['status_bayar']) ? $parameter['status_bayar'] : 'N',
+				'subtotal' => $parameter['subtotal'],
+				'discount' => $parameter['discount'],
+				'discount_type' => $parameter['discount_type'],
+				'pasien' => $parameter['pasien'],
+				'penjamin' => $parameter['penjamin'],
+				'keterangan' => $parameter['keterangan']*/
+			}
 			array_push($returnResponse, $new_asesmen_tindakan);
 		}
 
@@ -1197,6 +1341,11 @@ class Asesmen extends Utility {
 						),
 						'class'=>__CLASS__
 					));
+
+					$updateAsesmen = self::$query
+						->update('asesmen', array('status' => 'D'))
+						->where(array('asesmen.uid' => '= ?'), array($MasterUID))
+						->execute();
 				}
 			} else {
 				//new asesmen rawat --> sudah oke
@@ -1446,6 +1595,11 @@ class Asesmen extends Utility {
 				),
 				'class'=>__CLASS__
 			));
+
+			$updateAsesmen = self::$query
+				->update('asesmen', array('status' => 'D'))
+				->where(array('asesmen.uid' => '= ?'), array($uid_asesmen))
+				->execute();
 		}
 
 		return $rawat;
@@ -1480,6 +1634,9 @@ class Asesmen extends Utility {
 		$antrian = new Antrian(self::$pdo);
 		$param = ['','antrian-detail', $parameter];
 		$get_antrian = $antrian->__GET__($param);
+
+		$get_kunjungan = $antrian->get_kunjungan_detail($get_antrian['response_data'][0]['kunjungan']);
+
 		$result = array(
 					"uid"=>$get_antrian['response_data'][0]['uid'],
 					"kunjungan"=>$get_antrian['response_data'][0]['kunjungan'],
@@ -1487,7 +1644,9 @@ class Asesmen extends Utility {
 					"departemen"=>$get_antrian['response_data'][0]['departemen'],
 					"penjamin"=>$get_antrian['response_data'][0]['penjamin'],
 					"dokter"=>$get_antrian['response_data'][0]['dokter'],
-					"waktu_masuk"=>$get_antrian['response_data'][0]['waktu_masuk']
+					"waktu_masuk"=>$get_antrian['response_data'][0]['waktu_masuk'],
+					'pj_pasien'=>$get_kunjungan['response_data'][0]['pj_pasien'],
+					'info_didapat_dari'=>$get_kunjungan['response_data'][0]['info_didapat_dari'],
 				);
 
 		return $result;

@@ -29,6 +29,9 @@ class Apotek extends Utility {
 			switch($parameter[1]) {
 				case 'detail_resep':
 					return self::detail_resep($parameter[2]);
+				case 'lunas':
+					return self::get_resep('L');
+					break;
 				default:
 					return self::get_resep();
 			}
@@ -390,7 +393,8 @@ class Apotek extends Utility {
 			//Assign invoice item
 			//cek Pelunasan penjamin non umum. Status auto bayar jika non umum
 			$invo_detail = $parameter;
-			if(in_array(__UIDPENJAMINUMUM__, $value['penjamin'])) {
+			//Cek penjamin utama pasien
+			if($parameter['penjamin'] == __UIDPENJAMINUMUM__) {
 				$invo_detail['invoice'] = $TargetInvoice;
 				$invo_detail['item'] = $value['obat'];
 				$invo_detail['item_origin'] = 'master_inv';
@@ -400,7 +404,7 @@ class Apotek extends Utility {
 				$invo_detail['subtotal'] = $value['harga_after_profit'] * $value['jumlah'];
 				$invo_detail['discount'] = 0;
 				$invo_detail['discount_type'] = 'N';
-				$invo_detail['keterangan'] = '';
+				$invo_detail['keterangan'] = 'Biaya obat';
 			} else {
 				$invo_detail['invoice'] = $TargetInvoice;
 				$invo_detail['item'] = $value['obat'];
@@ -411,10 +415,8 @@ class Apotek extends Utility {
 				$invo_detail['subtotal'] = $value['harga_after_profit'] * $value['jumlah'];
 				$invo_detail['discount'] = 0;
 				$invo_detail['discount_type'] = 'N';
-				$invo_detail['keterangan'] = '';
+				$invo_detail['keterangan'] = 'Biaya obat';
 			}
-				
-
 			
 			$AppendInvoice = $Invoice::append_invoice($invo_detail);
 		} // End Loop Resep Biasa
@@ -425,7 +427,7 @@ class Apotek extends Utility {
 
 		//Racikan manager
 
-		/*$checkerObatRacikan = array(); //Buat check uid obat lama
+		$checkerObatRacikan = array(); //Buat check uid obat lama
 		$racikanChange = array();
 
 		foreach ($parameter['racikan'] as $key => $value) {
@@ -544,7 +546,7 @@ class Apotek extends Utility {
 			$parameter['keterangan'] = '';
 
 			$AppendInvoice = $Invoice::append_invoice($parameter);
-		}*/
+		}
 
 		//Update resep master menjadi kasir
 		$Resep = self::$query->update('resep', array(

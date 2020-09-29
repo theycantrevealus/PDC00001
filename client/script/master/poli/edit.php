@@ -1,13 +1,16 @@
 <script type="text/javascript">
 	var uid = <?php echo json_encode(__PAGES__[3]); ?>;
 	$(function(){
-		var dataObject= {}, 
+		var dataObject= {
+			tindakan_konsultasi:""
+		}, 
 			hargaPenjamin = {}, 
 			tindakanPoli = [];
 
 		var state_tindakan_uid = '';
 		var tindakan, penjamin;
 
+		
 
 		/*load data tindakan*/
 		tindakan = loadTindakan();
@@ -30,13 +33,18 @@
 			success:function(response) {
 				
 				var metaData = response.response_package.response_data;
+				dataObject.tindakan_konsultasi = metaData[0].tindakan_konsultasi;
+				for(var tinKey in tindakan) {
+					$("#tindakan_konsultasi").append("<option " + ((metaData[0].tindakan_konsultasi == tindakan[tinKey].uid) ? "selected=\"selected\"" : "") + " value=\"" + tindakan[tinKey].uid + "\">" + tindakan[tinKey].nama + "</option>");
+				}
+				$("#tindakan_konsultasi").select2();
 				var temp_nama = metaData[0].nama;
-				var nama = temp_nama.replace('Poli ', '');
+				var nama = temp_nama.replace('Poliklinik ', '');
 
 				var tindakanData = metaData[0].tindakan;
 				
 				dataObject.uid = uid;
-				dataObject.nama = "Poli " + nama;
+				dataObject.nama = "Poliklinik " + nama;
 
 				$.each(tindakanData, function(key, item){
 					var uid_tindakan = item.uid_tindakan;
@@ -252,8 +260,9 @@
 
 		$("#btnSubmit").on('click', function(){
 			dataObject.tindakan = hargaPenjamin;
+			dataObject.tindakan_konsultasi = $("#tindakan_konsultasi").val();
 			
-			if (dataObject.nama != "") {
+			if (dataObject.nama != "" && dataObject.tindakan_konsultasi != "") {
 				$.ajax({
 					url: __HOSTAPI__ + "/Poli",
 					data: {
@@ -295,7 +304,7 @@
 
 
 	/*========== FUNC FOR LOAD TINDAKAN ==========*/
-	function loadTindakan(){
+	function loadTindakan(tindakan_master = ""){
 		var dataTindakan;
 
 		$.ajax({
@@ -310,9 +319,15 @@
 
 				for(i = 0; i < dataTindakan.length; i++){
 					var selection = document.createElement("OPTION");
-
 					$(selection).attr("value", dataTindakan[i].uid).html(dataTindakan[i].nama);
-					$("#tindakan").append(selection);
+					if(tindakan_master != "") {
+						if(dataTindakan[i].uid != tindakan_master) {
+							$("#tindakan").append(selection);	
+						}
+					} else {
+						$("#tindakan").append(selection);
+					}
+						
 				}
 			},
 			error: function(response) {
