@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" id="info-pasien-perawat">
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header bg-white d-flex align-items-center">

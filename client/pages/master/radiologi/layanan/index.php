@@ -10,9 +10,12 @@
 			</nav>
 			<h4>Layanan Radiologi</h4>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/master/radiologi/layanan/tambah" class="btn btn-info btn-sm ml-3">
+		<!-- <a href="<?php echo __HOSTNAME__; ?>/master/radiologi/layanan/tambah" class="btn btn-info btn-sm ml-3">
 			<i class="fa fa-plus"></i> Tambah
-		</a>
+		</a> -->
+		<button class="btn btn-sm btn-info" id="btnTambahData">
+			<i class="fa fa-plus"></i> Tambah
+		</button>
 	</div>
 </div>
 
@@ -21,7 +24,7 @@
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
 				<table class="table table-bordered" id="table-layanan-radiologi">
-					<thead>
+					<thead class="thead-dark">
 						<tr>
 							<th style="width: 20px;">No</th>
 							<th>Nama</th>

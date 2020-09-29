@@ -65,6 +65,8 @@
 					$(".load-kategori-obat-badge").append("<div style=\"margin:5px;\" class=\"badge badge-info\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + $("#label_kategori_obat_" + selectedKategoriObat[b]).html() + "</div>");
 				}
 
+				autoGudang(invData.lokasi);
+
 				
 				
 
@@ -534,7 +536,7 @@
 
 
 
-		function autoGudang() {
+		function autoGudang(lokasi) {
 			var gudangData;
 			$("#table-lokasi-gudang tbody tr").remove();
 			$("#table-monitoring tbody tr").remove();
@@ -561,7 +563,13 @@
 
 						var newGudangLokasi = document.createElement("INPUT");
 						$(newCellGudangLokasi).append(newGudangLokasi);
-						$(newGudangLokasi).addClass("form-control");
+						$(newGudangLokasi).addClass("form-control").val("");
+						for(var b = 0; b < lokasi.length; b++) {
+							if(gudangData[a].uid == lokasi[b].gudang) {
+								$(newGudangLokasi).val(lokasi[b].rak);
+							}	
+						}
+						
 
 						$(newGudangRow).append(newCellGudangID);
 						$(newGudangRow).append(newCellGudangName);
@@ -621,7 +629,7 @@
 			});
 			return gudangData;
 		}
-		autoGudang();
+		
 
 		//==========================================================DASAR
 		function saveDasar() {
