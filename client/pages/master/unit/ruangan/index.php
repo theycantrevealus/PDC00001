@@ -28,6 +28,9 @@
 						<tr>
 							<th style="width: 20px;">No</th>
 							<th>Nama Ruangan</th>
+							<th>Kode Ruangan</th>
+							<th>Kelas</th>
+							<th>Kapasitas</th>
 							<th>Lantai</th>
 							<th>Aksi</th>
 						</tr>

@@ -31,6 +31,14 @@ class Penjamin extends Utility {
 					return self::get_penjamin_detail($parameter[2]);
 					break;
 
+				case 'get_penjamin_obat':
+					return self::get_penjamin_obat($parameter[2]);
+					break;
+
+				/*case 'get_penjamin_tindakan':
+					return self::get_penjamin_tindakan($parameter[2]);
+					break;*/
+
 				default:
 					# code...
 					break;
@@ -86,7 +94,7 @@ class Penjamin extends Utility {
 		return $data;
 	}
 
-	private function get_penjamin_detail($parameter){
+	public function get_penjamin_detail($parameter){
 		$data = self::$query
 				->select('master_penjamin', array(
 						'uid',
@@ -107,6 +115,73 @@ class Penjamin extends Utility {
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		return $data;
+	}
+
+	public function get_penjamin_tindakan($parameter) {
+		$data = self::$query
+		->select('master_poli_tindakan_penjamin', array(
+			'id',
+			'harga',
+			'uid_poli',
+			'uid_tindakan',
+			'uid_penjamin',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
+			'AND',
+			'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
+			'AND',
+			'master_poli_tindakan_penjamin.uid_penjamin' => '= ?',
+			'ANd',
+			'master_poli_tindakan_penjamin.uid_poli' => '= ?',
+		), array(
+			$parameter['tindakan'],
+			$parameter['penjamin'],
+			$parameter['poli']
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['penjamin'] = self::get_penjamin_detail($value['penjamin'])['response_data'][0];
+			$autonum++;
+		}
+
+		return $data;
+	}
+	
+	public function get_penjamin_obat($parameter) {
+		$data = self::$query
+		->select('master_inv_harga', array(
+			'barang',
+			'penjamin',
+			'profit',
+			'profit_type',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_inv_harga.deleted_at' => 'IS NULL',
+			'AND',
+			'master_inv_harga.barang' => '= ?',
+			'AND',
+			'master_inv_harga.profit' => '> 0',
+		), array(
+			$parameter
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['penjamin'] = self::get_penjamin_detail($value['penjamin'])['response_data'][0];
 			$autonum++;
 		}
 

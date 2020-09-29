@@ -7,6 +7,7 @@ use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\Lantai as Lantai;
+use PondokCoder\Terminologi as Terminologi;
 
 class Ruangan extends Utility {
 	static $pdo;
@@ -71,13 +72,42 @@ class Ruangan extends Utility {
 
 
 	/*====================== GET FUNCTION =====================*/
+	public function get_ruangan_detail_by_code($parameter) { //Untuk cek kode ruangan dari BPJS
+		$data = self::$query
+					->select('master_unit_ruangan', 
+						array(
+							'uid',
+							'nama',
+							'kode_ruangan',
+							'kelas',
+							'kapasitas',
+							'lantai',
+							'created_at',
+							'updated_at'
+						)
+					)
+					->where(array(
+							'master_unit_ruangan.deleted_at' => 'IS NULL',
+							'AND',
+							'master_unit_ruangan.kode_ruangan' => '= ?'
+						),
+						array($parameter)
+					)
+					->execute();
+
+		return $data['response_data'][0];
+	}
+
 	private function get_ruangan($table){
 		$data = self::$query
 					->select($table, 
 						array(
 							'uid',
 							'nama',
-							'uid_lantai',
+							'kode_ruangan',
+							'kelas as id_kelas',
+							'kapasitas',
+							'lantai as uid_lantai',
 							'created_at',
 							'updated_at'
 						)
@@ -93,26 +123,32 @@ class Ruangan extends Utility {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 
-			$uid_lantai = $data['response_data'][$key]['uid_lantai'];
-			$arr = ['','lantai-detail', $uid_lantai];
-
+			$arr = ['','lantai-detail', $value['uid_lantai']];
 			$lantai = new Lantai(self::$pdo);
 			$get_lantai = $lantai::__GET__($arr);
 
 			$lantai_res = $get_lantai['response_data'][0];
 			$data['response_data'][$key]['lantai'] = $lantai_res['nama']; 
+
+			$kelas = new Terminologi(self::$pdo);
+			$param = ['','terminologi-items-detail',$value['id_kelas']];
+			$get_kelas = $kelas::__GET__($param);
+			$data['response_data'][$key]['kelas'] = $get_kelas['response_data'][0]['nama']; 
 		}	
 
 		return $data;
 	}
 
-	private function get_ruangan_detail($table, $parameter){
+	public function get_ruangan_detail($table, $parameter){
 		$data = self::$query
 					->select($table, 
 						array(
 							'uid',
 							'nama',
-							'uid_lantai',
+							'kode_ruangan',
+							'kelas',
+							'kapasitas',
+							'lantai',
 							'created_at',
 							'updated_at'
 						)
@@ -141,7 +177,7 @@ class Ruangan extends Utility {
 						array(
 							'uid',
 							'nama',
-							'uid_lantai',
+							'lantai',
 							'created_at',
 							'updated_at'
 						)
@@ -348,7 +384,10 @@ class Ruangan extends Utility {
 						->insert($table, array(
 							'uid'=>$uid,
 							'nama'=>$parameter['nama'],
-							'uid_lantai'=>$parameter['lantai'],
+							'kode_ruangan'=>$parameter['kode_ruangan'],
+							'kelas'=>$parameter['kelas'],
+							'kapasitas'=>$parameter['kapasitas'],
+							'lantai'=>$parameter['lantai'],
 							'created_at'=>parent::format_date(),
 							'updated_at'=>parent::format_date()
 							)
@@ -386,16 +425,19 @@ class Ruangan extends Utility {
 		}
 	}
 
-	private function edit_lantai($table, $parameter){
+	private function edit_ruangan($table, $parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$old = self::get_lantai_detail($parameter['uid']);
+		$old = self::get_ruangan_detail('master_unit_ruangan', $parameter['uid']);
 
 		$ruangan = self::$query
 				->update($table, array(
 						'nama'=>$parameter['nama'],
-						'uid_lantai'=>$parameter['lantai'],
+						'kode_ruangan'=>$parameter['kode_ruangan'],
+						'kelas'=>$parameter['kelas'],
+						'kapasitas'=>$parameter['kapasitas'],
+						'lantai'=>$parameter['lantai'],
 						'updated_at'=>parent::format_date()
 					)
 				)

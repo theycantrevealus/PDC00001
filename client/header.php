@@ -12,15 +12,26 @@
 
 
 				<!-- Navbar Brand -->
-				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand ">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" width="60" height="40" alt="SIMRS PETALA BUMI">
-					SIMRS PETALA BUMI
-					<span> <small>-Integrated</small></span>
+				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand" style="padding: 10px 20px;">
+					<img class="navbar-brand-icon" style="position: absolute; margin-top: 20px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="160" height="160" alt="SIMRS PETALA BUMI">
 				</a>
-
-
 				
-				<ul class="nav navbar-nav d-none d-sm-flex border-left navbar-height align-items-center">
+				<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
+					<li class="nav-item dropdown">
+						<a href="#notifications_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
+							<i class="material-icons nav-icon" id="counter-notif-identifier">notifications</i>
+						</a>
+						<div id="notifications_menu" class="dropdown-menu dropdown-menu-right navbar-notifications-menu">
+							<div class="dropdown-item d-flex align-items-center py-2">
+								<span class="flex navbar-notifications-menu__title m-0">Notifications</span>
+								<a id="clear_notif" href="" class="text-muted"><small>Clear all</small></a>
+							</div>
+							<div class="navbar-notifications-menu__content" data-simplebar>
+								<div class="py-2" id="notification-container"></div>
+							</div>
+							<a href="javascript:void(0);" class="dropdown-item text-center navbar-notifications-menu__footer">View All</a>
+						</div>
+					</li>
 					<li class="nav-item dropdown">
 						<a href="<?php echo __HOSTNAME__; ?>/template/#account_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
 							<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/avatar/demi.png" class="rounded-circle" width="32" alt="Frontted" />
