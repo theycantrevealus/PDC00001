@@ -4,7 +4,9 @@ namespace PondokCoder;
 use PondokCoder\QueryException as QueryException;
 class Query {
 	static $pdo;
+	static $keyType;
 	static $queryMode;
+	static $keyReturn;
 	static $queryString;
 	static $queryStringOrder;
 	static $queryParams = array();
@@ -13,11 +15,12 @@ class Query {
 	static $whereParameter = array();
 	static $whereLogic = array();
 	private $tables = array();
-	private $limit, $offset;
+	static $limit, $offset;
 
 	public function __construct($connection) {
 		self::$pdo = $connection;
 		self::$queryString = '';
+		self::$keyType = '';
 	}
 
 	function insert($table, $parameter = array()) {
@@ -31,6 +34,13 @@ class Query {
 			array_push(self::$queryParams, $key);
 			array_push(self::$queryValues, $value);
 		}
+
+		return $this;
+	}
+
+	function returning($parameter) {
+		self::$keyType = ' RETURNING '. $parameter;
+		self::$keyReturn = $parameter;
 		return $this;
 	}
 
@@ -68,6 +78,7 @@ class Query {
 
 	function where($parameter = array(), $values = array()) {
 		self::$whereParameter = array();
+		self::$whereLogic = array();
 		foreach ($parameter as $key => $value) {
 			if(is_int($key)) {
 				array_push(self::$whereLogic, $value);
@@ -76,7 +87,11 @@ class Query {
 			}
 		}
 		foreach ($values as $key => $value) {
-			array_push(self::$queryValues, $value);
+			if($value == 'NULL'){
+				array_push(self::$queryValues, '');
+			} else {
+				array_push(self::$queryValues, $value);
+			}
 		}
 		return $this;
 	}
@@ -96,10 +111,12 @@ class Query {
 		return $this;
 	}
 
-	function select($table, $parameter = array()) {
-		$this->tables = array();
-		self::$queryValues = array();
-		self::$queryParams = array();
+	function select($table, $parameter = array(), $MODE = 1) {
+		if($MODE == 1) {
+			$this->tables = array();
+			self::$queryValues = array();
+			self::$queryParams = array();	
+		}
 		self::$queryMode = 'select';
 		self::$queryString = 'SELECT ';
 		$this->tables[$table] = array();
@@ -116,21 +133,23 @@ class Query {
 		if(isset($this->tables[$table])) {
 			throw new QueryException('Duplicated table defined', 1);
 		} else {
-			self::select($table, $parameter);	
+			self::select($table, $parameter, 2);
 		}
-		
+
 		return $this;
 	}
 
 	function offset($parameter) {
 
 		self::$offset = 'OFFSET ' . $parameter;
+		return $this;
 
 	}
 
 	function limit($parameter) {
 
 		self::$limit = 'LIMIT ' . $parameter;
+		return $this;
 
 	}
 
@@ -140,6 +159,7 @@ class Query {
 			foreach ($parameter as $key => $value) {
 				array_push($buildJoin, implode(' ', $value));
 			}
+
 			self::$joinString = $buildJoin;
 			return $this;
 		} else {
@@ -180,7 +200,7 @@ class Query {
 			}
 			$buildQuery = trim($buildQuery);
 			if(isset(self::$limit)) {
-				if(isset(self::$offset)) {
+				if(isset(self::$offset) && intval(self::$offset) >= 0) {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit . ' ' . self::$offset;	
 				} else {
 					return $buildQuery . self::$queryStringOrder . ' ' . self::$limit;
@@ -194,19 +214,37 @@ class Query {
 				array_push($defineColumn, '?');
 			}
 			$buildQuery .= $this->tables[0] . ' (' . implode(',', self::$queryParams) . ') VALUES (' . implode(',', $defineColumn) . ')';
+			
+			if(self::$keyType != '') {
+				$buildQuery .= self::$keyType;
+			}
 			return $buildQuery;
 		} else if(self::$queryMode == 'update') {
 			$defineColumn = array();
 			$buildQuery .= $this->tables[0] . ' SET ';
-			
-			$buildQuery .= implode(' = ?, ', self::$queryParams);
+			$nullCol = array();
+			for ($key = 0; $key < count(self::$queryParams); $key++) {
+				if(is_null(self::$queryValues[$key])) {
+					$buildQuery .= self::$queryParams[$key] . ' = NULL';
+					//array_splice(self::$queryValues, $key, 1);
+				} else {
+					$buildQuery .= self::$queryParams[$key] . ' = ?';
+				}
+				
+				if($key <= count(self::$queryParams) - 2) {
+					$buildQuery .= ', ';
+				} else {
+					$buildQuery .= '';
+				}
+			}
+			//$buildQuery .= implode(' = ?, ', self::$queryParams);
 			if(count(self::$whereParameter) > 0) {
 				$whereBuilder = array();
 				foreach (self::$whereParameter as $key => $value) {
 					array_push($whereBuilder, $value);
 					array_push($whereBuilder, self::$whereLogic[$key]);
 				}
-				$buildQuery .= '= ? WHERE ' . implode(' ', $whereBuilder);
+				$buildQuery .= ' WHERE ' . implode(' ', $whereBuilder);
 			}
 			$buildQuery = trim($buildQuery);
 
@@ -240,32 +278,56 @@ class Query {
 
 
 	function execute() {
+		$usedValues = array();
 		try {
 			$responseBuilder = array();
+			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
+			$responseBuilder['response_values'] = self::$queryValues;
 			$query = self::$pdo->prepare(self::buildQuery());
-			$query->execute(self::$queryValues);
+			foreach (self::$queryValues as $key => $value) {
+				if(!is_null($value)) {
+					array_push($usedValues, $value);
+					//array_splice(self::$queryValues, $key, 1);
+				}
+			}
+			//$query->execute(self::$queryValues);
+			$query->execute($usedValues);
 			
 			if(self::$queryMode == 'select') {
 				$read = $query->fetchAll(\PDO::FETCH_ASSOC);
 				$responseBuilder['response_data'] = (count($read) > 0) ? $read : array();
 			} else if(self::$queryMode == 'insert') {
+				if(self::$keyType != '') {
+					$getReturn = $query->fetchAll(\PDO::FETCH_ASSOC);
+					$responseBuilder['response_unique'] = $getReturn[0][self::$keyReturn];
+				}
+
 				$responseBuilder['response_message'] = ($query->rowCount() > 0) ? 'Data berhasil ditambahkan' : 'Data gagal ditambahkan';
 			} else if(self::$queryMode == 'update') {
 				$responseBuilder['response_message'] = ($query->rowCount() > 0) ? 'Data berhasil diupdate' : 'Data gagal diupdate';
 			} else if(self::$queryMode == 'delete') {
 				$responseBuilder['response_message'] = ($query->rowCount() > 0) ? 'Data berhasil dihapus' : 'Data gagal dihapus';
 			}
+			$this->tables = array();
 			self::$whereParameter = array();
 			self::$joinString = array();
 			self::$whereLogic = array();
 			self::$queryValues = array();
 			self::$queryParams = array();
 			self::$queryString = '';
+			self::$keyType = '';
+			self::$keyReturn = '';
+			self::$queryStringOrder = '';
 
 			$responseBuilder['response_result'] = $query->rowCount();
 			return $responseBuilder;
 		} catch (\PDOException $e) {
-			throw new QueryException($e->getMessage(), 1);
+			//throw new QueryException($e->getMessage(), 1);
+			$responseBuilder = array();
+			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
+			$responseBuilder['response_values'] = $usedValues;
+			$responseBuilder['response_params'] = self::$queryParams;
+			return $responseBuilder;
 		}
 	}
 }
