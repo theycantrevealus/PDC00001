@@ -1419,7 +1419,7 @@ class Laboratorium extends Utility {
 	private function add_order_lab($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+		
 		$get_antrian = new Antrian(self::$pdo);
 		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter['uid_antrian']);
 		
@@ -1474,6 +1474,111 @@ class Laboratorium extends Utility {
 					$uidLabOrder = $checkLabOrder['response_data'][0]['uid'];
 
 					$result['old_lab_order'] = $checkLabOrder;
+
+					if (count($parameter['listTindakanDihapus']) > 0){
+
+						foreach($parameter['listTindakanDihapus'] as $key => $value_dihapus){
+							$getNilaiTindakan = self::$query
+								->select('lab_order_nilai', 
+									array(
+										'id_lab_nilai',
+										'nilai'
+									)
+								)
+								->where(
+									array(
+										'lab_order_nilai.lab_order' 	=> '= ?',
+										'AND',
+										'lab_order_nilai.tindakan' 		=> '= ?',
+										'AND',
+										'lab_order_nilai.deleted_at'	=> 'IS NULL'
+									), array(
+										$uidLabOrder,
+										$value_dihapus
+									)
+								)
+								->execute();
+							
+							if ($getNilaiTindakan['response_result'] > 0){
+								$hapus = 'TRUE';
+								foreach ($getNilaiTindakan['response_data'] as $key => $value) {
+									if ($value['nilai'] != NULL AND $value['nilai'] != ""){
+										$hapus = 'FALSE';
+										break;
+									}
+								}
+
+								if ($hapus === 'TRUE'){
+
+									$hapusNilaiTindakanTerpilih = self::$query
+										->delete('lab_order_nilai')
+										->where(array(
+												'lab_order_nilai.lab_order' 	=> '= ?',
+												'AND',
+												'lab_order_nilai.tindakan' 		=> '= ?',
+												'AND',
+												'lab_order_nilai.deleted_at'	=> 'IS NULL'
+											), array(
+												$uidLabOrder,
+												$value_dihapus
+											)
+										)
+										->execute();
+
+									if ($hapusNilaiTindakanTerpilih['response_result'] > 0){
+										$result['delete_tindakan_nilai'] = $hapusNilaiTindakanTerpilih;
+
+										$hapusTindakanTerpilih = self::$query
+											->delete('lab_order_detail')
+											->where(array(
+													'lab_order_detail.lab_order' 	=> '= ?',
+													'AND',
+													'lab_order_detail.tindakan' 	=> '= ?',
+													'AND',
+													'lab_order_detail.deleted_at'	=> 'IS NULL'
+												), array(
+													$uidLabOrder,
+													$value_dihapus
+												)
+											)
+											->execute();
+										
+										if ($hapusTindakanTerpilih['response_result'] > 0){
+											$result['delete_tindakan_detail'] = $hapusTindakanTerpilih;
+										}
+
+										$log = parent::log(array(
+												'type'=>'activity',
+												'column'=>array(
+													'unique_target',
+													'user_uid',
+													'table_name',
+													'action',
+													'logged_at',
+													'status',
+													'login_id'
+												),
+												'value'=>array(
+													'lab_order: ' . $uidLabOrder . '; asesmen: ' . $uidAsesmen . "; tindakan: " . $value_dihapus,
+													$UserData['data']->uid,
+													'lab_order_detail, lab_order_nilai',
+													'D',
+													parent::format_date(),
+													'N',
+													$UserData['data']->log_id
+												),
+												'class'=>__CLASS__
+											)
+										);
+
+									}
+
+								}
+							}
+							
+						}
+
+					}
 				}
 
 			} else {
@@ -1525,51 +1630,57 @@ class Laboratorium extends Utility {
 			}
 
 			if ($statusOrder == "NEW"){
+				$uidLabOrder = "";
 
-				$uidLabOrder = parent::gen_uuid();
-				$labOrder = self::$query
-					->insert('lab_order', 
-						array(
-							'uid'			=>	$uidLabOrder,
-							'asesmen'		=>	$uidAsesmen,
-							'waktu_order'	=>	parent::format_date(),
-							'selesai'		=>	'false',
-							'petugas'		=>	$UserData['data']->uid,
-							'created_at'	=>	parent::format_date(),
-							'updated_at'	=>	parent::format_date()
+				if (count($parameter['listTindakan']) > 0){
+					$uidLabOrder = parent::gen_uuid();
+					$labOrder = self::$query
+						->insert('lab_order', 
+							array(
+								'uid'			=>	$uidLabOrder,
+								'asesmen'		=>	$uidAsesmen,
+								'waktu_order'	=>	parent::format_date(),
+								'selesai'		=>	'false',
+								'petugas'		=>	$UserData['data']->uid,
+								'created_at'	=>	parent::format_date(),
+								'updated_at'	=>	parent::format_date()
+							)
 						)
-					)
-					->execute();
-				
-				if($labOrder['response_result'] > 0) {
+						->execute();
+					
+					if($labOrder['response_result'] > 0) {
 
-					$log = parent::log(array(
-						'type'=>'activity',
-						'column'=>array(
-							'unique_target',
-							'user_uid',
-							'table_name',
-							'action',
-							'logged_at',
-							'status',
-							'login_id'
-						),
-						'value'=>array(
-							$uidLabOrder,
-							$UserData['data']->uid,
-							'lab_order',
-							'I',
-							parent::format_date(),
-							'N',
-							$UserData['data']->log_id
-						),
-						'class'=>__CLASS__
-					));
+						$log = parent::log(array(
+							'type'=>'activity',
+							'column'=>array(
+								'unique_target',
+								'user_uid',
+								'table_name',
+								'action',
+								'logged_at',
+								'status',
+								'login_id'
+							),
+							'value'=>array(
+								$uidLabOrder,
+								$UserData['data']->uid,
+								'lab_order',
+								'I',
+								parent::format_date(),
+								'N',
+								$UserData['data']->log_id
+							),
+							'class'=>__CLASS__
+						));
+						
+					}
+	
+					$result['new_lab_order'] = $labOrder;
+				} else {
 					
-					
+					$result['response_message'] = 'Nothing in action';
 				}
-
-				$result['new_lab_order'] = $labOrder;
+				
 			}
 			
 			//check if uid labOrder has no empty and add tindakan

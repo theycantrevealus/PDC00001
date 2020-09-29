@@ -19,7 +19,7 @@
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
 				<table class="table table-bordered" id="table-pegawai">
-					<thead>
+					<thead class="thead-dark">
 						<tr>
 							<th style="width: 20px;">No</th>
 							<th><i class="fa fa-user-circle"></i> Pengguna</th>
