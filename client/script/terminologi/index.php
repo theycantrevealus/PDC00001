@@ -1,20 +1,8 @@
 <script type="text/javascript">
 	$(function(){
-		/*$.ajax({
-			async: false,
-			url: __HOSTAPI__ + "/Terminologi",
-			beforeSend: function(request) {
-				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-			},
-			type: "GET",
-			success: function(response){
-				console.log(response.response_package.response_data);
-			}
-		});*/
-
 		var tableTerminologi = $("#table-terminologi").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/Terminologi",
+				url: __HOSTAPI__ + "/Terminologi/terminologi",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -31,7 +19,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["id"];
+						return row["autonum"];
 					}
 				},
 				{
@@ -42,12 +30,9 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<a href=\"" + __HOSTNAME__ + "/terminologi/edit/" + row["id"] + "\" class=\"btn btn-info btn-sm\">" +
-										"<i class=\"fa fa-pencil\"></i> Edit" +
+									"<a href=\"" + __HOSTNAME__ + "/terminologi/child/" + row["id"] + "\" class=\"btn btn-info btn-sm\" data-toggle='tooltip' title='Tampil Term Items'>" +
+										"<i class=\"fa fa-list\"></i>" +
 									"</a>" +
-									"<button id=\"delete_" + row['id'] + "\" class=\"btn btn-danger btn-sm btn-delete-terminologi\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
-									"</button>" +
 								"</div>";
 					}
 				}

@@ -235,12 +235,9 @@ class Modul extends Utility {
 
 		return $child_list;
 	}
-
-
 	
-
 	public function get_all() {
-		$query = self::$pdo->prepare('SELECT * FROM modul WHERE deleted_at IS NULL');
+		$query = self::$pdo->prepare('SELECT * FROM "public"."modul" WHERE deleted_at IS NULL');
 		$query->execute();
 		$read = $query->fetchAll(\PDO::FETCH_ASSOC);
 		return $read;
@@ -345,6 +342,8 @@ class Modul extends Utility {
 			$methods = self::$query->select('akses', array(
 				'id',
 				'class_name',
+				'caption',
+				'remark',
 				'methods_name',
 				'created_at',
 				'updated_at'
@@ -371,6 +370,8 @@ class Modul extends Utility {
 			$methods = self::$query->select('akses', array(
 				'id',
 				'class_name',
+				'caption',
+				'remark',
 				'methods_name',
 				'created_at',
 				'updated_at'
