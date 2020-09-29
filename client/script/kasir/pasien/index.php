@@ -14,14 +14,13 @@
 
 		
 
-		function getDateRange() {
-			var rangeKwitansi = $("#range_kwitansi").val().split(" to ");
+		function getDateRange(target) {
+			var rangeKwitansi = $(target).val().split(" to ");
 			if(rangeKwitansi.length > 1) {
 				return rangeKwitansi;
 			} else {
 				return [rangeKwitansi, rangeKwitansi];
-			}
-			
+			}	
 		}
 
 		var tableKwitansi = $("#table-kwitansi").DataTable({
@@ -36,8 +35,8 @@
 				type: "POST",
 				data: function(d){
 					d.request = "kwitansi_data";
-					d.from = getDateRange()[0];
-					d.to = getDateRange()[1];
+					d.from = getDateRange("#range_kwitansi")[0];
+					d.to = getDateRange("#range_kwitansi")[1];
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -49,7 +48,7 @@
 					}
 
 					response.draw = parseInt(response.response_package.response_draw);
-					console.log(response);
+					//console.log(response);
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = response.response_package.recordsFiltered;
 					return dataSet;
@@ -157,30 +156,52 @@
 			tableKwitansi.ajax.reload();
 		});
 
+		
 		var tableAntrianBayar = $("#table-biaya-pasien").DataTable({
+			processing: true,
+			serverSide: true,
+			sPaginationType: "full_numbers",
+			bPaginate: true,
+			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+			serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Invoice",
-				type: "GET",
+				type: "POST",
+				data: function(d) {
+					d.request = "biaya_pasien";
+					d.from = getDateRange("#range_invoice")[0];
+					d.to = getDateRange("#range_invoice")[1];
+				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
 					var returnedData = [];
+					if(returnedData == undefined || returnedData.response_package == undefined) {
+						returnedData = [];
+					}
 					for(var InvKeyData in response.response_package.response_data) {
 						if(response.response_package.response_data[InvKeyData].antrian_kunjungan != undefined) {
 							if(!response.response_package.response_data[InvKeyData].lunas) {
 								returnedData.push(response.response_package.response_data[InvKeyData]);
 							}
+						} else {
+							alert();
 						}
 					}
+
+					response.draw = parseInt(response.response_package.response_draw);
+					response.recordsTotal = response.response_package.recordsTotal;
+					response.recordsFiltered = response.response_package.recordsFiltered;
+					
 					return returnedData;
 				}
 			},
 			autoWidth: false,
-			aaSorting: [[0, "asc"]],
-			"columnDefs":[
-				{"targets":0, "className":"dt-body-left"}
-			],
+			language: {
+				search: "",
+				searchPlaceholder: "Cari Nomor Invoice"
+			},
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
@@ -218,6 +239,13 @@
 					}
 				}
 			]
+		});
+
+
+		$("#range_invoice").change(function() {
+			/*console.clear();
+			console.log(getDateRange());*/
+			tableAntrianBayar.ajax.reload();
 		});
 
 		

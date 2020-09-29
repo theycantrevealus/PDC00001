@@ -40,29 +40,38 @@
 					</li>
 				</ul>
 			</div>
+			<?php
+				$day=new DateTime('last day of this month');
+			?>
 			<div class="card card-body tab-content">
 				<div class="tab-pane show fade active" id="tab-tagihan">
-					<table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien" style="font-size: 0.9rem;">
-						<thead class="thead-dark">
-							<tr>
-								<th class="wrap_content">No</th>
-								<th class="wrap_content">No. Tagihan</th>
-								<th>Pasien</th>
-								<th>Poliklinik</th>
-								<th class="wrap_content">Staf Pendaftaran</th>
-								<th>Total Biaya</th>
-								<th>Aksi</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
+					<div class="row">
+						<div class="col-lg">
+							<input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+							<div class="row">
+								<div class="col-lg" style="margin-top: 25px">
+									<table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien" style="font-size: 0.9rem;">
+										<thead class="thead-dark">
+											<tr>
+												<th class="wrap_content">No</th>
+												<th class="wrap_content">No. Tagihan</th>
+												<th>Pasien</th>
+												<th>Poliklinik</th>
+												<th class="wrap_content">Staf Pendaftaran</th>
+												<th>Total Biaya</th>
+												<th>Aksi</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="tab-pane show fade" id="tab-kwitansi">
 					<div class="row">
 						<div class="col-lg">
-							<?php
-								$day=new DateTime('last day of this month');
-							?>
 							<input id="range_kwitansi" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
 							<div class="row">
 								<div class="col-lg" style="margin-top: 25px">

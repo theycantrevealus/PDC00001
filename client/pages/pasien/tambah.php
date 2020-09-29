@@ -47,6 +47,11 @@
 						<span style="color: #dc3545; font-size: 0.8rem;" id="error-nik"></span>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
+						<label for="nik">Email <span class="red">*</span></label>
+						<input type="email" class="form-control inputan required" maxlength="16" placeholder="email" value="" name="email" id="email">
+						<span style="color: #dc3545; font-size: 0.8rem;" id="error-email"></span>
+					</div>
+					<div class="col-12 col-md-6 mb-3">
 						<label for="nama">Nama Pasien <span class="red">*</span></label>
 						<input type="text" autocomplete="off" class="form-control uppercase inputan required" id="nama" name="nama" placeholder="Nama Pasien">
 						<div class="row col-md-9">
@@ -156,12 +161,12 @@
 						<input id="no_telp" type="text" autocomplete="off" maxlength="14" class="form-control numberonly inputan required" name="no_telp" placeholder="08xxxxxxxxxx">
 					</div>
 					<div class="col-12 col-md-6 mb-3">
-						<label for="goldar">Golongan Darah <span class="red">*</span></label>	
+						<label for="goldar">Golongan Darah</label>	
 						<!-- <div class="row col-md-9" id="parent_goldar">
 
 						</div> -->
-						<select class="form-control inputan select2 required" name="goldar" id="goldar">
-							<option value="" disabled selected>Pilih Golongan Darah</option>
+						<select class="form-control inputan select2" name="goldar" id="goldar">
+							<option value="" disabled selected>-</option>
 						</select>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
