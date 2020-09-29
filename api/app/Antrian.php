@@ -169,6 +169,34 @@ class Antrian extends Utility {
 				__UIDPENJAMINUMUM__))
 			->execute();
 
+
+
+			//Cek Penjamin. Jika BPJS maka cek status SEP pada lokal
+			if($value['uid_penjamin'] == __UIDPENJAMINBPJS__) {
+				//Cek tabel SEP
+				$SEP = self::$query->select('penjamin_sep', array(
+					'id',
+					'bpjs_no_sep'
+				))
+				->where(array(
+					'penjamin_sep.pasien' => '= ?',
+					'AND',
+					'penjamin_sep.created_at' => '>= now()::date',
+					'AND',
+					'penjamin_sep.deleted_at' => 'IS NULL'
+				), array(
+					$value['uid_pasien']
+				))
+				->execute();
+
+				if(count($SEP['response_data']) == 0) {
+					$data['response_data'][$key]['sep'] = 0;
+				} else {
+					$data['response_data'][$key]['sep'] = $SEP['response_data'][0]['bpjs_no_sep'];
+				}
+			}
+
+
 			$data['response_data'][$key]['harga'] = $harga['response_data'][0];
 		}
 
