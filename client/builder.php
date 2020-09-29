@@ -117,11 +117,11 @@
 		<div class="preloader">
 			<div class="sidemenu-shimmer">
 				<?php
-					for($sh = 1; $sh <= 10; $sh++) {
+					/*for($sh = 1; $sh <= 10; $sh++) {
 				?>
 				<div class="shine"></div>
 				<?php
-					}
+					}*/
 				?>
 			</div>
 			<div class="content-shimmer">
@@ -489,6 +489,32 @@
 			}
 			return s.join(dec);
 		}
+		
+
+		function bpjs_load_faskes() {
+			var dataFaskes = [];
+			$.ajax({
+				async: false,
+				url:__HOSTAPI__ + "/BPJS/get_faskes",
+				type: "GET",
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				success: function(response){
+					var data = [];
+					if(response == undefined || response.response_package == undefined || response.response_package.response_data == undefined) {
+						dataFaskes = [];
+					} else {
+						dataFaskes = response.response_package.response_data;
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+
+			return dataFaskes;
+		}
 
 		$(function() {
 			var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
@@ -520,6 +546,50 @@
 					placement: "top",
 					title: data
 				});
+			});
+			
+			$(".sidebar-menu").each(function(e) {
+				$(this).find("li.sidebar-menu-item").each(function(f) {
+					var shimmer = document.createElement("DIV");
+					$(shimmer).addClass("shine");
+					$(".sidemenu-shimmer").append(shimmer);
+				});
+			});
+
+			var weekday=new Array(7);
+			weekday[0]="Minggu";
+			weekday[1]="Senin";
+			weekday[2]="Selasa";
+			weekday[3]="Rabu";
+			weekday[4]="Kamis";
+			weekday[5]="Jumat";
+			weekday[6]="Sabtu";
+
+			var monthName=new Array(7);
+			monthName[0]="Januari";
+			monthName[1]="Februari";
+			monthName[2]="Maret";
+			monthName[3]="April";
+			monthName[4]="Mei";
+			monthName[5]="Juni";
+			monthName[6]="Juli";
+			monthName[7]="Agustus";
+			monthName[8]="September";
+			monthName[9]="Oktober";
+			monthName[10]="November";
+			monthName[11]="Desember";
+
+			$(".txt_tanggal").datepicker({
+				dateFormat: 'DD, dd MM yy',
+				onSelect: function(date) {
+					var date = $(this).datepicker('getDate'),
+					day  = date.getDate(),
+					month = date.getMonth() + 1,
+					year =  date.getFullYear();
+
+					var dayOfWeek = weekday[date.getUTCDay()+1];
+					$(this).datepicker("setDate", dayOfWeek);
+		        }
 			});
 		});
 	</script>

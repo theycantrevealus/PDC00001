@@ -1038,6 +1038,8 @@ class Inventori extends Utility {
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
+
+			
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$kategori_obat = self::get_kategori_obat_item($value['uid']);
 			foreach ($kategori_obat as $KOKey => $KOValue) {

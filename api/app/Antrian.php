@@ -10,6 +10,7 @@ use PondokCoder\Terminologi as Terminologi;
 use PondokCoder\Invoice as Invoice;
 use PondokCoder\Pasien as Pasien;
 use PondokCoder\Pegawai as Pegawai;
+use PondokCoder\Poli as Poli;
 
 class Antrian extends Utility {
 	static $pdo;
@@ -69,7 +70,9 @@ class Antrian extends Utility {
 			case 'tambah-kunjungan':
 				return self::tambah_kunjungan('kunjungan', $parameter);
 				break;
-
+			case 'ubah_dokter_antrian':
+				return self::ubah_dokter_antrian($parameter);
+				break;
 			default:
 				# code...
 				break;
@@ -165,6 +168,34 @@ class Antrian extends Utility {
 				__UIDKONSULDOKTER__,
 				__UIDPENJAMINUMUM__))
 			->execute();
+
+
+
+			//Cek Penjamin. Jika BPJS maka cek status SEP pada lokal
+			if($value['uid_penjamin'] == __UIDPENJAMINBPJS__) {
+				//Cek tabel SEP
+				$SEP = self::$query->select('penjamin_sep', array(
+					'id',
+					'bpjs_no_sep'
+				))
+				->where(array(
+					'penjamin_sep.pasien' => '= ?',
+					'AND',
+					'penjamin_sep.created_at' => '>= now()::date',
+					'AND',
+					'penjamin_sep.deleted_at' => 'IS NULL'
+				), array(
+					$value['uid_pasien']
+				))
+				->execute();
+
+				if(count($SEP['response_data']) == 0) {
+					$data['response_data'][$key]['sep'] = 0;
+				} else {
+					$data['response_data'][$key]['sep'] = $SEP['response_data'][0]['bpjs_no_sep'];
+				}
+			}
+
 
 			$data['response_data'][$key]['harga'] = $harga['response_data'][0];
 		}
@@ -290,6 +321,10 @@ class Antrian extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
 
+		//Tentukan tindakan untuk poli bersangkutan
+		$PoliTindakan = new Poli(self::$pdo);
+		$PoliTindakanInfo = $PoliTindakan::get_poli_detail($parameter['dataObj']['departemen'])['response_data'][0];
+
 		$kunjungan = self::$query->insert($table, array(
 			'uid'=>$uid,
 			'waktu_masuk'=>parent::format_date(),
@@ -374,7 +409,7 @@ class Antrian extends Utility {
 					
 
 					if(count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
-						$checkBiayaKartu = self::$query->select('antrian',array( //New Detail. Rekap tagihan
+						$checkBiayaKartu = self::$query->select('antrian', array( //New Detail. Rekap tagihan
 							'uid'
 						))
 						->where(array(
@@ -384,7 +419,7 @@ class Antrian extends Utility {
 						))
 						->execute();
 
-						if(count($checkBiayaKartu['response_data']) < 1) { //Biaya Kartu
+						if(count($checkBiayaKartu['response_data']) <= 0) { //Biaya Kartu
 							$Invoice = $SInvoice::append_invoice(array(
 								'invoice' => $InvoiceCheck['response_data'][0]['uid'],
 								'item' => __UID_KARTU__,
@@ -403,15 +438,15 @@ class Antrian extends Utility {
 						$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 							'poli' => $parameter['dataObj']['departemen'],
 	            			'kelas' => __UID_KELAS_GENERAL_RJ__,
-							'tindakan' => __UID_KONSULTASI__,
+							'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
 							'penjamin' => $parameter['dataObj']['penjamin']
 						));
 
-						print_r($HargaTindakan['response_data']);
+						//print_r($HargaTindakan['response_data']);
 
 						$Invoice = $SInvoice::append_invoice(array(
 							'invoice' => $InvoiceCheck['response_data'][0]['uid'],
-							'item' => __UID_KONSULTASI__,
+							'item' => $PoliTindakanInfo['tindakan_konsultasi'],
 							'item_origin' => 'master_tindakan',
 							'qty' => 1,
 							'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
@@ -437,12 +472,12 @@ class Antrian extends Utility {
 							->where(array(
 								'antrian.pasien' => '= ?'
 							), array(
-								$parameter
+								$parameter['dataObj']['pasien']
 							))
 							->execute();
 
-							if(count($checkBiayaKartu['response_data']) < 1) { //Biaya Kartu
-								if(isset($HargaKartu['response_data']) && count($HargaKartu['response_data']) > 0) {
+							if(count($checkBiayaKartu['response_data']) == 0) { //Biaya Kartu
+								/*if(isset($HargaKartu['response_data']) && count($HargaKartu['response_data']) > 0) {
 									$Invoice = $SInvoice::append_invoice(array(
 										'invoice' => $NewInvoiceUID,
 										'item' => __UID_KARTU__,
@@ -456,19 +491,32 @@ class Antrian extends Utility {
 										'penjamin' => $parameter['dataObj']['penjamin'],
 										'keterangan' => 'Biaya kartu pasien baru'
 									));
-								}
+								}*/
+								$Invoice = $SInvoice::append_invoice(array(
+									'invoice' => $NewInvoiceUID,
+									'item' => __UID_KARTU__,
+									'item_origin' => 'master_tindakan',
+									'qty' => 1,
+									'harga' => floatval($HargaKartu['response_data'][0]['harga']),
+									'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
+									'discount' => 0,
+									'discount_type' => 'N',
+									'pasien' => $parameter['dataObj']['currentPasien'],
+									'penjamin' => $parameter['dataObj']['penjamin'],
+									'keterangan' => 'Biaya kartu pasien baru'
+								));
 							}
 
 							$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 								'poli' => $parameter['dataObj']['departemen'],
 								'kelas' => __UID_KELAS_GENERAL_RJ__,
-								'tindakan' => __UID_KONSULTASI__,
+								'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
 								'penjamin' => $parameter['dataObj']['penjamin']
 							));
 
 							$Invoice = $SInvoice::append_invoice(array(
 								'invoice' => $NewInvoiceUID,
-								'item' => __UID_KONSULTASI__,
+								'item' => $PoliTindakanInfo['tindakan_konsultasi'],
 								'item_origin' => 'master_tindakan',
 								'qty' => 1,
 								'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
@@ -516,7 +564,7 @@ class Antrian extends Utility {
 					$Invoice = $SInvoice::create_invoice(array(
 						'kunjungan' => $uid,
 						'pasien' => $parameter['dataObj']['pasien'],
-						'keterangan' => ''
+						'keterangan' => 'Kunjungan Penjamin BPJS'
 					));
 
 					$InvoiceUID = $Invoice['response_unique'];
@@ -528,13 +576,13 @@ class Antrian extends Utility {
 				$HargaTindakan = $SInvoice::get_harga_tindakan(array(
 					'poli' => $parameter['dataObj']['departemen'],
           			'kelas' => __UID_KELAS_GENERAL_RJ__,
-					'tindakan' => __UID_KONSULTASI__,
+					'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
 					'penjamin' => $parameter['dataObj']['penjamin']
 				));
 
 				$Invoice = $SInvoice::append_invoice(array(
 					'invoice' => $InvoiceUID,
-					'item' => __UID_KONSULTASI__,
+					'item' => $PoliTindakanInfo['tindakan_konsultasi'],
 					'item_origin' => 'master_tindakan',
 					'qty' => 1,
 					'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
@@ -563,8 +611,6 @@ class Antrian extends Utility {
 				->execute();
 
 				if(count($checkStatusPasien['response_data']) > 0) { //Pasien sudah pernah terdaftar
-
-					
 					$antrianKunjungan = self::$query->update('antrian_nomor', array(
 						'status' => 'P',
 						'kunjungan' => $uid,
@@ -586,7 +632,6 @@ class Antrian extends Utility {
 					$PasienDetail = $Pasien::get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
 					$antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
 
-					
 					if($antrianKunjungan['response_result'] > 0) {
 						unset($parameter['dataObj']['currentPasien']);
 						$antrian['response_notif'] = 'P';
@@ -689,7 +734,6 @@ class Antrian extends Utility {
 					->execute();
 
 		if ($antrian['response_result'] > 0) {
-
 			$updateNomorAntrian = self::$query->update('antrian_nomor', array(
 				'antrian' => $uid
 			))
@@ -771,7 +815,7 @@ class Antrian extends Utility {
 		return $status_berobat;
 	}
 
-	public function ambilNomorAntrianPoli($poli){
+	public function ambilNomorAntrianPoli($poli) {
 		$waktu = date("Y-m-d", strtotime(parent::format_date()));
 
 		$data = self::$query
@@ -991,4 +1035,17 @@ class Antrian extends Utility {
 	}
 	/*====================================================================*/
 
+	private function ubah_dokter_antrian($parameter) {
+		return self::$query->update('antrian', array(
+			'dokter' => $parameter['dokter']
+		))
+		->where(array(
+			'antrian.deleted_at' => 'IS NULL',
+			'AND',
+			'antrian.uid' => '= ?'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
+	}
 }
