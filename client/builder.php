@@ -175,6 +175,7 @@
 	<script type="text/javascript">
 		var Sync;
 		$(function() {
+			moment.locale('id');
 			var parentList = [];
 
 			$(".sidebar-menu-item.active").each(function(){
@@ -516,6 +517,16 @@
 			return dataFaskes;
 		}
 
+		function str_pad(str_length, target, objectPad = "0") {
+			target = "" + target;
+			var pad = "";
+			for(var a = 1; a <= str_length; a++) {
+				pad += objectPad;
+			}
+			var ans = pad.substring(0, pad.length - target.length) + target;
+			return ans;
+		}
+
 		$(function() {
 			var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
 			var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
@@ -581,15 +592,7 @@
 
 			$(".txt_tanggal").datepicker({
 				dateFormat: 'DD, dd MM yy',
-				onSelect: function(date) {
-					var date = $(this).datepicker('getDate'),
-					day  = date.getDate(),
-					month = date.getMonth() + 1,
-					year =  date.getFullYear();
-
-					var dayOfWeek = weekday[date.getUTCDay()+1];
-					$(this).datepicker("setDate", dayOfWeek);
-		        }
+				autoclose: true
 			});
 		});
 	</script>

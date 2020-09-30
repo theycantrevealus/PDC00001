@@ -7,6 +7,8 @@ use PondokCoder\Authorization as Authorization;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\PO as PO;
 use PondokCoder\Penjamin as Penjamin;
+use PondokCoder\Pegawai as Pegawai;
+use PondokCoder\Unit as Unit;
 use PondokCoder\Utility as Utility;
 
 class Inventori extends Utility {
@@ -64,6 +66,9 @@ class Inventori extends Utility {
 				case 'item_batch':
 					return self::get_item_batch($parameter[2]);
 					break;
+				case 'get_amprah_detail':
+					return self::get_amprah_detail($parameter[2]);
+					break;
 				default:
 					return self::get_item();
 			}
@@ -111,6 +116,12 @@ class Inventori extends Utility {
 				break;
 			case 'edit_kategori_obat':
 				return self::edit_kategori_obat($parameter);
+				break;
+			case 'tambah_amprah':
+				return self::tambah_amprah($parameter);
+				break;
+			case 'get_amprah_request':
+				return self::get_amprah_request($parameter);
 				break;
 			default:
 				return array();
@@ -2253,6 +2264,278 @@ class Inventori extends Utility {
 			$error_count ++;
 		}
 		return $error_count;
+	}
+
+	private function tambah_amprah($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		//Get Last AI tahun ini
+		$lastID = self::$query->select('inventori_amprah', array(
+			'uid'
+		))
+		->where(array(
+			'EXTRACT(year FROM inventori_amprah.created_at)' => '= ?'
+		), array(
+			date('Y')
+		))
+		->execute();
+
+		/*$Unit = new Unit(self::$pdo);
+		$UnitInfo = $Unit::get_unit_detail();*/
+
+		$uid = parent::gen_uuid();
+		$worker = self::$query->insert('inventori_amprah', array(
+			'uid' => $uid,
+			'kode_amprah' => str_pad(count($lastID['response_data']) + 1, 5, '0', STR_PAD_LEFT) . '/' . $UserData['data']->unit_kode . '/' . date('m') . '/' . date('Y'),
+			'unit' => $UserData['data']->unit,
+			'pegawai' => $UserData['data']->uid,
+			'tanggal' => $parameter['tanggal'],
+			'status' => 'N',
+			'created_at' => parent::format_date(),
+			'updated_at' => parent::format_date(),
+			'keterangan' => $parameter['keterangan']
+		))
+		->execute();
+		if($worker['response_result'] > 0) {
+			$worker['amprah_detail'] = array();
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'new_value',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$uid,
+					$UserData['data']->uid,
+					'inventori_amprah',
+					'I',
+					json_encode($parameter),
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+
+			foreach ($parameter['item'] as $key => $value) {
+				//Amprah Detail
+				$worker_detail = self::$query->insert('inventori_amprah_detail', array(
+					'amprah' => $uid,
+					'item' => $key,
+					'jumlah' => floatval($value['qty']),
+					'created_at' => parent::format_date(),
+					'updated_at' => parent::format_date()
+				))
+				->returning('id')
+				->execute();
+
+				if($worker_detail['response_result'] > 0) {
+					$log = parent::log(array(
+						'type' => 'activity',
+						'column' => array(
+							'unique_target',
+							'user_uid',
+							'table_name',
+							'action',
+							'new_value',
+							'logged_at',
+							'status',
+							'login_id'
+						),
+						'value' => array(
+							$worker_detail['response_unique'],
+							$UserData['data']->uid,
+							'inventori_amprah_detail',
+							'I',
+							json_encode($parameter['item']),
+							parent::format_date(),
+							'N',
+							$UserData['data']->log_id
+						),
+						'class' => __CLASS__
+					));
+				}
+				array_push($worker['amprah_detail'], $worker_detail);
+			}
+		}
+		return $worker;
+	}
+
+	private function get_amprah_request($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		
+		if(isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'inventori_amprah.deleted_at' => 'IS NULL',
+				'AND',
+				'inventori_amprah.tanggal' => 'BETWEEN ? AND ?',
+				'AND',
+				'NOT inventori_amprah.status' => '= ?',
+				'AND',
+				'inventori_amprah.kode_amprah' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+			);
+
+			$paramValue = array(
+				$parameter['from'], $parameter['to'], 'S'
+			);
+		} else {
+			$paramData = array(
+				'inventori_amprah.deleted_at' => 'IS NULL',
+				'AND',
+				'NOT inventori_amprah.status' => '= ?',
+				'AND',
+				'inventori_amprah.tanggal' => 'BETWEEN ? AND ?'
+			);
+
+			$paramValue = array(
+				'S', $parameter['from'], $parameter['to']
+			);
+		}
+
+		if($parameter['length'] < 0) {
+			$data = self::$query->select('inventori_amprah', array(
+				'uid',
+				'unit',
+				'kode_amprah',
+				'pegawai',
+				'diproses',
+				'tanggal',
+				'status',
+				'created_at',
+				'updated_at'
+			))
+			->where($paramData, $paramValue)
+			->execute();
+		} else {
+			
+			$data = self::$query->select('inventori_amprah', array(
+				'uid',
+				'unit',
+				'kode_amprah',
+				'pegawai',
+				'diproses',
+				'tanggal',
+				'status',
+				'created_at',
+				'updated_at'
+			))
+			->where($paramData, $paramValue)
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->execute();
+		}
+
+		$data['response_draw'] = $parameter['draw'];
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['tanggal'] = date('d F Y', strtotime($value['tanggal']));
+
+			$Pegawai = new Pegawai(self::$pdo);
+			$data['response_data'][$key]['pegawai'] = $Pegawai::get_detail($value['pegawai'])['response_data'][0];
+			$data['response_data'][$key]['diproses'] = ((empty($value['diproses'])) ? "-" : $Pegawai::get_detail($value['pegawai'])['response_data'][0]);
+
+
+			if($value['status'] == 'N') {
+				$statusParse = 'Baru';
+			} else if($value['status'] == 'P') {
+				$statusParse = 'Proses';
+			} else if($value['status'] == 'S') {
+				$statusParse = 'Selesai';
+			} else {
+				$statusParse = 'Ditolak';
+			}
+			$data['response_data'][$key]['status_caption'] = $statusParse;
+			$autonum++;
+		}
+
+		$dataTotal = self::$query->select('inventori_amprah', array(
+			'uid',
+			'unit',
+			'kode_amprah',
+			'pegawai',
+			'diproses',
+			'tanggal',
+			'status',
+			'created_at',
+			'updated_at'
+		))
+		->where($paramData, $paramValue)
+		->execute();
+
+		$data['recordsTotal'] = count($dataTotal['response_data']);
+		$data['recordsFiltered'] = count($dataTotal['response_data']);
+		$data['length'] = intval($parameter['length']);
+		$data['start'] = intval($parameter['start']);
+
+		return $data;
+	}
+
+	public function get_amprah_detail($parameter) {
+		$data = self::$query->select('inventori_amprah', array(
+			'uid',
+			'unit',
+			'pegawai',
+			'kode_amprah',
+			'diproses',
+			'keterangan',
+			'tanggal',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'inventori_amprah.uid' => '= ?',
+			'AND',
+			'inventori_amprah.deleted_at' => 'IS NULL'
+		), array(
+			$parameter
+		))
+		->execute();
+		if(count($data['response_data']) > 0) {
+			$data['response_data'][0]['tanggal'] = date('d F Y', strtotime($data['response_data'][0]['tanggal']));
+			$Pegawai = new Pegawai(self::$pdo);
+			$data['response_data'][0]['pegawai_detail'] = $Pegawai::get_detail($data['response_data'][0]['pegawai'])['response_data'][0];
+			$Unit = new Unit(self::$pdo);
+			$data['response_data'][0]['pegawai_detail']['unit_detail'] = $Unit::get_unit_detail($data['response_data'][0]['pegawai_detail']['unit'])['response_data'][0];
+			$data['response_data'][0]['diproses_detail'] = $Pegawai::get_detail($data['response_data'][0]['diproses'])['response_data'][0];
+
+			$data_detail = self::$query->select('inventori_amprah_detail', array(
+				'id',
+				'amprah',
+				'item',
+				'jumlah',
+				'created_at',
+				'updated_at'
+			))
+			->where(array(
+				'inventori_amprah_detail.deleted_at' => 'IS NULL',
+				'AND',
+				'inventori_amprah_detail.amprah' => '= ?'
+			), array(
+				$parameter
+			))
+			->execute();
+			if(count($data_detail['response_data']) > 0) {
+				$detail_amprah = array();
+				foreach ($data_detail['response_data'] as $key => $value) {
+					$ItemDetail = self::get_item_detail($value['item'])['response_data'][0];
+					$ItemDetail['satuan_terkecil'] = self::get_satuan_detail($ItemDetail['satuan_terkecil'])['response_data'][0];
+					$value['item'] = $ItemDetail;
+					array_push($detail_amprah, $value);
+				}
+				$data['response_data'][0]['amprah_detail'] = $detail_amprah;
+			}
+		}
+		return $data;
 	}
 //===========================================================================================DELETE
 	private function delete($parameter) {
