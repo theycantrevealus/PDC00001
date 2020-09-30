@@ -3,6 +3,7 @@
 namespace PondokCoder;
 
 use PondokCoder\Query as Query;
+use PondokCoder\Inventori as Inventori;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 
@@ -30,7 +31,7 @@ class Unit extends Utility {
 					return self::get_unit_detail($parameter[2]);
 					break;
 				default:
-					return 'Unknown request';
+					return self::get_unit();
 			}
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
@@ -41,10 +42,10 @@ class Unit extends Utility {
 		try {
 			switch($parameter['request']) {
 				case 'tambah_unit':
-					return self::tambah_unit();
+					return self::tambah_unit($parameter);
 					break;
 				case 'edit_unit':
-					return self::edit_unit();
+					return self::edit_unit($parameter);
 					break;
 				default:
 					return 'Unknown request';
@@ -55,7 +56,32 @@ class Unit extends Utility {
 	}
 
 	public function get_unit() {
-		//
+		$data = self::$query->select('master_unit', array(
+			'uid',
+			'nama',
+			'kode',
+			'gudang',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_unit.deleted_at' => 'IS NULL'
+		), array())
+		->order(array(
+			'created_at' => 'DESC'
+		))
+		->execute();
+
+		$autonum = 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$Inventori = new Inventori(self::$pdo);
+			$InventoriDetail = $Inventori::get_gudang_detail($value['gudang'])['response_data'][0];
+			$data['response_data'][$key]['gudang'] = $InventoriDetail;
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		return $data;
 	}
 
 	public function get_unit_detail($parameter) {
@@ -63,6 +89,7 @@ class Unit extends Utility {
 			'uid',
 			'nama',
 			'kode',
+			'gudang',
 			'created_at',
 			'updated_at'
 		))
@@ -78,10 +105,91 @@ class Unit extends Utility {
 	}
 
 	private function tambah_unit($parameter) {
-		//
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$uid = parent::gen_uuid();
+		$worker = self::$query->insert('master_unit', array(
+			'uid' => $uid,
+			'nama' => $parameter['nama'],
+			'kode' => $parameter['kode'],
+			'gudang' => $parameter['gudang'],
+			'created_at' => parent::format_date(),
+			'updated_at' => parent::format_date()
+		))
+		->execute();
+		if($worker['response_result'] > 0) {
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$uid,
+					$UserData['data']->uid,
+					'master_unit',
+					'I',
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+		return $worker;
 	}
 
 	private function edit_unit($parameter) {
-		//
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$old = self::get_unit_detail($parameter['uid']);
+		$worker = self::$query->update('master_unit', array(
+			'nama' => $parameter['nama'],
+			'kode' => $parameter['kode'],
+			'gudang' => $parameter['gudang'],
+			'updated_at' => parent::format_date()
+		))
+		->where(array(
+			'master_unit.uid' => '= ?',
+			'AND',
+			'master_unit.deleted_at' => 'IS NULL'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
+		if($worker['response_result'] > 0) {
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'old_value',
+					'new_value',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter['uid'],
+					$UserData['data']->uid,
+					'master_unit',
+					'U',
+					json_encode($old['response_data'][0]),
+					json_encode($parameter),
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+		return $worker;
 	}
 }

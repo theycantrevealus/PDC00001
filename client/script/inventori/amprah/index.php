@@ -6,7 +6,7 @@
 				return rangeKwitansi;
 			} else {
 				return [rangeKwitansi, rangeKwitansi];
-			}	
+			}
 		}
 
 		var tableAmprah = $("#table-list-amprah").DataTable({
@@ -77,6 +77,10 @@
 					}
 				}
 			]
+		});
+
+		$("#range_amprah").change(function() {
+			tableAmprah.ajax.reload();
 		});
 	});
 </script>

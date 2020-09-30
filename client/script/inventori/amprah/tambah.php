@@ -183,7 +183,7 @@
 					$(verif_num).html(autonum);
 					$(verif_item).html(metaData[key].nama);
 					$(verif_satuan).html(metaData[key].satuan);
-					$(verif_qty).html(metaData[key].qty);
+					$(verif_qty).html(metaData[key].qty).addClass("number_style");
 
 					$("#table-verifikasi tbody").append(verif_row);
 					autonum++;

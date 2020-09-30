@@ -525,6 +525,7 @@ class Pegawai extends Utility {
 				'password' => password_hash('123456', PASSWORD_DEFAULT),
 				'nama' => $parameter['nama'],
 				'jabatan' => $parameter['jabatan'],
+				'unit' => $parameter['unit'],
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))
@@ -567,6 +568,7 @@ class Pegawai extends Utility {
 			'email' => $parameter['email'],
 			'nama' => $parameter['nama'],
 			'jabatan' => $parameter['jabatan'],
+			'unit' => $parameter['unit'],
 			'updated_at' => parent::format_date()
 		))
 		->where(array(

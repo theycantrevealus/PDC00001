@@ -21,7 +21,7 @@
 							"<td>" + (parseInt(key) + 1) + "</td>" +
 							"<td>" + data.amprah_detail[key].item.nama + "</td>" +
 							"<td>" + data.amprah_detail[key].item.satuan_terkecil.nama + "</td>" +
-							"<td>" + data.amprah_detail[key].jumlah + "</td>" +
+							"<td class=\"number_style\">" + data.amprah_detail[key].jumlah + "</td>" +
 						"</tr>"
 					);
 				}

@@ -13,6 +13,7 @@
 				$("#txt_email_pegawai").val(resp.response_package.response_data[0].email);
 				$("#txt_nama_pegawai").val(resp.response_package.response_data[0].nama);
 				reload_jabatan(resp.response_package.response_data[0].jabatan);
+				reload_unit(resp.response_package.response_data[0].unit);
 				render_module(resp.response_package.response_module);
 			}
 		});
@@ -28,6 +29,7 @@
 					email:$("#txt_email_pegawai").val(),
 					nama:$("#txt_nama_pegawai").val(),
 					jabatan:$("#txt_jabatan").val(),
+					unit:$("#txt_unit").val(),
 					uid:targetID
 				},
 				type:"POST",
@@ -121,6 +123,36 @@
 				}
 			});
 			return jabatanData;
+		}
+
+		function reload_unit(selected){
+			var unitData;
+			$.ajax({
+				url:__HOSTAPI__ + "/Unit/get_unit",
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(resp) {
+					$("#txt_unit option").remove();
+					unitData = resp.response_package.response_data;
+					for(var a = 0; a < unitData.length; a++) {
+						var newOption = document.createElement("OPTION");
+						$(newOption).attr({
+							"value": unitData[a].uid
+						}).html(unitData[a].kode + " - " + unitData[a].nama);
+						if(unitData[a].uid == selected) {
+							$(newOption).attr({
+								"selected":"selected"
+							});
+						}
+						$("#txt_unit").append(newOption);
+					}
+					$("#txt_unit").select2();
+				}
+			});
+			return unitData;
 		}
 
 		
