@@ -161,6 +161,7 @@ class Pegawai extends Utility {
 					'unit' => $read[0]['unit'],
 					'unit_name' => $Unit_Info['response_data'][0]['nama'],
 					'unit_kode' => $Unit_Info['response_data'][0]['kode'],
+					'gudang' => $Unit_Info['response_data'][0]['gudang'],
 					'jabatan' => $read[0]['jabatan'],
 					'email' => $read[0]['email'],
 					'log_id' => $log
