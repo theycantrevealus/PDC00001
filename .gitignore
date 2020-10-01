@@ -8,7 +8,7 @@ sync.php
 composer.lock
 composer.json
 
-node_modules/
+node_modules/*
 images/produk
 images/igd
 images/slideshow

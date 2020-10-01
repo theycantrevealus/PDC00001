@@ -117,11 +117,11 @@
 		<div class="preloader">
 			<div class="sidemenu-shimmer">
 				<?php
-					for($sh = 1; $sh <= 10; $sh++) {
+					/*for($sh = 1; $sh <= 10; $sh++) {
 				?>
 				<div class="shine"></div>
 				<?php
-					}
+					}*/
 				?>
 			</div>
 			<div class="content-shimmer">
@@ -136,7 +136,6 @@
 	<div class="global-sync-container blinker_dc">
 		<h4 class="text-center" style="font-family: Courier"><i class="fa fa-signal"></i><br /><br /><small>reconnecting</small></h4>
 	</div>
-	<div class="notification-container"></div>
 	<!-- <div id="app-settings">
 		<app-settings layout-active="default" :layout-location="{
 	  'default': 'index.html',
@@ -176,6 +175,7 @@
 	<script type="text/javascript">
 		var Sync;
 		$(function() {
+			moment.locale('id');
 			var parentList = [];
 
 			$(".sidebar-menu-item.active").each(function(){
@@ -268,10 +268,46 @@
 					$(".global-sync-container").fadeOut();
 				}
 
-				/*Sync.onmessage = function(evt) {
-					var signalData = evt.data;
-					
-				}*/
+				Sync.onmessage = function(evt) {
+					var signalData = JSON.parse(evt.data);
+					var command = signalData.protocols;
+					var type = signalData.type;
+					var sender = signalData.sender;
+					var receiver = signalData.receiver;
+					var time = signalData.time;
+					var parameter = signalData.parameter;
+
+					if(command !== undefined && command !== null && command !== "") {
+						if(protocolLibGLOBAL[command] !== undefined) {
+							if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
+								protocolLibGLOBAL[command](command, type, parameter, sender, receiver, time);
+							}
+						}
+					}
+				}
+
+				var protocolLibGLOBAL = {
+					akses_update: function(protocols, type, parameter, sender, receiver, time) {
+						if(sender != receiver) {
+							$.ajax({
+								url:__HOSTAPI__ + "/Pegawai",
+								beforeSend: function(request) {
+									request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+								},
+								type:"POST",
+								data: {
+									"request": "refresh_pegawai_access",
+									"uid": __ME__
+								},
+								success:function(resp) {
+									notification ("info", "Hak modul Anda sudah diupdate. Refresh halaman untuk akses baru", 3000, "hasil_modul_update");
+								}
+							});
+						} else {
+							//
+						}
+					}
+				};
 
 				Sync.onclose = function() {
 					$(".global-sync-container").fadeIn();
@@ -454,6 +490,42 @@
 			}
 			return s.join(dec);
 		}
+		
+
+		function bpjs_load_faskes() {
+			var dataFaskes = [];
+			$.ajax({
+				async: false,
+				url:__HOSTAPI__ + "/BPJS/get_faskes",
+				type: "GET",
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				success: function(response){
+					var data = [];
+					if(response == undefined || response.response_package == undefined || response.response_package.response_data == undefined) {
+						dataFaskes = [];
+					} else {
+						dataFaskes = response.response_package.response_data;
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+
+			return dataFaskes;
+		}
+
+		function str_pad(str_length, target, objectPad = "0") {
+			target = "" + target;
+			var pad = "";
+			for(var a = 1; a <= str_length; a++) {
+				pad += objectPad;
+			}
+			var ans = pad.substring(0, pad.length - target.length) + target;
+			return ans;
+		}
 
 		$(function() {
 			var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
@@ -486,8 +558,45 @@
 					title: data
 				});
 			});
+			
+			$(".sidebar-menu").each(function(e) {
+				$(this).find("li.sidebar-menu-item").each(function(f) {
+					var shimmer = document.createElement("DIV");
+					$(shimmer).addClass("shine");
+					$(".sidemenu-shimmer").append(shimmer);
+				});
+			});
+
+			var weekday=new Array(7);
+			weekday[0]="Minggu";
+			weekday[1]="Senin";
+			weekday[2]="Selasa";
+			weekday[3]="Rabu";
+			weekday[4]="Kamis";
+			weekday[5]="Jumat";
+			weekday[6]="Sabtu";
+
+			var monthName=new Array(7);
+			monthName[0]="Januari";
+			monthName[1]="Februari";
+			monthName[2]="Maret";
+			monthName[3]="April";
+			monthName[4]="Mei";
+			monthName[5]="Juni";
+			monthName[6]="Juli";
+			monthName[7]="Agustus";
+			monthName[8]="September";
+			monthName[9]="Oktober";
+			monthName[10]="November";
+			monthName[11]="Desember";
+
+			$(".txt_tanggal").datepicker({
+				dateFormat: 'DD, dd MM yy',
+				autoclose: true
+			});
 		});
 	</script>
+	<div class="notification-container"></div>
 </body>
 
 </html>

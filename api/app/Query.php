@@ -78,6 +78,7 @@ class Query {
 
 	function where($parameter = array(), $values = array()) {
 		self::$whereParameter = array();
+		self::$whereLogic = array();
 		foreach ($parameter as $key => $value) {
 			if(is_int($key)) {
 				array_push(self::$whereLogic, $value);

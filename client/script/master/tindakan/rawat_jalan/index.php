@@ -66,8 +66,6 @@
 		tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
 		penjaminBuilder = refresh_penjamin("#txt_penjamin", __UIDPENJAMINUMUM__);
 
-
-
 		function refresh_kelas_data(tindakanKelas) {
 			var columnKelas = {};
 			var dataBuilder;
@@ -114,6 +112,7 @@
 						},
 						type:"GET",
 						success:function(response) {
+
 							var DataPopulator = {};
 							var DataPopulatorParsed = [];
 
@@ -122,22 +121,22 @@
 							var data_harga = response.response_package;
 
 							for(var key = 0; key < data_harga.length; key++) {
-								var kelasTarget = data_harga[key].tindakan;
-								
-								if(DataPopulator[kelasTarget] === undefined) {
-									DataPopulator[kelasTarget] = {
-										uid: kelasTarget,
-										nama: data_harga[key].tindakan_detail.nama
-									};
+								if(data_harga[key].tindakan_detail != null) {
+									var kelasTarget = data_harga[key].tindakan;
+									if(DataPopulator[kelasTarget] === undefined) {
+										DataPopulator[kelasTarget] = {
+											uid: kelasTarget,
+											nama: data_harga[key].tindakan_detail.nama
+										};
 
-									if(DataPopulator[kelasTarget].kelas_harga == undefined) {
-										DataPopulator[kelasTarget].kelas_harga = columnKelas;
+										if(DataPopulator[kelasTarget].kelas_harga == undefined) {
+											DataPopulator[kelasTarget].kelas_harga = columnKelas;
+										}
 									}
-								}
-
-								var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
-								if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
-									DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+									var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
+									if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
+										DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+									}
 								}
 							}
 							
@@ -237,22 +236,24 @@
 									var data_harga = response.response_package;
 
 									for(var key = 0; key < data_harga.length; key++) {
-										var kelasTarget = data_harga[key].tindakan;
-										
-										if(DataPopulator[kelasTarget] === undefined) {
-											DataPopulator[kelasTarget] = {
-												uid: kelasTarget,
-												nama: data_harga[key].tindakan_detail.nama
-											};
+										if(data_harga[key].tindakan_detail != undefined) {
+											var kelasTarget = data_harga[key].tindakan;
+											
+											if(DataPopulator[kelasTarget] === undefined) {
+												DataPopulator[kelasTarget] = {
+													uid: kelasTarget,
+													nama: data_harga[key].tindakan_detail.nama
+												};
 
-											if(DataPopulator[kelasTarget].kelas_harga == undefined) {
-												DataPopulator[kelasTarget].kelas_harga = columnKelas;
+												if(DataPopulator[kelasTarget].kelas_harga == undefined) {
+													DataPopulator[kelasTarget].kelas_harga = columnKelas;
+												}
 											}
-										}
 
-										var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
-										if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
-											DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+											var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
+											if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
+												DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+											}
 										}
 									}
 									
@@ -596,6 +597,7 @@
 				},
 				type: "POST",
 				success: function(response){
+					console.log(response);
 					metaData = {};
 					dataBuilder = refresh_kelas_data(tindakanKelas);
 					tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);

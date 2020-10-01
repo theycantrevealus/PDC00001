@@ -5,6 +5,7 @@ namespace PondokCoder;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Modul as Modul;
 use PondokCoder\Poli as Poli;
+use PondokCoder\Unit as Unit;
 use \Firebase\JWT\JWT;
 
 class Pegawai extends Utility {
@@ -146,7 +147,8 @@ class Pegawai extends Utility {
 					'class' => 'User'
 				));
 
-
+				$Unit = new Unit(self::$pdo);
+				$Unit_Info = $Unit::get_unit_detail($read[0]['unit']);
 
 				//Register JWT
 				$iss = __HOSTNAME__;
@@ -156,6 +158,9 @@ class Pegawai extends Utility {
 				$aud = 'users_library';
 				$user_arr_data = array(
 					'uid' => $read[0]['uid'],
+					'unit' => $read[0]['unit'],
+					'unit_name' => $Unit_Info['response_data'][0]['nama'],
+					'unit_kode' => $Unit_Info['response_data'][0]['kode'],
 					'jabatan' => $read[0]['jabatan'],
 					'email' => $read[0]['email'],
 					'log_id' => $log
@@ -171,7 +176,6 @@ class Pegawai extends Utility {
 					'data' => $user_arr_data,
 				);
 				$jwt = JWT::encode($payload_info, $secret_key);
-
 				
 				$_SESSION['token'] = $jwt;
 				$_SESSION['uid'] = $read[0]['uid'];
@@ -179,7 +183,7 @@ class Pegawai extends Utility {
 				$_SESSION['nama'] = $read[0]['nama'];
 				$_SESSION['password'] = $read[0]['password'];
 				$_SESSION['jabatan'] = self::get_jabatan_detail($read[0]['jabatan']);
-				
+				$_SESSION['unit'] = $Unit_Info['response_data'][0];
 				$moduleSelectedMeta = self::get_module($read[0]['uid']);
 				$_SESSION['akses_halaman'] = $moduleSelectedMeta['selected'];
 				$_SESSION['akses_halaman_link'] = $moduleSelectedMeta['selected_link'];
@@ -246,6 +250,7 @@ class Pegawai extends Utility {
 			'email',
 			'jabatan',
 			'nama',
+			'unit',
 			'password',
 			'created_at',
 			'updated_at'
@@ -520,6 +525,7 @@ class Pegawai extends Utility {
 				'password' => password_hash('123456', PASSWORD_DEFAULT),
 				'nama' => $parameter['nama'],
 				'jabatan' => $parameter['jabatan'],
+				'unit' => $parameter['unit'],
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))
@@ -562,6 +568,7 @@ class Pegawai extends Utility {
 			'email' => $parameter['email'],
 			'nama' => $parameter['nama'],
 			'jabatan' => $parameter['jabatan'],
+			'unit' => $parameter['unit'],
 			'updated_at' => parent::format_date()
 		))
 		->where(array(

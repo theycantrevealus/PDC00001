@@ -8,7 +8,7 @@
 
 		<!-- Prevent the demo from appearing in search engines -->
 		<meta name="robots" content="noindex">
-
+		<link rel="icon" href="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.ico" type="image/ico" sizes="16x16" />
 		<!-- Simplebar -->
 		<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/simplebar.min.css" rel="stylesheet">
 
@@ -83,20 +83,15 @@
 	</head>
 
 	<body class="layout-login">
-
-
-
-
-
 		<div class="layout-login__overlay"></div>
-		<div class="layout-login__form bg-white" data-simplebar>
+		<div class="layout-login__form bg-white" data-simplebar style="padding-top: 120px;">
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
 				<a href="<?php echo __HOSTNAME__; ?>/template/index.html" class="navbar-brand" style="min-width: 0">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" width="120" height="120" alt="SIMRS RSUD Petala Bumi">
+					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" width="280" height="280" alt="SIMRS RSUD Petala Bumi">
 				</a>
 			</div>
-			<h4 class="m-0">RSUD Bintan</h4>
-			<p class="mb-5">SIMRS Integrated System</p>
+			<!-- <h4 class="m-0">RSUD Petala Bumi</h4>
+			<p class="mb-5 text-muted">SIMRS Integrated System</p> -->
 			<form>
 				<div class="form-group">
 					<label class="text-label" for="email_2">Email Address:</label>

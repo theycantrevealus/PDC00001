@@ -61,7 +61,6 @@
 				</div>
 				<div class="card-header card-header-tabs-basic nav" role="tablist">
 					<a href="#list-resep" class="active" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">Resep</a>
-					<a href="#list-revisi" data-toggle="tab" role="tab" aria-selected="false">Revisi</a>
 				</div>
 				<div class="card-body tab-content">
 					<div class="tab-pane active show fade" id="list-resep">
@@ -78,8 +77,6 @@
 							</thead>
 							<tbody></tbody>
 						</table>
-					</div>
-					<div class="tab-pane active show fade" id="list-revisi">
 					</div>
 				</div>
 			</div>
