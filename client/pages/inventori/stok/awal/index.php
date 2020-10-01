@@ -6,38 +6,58 @@
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item" aria-current="page">Inventori</li>
 					<li class="breadcrumb-item" aria-current="page">Stok</li>
-					<li class="breadcrumb-item active" aria-current="page">Stok Awal</li>
+					<li class="breadcrumb-item" aria-current="page">Stok Awal</li>
+					<li class="breadcrumb-item active" aria-current="page">Tambah Stok Awal</li>
 				</ol>
 			</nav>
 			<h4 class="m-0">Stok Awal</h4>
 		</div>
-		<button class="btn btn-sm btn-info" id="btnTambahStokAwal">
-			<i class="fa fa-plus"></i> Tambah
-		</button>
 	</div>
 </div>
 
-
 <div class="container-fluid page__container">
-	<div class="row card-group-row">
-		<div class="col-lg-12 col-md-12 card-group-row__col">
-			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<table class="table table-bordered" id="table-penjamin">
-					<thead>
-						<tr>
-							<th style="width: 20px;">No</th>
-							<th>Kode</th>
-							<th>Item</th>
-							<th>Batch</th>
-							<th>Tanggal Expired</th>
-							<th>Stok Awal</th>
-							<th>Aksi</th>
-						</tr>
-					</thead>
-					<tbody>
-						
-					</tbody>
-				</table>
+   <div class="card card-form">
+		<div class="row no-gutters">
+			<div class="col-lg-4 card-body">
+				<p><strong class="headings-color">Informasi Gudang</strong></p>
+				<p style="font-size: 0.9rem;" class="text-muted"></p>
+			</div>
+			<div class="col-lg-8 card-form__body card-body">
+				<div class="form-row">
+					<div class="col-12 col-md-6 mb-3">
+						<label for="">Gudang</label>
+						<select class="form-control" id="txt_gudang"></select>
+					</div>
+					<div class="col-12 col-md-6 mb-3" style="padding-top: 22.5px;">
+						<button class="btn btn-info" id="tambahStokAwal">
+							<i class="fa fa-plus"></i> Tambah Stok Awal
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="card card-form">
+		<div class="row no-gutters">
+			<div class="col-lg-12 card-body">
+			   <div class="table-responsive border-bottom">
+					<table class="table table-bordered table-striped largeDataType" id="table-stok-awal" style="font-size: 0.9rem;">
+						<thead class="thead-dark">
+							<tr>
+								<th style="width: 20px;">No</th>
+								<th>Item</th>
+								<th>Batch</th>
+								<th>Tanggal Expired</th>
+								<th>Masuk</th>
+								<th>Keluar</th>
+								<th>Saldo</th>
+							</tr>
+						</thead>
+						<tbody>
+							
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
