@@ -4,8 +4,8 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item">Master Poli</li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/poli">Poli</a></li>
+					<li class="breadcrumb-item">Master Poliklinik</li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/poli">Poliklinik</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Edit</li>
 				</ol>
 			</nav>
@@ -24,7 +24,7 @@
                 </li>
                 <li class="nav-item">
                     <a href="#" id="nav-tab-2" class="nav-link navTabs not-active" data-toggle="tab" role="tab" aria-selected="false">
-                        Tindakan Poli
+                        Tindakan Poliklinik
                     </a>
                 </li>
                 <li class="nav-item">
@@ -32,8 +32,13 @@
                         Dokter
                     </a>
                 </li>
-                 <li class="nav-item">
+                <li class="nav-item">
                     <a href="#" id="nav-tab-4" class="nav-link navTabs not-active" data-toggle="tab" role="tab" aria-selected="false">
+                        Perawat
+                    </a>
+                </li>
+                 <li class="nav-item">
+                    <a href="#" id="nav-tab-5" class="nav-link navTabs not-active" data-toggle="tab" role="tab" aria-selected="false">
                         Konfirmasi Data
                     </a>
                 </li>
@@ -44,10 +49,18 @@
 	                    <div class="tab-pane active show fade tabsContent" id="tab-1">
 	                        <div class="col-md-6">
 								<div class="form-group">
-									<label for="txt_nama">Nama Poli:</label>
+									<label for="txt_nama">Nama Poliklinik:</label>
 									<div class="search-form">
-										<span style="margin-left: 4%;" class="text-center bg-light">Poli</span>
+										<span style="margin-left: 4%;" class="text-center bg-light">Poliklinik</span>
 										<input type="text" class="form-control uppercase" id="txt_nama" placeholder="Nama Poli" required>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for="txt_nama">Tindakan Konsultasi:</label>
+									<div class="search-form">
+										<select class="form-control" id="tindakan_konsultasi">
+											<option value="" disabled>Pilih Tindakan</option>
+										</select>
 									</div>
 								</div>
 							</div>
@@ -142,8 +155,42 @@
 	                    </div>
 	                    <div class="tab-pane fade tabsContent" id="tab-4">
 	                    	<div class="row">
+	                    		<div class="col-md-8">
+	                    			<select class="form-control" id="txt_set_perawat">
+	                    				<option value="">Pilih</option>
+	                    			</select>
+	                    		</div>
+	                    		<div class="col-md-4">
+	                    			<button class="btn btn-info" id="btn_tambah_perawat">
+	                    				<i class="fa fa-plus"></i> Tambah
+	                    			</button>
+	                    		</div>
+	                    	</div>
+	                    	<br />
+	                    	<div class="row">
+		                    	<div class="col-md-8">
+									<table class="table-bordered table" id="poli-list-perawat">
+										<thead>
+											<tr>
+												<th class="wrap_content">No</th>
+												<th>Nama</th>
+												<th class="wrap_content">Aksi</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+							</div>
+							<hr />
+	                        <ul class="list-inline ">
+	                            <li><button type="button" class="btn btn-warning prev-step btnPrev float-left">Kembali</button></li>
+	                            <li><button type="button" class="btn btn-primary next-step btnNext btnNextTindakan float-right"  >Simpan dan lanjut</button></li>
+	                        </ul>
+	                    </div>
+	                    <div class="tab-pane fade tabsContent" id="tab-5">
+	                    	<div class="row">
 		                    	<div class="col-md-12">
-									<p>Nama Poli: &nbsp; <b><span id="title-konfirmasi-poli" style="color: #4a90e2; font-size: 1.5rem;"></span></b></p>
+									<p>Nama Poliklinik: &nbsp; <b><span id="title-konfirmasi-poli" style="color: #4a90e2; font-size: 1.5rem;"></span></b></p>
 									<hr />
 									<span style="text-align: center;"><p>Tabel tindakan</p></span>
 								</div>

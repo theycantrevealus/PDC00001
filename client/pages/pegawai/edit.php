@@ -7,11 +7,11 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/pegawai">Pegawai</a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/pegawai">Pengguna</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Edit - <?php echo $targetID; ?></li>
 				</ol>
 			</nav>
-			<h4 class="m-0">Edit Data Pegawai</h4>
+			<h4 class="m-0">Edit Data Pengguna</h4>
 		</div>
 	</div>
 </div>
@@ -23,19 +23,18 @@
 			<div class="z-0">
 				<ul class="nav nav-tabs nav-tabs-custom" role="tablist">
 					<li class="nav-item">
-						<a href="#tab-awal-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-informasi" >
+						<a href="#tab-awal-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-informasi" >
 							<span class="nav-link__count">
 								01
-								<b class="inv-tab-status text-success" id="status-informasi"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Data Diri
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-awal-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-awal-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								02
-								<b class="inv-tab-status text-success" id="status-keperawatan"><i class="fa fa-check-circle"></i></b>
+								<!-- <b class="inv-tab-status text-success" id="status-keperawatan"><i class="fa fa-check-circle"></i></b> -->
 							</span>
 							Akses
 						</a>
@@ -43,10 +42,10 @@
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
-				<div class="tab-pane show fade" id="tab-awal-1">
+				<div class="tab-pane active show fade" id="tab-awal-1">
 					<div class="card">
 						<div class="card-header card-header-large bg-white d-flex align-items-center">
-							<h5 class="card-header__title flex m-0">Informasi Pegawai</h5>
+							<h5 class="card-header__title flex m-0">Informasi Pengguna</h5>
 						</div>
 						<div class="card-body tab-content">
 							<form>
@@ -57,7 +56,7 @@
 									<div class="col-sm-9">
 										<div class="form-group">
 											<label for="txt_nama_pegawai">Email:</label>
-											<input type="text" class="form-control" disabled="disabled" id="txt_email_pegawai" placeholder="Enter your email address ..">
+											<input type="text" class="form-control" id="txt_email_pegawai" placeholder="Enter your email address ..">
 										</div>
 										<div class="form-group">
 											<label for="txt_nama_pegawai">Nama:</label>
@@ -75,10 +74,10 @@
 						</div>
 					</div>
 				</div>
-				<div class="tab-pane active show fade" id="tab-awal-2">
+				<div class="tab-pane show fade" id="tab-awal-2">
 					<div class="card">
 						<div class="card-header card-header-large bg-white d-flex align-items-center">
-							<h5 class="card-header__title flex m-0">Akses Pegawai</h5>
+							<h5 class="card-header__title flex m-0">Akses Pengguna</h5>
 						</div>
 						<div class="card-header card-header-tabs-basic nav" role="tablist">
 							<a href="#pegawai-modul" class="active" data-toggle="tab" role="tab" aria-controls="asesmen-kerja" aria-selected="true">Halaman</a>

@@ -1,28 +1,64 @@
 <script type="text/javascript">
 	$(function(){
 
-		var tableAntrianBayar = $("#table-biaya-pasien").DataTable({
+		var selectedUID;
+		var selectedUIDKwitansi;
+		var selectedPoli;
+		var selectedPasien;
+		var selectedPenjamin;
+		var selectedKunjungan;
+		var totalItemPay = 0;
+		var totalItemPayDiscount = 0;
+		var currentPasienName;
+		var itemMeta = [];
+
+		
+
+		function getDateRange(target) {
+			var rangeKwitansi = $(target).val().split(" to ");
+			if(rangeKwitansi.length > 1) {
+				return rangeKwitansi;
+			} else {
+				return [rangeKwitansi, rangeKwitansi];
+			}	
+		}
+
+		var tableKwitansi = $("#table-kwitansi").DataTable({
+			processing: true,
+			serverSide: true,
+			sPaginationType: "full_numbers",
+			bPaginate: true,
+			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+			serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Invoice",
-				type: "GET",
+				type: "POST",
+				data: function(d){
+					d.request = "kwitansi_data";
+					d.from = getDateRange("#range_kwitansi")[0];
+					d.to = getDateRange("#range_kwitansi")[1];
+				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					var returnedData = [];
-					for(var InvKeyData in response.response_package.response_data) {
-						if(!response.response_package.response_data[InvKeyData].lunas) {
-							returnedData.push(response.response_package.response_data[InvKeyData]);
-						}
+					var dataSet = response.response_package.response_data;
+					if(dataSet == undefined) {
+						dataSet = [];
 					}
-					return returnedData;
+
+					response.draw = parseInt(response.response_package.response_draw);
+					//console.log(response);
+					response.recordsTotal = response.response_package.recordsTotal;
+					response.recordsFiltered = response.response_package.recordsFiltered;
+					return dataSet;
 				}
 			},
 			autoWidth: false,
-			aaSorting: [[0, "asc"]],
-			"columnDefs":[
-				{"targets":0, "className":"dt-body-left"}
-			],
+			language: {
+				search: "",
+				searchPlaceholder: "Cari Nomor Kwitansi"
+			},
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
@@ -31,7 +67,150 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.nomor_invoice;
+						return row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.tanggal_bayar;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.metode_bayar;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.pegawai.nama;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.terbayar;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return 	"<button class=\"btn btn-info btn-sm btnDetailKwitansi\" invoice_payment=\"" + row.uid + "\" invoice=\"" + row.invoice + "\" id=\"invoice_" + row.uid + "\"><i class=\"fa fa-eye\"></i></button>";
+					}
+				}
+			]
+		});
+
+		$("body").on("click", ".btnDetailKwitansi", function() {
+			var uid = $(this).attr("id").split("_");
+			uid = uid[uid.length - 1];
+
+			selectedUID = $(this).attr("invoice");
+			selectedUIDKwitansi = $(this).attr("invoice_payment");
+
+			$.ajax({
+				url: __HOSTNAME__ + "/pages/kasir/pasien/payment_detail.php",
+				type: "POST",
+				success: function(response) {
+					$("#form-payment-detail").modal("show");
+					$("#payment-detail-loader").html(response);
+					
+					$.ajax({
+						url:__HOSTAPI__ + "/Invoice/payment/" + uid,
+						beforeSend: function(request) {
+							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+						},
+						type:"GET",
+						success:function(response_data) {
+							var pasienInfo = response_data.response_package.response_data[0].pasien;
+							$("#nama-pasien-faktur").html(pasienInfo.panggilan_name.nama + " " + pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]");
+							$("#nomor-faktur").html($("#kwitansi_" + uid).html());
+
+							var historyData = response_data.response_package.response_data[0];
+							var historyDetail = historyData.detail;
+
+							$("#pegawai-faktur").html("Diterima Oleh : " + historyData.pegawai.nama);
+							$("#tanggal-faktur").html("Tanggal Bayar : " + historyData.tanggal_bayar);
+							$("#keterangan-faktur").html(historyData.keterangan);
+							$("#total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
+							$("#diskon-faktur").html(0);
+							$("#grand-total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
+							for(var historyKey in historyDetail) {
+								$("#invoice_detail_history tbody").append(
+									"<tr>" +
+										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
+										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
+										"<td>" + historyDetail[historyKey].item.toUpperCase() + "</td>" +
+										"<td>" + historyDetail[historyKey].qty + "</td>" +
+										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
+										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
+									"</tr>"
+								);
+							}
+						}
+					});
+				}
+			});
+		});
+
+		$("#range_kwitansi").change(function() {
+			/*console.clear();
+			console.log(getDateRange());*/
+			tableKwitansi.ajax.reload();
+		});
+
+		
+		var tableAntrianBayar = $("#table-biaya-pasien").DataTable({
+			processing: true,
+			serverSide: true,
+			sPaginationType: "full_numbers",
+			bPaginate: true,
+			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+			serverMethod: "POST",
+			"ajax":{
+				url: __HOSTAPI__ + "/Invoice",
+				type: "POST",
+				data: function(d) {
+					d.request = "biaya_pasien";
+					d.from = getDateRange("#range_invoice")[0];
+					d.to = getDateRange("#range_invoice")[1];
+				},
+				headers:{
+					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+				},
+				dataSrc:function(response) {
+					var returnedData = [];
+					if(returnedData == undefined || returnedData.response_package == undefined) {
+						returnedData = [];
+					}
+					for(var InvKeyData in response.response_package.response_data) {
+						if(response.response_package.response_data[InvKeyData].antrian_kunjungan != undefined) {
+							if(!response.response_package.response_data[InvKeyData].lunas) {
+								returnedData.push(response.response_package.response_data[InvKeyData]);
+							}
+						} else {
+							alert();
+						}
+					}
+
+					response.draw = parseInt(response.response_package.response_draw);
+					response.recordsTotal = response.response_package.recordsTotal;
+					response.recordsFiltered = response.response_package.recordsFiltered;
+					
+					return returnedData;
+				}
+			},
+			autoWidth: false,
+			language: {
+				search: "",
+				searchPlaceholder: "Cari Nomor Invoice"
+			},
+			"columns" : [
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.autonum;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
 					}
 				},
 				{
@@ -62,15 +241,14 @@
 			]
 		});
 
-		var selectedUID;
-		var selectedPoli;
-		var selectedPasien;
-		var selectedPenjamin;
-		var selectedKunjungan;
-		var totalItemPay = 0;
-		var totalItemPayDiscount = 0;
-		var currentPasienName;
-		var itemMeta = [];
+
+		$("#range_invoice").change(function() {
+			/*console.clear();
+			console.log(getDateRange());*/
+			tableAntrianBayar.ajax.reload();
+		});
+
+		
 
 
 		$("body").on("click", ".btnDetail", function() {
@@ -105,6 +283,7 @@
 						type:"GET",
 						success:function(response_data) {
 							var invoice_detail = response_data.response_package.response_data[0];
+							console.log(invoice_detail);
 							$("#nama-pasien").html(invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]");
 							currentPasienName = invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]";
 							$("#nomor-invoice").html(invoice_detail.nomor_invoice);
@@ -114,13 +293,26 @@
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
 									status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
 								} else {
-									status_bayar = "<i class=\"fa fa-check text-success\"></i>";
+									if(invoice_detail_item[invKey].item.allow_retur == true) {
+										if(invoice_detail_item[invKey].status_berobat == undefined) {
+											status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+										} else {
+											if(invoice_detail_item[invKey].status_berobat.status == "N") {
+												//status_bayar = "<button class=\"btn btn-info btn-sm btn-retur-pembayaran\" id=\"retur_pembayaran_" + invoice_detail_item[invKey].item.uid + "\">Retur</button>";
+												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+											} else {
+												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+											}
+										}
+									} else {
+										status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+									}
 								}
 								$("#invoice_detail_item").append(
 									"<tr>" +
 										"<td>" + status_bayar + "</td>" +
 										"<td>" + invoice_detail_item[invKey].autonum + "</td>" +
-										"<td>" + invoice_detail_item[invKey].item.nama + " <span style=\"margin-left: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
+										"<td>" + invoice_detail_item[invKey].item.nama.toUpperCase() + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
 										"<td>" + invoice_detail_item[invKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",") + "</td>" +
@@ -351,6 +543,12 @@
 						console.log(response);
 						if(response.response_package.response_result > 0) {
 							tableAntrianBayar.ajax.reload();
+							tableKwitansi.ajax.reload();
+							$("#form-invoice").modal("hide");
+							$("#form-payment").modal("hide");
+						} else {
+							tableAntrianBayar.ajax.reload();
+							tableKwitansi.ajax.reload();
 							$("#form-invoice").modal("hide");
 							$("#form-payment").modal("hide");
 						}
@@ -394,6 +592,7 @@
 							for(var historyKey in historyDetail) {
 								$("#invoice_detail_history tbody").append(
 									"<tr>" +
+										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
 										"<td>" + historyDetail[historyKey].item + "</td>" +
 										"<td>" + historyDetail[historyKey].qty + "</td>" +
@@ -406,6 +605,77 @@
 					});
 				}
 			});
+		});
+
+		/*$("body").on("click", ".btn-retur-pembayaran", function() {
+			var uid = $(this).attr("id").split("_");
+			uid = uid[uid.length - 1];
+
+			//Return Biaya
+			var conf = confirm("Return Biaya ?");
+			if(conf) {
+				$.ajax({
+					url: __HOSTAPI__ + "/Invoice",
+					type: "POST",
+					data:{
+						request: "retur_biaya",
+						item:uid,
+						invoice:selectedUID
+					},
+					success: function(response) {
+						var responseData = response.response_package.response_result;
+					}
+				});
+			}
+			return false;
+		});*/
+
+		$("#btnProsesRetur").click(function() {
+			var conf = confirm("Retur Transaksi?");
+			
+			if(conf) {
+				var itemList = [];
+				$(".returItem").each(function(e){
+					var item = $(this).val();
+					itemList.push(item);
+				});
+
+				if(itemList.length > 0) {
+					$.ajax({
+						url: __HOSTAPI__ + "/Invoice",
+						type: "POST",
+						beforeSend: function(request) {
+							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+						},
+						data:{
+							request: "retur_biaya",
+							item:itemList,
+							invoice:selectedUID,
+							payment:selectedUIDKwitansi
+						},
+						success: function(response) {
+							console.log(selectedUID);
+							console.log(response);
+							var resultCheck = 0;
+							
+							for(var returnKey in response.response_package) {
+								resultCheck += response.response_package[returnKey].response_result
+							}
+
+							if(resultCheck == $(".returItem:checked").length) {
+								$("#form-payment-detail").modal("hide");
+							} else {
+								console.log("Gagal Retur");
+							}
+							$("#form-payment-detail").modal("hide");
+							tableKwitansi.ajax.reload();
+						}
+					});
+				} else {
+					alert("Pilih item yang akan diretur");
+				}
+			}
+			return false;
 		});
 	});
 </script>
@@ -466,6 +736,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Kembali</button>
+				<button type="button" class="btn btn-warning" id="btnProsesRetur"><i class="fa fa-database"></i> Proses Retur</button>
 				<button type="button" class="btn btn-success" id="btnBayar"><i class="fa fa-print"></i> Cetak Faktur</button>
 			</div>
 		</div>
