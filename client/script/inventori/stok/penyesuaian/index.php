@@ -287,6 +287,7 @@
 				},
 				dataSrc:function(response) {
 					var dataSet = response.response_package.response_data;
+					console.log(response);
 					if(dataSet == undefined) {
 						dataSet = [];
 					}
