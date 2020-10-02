@@ -2,6 +2,7 @@
 	
 	$(function(){
 		var metaDataOpname = {};
+		var tableDetailOpname;
 		function load_gudang(target,selected = "") {
 			var gudangData;
 			$.ajax({
@@ -190,8 +191,97 @@
 					$("#txt_periode_akhir_detail").html(data.sampai);
 					$("#txt_diproses_detail").html(data.pegawai.nama);
 					$("#txt_kode_detail").html(data.kode);
-					$("#detail-opname tbody tr").remove();
-					for(var b in data.detail) {
+					//$("#detail-opname tbody tr").remove();
+
+					if($("#detail-opname").hasClass("dataTable")) {
+						tableDetailOpname.ajax.reload();
+					} else {
+						tableDetailOpname = $("#detail-opname").DataTable({
+							processing: true,
+							serverSide: true,
+							sPaginationType: "full_numbers",
+							bPaginate: true,
+							lengthMenu: [[5, 10, 15, 50], [5, 10, 15, 50]],
+							serverMethod: "POST",
+							"ajax":{
+								url: __HOSTAPI__ + "/Inventori",
+								type: "POST",
+								data: function(d){
+									d.request = "get_opname_detail_item";
+									d.uid = uid;
+								},
+								headers:{
+									Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+								},
+								dataSrc:function(response) {
+									var dataSet = response.response_package.response_data;
+									if(dataSet == undefined) {
+										dataSet = [];
+									}
+
+									response.draw = parseInt(response.response_package.response_draw);
+									response.recordsTotal = response.response_package.recordsTotal;
+									response.recordsFiltered = response.response_package.recordsFiltered;
+									return dataSet;
+								}
+							},
+							autoWidth: false,
+							language: {
+								search: "",
+								searchPlaceholder: "Cari Barang"
+							},
+							"columns" : [
+								{
+									"data" : null, render: function(data, type, row, meta) {
+										return row.autonum;
+									}
+								},
+								{
+									"data" : null, render: function(data, type, row, meta) {
+										return row.nama_barang;
+									}
+								},
+								{
+									"data" : null, render: function(data, type, row, meta) {
+										return row.batch.batch;
+									}
+								},
+								{
+									"data" : null, render: function(data, type, row, meta) {
+										return "<h6 class=\"number_style\">" + row.qty_awal + "</h6>";
+									}
+								},
+								{
+									"data" : null, render: function(data, type, row, meta) {
+										return "<h6 class=\"number_style\">" + row.qty_akhir + "</h6>";
+									}
+								},
+								{
+									"data" : null, render: function(data, type, row, meta) {
+										var parsedVisual = "";
+										var selisih = 0;
+										if(row.qty_awal > row.qty_akhir) {
+											selisih = parseFloat(row.qty_awal) - parseFloat(row.qty_akhir);
+											parsedVisual = "<b class=\"text-danger\"><i class=\"fa fa-caret-down\"></i> " + selisih + "</b>";
+										} else if(row.qty_awal < row.qty_akhir) {
+											selisih = parseFloat(row.qty_akhir) - parseFloat(row.qty_awal);
+											parsedVisual = "<b class=\"text-warning\"><i class=\"fa fa-caret-up\"></i> " + selisih + "</b>";
+										} else {
+											selisih = parseFloat(row.qty_akhir) - parseFloat(row.qty_awal);
+											parsedVisual = "<b class=\"text-success\"><i class=\"fa fa-check\"></i> " + selisih + "</b>";
+										}
+										return parsedVisual;
+									}
+								},
+								{
+									"data" : null, render: function(data, type, row, meta) {
+										return row.keterangan;
+									}
+								},
+							]
+						});
+					}
+					/*for(var b in data.detail) {
 						var parsedVisual = "";
 						var selisih = 0;
 						if(data.detail[b].qty_awal > data.detail[b].qty_akhir) {
@@ -216,7 +306,7 @@
 								"<td>" + data.detail[b].keterangan + "</td>" +
 							"</tr>"
 						);
-					}
+					}*/
 
 					$("#txt_keterangan_detail").html(data.keterangan);
 
@@ -287,7 +377,6 @@
 				},
 				dataSrc:function(response) {
 					var dataSet = response.response_package.response_data;
-					console.log(response);
 					if(dataSet == undefined) {
 						dataSet = [];
 					}
@@ -351,6 +440,87 @@
 				digitsOptional: true
 			});
 		});
+
+
+
+
+
+
+
+
+		/*var tableDetailOpname = $("#detail-opname").DataTable({
+			processing: true,
+			serverSide: true,
+			sPaginationType: "full_numbers",
+			bPaginate: true,
+			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+			serverMethod: "POST",
+			"ajax":{
+				url: __HOSTAPI__ + "/Inventori",
+				type: "POST",
+				data: function(d){
+					d.request = "get_stok_gudang";
+					d.gudang = __UNIT__.gudang;
+				},
+				headers:{
+					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+				},
+				dataSrc:function(response) {
+					var dataSet = response.response_package.response_data;
+					if(dataSet == undefined) {
+						dataSet = [];
+					}
+
+					for(var a in dataSet) {
+						if(metaDataOpname[dataSet[a].uid] == undefined) {
+							metaDataOpname[dataSet[a].uid] = {
+								qty_awal: dataSet[a].stok_terkini,
+								batch: dataSet[a].batch.uid,
+								nilai: 0,
+								keterangan: ""
+							};
+						}
+					}
+
+					response.draw = parseInt(response.response_package.response_draw);
+					response.recordsTotal = response.response_package.recordsTotal;
+					response.recordsFiltered = response.response_package.recordsFiltered;
+					return dataSet;
+				}
+			},
+			autoWidth: false,
+			language: {
+				search: "",
+				searchPlaceholder: "Cari Barang"
+			},
+			"columns" : [
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.autonum;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<b>" + row.nama + "</b><span class=\"pull-right text-info\" style=\"font-size: 14pt;\">[" + row.batch.batch + "]</span>" + "<br />" + row.batch.expired_date;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.stok_terkini;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<input type=\"text\" class=\"form-control aktual_qty\" id=\"item_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"0.00\" />";
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<input type=\"text\" class=\"form-control keterangan_item\" id=\"keterangan_" + row.uid + "\" placeholder=\"Keterangan per Item\" />";
+					}
+				}
+			]
+		});*/
 
 		$("#txt_diproses").val(__MY_NAME__);
 
