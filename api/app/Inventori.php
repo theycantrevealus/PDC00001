@@ -121,6 +121,7 @@ class Inventori extends Utility {
 				break;
 			case 'tambah_item':
 				return self::tambah_item($parameter);
+				break;
 			case 'edit_item':
 				return self::edit_item($parameter);
 				break;

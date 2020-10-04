@@ -50,10 +50,11 @@
 						<div class="card-body tab-content">
 							<form>
 								<div class="row">
-									<div class="col-sm-3">
-										<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/avatar/demi.png" class="rounded-circle" width="100" alt="Frontted" />
+									<div class="col-sm-4">
+										<div class="profile_photo"></div>
+										
 									</div>
-									<div class="col-sm-9">
+									<div class="col-sm-8">
 										<div class="form-group">
 											<label for="txt_nama_pegawai">Email:</label>
 											<input type="text" class="form-control" id="txt_email_pegawai" placeholder="Enter your email address ..">
@@ -72,6 +73,16 @@
 										</div>
 										<button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Submit</button>
 											<a href="<?php echo __HOSTNAME__; ?>/pegawai" class="btn btn-danger"><i class="fa fa-ban"></i> Kembali</a>
+									</div>
+								</div>
+								<div class="row" style="margin-top: 50px;">
+									<div class="col-sm-4">
+										<center>
+											<div class="btn btn-info upload-container">
+												<input type="file" class="customUpload" id="uploadImage" />
+												Upload
+											</div>
+										</center>
 									</div>
 								</div>
 							</form>
