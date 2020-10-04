@@ -92,6 +92,10 @@ class Anjungan extends Utility {
 		}
 	}
 
+	public function __DELETE__($parameter = array()) {
+		return self::delete($parameter);
+	}
+
 	private function get_terbilang($parameter) {
 		return parent::terbilang($parameter['nomor_urut']);
 	}
@@ -917,6 +921,47 @@ class Anjungan extends Utility {
 					}
 				}
 			}			
+		}
+		return $worker;
+	}
+
+
+
+	private function delete($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$worker = self::$query
+		->delete($parameter[6])
+		->where(array(
+			$parameter[6] . '.uid' => '= ?'
+		), array(
+			$parameter[7]
+		))
+		->execute();
+		if($worker['response_result'] > 0) {
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter[7],
+					$UserData['data']->uid,
+					$parameter[6],
+					'D',
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
 		}
 		return $worker;
 	}

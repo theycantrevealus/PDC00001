@@ -746,7 +746,7 @@ class Laboratorium extends Utility {
 			}
 
 			//Lokasi Item
-			foreach ($parameter['lokasi'] as $key => $value) {
+			/*foreach ($parameter['lokasi'] as $key => $value) {
 				$worker = self::$query->insert('master_lab_lokasi_item', array(
 					'lab' => $uid,
 					'lokasi' => $value,
@@ -758,7 +758,7 @@ class Laboratorium extends Utility {
 				if($worker['response_result'] > 0) {
 					//
 				}
-			}
+			}*/
 
 			//Nilai Item
 			foreach ($parameter['nilai'] as $key => $value) {
@@ -939,7 +939,7 @@ class Laboratorium extends Utility {
 					->execute();
 				} else {
 					$activate_kategori_item = self::$query->update('master_lab_kategori_item', array(
-						'deleted_at' => ''
+						'deleted_at' => NULL
 					))
 					->where(array(
 						'master_lab_kategori_item.id' => '= ?'
@@ -963,10 +963,10 @@ class Laboratorium extends Utility {
 				}
 			}
 
-			return $queryList;
+			
 
 			//Lokasi Item
-			foreach ($parameter['lokasi'] as $key => $value) {
+			/*foreach ($parameter['lokasi'] as $key => $value) {
 				$worker = self::$query->insert('master_lab_lokasi_item', array(
 					'lab' => $uid,
 					'lokasi' => $value,
@@ -978,7 +978,18 @@ class Laboratorium extends Utility {
 				if($worker['response_result'] > 0) {
 					//
 				}
-			}
+			}*/
+
+			//Reset Lab Item
+			$resetLabNilai = self::$query->update('master_lab_nilai', array(
+				'deleted_at' => parent::format_date()
+			))
+			->where(array(
+				'master_lab_nilai.lab' => '= ?'
+			), array(
+				$uid
+			))
+			->execute();
 
 			//Nilai Item
 			foreach ($parameter['nilai'] as $key => $value) {
@@ -991,11 +1002,37 @@ class Laboratorium extends Utility {
 					'created_at' => parent::format_date(),
 					'updated_at' => parent::format_date()
 				))
+				->returning('id')
 				->execute();
 
 				if($worker['response_result'] > 0) {
-					//
+					$log = parent::log(array(
+						'type' => 'activity',
+						'column' => array(
+							'unique_target',
+							'user_uid',
+							'table_name',
+							'action',
+							'new_value',
+							'logged_at',
+							'status',
+							'login_id'
+						),
+						'value' => array(
+							$worker['response_unique'],
+							$UserData['data']->uid,
+							'master_lab_nilai',
+							'I',
+							json_encode($value),
+							parent::format_date(),
+							'N',
+							$UserData['data']->log_id
+						),
+						'class' => __CLASS__
+					));
 				}
+
+				array_push($queryList, $worker);
 			}
 			
 
@@ -1076,6 +1113,7 @@ class Laboratorium extends Utility {
 				}
 			}*/
 		}
+		return $queryList;
 	}
 
 
@@ -1135,7 +1173,7 @@ class Laboratorium extends Utility {
 				->execute();
 
 				//delete lokasi item also
-				$delete_lokasi = self::$query->update('master_lab_lokasi_item', array(
+				/*$delete_lokasi = self::$query->update('master_lab_lokasi_item', array(
 					'deleted_at' => parent::format_date()
 				))
 				->where(array(
@@ -1143,7 +1181,7 @@ class Laboratorium extends Utility {
 				), array(
 					$parameter[7]
 				))
-				->execute();
+				->execute();*/
 
 				//delete penjamin item also
 				$delete_kategori = self::$query->update('master_poli_tindakan_penjamin', array(
