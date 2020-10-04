@@ -170,13 +170,7 @@ class Icd extends Utility {
 			$autonum++;
 		}
 
-		$dataTotal = self::$query->select('master_icd_10', array(
-			'id',
-			'kode',
-			'nama',
-			'created_at',
-			'updated_at'
-		))	
+		$dataTotal = self::$query->select('master_icd_10', $columnTarget)	
 		->where($paramData, $paramValue)
 		->execute();
 

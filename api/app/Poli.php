@@ -73,11 +73,11 @@ class Poli extends Utility {
 	public function __POST__($parameter = array()) {
 		switch ($parameter['request']) {
 			case 'tambah_poli':
-				return self::tambah_poli('master_poli', $parameter);
+				return self::tambah_poli($parameter);
 				break;
 
 			case 'edit_poli':
-				return self::edit_poli('master_poli', $parameter);
+				return self::edit_poli($parameter);
 				break;
 
 			case 'poli_dokter':
@@ -96,6 +96,42 @@ class Poli extends Utility {
 				return self::poli_perawat_buang($parameter);
 				break;
 
+			case 'get_poli_tindakan_back_end':
+				return self::get_poli_tindakan_back_end($parameter);
+				break;
+
+			case 'add_poli_tindakan':
+				return self::add_poli_tindakan($parameter);
+				break;
+
+			case 'add_dokter_tindakan':
+				return self::add_dokter_tindakan($parameter);
+				break;
+
+			case 'add_perawat_tindakan':
+				return self::add_perawat_tindakan($parameter);
+				break;
+
+			case 'delete_poli_tindakan':
+				return self::delete_poli_tindakan($parameter);
+				break;
+
+			case 'get_poli_dokter_back_end':
+				return self::get_poli_dokter_back_end($parameter);
+				break;
+
+			case 'get_poli_perawat_back_end':
+				return self::get_poli_perawat_back_end($parameter);
+				break;
+
+			case 'delete_poli_dokter':
+				return self::delete_poli_dokter($parameter);
+				break;
+
+			case 'delete_poli_perawat':
+				return self::delete_poli_perawat($parameter);
+				break;
+
 			default:
 				# code...
 				break;
@@ -108,20 +144,20 @@ class Poli extends Utility {
 
 	/*=============== GET POLI ================*/
 	private function get_poli(){
-		$data = self::$query
-					->select('master_poli', array(
-						'uid',
-						'nama',
-						'tindakan_konsultasi',
-						'created_at',
-						'updated_at'
-						)
-					)	
-					->where(array(
-							'master_poli.deleted_at' => 'IS NULL'
-						)
-					)
-					->execute();
+		$data = self::$query->select('master_poli', array(
+			'uid',
+			'nama',
+			'tindakan_konsultasi',
+			'created_at',
+			'updated_at'
+		))
+		->order(array(
+			'master_poli.created_at' => 'ASC'
+		))
+		->where(array(
+			'master_poli.deleted_at' => 'IS NULL'
+		))
+		->execute();
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
@@ -186,43 +222,38 @@ class Poli extends Utility {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 
-			$tindakan = self::get_poli_tindakan($parameter);
-			$data['response_data'][$key]['tindakan'] = $tindakan['response_data'];
+			$data['response_data'][$key]['tindakan'] = self::get_poli_tindakan($parameter)['response_data'];
+			$data['response_data'][$key]['dokter'] = self::get_set_dokter($parameter)['response_data'];
+			$data['response_data'][$key]['perawat'] = self::get_set_perawat($parameter)['response_data'];
 		}
 
 		return $data;
 	}
 
 	private function get_poli_tindakan($parameter) {
-		/*$data = self::$query
-				->select('master_poli_tindakan_penjamin', array(
-						'id',
-						'harga',
-						'uid_tindakan',
-						'uid_penjamin',
-						'created_at',
-						'updated_at'
-					)
-				)
-				->where(array(
-							'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
-							'AND',
-							'master_poli_tindakan_penjamin.uid_poli' => '= ?'
-						),
-						array($parameter)
-				)
-				->execute();
+		$data = self::$query->select('master_poli_tindakan', array(
+			'id',
+			'uid_poli',
+			'uid_tindakan',
+			'created_at',
+			'updated_at'
+		))
+		->where(array(
+			'master_poli_tindakan.deleted_at' => 'IS NULL',
+			'AND',
+			'master_poli_tindakan.uid_poli' => '= ?'
+		), array($parameter))
+		->execute();
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
-			$Penjamin = new Penjamin(self::$pdo);
 			$Tindakan = new Tindakan(self::$pdo);
 			$data['response_data'][$key]['tindakan'] = $Tindakan::get_tindakan_detail($value['uid_tindakan'])['response_data'][0];
-			$data['response_data'][$key]['penjamin'] = $Penjamin::get_penjamin_detail($value['uid_penjamin'])['response_data'][0];
 			$autonum++;
-		}*/
-		$targetKelas = (!isset($parameter['kelas'])) ? __UID_KELAS_GENERAL_RJ__ : $parameter['kelas'];
+		}
+
+		/*$targetKelas = (!isset($parameter['kelas'])) ? __UID_KELAS_GENERAL_RJ__ : $parameter['kelas'];
 		
 		$data = self::$query->select('master_tindakan_kelas_harga', array(
 			'id',
@@ -247,7 +278,718 @@ class Poli extends Utility {
 			$data['response_data'][$key]['tindakan'] = $Tindakan::get_tindakan_detail($value['uid_tindakan'])['response_data'][0];
 			$data['response_data'][$key]['penjamin'] = $Penjamin::get_penjamin_detail($value['uid_penjamin'])['response_data'][0];
 			$autonum++;
+		}*/
+		return $data;
+	}
+
+	private function delete_poli_tindakan($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$poli = self::$query->delete('master_poli_tindakan')
+		->where(array(
+			'master_poli_tindakan.uid_tindakan' => '= ?',
+			'AND',
+			'master_poli_tindakan.uid_poli' => '= ?'
+		), array(
+			$parameter['tindakan'],
+			$parameter['poli']
+		))
+		->execute();
+
+		if ($poli['response_result'] > 0){
+			$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$parameter['tindakan'] . '|' . $parameter['poli'],
+						$UserData['data']->uid,
+						'master_poli_tindakan',
+						'D',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				)
+			);
 		}
+
+		return $poli;
+	}
+
+	private function delete_poli_dokter($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$poli = self::$query->delete('master_poli_dokter')
+		->where(array(
+			'master_poli_dokter.dokter' => '= ?',
+			'AND',
+			'master_poli_dokter.poli' => '= ?'
+		), array(
+			$parameter['dokter'],
+			$parameter['poli']
+		))
+		->execute();
+
+		if ($poli['response_result'] > 0){
+			$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$parameter['dokter'] . '|' . $parameter['poli'],
+						$UserData['data']->uid,
+						'master_poli_dokter',
+						'D',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				)
+			);
+		}
+
+		return $poli;
+	}
+
+	private function delete_poli_perawat($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$poli = self::$query->delete('master_poli_perawat')
+		->where(array(
+			'master_poli_perawat.perawat' => '= ?',
+			'AND',
+			'master_poli_perawat.poli' => '= ?'
+		), array(
+			$parameter['perawat'],
+			$parameter['poli']
+		))
+		->execute();
+
+		if ($poli['response_result'] > 0){
+			$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$parameter['perawat'] . '|' . $parameter['poli'],
+						$UserData['data']->uid,
+						'master_poli_perawat',
+						'D',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				)
+			);
+		}
+
+		return $poli;
+	}
+
+	private function add_poli_tindakan($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		//Check Tindakan
+		$check = self::$query->select('master_poli_tindakan', array(
+			'id',
+			'uid_poli',
+			'uid_tindakan'
+		))
+		->where(array(
+			'master_poli_tindakan.uid_tindakan' => '= ?',
+			'AND',
+			'master_poli_tindakan.uid_poli' => '= ?'
+		), array(
+			$parameter['tindakan'],
+			$parameter['poli']
+		))
+		->execute();
+
+		if(count($check['response_data']) > 0) {
+			$worker = self::$query->update('master_poli_tindakan', array(
+				'deleted_at' => NULL
+			))
+			->where(array(
+				'master_poli_tindakan.uid_tindakan' => '= ?',
+				'AND',
+				'master_poli_tindakan.uid_poli' => '= ?'
+			), array(
+				$parameter['tindakan'],
+				$parameter['poli']
+			))
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$check['response_data'][0]['id'],
+						$UserData['data']->uid,
+						'master_poli_tindakan',
+						'U',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		} else {
+			$worker = self::$query->insert('master_poli_tindakan', array(
+				'uid_poli' => $parameter['poli'],
+				'uid_tindakan' => $parameter['tindakan'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->returning('id')
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$worker['response_unique'],
+						$UserData['data']->uid,
+						'master_poli_tindakan',
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		}
+
+		
+		return $worker;
+	}
+
+	private function add_dokter_tindakan($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		//Check Tindakan
+		$check = self::$query->select('master_poli_dokter', array(
+			'id',
+			'poli',
+			'dokter'
+		))
+		->where(array(
+			'master_poli_dokter.dokter' => '= ?',
+			'AND',
+			'master_poli_dokter.poli' => '= ?'
+		), array(
+			$parameter['dokter'],
+			$parameter['poli']
+		))
+		->execute();
+
+		if(count($check['response_data']) > 0) {
+			$worker = self::$query->update('master_poli_dokter', array(
+				'deleted_at' => NULL
+			))
+			->where(array(
+				'master_poli_dokter.dokter' => '= ?',
+				'AND',
+				'master_poli_dokter.poli' => '= ?'
+			), array(
+				$parameter['dokter'],
+				$parameter['poli']
+			))
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$check['response_data'][0]['id'],
+						$UserData['data']->uid,
+						'master_poli_dokter',
+						'U',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		} else {
+			$worker = self::$query->insert('master_poli_dokter', array(
+				'poli' => $parameter['poli'],
+				'dokter' => $parameter['dokter'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->returning('id')
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$worker['response_unique'],
+						$UserData['data']->uid,
+						'master_poli_dokter',
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		}
+
+		
+		return $worker;
+	}
+
+	private function add_perawat_tindakan($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		//Check Tindakan
+		$check = self::$query->select('master_poli_perawat', array(
+			'id',
+			'poli',
+			'perawat'
+		))
+		->where(array(
+			'master_poli_perawat.perawat' => '= ?',
+			'AND',
+			'master_poli_perawat.poli' => '= ?'
+		), array(
+			$parameter['perawat'],
+			$parameter['poli']
+		))
+		->execute();
+
+		if(count($check['response_data']) > 0) {
+			$worker = self::$query->update('master_poli_perawat', array(
+				'deleted_at' => NULL
+			))
+			->where(array(
+				'master_poli_perawat.perawat' => '= ?',
+				'AND',
+				'master_poli_perawat.poli' => '= ?'
+			), array(
+				$parameter['perawat'],
+				$parameter['poli']
+			))
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$check['response_data'][0]['id'],
+						$UserData['data']->uid,
+						'master_poli_perawat',
+						'U',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		} else {
+			$worker = self::$query->insert('master_poli_perawat', array(
+				'poli' => $parameter['poli'],
+				'perawat' => $parameter['perawat'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->returning('id')
+			->execute();
+
+			if($worker['response_result'] > 0) {
+				$log = parent::log(array(
+					'type'=>'activity',
+					'column'=>array(
+						'unique_target',
+						'user_uid',
+						'table_name',
+						'action',
+						'logged_at',
+						'status',
+						'login_id'
+					),
+					'value'=>array(
+						$worker['response_unique'],
+						$UserData['data']->uid,
+						'master_poli_perawat',
+						'I',
+						parent::format_date(),
+						'N',
+						$UserData['data']->log_id
+					),
+					'class'=>__CLASS__
+				));
+			}
+		}
+
+		
+		return $worker;
+	}
+
+	private function get_poli_tindakan_back_end($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$columnTarget = array(
+			'id',
+			'uid_poli',
+			'uid_tindakan',
+			'created_at',
+			'updated_at'
+		);
+
+		$columnTargetSetter = array(
+			'id',
+			'nama_tindakan'
+		);
+
+		if(isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'master_poli_tindakan.deleted_at' => 'IS NULL',
+				'AND',
+				'master_poli_tindakan.uid_poli' => '= ?',
+				'AND',
+				'master_tindakan.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+			);
+
+			$paramValue = array($parameter['poli']);
+		} else {
+			$paramData = array(
+				'master_poli_tindakan.deleted_at' => 'IS NULL',
+				'AND',
+				'master_poli_tindakan.uid_poli' => '= ?'
+			);
+
+			$paramValue = array($parameter['poli']);
+		}
+
+
+		if($parameter['length'] < 0) {
+			$data = self::$query->select('master_poli_tindakan', $columnTarget)
+			->join('master_tindakan', array(
+				'nama as nama_tindakan'
+			))
+			->on(array(
+				array(
+					'master_poli_tindakan.uid_tindakan' => 'master_tindakan.uid'
+				)
+			))
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->execute();
+		} else {
+			$data = self::$query->select('master_poli_tindakan', $columnTarget)	
+			->join('master_tindakan', array(
+				'nama as nama_tindakan'
+			))
+			->on(array(
+				array('master_poli_tindakan.uid_tindakan', '=', 'master_tindakan.uid')
+			))
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->execute();
+		}
+
+		$data['response_draw'] = $parameter['draw'];
+
+		$autonum = $parameter['start'] + 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		$dataTotal = self::$query->select('master_poli_tindakan', $columnTarget)	
+		->where($paramData, $paramValue)
+		->execute();
+
+		$data['recordsTotal'] = count($dataTotal['response_data']);
+		$data['recordsFiltered'] = count($dataTotal['response_data']);
+		$data['length'] = intval($parameter['length']);
+		$data['start'] = intval($parameter['start']);
+		$data['sort'] = $parameter;
+
+		return $data;
+	}
+
+	public function get_poli_dokter_back_end($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$columnTarget = array(
+			'id',
+			'poli',
+			'dokter',
+			'created_at',
+			'updated_at'
+		);
+
+		$columnTargetSetter = array(
+			'id',
+			'nama_dokter'
+		);
+
+		if(isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'master_poli_dokter.deleted_at' => 'IS NULL',
+				'AND',
+				'master_poli_dokter.poli' => '= ?',
+				'AND',
+				'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+			);
+
+			$paramValue = array($parameter['poli']);
+		} else {
+			$paramData = array(
+				'master_poli_dokter.deleted_at' => 'IS NULL',
+				'AND',
+				'master_poli_dokter.poli' => '= ?'
+			);
+
+			$paramValue = array($parameter['poli']);
+		}
+
+
+		if($parameter['length'] < 0) {
+			$data = self::$query->select('master_poli_dokter', $columnTarget)
+			->join('pegawai', array(
+				'nama as nama_dokter'
+			))
+			->on(array(
+				array(
+					'master_poli_dokter.dokter' => 'pegawai.uid'
+				)
+			))
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->execute();
+		} else {
+			$data = self::$query->select('master_poli_dokter', $columnTarget)	
+			->join('pegawai', array(
+				'nama as nama_dokter'
+			))
+			->on(array(
+				array('master_poli_dokter.dokter', '=', 'pegawai.uid')
+			))
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->execute();
+		}
+
+		$data['response_draw'] = $parameter['draw'];
+
+		$autonum = $parameter['start'] + 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		$dataTotal = self::$query->select('master_poli_dokter', $columnTarget)	
+		->where(array(
+			'master_poli_dokter.deleted_at' => 'IS NULL',
+			'AND',
+			'master_poli_dokter.poli' => '= ?'
+		), array(
+			$parameter['poli']
+		))
+		->execute();
+
+		$data['recordsTotal'] = count($dataTotal['response_data']);
+		$data['recordsFiltered'] = count($dataTotal['response_data']);
+		$data['length'] = intval($parameter['length']);
+		$data['start'] = intval($parameter['start']);
+		$data['sort'] = $parameter;
+
+		return $data;
+	}
+
+	private function get_poli_perawat_back_end($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$columnTarget = array(
+			'id',
+			'poli',
+			'perawat',
+			'created_at',
+			'updated_at'
+		);
+
+		$columnTargetSetter = array(
+			'id',
+			'nama_perawat'
+		);
+
+		if(isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'master_poli_perawat.deleted_at' => 'IS NULL',
+				'AND',
+				'master_poli_perawat.poli' => '= ?',
+				'AND',
+				'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+			);
+
+			$paramValue = array($parameter['poli']);
+		} else {
+			$paramData = array(
+				'master_poli_perawat.deleted_at' => 'IS NULL',
+				'AND',
+				'master_poli_perawat.poli' => '= ?'
+			);
+
+			$paramValue = array($parameter['poli']);
+		}
+
+
+		if($parameter['length'] < 0) {
+			$data = self::$query->select('master_poli_perawat', $columnTarget)
+			->join('pegawai', array(
+				'nama as nama_perawat'
+			))
+			->on(array(
+				array(
+					'master_poli_perawat.perawat' => 'pegawai.uid'
+				)
+			))
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->execute();
+		} else {
+			$data = self::$query->select('master_poli_perawat', $columnTarget)	
+			->join('pegawai', array(
+				'nama as nama_perawat'
+			))
+			->on(array(
+				array('master_poli_perawat.perawat', '=', 'pegawai.uid')
+			))
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->execute();
+		}
+
+		$data['response_draw'] = $parameter['draw'];
+
+		$autonum = $parameter['start'] + 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		$dataTotal = self::$query->select('master_poli_perawat', $columnTarget)	
+		->where(array(
+			'master_poli_perawat.deleted_at' => 'IS NULL',
+			'AND',
+			'master_poli_perawat.poli' => '= ?'
+		), array(
+			$parameter['poli']
+		))
+		->execute();
+
+		$data['recordsTotal'] = count($dataTotal['response_data']);
+		$data['recordsFiltered'] = count($dataTotal['response_data']);
+		$data['length'] = intval($parameter['length']);
+		$data['start'] = intval($parameter['start']);
+		$data['sort'] = $parameter;
+
 		return $data;
 	}
 
@@ -779,18 +1521,13 @@ class Poli extends Utility {
 		return $worker;
 	}
 
-	private function tambah_poli($table_name, $parameter){
+	private function tambah_poli($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		//$objData = $parameter['dataObject'];
-		$nama = $parameter['dataObject']['nama'];
-		$tindakan_konsultasi = $parameter['dataObject']['tindakan_konsultasi'];
-		$tindakanData = $parameter['dataObject']['tindakan'];
-
 		$check = self::duplicate_check(array(
-			'table'=>$table_name,
-			'check'=>$nama
+			'table' => 'master_poli',
+			'check' => $parameter['nama']
 		));
 
 		if (count($check['response_data']) > 0){
@@ -799,125 +1536,42 @@ class Poli extends Utility {
 			unset($check['response_data']);
 			return $check;
 		} else {
-			$uid_poli = parent::gen_uuid();
-			$poli = self::$query
-						->insert($table_name, array(
-								'uid' => $uid_poli,
-								'nama' => $nama,
-								'tindakan_konsultasi' => $tindakan_konsultasi,
-								'created_at' => parent::format_date(),
-								'updated_at' => parent::format_date(),
-								'editable' => TRUE
-								)
-						)->execute();
-
-				if ($tindakanData != ""){
-					foreach ($tindakanData as $key => $values) {
-						$uid_tindakan = $key;
-
-						foreach ($values as $key => $value) {
-							$uid_penjamin = $key;
-
-							$tindakan = self::$query
-								->insert('master_poli_tindakan_penjamin', array(
-											'harga'=>$value,
-											'uid_poli'=>$uid_poli,
-											'uid_tindakan'=>$uid_tindakan,
-											'uid_penjamin'=>$uid_penjamin,
-											'created_at'=>parent::format_date(),
-											'updated_at'=>parent::format_date()
-										)
-									)
-								->execute();
-
-						}
-
-					}
-				}
-
-			if ($poli['response_result'] > 0){
-				$log = parent::log(array(
-							'type'=>'activity',
-							'column'=>array(
-								'unique_target',
-								'user_uid',
-								'table_name',
-								'action',
-								'logged_at',
-								'status',
-								'login_id'
-							),
-							'value'=>array(
-								$uid,
-								$UserData['data']->uid,
-								$table_name,
-								'I',
-								parent::format_date(),
-								'N',
-								$UserData['data']->log_id
-							),
-							'class'=>__CLASS__
-						)
-					);
-			}
+			$poli = self::$query->insert('master_poli', array(
+				'uid' => parent::gen_uuid(),
+				'nama' => $parameter['nama'],
+				'tindakan_konsultasi' => $parameter['tindakan_konsultasi'],
+				'created_at' => parent::format_date(),
+				'updated_at' => parent::format_date()
+			))
+			->returning('uid')
+			->execute();
+			return $poli;
 		}
-
-		return $poli;
 	}
 
 
-	private function edit_poli($table_name, $parameter){
+	private function edit_poli($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-		$uid_poli = $parameter['dataObject']['uid'];
-		$nama = $parameter['dataObject']['nama'];
-		$tindakan_konsultasi = $parameter['dataObject']['tindakan_konsultasi'];
-		$tindakanData = $parameter['dataObject']['tindakan'];
+		
+		$old = self::get_poli_detail($parameter['uid']);
+		
+		$poli = self::$query->update('master_poli', array(
+			'nama' => $parameter['nama'],
+			'tindakan_konsultasi' => $parameter['tindakan_konsultasi'],
+			'updated_at' => parent::format_date()
+		))
+		->where(array(
+			'master_poli.deleted_at' => 'IS NULL',
+			'AND',
+			'master_poli.uid' => '= ?'
+		), array(
+			$parameter['uid']
+		))
+		->execute();
 
-		$old = self::get_poli_detail($uid_poli);
-		$old_tindakan = self::get_poli_tindakan($uid_poli);
-		$old_data['nama'] = $old['response_data'][0]['nama'];
-		$old_data['tindakan'] = $old_tindakan['response_data'];
-
-		$poli = self::$query
-					->update($table_name, array(
-						'nama' => $nama,
-						'tindakan_konsultasi' => $tindakan_konsultasi,
-						'updated_at' => parent::format_date()
-						)
-					)
-					->where(array(
-							$table_name . '.deleted_at' => 'IS NULL',
-							'AND',
-							$table_name . '.uid' => '= ?'
-						),
-						array(
-							$uid_poli
-						)
-					)
-					->execute();
-
-		if(isset($tindakanData) && $tindakanData != "") {
-			//Reset All Price
-			/*$reset = self::$query->update('master_poli_tindakan_penjamin', array(
-				'deleted_at' => parent::format_date()
-			))
-			->where(array(
-				'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
-				'AND',
-				'master_poli_tindakan_penjamin.uid_poli' => '= ?',
-				'AND',
-				'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
-				'AND',
-				'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
-			), array(
-				$uid_poli,
-				$key,
-				$Tkey
-			))
-			->execute();*/
-			
+		/*if(isset($tindakanData) && $tindakanData != "") {
 			foreach ($tindakanData as $key => $value) {
 				foreach ($value as $Tkey => $Tvalue) {
 					$check = self::$query->select('master_poli_tindakan_penjamin', array(
@@ -1027,7 +1681,7 @@ class Poli extends Utility {
 				}
 			}
 					
-		}
+		}*/
 
 
 		if ($poli['response_result'] > 0){
@@ -1047,10 +1701,10 @@ class Poli extends Utility {
 					'value'=>array(
 						$uid_poli,
 						$UserData['data']->uid,
-						$table_name,
+						'master_poli',
 						'U',
 						json_encode($old_data),
-						json_encode($parameter['dataObject']),
+						json_encode($parameter),
 						parent::format_date(),
 						'N',
 						$UserData['data']->log_id
