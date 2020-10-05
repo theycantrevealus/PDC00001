@@ -1028,7 +1028,7 @@ class Antrian extends Utility {
 
 		$pasien = new Pasien(self::$pdo);
 		$dataPasien = $pasien->get_data_pasien($dataAntrian['uid_pasien']);
-
+		
 		$result = ['antrian'=>$dataAntrian, 'pasien'=>$dataPasien];
 
 		return $result;
