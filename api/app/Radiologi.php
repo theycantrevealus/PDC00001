@@ -464,22 +464,6 @@ class Radiologi extends Utility {
 					)
 					->execute();
 
-				// if ($tindakan['response_result'] > 0){
-				// 	foreach ($dataObj['penjamin'] as $key => $value) {
-				// 		$penjamin = self::$query
-				// 				->insert('master_poli_tindakan_penjamin', array(
-				// 						'harga'=>$value,
-				// 						'uid_poli'=>__UIDRADIOLOGI__,
-				// 						'uid_tindakan'=>$uid,
-				// 						'uid_penjamin'=>$key,
-				// 						'created_at'=>parent::format_date(),
-				// 						'updated_at'=>parent::format_date()
-				// 					)
-				// 				)
-				// 				->execute();
-				// 	}
-				// }
-
 				$log = parent::log(array(
 						'type'=>'activity',
 						'column'=>array(
