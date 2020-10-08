@@ -12,14 +12,13 @@
 			}
 		}
 
-		console.log(poliList);
-
 		//Init
 		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorKeteranganResepRacikan, editorPlanning;
 		var antrianData, asesmen_detail;
 		var tindakanMeta = [];
 		var usedTindakan = [];
 		var pasien_penjamin, pasien_penjamin_uid;
+		var pasien_uid;
 		var UID = __PAGES__[3];
 		$("#info-pasien-perawat").remove();
 		$.ajax({
@@ -31,6 +30,7 @@
 			type:"GET",
 			success:function(response) {
 				antrianData = response.response_package.response_data[0];
+				pasien_uid = antrianData.pasien_info.uid;
 				var pasien_nama = antrianData.pasien_info.nama;
 				var pasien_rm = antrianData.pasien_info.no_rm;
 				var pasien_jenkel = antrianData.pasien_info.jenkel_nama;
@@ -1938,10 +1938,15 @@
 						},
 						type: "POST",
 						success: function(response) {
-							console.log(response);
+							
+							//console.log(response);
+
 							if(response.response_package.response_result > 0) {
+								orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
+								listTindakanRadiologiDihapus = [];		//set back to empty
+								
 								notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-								location.href = __HOSTNAME__ + "/rawat_jalan/dokter";
+								//location.href = __HOSTNAME__ + "/rawat_jalan/dokter";
 							} else {
 								notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
 							}
@@ -1953,8 +1958,7 @@
 					});
 					
 
-					orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
-					listTindakanRadiologiDihapus = [];		//set back to empty
+					
 				} else if (result.isDenied) {
 					//Swal.fire('Changes are not saved', '', 'info')
 				}
@@ -1962,6 +1966,42 @@
 			return false;
 		});
 
+<<<<<<< Updated upstream
+=======
+		
+		loadRadiologiTindakan('tindakan-radiologi');
+		
+		$("#tindakan-radiologi").select2({});
+		
+		function loadRadiologiTindakan(selector){
+			var radiologiTindakan;
+			$.ajax({
+				url: __HOSTAPI__ + "/Radiologi/tindakan",
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					if(response.response_package != null) {
+						radiologiTindakan = response.response_package.response_data;
+						if (radiologiTindakan.length > 0){
+							for(i = 0; i < radiologiTindakan.length; i++){
+			                    var selection = document.createElement("OPTION");
+			                    $(selection).attr("value", radiologiTindakan[i].uid).html(radiologiTindakan[i].nama);
+			                    $("#" + selector).append(selection);
+			                }
+						}
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+			return radiologiTindakan;
+		}
+
+>>>>>>> Stashed changes
 		function loadPasien(params){
 			var MetaData = null;
 
@@ -2058,6 +2098,80 @@
 
 			return dataPenjamin;
 		}
+
+
+
+
+
+
+
+
+
+		/*========================= CPPT ==========================*/
+
+		load_cppt(pasien_uid);
+
+		function load_cppt(pasien, dari = "", sampai = "") {
+			$.ajax({
+				url: __HOSTAPI__ + "/CPPT/semua/" + pasien,
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(response) {
+					$("#cppt_loader").html("");
+					var data = response.response_package.response_data;
+					for(var a = 0; a < data.length; a++) {
+						$.ajax({
+							url: __HOSTNAME__ + "/pages/rawat_jalan/dokter/cppt-single.php",
+							async:false,
+							data:{
+								setter:data[a]
+							},
+							beforeSend: function(request) {
+								request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+							},
+							type:"POST",
+							success:function(response_html) {
+								$("#cppt_loader").append(response_html);
+							},
+							error: function(response_html) {
+								console.log(response_html);
+							}
+						});
+					}
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+		}
+
+
+
+		/*=========================================================*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		
 		/*========================= RADIOLOGI SCRIPT AREA START ==========================*/
 		//load order with returning selectedTindakan

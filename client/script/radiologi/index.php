@@ -64,13 +64,6 @@
 										"<i class=\"fa fa-check\"></i>" +
 									"</a>" +
 								"</div>";
-						/*var button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-info btn-sm' data-toggle='tooltip' title='Isi Assesmen Pasien'><i class='fa fa-address-card'></i></a>";
-
-						if (row['status_asesmen'] === true){
-							button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-warning btn-sm' data-toggle='tooltip' title='Edit Assesmen Pasien'><i class='fa fa-address-card'></i></a>";
-						}*/
-
-						//return "<div class=\"btn-group \" role=\"group\" aria-label=\"Basic example\">" + button + "</div>";
 					}
 				}
 			]

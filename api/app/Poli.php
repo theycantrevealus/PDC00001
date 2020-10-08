@@ -132,6 +132,10 @@ class Poli extends Utility {
 				return self::delete_poli_perawat($parameter);
 				break;
 
+			case 'get_kunjungan_per_layanan':
+				return self::get_kunjungan_per_layanan($parameter);
+				break;
+
 			default:
 				# code...
 				break;
@@ -1772,6 +1776,109 @@ class Poli extends Utility {
 		}
 
 		return $poli;
+	}
+
+	private function get_kunjungan_per_layanan($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		
+		if(isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'master_poli.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+				'AND',
+				'master_poli.deleted_at' => 'IS NULL'
+			);
+
+			$paramValue = array();
+		} else {
+			$paramData = array(
+				'master_poli.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+				'AND',
+				'master_poli.deleted_at' => 'IS NULL'
+			);
+
+			$paramValue = array();
+		}
+
+		
+
+
+		if($parameter['length'] < 0) {
+			$data = self::$query->select('master_poli', array(
+				'uid',
+				'nama',
+				'created_at',
+				'updated_at'
+			))
+			/*->join('poli', array(
+				'nama as nama_poli'
+			))
+			->on(array(
+				array('antrian.departemen', '=', 'poli.uid')
+			))*/
+			->where($paramData, $paramValue)
+			->execute();
+		} else {
+			$data = self::$query->select('master_poli', array(
+				'uid',
+				'nama',
+				'created_at',
+				'updated_at'
+			))
+			->where($paramData, $paramValue)
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->execute();
+		}
+
+		$data['response_draw'] = $parameter['draw'];
+
+
+		//Get Count Pelayanan Total
+		$antrianTotal = self::$query->select('antrian', array(
+			'uid'
+		))
+		->where(array(
+			'antrian.deleted_at' => 'IS NULL'
+		))
+		->execute();
+
+
+		$autonum = intval($parameter['start']) + 1;
+		foreach ($data['response_data'] as $key => $value) {
+			//Get Count Pelayanan
+			$antrian = self::$query->select('antrian', array(
+				'uid'
+			))
+			->where(array(
+				'antrian.deleted_at' => 'IS NULL',
+				'AND',
+				'antrian.departemen' => '= ?'
+			), array(
+				$value['uid']
+			))
+			->execute();
+
+			$data['response_data'][$key]['jumlah_pelayanan'] = count($antrian['response_data']);
+			$data['response_data'][$key]['jumlah_pelayanan_total'] = count($antrianTotal['response_data']);
+			$data['response_data'][$key]['percentage'] = (count($antrian['response_data']) / count($antrianTotal['response_data']) * 100);
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		$dataTotal = self::$query->select('master_poli', array(
+			'uid',
+			'nama'
+		))
+		->where($paramData, $paramValue)
+		->execute();
+
+		$data['recordsTotal'] = count($dataTotal['response_data']);
+		$data['recordsFiltered'] = count($dataTotal['response_data']);
+		$data['length'] = intval($parameter['length']);
+		$data['start'] = intval($parameter['start']);
+
+		return $data;
 	}
 
 

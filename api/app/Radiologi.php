@@ -748,44 +748,35 @@ class Radiologi extends Utility {
 	}
 
 	/*------------------ ANTRIAN RADIOLOGI -------------------*/
-	private function get_antrian(){
+	private function get_antrian() {
 		$data = self::$query
-				->select('radiologi_order', 
-					array(
-						'uid',
-						'asesmen as uid_asesmen',
-						'waktu_order'
-					)
-				)
+				->select('radiologi_order',  array(
+					'uid',
+					'asesmen as uid_asesmen',
+					'waktu_order'))
 				->join('asesmen', array(
-						'antrian as uid_antrian'
-					)
-				)
+					'antrian as uid_antrian'
+				))
 				->join('antrian', array(
-						'pasien as uid_pasien',
-						'dokter as uid_dokter',
-						'departemen as uid_poli',
-						'penjamin as uid_penjamin',
-						'waktu_masuk'
-					)
-				)
+					'pasien as uid_pasien',
+					'dokter as uid_dokter',
+					'departemen as uid_poli',
+					'penjamin as uid_penjamin',
+					'waktu_masuk'
+				))
 				->join('pasien', array(
-						'nama as pasien',
-						'no_rm'
-					)
-				)
+					'nama as pasien',
+					'no_rm'
+				))
 				->join('master_poli', array(
-						'nama as departemen'
-					)
-				)
+					'nama as departemen'
+				))
 				->join('pegawai', array(
-						'nama as dokter'
-					)
-				)
+					'nama as dokter'
+				))
 				->join('master_penjamin', array(
-						'nama as penjamin'
-					)
-				)
+					'nama as penjamin'
+				))
 				->join('kunjungan', array(
 						'pegawai as uid_resepsionis'
 					)
@@ -1014,7 +1005,7 @@ class Radiologi extends Utility {
 			
 			$uidRadiologiOrder = "";
 			$statusOrder = "NEW";	//parameter to set status order, set "NEW" for default
-			if ($get_asesmen['response_result'] > 0){
+			if ($get_asesmen['response_result'] > 0) {
 				$uidAsesmen = $get_asesmen['response_data'][0]['uid'];
 
 				$checkRadiologiOrder = self::$query
