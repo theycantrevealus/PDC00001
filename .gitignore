@@ -39,3 +39,5 @@ config.php
 *.req
 *.crt
 *.sql
+.idea/
+*.png

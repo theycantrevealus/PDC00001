@@ -1966,8 +1966,6 @@
 			return false;
 		});
 
-<<<<<<< Updated upstream
-=======
 		
 		loadRadiologiTindakan('tindakan-radiologi');
 		
@@ -2001,7 +1999,6 @@
 			return radiologiTindakan;
 		}
 
->>>>>>> Stashed changes
 		function loadPasien(params){
 			var MetaData = null;
 
