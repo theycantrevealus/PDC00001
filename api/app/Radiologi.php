@@ -1141,7 +1141,7 @@ class Radiologi extends Utility
 
                 if (count($parameter['listTindakan']) > 0) {
                     //Cek Penjamin dulu. Jika non umum langsung lunas. gitulah kira-kira
-                    if ($parameter['penjamin'] == __UIDPENJAMINUMUM__) {
+                    if ($data_antrian['penjamin'] == __UIDPENJAMINUMUM__) {
                         $status_lunas = 'K';
                     } else {
                         $status_lunas = 'P';
@@ -1301,7 +1301,7 @@ class Radiologi extends Utility
                                 'item_origin' => 'master_tindakan',
                                 'qty' => 1,
                                 'harga' => $HargaFinal,
-                                'status_bayar' => 'N',
+                                'status_bayar' => ($valueTindakan == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
                                 'subtotal' => $HargaFinal,
                                 'discount' => 0,
                                 'discount_type' => 'N',
