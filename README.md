@@ -3,7 +3,6 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-
 <p align="center">
   <a href="https://github.com/pondokcoder2020/PDC00001">
     <img src="images/pondokcoder1280.svg" alt="Logo" width="240">
