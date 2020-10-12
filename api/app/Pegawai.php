@@ -43,6 +43,10 @@ class Pegawai extends Utility {
 
 			return self::get_module($parameter[2]);
 
+		} else if($parameter[1] == 'get_all_dokter') {
+
+			return self::get_all_dokter();
+
 		} else {
 
 			//__HOST__/Pegawai
@@ -778,6 +782,55 @@ class Pegawai extends Utility {
 		}
 	}
 
+	private function get_all_dokter(){
+		$Dokter = self::$query->select('pegawai', array(
+					'uid',
+					'nama AS nama_dokter'
+				)
+			)
+			->join('pegawai_jabatan', array(
+					'uid AS uid_jabatan',
+					'nama AS nama_jabatan'
+				)
+			)
+			->on(
+				array(
+					array('pegawai.jabatan', '=', 'pegawai_jabatan.uid')
+				)
+			)
+			->where(
+				array(
+				'pegawai.deleted_at' => 'IS NULL',
+				'AND',
+				'pegawai_jabatan.nama' => '= ?'
+				), array(
+					'Dokter'
+				)
+			)
+			->execute();
+		
+		return $Dokter;
+	}
+
+	public function get_detail_pegawai($parameter){
+		$pegawai = self::$query->select('pegawai', array(
+					'uid',
+					'nama'
+				)
+			)
+			->where(
+				array(
+					'pegawai.deleted_at' => 'IS NULL',
+					'AND',
+					'pegawai.uid' => '= ?'
+				), array(
+					$parameter
+				)
+			)
+			->execute();
+		
+		return $pegawai;
+	}
 
 	private function duplicate_check($parameter) {
 		return self::$query
