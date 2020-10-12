@@ -1305,7 +1305,11 @@ class Laboratorium extends Utility {
 					)
 				)
 				->where(array(
-						'lab_order.deleted_at' => 'IS NULL'
+						'lab_order.status'	=> '= ?',
+						'AND',
+						'lab_order.deleted_at' 		=> 'IS NULL'
+					), array(
+						'P'
 					)
 				)
 				->order(
@@ -1981,6 +1985,7 @@ class Laboratorium extends Utility {
 							'dr_pengirim'			=>	$UserData['data']->uid,
 							'dr_penanggung_jawab'	=>	$parameter['dokterPJ'],
 							'no_order'				=>	$no_order_new,
+							'status'				=>	'P',
 							'created_at'			=>	parent::format_date(),
 							'updated_at'			=>	parent::format_date()
 						)
@@ -2014,8 +2019,10 @@ class Laboratorium extends Utility {
 					));
 					
 					$result['new_lab_order'] = $labOrder;
-					
+					$status_lunas = 'P';
+
 					foreach ($parameter['listTindakan'] as $keyTindakan => $valueTindakan) {
+						
 						$checkDetailLabor = self::$query
 							->select('lab_order_detail', array('id'))
 							->where(
@@ -2033,6 +2040,10 @@ class Laboratorium extends Utility {
 							->execute();
 						
 						if ($checkDetailLabor['response_result'] == 0){
+							if ($valueTindakan == __UIDPENJAMINUMUM__){
+								$status_lunas = 'K';
+							}
+
 							$addDetailLabor = self::$query
 								->insert('lab_order_detail', 
 									array(
@@ -2046,6 +2057,71 @@ class Laboratorium extends Utility {
 								->execute();
 
 							if ($addDetailLabor['response_result'] > 0){
+								//Check Invoice
+								$Invoice = new Invoice(self::$pdo);
+								$InvoiceCheck = self::$query->select('invoice', array(
+									'uid'
+								))
+									->where(array(
+										'invoice.kunjungan' => '= ?',
+										'AND',
+										'invoice.deleted_at' => 'IS NULL'
+									), array(
+										$data_antrian['kunjungan']
+									))
+									->execute();
+	
+								if (count($InvoiceCheck['response_data']) > 0) {
+									$TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+								} else {
+									$InvMasterParam = array(
+										'kunjungan' => $data_antrian['kunjungan'],
+										'pasien' => $data_antrian['pasien'],
+										'keterangan' => 'Tagihan laboratorium'
+									);
+									$NewInvoice = $Invoice::create_invoice($InvMasterParam);
+									$TargetInvoice = $NewInvoice['response_unique'];
+								}
+	
+	
+								$HargaTindakan = self::$query->select('master_tindakan_kelas_harga', array(
+									'id',
+									'tindakan',
+									'kelas',
+									'penjamin',
+									'harga'
+								))
+									->where(array(
+										'master_tindakan_kelas_harga.penjamin' => '= ?',
+										'AND',
+										'master_tindakan_kelas_harga.kelas' => '= ?',
+										'AND',
+										'master_tindakan_kelas_harga.tindakan' => '= ?',
+										'AND',
+										'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+									), array(
+										$valueTindakan,
+										__UID_KELAS_GENERAL_RAD__,    //Fix 1 harga kelas GENERAL
+										$keyTindakan
+									))
+									->execute();
+								$HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
+	
+								$InvoiceDetail = $Invoice::append_invoice(array(
+									'invoice' => $TargetInvoice,
+									'item' => $keyTindakan,
+									'item_origin' => 'master_tindakan',
+									'qty' => 1,
+									'harga' => $HargaFinal,
+									'status_bayar' => ($valueTindakan == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+									'subtotal' => $HargaFinal,
+									'discount' => 0,
+									'discount_type' => 'N',
+									'pasien' => $data_antrian['pasien'],
+									'penjamin' => $valueTindakan,
+									'keterangan' => 'Biaya Radiologi'
+								));
+
 								$log = parent::log(array(
 									'type'=>'activity',
 									'column'=>array(
@@ -2125,6 +2201,23 @@ class Laboratorium extends Utility {
 						}
 
 					}
+					
+					//update status order
+					$updateStatusOrder = self::$query
+						->update('lab_order', array(
+								'status'	=>	$status_lunas
+							)
+						)
+						->where(
+							array(
+								'lab_order.uid'			=>	'= ?',
+								'AND',
+								'lab_order.deleted_at'	=>	'IS NULL'
+							), array(
+								$uidLabOrder
+							)
+						)
+						->execute();
 				}
 
 			}
