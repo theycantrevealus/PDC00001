@@ -13,7 +13,7 @@
   <h3 align="center">PC-MedShield</h3>
 
   <p align="center">
-    PC-MedShield is an integrated hospital management application
+    PC-MedShield is an Integrated Hospital Management Application
     <br />
     <a href="https://github.com/pondokcoder2020/PDC00001"><strong>Explore the docs »</strong></a>
     <br />
