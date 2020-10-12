@@ -34,7 +34,7 @@
 					</li>
 					<li class="nav-item dropdown">
 						<a href="<?php echo __HOSTNAME__; ?>/template/#account_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
-							<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/avatar/demi.png" class="rounded-circle" width="32" alt="Frontted" />
+							<img src="<?php echo __HOST__ . $_SESSION['profile_pic']; ?>?d=<?php echo date('H:i:s'); ?>" class="rounded-circle" width="32" alt="Frontted" />
 							<span class="ml-1 d-flex-inline">
 								<span class="text-light"><?php echo $_SESSION['nama']; ?></span>
 							</span>

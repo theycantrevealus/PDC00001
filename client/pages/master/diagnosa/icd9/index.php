@@ -20,12 +20,12 @@
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
 				<table class="table table-bordered" id="table-icd9">
-					<thead>
+					<thead class="thead-dark">
 						<tr>
-							<th style="width: 20px;">No</th>
-							<th>Kode</th>
+							<th class="wrap_content">No</th>
+							<th class="wrap_content">Kode</th>
 							<th>Diagnosa</th>
-							<th>Aksi</th>
+							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>

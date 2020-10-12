@@ -1049,30 +1049,6 @@ class Asesmen extends Utility {
 		}
 
 		foreach ($parameter['tindakan'] as $key => $value) {
-			/*$Penjamin = self::$query->select('master_poli_tindakan_penjamin', array(
-				'id',
-				'harga',
-				'uid_poli',
-				'uid_tindakan',
-				'uid_penjamin',
-				'created_at',
-				'updated_at'
-			))
-			->where(array(
-				'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
-				'AND',
-				'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
-				'AND',
-				'master_poli_tindakan_penjamin.uid_penjamin' => '= ?',
-				'AND',
-				'master_poli_tindakan_penjamin.uid_poli' => '= ?'
-			), array(
-				$value['item'],
-				$value['penjamin'],
-				$value['poli']
-			))
-			->execute();*/
-
 			$HargaTindakan = self::$query->select('master_tindakan_kelas_harga', array(
 				'id',
 				'tindakan',
@@ -1089,56 +1065,42 @@ class Asesmen extends Utility {
 				'AND',
 				'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
 			), array(
-				$value['penjamin'],
-				$value['kelas'],
+				$parameter['penjamin'],
+				__UID_KELAS_GENERAL_RJ__,	//Fix 1 harga kelas GENERAL
 				$value['item']
 			))
 			->execute();
-
-			$new_asesmen_uid = parent::gen_uuid();
+			$HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
 			$new_asesmen_tindakan = self::$query->insert('asesmen_tindakan', array(
-				'uid' => $new_asesmen_uid,
 				'kunjungan' => $value['kunjungan'],
 				'antrian' => $value['antrian'],
 				'asesmen' => $MasterAsesmen,
 				'tindakan' => $value['item'],
-				'penjamin' => $value['penjamin'],
-				'kelas' => $value['kelas'],
-				'harga' => $HargaTindakan['response_data'][0]['harga'],
+				'penjamin' => $parameter['penjamin'],
+				'kelas' => __UID_KELAS_GENERAL_RJ__,
+				'harga' => $HargaFinal,
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))
 			->execute();
+
 			if($new_asesmen_tindakan['response_result'] > 0) {
 				$InvoiceDetail = $Invoice::append_invoice(array(
 					'invoice' => $TargetInvoice,
 					'item' => $value['item'],
 					'item_origin' => 'master_tindakan',
 					'qty' => 1,
-					'harga' => $HargaTindakan['response_data'][0]['harga'],
+					'harga' => $HargaFinal,
 					'status_bayar' => 'N',
-					'subtotal' => $HargaTindakan['response_data'][0]['harga'],
+					'subtotal' => $HargaFinal,
 					'discount' => 0,
 					'discount_type' => 'N',
 					'pasien' => $parameter['pasien'],
-					'penjamin' => $value['penjamin'],
+					'penjamin' => $parameter['penjamin'],
 					'keterangan' => 'Biaya Tindakan Perobatan'
 				));
 
 				array_push($returnResponse, $InvoiceDetail);
-				
-				/*'invoice' => $parameter['invoice'],
-				'item' => $parameter['item'],
-				'item_type' => $parameter['item_origin'],
-				'qty' => $parameter['qty'],
-				'harga' => $parameter['harga'],
-				'status_bayar' => isset($parameter['status_bayar']) ? $parameter['status_bayar'] : 'N',
-				'subtotal' => $parameter['subtotal'],
-				'discount' => $parameter['discount'],
-				'discount_type' => $parameter['discount_type'],
-				'pasien' => $parameter['pasien'],
-				'penjamin' => $parameter['penjamin'],
-				'keterangan' => $parameter['keterangan']*/
 			}
 			array_push($returnResponse, $new_asesmen_tindakan);
 		}
