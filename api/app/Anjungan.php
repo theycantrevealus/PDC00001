@@ -254,10 +254,11 @@ class Anjungan extends Utility {
 			'id'
 		))
 		->where(array(
-			'antrian_nomor.created_at' => '>= now()::date + interval \'1h\'',
+            'DATE(antrian_nomor.created_at)' => '= ?',
 			'AND',
 			'antrian_nomor.jenis_antrian' => '= ?'
 		), array(
+		    date('Y-m-d'),
 			$parameter['jenis']
 		))
 		->execute();

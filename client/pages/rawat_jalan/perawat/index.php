@@ -55,7 +55,7 @@
 								<th>Poliklinik</th>
 								<th>Dokter</th>
 								<th>Jenis Bayar</th>
-								<!-- <th>Oleh</th> -->
+								 <th>Prioritas</th>
 								<th>Aksi</th>
 							</tr>
 						</thead>

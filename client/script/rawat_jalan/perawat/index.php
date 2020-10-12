@@ -84,6 +84,11 @@
 						return row["penjamin"];
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.prioritas.nama;
+                    }
+                },
 				/*{
 					"data" : null, render: function(data, type, row, meta) {
 						return row["user_resepsionis"];
