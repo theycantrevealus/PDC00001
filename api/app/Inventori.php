@@ -1630,7 +1630,7 @@ class Inventori extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$error_count = 0;
 		$uid = $parameter['uid'];
-		$old_value = self::get_item_detail($uid);
+		$old = self::get_item_detail($uid);
 		$worker = self::$query->update('master_inv', array(
 			'uid' => $uid,
 			'kode_barang' => $parameter['kode'],
