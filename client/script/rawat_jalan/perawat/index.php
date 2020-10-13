@@ -110,6 +110,7 @@
 				if (data['status_assesmen'] === true){
 					$(row).css({"background-color":"#E0F5E5","color":"#000"});
 				}
+				$(".selector_dokter").select2();
 			}
 		});
 
