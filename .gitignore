@@ -8,10 +8,12 @@ sync.php
 composer.lock
 composer.json
 
-node_modules/*
-images/produk
-images/igd
-images/slideshow
+node_modules/
+images/produk/
+images/pegawai/
+images/igd/
+images/slideshow/
+.idea/
 audio/
 document/
 client/template/
@@ -41,4 +43,3 @@ config.php
 *.sql
 .idea/
 *.png
-/api/nbproject/private/
