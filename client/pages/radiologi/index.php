@@ -4,7 +4,6 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item">Radiologi</li>
 					<li class="breadcrumb-item active" aria-current="page">Antrian Radiologi</li>
 				</ol>
 			</nav>
@@ -25,6 +24,7 @@
 						<div class="col-md-10">
 							<b><?php echo $_SESSION['nama']; ?></b>
 							<br />
+							Petugas Radiologi
 						</div>
 					</div>
 				</div>
@@ -32,9 +32,7 @@
 					<div class="d-flex flex-row">
 						<div class="col-md-12">
 							<b>Antrian</b>
-							<h5 class="text-info handy" id="current-poli">
-								<small><i class="fa fa-sync text-success" id="change-poli"></i></small>
-							</h5>
+							<br />
 							<b id="jlh-antrian">0</b> antrian
 						</div>
 					</div>
@@ -42,9 +40,9 @@
 			</div>
 			<div class="card card-body">
 				<table class="table table-bordered table-striped" id="table-antrian-radiologi" style="font-size: 0.9rem;">
-					<thead>
+					<thead class="thead-dark">
 						<tr>
-							<th width="2%">No</th>
+							<th class="wrap_content">No</th>
 							<th>Waktu Order</th>
 							<th>No. RM</th>
 							<th>Pasien</th>
@@ -52,7 +50,7 @@
 							<th>Dokter</th>
 							<!-- <th>Penjamin</th>
 							<th>Oleh</th> -->
-							<th>Aksi</th>
+							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>

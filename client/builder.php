@@ -175,6 +175,11 @@
 	<script type="text/javascript">
 		var Sync;
 		$(function() {
+			$(".txt_tanggal").datepicker({
+				dateFormat: 'DD, dd MM yy',
+				autoclose: true
+			});
+			
 			moment.locale('id');
 			var parentList = [];
 
@@ -589,11 +594,6 @@
 			monthName[9]="Oktober";
 			monthName[10]="November";
 			monthName[11]="Desember";
-
-			$(".txt_tanggal").datepicker({
-				dateFormat: 'DD, dd MM yy',
-				autoclose: true
-			});
 		});
 	</script>
 	<div class="notification-container"></div>

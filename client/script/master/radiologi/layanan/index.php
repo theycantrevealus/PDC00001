@@ -2,7 +2,6 @@
 	$(function(){
 		var selectedID;
 		loadJenisTindakan();
-		
 		var tableLayanan = $("#table-layanan-radiologi").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/Radiologi/tindakan",
@@ -11,6 +10,7 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+					console.log(response);
 					return response.response_package.response_data;
 				}
 			},
@@ -122,7 +122,6 @@
 					},
 					type: "POST",
 					success: function(response){
-						console.log(response);
 						$("#nama").val("");
 						$("#jenis").val("");
 						$("#form-tambah").modal("hide");
@@ -145,7 +144,7 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             success: function(response){
-                var MetaData = response.response_package.response_data;
+            	var MetaData = response.response_package.response_data;
 
                 if (MetaData != ""){ 
                 	for(i = 0; i < MetaData.length; i++){

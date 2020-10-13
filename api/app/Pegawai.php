@@ -43,6 +43,10 @@ class Pegawai extends Utility {
 
 			return self::get_module($parameter[2]);
 
+		} else if($parameter[1] == 'get_all_dokter') {
+
+			return self::get_all_dokter();
+
 		} else {
 
 			//__HOST__/Pegawai
@@ -150,6 +154,12 @@ class Pegawai extends Utility {
 				$Unit = new Unit(self::$pdo);
 				$Unit_Info = $Unit::get_unit_detail($read[0]['unit']);
 
+				if(file_exists('../images/pegawai/' . $read[0]['uid'] . '.png')) {
+					$profile_pic = '/images/pegawai/' . $read[0]['uid'] . '.png';
+				} else {
+					$profile_pic = '/client/template/assets/images/avatar/demi.png';
+				}
+
 				//Register JWT
 				$iss = __HOSTNAME__;
 				$iat = time();
@@ -158,9 +168,11 @@ class Pegawai extends Utility {
 				$aud = 'users_library';
 				$user_arr_data = array(
 					'uid' => $read[0]['uid'],
+					'pic' => $profile_pic,
 					'unit' => $read[0]['unit'],
 					'unit_name' => $Unit_Info['response_data'][0]['nama'],
 					'unit_kode' => $Unit_Info['response_data'][0]['kode'],
+					'gudang' => $Unit_Info['response_data'][0]['gudang'],
 					'jabatan' => $read[0]['jabatan'],
 					'email' => $read[0]['email'],
 					'log_id' => $log
@@ -188,7 +200,8 @@ class Pegawai extends Utility {
 				$_SESSION['akses_halaman'] = $moduleSelectedMeta['selected'];
 				$_SESSION['akses_halaman_link'] = $moduleSelectedMeta['selected_link'];
 				$_SESSION['akses_halaman_meta'] = $moduleSelectedMeta['selected_meta'];
-
+				
+				$_SESSION['profile_pic'] = $profile_pic;
 				if(strtolower($_SESSION['jabatan']['response_data'][0]['nama']) == 'dokter') {
 					//Load Dokter Data
 					$Poli = new Poli(self::$pdo);
@@ -236,6 +249,12 @@ class Pegawai extends Utility {
 		$read = $query->fetchAll(\PDO::FETCH_ASSOC);
 		$autonum = 1;
 		foreach ($read as $key => $value) {
+			if(file_exists('../images/pegawai/' . $value['uid'] . '.png')) {
+				$profile_pic = '/images/pegawai/' . $value['uid'] . '.png';
+			} else {
+				$profile_pic = '/client/template/assets/images/avatar/demi.png';
+			}
+			$read[$key]['profile_pic'] = $profile_pic;
 			$read[$key]['autonum'] = $autonum;
 			$autonum++;
 		}
@@ -263,8 +282,15 @@ class Pegawai extends Utility {
 			$parameter
 		))
 		->execute();
+
 		$modulDataMeta = self::get_module($data['response_data'][0]['uid']);
 		$data['response_module'] = $modulDataMeta['build'];
+		if(file_exists('../images/pegawai/' . $data['response_data'][0]['uid'] . '.png')) {
+			$profile_pic = '/images/pegawai/' . $data['response_data'][0]['uid'] . '.png';
+		} else {
+			$profile_pic = '/client/template/assets/images/avatar/demi.png';
+		}
+		$data['response_data'][0]['profile_pic'] = $profile_pic;
 		$data['response_selected'] = $modulDataMeta['selected'];
 
 		return $data;
@@ -435,7 +461,9 @@ class Pegawai extends Utility {
 				))
 
 				->where(array(
-					'pegawai_akses.uid_pegawai' => '= ?'
+					'pegawai_akses.uid_pegawai' => '= ?',
+					'AND',
+					'pegawai_akses.deleted_at' => 'IS NULL'
 				), array(
 					$parameter['uid']
 				))
@@ -458,7 +486,9 @@ class Pegawai extends Utility {
 			'modul'
 		))
 		->where(array(
-			'pegawai_module.uid_pegawai' => '= ?'
+			'pegawai_module.uid_pegawai' => '= ?',
+			'AND',
+			'pegawai_module.deleted_at' => 'IS NULL'
 		), array(
 			$parameter
 		))
@@ -531,6 +561,17 @@ class Pegawai extends Utility {
 			))
 			->execute();
 			if($worker['response_result'] > 0) {
+
+				$data = $parameter['image'];
+				list($type, $data) = explode(';', $data);
+				list(, $data)      = explode(',', $data);
+				$data = base64_decode($data);
+				if(!file_exists('../images/pegawai')) {
+					mkdir('../images/pegawai');
+				}
+
+				file_put_contents('../images/pegawai/' . $uid . '.png', $data);
+
 				$log = parent::log(array(
 					'type' => 'activity',
 					'column' => array(
@@ -583,7 +624,16 @@ class Pegawai extends Utility {
 		if($worker['response_result'] > 0) {
 			unset($parameter['access_token']);
 
-			
+			$data = $parameter['image'];
+			list($type, $data) = explode(';', $data);
+			list(, $data)      = explode(',', $data);
+			$data = base64_decode($data);
+			if(!file_exists('../images/pegawai')) {
+				mkdir('../images/pegawai');
+			}
+
+			file_put_contents('../images/pegawai/' . $parameter['uid'] . '.png', $data);
+
 			$log = parent::log(array(
 				'type' => 'activity',
 				'column' => array(
@@ -732,6 +782,55 @@ class Pegawai extends Utility {
 		}
 	}
 
+	private function get_all_dokter(){
+		$Dokter = self::$query->select('pegawai', array(
+					'uid',
+					'nama AS nama_dokter'
+				)
+			)
+			->join('pegawai_jabatan', array(
+					'uid AS uid_jabatan',
+					'nama AS nama_jabatan'
+				)
+			)
+			->on(
+				array(
+					array('pegawai.jabatan', '=', 'pegawai_jabatan.uid')
+				)
+			)
+			->where(
+				array(
+				'pegawai.deleted_at' => 'IS NULL',
+				'AND',
+				'pegawai_jabatan.nama' => '= ?'
+				), array(
+					'Dokter'
+				)
+			)
+			->execute();
+		
+		return $Dokter;
+	}
+
+	public function get_detail_pegawai($parameter){
+		$pegawai = self::$query->select('pegawai', array(
+					'uid',
+					'nama'
+				)
+			)
+			->where(
+				array(
+					'pegawai.deleted_at' => 'IS NULL',
+					'AND',
+					'pegawai.uid' => '= ?'
+				), array(
+					$parameter
+				)
+			)
+			->execute();
+		
+		return $pegawai;
+	}
 
 	private function duplicate_check($parameter) {
 		return self::$query

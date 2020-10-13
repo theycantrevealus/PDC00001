@@ -49,6 +49,7 @@
 					autoLokasi(selectedLokasi, labData.lokasi[lok].uid);
 					selectedLokasi.push(labData.lokasi[lok].uid);
 				}
+
 				autoLokasi(selectedLokasi);
 
 				for(var nil in labData.nilai) {
@@ -736,13 +737,13 @@
 				}
 			});
 
-			var lokasi = [];
+			/*var lokasi = [];
 			$("#lokasi-lab tbody tr").each(function() {
 				var lokasiData = $(this).find("td:eq(1) select").val();
 				if(lokasi.indexOf(lokasiData) < 0 && !$(this).hasClass("last-lokasi")) {
 					lokasi.push(lokasiData);
 				}
-			});
+			});*/
 
 			var nilai = [];
 			$("#nilai-lab tbody tr").each(function() {
@@ -785,7 +786,7 @@
 						spesimen: spesimen,
 						keterangan: keterangan,
 						kategori: kategori,
-						lokasi: lokasi,
+						//lokasi: lokasi,
 						nilai: nilai,
 						//penjamin: penjamin
 					},
@@ -794,8 +795,7 @@
 					},
 					type: "POST",
 					success: function(response){
-						console.log(response);
-						//location.href = __HOSTNAME__ + "/master/laboratorium";
+						location.href = __HOSTNAME__ + "/master/laboratorium";
 					},
 					error: function(response) {
 						console.log(response);
