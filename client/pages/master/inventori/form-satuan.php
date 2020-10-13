@@ -11,7 +11,7 @@
 					<select class="form-control" id="txt_satuan_terkecil"></select>
 				</div>
 				<table class="table table-bordered table-data" id="table-konversi-satuan">
-					<thead>
+					<thead class="thead-dark">
 						<tr>
 							<th class="wrap_content">No</th>
 							<th>Dari</th>
