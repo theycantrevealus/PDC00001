@@ -1,5 +1,13 @@
 <script type="text/javascript">
 	$(function(){
+		var basic = $('.profile_photo').croppie({
+			enforceBoundary:false,
+			viewport: {
+				width: 200,
+				height: 200
+			}
+		});
+
 		//INIT DATA
 		let targetID = <?php echo json_encode($targetID); ?>;
 		var accessData = reload_access_data(targetID);
@@ -12,36 +20,60 @@
 			success:function(resp) {
 				$("#txt_email_pegawai").val(resp.response_package.response_data[0].email);
 				$("#txt_nama_pegawai").val(resp.response_package.response_data[0].nama);
+				basic.croppie('bind', {
+					url: __HOST__ + resp.response_package.response_data[0].profile_pic,
+					points: [0, 0, 200, 200]
+				}).then(function() {
+					//
+				});
 				reload_jabatan(resp.response_package.response_data[0].jabatan);
+				reload_unit(resp.response_package.response_data[0].unit);
 				render_module(resp.response_package.response_module);
+				
+				
+			},
+			error: function(resp) {
+				console.log(resp);
 			}
 		});
+
+		$("#uploadImage").change(function(){
+			readURL(this, basic);
+		});
+
 		//var ModuleTable = $("#module-table").DataTable();
 		$("form").submit(function(){
-			$.ajax({
-				url:__HOSTAPI__ + "/Pegawai",
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				data:{
-					request:"edit_pegawai",
-					email:$("#txt_email_pegawai").val(),
-					nama:$("#txt_nama_pegawai").val(),
-					jabatan:$("#txt_jabatan").val(),
-					uid:targetID
-				},
-				type:"POST",
-				success:function(resp) {
-					if(resp.response_package.response_result > 0) {
-						location.href = __HOSTNAME__ + "/pegawai";
-					} else {
-						alert(resp.response_package.response_message);
+			basic.croppie('result', {
+				type: 'canvas',
+				size: 'viewport'
+			}).then(function (image) {
+				$.ajax({
+					url:__HOSTAPI__ + "/Pegawai",
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					data:{
+						request:"edit_pegawai",
+						image:image,
+						email:$("#txt_email_pegawai").val(),
+						nama:$("#txt_nama_pegawai").val(),
+						jabatan:$("#txt_jabatan").val(),
+						unit:$("#txt_unit").val(),
+						uid:targetID
+					},
+					type:"POST",
+					success:function(resp) {
+						if(resp.response_package.response_result > 0) {
+							location.href = __HOSTNAME__ + "/pegawai";
+						} else {
+							alert(resp.response_package.response_message);
+						}
+					},
+					error:function(resp) {
+						console.log(resp);
 					}
-				},
-				error:function(resp) {
-					console.log(resp);
-				}
-			});	
+				});
+			});
 			return false;
 		});
 
@@ -121,6 +153,36 @@
 				}
 			});
 			return jabatanData;
+		}
+
+		function reload_unit(selected){
+			var unitData;
+			$.ajax({
+				url:__HOSTAPI__ + "/Unit/get_unit",
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(resp) {
+					$("#txt_unit option").remove();
+					unitData = resp.response_package.response_data;
+					for(var a = 0; a < unitData.length; a++) {
+						var newOption = document.createElement("OPTION");
+						$(newOption).attr({
+							"value": unitData[a].uid
+						}).html(unitData[a].kode + " - " + unitData[a].nama);
+						if(unitData[a].uid == selected) {
+							$(newOption).attr({
+								"selected":"selected"
+							});
+						}
+						$("#txt_unit").append(newOption);
+					}
+					$("#txt_unit").select2();
+				}
+			});
+			return unitData;
 		}
 
 		
@@ -276,5 +338,27 @@
 				}
 			});
 		});
+
+
+		
+
+
+		function readURL(input, cropper) {
+			var url = input.value;
+			var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+			if (input.files && input.files[0]&& (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) {
+				var reader = new FileReader();
+
+				reader.onload = function (e) {
+					
+					cropper.croppie('bind', {
+						url: e.target.result
+					});
+					//$('#imageLoader').attr('src', e.target.result);
+				}
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+
 	});
 </script>

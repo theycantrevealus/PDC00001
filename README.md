@@ -3,23 +3,21 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-
-<br />
 <p align="center">
   <a href="https://github.com/pondokcoder2020/PDC00001">
-    <img src="images/pondokcoder1280.svg" alt="Logo" width="240">
+    <img src="images/pondokcoder1280.svg" alt="Logo" width="241">
   </a>
   
   <h3 align="center">PC-MedShield</h3>
 
   <p align="center">
-    PC-MedShield is an integrated hospital management application
+    PC-MedShield is an Integrated Hospital Management Application
     <br />
     <a href="https://github.com/pondokcoder2020/PDC00001"><strong>Explore the docs »</strong></a>
     <br />
     <a href="https://simrsv2.pondokcoder.com/client/">View Demo</a>
     ·
-    <a href="https://github.com/pondokcoder2020/PDC00001/issues">Report Bug</a>
+    <a href="https://github.com/pondokcoder2020/PDC00001/issues">Report Bugs</a>
     ·
     <a href="https://github.com/pondokcoder2020/PDC00001/issues/new">Request Feature</a>
   </p>
@@ -42,7 +40,7 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## Tentang Projek
+## Tentang Projek Aplikasi
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
