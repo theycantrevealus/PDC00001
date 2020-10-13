@@ -84,11 +84,6 @@
 						return row["penjamin"];
 					}
 				},
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row.prioritas.nama;
-                    }
-                },
 				/*{
 					"data" : null, render: function(data, type, row, meta) {
 						return row["user_resepsionis"];
@@ -110,7 +105,6 @@
 				if (data['status_assesmen'] === true){
 					$(row).css({"background-color":"#E0F5E5","color":"#000"});
 				}
-				$(".selector_dokter").select2();
 			}
 		});
 

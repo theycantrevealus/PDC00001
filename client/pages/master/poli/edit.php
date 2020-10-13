@@ -18,77 +18,77 @@
         <div class="z-0">
             <ul class="nav nav-tabs nav-tabs-custom tabList" role="tablist">
                 <li class="nav-item">
-                    <a href="#tab-1" id="nav-tab-1" class="nav-link active navTabs" data-toggle="tab" role="tab" aria-controls="tab-1" aria-selected="true">
+                    <a href="#" id="nav-tab-1" class="nav-link active navTabs not-active" data-toggle="tab" role="tab" aria-controls="tab-1" aria-selected="true">
                         Informasi
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#tab-2" id="nav-tab-2" class="nav-link navTabs" data-toggle="tab" role="tab" aria-selected="false">
+                    <a href="#" id="nav-tab-2" class="nav-link navTabs not-active" data-toggle="tab" role="tab" aria-selected="false">
                         Tindakan Poliklinik
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#tab-3" id="nav-tab-3" class="nav-link navTabs" data-toggle="tab" role="tab" aria-selected="false">
+                    <a href="#" id="nav-tab-3" class="nav-link navTabs not-active" data-toggle="tab" role="tab" aria-selected="false">
                         Dokter
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#tab-4" id="nav-tab-4" class="nav-link navTabs" data-toggle="tab" role="tab" aria-selected="false">
+                    <a href="#" id="nav-tab-4" class="nav-link navTabs not-active" data-toggle="tab" role="tab" aria-selected="false">
                         Perawat
+                    </a>
+                </li>
+                 <li class="nav-item">
+                    <a href="#" id="nav-tab-5" class="nav-link navTabs not-active" data-toggle="tab" role="tab" aria-selected="false">
+                        Konfirmasi Data
                     </a>
                 </li>
             </ul>
             <div class="card">
-            	<div class="card-body tab-content">
-                    <div class="tab-pane active show fade tabsContent" id="tab-1">
-                    	<div class="row">
-							<div class="col-lg">
-								<div class="card">
-									<div class="card-header card-header-large bg-white d-flex align-items-center">
-										<h5 class="card-header__title flex m-0">Informasi Poli</h5>
+            	<form>
+	                <div class="card-body tab-content">
+	                    <div class="tab-pane active show fade tabsContent" id="tab-1">
+	                        <div class="col-md-6">
+								<div class="form-group">
+									<label for="txt_nama">Nama Poliklinik:</label>
+									<div class="search-form">
+										<span style="margin-left: 4%;" class="text-center bg-light">Poliklinik</span>
+										<input type="text" class="form-control uppercase" id="txt_nama" placeholder="Nama Poli" required>
 									</div>
-									<div class="card-body tab-content">
-				                        <div class="col-md-6">
-											<div class="form-group">
-												<label for="txt_nama">Nama Poliklinik:</label>
-												<div class="search-form">
-													<input type="text" class="form-control" id="txt_nama" placeholder="Nama Poli" required>
-												</div>
-											</div>
-											<div class="form-group">
-												<label for="txt_nama">Tindakan Konsultasi:</label>
-												<div class="search-form">
-													<select class="form-control" id="tindakan_konsultasi">
-														<option value="" disabled>Pilih Tindakan</option>
-													</select>
-												</div>
-											</div>
-										</div>
+								</div>
+								<div class="form-group">
+									<label for="txt_nama">Tindakan Konsultasi:</label>
+									<div class="search-form">
+										<select class="form-control" id="tindakan_konsultasi">
+											<option value="" disabled>Pilih Tindakan</option>
+										</select>
 									</div>
 								</div>
 							</div>
-						</div>
-                    </div>
+							<hr />
+		                    <ul class="list-inline float-right">
+	                            <li><button type="button" class="btn btn-primary next-step btnNext btnNextInfo">Simpan dan lanjut</button></li>
+	                        </ul>
+	                    </div>
 
-                    <div class="tab-pane fade tabsContent" id="tab-2">
-                    	<div class="row">
-							<div class="col-lg">
-								<div class="card">
-									<div class="card-header card-header-large bg-white align-items-center">
+	                    <div class="tab-pane fade tabsContent" id="tab-2">
+	                    	<div class="row">
+		                    	<div class="col-md-6">
+									<div class="col-md-12">
 										<div class="form-group">
 											<label for="txt_nama">Tindakan:</label>
+											<!-- <input type="text" class="form-control uppercase" id="txt_nama" placeholder="Nama Poli" required> -->
 											<select class="form-control tindakan" id="tindakan">
 												 <option value="" disabled selected>Pilih Tindakan</option>
 											</select>
 										</div>
 									</div>
-									<div class="card-body tab-content">
-		                    			<table class="table table-bordered" id="table-tindakan">
-											<thead class="thead-dark">
+									<div class="col-md-12">
+										<table class="table table-bordered" id="table-tindakan">
+											<thead>
 												<tr>
-													<th class="wrap_content">No</th>
+													<th style="width: 20px;">No</th>
 													<th>Tindakan</th>
-													<th class="wrap_content">Aksi</th>
+													<th>Aksi</th>
 												</tr>
 											</thead>
 											<tbody>
@@ -97,64 +97,132 @@
 										</table>
 									</div>
 								</div>
+								<div class="col-md-6">
+									<div class="col-md-12">
+										<label for="">Harga <span id="title-tindakan-penjamin"></span>:</label>
+										<table class="table table-bordered table-not-active" id="table-penjamin">
+											<thead>
+												<tr>
+													<th style="width: 10px;">No</th>
+													<th>Penjamin</th>
+													<th width="50%">Harga</th>
+												</tr>
+											</thead>
+											<tbody style="font-size: 0.8rem;">
+
+											</tbody>
+										</table>
+									</div>
+								</div>
 							</div>
-						</div>
-                    </div>
-                    <div class="tab-pane fade tabsContent" id="tab-3">
-                    	<div class="row">
-                    		<div class="col-md-12">
-                    			<select class="form-control" id="txt_set_dokter"></select>
-                    		</div>
-                    	</div>
-                    	<br />
-                    	<div class="row">
-	                    	<div class="col-md-12">
-								<table class="table-bordered table" id="poli-list-dokter">
-									<thead class="thead-dark">
-										<tr>
-											<th class="wrap_content">No</th>
-											<th>Nama</th>
-											<th class="wrap_content">Aksi</th>
-										</tr>
-									</thead>
-									<tbody></tbody>
-								</table>
+							<hr />
+	                        <ul class="list-inline ">
+	                            <li><button type="button" class="btn btn-warning prev-step btnPrev float-left">Kembali</button></li>
+	                            <li><button type="button" class="btn btn-primary next-step btnNext btnNextTindakan float-right"  >Simpan dan lanjut</button></li>
+	                        </ul>
+	                    </div>
+	                    <div class="tab-pane fade tabsContent" id="tab-3">
+	                    	<div class="row">
+	                    		<div class="col-md-8">
+	                    			<select class="form-control" id="txt_set_dokter"></select>
+	                    		</div>
+	                    		<div class="col-md-4">
+	                    			<button class="btn btn-info" id="btn_tambah_dokter">
+	                    				<i class="fa fa-plus"></i> Tambah
+	                    			</button>
+	                    		</div>
+	                    	</div>
+	                    	<br />
+	                    	<div class="row">
+		                    	<div class="col-md-8">
+									<table class="table-bordered table" id="poli-list-dokter">
+										<thead>
+											<tr>
+												<th class="wrap_content">No</th>
+												<th>Nama</th>
+												<th class="wrap_content">Aksi</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
 							</div>
-						</div>
-                    </div>
-                    <div class="tab-pane fade tabsContent" id="tab-4">
-                    	<div class="row">
-                    		<div class="col-md-12">
-                    			<select class="form-control" id="txt_set_perawat">
-                    				<option value="">Pilih</option>
-                    			</select>
-                    		</div>
-                    	</div>
-                    	<br />
-                    	<div class="row">
-	                    	<div class="col-md-12">
-								<table class="table-bordered table" id="poli-list-perawat">
-									<thead class="thead-dark">
-										<tr>
-											<th class="wrap_content">No</th>
-											<th>Nama</th>
-											<th class="wrap_content">Aksi</th>
-										</tr>
-									</thead>
-									<tbody></tbody>
-								</table>
+							<hr />
+	                        <ul class="list-inline ">
+	                            <li><button type="button" class="btn btn-warning prev-step btnPrev float-left">Kembali</button></li>
+	                            <li><button type="button" class="btn btn-primary next-step btnNext btnNextTindakan float-right"  >Simpan dan lanjut</button></li>
+	                        </ul>
+	                    </div>
+	                    <div class="tab-pane fade tabsContent" id="tab-4">
+	                    	<div class="row">
+	                    		<div class="col-md-8">
+	                    			<select class="form-control" id="txt_set_perawat">
+	                    				<option value="">Pilih</option>
+	                    			</select>
+	                    		</div>
+	                    		<div class="col-md-4">
+	                    			<button class="btn btn-info" id="btn_tambah_perawat">
+	                    				<i class="fa fa-plus"></i> Tambah
+	                    			</button>
+	                    		</div>
+	                    	</div>
+	                    	<br />
+	                    	<div class="row">
+		                    	<div class="col-md-8">
+									<table class="table-bordered table" id="poli-list-perawat">
+										<thead>
+											<tr>
+												<th class="wrap_content">No</th>
+												<th>Nama</th>
+												<th class="wrap_content">Aksi</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
 							</div>
-						</div>
-                    </div>
-                    <div class="col-md-12 text-right">
-	                    <button class="btn btn-success" id="btnSubmit">
-	                    	<i class="fa fa-check"></i> Submit
-	                    </button>
-	                    <a class="btn btn-danger" href="<?php echo __HOSTNAME__; ?>/master/poli">
-	                    	<i class="fa fa-ban"></i> Kembali
-	                    </a>
+							<hr />
+	                        <ul class="list-inline ">
+	                            <li><button type="button" class="btn btn-warning prev-step btnPrev float-left">Kembali</button></li>
+	                            <li><button type="button" class="btn btn-primary next-step btnNext btnNextTindakan float-right"  >Simpan dan lanjut</button></li>
+	                        </ul>
+	                    </div>
+	                    <div class="tab-pane fade tabsContent" id="tab-5">
+	                    	<div class="row">
+		                    	<div class="col-md-12">
+									<p>Nama Poliklinik: &nbsp; <b><span id="title-konfirmasi-poli" style="color: #4a90e2; font-size: 1.5rem;"></span></b></p>
+									<hr />
+									<span style="text-align: center;"><p>Tabel tindakan</p></span>
+								</div>
+								<br />
+								<div class="col-md-12">
+									<table class='table table-bordered table-striped' id="table-konfirmasi">
+                        				<thead style="text-transform: uppercase;">
+                        					<tr>
+                        						<th rowspan="2">No</th>
+                        						<th rowspan="2">Tindakan</th>
+                        						<th colspan="2">Harga per Penjamin</th>
+                        					</tr>
+                        					<tr>
+                        						<th>Penjamin</th>
+                        						<th>Harga</th>
+                        					</tr>
+                        				</thead>
+                        				<tbody>
+                        					
+                        				</tbody>
+                    				</table>
+								</div>
+							</div>
+							<hr />
+	                        <ul class="list-inline">
+	                        	<li><button type="button" class="btn btn-warning prev-step btnPrev float-left">Kembali</button></li>
+	                            <li><button type="button" class="btn btn-success next-step float-right" id="btnSubmit">Simpan Data</button></li>
+	                        </ul>
+	                    </div>
+
 	                </div>
-                </div>
+	            </form>
             </div>
         </div>
     </div>

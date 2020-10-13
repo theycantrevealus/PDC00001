@@ -186,7 +186,7 @@
 								returnedData.push(response.response_package.response_data[InvKeyData]);
 							}
 						} else {
-							//
+							alert();
 						}
 					}
 

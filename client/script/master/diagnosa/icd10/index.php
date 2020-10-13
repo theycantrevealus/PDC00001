@@ -2,38 +2,21 @@
 	$(function(){
 		var MODE = "tambah", selectedID;
 		var tableIcd = $("#table-icd10").DataTable({
-			processing: true,
-			serverSide: true,
-			sPaginationType: "full_numbers",
-			bPaginate: true,
-			lengthMenu: [[15, 50, -1], [15, 50, "All"]],
-			serverMethod: "POST",
 			"ajax":{
-				url: __HOSTAPI__ + "/Icd",
-				type: "POST",
-				data: function(d){
-					d.request = "get_icd_10_back_end_dt";
-				},
+				url: __HOSTAPI__ + "/Icd/icd10",
+				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					var dataSet = response.response_package.response_data;
-					if(dataSet == undefined) {
-						dataSet = [];
-					}
-
-					response.draw = parseInt(response.response_package.response_draw);
-					response.recordsTotal = response.response_package.recordsTotal;
-					response.recordsFiltered = response.response_package.recordsFiltered;
-					return dataSet;
+					return response.response_package.response_data;
 				}
 			},
 			autoWidth: false,
-			language: {
-				search: "",
-				searchPlaceholder: "Cari Nomor Kwitansi"
-			},
+			aaSorting: [[0, "asc"]],
+			"columnDefs":[
+				{"targets":0, "className":"dt-body-left"}
+			],
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
@@ -52,7 +35,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-icd10\" id=\"icd10_edit_" + row["id"] + "\">" +
 										"<i class=\"fa fa-edit\"></i> Edit" +
 									"</button>" +
@@ -70,7 +53,6 @@
 			id = id[id.length - 1];
 
 			var conf = confirm("Hapus ICD 10 item?");
-			
 			if(conf) {
 				$.ajax({
 					url:__HOSTAPI__ + "/Icd/master_icd_10/" + id,
@@ -79,7 +61,6 @@
 					},
 					type:"DELETE",
 					success:function(response) {
-						console.log(response);
 						tableIcd.ajax.reload();
 					},
 					error: function(response) {
@@ -139,7 +120,6 @@
 					},
 					type: "POST",
 					success: function(response){
-						console.log(response);
 						$("#txt_kode").val("");
 						$("#txt_nama").val("");
 						$("#form-tambah").modal("hide");
@@ -156,7 +136,7 @@
 </script>
 
 <div id="form-tambah" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog modal-md" role="document">
+	<div class="modal-dialog modal-md bg-danger" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modal-large-title">Tambah ICD 10</h5>

@@ -117,8 +117,7 @@
 					},
 					type:"DELETE",
 					success:function(response) {
-						console.log(response);
-						tableAnjungan.ajax.reload();
+						tableGudang.ajax.reload();
 					},
 					error: function(response) {
 						console.log(response);

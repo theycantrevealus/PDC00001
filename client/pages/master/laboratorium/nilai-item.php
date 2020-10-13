@@ -6,7 +6,7 @@
 			</div>
 			<div class="card-body">
 				<table class="table table-bordered" id="nilai-lab">
-					<thead class="thead-dark">
+					<thead>
 						<tr>
 							<th class="wrap_content">No</th>
 							<th style="width: 100px">Nilai Minimum</th>

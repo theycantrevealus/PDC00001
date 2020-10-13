@@ -48,7 +48,7 @@
 					</div>
 					<div class="col-12 col-md-6 mb-3">
 						<label for="nik">Email <span class="red">*</span></label>
-						<input type="email" class="form-control inputan required" placeholder="email" value="" name="email" id="email">
+						<input type="email" class="form-control inputan required" maxlength="16" placeholder="email" value="" name="email" id="email">
 						<span style="color: #dc3545; font-size: 0.8rem;" id="error-email"></span>
 					</div>
 					<div class="col-12 col-md-6 mb-3">

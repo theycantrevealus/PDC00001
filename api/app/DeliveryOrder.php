@@ -456,8 +456,7 @@ class DeliveryOrder extends Utility {
 							'gudang' => $parameter['gudang'],
 							'masuk' => $value['qty'],
 							'keluar' => 0,
-							'saldo' => $getSaldo['response_data'][0]['stok_terkini'],
-							'type' => __STATUS_BARANG_MASUK__
+							'saldo' => $getSaldo['response_data'][0]['stok_terkini']
 						))
 						->execute();
 					}

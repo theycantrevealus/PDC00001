@@ -48,10 +48,6 @@ class Supplier extends Utility {
 		}
 	}
 
-	public function __DELETE__($parameter = array()) {
-		return self::delete($parameter);
-	}
-
 	private function get_all() {
 		$data = self::$query
 		->select('master_supplier', array(
@@ -71,22 +67,6 @@ class Supplier extends Utility {
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['nama'] = strtoupper($value['nama']);
 			$data['response_data'][$key]['autonum'] = $autonum;
-
-			$relasi_data = self::$query->select('inventori_po', array(
-				'uid',
-				'nomor_po'
-			))
-			->where(array(
-				'inventori_po.deleted_at' => 'IS NULL',
-				'AND',
-				'inventori_po.supplier' => '= ?'
-			), array(
-				$value['uid']
-			))
-			->execute();
-
-			$data['response_data'][$key]['relasi_po'] = $relasi_data['response_data'];
-
 			$autonum++;
 		}
 		return $data;
@@ -235,44 +215,5 @@ class Supplier extends Utility {
 			$parameter['check']
 		))
 		->execute();
-	}
-
-	private function delete($parameter) {
-		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
-		$worker = self::$query
-		->delete($parameter[6])
-		->where(array(
-			$parameter[6] . '.uid' => '= ?'
-		), array(
-			$parameter[7]
-		))
-		->execute();
-		if($worker['response_result'] > 0) {
-			$log = parent::log(array(
-				'type' => 'activity',
-				'column' => array(
-					'unique_target',
-					'user_uid',
-					'table_name',
-					'action',
-					'logged_at',
-					'status',
-					'login_id'
-				),
-				'value' => array(
-					$parameter[7],
-					$UserData['data']->uid,
-					$parameter[6],
-					'D',
-					parent::format_date(),
-					'N',
-					$UserData['data']->log_id
-				),
-				'class' => __CLASS__
-			));
-		}
-		return $worker;
 	}
 }

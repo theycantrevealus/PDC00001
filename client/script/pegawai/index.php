@@ -26,7 +26,7 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return 	"<div class=\"row\">" +
 									"<div class=\"col-md-1 text-center\">" +
-										"<img width=\"40\" src=\"" + __HOST__ + row.profile_pic + "\" class=\"rounded-circle img-responsive\" alt=\"" + row["nama"] + "\" />" +
+										"<img width=\"40\" src=\"" + __HOSTNAME__ + "/template/assets/images/avatar/demi.png\" class=\"rounded-circle img-responsive\" alt=\"" + row["nama"] + "\" />" +
 									"</div>" +
 									"<div class=\"col-md-11\">" +
 										"<h5>" + row["nama"] + "</h5>" +

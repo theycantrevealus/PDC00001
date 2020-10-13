@@ -117,8 +117,6 @@ class Query {
 			self::$queryValues = array();
 			self::$queryParams = array();	
 		}
-		self::$limit = null;
-		self::$offset = null;
 		self::$queryMode = 'select';
 		self::$queryString = 'SELECT ';
 		$this->tables[$table] = array();

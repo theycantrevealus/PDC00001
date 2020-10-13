@@ -30,7 +30,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-kategori\" id=\"kategori_edit_" + row["uid"] + "\">" +
 										"<i class=\"fa fa-pencil\"></i> Edit" +
 									"</button>" +
@@ -50,13 +50,12 @@
 			var conf = confirm("Hapus kategori laboratorium?");
 			if(conf) {
 				$.ajax({
-					url:__HOSTAPI__ + "/Inventori/master_lab_kategori/" + uid,
+					url:__HOSTAPI__ + "/Inventori/master_inv_kategori/" + uid,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
 					type:"DELETE",
 					success:function(response) {
-						console.log(response);
 						tableKategori.ajax.reload();
 					},
 					error: function(response) {
