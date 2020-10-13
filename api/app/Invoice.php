@@ -574,8 +574,25 @@ class Invoice extends Utility {
 				))
 				->execute();
 				if($getPaymentResult['response_data'][0]['item'] != __UID_KARTU__)  {
+					$KonsulListItem = array();
+					//List semua biaya konsultasi dari setting poli
+					$poliKonsulPrice = self::$query->select('master_poli', array(
+						'uid',
+						'tindakan_konsultasi'
+					))
+					->where(array(
+						'master_poli.deleted_at' => 'IS NULL'
+					))
+					->execute();
+
+					foreach ($poliKonsulPrice['response_data'] as $PKKey => $PKValue) {
+						if(!in_array($PKValue['tindakan_konsultasi'], $KonsulListItem)) {
+							array_push($KonsulListItem, $PKValue['tindakan_konsultasi']);
+						}
+					}
+
 					if(
-						$getPaymentResult['response_data'][0]['item'] == __UID_KONSULTASI__ &&
+						in_array($getPaymentResult['response_data'][0]['item'], $KonsulListItem) &&
 						$getPaymentResult['response_data'][0]['item_type'] == 'master_tindakan' &&
 						$getPaymentResult['response_data'][0]['status_bayar'] == 'Y'
 					) {

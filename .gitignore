@@ -8,14 +8,14 @@ sync.php
 composer.lock
 composer.json
 
-node_modules/*
-images/
-images/produk
-images/igd
-images/slideshow
+node_modules/
+images/produk/
+images/pegawai/
+images/igd/
+images/slideshow/
+assets/
 .idea/
 audio/
-assets/
 document/
 client/template/
 client/plugins/
@@ -42,3 +42,4 @@ config.php
 *.req
 *.crt
 *.sql
+*.png
