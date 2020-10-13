@@ -518,31 +518,57 @@
 			});
 		});
 
-		$("body").on("keyup", ".harga-tindakan", function() {
-			var me = $(this);
-			var kelas = me.attr("kelas");
-			var kelasIden = me.attr("identifier");
+        $("body").on("keyup", ".harga-tindakan", function() {
+            var me = $(this);
+            var kelas = me.attr("kelas");
+            var kelasIden = me.attr("identifier");
+            if($("#satu_harga").is(":checked")) {
+                $("#txt_penjamin option").each(function () {
+                    var penjaminType = $(this);
+                    if (metaData[penjaminType.attr("value")] == undefined) {
+                        metaData[penjaminType.attr("value")] = {};
+                    }
 
-			if(metaData[$("#txt_penjamin").val()] == undefined) {
-				metaData[$("#txt_penjamin").val()] = {};
-			}
-
-			if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
-				metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
-			}
-
-			$("#form-tambah table tbody tr").each(function() {
-				var us = $(this);
-				if($("#satu_harga").is(":checked")) {
-                    us.find("td:eq(1) input").attr("kelas").val(me.inputmask("unmaskedvalue"));
+                    if(metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] == undefined) {
+                        metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] = {};
+                    }
+                });
+            } else {
+                if (metaData[$("#txt_penjamin").val()] == undefined) {
+                    metaData[$("#txt_penjamin").val()] = {};
                 }
-				if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
-					metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
-				}
-			});
 
-			metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
-		});
+                if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
+                    metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
+                }
+            }
+
+
+
+            $("#form-tambah table tbody tr").each(function() {
+                var us = $(this);
+                if($("#satu_harga").is(":checked")) {
+                    $("#txt_penjamin option").each(function () {
+                        var penjaminType = $(this);
+                        if(metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+                            metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
+                        }
+                    });
+                } else {
+                    if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+                        metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
+                    }
+                }
+            });
+            if($("#satu_harga").is(":checked")) {
+                $("#txt_penjamin option").each(function () {
+                    var penjaminType = $(this);
+                    metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+                });
+            } else {
+                metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+            }
+        });
 
 		$("#btnSubmitMasterTindakan").click(function() {
 			var nama = $("#txt_nama_master_tindakan_baru").val();
