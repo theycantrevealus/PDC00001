@@ -13,6 +13,7 @@ images/produk/
 images/pegawai/
 images/igd/
 images/slideshow/
+assets/
 .idea/
 audio/
 document/
@@ -41,5 +42,4 @@ config.php
 *.req
 *.crt
 *.sql
-.idea/
 *.png
