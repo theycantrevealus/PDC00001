@@ -372,30 +372,30 @@
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Merokok: </label>
 							<br />
-							<input type="radio" name="riwayat_merokok_option" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
-							<input type="radio" name="riwayat_merokok_option" value="y" /> Ya
+							<input type="radio" name="rokok_yes" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
+							<input type="radio" name="rokok_yes" value="y" /> Ya
 							<br />
-							<input type="text" class="form-control inputan riwayat_merokok" disabled="disabled" id="riwayat_merokok" placeholder="Riwayat Merokok" />
+							<input type="text" class="form-control inputan" disabled="disabled" id="riwayat_merokok" placeholder="Riwayat Merokok" />
 	                    </div>
 	                </div>
 	                <div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Minuman Keras: </label>
 							<br />
-							<input type="radio" name="riwayat_miras_option" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
-							<input type="radio" name="riwayat_miras_option" value="y" /> Ya
+							<input type="radio" name="miras_yes" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
+							<input type="radio" name="miras_yes" value="y" /> Ya
 							<br />
-							<input type="text" disabled="disabled" class="form-control inputan riwayat_miras" id="riwayat_miras" placeholder="Riwayat Minuman Keras" />
+							<input type="text" disabled="disabled" class="form-control inputan" id="riwayat_miras" placeholder="Riwayat Minuman Keras" />
 	                    </div>
 	                </div>
 	                <div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Obat Terlarang: </label>
 							<br />
-							<input type="radio" name="riwayat_obt_terlarang_option" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
-							<input type="radio" name="riwayat_obt_terlarang_option" value="y" /> Ya
+							<input type="radio" name="obt_terlarang_yes" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
+							<input type="radio" name="obt_terlarang_yes" value="y" /> Ya
 							<br />
-							<input type="text" disabled="disabled" class="form-control inputan riwayat_obt_terlarang" id="riwayat_obt_terlarang" placeholder="Riwayat Obat Terlarang" />
+							<input type="text" disabled="disabled" class="form-control inputan" id="riwayat_obt_terlarang" placeholder="Riwayat Obat Terlarang" />
 	                    </div>
 	                </div>
 	                <div class="form-group col-lg-12">
@@ -496,7 +496,8 @@
 								</div>
 								<div class="col-md-2">
 									<div class="form-check">
-										<input type="checkbox" class="form-check-input" name="riwayat_keluarga_hipertensi" value="1" id="riwayat_keluarga_hipertensi">
+										<input type="checkbox" class="form-check-input" name="
+										riwayat_keluarga_hipertensi" value="1" id="riwayat_keluarga_hipertensi">
 										<label for="riwayat_keluarga_hipertensi">Hipertensi</label>
 									</div>
 								</div>

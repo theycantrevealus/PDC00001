@@ -35,7 +35,7 @@
 										"</div>");
 		}
 
-		/*for(var b = 0; b <=6; b++) {
+		for(var b = 0; b <=6; b++) {
 			var singleSlide = document.createElement("DIV");
 			$(singleSlide).addClass("carousel-item");
 			if(b == 0) {
@@ -58,7 +58,7 @@
 			$(singleSlide).append(caption);
 
 			$("#carousel-slider .carousel-inner").append(singleSlide);
-		}*/
+		}
 
 		$.ajax({
 			url: __HOSTAPI__ + "/Aplicares/get-ruangan-terdaftar-bpjs",
@@ -142,69 +142,6 @@
 			interval: 7000
 		});
 
-		var tablePelayanan = $("#table-poli-pelayanan").DataTable({
-			processing: true,
-			serverSide: true,
-			sPaginationType: "full_numbers",
-			bPaginate: true,
-			lengthMenu: [[10, 15, -1], [10, 15, "All"]],
-			serverMethod: "POST",
-			"ajax":{
-				url: __HOSTAPI__ + "/Poli",
-				type: "POST",
-				data: function(d){
-					d.request = "get_kunjungan_per_layanan";
-				},
-				headers:{
-					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
-				},
-				dataSrc:function(response) {
-					var dataSet = response.response_package.response_data;
-					if(dataSet == undefined) {
-						dataSet = [];
-					}
-
-					response.draw = parseInt(response.response_package.response_draw);
-					response.recordsTotal = response.response_package.recordsTotal;
-					response.recordsFiltered = response.response_package.recordsFiltered;
-					return dataSet;
-				}
-			},
-			autoWidth: false,
-			language: {
-				search: "",
-				searchPlaceholder: "Cari Kode Amprah"
-			},
-			"columns" : [
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return row.nama;
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return row.jumlah_pelayanan;
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						var pelayanan_current = row.jumlah_pelayanan;
-						var jumlah_pelayanan_total = row.jumlah_pelayanan_total;
-						console.log(row.percentage);
-						var progress = "<div class=\"progress\">" +
-											"<div class=\"progress-bar\" style=\"width:" + row.percentage + "%\" role=\"progressbar\" aria-valuenow=\"" + row.percentage + "\" aria-valuemin=\"0\" aria-valuemax=\"100\"></div>" +
-										"</div>";
-						return "<span>" + row.percentage + "%</span><br />" + progress;
-					}
-				}
-			]
-		});
-
 		
 
 
@@ -230,7 +167,7 @@
 						
 						
 						console.clear();
-						//console.log(playlist);
+						console.log(playlist);
 						if(!audio.paused && !audio.ended && 0 < audio.currentTime) {
 							var listParse = protocolLib[command](command, type, parameter, sender, receiver, time, audio, playlist);
 							playlist = listParse.playlist;
@@ -243,6 +180,7 @@
 							}
 
 							playlist = listParse.playlist;
+							console.log(playlist);
 							audio.src = playlist[0];
 							audio.play();
 						}

@@ -175,12 +175,6 @@
 	<script type="text/javascript">
 		var Sync;
 		$(function() {
-			$(".txt_tanggal").datepicker({
-				dateFormat: 'DD, dd MM yy',
-				autoclose: true
-			});
-			
-			moment.locale('id');
 			var parentList = [];
 
 			$(".sidebar-menu-item.active").each(function(){
@@ -522,16 +516,6 @@
 			return dataFaskes;
 		}
 
-		function str_pad(str_length, target, objectPad = "0") {
-			target = "" + target;
-			var pad = "";
-			for(var a = 1; a <= str_length; a++) {
-				pad += objectPad;
-			}
-			var ans = pad.substring(0, pad.length - target.length) + target;
-			return ans;
-		}
-
 		$(function() {
 			var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
 			var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
@@ -594,6 +578,19 @@
 			monthName[9]="Oktober";
 			monthName[10]="November";
 			monthName[11]="Desember";
+
+			$(".txt_tanggal").datepicker({
+				dateFormat: 'DD, dd MM yy',
+				onSelect: function(date) {
+					var date = $(this).datepicker('getDate'),
+					day  = date.getDate(),
+					month = date.getMonth() + 1,
+					year =  date.getFullYear();
+
+					var dayOfWeek = weekday[date.getUTCDay()+1];
+					$(this).datepicker("setDate", dayOfWeek);
+		        }
+			});
 		});
 	</script>
 	<div class="notification-container"></div>

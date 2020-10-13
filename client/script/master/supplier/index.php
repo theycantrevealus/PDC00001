@@ -20,56 +20,26 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+						return row["autonum"];
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						var alamat = "";
-						if(row.kontak == undefined) {
-							alamat = "<span class=\"text-danger\">[ADDRESS NOT SET]</span>";
-						} else {
-							alamat = "<small>" +
-										"<i class=\"fa fa-home\"></i> " + row.alamat +
-									"</small>";
-						}
-						return 	"<b id=\"nama_" + row.uid + "\">" + row.nama + "</b><br />" + 
-								alamat;
+						return 	"<b id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</b><br />" + 
+								"<small>" +
+									"<i class=\"fa fa-home\"></i> " + row["alamat"] +
+								"</small>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						var kontak = "";
-						if(row.kontak == undefined) {
-							kontak = "<span class=\"text-danger\">[CONTACT NOT SET]</span>";
-						} else {
-							kontak = "<i class=\"fa fa-phone\"></i> +62" + row["kontak"];
-						}
-
-						var email = "";
-						if(row.email == undefined) {
-							email = "<span class=\"text-danger\">[EMAIL NOT SET]</span>";
-						} else {
-							email = "<a href=\"mailto:" + row.email + "\"><i class=\"fa fa-envelope\"></i> " + row.email + "</a>";
-						}
-
-						return email + "<br />" + kontak;
+						return "<a href=\"mailto:" + row["email"] + "\"><i class=\"fa fa-envelope\"></i> " + row["email"] + "</a><br />" +
+								"<i class=\"fa fa-phone\"></i> +62" + row["kontak"] + "<br />";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						var relasi_po = "";
-						if(row.relasi_po.length > 0) {
-							relasi_po = "<span class=\"text-success\"><i class=\"fa fa-check-square\"></i> " + row.relasi_po.length + " linked</span>";
-						} else {
-							relasi_po = "<span class=\"text-danger\">No Link</span>";
-						}
-						return relasi_po;
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
 									"<a href=\"" + __HOSTNAME__ + "/master/supplier/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-supplier\">" +
 										"<i class=\"fa fa-pencil\"></i> Edit" +
 									"</a>" +
@@ -89,21 +59,15 @@
 			var conf = confirm("Hapus supplier item?");
 			if(conf) {
 				$.ajax({
-					url:__HOSTAPI__ + "/Supplier/master_supplier/" + uid,
+					url:__HOSTAPI__ + "/Inventori/master_inv_supplier/" + uid,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
 					type:"DELETE",
 					success:function(response) {
-						if(response.response_package.response_result > 0) {
-							notification ("success", "Supplier berhasil dihapus", 3000, "hasil_supplier");
-							tableSupplier.ajax.reload();
-						} else {
-							notification ("danger", "Supplier gagal dihapus", 3000, "hasil_supplier");
-						}		
+						tableSupplier.ajax.reload();
 					},
 					error: function(response) {
-						notification ("danger", "Supplier gagal dihapus", 3000, "hasil_supplier");
 						console.log(response);
 					}
 				});

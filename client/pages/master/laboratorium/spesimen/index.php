@@ -22,11 +22,11 @@
 		<div class="col-lg-12 col-md-12 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
 				<table class="table table-bordered" id="table-spesimen">
-					<thead class="thead-dark">
+					<thead>
 						<tr>
-							<th class="wrap_content">No</th>
+							<th style="width: 20px;">No</th>
 							<th>Nama</th>
-							<th class="wrap_content">Aksi</th>
+							<th>Aksi</th>
 						</tr>
 					</thead>
 					<tbody></tbody>

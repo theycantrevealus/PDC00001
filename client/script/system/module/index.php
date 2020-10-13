@@ -49,10 +49,29 @@
 				"data":TreeData,
 				"check_callback" : true
 			},
-			"plugins" : ["search"]
+			"plugins" : ["search", "contextmenu"],
+            contextmenu: {items: customMenu}
 		});
 
+		function customMenu(node) {
+            selectedID = data.node.id;
+            selectedCheckChild = data.node.data.childCount;
+            selectedParent = data.node.data.parent;
+            selectedNama = data.node.data.nama;
+            selectedIdentifier = data.node.data.identifier;
+            selectedKeterangan = data.node.data.keterangan;
+            selectedIcon = data.node.data.icon;
+            selectedShowOnMenu = data.node.data.show_on_menu;
+            selectedShowOrder = data.node.data.show_order;
+            selectedMenuGroup = data.node.data.menu_group;
 
+            PARENT = selectedID;
+            //alert($(".jstree-container-ul li").width());
+            $(".custom-menu").finish().toggle(100).css({
+                top: (event.pageY - $(".navbar-main").height()) + "px",
+                left: (event.pageX - $(".simplebar-mask").width() - $(".jstree-container-ul li").width() + 100) + "px"
+            });
+        }
 
 		$("#module").on("select_node.jstree", function (e, data) {
 			selectedID = data.node.id;

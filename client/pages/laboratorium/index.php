@@ -42,15 +42,17 @@
 			</div>
 			<div class="card card-body">
 				<table class="table table-bordered table-striped" id="table-antrian-labor" style="font-size: 0.9rem;">
-					<thead class="thead-dark">
+					<thead class="thead-black">
 						<tr>
-							<th class="wrap_content">No</th>
+							<th width="2%">No</th>
 							<th>Waktu Order</th>
 							<th>No. RM</th>
 							<th>Pasien</th>
 							<th>Poliklinik</th>
 							<th>Dokter</th>
-							<th class="wrap_content">Aksi</th>
+							<!-- <th>Penjamin</th>
+							<th>Oleh</th> -->
+							<th>Aksi</th>
 						</tr>
 					</thead>
 					<tbody>

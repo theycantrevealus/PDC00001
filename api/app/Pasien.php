@@ -441,13 +441,13 @@ class Pasien extends Utility {
 		$get_panggilan = $term->__GET__($param);
 
 		$result = array(
-					'uid' => $get_pasien['response_data'][0]['uid'],
-					'no_rm' => $get_pasien['response_data'][0]['no_rm'],
-					'nama' => $get_pasien['response_data'][0]['nama'],
-					'tanggal_lahir' => date('d F Y', strtotime($get_pasien['response_data'][0]['tanggal_lahir'])),
-					'jenkel'=> $get_jenkel['response_data'][0]['nama'],
-					'id_jenkel' => $get_pasien['response_data'][0]['jenkel'],
-					'panggilan' => $get_panggilan['response_data'][0]['nama']
+					'uid'=>$get_pasien['response_data'][0]['uid'],
+					'no_rm'=>$get_pasien['response_data'][0]['no_rm'],
+					'nama'=>$get_pasien['response_data'][0]['nama'],
+					'tanggal_lahir'=>$get_pasien['response_data'][0]['tanggal_lahir'],
+					'jenkel'=>$get_jenkel['response_data'][0]['nama'],
+					'id_jenkel'=>$get_pasien['response_data'][0]['jenkel'],
+					'panggilan'=>$get_panggilan['response_data'][0]['nama']
 				);
 
 		return $result;

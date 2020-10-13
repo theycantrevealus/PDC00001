@@ -92,10 +92,6 @@ class Anjungan extends Utility {
 		}
 	}
 
-	public function __DELETE__($parameter = array()) {
-		return self::delete($parameter);
-	}
-
 	private function get_terbilang($parameter) {
 		return parent::terbilang($parameter['nomor_urut']);
 	}
@@ -167,7 +163,7 @@ class Anjungan extends Utility {
 		return $data;
 	}
 
-	private function check_job($parameter) {
+	private function check_job($from_loket) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -235,10 +231,9 @@ class Anjungan extends Utility {
 		->where(array(
 			'antrian_nomor.status' => '= ?',
 			'AND',
-            'DATE(antrian_nomor.created_at)' => '= ?'
+			'antrian_nomor.created_at' => '>= now()::date'
 		), array(
-			'N',
-            date('Y-m-d')
+			'N'
 		))
 		->execute();
 		$data['response_standby'] = count($sisa['response_data']);
@@ -254,11 +249,10 @@ class Anjungan extends Utility {
 			'id'
 		))
 		->where(array(
-            'DATE(antrian_nomor.created_at)' => '= ?',
+			'antrian_nomor.created_at' => '>= now()::date + interval \'1h\'',
 			'AND',
 			'antrian_nomor.jenis_antrian' => '= ?'
 		), array(
-		    date('Y-m-d'),
 			$parameter['jenis']
 		))
 		->execute();
@@ -296,7 +290,7 @@ class Anjungan extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$allowed_jenis = array();
-		$allowed_item = array(date('Y-m-d'), 'N');
+		$allowed_item = array('N');
 		//Loket Job
 		//Get Jalur
 		$Jalur = self::anjungan_jenis();
@@ -332,8 +326,6 @@ class Anjungan extends Utility {
 			'antrian_nomor.pasien' => 'IS NULL',
 			'AND',
 			'antrian_nomor.poli' => 'IS NULL',
-            'AND',
-            'DATE(antrian_nomor.created_at)' => '= ?',
 			'AND',
 			'antrian_nomor.status' => '= ? AND (' . implode('OR', $allowed_jenis) . ')'
 		), $allowed_item)
@@ -925,47 +917,6 @@ class Anjungan extends Utility {
 					}
 				}
 			}			
-		}
-		return $worker;
-	}
-
-
-
-	private function delete($parameter) {
-		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
-		$worker = self::$query
-		->delete($parameter[6])
-		->where(array(
-			$parameter[6] . '.uid' => '= ?'
-		), array(
-			$parameter[7]
-		))
-		->execute();
-		if($worker['response_result'] > 0) {
-			$log = parent::log(array(
-				'type' => 'activity',
-				'column' => array(
-					'unique_target',
-					'user_uid',
-					'table_name',
-					'action',
-					'logged_at',
-					'status',
-					'login_id'
-				),
-				'value' => array(
-					$parameter[7],
-					$UserData['data']->uid,
-					$parameter[6],
-					'D',
-					parent::format_date(),
-					'N',
-					$UserData['data']->log_id
-				),
-				'class' => __CLASS__
-			));
 		}
 		return $worker;
 	}
