@@ -533,6 +533,9 @@
 
 			$("#form-tambah table tbody tr").each(function() {
 				var us = $(this);
+				if($("#satu_harga").is(":checked")) {
+                    us.find("td:eq(1) input").attr("kelas").val(me.inputmask("unmaskedvalue"));
+                }
 				if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
 					metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
 				}
@@ -642,6 +645,15 @@
 						<select class="form-control" id="txt_penjamin"></select>
 					</div>
 				</div>
+                <div class="row">
+                    <div class="form-group col-md-5">
+                        <div class="custom-control custom-checkbox-toggle custom-control-inline mr-1">
+                            <input checked="" type="checkbox" id="satu_harga" class="custom-control-input">
+                            <label class="custom-control-label" for="satu_harga">Yes</label>
+                        </div>
+                        <label for="subscribe">Satu Harga</label>
+                    </div>
+                </div>
 				<div class="row">
 					<div class="form-group col-md-12" id="kelas_loader">
 						<table class="table largeDataType">
