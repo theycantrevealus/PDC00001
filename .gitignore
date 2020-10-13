@@ -41,3 +41,4 @@ config.php
 *.sql
 .idea/
 *.png
+/api/nbproject/private/
