@@ -18,7 +18,8 @@
 			let id_tindakan = $(this).parent().parent().attr("id").split("_");
 			tindakanID = id_tindakan[id_tindakan.length - 1];
 			
-			let nama = $(this).html();
+			
+			let nama =  $(this).closest('tr').find('td:eq(1)').text(); //$(this).html();
 			$(".title-pemeriksaan").html(nama);
 
 			$("#panel-hasil").fadeIn(function() {
@@ -26,10 +27,14 @@
 				if (order_data != ""){
 					if (order_data[0].keterangan != null){
 						editorKeteranganPeriksa.setData(order_data[0].keterangan);
+					} else {
+						editorKeteranganPeriksa.setData("");
 					}
 
 					if (order_data[0].keterangan != null){
 						editorKesimpulanPeriksa.setData(order_data[0].kesimpulan);
+					} else {
+						editorKesimpulanPeriksa.setData("");
 					}
 				}
 			});
@@ -70,10 +75,10 @@
 			form_data.append("request", "update-hasil-radiologi");
 			form_data.append("uid_radiologi_order", uid_order);
 			
-			
-			if (tindakanID !== undefined && tindakanID !== ""){
+			//if (tindakanID !== undefined && tindakanID !== ""){
 				let keteranganPeriksa = editorKeteranganPeriksa.getData();
 				let kesimpulanPeriksa = editorKesimpulanPeriksa.getData();
+				//console.log(deletedDocList);
 
 				/*formData = {
 					request : "update-hasil-radiologi",
@@ -97,6 +102,7 @@
 				for (var i = 0; i < deletedDocList.length; i++){
 					form_data.append("deletedDocList[]", deletedDocList[i]);
 				}
+
 
 				/*for (var value of form_data.values()) {
 				   console.log(value); 
@@ -151,16 +157,17 @@
 							location.href = __HOSTNAME__ + "/radiologi";
 						} else {
 							$("#btnSimpan").removeAttr("disabled");
-							notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");
+							notification ("warning", "Tidak Ada Data yang Disimpan", 3000, "hasil_tambah_dev");
 						}
 					},
 					error: function(response) {
+						notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");
 						$("#btnSimpan").removeAttr("disabled");
 						console.log("Error : ");
 						console.log(response);
 					}
 				});
-			}
+			//}
 			//}
 
 			return false;
@@ -207,10 +214,20 @@
 			}
 		});
 
+		var status_file;
 
 		$("#add_file").change(function(e) {
-			$("#form-upload-lampiran").modal("show");
+		
 			file = e.target.files[0];
+			if (file.name != ""){
+				status_file = checkFile(file.name);
+			}
+
+			if (status_file == true){
+				$("#form-upload-lampiran").modal("show");
+			} else {
+				alert("Berkas harus PDF");
+			}
 		});
 
 		$("#btnSubmitLampiran").click(function() {
@@ -323,6 +340,7 @@
 				success: function(response){
 					if (response.response_package != undefined){
 						dataItem = response.response_package.response_data;
+						console.log(dataItem);
 					}
 				},
 				error: function(response) {
@@ -519,6 +537,22 @@
 			});
 		});
 	}
+
+	//for checking pdf file
+	function checkFile(file_name) {
+        let fileExtension = "";
+
+        if (file_name.lastIndexOf(".") > 0) {
+            fileExtension = file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length);
+        }
+
+        if (fileExtension.toLowerCase() == "pdf") {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
 	//fungsi untuk editor textarea
 	function MyCustomUploadAdapterPlugin( editor ) {
