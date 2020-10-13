@@ -167,7 +167,7 @@ class Anjungan extends Utility {
 		return $data;
 	}
 
-	private function check_job($from_loket) {
+	private function check_job($parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -235,9 +235,10 @@ class Anjungan extends Utility {
 		->where(array(
 			'antrian_nomor.status' => '= ?',
 			'AND',
-			'antrian_nomor.created_at' => '>= now()::date'
+            'DATE(antrian_nomor.created_at)' => '= ?'
 		), array(
-			'N'
+			'N',
+            date('Y-m-d')
 		))
 		->execute();
 		$data['response_standby'] = count($sisa['response_data']);
@@ -253,10 +254,11 @@ class Anjungan extends Utility {
 			'id'
 		))
 		->where(array(
-			'antrian_nomor.created_at' => '>= now()::date + interval \'1h\'',
+            'DATE(antrian_nomor.created_at)' => '= ?',
 			'AND',
 			'antrian_nomor.jenis_antrian' => '= ?'
 		), array(
+		    date('Y-m-d'),
 			$parameter['jenis']
 		))
 		->execute();
@@ -294,7 +296,7 @@ class Anjungan extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$allowed_jenis = array();
-		$allowed_item = array('N');
+		$allowed_item = array(date('Y-m-d'), 'N');
 		//Loket Job
 		//Get Jalur
 		$Jalur = self::anjungan_jenis();
@@ -330,6 +332,8 @@ class Anjungan extends Utility {
 			'antrian_nomor.pasien' => 'IS NULL',
 			'AND',
 			'antrian_nomor.poli' => 'IS NULL',
+            'AND',
+            'DATE(antrian_nomor.created_at)' => '= ?',
 			'AND',
 			'antrian_nomor.status' => '= ? AND (' . implode('OR', $allowed_jenis) . ')'
 		), $allowed_item)

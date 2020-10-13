@@ -522,23 +522,52 @@
 			var me = $(this);
 			var kelas = me.attr("kelas");
 			var kelasIden = me.attr("identifier");
+            if($("#satu_harga").is(":checked")) {
+                $("#txt_penjamin option").each(function () {
+                    var penjaminType = $(this);
+                    if (metaData[penjaminType.attr("value")] == undefined) {
+                        metaData[penjaminType.attr("value")] = {};
+                    }
 
-			if(metaData[$("#txt_penjamin").val()] == undefined) {
-				metaData[$("#txt_penjamin").val()] = {};
-			}
+                    if(metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] == undefined) {
+                        metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] = {};
+                    }
+                });
+            } else {
+                if (metaData[$("#txt_penjamin").val()] == undefined) {
+                    metaData[$("#txt_penjamin").val()] = {};
+                }
 
-			if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
-				metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
-			}
+                if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
+                    metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
+                }
+            }
+
+
 
 			$("#form-tambah table tbody tr").each(function() {
 				var us = $(this);
-				if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
-					metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
-				}
+                if($("#satu_harga").is(":checked")) {
+                    $("#txt_penjamin option").each(function () {
+                        var penjaminType = $(this);
+                        if(metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+                            metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
+                        }
+                    });
+                } else {
+                    if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+                        metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
+                    }
+                }
 			});
-
-			metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+            if($("#satu_harga").is(":checked")) {
+                $("#txt_penjamin option").each(function () {
+                    var penjaminType = $(this);
+                    metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+                });
+            } else {
+                metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+            }
 		});
 
 		$("#btnSubmitMasterTindakan").click(function() {
@@ -642,6 +671,15 @@
 						<select class="form-control" id="txt_penjamin"></select>
 					</div>
 				</div>
+                <div class="row">
+                    <div class="form-group col-md-5">
+                        <div class="custom-control custom-checkbox-toggle custom-control-inline mr-1">
+                            <input checked="" type="checkbox" id="satu_harga" class="custom-control-input">
+                            <label class="custom-control-label" for="satu_harga">Yes</label>
+                        </div>
+                        <label for="subscribe">Satu Harga</label>
+                    </div>
+                </div>
 				<div class="row">
 					<div class="form-group col-md-12" id="kelas_loader">
 						<table class="table largeDataType">
