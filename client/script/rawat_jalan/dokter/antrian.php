@@ -1947,6 +1947,7 @@
 								listTindakanRadiologiDihapus = [];		//set back to empty
 								
 								notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
+                                push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
 								//location.href = __HOSTNAME__ + "/rawat_jalan/dokter";
 							} else {
 								notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
