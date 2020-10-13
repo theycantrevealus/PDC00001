@@ -33,6 +33,8 @@
 		});
 
 		$("#btnSelesai").on('click', function(){
+			var btnSelesai = $(this);
+			btnSelesai.attr('disabled', 'disabled');
 
 			$(".inputan").each(function(){
 				var value = $(this).val();
@@ -42,6 +44,11 @@
 					var name = $(this).attr("id");
 					allData[name] = value;
 				}
+			});
+
+			$("input[type=checkbox]:not(:checked)").each(function(){
+				var name = $(this).attr("id");
+				allData[name] = null;
 			});
 
 			$("input[type=checkbox]:checked").each(function(){
@@ -56,6 +63,10 @@
 					allData[name] = value;
 				}
 			});
+
+			delete allData['riwayat_merokok_option'];
+			delete allData['riwayat_miras_option'];
+			delete allData['riwayat_obt_terlarang_option'];
 
 			$.ajax({
 				async: false,
@@ -75,6 +86,7 @@
 					location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
 				},
 				error: function(response) {
+					btnSelesai.removeAttr("disabled");
 					console.log("Error : ");
 					console.log(response);
 				}
@@ -137,6 +149,23 @@
         	disableLainnya('kaji_resiko_jam_dokter', value, 1);
         });
 
+		$("input[name='riwayat_merokok_option']").on('change', function(){
+        	let value = $(this).val();
+
+        	disableLainnya('riwayat_merokok', value, "y");
+        });
+
+		$("input[name='riwayat_miras_option']").on('change', function(){
+        	let value = $(this).val();
+
+        	disableLainnya('riwayat_miras', value, "y");
+        });
+
+		$("input[name='riwayat_obt_terlarang_option']").on('change', function(){
+        	let value = $(this).val();
+
+        	disableLainnya('riwayat_obt_terlarang', value, "y");
+        });
 	});
 
 	function loadTermSelectBox(selector, id_term){
@@ -213,6 +242,7 @@
 	            	if (response.response_package != ""){
 	            		MetaData = response.response_package;
 
+
 		                $.each(MetaData.pasien, function(key, item){
 		                	$("#" + key).html(item)
 		                });
@@ -236,6 +266,7 @@
 		                	$.each(MetaData.asesmen_rawat, function(key, item){
 			                	$("#" + key).val(item);
 
+								
 			                	checkedRadio(key, item);
 			                	checkedCheckbox(key, item);
 			                });
@@ -284,10 +315,30 @@
 		                	if ($("#tatalaksana_konsul").is(':checked')) {
 		                		$(".tatalaksana_konsul_ket").removeAttr("disabled");
 		                	}
+
+							if ($("#riwayat_merokok").val() != ""){
+								let $this = $("input:radio[name='riwayat_merokok_option']");
+								$this.val("y").prop('checked', true);
+
+								$("#riwayat_merokok").removeAttr("disabled");
+							}
+
+							if ($("#riwayat_miras").val() != ""){
+								let $this = $("input:radio[name='riwayat_miras_option']");
+								$this.val("y").prop('checked', true);
+
+								$("#riwayat_miras").removeAttr("disabled");
+							}
+
+							if ($("#riwayat_obt_terlarang").val() != ""){
+								let $this = $("input:radio[name='riwayat_obt_terlarang_option']");
+								$this.val("y").prop('checked', true);
+
+								$("#riwayat_obt_terlarang").removeAttr("disabled");
+							}
+
 		                }
 	            	}
-
-	            	console.log(MetaData);
 	            },
 	            error: function(response) {
 	                console.log(response);
@@ -311,14 +362,8 @@
 	}
 
 	function checkedCheckbox(name, value){
-		var $check = $('input:checkbox[name='+ name +']');
-
-	    if ($check != ""){
-		    if($check.is(':checked') === false) {
-		    	if (value != null && value != ""){
-		    		$check.filter('[value="'+ value +'"]').prop('checked', true);
-		    	}
-		    }
-		}		 
+		if (value == 1){
+			$('input:checkbox[name='+ name +']').prop('checked', true);
+		}
 	}
 </script>

@@ -29,7 +29,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+						<a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								02
 								<b class="inv-tab-status text-success" id="status-2"><i class="fa fa-check-circle"></i></b>
@@ -74,7 +74,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-poli-7" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								07
 								<b class="inv-tab-status text-success" id="status-7"><i class="fa fa-check-circle"></i></b>
@@ -99,7 +99,7 @@
 					<?php require 'perawat/form.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade active" id="tab-poli-2">
+				<div class="tab-pane show fade" id="tab-poli-2">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'asesmen-awal.php'; ?>
 					<?php require 'action-panel.php'; ?>
@@ -124,7 +124,7 @@
 					<?php require 'radiologi.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-poli-7">
+				<div class="tab-pane show fade active" id="tab-poli-7">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'cppt.php'; ?>
 					<?php require 'action-panel.php'; ?>

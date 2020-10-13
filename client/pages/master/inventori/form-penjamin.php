@@ -7,7 +7,7 @@
 			</div>
 			<div class="card-body tab-content">
 				<table class="table table-bordered table-data" id="table-penjamin">
-					<thead>
+					<thead class="thead-dark">
 						<tr>
 							<th class="wrap_content">No</th>
 							<th>Penjamin</th>
