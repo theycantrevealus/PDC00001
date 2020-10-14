@@ -33,7 +33,7 @@
 								<b class="text-danger">2 item</b> (habis)
 							</span>
 							<h6 class="text-right">
-								<small><a href="<?php echo __HOSTNAME__; ?>"><i class="fa fa-cubes"></i> Amprah</a></small>
+								<small><a href="<?php echo __HOSTNAME__; ?>/inventori/amprah/tambah"><i class="fa fa-cubes"></i> Amprah</a></small>
 							</h6>
 						</div>
 					</div>
