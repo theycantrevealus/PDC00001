@@ -96,6 +96,7 @@
 
 					if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){
 						notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
+						location.href = __HOSTNAME__ + "/laboratorium";
 					} else {
 						//notification ("danger", "Data Gagal Disimpan" /*response.response_package*/, 3000, "hasil_tambah_dev");
 					}

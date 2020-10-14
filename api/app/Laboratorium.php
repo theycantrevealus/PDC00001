@@ -61,7 +61,7 @@ class Laboratorium extends Utility {
 
 				case 'get-laboratorium-order-detail-item':
 					return self::get_laboratorium_order_detail_item($parameter[2]);
-					break;
+				break;
 				
 				case 'get-laboratorium-lampiran':
 					return self::get_laboratorium_lampiran($parameter[2]);
@@ -799,6 +799,7 @@ class Laboratorium extends Utility {
 			$tindakan = self::$query->insert('master_tindakan', array(
 				'uid' => $uid,
 				'nama' => 'Laboratorium ' . $parameter['nama'],
+				'kelompok' => 'LAB',
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))
@@ -1385,7 +1386,7 @@ class Laboratorium extends Utility {
 			$data['response_data'][$key]['nama'] = $data_lab['response_data'][0]['nama'];
 			
 			$data['response_data'][$key]['nilai_item'] = [];
-			$data_nilai = self::get_laboratorium_order_nilai_item($value['tindakan']);
+			$data_nilai = self::get_laboratorium_order_nilai_item($value['tindakan'], $value['lab_order']);
 			$data['response_data'][$key]['nilai_item'] = $data_nilai['response_data'];
 			
 		}
@@ -1393,7 +1394,7 @@ class Laboratorium extends Utility {
 		return $data;
 	}
 
-	public function get_lab_detail_data_only($parameter){
+	public static function get_lab_detail_data_only($parameter){
 		$data_lab = self::$query
 			->select('master_lab', array(
 					'uid',
@@ -1410,7 +1411,7 @@ class Laboratorium extends Utility {
 			return $data_lab;
 	}
 
-	private function get_laboratorium_order_nilai_item($parameter){
+	private static function get_laboratorium_order_nilai_item($uid_tindakan, $uid_order){
 		$data = self::$query
 			->select('lab_order_nilai', array(
 					'id',
@@ -1435,15 +1436,20 @@ class Laboratorium extends Utility {
 			->where(array(
 					'lab_order_nilai.tindakan' => '= ?',
 					'AND',
+					'lab_order_nilai.lab_order' => '= ?',
+					'AND',
 					'lab_order_nilai.deleted_at' => 'IS NULL'
-				), array($parameter)
+				), array(
+					$uid_tindakan,
+					$uid_order
+				)
 			)
 			->execute();
 
 		return $data;
 	}
 
-	public function get_laboratorium_order_nilai_per_item($lab_order, $tindakan, $id_nilai){
+	public static function get_laboratorium_order_nilai_per_item($lab_order, $tindakan, $id_nilai){
 		$data = self::$query
 			->select('lab_order_nilai', array(
 					'id',
@@ -1853,7 +1859,7 @@ class Laboratorium extends Utility {
 
 	private function new_order_lab($parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		
 		$get_antrian = new Antrian(self::$pdo);
 		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter['uid_antrian']);
@@ -1986,6 +1992,8 @@ class Laboratorium extends Utility {
 							'dr_penanggung_jawab'	=>	$parameter['dokterPJ'],
 							'no_order'				=>	$no_order_new,
 							'status'				=>	'P',
+							'pasien'				=>	$data_antrian['pasien'],
+							'kunjungan'				=>	$data_antrian['kunjungan'],
 							'created_at'			=>	parent::format_date(),
 							'updated_at'			=>	parent::format_date()
 						)
@@ -2079,7 +2087,7 @@ class Laboratorium extends Utility {
 										'pasien' => $data_antrian['pasien'],
 										'keterangan' => 'Tagihan laboratorium'
 									);
-									$NewInvoice = $Invoice::create_invoice($InvMasterParam);
+									$NewInvoice = $Invoice->create_invoice($InvMasterParam);
 									$TargetInvoice = $NewInvoice['response_unique'];
 								}
 	
@@ -2101,13 +2109,13 @@ class Laboratorium extends Utility {
 										'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
 									), array(
 										$valueTindakan,
-										__UID_KELAS_GENERAL_RAD__,    //Fix 1 harga kelas GENERAL
+										__UID_KELAS_GENERAL_LAB__,    //Fix 1 harga kelas GENERAL
 										$keyTindakan
 									))
 									->execute();
 								$HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
 	
-								$InvoiceDetail = $Invoice::append_invoice(array(
+								$InvoiceDetail = $Invoice->append_invoice(array(
 									'invoice' => $TargetInvoice,
 									'item' => $keyTindakan,
 									'item_origin' => 'master_tindakan',
@@ -2119,7 +2127,7 @@ class Laboratorium extends Utility {
 									'discount_type' => 'N',
 									'pasien' => $data_antrian['pasien'],
 									'penjamin' => $valueTindakan,
-									'keterangan' => 'Biaya Radiologi'
+									'keterangan' => 'Biaya Laboratorium'
 								));
 
 								$log = parent::log(array(
@@ -2229,7 +2237,7 @@ class Laboratorium extends Utility {
 
 	private function edit_order_lab($parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		
 		$uidLabOrder = $parameter['uid_lab_order'];
 		$old_detail = self::get_laboratorium_order_detail($uidLabOrder);
@@ -2276,7 +2284,7 @@ class Laboratorium extends Utility {
 						'lab_order; lab_order_detail',
 						'U',
 						'lab_order: {' . json_encode($old_order) . '}; lab_order_detail: {' . json_encode($old_detail) . '}',
-						json_encode($value_tindakan),
+						json_encode($parameter),
 						parent::format_date(),
 						'N',
 						$UserData['data']->log_id
@@ -2454,7 +2462,6 @@ class Laboratorium extends Utility {
 									$result['new_lab_nilai'] = $addNilaiLabor;
 								}
 								
-
 							}
 
 						}
@@ -2471,7 +2478,7 @@ class Laboratorium extends Utility {
 
 	private function update_hasil_lab($parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$result = [];
 		$dataNilai = json_decode($parameter['data_nilai']);
 
@@ -2583,7 +2590,9 @@ class Laboratorium extends Utility {
 				if(!empty($_FILES['fileList']['tmp_name'][$a])) {
 					$nama_lampiran = 'L_' . str_pad($max, 6, "0", STR_PAD_LEFT);
 
-					if(move_uploaded_file($_FILES['fileList']['tmp_name'][$a], '../document/laboratorium/' . $parameter['uid_order'] . '/' . $nama_lampiran . '.pdf')) {
+					if (
+						move_uploaded_file($_FILES['fileList']['tmp_name'][$a], '../document/laboratorium/' . $parameter['uid_order'] . '/' . $nama_lampiran . '.pdf')
+					) {
 						array_push($result['response_upload'], 'Berhasil diupload');
 						$lampiran = self::$query
 							->insert('lab_order_document', array(
@@ -2595,7 +2604,7 @@ class Laboratorium extends Utility {
 						
 						$result['response_upload']['response_result'] = 1;
 					} else {
-						array_push($result['response_upload'], 'Gagal diupload : ' . $_FILES['fileList']['tmp_name'][$a] . ' => ' . $set_code . '-' . $a . '.pdf');
+						array_push($result['response_upload'], 'Gagal diupload : ' . $_FILES['fileList']['tmp_name'][$a] . ' => ' . $nama_lampiran . '-' . $a . '.pdf');
 					}
 				}
 			}
@@ -2681,9 +2690,12 @@ class Laboratorium extends Utility {
 				)
 			)
 			->execute();
-
+		
+		$tindakan = new Tindakan(self::$pdo);
 		foreach ($dataTindakan['response_data'] as $key => $value){
-			$dataTindakan['response_data'][$key]['harga'] = [];
+			$harga = $tindakan->get_harga_tindakan($value['uid']);
+			
+			$dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
 		}
 			
 		return $dataTindakan;
@@ -2822,7 +2834,8 @@ class Laboratorium extends Utility {
 							'selesai',
 							'dr_pengirim',
 							'no_order',
-							'dr_penanggung_jawab as uid_dr_penanggung_jawab'
+							'dr_penanggung_jawab as uid_dr_penanggung_jawab',
+							'status as status_order'
 						)
 					)
 					->where(
@@ -2848,10 +2861,17 @@ class Laboratorium extends Utility {
 
 					$get_valueable_nilai = self::$query
 						->select('lab_order_nilai', array('id','nilai'))
-						->where(array('lab_order_nilai.nilai' => 'IS NOT NULL'))
+						->where(
+							array('lab_order_nilai.nilai' => 'IS NOT NULL',
+								'AND',
+								'lab_order_nilai.lab_order'	=> '= ?'
+							), array(
+								$value['uid']
+							) 
+						)
 						->execute();
 
-					if ($get_valueable_nilai['response_result'] > 0){
+					if ($get_valueable_nilai['response_result'] > 0 || $value['status_order'] == 'P'){
 						$dataOrder['response_data'][$key]['editable'] = 'false';
 					} else {
 						$dataOrder['response_data'][$key]['editable'] = 'true';						
@@ -2864,7 +2884,7 @@ class Laboratorium extends Utility {
 
 	}
 
-	private function get_laboratorium_order_detail($parameter){
+	private static function get_laboratorium_order_detail($parameter){
 		$data = self::$query
 			->select('lab_order_detail', array(
 					'id',
@@ -2919,7 +2939,7 @@ class Laboratorium extends Utility {
 		return $data;
 	}
 
-	private function get_nilai_tindakan($parameter){
+	private static function get_nilai_tindakan($parameter){
 		$data = self::$query
 			->select('master_lab_nilai', array(
 					'id',

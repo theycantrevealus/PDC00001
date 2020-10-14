@@ -1943,8 +1943,8 @@
 							//console.log(response);
 
 							if(response.response_package.response_result > 0) {
-								orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
-								listTindakanRadiologiDihapus = [];		//set back to empty
+					//			orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
+					//			listTindakanRadiologiDihapus = [];		//set back to empty
 								
 								notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                                 push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
@@ -1959,8 +1959,8 @@
 						}
 					});
 					
-					//orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
-					//listTindakanRadiologiDihapus = [];		//set back to empty
+					orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
+					listTindakanRadiologiDihapus = [];		//set back to empty
 				} else if (result.isDenied) {
 					//Swal.fire('Changes are not saved', '', 'info')
 				}
@@ -2490,6 +2490,11 @@
 			
 		}
 
+		
+		// $('a[data-toggle="tab"]').on( 'shown.bs.tab', function (e) {
+		// 	$.fn.dataTable.tables( {visible: true, api: true} ).columns.adjust();
+		// });
+
 		var dataTableLabOrder = $("#table_order_lab").DataTable({
 			"ajax":{
 				"url" : __HOSTAPI__ + "/Laboratorium/get-laboratorium-order/" + UID,
@@ -2505,12 +2510,11 @@
 				}
 			},
 			"columnDefs":[
-				{"targets":0, "className":"dt-body-left"}
+				{"targets": [0], "className":"dt-body-left"}
 			],
 			"columns" : [
 				{ 
-					"data": null,"sortable": false, 
-					render: function (data, type, row, meta) {
+					"data": null, "sortable": false, render: function (data, type, row, meta) {
 						return meta.row + meta.settings._iDisplayStart + 1;
 					}  
 				},
@@ -2532,14 +2536,23 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 
-						let button = "<button class='btn btn-warning btn-sm btnViewDetailOrder' data-uid='"
-									+ row['uid'] +"' data-dokterpj='"+ row['uid_dr_penanggung_jawab'] +"' data-editable='" + row['editable'] + "'  >\
-										<i class='fa fa-list'></i></button>";
+						let button = "<div>";
 						
 						if (row['editable'] == 'true') {
-							button += "<button class='btn btn-danger btn-sm btnHapusOrderLab' 					data-uid='"+ row['uid'] +"' data-order='" + row['no_order'] + "' " + ">\
+							button += "<button class='btn btn-warning btn-sm btnViewDetailOrder' data-uid='"
+										+ row['uid'] +"' data-dokterpj='"+ row['uid_dr_penanggung_jawab'] +"' data-editable='" + row['editable'] + "'  >\
+										<i class='fa fa-list'></i></button>" + 
+										
+										"<button class='btn btn-danger btn-sm btnHapusOrderLab' 					data-uid='"+ row['uid'] +"' data-order='" + row['no_order'] + "' " + ">\
 										<i class='fa fa-trash'></i></button>";
+
+						} else if (row['editable'] == 'false') {
+							button += "<button class='btn btn-info btn-sm btnViewHasilOrder' data-uid='"
+										+ row['uid'] +"' data-dokterpj='"+ row['nama_dr_penanggung_jawab'] +"' data-editable='" + row['editable'] + "'  >\
+										<i class='fa fa-eye'></i></button>";
 						}
+
+						button += "</div>";
 
 						return button;
 					}
@@ -2632,6 +2645,81 @@
 			return labTindakan;
 		}
 
+		function loadLabOrderItem(params){	        //params = uid lab_order
+			let dataItem;
+
+			if (params != ""){
+				$.ajax({
+					async: false,
+					url:__HOSTAPI__ + "/Laboratorium/get-laboratorium-order-detail-item/" + params,
+					type: "GET",
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					success: function(response){
+						console.log(response);
+
+						let html = "";
+						if (response.response_package.response_result > 0){
+							dataItem = response.response_package.response_data;
+							//console.log(response.response_data);
+							$.each(dataItem, function(key, item){
+
+								html = '<p><h7><b>'+ item.nama +'</b></h7></p>\
+									<table class="table table-bordered table-striped" style="font-size: 0.9rem;">\
+									<thead>\
+										<tr>\
+											<th width="2%">No</th>\
+											<th width="10%">Item</th>\
+											<th width="40%">Nilai</th>\
+											<th width="10%">Satuan</td>\
+											<th width="15%">Nilai Min.</td>\
+											<th width="15%">Nilai Maks.</td>\
+										</tr>\
+									</thead>\
+									<tbody>';
+
+								if (item.nilai_item.length > 0){
+
+									let nomor = 1;
+									$.each(item.nilai_item, function(key, items){
+										let nilai = items.nilai;
+
+										if (nilai == null){
+											nilai = "";
+										}
+
+										// id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
+										html += '<tr>\
+											<td>'+ nomor +'</td>\
+											<td>'+ items.keterangan +'</td>\
+											<td><input id="nilai_'+ items.uid_tindakan + '_'+ items.id_lab_nilai +'" value="'+ nilai +'" readonly class="form-control inputItemTindakan" placeholder="-" /></td>\
+											<td>'+ items.satuan +'</td>\
+											<td>'+ items.nilai_min +'</td>\
+											<td>'+ items.nilai_maks +'</td>\
+										</tr>';
+
+										nomor++;
+									});
+								}
+
+								html += '</tbody>\
+									</table><hr />';
+								
+
+								$("#lab_hasil_pemeriksaan").append(html);
+							});
+							
+						}
+					},
+					error: function(response) {
+						console.log(response);
+					}
+				});
+			}
+		}
+
+
 		//loadLabOrder(UID);
 		
 		//initiate laboratorium tindakan data
@@ -2658,6 +2746,8 @@
 
 		$("#tindakan_lab").on('select2:select', function(){
 			let uidTindakanLab = $(this).val();
+			//console.log(__UIDPENJAMINUMUM__);
+			//console.log(pasien_penjamin_uid);
 
 			$("#lab_tindakan_notifier").html("");
 			if (pasien_penjamin_uid !== __UIDPENJAMINUMUM__){
@@ -2737,6 +2827,18 @@
 			$("#form-tambah-order-lab").modal("show");
 
 			//listTindakanLabTerpilih = loadLabOrder(uidLabOrder);
+		});
+	
+		
+		$("#table_order_lab tbody").on('click', '.btnViewHasilOrder', function(){
+			let uidLabOrder = $(this).data('uid');
+			let namaDokterPj = $(this).data('dokterpj');
+
+			$("#dr_penanggung_jawab_view_hasil").val(namaDokterPj);
+			$("#lab_hasil_pemeriksaan").html("");
+
+			loadLabOrderItem(uidLabOrder);
+			$("#form-view-hasil-lab").modal("show");
 		});
 
 		$("#table_order_lab tbody").on('click', '.btnHapusOrderLab', function(){
@@ -3055,6 +3157,36 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
 				<button type="button" class="btn btn-primary" id="btnSubmitOrderLab">Submit</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="form-view-hasil-lab" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-large-title"></h5>
+			</div>
+			<div class="modal-body">
+				<div class="col-md-12 row form-group">
+					<div class="col-md-3">
+						<label for="dr_penanggung_jawab_lab">Dokter Penanggung Jawab</label>
+					</div>
+					<div class="col-md-6">
+						<input type="text" class="form-control" id="dr_penanggung_jawab_view_hasil" readonly>
+					</div>
+				</div>
+				<hr />
+				<div class="col-md-12">
+					<div id="lab_hasil_pemeriksaan">
+
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
 			</div>
 		</div>
 	</div>
