@@ -67,6 +67,14 @@ class Icd extends Utility {
 				return self::edit_icd('master_icd_10', $parameter);
 				break;
 
+			case 'get_icd_10_back_end_dt':
+				return self::get_icd_10_back_end_dt($parameter);
+				break;
+
+			case 'get_icd_9_back_end_dt':
+				return self::get_icd_9_back_end_dt($parameter);
+				break;
+
 			default:
 				# code...
 				break;
@@ -100,6 +108,157 @@ class Icd extends Utility {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 		}
+
+		return $data;
+    }
+
+
+    private function get_icd_10_back_end_dt($parameter) {
+    	$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$columnTarget = array(
+			'id',
+			'kode',
+			'nama',
+			'created_at',
+			'updated_at'
+		);
+
+		if(isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'master_icd_10.deleted_at' => 'IS NULL',
+				'AND',
+				'(master_icd_10.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+				'OR',
+				'master_icd_10.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+			);
+
+			$paramValue = array();
+		} else {
+			$paramData = array(
+				'master_icd_10.deleted_at' => 'IS NULL'
+			);
+
+			$paramValue = array();
+		}
+
+
+		if($parameter['length'] < 0) {
+			$data = self::$query->select('master_icd_10', $columnTarget)	
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTarget[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->execute();
+		} else {
+			$data = self::$query->select('master_icd_10', $columnTarget)	
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTarget[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->execute();
+		}
+
+		$data['response_draw'] = $parameter['draw'];
+
+		$autonum = $parameter['start'] + 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		$dataTotal = self::$query->select('master_icd_10', $columnTarget)	
+		->where($paramData, $paramValue)
+		->execute();
+
+		$data['recordsTotal'] = count($dataTotal['response_data']);
+		$data['recordsFiltered'] = count($dataTotal['response_data']);
+		$data['length'] = intval($parameter['length']);
+		$data['start'] = intval($parameter['start']);
+		$data['sort'] = $parameter;
+
+		return $data;
+    }
+
+
+
+
+
+    private function get_icd_9_back_end_dt($parameter) {
+    	$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$columnTarget = array(
+			'id',
+			'kode',
+			'nama',
+			'created_at',
+			'updated_at'
+		);
+
+		if(isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'master_icd_9.deleted_at' => 'IS NULL',
+				'AND',
+				'(master_icd_9.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+				'OR',
+				'master_icd_9.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+			);
+
+			$paramValue = array();
+		} else {
+			$paramData = array(
+				'master_icd_9.deleted_at' => 'IS NULL'
+			);
+
+			$paramValue = array();
+		}
+
+
+		if($parameter['length'] < 0) {
+			$data = self::$query->select('master_icd_9', $columnTarget)	
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTarget[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->execute();
+		} else {
+			$data = self::$query->select('master_icd_9', $columnTarget)	
+			->where($paramData, $paramValue)
+			->order(array(
+				$columnTarget[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+			))
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->execute();
+		}
+
+		$data['response_draw'] = $parameter['draw'];
+
+		$autonum = $parameter['start'] + 1;
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
+
+		$dataTotal = self::$query->select('master_icd_9', array(
+			'id',
+			'kode',
+			'nama',
+			'created_at',
+			'updated_at'
+		))	
+		->where($paramData, $paramValue)
+		->execute();
+
+		$data['recordsTotal'] = count($dataTotal['response_data']);
+		$data['recordsFiltered'] = count($dataTotal['response_data']);
+		$data['length'] = intval($parameter['length']);
+		$data['start'] = intval($parameter['start']);
+		$data['sort'] = $parameter;
 
 		return $data;
     }

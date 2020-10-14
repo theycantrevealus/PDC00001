@@ -26,12 +26,11 @@
                 }
 			});
 
-			//console.log(nilaiItemTindakan);
-
 			var form_data = new FormData(this);
 			form_data.append("request", "update-hasil-lab");
 			form_data.append("uid_order", uid_order);
-			form_data.append("data_nilai", nilaiItemTindakan);
+			form_data.append('data_nilai', JSON.stringify(nilaiItemTindakan));
+			
 
 			for(var i = 0; i < fileList.length; i++) {
 				form_data.append("fileList[]", fileList[i]);
@@ -43,7 +42,7 @@
 
 			// for (var value of form_data.values()) {
 			//    console.log(value); 
-			// }
+			// }	`
 
 			// let form_data = {
 			// 	request : 'update-hasil-lab',
@@ -81,7 +80,7 @@
 						response_upload = response.response_package.response_upload.response_result;
 						if (response_upload > 0){
 							fileList = [];
-							$("#radiologi-lampiran-table tbody").empty();
+							$("#labor-lampiran-table tbody").empty();
 							loadLampiran(uid_order);
 						}
 					}
@@ -97,6 +96,7 @@
 
 					if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){
 						notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
+						location.href = __HOSTNAME__ + "/laboratorium";
 					} else {
 						//notification ("danger", "Data Gagal Disimpan" /*response.response_package*/, 3000, "hasil_tambah_dev");
 					}
@@ -219,7 +219,7 @@
 		if (params != ""){
 			$.ajax({
 				async: false,
-	            url:__HOSTAPI__ + "/Laboratorium/laboratorium-order-detail-item/" + params,
+	            url:__HOSTAPI__ + "/Laboratorium/get-laboratorium-order-detail-item/" + params,
 	            type: "GET",
 	            beforeSend: function(request) {
 	                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -260,11 +260,13 @@
                                     html += '<tr>\
                                         <td>'+ nomor +'</td>\
                                         <td>'+ items.keterangan +'</td>\
-                                        <td><input id="nilai_'+ items.uid_tindakan + '_'+ items.id +'" value="'+ nilai +'" class="form-control inputItemTindakan" /></td>\
+                                        <td><input id="nilai_'+ items.uid_tindakan + '_'+ items.id_lab_nilai +'" value="'+ nilai +'" class="form-control inputItemTindakan" /></td>\
                                         <td>'+ items.satuan +'</td>\
                                         <td>'+ items.nilai_min +'</td>\
                                         <td>'+ items.nilai_maks +'</td>\
                                     </tr>';
+
+									nomor++;
                                 });
                             }
 

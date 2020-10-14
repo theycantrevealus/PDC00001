@@ -4,7 +4,7 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item">Radiologi</li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/radiologi">Radiologi</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Hasil Pemeriksaan Radiologi</li>
 				</ol>
 			</nav>

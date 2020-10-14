@@ -42,7 +42,7 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.log(response);
+					$("#jlh-antrian").html(response.response_package.response_data.length);
 					return response.response_package.response_data;
 				}
 			},
