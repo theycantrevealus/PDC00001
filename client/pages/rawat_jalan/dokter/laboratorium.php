@@ -15,11 +15,11 @@
 						<table class="table table-bordered" id="table_order_lab" style="width: 100%;">
 							<thead class="thead-dark">
 								<tr>
-									<th width='10px'>No</th>
+									<th class="wrap_content">No</th>
 									<th width='15%'>Nomor Order</th>
 									<th width='15%'>Waktu Order</th>
 									<th width='25%'>Dokter Penanggung Jawab</th>
-									<th width='15%'>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody>

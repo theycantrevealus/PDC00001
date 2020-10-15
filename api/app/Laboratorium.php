@@ -2855,7 +2855,8 @@ class Laboratorium extends Utility {
 					$dataOrder['response_data'][$key]['nama_dr_penanggung_jawab'] = $detail_pegawai['response_data'][0]['nama'];
 
 					$date_time = explode(" ", $dataOrder['response_data'][$key]['waktu_order']);
-					$date = parent::dateToIndoSlash($date_time[0]);
+					//$date = parent::dateToIndoSlash($date_time[0]); Fungsi tolong diinfokan
+                    $date = $date_time[0];
 
 					$dataOrder['response_data'][$key]['waktu_order'] = $date . " " . $date_time[1];
 
@@ -2879,9 +2880,12 @@ class Laboratorium extends Utility {
 				}
 
 				return $dataOrder;
-			}
-		}
-
+			} else {
+                return array('response_data' => array());
+            }
+		} else {
+            return array('response_data' => array());
+        }
 	}
 
 	private static function get_laboratorium_order_detail($parameter){

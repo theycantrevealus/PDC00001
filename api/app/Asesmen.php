@@ -259,6 +259,10 @@ class Asesmen extends Utility {
 						$value['uid']
 					))
 					->execute();
+					foreach ($resepDetail['response_data'] as $RDKey => $RDValue) {
+					    $Inventori = new Inventori(self::$pdo);
+                        $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori::get_item_detail($RDValue['obat'])['response_data'][0];
+                    }
 					$resep['response_data'][$key]['resep_detail'] = $resepDetail['response_data'];
 
 					//Racikan Detail
