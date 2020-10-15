@@ -234,7 +234,7 @@ class Radiologi extends Utility
     private function get_antrian()
     {
         $data = self::$query
-            ->select('radiologi_order', array(
+            ->select('rad_order', array(
                 'uid',
                 'asesmen as uid_asesmen',
                 'waktu_order'))
@@ -266,7 +266,7 @@ class Radiologi extends Utility
                 )
             )
             ->on(array(
-                    array('radiologi_order.asesmen', '=', 'asesmen.uid'),
+                    array('rad_order.asesmen', '=', 'asesmen.uid'),
                     array('asesmen.antrian', '=', 'antrian.uid'),
                     array('pasien.uid', '=', 'antrian.pasien'),
                     array('master_poli.uid', '=', 'antrian.departemen'),
@@ -276,12 +276,16 @@ class Radiologi extends Utility
                 )
             )
             ->where(array(
-                    'radiologi_order.deleted_at' => 'IS NULL'
+                    'rad_order.status'  => '= ?',
+                    'AND',
+                    'rad_order.deleted_at' => 'IS NULL'
+                ), array(
+                    'P'
                 )
             )
             ->order(
                 array(
-                    'radiologi_order.waktu_order' => 'DESC'
+                    'rad_order.waktu_order' => 'DESC'
                 )
             )
             ->execute();
@@ -299,7 +303,7 @@ class Radiologi extends Utility
     private function get_radiologi_order_detail($parameter)
     {
         $data = self::$query
-            ->select('radiologi_order_detail', array(
+            ->select('rad_order_detail', array(
                     'id',
                     'radiologi_order as uid_radiologi_order',
                     'tindakan as uid_tindakan',
@@ -310,9 +314,9 @@ class Radiologi extends Utility
                 )
             )
             ->where(array(
-                'radiologi_order_detail.radiologi_order' => '= ?',
+                'rad_order_detail.radiologi_order' => '= ?',
                 'AND',
-                'radiologi_order_detail.deleted_at' => 'IS NULL'
+                'rad_order_detail.deleted_at' => 'IS NULL'
             ), array($parameter)
             )
             ->execute();
@@ -370,7 +374,7 @@ class Radiologi extends Utility
             if ($get_asesmen['response_result'] > 0) {
 
                 $dataOrder = self::$query
-                    ->select('radiologi_order',
+                    ->select('rad_order',
                         array(
                             'uid',
                             'asesmen',
@@ -381,9 +385,9 @@ class Radiologi extends Utility
                     )
                     ->where(
                         array(
-                            'radiologi_order.asesmen' => '= ?',
+                            'rad_order.asesmen' => '= ?',
                             'AND',
-                            'radiologi_order.deleted_at' => 'IS NULL'
+                            'rad_order.deleted_at' => 'IS NULL'
                         ), array($get_asesmen['response_data'][0]['uid'])
                     )
                     ->execute();
@@ -410,12 +414,12 @@ class Radiologi extends Utility
     private function get_data_pasien_antrian($parameter)
     {
         $get_uid_asesmen = self::$query
-            ->select('radiologi_order', array(
+            ->select('rad_order', array(
                     'asesmen'
                 )
             )
             ->where(array(
-                'radiologi_order.uid' => '= ?'
+                'rad_order.uid' => '= ?'
             ),
                 array($parameter)
             )
@@ -443,7 +447,7 @@ class Radiologi extends Utility
     private function get_radiologi_order_detail_item($parameter)
     {
         $data = self::$query
-            ->select('radiologi_order_detail', array(
+            ->select('rad_order_detail', array(
                     'id',
                     'radiologi_order as uid_radiologi_order',
                     'tindakan as uid_tindakan',
@@ -454,9 +458,9 @@ class Radiologi extends Utility
                 )
             )
             ->where(array(
-                'radiologi_order_detail.id' => '= ?',
+                'rad_order_detail.id' => '= ?',
                 'AND',
-                'radiologi_order_detail.deleted_at' => 'IS NULL'
+                'rad_order_detail.deleted_at' => 'IS NULL'
             ), array($parameter)
             )
             ->execute();
@@ -467,7 +471,7 @@ class Radiologi extends Utility
     private function get_radiologi_lampiran($parameter)
     {
         $data = self::$query
-            ->select('radiologi_order_document', array(
+            ->select('rad_order_document', array(
                     'id',
                     'radiologi_order',
                     'lampiran',
@@ -475,9 +479,9 @@ class Radiologi extends Utility
                 )
             )
             ->where(array(
-                'radiologi_order_document.radiologi_order' => '= ?',
+                'rad_order_document.radiologi_order' => '= ?',
                 'AND',
-                'radiologi_order_document.deleted_at' => 'IS NULL'
+                'rad_order_document.deleted_at' => 'IS NULL'
             ), array($parameter)
             )
             ->execute();
@@ -911,12 +915,12 @@ class Radiologi extends Utility
                 $uidAsesmen = $get_asesmen['response_data'][0]['uid'];
 
                 $checkRadiologiOrder = self::$query
-                    ->select('radiologi_order', array('uid'))
+                    ->select('rad_order', array('uid'))
                     ->where(
                         array(
-                            'radiologi_order.asesmen' => '= ?',
+                            'rad_order.asesmen' => '= ?',
                             'AND',
-                            'radiologi_order.deleted_at' => 'IS NULL'
+                            'rad_order.deleted_at' => 'IS NULL'
                         )
                         , array($uidAsesmen)
                     )
@@ -932,17 +936,17 @@ class Radiologi extends Utility
 
                         foreach ($parameter['listTindakanDihapus'] as $key => $value) {
                             $hapusTindakanTerpilih = self::$query
-                                ->delete('radiologi_order_detail')
+                                ->delete('rad_order_detail')
                                 ->where(array(
-                                    'radiologi_order_detail.radiologi_order' => '= ?',
+                                    'rad_order_detail.radiologi_order' => '= ?',
                                     'AND',
-                                    'radiologi_order_detail.tindakan' => '= ?',
+                                    'rad_order_detail.tindakan' => '= ?',
                                     'AND',
-                                    'radiologi_order_detail.keterangan' => 'IS NULL',
+                                    'rad_order_detail.keterangan' => 'IS NULL',
                                     'AND',
-                                    'radiologi_order_detail.kesimpulan' => 'IS NULL',
+                                    'rad_order_detail.kesimpulan' => 'IS NULL',
                                     'AND',
-                                    'radiologi_order_detail.deleted_at' => 'IS NULL'
+                                    'rad_order_detail.deleted_at' => 'IS NULL'
                                 ), array(
                                         $uidRadiologiOrder,
                                         $value
@@ -967,7 +971,7 @@ class Radiologi extends Utility
                                         'value' => array(
                                             'asesmen: ' . $uidAsesmen . "; tindakan: " . $value,
                                             $UserData['data']->uid,
-                                            'radiologi_order_detail',
+                                            'rad_order_detail',
                                             'D',
                                             parent::format_date(),
                                             'N',
@@ -1044,13 +1048,15 @@ class Radiologi extends Utility
 
                     $uidRadiologiOrder = parent::gen_uuid();
                     $radiologiOrder = self::$query
-                        ->insert('radiologi_order',
+                        ->insert('rad_order',
                             array(
                                 'uid' => $uidRadiologiOrder,
                                 'asesmen' => $uidAsesmen,
                                 'waktu_order' => parent::format_date(),
                                 'selesai' => 'false',
                                 'status' => $status_lunas,
+                                'pasien' => $data_antrian['pasien'],
+                                'kunjungan' => $data_antrian['kunjungan'],
                                 'petugas' => $UserData['data']->uid,
                                 'created_at' => parent::format_date(),
                                 'updated_at' => parent::format_date()
@@ -1074,7 +1080,7 @@ class Radiologi extends Utility
                             'value' => array(
                                 $uidRadiologiOrder,
                                 $UserData['data']->uid,
-                                'radiologi_order',
+                                'rad_order',
                                 'I',
                                 parent::format_date(),
                                 'N',
@@ -1106,14 +1112,14 @@ class Radiologi extends Utility
                 $InvoiceResult = array();
                 foreach ($parameter['listTindakan'] as $keyTindakan => $valueTindakan) {
                     $checkDetailRadiologi = self::$query
-                        ->select('radiologi_order_detail', array('id'))
+                        ->select('rad_order_detail', array('id'))
                         ->where(
                             array(
-                                'radiologi_order_detail.radiologi_order' => '= ?',
+                                'rad_order_detail.radiologi_order' => '= ?',
                                 'AND',
-                                'radiologi_order_detail.tindakan' => '= ?',
+                                'rad_order_detail.tindakan' => '= ?',
                                 'AND',
-                                'radiologi_order_detail.deleted_at' => 'IS NULL'
+                                'rad_order_detail.deleted_at' => 'IS NULL'
                             ), array(
                                 $uidRadiologiOrder,
                                 $keyTindakan
@@ -1125,7 +1131,7 @@ class Radiologi extends Utility
 
 
                         $addDetailRadiologi = self::$query
-                            ->insert('radiologi_order_detail',
+                            ->insert('rad_order_detail',
                                 array(
                                     'radiologi_order' => $uidRadiologiOrder,
                                     'tindakan' => $keyTindakan,
@@ -1218,7 +1224,7 @@ class Radiologi extends Utility
                                 'value' => array(
                                     $uidRadiologiOrder . "; " . $keyTindakan,
                                     $UserData['data']->uid,
-                                    'radiologi_order_detail',
+                                    'rad_order_detail',
                                     'I',
                                     parent::format_date(),
                                     'N',
@@ -1248,16 +1254,16 @@ class Radiologi extends Utility
             $old = self::get_radiologi_order_detail_item($parameter['tindakanID']);
 
             $updateData = self::$query
-                ->update('radiologi_order_detail', array(
+                ->update('rad_order_detail', array(
                         'keterangan' => $parameter['keteranganPeriksa'],
                         'kesimpulan' => $parameter['kesimpulanPeriksa'],
                         'updated_at' => parent::format_date()
                     )
                 )
                 ->where(array(
-                    'radiologi_order_detail.id' => '= ?',
+                    'rad_order_detail.id' => '= ?',
                     'AND',
-                    'radiologi_order_detail.deleted_at' => 'IS NULL'
+                    'rad_order_detail.deleted_at' => 'IS NULL'
                 ), array($parameter['tindakanID'])
                 )
                 ->execute();
@@ -1280,7 +1286,7 @@ class Radiologi extends Utility
                         'value' => array(
                             $parameter['tindakanID'],
                             $UserData['data']->uid,
-                            'radiologi_order_detail',
+                            'rad_order_detail',
                             'U',
                             json_encode($old),
                             json_encode($parameter),
@@ -1313,13 +1319,13 @@ class Radiologi extends Utility
 
             //get maximum id
             $get_max = self::$query
-                ->select('radiologi_order_document', array(
+                ->select('rad_order_document', array(
                         'id'
                     )
                 )
                 ->order(
                     array(
-                        'radiologi_order_document.created_at' => 'DESC'
+                        'rad_order_document.created_at' => 'DESC'
                     )
                 )
                 ->execute();
@@ -1338,7 +1344,7 @@ class Radiologi extends Utility
                     if (move_uploaded_file($_FILES['fileList']['tmp_name'][$a], '../document/radiologi/' . $parameter['uid_radiologi_order'] . '/' . $nama_lampiran . '.pdf')) {
                         array_push($result['response_upload'], 'Berhasil diupload');
                         $lampiran = self::$query
-                            ->insert('radiologi_order_document', array(
+                            ->insert('rad_order_document', array(
                                 'radiologi_order' => $parameter['uid_radiologi_order'],
                                 'lampiran' => $nama_lampiran . '.pdf',
                                 'created_at' => parent::format_date()
@@ -1347,7 +1353,7 @@ class Radiologi extends Utility
 
                         $result['response_upload']['response_result'] = 1;
                     } else {
-                        array_push($result['response_upload'], 'Gagal diupload : ' . $_FILES['fileList']['tmp_name'][$a] . ' => ' . $set_code . '-' . $a . '.pdf');
+                        array_push($result['response_upload'], 'Gagal diupload : ' . $_FILES['fileList']['tmp_name'][$a] . ' => ' . $nama_lampiran . '-' . $a . '.pdf');
                     }
                 }
             }
@@ -1359,12 +1365,12 @@ class Radiologi extends Utility
         if (count($parameter['deletedDocList']) > 0) {
             foreach ($parameter['deletedDocList'] as $key => $value) {
                 $getLampiran = self::$query
-                    ->select('radiologi_order_document', array(
+                    ->select('rad_order_document', array(
                             'lampiran'
                         )
                     )
                     ->where(array(
-                        'radiologi_order_document.id' => '= ?'
+                        'rad_order_document.id' => '= ?'
                     ), array($value)
                     )
                     ->execute();
@@ -1373,9 +1379,9 @@ class Radiologi extends Utility
                     $nama_lampiran_hapus = $getLampiran['response_data'][0]['lampiran'];
 
                     $hapusLampiran = self::$query
-                        ->delete('radiologi_order_document')
+                        ->delete('rad_order_document')
                         ->where(array(
-                            'radiologi_order_document.id' => '= ?'
+                            'rad_order_document.id' => '= ?'
                         ), array($value)
                         )
                         ->execute();

@@ -12,14 +12,14 @@
 						</button>
 					</div>
 					<div class="col-md-12" style="margin-top: 10px;">
-						<table class="table table-bordered" id="table_order_lab">
+						<table class="table table-bordered" id="table_order_lab" style="width: 100%;">
 							<thead class="thead-dark">
 								<tr>
-									<th width='2%' class="wrap_content">No</th>
+									<th class="wrap_content">No</th>
 									<th width='15%'>Nomor Order</th>
 									<th width='15%'>Waktu Order</th>
 									<th width='25%'>Dokter Penanggung Jawab</th>
-									<th width='10%'>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody>
