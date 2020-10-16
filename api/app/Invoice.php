@@ -248,6 +248,7 @@ class Invoice extends Utility
                 ))
                 ->execute();
         }
+
         $dataResult = array();
         $data['response_draw'] = intval($parameter['draw']);
         $autonum = intval($parameter['start']) + 1;
@@ -437,6 +438,12 @@ class Invoice extends Utility
         $allowAntrian = false;
         $totalPayment = 0;
 
+        $goto_apotek = false;
+        $goto_poli = false;
+        $goto_lab = false;
+        $goto_rad = false;
+
+
         $ResepMaster = self::$query->select('resep', array(
             'uid'
         ))
@@ -520,11 +527,10 @@ class Invoice extends Utility
                             $ResepMaster['response_data'][0]['uid']
                         ))
                         ->execute();
+                    $goto_apotek = true;
                 }
 
-
                 if (
-                    count($ResepMaster['response_data']) > 0 &&
                     $getPaymentDetail['response_data'][0]['item_type'] == 'master_tindakan'
                 ) { //Tindakan Check LAB / RAD
                     $TindakanInfo = self::$query->select('master_tindakan', array(
@@ -539,21 +545,32 @@ class Invoice extends Utility
                             $getPaymentDetail['response_data'][0]['item']
                         ))
                         ->execute();
-
-                    $updateTindakan = self::$query->update(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order', array(
-                        'status' => 'P'
-                    ))
-                        ->where(array(
-                            strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.kunjungan' => '= ?',
-                            'AND',
-                            strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.pasien' => '= ?',
-                            'AND',
-                            strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.deleted_at' => 'IS NULL'
-                        ), array(
-                            $parameter['kunjungan'],
-                            $parameter['pasien'],
+                    if(
+                        $TindakanInfo['response_data'][0]['kelompok'] === 'LAB' ||
+                        $TindakanInfo['response_data'][0]['kelompok'] === 'RAD'
+                    ) {
+                        $updateTindakan = self::$query->update(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order', array(
+                            'status' => 'P'
                         ))
-                        ->execute();
+                            ->where(array(
+                                strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.kunjungan' => '= ?',
+                                'AND',
+                                strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.pasien' => '= ?',
+                                'AND',
+                                strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.deleted_at' => 'IS NULL'
+                            ), array(
+                                $parameter['kunjungan'],
+                                $parameter['pasien'],
+                            ))
+                            ->execute();
+                        if($TindakanInfo['response_data'][0]['kelompok'] === 'LAB') {
+                            $goto_lab = true;
+                        }
+
+                        if($TindakanInfo['response_data'][0]['kelompok'] === 'RAD') {
+                            $goto_rad = true;
+                        }
+                    }
                 }
 
 
@@ -610,6 +627,7 @@ class Invoice extends Utility
 
         if ($parameter['penjamin'] == __UIDPENJAMINUMUM__) {
             foreach ($parameter['invoice_item'] as $key => $value) {
+
                 //Check Pembayaran Kartu dan Konsultasi
                 $getPaymentResult = self::$query->select('invoice_detail', array(
                     'item',
@@ -827,6 +845,20 @@ class Invoice extends Utility
                     );
                     $AntrianProses = $Antrian::tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
                 }
+            }
+
+            if($allowAntrian) {
+                $worker['response_message'] = 'Silahkan arahkan pasien menuju antrian poli';
+            } else if($goto_lab) {
+                $worker['response_message'] = 'Silahkan arahkan pasien menuju laboratorium';
+            } else if($goto_rad) {
+                $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi';
+            } else if($goto_rad && $goto_lab) {
+                $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi lalu laboratorium';
+            } else if($goto_apotek) {
+                $worker['response_message'] = 'Silahkan arahkan pasien menuju apotek';
+            } else {
+                $worker['response_message'] = '[ARAHAN TIDAK DITEMUKANS]';
             }
             return $worker;
         } else {

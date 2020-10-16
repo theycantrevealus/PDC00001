@@ -2,6 +2,7 @@
 
 namespace PondokCoder;
 
+use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
@@ -62,6 +63,18 @@ class Pasien extends Utility
 
             case 'edit-pasien':
                 return self::edit_pasien('pasien', $parameter);
+                break;
+
+            case 'master_pasien_import_fetch':
+                return self::master_pasien_import_fetch($parameter);
+                break;
+
+            case 'proceed_import_pasien':
+                return self::proceed_import_pasien($parameter);
+                break;
+
+            case 'get_pasien_back_end':
+                return self::get_pasien_back_end($parameter);
                 break;
 
             default:
@@ -394,6 +407,286 @@ class Pasien extends Utility
         if ($data['response_result'] > 0) {
             $result = true;
         }
+
+        return $data;
+    }
+
+    private function master_pasien_import_fetch($parameter)
+    {
+        if (!empty($_FILES['csv_file']['name'])) {
+            $unique_name = array();
+
+            $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $column = fgetcsv($file_data); //array_head
+            $row_data = array();
+            while ($row = fgetcsv($file_data)) {
+                if (!in_array($row[0], $unique_name)) {
+                    array_push($unique_name, $row[0]);
+                    $column_builder = array();
+                    foreach ($column as $key => $value) {
+                        $column_builder[$value] = $row[$key];
+                    }
+                    array_push($row_data, $column_builder);
+                }
+            }
+
+            $build_col = array();
+            foreach ($column as $key => $value) {
+                array_push($build_col, array("data" => $value));
+            }
+
+            $output = array(
+                'column' => $column,
+                'row_data' => $row_data,
+                'column_builder' => $build_col
+            );
+            return $output;
+        }
+    }
+
+    private function proceed_import_pasien($parameter)
+    {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $duplicate_row = array();
+        $termi_item = array();
+        $non_active = array();
+        $success_proceed = 0;
+        $proceed_data = array();
+
+        foreach ($parameter['data_import'] as $key => $value) {
+            $check = self::$query->select('pasien', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_inv.no_rm' => '= ?',
+                    'AND',
+                    'master_inv.nik' => '= ?',
+                ), array(
+                    $value['no_rm'],
+                    $value['nik']
+                ))
+                ->execute();
+            if(count($check['response_data']) > 0) {
+                //
+            } else {
+                //Prepare Data
+                $data_terminologi = array(
+                    'agama' => array(
+                        'target' => 0,
+                        'nama' => $value['agama'],
+                        'id' => 5
+                    ),
+                    'pendidikan' => array(
+                        'target' => 0,
+                        'nama' => $value['pendidikan'],
+                        'id' => 8
+                    ),
+                    'pekerjaan' => array(
+                        'target' => 0,
+                        'nama' => $value['pekerjaan'],
+                        'id' => 9
+                    ),
+                    'status_pernikahan' => array(
+                        'target' => 0,
+                        'nama' => $value['status_pernikahan'],
+                        'id' => 10
+                    ),
+                );
+
+                foreach ($data_terminologi as $TermiKey => $TermiValue) {
+                    $check_terminologi = self::$query->select('terminologi_item', array(
+                        'id',
+                        'nama',
+                        'deleted_at'
+                    ))
+                        ->where(array(
+                            'terminologi_item.nama' => '= ?',
+                            'AND',
+                            'terminologi_item.terminologi' => '= ?'
+                        ), array(
+                            $TermiValue['nama'], $TermiValue['id']
+                        ))
+                        ->execute();
+                    if(count($check_terminologi['response_data']) > 0) {
+                        if(!empty($check_terminologi['response_data'][0]['deleted_at'])) {
+                            $update_status_delete = self::$query->update('terminologi_item', array(
+                                'deleted_at' => NULL
+                            ))
+                                ->where(array(
+                                    'terminologi_item.id' => '= ?'
+                                ), array(
+                                    $check_terminologi['response_data'][0]['id']
+                                ))
+                                ->execute();
+                        }
+                        $data_terminologi[$TermiKey]['target'] = $check_terminologi['response_data'][0]['id'];
+                    } else {
+                        if($TermiValue['nama'] != "") {
+                            $new_terminologi = self::$query->insert('terminologi_item', array(
+                                'nama' => $TermiValue['nama'],
+                                'terminologi' => $TermiValue['id'],
+                                'created_at' => parent::format_date(),
+                                'updated_at' => parent::format_date()
+                            ))
+                                ->returning('id')
+                                ->execute();
+                            if($new_terminologi['response_result'] > 0) {
+                                $data_terminologi[$TermiKey]['target'] = $new_terminologi['response_unique'];
+                            } else {
+                                $data_terminologi[$TermiKey]['target'] = 0;
+                            }
+                            array_push($termi_item, $new_terminologi);
+                        } else {
+                            $data_terminologi[$TermiKey]['target'] = 0;
+                        }
+                    }
+                }
+
+                //Prepare Jenis Kelamin
+                $target_jenkel = 0;
+                if($value['jenkel'] == 'Laki-laki') {
+                    $target_jenkel = 2;
+                } else if($value['jenkel'] == 'Perempuan') {
+                    $target_jenkel = 3;
+                }
+
+
+                //New Pasien
+                if($value['no_rm'] != '' && $value['nama'] != '') {
+                    $new_pasien = self::$query->insert('pasien', array(
+                        'no_rm' => $value['no_rm'],
+                        'nik' => $value['nik'],
+                        'nama' => $value['nama'],
+                        'jenkel' => $target_jenkel,
+                        'tempat_lahir' => $value['tempat_lahir'],
+                        'tanggal_lahir' => $value['tanggal_lahir'],
+                        'agama' => $data_terminologi['agama']['target'],
+                        'status_pernikahan' => $data_terminologi['status_pernikahan']['target'],
+                        'pendidikan' => $data_terminologi['pendidikan']['target'],
+                        'pekerjaan' => $data_terminologi['pekerjaan']['target'],
+                        'alamat' => $value['alamat'],
+                        'kode_pos' => $value['kode_pos'],
+                        'no_telp' => $value['no_telp'],
+                        'email' => $value['email'],
+                        'nama_ayah' => $value['nama_ayah'],
+                        'nama_ibu' => $value['nama_ibu'],
+                        'nama_suami_istri' => $value['nama_suami_istri'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+
+                    if($new_pasien['response_result'] > 0) {
+                        $success_proceed += 1;
+                    }
+
+                    array_push($proceed_data, $new_pasien);
+                }
+            }
+        }
+
+        return array(
+            'duplicate_row' => $duplicate_row,
+            'non_active' => $non_active,
+            'success_proceed' => $success_proceed,
+            'data' => $parameter['data_import'],
+            'proceed' => $proceed_data,
+            'termin_item' => $termi_item,
+            'meta_data' => $data_terminologi
+        );
+    }
+
+
+
+    private function get_pasien_back_end($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'pasien.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'pasien.deleted_at' => 'IS NULL',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+
+            $paramValue = array();
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('pasien', array(
+                'uid',
+                'no_rm',
+                'nama',
+                'panggilan AS id_panggilan',
+                'tanggal_lahir',
+                'jenkel AS id_jenkel',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('pasien', array(
+                    'uid',
+                    'no_rm',
+                    'nama',
+                    'panggilan AS id_panggilan',
+                    'tanggal_lahir',
+                    'jenkel AS id_jenkel',
+                    'created_at',
+                    'updated_at'
+                )
+            )
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+            $data['response_data'][$key]['tanggal_lahir'] = date('d F Y', strtotime($data['response_data'][$key]['tanggal_lahir']));
+            $term = new Terminologi(self::$pdo);
+
+            $value = $data['response_data'][$key]['id_panggilan'];
+            $param = ['', 'terminologi-items-detail', $value];
+            $get_panggilan = $term->__GET__($param);
+            $data['response_data'][$key]['panggilan'] = $get_panggilan['response_data'][0]['nama'];
+
+
+            $value = $data['response_data'][$key]['id_jenkel'];
+            $param = ['', 'terminologi-items-detail', $value];
+            $get_jenkel = $term->__GET__($param);
+            $data['response_data'][$key]['jenkel'] = $get_jenkel['response_data'][0]['nama'];
+
+            $tgl_daftar = date("Y-m-d", strtotime($data['response_data'][$key]['created_at']));
+            $data['response_data'][$key]['tgl_daftar'] = date('d F Y', strtotime($tgl_daftar));
+        }
+
+        $itemTotal = self::$query->select('pasien', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
 
         return $data;
     }

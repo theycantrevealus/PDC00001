@@ -26,6 +26,11 @@ class Supplier extends Utility {
 				case 'detail':
 					return self::get_detail($parameter[2]);
 					break;
+
+                case 'get_supplier_select2':
+                    return self::get_supplier_select2();
+                    break;
+
 				default:
 					return self::get_all();
 			}
@@ -51,6 +56,48 @@ class Supplier extends Utility {
 	public function __DELETE__($parameter = array()) {
 		return self::delete($parameter);
 	}
+
+	private function get_supplier_select2() {
+        $data = self::$query
+            ->select('master_supplier', array(
+                'uid',
+                'nama',
+                'email',
+                'alamat',
+                'kontak',
+                'created_at',
+                'updated_at'
+            ))
+            ->where(array(
+                'master_supplier.deleted_at' => 'IS NULL',
+                'AND',
+                'master_supplier.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\''
+            ))
+            ->execute();
+        $autonum = 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['nama'] = strtoupper($value['nama']);
+            $data['response_data'][$key]['autonum'] = $autonum;
+
+            $relasi_data = self::$query->select('inventori_po', array(
+                'uid',
+                'nomor_po'
+            ))
+                ->where(array(
+                    'inventori_po.deleted_at' => 'IS NULL',
+                    'AND',
+                    'inventori_po.supplier' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+
+            $data['response_data'][$key]['relasi_po'] = $relasi_data['response_data'];
+
+            $autonum++;
+        }
+        return $data;
+    }
 
 	private function get_all() {
 		$data = self::$query

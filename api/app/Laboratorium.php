@@ -2684,17 +2684,16 @@ class Laboratorium extends Utility {
 					'updated_at'
 				)
 			)
-			->where(
-				array(
-					'master_lab.deleted_at' => 'IS NULL'
-				)
-			)
+			->where(array(
+			    'master_lab.deleted_at' => 'IS NULL',
+                'AND',
+                'master_lab.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\''
+            ))
 			->execute();
 		
 		$tindakan = new Tindakan(self::$pdo);
 		foreach ($dataTindakan['response_data'] as $key => $value){
-			$harga = $tindakan->get_harga_tindakan($value['uid']);
-			
+			$harga = $tindakan::get_harga_tindakan($value['uid']);
 			$dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
 		}
 			
@@ -2793,7 +2792,7 @@ class Laboratorium extends Utility {
 	private function get_laboratorium_order($parameter){	//uid_antrian
 		$get_antrian = new Antrian(self::$pdo);
 		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter);
-		
+		$autonum = 1;
 		$result = [];
 		if ($antrian['response_result'] > 0){
 
@@ -2850,15 +2849,16 @@ class Laboratorium extends Utility {
 				$pegawai = new Pegawai(self::$pdo);
 
 				foreach ($dataOrder['response_data'] as $key => $value) {
-					$detail_pegawai = $pegawai->get_detail_pegawai($value['uid_dr_penanggung_jawab']);
+                    $dataOrder['response_data'][$key]['autonum'] = $autonum;
+				    $detail_pegawai = $pegawai->get_detail_pegawai($value['uid_dr_penanggung_jawab']);
 
 					$dataOrder['response_data'][$key]['nama_dr_penanggung_jawab'] = $detail_pegawai['response_data'][0]['nama'];
 
-					$date_time = explode(" ", $dataOrder['response_data'][$key]['waktu_order']);
+					/*$date_time = explode(" ", $dataOrder['response_data'][$key]['waktu_order']);
 					//$date = parent::dateToIndoSlash($date_time[0]); Fungsi tolong diinfokan
-                    $date = $date_time[0];
+                    $date = $date_time[0];*/
 
-					$dataOrder['response_data'][$key]['waktu_order'] = $date . " " . $date_time[1];
+					$dataOrder['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order']));
 
 					$get_valueable_nilai = self::$query
 						->select('lab_order_nilai', array('id','nilai'))
@@ -2875,8 +2875,9 @@ class Laboratorium extends Utility {
 					if ($get_valueable_nilai['response_result'] > 0 || $value['status_order'] == 'P'){
 						$dataOrder['response_data'][$key]['editable'] = 'false';
 					} else {
-						$dataOrder['response_data'][$key]['editable'] = 'true';						
+						$dataOrder['response_data'][$key]['editable'] = 'true';
 					}
+					$autonum ++;
 				}
 
 				return $dataOrder;
