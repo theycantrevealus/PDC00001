@@ -132,7 +132,14 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.antrian.pasien_info.panggilan_name.nama + " " + row.antrian.pasien_info.nama;
+					    if(
+					        row.antrian.pasien_info.panggilan_name !== undefined &&
+                            row.antrian.pasien_info.panggilan_name !== null
+                        ) {
+                            return row.antrian.pasien_info.panggilan_name.nama + " " + row.antrian.pasien_info.nama;
+                        } else {
+                            return row.antrian.pasien_info.nama;
+                        }
 					}
 				},
 				{
@@ -165,7 +172,7 @@
 			targettedData = listResep[(dataRow - 1)];
 			$("#nama-pasien").attr({
 				"set-penjamin": targettedData.antrian.penjamin_data.uid
-			}).html(targettedData.antrian.pasien_info.panggilan_name.nama + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
+			}).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
 			loadDetailResep(targettedData);
 		});
 

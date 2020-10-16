@@ -5,6 +5,7 @@
 		//var allICD10 = load_icd_10();
         var allICD10 = [];
 		var selectedICD10Kerja = [], selectedICD10Banding = [];
+
 		poliList.tindakan = [];
 		//Filter Rawat Jalan
 		for(var z in poliListRaw.tindakan) {
@@ -363,9 +364,13 @@
 
 		$("#btn_tambah_icd10_kerja").click(function() {
 			var allowAdd = false;
+			if(selectedICD10Kerja === undefined) {
+                selectedICD10Kerja = [];
+            }
+
 			if(selectedICD10Kerja.length > 0) {
 				for(var selectedKeyKerja in selectedICD10Kerja) {
-					if(selectedICD10Kerja[selectedKeyKerja].id != parseInt($("#txt_icd_10_kerja").val())) {
+					if(selectedICD10Kerja[selectedKeyKerja].id !== parseInt($("#txt_icd_10_kerja").val())) {
 						allowAdd = true;
 					} else {
 						allowAdd = false;
@@ -416,6 +421,9 @@
 
 		$("#btn_tambah_icd10_banding").click(function() {
 			var allowAdd = false;
+			if(selectedICD10Banding === undefined) {
+                selectedICD10Banding = [];
+            }
 			if(selectedICD10Banding.length > 0) {
 				for(var selectedKeyBanding in selectedICD10Banding) {
 					if(selectedICD10Banding[selectedKeyBanding].id != parseInt($("#txt_icd_10_banding").val())) {
@@ -1106,12 +1114,19 @@
 
                 if(setter.obat != "") {
                     if($(newObat).val() != "none") {
-                        var dataKategoriPerObat = autoKategoriObat(data["id"]);
+                        var dataKategoriPerObat = autoKategoriObat(setter.obat);
                         var kategoriObatDOM = "";
-                        for(var kategoriObatKey in dataKategoriPerObat) {
-                            kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+                        if(dataKategoriPerObat.length > 0) {
+                            for(var kategoriObatKey in dataKategoriPerObat) {
+                                if(
+                                    dataKategoriPerObat[kategoriObatKey].kategori !== undefined &&
+                                    dataKategoriPerObat[kategoriObatKey].kategori !== null
+                                ) {
+                                    kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+                                }
+                            }
+                            $(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
                         }
-                        $(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
                     }
 
                     var penjaminAvailable = [];
@@ -1141,10 +1156,17 @@
                 if($(newObat).val() != "none") {
                     var dataKategoriPerObat = autoKategoriObat(setter.obat);
                     var kategoriObatDOM = "";
-                    for(var kategoriObatKey in dataKategoriPerObat) {
-                        kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+                    if(dataKategoriPerObat.length > 0) {
+                        for(var kategoriObatKey in dataKategoriPerObat) {
+                            if(
+                                dataKategoriPerObat[kategoriObatKey].kategori !== undefined&&
+                                dataKategoriPerObat[kategoriObatKey].kategori !== null
+                            ) {
+                                kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+                            }
+                        }
+                        $(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
                     }
-                    $(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
                 }
 
                 /*var penjaminAvailable = [];
@@ -1519,7 +1541,7 @@
 					}).html(setter.obat_detail.nama.toUpperCase());
 
 					//$(newKomposisiCellJumlah).html(setter.ratio);
-					$(newKomposisiCellSatuan).html(setter.satuan);
+					$(newKomposisiCellSatuan).html(setter.kekuatan);
 				} else {
 					prepareModal(id);
 				}
@@ -1805,11 +1827,14 @@
 			id = id[id.length - 1];
 
 			if($(this).val() != "none") {
-				var dataKategoriPerObat = autoKategoriObat(data['id']);
+			    var dataKategoriPerObat = autoKategoriObat(data['id']);
 				var kategoriObatDOM = "";
 				if(dataKategoriPerObat.length > 0) {
                     for(var kategoriObatKey in dataKategoriPerObat) {
-                        if(dataKategoriPerObat[kategoriObatKey].kategori !== undefined && dataKategoriPerObat[kategoriObatKey].kategori !== null) {
+                        if(
+                            dataKategoriPerObat[kategoriObatKey].kategori !== undefined &&
+                            dataKategoriPerObat[kategoriObatKey].kategori !== null
+                        ) {
                             kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
                         }
                     }
@@ -2531,12 +2556,12 @@
 				}
 			});
 
-			let html = "<tr>\
-					<td class='no_urut_rad'></td>\
-					<td>"+ dataTindakan[0].text +"</td>\
-					<td>"+ namaPenjamin +"</td>\
-					<td><button class='btn btn-danger btn-sm btnHapusTindakanRad'><i class='fa fa-trash'></button></td>\
-				</tr>";
+			let html = "<tr>" +
+					"<td class='no_urut_rad'></td>" +
+					"<td>"+ dataTindakan[0].text +"</td>" +
+					"<td>"+ namaPenjamin +"</td>" +
+					"<td><button class='btn btn-danger btn-sm btnHapusTindakanRad'><i class='fa fa-trash'></button></td>" +
+				"</tr>";
 
 			$("#table_tindakan_radiologi tbody").append(html);
 
@@ -2716,8 +2741,7 @@
 			"columns" : [
 				{ 
 					"data": null, "sortable": false, render: function (data, type, row, meta) {
-						//return meta.row + meta.settings._iDisplayStart + 1;
-                        return "";
+						return row.autonum;
 					}  
 				},
 				{
@@ -2762,7 +2786,7 @@
 			]
 		});
 
-		function loadLabDetailOrder(uid_lab_order, status_disabled){
+		function loadLabDetailOrder(uid_lab_order, status_disabled) {
 			let dataDetail;
 			let tindakanTerpilih = {};
 
@@ -2805,13 +2829,13 @@
 			return tindakanTerpilih;
 		}
 
-		function setLabTindakan(listLabTindakan){
-			$("#tindakan_lab").empty();
+		function setLabTindakan() {
+		    /*$("#tindakan_lab").empty();
 			$("#tindakan_lab").append("<option disabled selected value=''>Pilih Tindakan Laboratorium</option>");
 
 			if (listLabTindakan.length > 0){
 				for(i = 0; i < listLabTindakan.length; i++){
-					
+
 					var selection = document.createElement("OPTION");
 					$(selection).attr("value", listLabTindakan[i].uid).html(listLabTindakan[i].nama);
 					$("#tindakan_lab").append(selection);
@@ -2820,7 +2844,50 @@
 				$("#tindakan_lab").select2({
 					dropdownParent: $("#form-tambah-order-lab")
 				});
-			}
+			}*/
+
+            $("#tindakan_lab").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Laboratorium";
+                    }
+                },
+                placeholder:"Cari Laboratorium",
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/Laboratorium/get_tindakan_for_dokter",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.response_data;
+                        console.log(data);
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.uid,
+                                    harga: item.harga
+                                }
+                            })
+                        };
+                    }
+                }
+            }).addClass("form-control").on("select2:select", function(e) {
+                var data = e.params.data;
+                $(this).children("[value=\""+ data.id + "\"]").attr({
+                    "harga": data.harga
+                });
+            });
 		}
 
 		function loadLabTindakan(){
@@ -2924,8 +2991,8 @@
 		//loadLabOrder(UID);
 		
 		//initiate laboratorium tindakan data
-		var listLabTindakan = loadLabTindakan();
-		setLabTindakan(listLabTindakan);
+		//var listLabTindakan = loadLabTindakan();
+		setLabTindakan();
 
 		//variable for collect selected Tindakan
 		var listTindakanLabTerpilih = {};
@@ -2996,7 +3063,7 @@
 
 			$("#table_tindakan_lab tbody").html("");
 			$("#dr_penanggung_jawab_lab").val("").trigger('change');
-			setLabTindakan(listLabTindakan);
+			//setLabTindakan();
 
 			$("#form-tambah-order-lab").modal("show");
 
@@ -3008,7 +3075,7 @@
 			let uidDokterPj = $(this).data('dokterpj');
 			let statusEditable = $(this).data('editable');
 			let status_disabled = "";
-			setLabTindakan(listLabTindakan);
+			setLabTindakan();
 
 			if (statusEditable == false) {
 				$("#btnTambahTindakanLab").prop("disabled", true);
@@ -3087,6 +3154,7 @@
 
 		$("#btnTambahTindakanLab").click(function(){
 			let uidTindakanLab = $("#tindakan_lab").val();
+			let hargaPenjamin = $("#tindakan_lab").attr("harga");
 			
 			if (uidTindakanLab != null){
 				let dataTindakan = $("#tindakan_lab").select2('data');
@@ -3100,14 +3168,15 @@
 					}
 				});
 
-				let html = "<tr>\
-						<td class='no_urut_lab'></td>\
-						<td>"+ dataTindakan[0].text +"</td>\
-						<td>"+ namaPenjamin +"</td>\
-						<td>\
-							<button class='btn btn-danger btn-sm btnHapusTindakanLab' data-uid='"+ uidTindakanLab + "' data-nama='" + dataTindakan[0].text + "'><i class='fa fa-trash'></i></button>\
-						</td>\
-					</tr>";
+				let html = "<tr>" +
+						"<td class='no_urut_lab'></td>" +
+						"<td>"+ dataTindakan[0].text +"</td>" +
+						"<td>"+ namaPenjamin +"</td>" +
+                        "<td>"+ hargaPenjamin +"</td>" +
+						"<td>" +
+							"<button class='btn btn-danger btn-sm btnHapusTindakanLab' data-uid='"+ uidTindakanLab + "' data-nama='" + dataTindakan[0].text + "'><i class='fa fa-trash'></i></button>" +
+						"</td>" +
+					"</tr>";
 
 				$("#table_tindakan_lab tbody").append(html);
 
@@ -3284,7 +3353,7 @@
 	<div class="modal-dialog modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="modal-large-title"></h5>
+				<h5 class="modal-title" id="modal-large-title">Order Laboratorium</h5>
 				<!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button> -->
@@ -3333,7 +3402,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-				<button type="button" class="btn btn-primary" id="btnSubmitKomposisi">Submit</button>
+				<button type="button" class="btn btn-primary" id="btnSubmitKomposisi">Order</button>
 			</div>
 		</div>
 	</div>
@@ -3344,7 +3413,7 @@
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="modal-large-title"></h5>
+				<h5 class="modal-title" id="modal-large-title">Order Laboratorium</h5>
 			</div>
 			<div class="modal-body">
 				<div class="col-md-12 row form-group">
@@ -3380,9 +3449,10 @@
 					<table class="table table-bordered" id="table_tindakan_lab">
 						<thead class="thead-dark">
 							<tr>
-								<th width='2%' class="wrap_content">No</th>
-								<th width='25%'>Tindakan Laboratorium</th>
-								<th width='25%'>Penjamin</th>
+								<th class="wrap_content">No</th>
+								<th>Tindakan Laboratorium</th>
+								<th>Penjamin</th>
+                                <th>Harga</th>
 								<th width='8%' class="wrap_content">Aksi</th>
 							</tr>
 						</thead>
@@ -3393,7 +3463,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-				<button type="button" class="btn btn-primary" id="btnSubmitOrderLab">Submit</button>
+				<button type="button" class="btn btn-primary" id="btnSubmitOrderLab">Order</button>
 			</div>
 		</div>
 	</div>

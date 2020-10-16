@@ -67,7 +67,14 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama;
+					    if(
+					        row.pasien.panggilan_name !== undefined &&
+                            row.pasien.panggilan_name !== null
+                        ) {
+                            return row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama;
+                        } else {
+                            return row.nomor_kwitansi + " - " + row.pasien.nama;
+                        }
 					}
 				},
 				{
@@ -111,7 +118,6 @@
 				success: function(response) {
 					$("#form-payment-detail").modal("show");
 					$("#payment-detail-loader").html(response);
-					
 					$.ajax({
 						url:__HOSTAPI__ + "/Invoice/payment/" + uid,
 						beforeSend: function(request) {
@@ -120,7 +126,15 @@
 						type:"GET",
 						success:function(response_data) {
 							var pasienInfo = response_data.response_package.response_data[0].pasien;
-							$("#nama-pasien-faktur").html(pasienInfo.panggilan_name.nama + " " + pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]");
+							if(
+                                pasienInfo.panggilan_name !== undefined &&
+                                pasienInfo.panggilan_name !== null
+                            ) {
+                                $("#nama-pasien-faktur").html(pasienInfo.panggilan_name.nama + " " + pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]");
+                            } else {
+                                $("#nama-pasien-faktur").html(pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]");
+                            }
+
 							$("#nomor-faktur").html($("#kwitansi_" + uid).html());
 
 							var historyData = response_data.response_package.response_data[0];
@@ -182,8 +196,16 @@
 						returnedData = [];
 					}
 					for(var InvKeyData in response.response_package.response_data) {
-						if(response.response_package.response_data[InvKeyData].antrian_kunjungan != undefined) {
+						if(
+						    response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                            response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                            response.response_package.response_data[InvKeyData].pasien !== null
+                        ) {
 							if(!response.response_package.response_data[InvKeyData].lunas) {
+
+							    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                    response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                }
 								returnedData.push(response.response_package.response_data[InvKeyData]);
 							}
 						} else {
@@ -216,7 +238,14 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+					    if(
+					        row.pasien.panggilan_name !== undefined &&
+                            row.pasien.panggilan_name !== null
+                        ) {
+                            return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+                        } else {
+                            return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
+                        }
 					}
 				},
 				{
@@ -284,9 +313,19 @@
 						type:"GET",
 						success:function(response_data) {
 							var invoice_detail = response_data.response_package.response_data[0];
-							console.log(invoice_detail);
-							$("#nama-pasien").html(invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]");
-							currentPasienName = invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]";
+
+							if(
+							    invoice_detail.pasien.panggilan_name !== undefined &&
+                                invoice_detail.pasien.panggilan_name !== null
+                            ) {
+                                $("#nama-pasien").html(invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]");
+                                currentPasienName = invoice_detail.pasien.panggilan_name.nama + " " + invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]";
+                            } else {
+                                $("#nama-pasien").html(invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]");
+                                currentPasienName = invoice_detail.pasien.nama + " [<span class=\"text-info\">" + invoice_detail.pasien.no_rm + "</span>]";
+                            }
+
+
 							$("#nomor-invoice").html(invoice_detail.nomor_invoice);
 							var invoice_detail_item = invoice_detail.invoice_detail;
 							for(var invKey in invoice_detail_item) {
@@ -518,47 +557,62 @@
 		});
 
 		$("#btnBayar").click(function() {
-			var conf = confirm("Proses pembayaran ?");
-			if(conf) {
-
-				$.ajax({
-					url:__HOSTAPI__ + "/Invoice",
-					beforeSend: function(request) {
-						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-					},
-					type:"POST",
-					data:{
-						request: "proses_bayar",
-						invoice: selectedUID,
-						invoice_item: selectedPay,
-						metode: "CASH",
-						discount:$("#txt_diskon_all").val(),
-						discount_type:$("#txt_diskon_type_all").val(),
-						pasien:selectedPasien,
-						penjamin:selectedPenjamin,
-						kunjungan:selectedKunjungan,
-						poli:selectedPoli,
-						keterangan:$("#keterangan-faktur").val()
-					},
-					success:function(response) {
-						console.log(response);
-						if(response.response_package.response_result > 0) {
-							tableAntrianBayar.ajax.reload();
-							tableKwitansi.ajax.reload();
-							$("#form-invoice").modal("hide");
-							$("#form-payment").modal("hide");
-						} else {
-							tableAntrianBayar.ajax.reload();
-							tableKwitansi.ajax.reload();
-							$("#form-invoice").modal("hide");
-							$("#form-payment").modal("hide");
-						}
-					},
-					error: function(response) {
-						console.log(response);
-					}
-				});
-			}
+			Swal.fire({
+                title: 'Sudah terima uang?',
+                showDenyButton: true,
+                type: 'warning',
+                confirmButtonText: `Ya`,
+                confirmButtonColor: `#ff2a2a`,
+                denyButtonText: `Batal`,
+                denyButtonColor: `#1297fb`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Invoice",
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        data:{
+                            request: "proses_bayar",
+                            invoice: selectedUID,
+                            invoice_item: selectedPay,
+                            metode: "CASH",
+                            discount:$("#txt_diskon_all").val(),
+                            discount_type:$("#txt_diskon_type_all").val(),
+                            pasien:selectedPasien,
+                            penjamin:selectedPenjamin,
+                            kunjungan:selectedKunjungan,
+                            poli:selectedPoli,
+                            keterangan:$("#keterangan-faktur").val()
+                        },
+                        success:function(response) {
+                            if(response.response_package.response_result > 0) {
+                                Swal.fire(
+                                    'Pembayaran Berhasil!',
+                                    response.response_package.response_message,
+                                    'success'
+                                ).then((result) => {
+                                    tableAntrianBayar.ajax.reload();
+                                    tableKwitansi.ajax.reload();
+                                    $("#form-invoice").modal("hide");
+                                    $("#form-payment").modal("hide");
+                                });
+                            } else {
+                                tableAntrianBayar.ajax.reload();
+                                tableKwitansi.ajax.reload();
+                                $("#form-invoice").modal("hide");
+                                $("#form-payment").modal("hide");
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                } else if (result.isDenied) {
+                    //Swal.fire('Changes are not saved', '', 'info')
+                }
+            });
 		});
 
 		$("body").on("click", ".btnDetailPayment", function() {

@@ -23,7 +23,9 @@
 				<div class="card card-body">
 					<div class="d-flex flex-row">
 						<div class="col-md-2">
-							<i class="material-icons icon-muted icon-30pt">account_circle</i>
+                            <center>
+                                <img src="<?php echo __HOST__ . $_SESSION['profile_pic']; ?>" class="img-responsive img-circle panel-image" />
+                            </center>
 						</div>
 						<div class="col-md-10">
 							<b><?php echo $_SESSION['nama']; ?></b>

@@ -911,6 +911,7 @@ class Antrian extends Utility
                     'pasien.created_at' => 'ASC'
                 )
             )
+            ->limit(10)
             ->execute();
 
         $autonum = 1;
