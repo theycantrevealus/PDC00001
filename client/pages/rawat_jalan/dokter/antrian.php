@@ -23,7 +23,6 @@
 						<a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								01
-								<b class="inv-tab-status text-success" id="status-rawat"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Asesmen Rawat
 						</a>
@@ -32,7 +31,6 @@
 						<a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								02
-								<b class="inv-tab-status text-success" id="status-2"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Asesmen Medis
 						</a>
@@ -41,7 +39,6 @@
 						<a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								03
-								<b class="inv-tab-status text-success" id="status-3"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Tindakan
 						</a>
@@ -50,7 +47,6 @@
 						<a href="#tab-poli-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								04
-								<b class="inv-tab-status text-success" id="status-4"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Resep
 						</a>
@@ -59,7 +55,6 @@
 						<a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								05
-								<b class="inv-tab-status text-success" id="status-5"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Laboratorium
 						</a>
@@ -68,29 +63,26 @@
 						<a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								06
-								<b class="inv-tab-status text-success" id="status-6"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Radiologi
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-7" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								07
-								<b class="inv-tab-status text-success" id="status-7"><i class="fa fa-check-circle"></i></b>
 							</span>
 							CPPT
 						</a>
 					</li>
-					<!-- <li class="nav-item">
-						<a href="#tab-poli-8" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+					 <li class="nav-item">
+						<a href="#tab-poli-8" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								08
-								<b class="inv-tab-status text-success" id="status-8"><i class="fa fa-check-circle"></i></b>
 							</span>
-							Review
+							Dokumen
 						</a>
-					</li> -->
+					</li>
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
@@ -124,11 +116,16 @@
 					<?php require 'radiologi.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade active" id="tab-poli-7">
+				<div class="tab-pane show fade" id="tab-poli-7">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'cppt.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
+                <div class="tab-pane show fade active" id="tab-poli-8">
+                    <?php require 'info-pasien.php'; ?>
+                    <?php require 'dokumen.php'; ?>
+                    <?php require 'action-panel.php'; ?>
+                </div>
 				<!-- <div class="tab-pane show fade" id="tab-poli-8">
 					<?php
 						/*require 'info-pasien.php';

@@ -82,9 +82,9 @@
 
 	</head>
 
-	<body class="layout-login">
+	<body class="layout-login" style="background-image: url(<?php echo __HOST__; ?>/client/template/assets/images/wallpaper.svg); background-size: cover; background-position: center; background-attachment: fixed">
 		<div class="layout-login__overlay"></div>
-		<div class="layout-login__form bg-white" data-simplebar style="padding-top: 120px;">
+		<div class="layout-login__form" data-simplebar>
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
 				<a href="<?php echo __HOSTNAME__; ?>/" class="navbar-brand" style="min-width: 0">
 					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" width="280" height="280" alt="SIMRS RSUD Petala Bumi">
@@ -133,6 +133,30 @@
 				<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/pondokcoder1280.svg" width="120" />
 			</div>
 		</div>
+        <style type="text/css">
+            form {
+                margin-top: -100px;
+            }
+            .layout-login__overlay {
+                background: rgba(250, 250, 250, .5) !important;
+            }
+            .layout-login__form {
+                position: relative;
+                box-shadow: 0 0 10px 10px rgba(0, 0, 0, .2);
+            }
+            .layout-login__form:after {
+                position: absolute !important;
+                top: 0; left: 0;
+                content: "";
+                width: 100%; height: 100%;
+                background: #fff !important;
+                z-index: -1;
+                opacity: .9;
+                background: #fff;
+                background-size: cover;
+                background-position: center;
+            }
+        </style>
 
 
 		<!-- jQuery -->
@@ -201,7 +225,6 @@
 				});
 			});
 		</script>
-
 
 	</body>
 

@@ -219,6 +219,7 @@ class Supplier extends Utility {
 			'table' => 'master_supplier',
 			'check' => $parameter['nama']
 		));
+
 		if(count($check['response_data']) > 0) {
 			$check['response_message'] = 'Duplicate data detected';
 			$check['response_result'] = 0;
