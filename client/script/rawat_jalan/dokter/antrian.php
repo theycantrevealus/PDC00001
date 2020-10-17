@@ -17,6 +17,7 @@
 
 		//Init
 		let editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorKeteranganResepRacikan, editorPlanning;
+		let editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi;
 		var antrianData, asesmen_detail;
 		var tindakanMeta = [];
 		var usedTindakan = [];
@@ -203,7 +204,8 @@
 						ClassicEditor
 							.create( document.querySelector( '#txt_keluhan_utama' ), {
 								extraPlugins: [ MyCustomUploadAdapterPlugin ],
-								placeholder: "Keluhan Utama..."
+								placeholder: "Keluhan Utama...",
+                                removePlugins: ['MediaEmbed']
 							} )
 							.then( editor => {
 								if(asesmen_detail.keluhan_utama === undefined) {
@@ -221,7 +223,8 @@
 						ClassicEditor
 							.create( document.querySelector( '#txt_keluhan_tambahan' ), {
 								extraPlugins: [ MyCustomUploadAdapterPlugin ],
-								placeholder: "Keluhan Tambahan..."
+								placeholder: "Keluhan Tambahan...",
+                                removePlugins: ['MediaEmbed']
 							} )
 							.then( editor => {
 								if(asesmen_detail.keluhan_tambahan === undefined) {
@@ -247,7 +250,8 @@
 						ClassicEditor
 							.create( document.querySelector( '#txt_pemeriksaan_fisik' ), {
 								extraPlugins: [ MyCustomUploadAdapterPlugin ],
-								placeholder: "Pemeriksaan Fisik..."
+								placeholder: "Pemeriksaan Fisik...",
+                                removePlugins: ['MediaEmbed']
 							} )
 							.then( editor => {
 								if(asesmen_detail.pemeriksaan_fisik === undefined) {
@@ -265,7 +269,8 @@
 						ClassicEditor
 							.create( document.querySelector( '#txt_diagnosa_kerja' ), {
 								extraPlugins: [ MyCustomUploadAdapterPlugin ],
-								placeholder: "Diagnosa Kerja..."
+								placeholder: "Diagnosa Kerja...",
+                                removePlugins: ['MediaEmbed']
 							} )
 							.then( editor => {
 								if(asesmen_detail.diagnosa_kerja === undefined) {
@@ -283,6 +288,8 @@
 						ClassicEditor
 							.create( document.querySelector( '#txt_diagnosa_banding' ), {
 								extraPlugins: [ MyCustomUploadAdapterPlugin ],
+                                placeholder: "Diagnosa Banding...",
+                                removePlugins: ['MediaEmbed']
 							} )
 							.then( editor => {
 								if(asesmen_detail.diagnosa_banding === undefined) {
@@ -296,12 +303,11 @@
 							.catch( err => {
 								//console.error( err.stack );
 							} );
-
-
-						ClassicEditor
+                        ClassicEditor
 							.create( document.querySelector( '#txt_keterangan_resep' ), {
 								extraPlugins: [ MyCustomUploadAdapterPlugin ],
-								placeholder: "Keterangan resep..."
+								placeholder: "Keterangan resep...",
+                                removePlugins: ['MediaEmbed']
 							} )
 							.then( editor => {
 								editor.setData(keterangan_resep);
@@ -315,7 +321,8 @@
 						ClassicEditor
 							.create( document.querySelector( '#txt_keterangan_resep_racikan' ), {
 								extraPlugins: [ MyCustomUploadAdapterPlugin ],
-								placeholder: "Keterangan resep..."
+								placeholder: "Keterangan racikan...",
+                                removePlugins: ['MediaEmbed']
 							} )
 							.then( editor => {
 								editor.setData(keterangan_racikan);
@@ -329,7 +336,8 @@
 						ClassicEditor
 							.create( document.querySelector( '#txt_planning' ), {
 								extraPlugins: [ MyCustomUploadAdapterPlugin ],
-								placeholder: "Planning Tindakan"
+								placeholder: "Planning Tindakan",
+                                removePlugins: ['MediaEmbed']
 							} )
 							.then( editor => {
 								if(asesmen_detail.planning === undefined) {
@@ -343,6 +351,53 @@
 							.catch( err => {
 								//console.error( err.stack );
 							} );
+
+						//Terapis CKEDITOR
+
+                        ClassicEditor
+                            .create( document.querySelector( '#txt_terapis_anamnesa' ), {
+                                extraPlugins: [ MyCustomUploadAdapterPlugin ],
+                                placeholder: "Anamnesa...",
+                                removePlugins: ['MediaEmbed']
+                            } )
+                            .then( editor => {
+                                //editor.setData(keterangan_resep);
+                                editorTerapisAnamnesa = editor;
+                                window.editor = editor;
+                            } )
+                            .catch( err => {
+                                //console.error( err.stack );
+                            } );
+
+                        ClassicEditor
+                            .create( document.querySelector( '#txt_terapis_tatalaksana' ), {
+                                extraPlugins: [ MyCustomUploadAdapterPlugin ],
+                                placeholder: "Tata Laksana KFR...",
+                                removePlugins: ['MediaEmbed']
+                            } )
+                            .then( editor => {
+                                //editor.setData(keterangan_resep);
+                                editorTerapisTataLaksana = editor;
+                                window.editor = editor;
+                            } )
+                            .catch( err => {
+                                //console.error( err.stack );
+                            } );
+
+                        ClassicEditor
+                            .create( document.querySelector( '#txt_terapis_evaluasi' ), {
+                                extraPlugins: [ MyCustomUploadAdapterPlugin ],
+                                placeholder: "Evaluasi...",
+                                removePlugins: ['MediaEmbed']
+                            } )
+                            .then( editor => {
+                                //editor.setData(keterangan_resep);
+                                editorTerapisEvaluasi = editor;
+                                window.editor = editor;
+                            } )
+                            .catch( err => {
+                                //console.error( err.stack );
+                            } );
 					},
 					error: function(response) {
 						console.log(response);
@@ -1981,6 +2036,32 @@
 			digitsOptional: true
 		});
 
+        $("#txt_terapis_frekuensi_bulan").inputmask({
+            alias: 'decimal',
+            rightAlign: true,
+            placeholder: "0.00",
+            prefix: "",
+            autoGroup: false,
+            digitsOptional: true
+        });
+
+		$("#txt_terapis_frekuensi_minggu").inputmask({
+            alias: 'decimal',
+            rightAlign: true,
+            placeholder: "0.00",
+            prefix: "",
+            autoGroup: false,
+            digitsOptional: true
+        });
+
+        $("input[type=\"radio\"][name=\"suspek_kerja\"]").change(function() {
+            if($(this).val() == "y") {
+                $("#suspek_kerja").removeAttr("disabled");
+            } else {
+                $("#suspek_kerja").attr("disabled", "disabled");
+            }
+        });
+
 		$("body").on("click", "#btnSelesai", function() {
 			var kunjungan = antrianData.kunjungan;
 			var antrian = UID;
@@ -1999,7 +2080,14 @@
 			var tinggiBadan = $("#txt_tinggi_badan").inputmask("unmaskedvalue");
 			var lingkarLengan = $("#txt_lingkar_lengan").inputmask("unmaskedvalue");
 			var pemeriksaanFisikData = editorPeriksaFisikData.getData();
-			
+
+			var terapisAnamnesa = editorTerapisAnamnesa.getData();
+			var terapisTataLaksana = editorTerapisTataLaksana.getData();
+			var terapisEvaluasi = editorTerapisEvaluasi.getData();
+			var terapisAnjuranBulan = $("#txt_terapis_frekuensi_bulan").inputmask("unmaskedvalue");
+            var terapisAnjuranMinggu = $("#txt_terapis_frekuensi_minggu").inputmask("unmaskedvalue");
+			var terapisSuspek = $("#suspek_kerja").val();
+
 			/*var icd10Kerja = $("#txt_icd_10_kerja").val();
 			var icd10Banding = $("#txt_icd_10_banding").val();*/
 			
@@ -2139,6 +2227,12 @@
 				icd10_banding: selectedICD10Banding,
 				diagnosa_banding: diagnosaBandingData,
 				planning: planningData,
+                anamnesa:terapisAnamnesa,
+                tataLaksana: terapisTataLaksana,
+                evaluasi: terapisEvaluasi,
+                anjuranBulan: terapisAnjuranBulan,
+                anjuranMinggu: terapisAnjuranMinggu,
+                suspek: terapisSuspek,
 				//==============================
 				tindakan:tindakan,
 				resep: resep,

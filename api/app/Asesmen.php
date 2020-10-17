@@ -407,27 +407,63 @@ class Asesmen extends Utility {
 					array_push($selectedICD10Banding, $ICD10BV['id']);
 				}
 
+
+
+
+				//Kasus Spesial FisioTerapi. Memang beda sendiri dia. aut of de boks. Paten kaleee
+                if($PoliDetail['poli_asesmen'] === 'fisioterapi')
+                {
+                    $saveParam = array(
+                        'keluhan_utama' => $parameter['keluhan_utama'],
+                        'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                        'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                        'nadi' => floatval($parameter['nadi']),
+                        'suhu' => floatval($parameter['suhu']),
+                        'pernafasan' => floatval($parameter['pernafasan']),
+                        'berat_badan' => floatval($parameter['berat_badan']),
+                        'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                        'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                        'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                        //'icd10_kerja' => intval($parameter['icd10_kerja']),
+                        'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                        'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                        //'icd10_banding' => intval($parameter['icd10_banding']),
+                        'icd10_banding' => implode(',', $selectedICD10Banding),
+                        'diagnosa_banding' => $parameter['diagnosa_banding'],
+                        'planning' => $parameter['planning'],
+                        'anamnesa' => $parameter['anamnesa'],
+                        'tatalaksana' => $parameter['tataLaksana'],
+                        'evaluasi' => $parameter['evaluasi'],
+                        'anjuran_bulan' => $parameter['anjuranBulan'],
+                        'anjuran_minggu' => $parameter['anjuranMinggu'],
+                        'suspek_akibat_kerja' => $parameter['suspek'],
+                        'updated_at' => parent::format_date()
+                    );
+                } else // Non Fisio Terapi
+                {
+                    $saveParam = array(
+                        'keluhan_utama' => $parameter['keluhan_utama'],
+                        'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                        'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                        'nadi' => floatval($parameter['nadi']),
+                        'suhu' => floatval($parameter['suhu']),
+                        'pernafasan' => floatval($parameter['pernafasan']),
+                        'berat_badan' => floatval($parameter['berat_badan']),
+                        'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                        'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                        'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                        //'icd10_kerja' => intval($parameter['icd10_kerja']),
+                        'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                        'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                        //'icd10_banding' => intval($parameter['icd10_banding']),
+                        'icd10_banding' => implode(',', $selectedICD10Banding),
+                        'diagnosa_banding' => $parameter['diagnosa_banding'],
+                        'planning' => $parameter['planning'],
+                        'updated_at' => parent::format_date()
+                    );
+                }
 				//Update
-				$worker = self::$query->update('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
-					'keluhan_utama' => $parameter['keluhan_utama'],
-					'keluhan_tambahan' => $parameter['keluhan_tambahan'],
-					'tekanan_darah' => floatval($parameter['tekanan_darah']),
-					'nadi' => floatval($parameter['nadi']),
-					'suhu' => floatval($parameter['suhu']),
-					'pernafasan' => floatval($parameter['pernafasan']),
-					'berat_badan' => floatval($parameter['berat_badan']),
-					'tinggi_badan' => floatval($parameter['tinggi_badan']),
-					'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
-					'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
-					//'icd10_kerja' => intval($parameter['icd10_kerja']),
-					'icd10_kerja' => implode(',', $selectedICD10Kerja),
-					'diagnosa_kerja' => $parameter['diagnosa_kerja'],
-					//'icd10_banding' => intval($parameter['icd10_banding']),
-					'icd10_banding' => implode(',', $selectedICD10Banding),
-					'diagnosa_banding' => $parameter['diagnosa_banding'],
-					'planning' => $parameter['planning'],
-					'updated_at' => parent::format_date()
-				))
+				$worker = self::$query->update('asesmen_medis_' . $PoliDetail['poli_asesmen'], $saveParam)
 				->where(array(
 					'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
 					'AND',
@@ -1118,32 +1154,75 @@ class Asesmen extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$NewAsesmenPoli = parent::gen_uuid();
+
+
+
+
+        if($PoliDetail['poli_asesmen'] === 'fisioterapi')
+        {
+            $saveParam = array(
+                'uid' => $NewAsesmenPoli,
+                'asesmen' => $parent,
+                'kunjungan' => $parameter['kunjungan'],
+                'antrian' => $parameter['antrian'],
+                'pasien' => $parameter['pasien'],
+                'dokter' => $UserData['data']->uid,
+                'keluhan_utama' => $parameter['keluhan_utama'],
+                'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                'nadi' => floatval($parameter['nadi']),
+                'suhu' => floatval($parameter['suhu']),
+                'pernafasan' => floatval($parameter['pernafasan']),
+                'berat_badan' => floatval($parameter['berat_badan']),
+                'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                'icd10_kerja' => intval($parameter['icd10_kerja']),
+                'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                'icd10_banding' => intval($parameter['icd10_banding']),
+                'diagnosa_banding' => $parameter['diagnosa_banding'],
+                'planning' => $parameter['planning'],
+
+                'anamnesa' => $parameter['anamnesa'],
+                'tatalaksana' => $parameter['tataLaksana'],
+                'evaluasi' => $parameter['evaluasi'],
+                'anjuran_bulan' => $parameter['anjuranBulan'],
+                'anjuran_minggu' => $parameter['anjuranMinggu'],
+                'suspek_akibat_kerja' => $parameter['suspek'],
+
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            );
+        } else // Non Fisio Terapi
+        {
+            $saveParam = array(
+                'uid' => $NewAsesmenPoli,
+                'asesmen' => $parent,
+                'kunjungan' => $parameter['kunjungan'],
+                'antrian' => $parameter['antrian'],
+                'pasien' => $parameter['pasien'],
+                'dokter' => $UserData['data']->uid,
+                'keluhan_utama' => $parameter['keluhan_utama'],
+                'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                'nadi' => floatval($parameter['nadi']),
+                'suhu' => floatval($parameter['suhu']),
+                'pernafasan' => floatval($parameter['pernafasan']),
+                'berat_badan' => floatval($parameter['berat_badan']),
+                'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                'icd10_kerja' => intval($parameter['icd10_kerja']),
+                'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                'icd10_banding' => intval($parameter['icd10_banding']),
+                'diagnosa_banding' => $parameter['diagnosa_banding'],
+                'planning' => $parameter['planning'],
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            );
+        }
 		//insert
-		$worker = self::$query->insert('asesmen_medis_' . $poli, array(
-			'uid' => $NewAsesmenPoli,
-			'asesmen' => $parent,
-			'kunjungan' => $parameter['kunjungan'],
-			'antrian' => $parameter['antrian'],
-			'pasien' => $parameter['pasien'],
-			'dokter' => $UserData['data']->uid,
-			'keluhan_utama' => $parameter['keluhan_utama'],
-			'keluhan_tambahan' => $parameter['keluhan_tambahan'],
-			'tekanan_darah' => floatval($parameter['tekanan_darah']),
-			'nadi' => floatval($parameter['nadi']),
-			'suhu' => floatval($parameter['suhu']),
-			'pernafasan' => floatval($parameter['pernafasan']),
-			'berat_badan' => floatval($parameter['berat_badan']),
-			'tinggi_badan' => floatval($parameter['tinggi_badan']),
-			'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
-			'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
-			'icd10_kerja' => intval($parameter['icd10_kerja']),
-			'diagnosa_kerja' => $parameter['diagnosa_kerja'],
-			'icd10_banding' => intval($parameter['icd10_banding']),
-			'diagnosa_banding' => $parameter['diagnosa_banding'],
-			'planning' => $parameter['planning'],
-			'created_at' => parent::format_date(),
-			'updated_at' => parent::format_date()
-		))
+		$worker = self::$query->insert('asesmen_medis_' . $poli, $saveParam)
 		->execute();
 
 		if($worker['response_result'] > 0) {

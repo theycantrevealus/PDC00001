@@ -22,23 +22,23 @@
 					<li class="nav-item">
 						<a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
-								01
+								<i class="fa fa-address-book"></i>
 							</span>
 							Asesmen Rawat
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+						<a href="#tab-poli-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
-								02
+								<i class="fa fa-briefcase-medical"></i>
 							</span>
 							Asesmen Medis
 						</a>
 					</li>
-					<li class="nav-item">
+                    <li class="nav-item">
 						<a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								03
+								<i class="fa fa-child"></i>
 							</span>
 							Tindakan
 						</a>
@@ -46,7 +46,7 @@
 					<li class="nav-item">
 						<a href="#tab-poli-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								04
+								<i class="fa fa-pills"></i>
 							</span>
 							Resep
 						</a>
@@ -54,7 +54,7 @@
 					<li class="nav-item">
 						<a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								05
+								<i class="fa fa-flask"></i>
 							</span>
 							Laboratorium
 						</a>
@@ -62,7 +62,7 @@
 					<li class="nav-item">
 						<a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								06
+								<i class="fa fa-life-ring"></i>
 							</span>
 							Radiologi
 						</a>
@@ -70,15 +70,15 @@
 					<li class="nav-item">
 						<a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								07
+								<i class="fa fa-tasks"></i>
 							</span>
 							CPPT
 						</a>
-					</li>
-					 <li class="nav-item">
-						<a href="#tab-poli-8" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+                    </li>
+                    <li class="nav-item">
+						<a href="#tab-poli-8" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								08
+								<i class="fa fa-print"></i>
 							</span>
 							Dokumen
 						</a>
@@ -91,12 +91,12 @@
 					<?php require 'perawat/form.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-poli-2">
+				<div class="tab-pane show fade active" id="tab-poli-2">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'asesmen-awal.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-poli-3">
+                <div class="tab-pane show fade" id="tab-poli-3">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'tindakan.php'; ?>
 					<?php require 'action-panel.php'; ?>
@@ -121,7 +121,7 @@
 					<?php require 'cppt.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-                <div class="tab-pane show fade active" id="tab-poli-8">
+                <div class="tab-pane show fade" id="tab-poli-8">
                     <?php require 'info-pasien.php'; ?>
                     <?php require 'dokumen.php'; ?>
                     <?php require 'action-panel.php'; ?>
