@@ -2,7 +2,6 @@
 	
 	$(function(){
 		var status_antrian = '<?= $_GET['antrian']; ?>';
-		console.log(status_antrian);
 
 		var allData = {};
 		loadTermSelectBox('panggilan', 3);
@@ -61,23 +60,22 @@
 		});
 
 		$("#no_rm").on('keyup', function() {
-			let value = $(this).inputmask('unmaskedvalue');
-
-			if (value.length == 6){
-				if (cekNoRM(value) == false){
-					$("#no_rm").addClass("is-valid").removeClass("is-invalid");
-					$("#error-no-rm").html("");
-					$("#btnSubmit").removeAttr("disabled");
-				} else {
-					$("#no_rm").addClass("is-invalid");
-					$("#error-no-rm").html("No. RM tidak tersedia");
-					$("#btnSubmit").attr("disabled", true);
-				}
-			} else {
-				$("#no_rm").addClass("is-invalid");
-				$("#error-no-rm").html("No. RM harus 6 angka");
-				$("#btnSubmit").attr("disabled", true);
-			}
+            let value = $(this).val();
+            if ($(this).inputmask("unmaskedvalue").length == 6){
+                if (cekNoRM(value)){
+                    $("#no_rm").addClass("is-invalid");
+                    $("#error-no-rm").html("No. RM sudah terdaftar");
+                    $("#btnSubmit").attr("disabled", true);
+                } else {
+                    $("#no_rm").addClass("is-valid").removeClass("is-invalid");
+                    $("#error-no-rm").html("");
+                    $("#btnSubmit").removeAttr("disabled");
+                }
+            } else {
+                $("#no_rm").addClass("is-invalid");
+                $("#error-no-rm").html("No. RM harus 6 angka");
+                $("#btnSubmit").attr("disabled", true);
+            }
 		});
 
 		$("#form-add-pasien").submit(function() {
@@ -187,8 +185,8 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             success: function(response){
-            	if (response.response_package != ""){
-            		if (response.response_package.response_result > 0){
+            	if (response.response_package !== undefined){
+            		if (response.response_package.response_data.length > 0){
             			result = true;
             		}
             	}

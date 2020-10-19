@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
 	$(function() {
 
@@ -464,7 +465,7 @@
 		function autoNilai(setterNilai = {}) {
 			var min = ((setterNilai.min === undefined) ? 0 : setterNilai.min);
 			var max = ((setterNilai.max === undefined) ? 0 : setterNilai.max);
-			var satuan = ((setterNilai.satuan === undefined) ? "" : setterNilai.satuan);
+			var satuan = ((setterNilai.satuan === undefined) ? "-" : setterNilai.satuan);
 			var keterangan = ((setterNilai.keterangan === undefined) ? "" : setterNilai.keterangan);
 
 			var newRowNilai = document.createElement("TR");
@@ -582,9 +583,9 @@
 
 		function checkNilaiAllow(id) {
 			if(
-				parseFloat($("#nilai_min_lab_" + id).val()) > 0 &&
+				/*parseFloat($("#nilai_min_lab_" + id).val()) > 0 &&
 				parseFloat($("#nilai_max_lab_" + id).val()) > 0 &&
-				$("#nilai_satuan_lab_" + id).val() != "" &&
+				$("#nilai_satuan_lab_" + id).val() != "" &&*/
 				$("#nilai_keterangan_lab_" + id).val() != "" &&
 				$("#row_nilai_lab_" + id).hasClass("last-nilai")
 			) {
@@ -795,7 +796,16 @@
 					},
 					type: "POST",
 					success: function(response){
-						location.href = __HOSTNAME__ + "/master/laboratorium";
+					    if(response.response_package[0].response_result > 0)
+                        {
+                            Swal.fire(
+                                'Laboratorium',
+                                'Data berhasil di update',
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + "/master/laboratorium";
+                            });
+                        }
 					},
 					error: function(response) {
 						console.log(response);

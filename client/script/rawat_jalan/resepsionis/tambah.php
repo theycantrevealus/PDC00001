@@ -55,19 +55,31 @@
 							},
 							type: "POST",
 							success: function(response){
-								console.log(response)
-								if(response.response_package.response_notif == 'K') {
+                                localStorage.getItem("currentPasien");
+                                localStorage.getItem("currentAntrianID");
+
+							    if(response.response_package.response_notif == 'K') {
 									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+                                    Swal.fire(
+                                        'Berhasil ditambahkan!',
+                                        'Silahkan arahkan pasien ke kasir',
+                                        'success'
+                                    ).then((result) => {
+                                        location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                    });
 								} else if(response.response_package.response_notif == 'P') {
 									push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+                                    Swal.fire(
+                                        'Berhasil ditambahkan!',
+                                        'Silahkan arahkan pasien ke poli',
+                                        'success'
+                                    ).then((result) => {
+                                        location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                    });
 								} else {
 									console.log("command not found");
 								}
 
-								localStorage.getItem("currentPasien");
-								localStorage.getItem("currentAntrianID");
-								//console.log(response.response_package);
-								//location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
 							},
 							error: function(response) {
 								console.log("Error : ");

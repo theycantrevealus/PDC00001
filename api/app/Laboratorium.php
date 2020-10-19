@@ -1053,14 +1053,45 @@ class Laboratorium extends Utility {
 			}
 			
 
+			$checkTindakan = self::$query->select('master_tindakan', array(
+			    'uid'
+            ))
+                ->where(array(
+                    'master_tindakan.uid' => '= ?',
+                    'AND',
+                    'master_tindakan.deleted_at' => 'IS NULL'
+                ), array(
+                    $uid
+                ))
+            ->execute();
+
+			if(count($checkTindakan['response_data']) > 0)
+            {
+                $tindakan = self::$query->update('master_tindakan', array(
+                    'nama' => 'Laboratorium ' . $parameter['nama'],
+                    'updated_at' => parent::format_date(),
+                    'kelompok' => 'LAB'
+                ))
+                    ->where(array(
+                        'master_tindakan.uid' => '= ?',
+                        'AND',
+                        'master_tindakan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $uid
+                    ))
+                    ->execute();
+            } else {
+                $tindakan = self::$query->insert('master_tindakan', array(
+                    'uid' => $uid,
+                    'nama' => 'Laboratorium ' . $parameter['nama'],
+                    'kelompok' => 'LAB',
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
 			//New Tindakan
-			$tindakan = self::$query->insert('master_tindakan', array(
-				'uid' => $uid,
-				'nama' => 'Laboratorium ' . $parameter['nama'],
-				'created_at' => parent::format_date(),
-				'updated_at' => parent::format_date()
-			))
-			->execute();
+
 
 			if($tindakan['response_result'] > 0) {
 				$log = parent::log(array(
@@ -1369,6 +1400,7 @@ class Laboratorium extends Utility {
 			->select('lab_order_detail', array(
 					'id',
 					'lab_order',
+					'request_item',
 					'tindakan'
 				)
 			)
@@ -2003,6 +2035,12 @@ class Laboratorium extends Utility {
 				if($labOrder['response_result'] > 0) {
 					$result['response_result'] += 1;
 
+                    $orderItemID = array();
+                    foreach ($parameter['order_list'] as $LabItemKey => $LabItemValue)
+                    {
+                        array_push($orderItemID, $LabItemValue['id']);
+                    }
+
 					$log = parent::log(array(
 						'type'=>'activity',
 						'column'=>array(
@@ -2057,6 +2095,7 @@ class Laboratorium extends Utility {
 									array(
 										'lab_order'		=>	$uidLabOrder,
 										'tindakan'		=>	$keyTindakan,
+										'request_item'  =>  implode(',',$orderItemID),
 										'penjamin'		=>	$valueTindakan,
 										'created_at'	=>	parent::format_date(),
 										'updated_at'	=>	parent::format_date()	
@@ -2684,17 +2723,35 @@ class Laboratorium extends Utility {
 					'updated_at'
 				)
 			)
-			->where(
-				array(
-					'master_lab.deleted_at' => 'IS NULL'
-				)
-			)
+			->where(array(
+			    'master_lab.deleted_at' => 'IS NULL',
+                'AND',
+                'master_lab.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\''
+            ))
 			->execute();
 		
 		$tindakan = new Tindakan(self::$pdo);
 		foreach ($dataTindakan['response_data'] as $key => $value){
-			$harga = $tindakan->get_harga_tindakan($value['uid']);
-			
+
+		    //Master Lab Item
+            $Nilai = self::$query->select('master_lab_nilai', array(
+                'id',
+                'lab',
+                'satuan',
+                'nilai_min',
+                'nilai_maks',
+                'keterangan'
+            ))
+                ->where(array(
+                    'master_lab_nilai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_lab_nilai.lab' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $dataTindakan['response_data'][$key]['detail'] = $Nilai['response_data'];
+			$harga = $tindakan::get_harga_tindakan($value['uid']);
 			$dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
 		}
 			
@@ -2793,7 +2850,7 @@ class Laboratorium extends Utility {
 	private function get_laboratorium_order($parameter){	//uid_antrian
 		$get_antrian = new Antrian(self::$pdo);
 		$antrian = $get_antrian->get_antrian_detail('antrian', $parameter);
-		
+		$autonum = 1;
 		$result = [];
 		if ($antrian['response_result'] > 0){
 
@@ -2834,7 +2891,7 @@ class Laboratorium extends Utility {
 							'selesai',
 							'dr_pengirim',
 							'no_order',
-							'dr_penanggung_jawab as uid_dr_penanggung_jawab',
+                            'dr_penanggung_jawab as uid_dr_penanggung_jawab',
 							'status as status_order'
 						)
 					)
@@ -2850,14 +2907,16 @@ class Laboratorium extends Utility {
 				$pegawai = new Pegawai(self::$pdo);
 
 				foreach ($dataOrder['response_data'] as $key => $value) {
-					$detail_pegawai = $pegawai->get_detail_pegawai($value['uid_dr_penanggung_jawab']);
+                    $dataOrder['response_data'][$key]['autonum'] = $autonum;
+				    $detail_pegawai = $pegawai->get_detail_pegawai($value['uid_dr_penanggung_jawab']);
 
 					$dataOrder['response_data'][$key]['nama_dr_penanggung_jawab'] = $detail_pegawai['response_data'][0]['nama'];
 
-					$date_time = explode(" ", $dataOrder['response_data'][$key]['waktu_order']);
-					$date = parent::dateToIndoSlash($date_time[0]);
+					/*$date_time = explode(" ", $dataOrder['response_data'][$key]['waktu_order']);
+					//$date = parent::dateToIndoSlash($date_time[0]); Fungsi tolong diinfokan
+                    $date = $date_time[0];*/
 
-					$dataOrder['response_data'][$key]['waktu_order'] = $date . " " . $date_time[1];
+					$dataOrder['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order']));
 
 					$get_valueable_nilai = self::$query
 						->select('lab_order_nilai', array('id','nilai'))
@@ -2874,14 +2933,18 @@ class Laboratorium extends Utility {
 					if ($get_valueable_nilai['response_result'] > 0 || $value['status_order'] == 'P'){
 						$dataOrder['response_data'][$key]['editable'] = 'false';
 					} else {
-						$dataOrder['response_data'][$key]['editable'] = 'true';						
+						$dataOrder['response_data'][$key]['editable'] = 'true';
 					}
+					$autonum ++;
 				}
 
 				return $dataOrder;
-			}
-		}
-
+			} else {
+                return array('response_data' => array());
+            }
+		} else {
+            return array('response_data' => array());
+        }
 	}
 
 	private static function get_laboratorium_order_detail($parameter){
