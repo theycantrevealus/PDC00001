@@ -372,21 +372,25 @@
 						"satuan-terkecil": dataObat["satuan-terkecil"]
 					});
 
-					var penjaminAvailable = parsedItemData[obatNavigator.indexOf(currentObat)]['penjamin-list'];
-					var diskonNilai = 0;
-					var diskonType = "N";
-					if(penjaminAvailable.length > 0) {
-						if(penjaminAvailable.indexOf($("#nama-pasien").attr("set-penjamin")) >= 0) {
-							var diskonNilai = parseInt($(this).parent().parent().find("td:eq(1)").attr("disc"));
-							var diskonType = $(this).parent().parent().find("td:eq(1)").attr("disc-type");
-							$(this).parent().parent().find("td:eq(6)").html("<span class=\"badge text-success\"><i class=\"fa fa-check\" style=\"margin-right: 5px;\"></i> Ya</span>");
-						} else {
-							$(this).parent().parent().find("td:eq(6)").html("<span class=\"badge text-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak</span>");
-						}
-					} else {
-						$(this).parent().parent().find("td:eq(6)").html("<span class=\"badge text-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak</span>");
-					}
-					$(this).parent().parent().find("td:eq(3) span").html(parsedItemData[obatNavigator.indexOf(currentObat)]['satuan-caption']);
+					if(parsedItemData[obatNavigator.indexOf(currentObat)] !== undefined)
+                    {
+                        var penjaminAvailable = parsedItemData[obatNavigator.indexOf(currentObat)]['penjamin-list'];
+                        var diskonNilai = 0;
+                        var diskonType = "N";
+                        if(penjaminAvailable.length > 0) {
+                            if(penjaminAvailable.indexOf($("#nama-pasien").attr("set-penjamin")) >= 0) {
+                                var diskonNilai = parseInt($(this).parent().parent().find("td:eq(1)").attr("disc"));
+                                var diskonType = $(this).parent().parent().find("td:eq(1)").attr("disc-type");
+                                $(this).parent().parent().find("td:eq(6)").html("<span class=\"badge text-success\"><i class=\"fa fa-check\" style=\"margin-right: 5px;\"></i> Ya</span>");
+                            } else {
+                                $(this).parent().parent().find("td:eq(6)").html("<span class=\"badge text-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak</span>");
+                            }
+                        } else {
+                            $(this).parent().parent().find("td:eq(6)").html("<span class=\"badge text-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak</span>");
+                        }
+                        $(this).parent().parent().find("td:eq(3) span").html(parsedItemData[obatNavigator.indexOf(currentObat)]['satuan-caption']);
+                    }
+
 
 
 					var refreshBatchData = refreshBatch(currentObat);
@@ -425,11 +429,11 @@
 				});
 
 				$(newObat).find("option:selected").attr({
-					"data-value": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["data-value"],
-					"jumlah": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["jumlah"],
+					"data-value": (parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)] !== undefined) ? parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["data-value"] : "",
+					"jumlah": (parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)] !== undefined) ? parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["jumlah"] : "",
 					"penjamin-list": penjaminList,
-					"satuan-caption": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["satuan-caption"],
-					"satuan-terkecil": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["satuan-terkecil"]
+					"satuan-caption": (parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)] !== undefined) ? parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["satuan-caption"] : "",
+					"satuan-terkecil": (parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)] !== undefined) ? parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["satuan-terkecil"] : ""
 				});
 			}
 

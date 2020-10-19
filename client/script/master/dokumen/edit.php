@@ -89,15 +89,13 @@
                             type:"POST",
                             success:function(response) {
                                 if(response.response_package.response_result > 0) {
-                                    console.clear();
-                                    console.log(response);
-                                    /*Swal.fire(
+                                    Swal.fire(
                                         'Template berhasil disimpan!',
                                         'Dokumen sudah dapat digunakan',
                                         'success'
                                     ).then((result) => {
                                         location.href = __HOSTNAME__ + '/master/dokumen';
-                                    });*/
+                                    });
                                 } else {
                                     console.log(response);
                                 }

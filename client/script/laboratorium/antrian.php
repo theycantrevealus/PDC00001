@@ -232,19 +232,19 @@
                         //console.log(response.response_data);
                         $.each(dataItem, function(key, item){
 
-                            html = '<p><h7><b>'+ item.nama +'</b></h7></p>\
-                                <table class="table table-bordered table-striped" style="font-size: 0.9rem;">\
-                                <thead>\
-                                    <tr>\
-                                        <th width="2%">No</th>\
-                                        <th width="10%">Item</th>\
-                                        <th width="40%">Nilai</th>\
-                                        <th width="10%">Satuan</td>\
-                                        <th width="15%">Nilai Min.</td>\
-                                        <th width="15%">Nilai Maks.</td>\
-                                    </tr>\
-                                </thead>\
-                                <tbody>';
+                            html = "<p><h7><b>"+ item.nama + "</b></h7></p>" +
+                                "<table class=\"table table-bordered table-striped largeDataType\">" +
+                                "<thead class=\"thead-dark\">" +
+                                    "<tr>" +
+                                        "<th class=\"wrap_content\">No</th>" +
+                                        "<th>Item</th>" +
+                                        "<th>Nilai</th>" +
+                                        "<th class=\"wrap_content\">Satuan</td>" +
+                                        "<th class=\"wrap_content\">Nilai Min.</td>" +
+                                        "<th class=\"wrap_content\">Nilai Maks.</td>" +
+                                    "</tr>" +
+                                "</thead>" +
+                                "<tbody>";
 
                             if (item.nilai_item.length > 0){
 
@@ -257,14 +257,14 @@
                                     }
 
 									// id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                    html += '<tr>\
-                                        <td>'+ nomor +'</td>\
-                                        <td>'+ items.keterangan +'</td>\
-                                        <td><input id="nilai_'+ items.uid_tindakan + '_'+ items.id_lab_nilai +'" value="'+ nilai +'" class="form-control inputItemTindakan" /></td>\
-                                        <td>'+ items.satuan +'</td>\
-                                        <td>'+ items.nilai_min +'</td>\
-                                        <td>'+ items.nilai_maks +'</td>\
-                                    </tr>';
+                                    html += "<tr>" +
+                                        "<td>"+ nomor +"</td>" +
+                                        "<td>" + items.keterangan + "</td>" +
+                                        "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + " value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                        "<td>" + items.satuan + "</td>" +
+                                        "<td>" + items.nilai_min + "</td>" +
+                                        "<td>" + items.nilai_maks + "</td>" +
+                                    "</tr>";
 
 									nomor++;
                                 });

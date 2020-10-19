@@ -4,7 +4,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/dokumen">Master Dokumen</a></li>
+                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/dokumen">Master Dokumen</a>
+                    </li>
                     <li class="breadcrumb-item active" aria-current="page">Tambah</li>
                 </ol>
             </nav>
@@ -34,13 +35,15 @@
                                 <div class="form-group">
                                     <label for="txt_nama">Nama Dokumen</label>
                                     <div class="search-form">
-                                        <input type="text" class="form-control" id="txt_nama" placeholder="Nama Dokumen" required />
+                                        <input type="text" class="form-control" id="txt_nama" placeholder="Nama Dokumen"
+                                               required/>
                                     </div>
                                 </div>
                                 <div class="document-editor">
                                     <div class="document-editor__toolbar"></div>
                                     <div class="document-editor__editable-container">
                                         <div id="template-editor">
+                                            <figure class="table"><table><tbody><tr><td><figure class="image"><img src="<?php echo __HOST__; ?>client/template/assets/images/logo-icon.png"></figure></td><td><h4 style="text-align:center;"><span class="text-small" style="font-family:'Times New Roman', Times, serif;">PEMERINTAH PROVINSI RIAU</span></h4><h4 style="text-align:center;"><span style="font-family:'Times New Roman', Times, serif;">RUMAH SAKIT UMUM DAERAH PETALA BUMI</span></h4><p style="text-align:center;"><span class="text-small">Jl. Dr. Soetomo No. 65 Telp. (0761) 23024</span><br><span class="text-small">Email : rsudpetalabumi@riau.go.id</span></p><h4 style="text-align:center;"><span class="text-tiny">PEKANBARU</span></h4></td></tr></tbody></table></figure><hr />
                                         </div>
                                     </div>
                                 </div>

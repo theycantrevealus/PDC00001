@@ -1,3 +1,13 @@
+<?php
+    $PoliList = array();
+    foreach ($_SESSION['poli']['response_data'] as $key => $value)
+    {
+        foreach ($value['poli']['response_data'] as $PoliKey => $PoliValue)
+        {
+            array_push($PoliList, $PoliValue['uid']);
+        }
+    }
+?>
 <div class="container-fluid page__heading-container">
 	<div class="page__heading d-flex align-items-center">
 		<div class="flex">
@@ -9,7 +19,7 @@
 					<li class="breadcrumb-item active" aria-current="page">Pemeriksaan Medis</li>
 				</ol>
 			</nav>
-			<h4><span id="nama-departemen"></span> - Pemeriksaan</h4>
+            <h4><span id="nama-departemen"></span> - Pemeriksaan <b class="text-info" id="heading_nama_poli"></b></h4>
 		</div>
 	</div>
 </div>
@@ -35,6 +45,20 @@
 							Asesmen Medis
 						</a>
 					</li>
+                    <?php
+                    if(in_array(__UIDFISIOTERAPI__, $PoliList)) {
+                    ?>
+                    <li class="nav-item">
+                        <a href="#tab-poli-9" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+                        <span class="nav-link__count">
+                            <i class="fa fa-running"></i>
+                        </span>
+                            Fisioterapi
+                        </a>
+                    </li>
+                    <?php
+                    }
+                    ?>
                     <li class="nav-item">
 						<a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
@@ -89,50 +113,40 @@
 				<div class="tab-pane show fade perawat" id="tab-poli-1">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'perawat/form.php'; ?>
-					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade active" id="tab-poli-2">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'asesmen-awal.php'; ?>
-					<?php require 'action-panel.php'; ?>
 				</div>
+                <div class="tab-pane show fade" id="tab-poli-9">
+                    <?php require 'info-pasien.php'; ?>
+                    <?php require 'fisioterapi.php'; ?>
+                </div>
                 <div class="tab-pane show fade" id="tab-poli-3">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'tindakan.php'; ?>
-					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-4">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'resep.php'; ?>
-					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-5">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'laboratorium.php'; ?>
-					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-6">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'radiologi.php'; ?>
-					<?php require 'action-panel.php'; ?>
 				</div>
 				<div class="tab-pane show fade" id="tab-poli-7">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'cppt.php'; ?>
-					<?php require 'action-panel.php'; ?>
 				</div>
                 <div class="tab-pane show fade" id="tab-poli-8">
                     <?php require 'info-pasien.php'; ?>
                     <?php require 'dokumen.php'; ?>
-                    <?php require 'action-panel.php'; ?>
                 </div>
-				<!-- <div class="tab-pane show fade" id="tab-poli-8">
-					<?php
-						/*require 'info-pasien.php';
-						require 'review.php';
-						require 'action-panel.php';*/
-					?>
-				</div> -->
+                <?php require 'action-panel.php'; ?>
 			</div>
 		</div>
 	</div>

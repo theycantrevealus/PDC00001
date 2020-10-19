@@ -45,6 +45,38 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 			</div>
 			<div class="card-body">
 				<div class="row">
+                    <div class="col-lg-6">
+                        Pemeriksaan Fisik
+                        <div class="special-tab-fisioterapi col-md-12">
+                            <div class="form-group">
+                                <label for="txt_icd_10_kerja">ICD 9</label>
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <div class="input-group input-group-merge">
+                                            <select id="txt_icd_9" class="form-control"></select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <button class="btn btn-info" id="btn_tambah_icd9">
+                                            <i class="fa fa-plus"></i> Tambah ICD9
+                                        </button>
+                                    </div>
+                                </div>
+                                <br />
+                                <table class="table" id="txt_fisik_list">
+                                    <thead class="thead-dark">
+                                    <tr>
+                                        <th class="wrap_content">No</th>
+                                        <th>ICD</th>
+                                        <th class="wrap_content">Aksi</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="txt_pemeriksaan_fisik"></div>
+                    </div>
 					<div class="col-lg-6">
 						<div class="row">
 							<div class="form-group col-lg-6">
@@ -129,10 +161,6 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 								</div>
 							</div>
 						</div>
-					</div>
-					<div class="col-lg-6">
-                        <i class="fa fa-hashtag"></i> Pemeriksaan Fisik
-						<div id="txt_pemeriksaan_fisik"></div>
 					</div>
 				</div>
 			</div>
@@ -275,6 +303,42 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
                         <input type="text" class="form-control" disabled="disabled" id="suspek_kerja" placeholder="Suspek" />
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg">
+        <div class="card">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0">#Hasil yang di dapat</h5>
+            </div>
+            <div class="card-body tab-content">
+                <div id="txt_terapis_hasil"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg">
+        <div class="card">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0">#Kesimpulan</h5>
+            </div>
+            <div class="card-body tab-content">
+                <div id="txt_terapis_kesimpulan"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg">
+        <div class="card">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0">#Rekomendasi</h5>
+            </div>
+            <div class="card-body tab-content">
+                <div id="txt_terapis_rekomendasi"></div>
             </div>
         </div>
     </div>

@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
 	$(function() {
 
@@ -463,10 +464,11 @@
 			var newNilaiMin = document.createElement("INPUT");
 			$(newCellNilaiMin).append(newNilaiMin);
 			$(newNilaiMin).addClass("form-control nilai_min_selection").inputmask({
-				alias: 'decimal',
+				alias: "decimal",
 				rightAlign: true,
 				placeholder: "0.00",
 				prefix: "",
+                placeholder: "0",
 				autoGroup: false,
 				digitsOptional: true
 			});
@@ -474,17 +476,18 @@
 			var newNilaiMax = document.createElement("INPUT");
 			$(newCellNilaiMax).append(newNilaiMax);
 			$(newNilaiMax).addClass("form-control nilai_max_selection").inputmask({
-				alias: 'decimal',
+				alias: "decimal",
 				rightAlign: true,
 				placeholder: "0.00",
 				prefix: "",
+                placeholder: "0",
 				autoGroup: false,
 				digitsOptional: true
 			});
 			
 			var newNilaiSatuan = document.createElement("INPUT");
 			$(newCellNilaiSatuan).append(newNilaiSatuan);
-			$(newNilaiSatuan).addClass("form-control nilai_satuan_selection");
+			$(newNilaiSatuan).addClass("form-control nilai_satuan_selection").val("-");
 
 			var newNilaiKeterangan = document.createElement("INPUT");
 			$(newCellNilaiKeterangan).append(newNilaiKeterangan);
@@ -567,9 +570,9 @@
 
 		function checkNilaiAllow(id) {
 			if(
-				parseFloat($("#nilai_min_lab_" + id).val()) > 0 &&
+				/*parseFloat($("#nilai_min_lab_" + id).val()) > 0 &&
 				parseFloat($("#nilai_max_lab_" + id).val()) > 0 &&
-				$("#nilai_satuan_lab_" + id).val() != "" &&
+				$("#nilai_satuan_lab_" + id).val() != "" &&*/
 				$("#nilai_keterangan_lab_" + id).val() != "" &&
 				$("#row_nilai_lab_" + id).hasClass("last-nilai")
 			) {
@@ -787,7 +790,16 @@
 					},
 					type: "POST",
 					success: function(response){
-						location.href = __HOSTNAME__ + "/master/laboratorium";
+                        if(response.response_package[0].response_result > 0)
+                        {
+                            Swal.fire(
+                                'Laboratorium',
+                                'Data berhasil di tambah',
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + "/master/laboratorium";
+                            });
+                        }
 					},
 					error: function(response) {
 						console.log(response);

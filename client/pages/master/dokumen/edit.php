@@ -53,7 +53,6 @@
                                                         <div class="document-editor__toolbar"></div>
                                                         <div class="document-editor__editable-container">
                                                             <div id="template-editor">
-
                                                             </div>
                                                         </div>
                                                     </div>

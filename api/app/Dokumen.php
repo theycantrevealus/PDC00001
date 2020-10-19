@@ -39,8 +39,8 @@ class Dokumen extends Utility
     {
         switch ($parameter['request'])
         {
-            case 'get_supplier_back_end':
-                return self::get_supplier_back_end($parameter);
+            case 'get_dokumen_back_end':
+                return self::get_dokumen_back_end($parameter);
                 break;
 
             case 'tambah_dokumen':
@@ -51,10 +51,66 @@ class Dokumen extends Utility
                 return self::edit_dokumen($parameter);
                 break;
 
+            case 'cetak_dokumen':
+                return self::cetak_dokumen($parameter);
+                break;
+
             default:
                 return array();
                 break;
         }
+    }
+
+    private function cetak_dokumen($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $uid = parent::gen_uuid();
+
+        //Get Asesmen
+        $Asesmen = self::$query->select('asesmen', array(
+            'uid'
+        ))
+            ->where(array(
+                'asesmen.kunjungan' => '= ?',
+                'AND',
+                'asesmen.pasien' => '= ?',
+                'AND',
+                'asesmen.antrian' => '= ?',
+                'AND',
+                'asesmen.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['kunjungan'], $parameter['pasien'], $parameter['antrian']
+            ))
+            ->execute();
+
+        $worker = self::$query->insert('asesmen_dokumen', array(
+            'uid' => $uid,
+            'tanggal' => parent::format_date(),
+            'asesmen' => $Asesmen['response_data'][0]['uid'],
+            'dokumen' => $parameter['dokumen'],
+            'created_at' => parent::format_date(),
+            'updated_at' => parent::format_date()
+        ))
+            ->execute();
+        if($worker['response_result'] > 0)
+        {
+            $detailResult = array();
+            foreach ($parameter['nilai'] as $key => $value)
+            {
+                $detail_worker = self::$query->insert('asesmen_dokumen_value', array(
+                    'asesmen_dokumen' => $uid,
+                    'param_iden' => $value['identifier'],
+                    'param_value' => $value['iden_value'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+                array_push($detailResult, $detail_worker);
+            }
+            $worker['detail_result'] = $detailResult;
+            $worker['compoz'] = $parameter;
+        }
+        return $worker;
     }
 
     private function detail_dokumen($parameter) {
@@ -72,10 +128,35 @@ class Dokumen extends Utility
                 $parameter
             ))
             ->execute();
+        foreach ($data['response_data'] as $key => $value)
+        {
+            $parameterBuilder = self::$query->select('master_dokumen_item', array(
+                'id',
+                'param_iden'
+            ))
+                ->where(array(
+                    'master_dokumen_item.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_dokumen_item.dokumen' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($parameterBuilder['response_data'] as $ParamIdenKey => $ParamIdenValue)
+            {
+                if($ParamIdenValue['param_iden'] === '{{__TODAY__}}')
+                {
+                    $parameterBuilder['response_data'][$ParamIdenKey]['default'] = date('d F Y');
+                } else {
+                    $parameterBuilder['response_data'][$ParamIdenKey]['default'] = '';
+                }
+            }
+            $data['response_data'][$key]['parameter'] = $parameterBuilder['response_data'];
+        }
         return $data;
     }
 
-    private function get_supplier_back_end($parameter)
+    private function get_dokumen_back_end($parameter)
     {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
@@ -189,6 +270,17 @@ class Dokumen extends Utility
 
 
             //Get Input Parameter
+            //Reset Old Data
+            $paramIdenReset = self::$query->update('master_dokumen_item', array(
+                'deleted_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'master_dokumen_item.dokumen' => '= ?'
+                ), array(
+                    $parameter['uid']
+                ))
+                ->execute();
+
             $match = array();
             $raw = trim(addslashes(strip_tags($parameter['template_iden'])));
             preg_match_all('/({{__+[A-Z]+__}})/', $raw, $match);
@@ -294,7 +386,7 @@ class Dokumen extends Utility
                 //Get Input Parameter
                 $match = array();
                 $raw = trim(addslashes(strip_tags($parameter['template_iden'])));
-                preg_match_all('/({{__+[A-Z]+__}})/', $raw, $match);
+                preg_match_all('/({{__+[A-Z]+_+[A-Z]+__}})|({{__+[A-Z]+__}})/', $raw, $match);
                 $MatchProcess = array();
                 foreach($match[0] as $MatchKey => $MatchValue) {
                     //Check Identifier

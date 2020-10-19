@@ -1053,14 +1053,45 @@ class Laboratorium extends Utility {
 			}
 			
 
+			$checkTindakan = self::$query->select('master_tindakan', array(
+			    'uid'
+            ))
+                ->where(array(
+                    'master_tindakan.uid' => '= ?',
+                    'AND',
+                    'master_tindakan.deleted_at' => 'IS NULL'
+                ), array(
+                    $uid
+                ))
+            ->execute();
+
+			if(count($checkTindakan['response_data']) > 0)
+            {
+                $tindakan = self::$query->update('master_tindakan', array(
+                    'nama' => 'Laboratorium ' . $parameter['nama'],
+                    'updated_at' => parent::format_date(),
+                    'kelompok' => 'LAB'
+                ))
+                    ->where(array(
+                        'master_tindakan.uid' => '= ?',
+                        'AND',
+                        'master_tindakan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $uid
+                    ))
+                    ->execute();
+            } else {
+                $tindakan = self::$query->insert('master_tindakan', array(
+                    'uid' => $uid,
+                    'nama' => 'Laboratorium ' . $parameter['nama'],
+                    'kelompok' => 'LAB',
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
 			//New Tindakan
-			$tindakan = self::$query->insert('master_tindakan', array(
-				'uid' => $uid,
-				'nama' => 'Laboratorium ' . $parameter['nama'],
-				'created_at' => parent::format_date(),
-				'updated_at' => parent::format_date()
-			))
-			->execute();
+
 
 			if($tindakan['response_result'] > 0) {
 				$log = parent::log(array(
@@ -1369,6 +1400,7 @@ class Laboratorium extends Utility {
 			->select('lab_order_detail', array(
 					'id',
 					'lab_order',
+					'request_item',
 					'tindakan'
 				)
 			)
@@ -2003,6 +2035,12 @@ class Laboratorium extends Utility {
 				if($labOrder['response_result'] > 0) {
 					$result['response_result'] += 1;
 
+                    $orderItemID = array();
+                    foreach ($parameter['order_list'] as $LabItemKey => $LabItemValue)
+                    {
+                        array_push($orderItemID, $LabItemValue['id']);
+                    }
+
 					$log = parent::log(array(
 						'type'=>'activity',
 						'column'=>array(
@@ -2057,6 +2095,7 @@ class Laboratorium extends Utility {
 									array(
 										'lab_order'		=>	$uidLabOrder,
 										'tindakan'		=>	$keyTindakan,
+										'request_item'  =>  implode(',',$orderItemID),
 										'penjamin'		=>	$valueTindakan,
 										'created_at'	=>	parent::format_date(),
 										'updated_at'	=>	parent::format_date()	
@@ -2693,6 +2732,25 @@ class Laboratorium extends Utility {
 		
 		$tindakan = new Tindakan(self::$pdo);
 		foreach ($dataTindakan['response_data'] as $key => $value){
+
+		    //Master Lab Item
+            $Nilai = self::$query->select('master_lab_nilai', array(
+                'id',
+                'lab',
+                'satuan',
+                'nilai_min',
+                'nilai_maks',
+                'keterangan'
+            ))
+                ->where(array(
+                    'master_lab_nilai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_lab_nilai.lab' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $dataTindakan['response_data'][$key]['detail'] = $Nilai['response_data'];
 			$harga = $tindakan::get_harga_tindakan($value['uid']);
 			$dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
 		}
@@ -2833,7 +2891,7 @@ class Laboratorium extends Utility {
 							'selesai',
 							'dr_pengirim',
 							'no_order',
-							'dr_penanggung_jawab as uid_dr_penanggung_jawab',
+                            'dr_penanggung_jawab as uid_dr_penanggung_jawab',
 							'status as status_order'
 						)
 					)

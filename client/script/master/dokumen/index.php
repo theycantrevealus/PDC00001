@@ -1,6 +1,6 @@
 <script type="text/javascript">
     $(function () {
-        var tableGudang = $("#table-dokumen").DataTable({
+        var tableDokumen = $("#table-dokumen").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
@@ -11,7 +11,7 @@
                 url: __HOSTAPI__ + "/Dokumen",
                 type: "POST",
                 data: function(d) {
-                    d.request = "get_supplier_back_end";
+                    d.request = "get_dokumen_back_end";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>

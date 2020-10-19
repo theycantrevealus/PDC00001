@@ -188,7 +188,11 @@ class Pasien extends Utility
             $Terminologi = new Terminologi(self::$pdo);
             $TerminologiInfo = $Terminologi::get_terminologi_items_detail('terminologi_item', $value['panggilan']);
             $data['response_data'][$key]['panggilan_name'] = $TerminologiInfo['response_data'][0];
+
+            $data['response_data'][$key]['usia'] = date("Y") - date("Y", strtotime($value['tanggal_lahir']));
+            $data['response_data'][$key]['periode'] = date('m/y', strtotime($value['created_at']));
             $data['response_data'][$key]['autonum'] = $autonum;
+
             $autonum++;
         }
 
