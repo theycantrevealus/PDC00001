@@ -7,9 +7,9 @@
 
 		</h5>
 		<table class="table table-bordered largeDataType" id="labor-lampiran-table">
-			<thead>
+			<thead class="thead-dark">
 				<tr>
-					<th style="width: 20px;">No</th>
+					<th class="wrapContainers">No</th>
 					<th>Lampiran</th>
 					<th class="wrap_content">Aksi</th>
 				</tr>

@@ -561,10 +561,10 @@
                 title: 'Sudah terima uang?',
                 showDenyButton: true,
                 type: 'warning',
-                confirmButtonText: `Ya`,
-                confirmButtonColor: `#ff2a2a`,
-                denyButtonText: `Batal`,
-                denyButtonColor: `#1297fb`
+                confirmButtonText: `Sudah`,
+                confirmButtonColor: `#1297fb`,
+                denyButtonText: `Belum`,
+                denyButtonColor: `#ff2a2a`
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
@@ -593,6 +593,11 @@
                                     response.response_package.response_message,
                                     'success'
                                 ).then((result) => {
+                                    var notifier_target = response.response_package.response_notifier;
+                                    for(var notifKey in notifier_target)
+                                    {
+                                        push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info");
+                                    }
                                     tableAntrianBayar.ajax.reload();
                                     tableKwitansi.ajax.reload();
                                     $("#form-invoice").modal("hide");

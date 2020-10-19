@@ -528,6 +528,8 @@
                                 .catch( err => {
                                     //console.error( err.stack );
                                 } );
+                        } else {
+                            $(".special-tab-fisioterapi").hide();
                         }
 					},
 					error: function(response) {
@@ -3482,7 +3484,7 @@
 				});
 			}*/
 
-            $("#tindakan_lab").select2({
+            $("#tindakan_lab").select2({ //Tindakan Lab Sini
                 minimumInputLength: 2,
                 "language": {
                     "noResults": function(){
@@ -3597,7 +3599,7 @@
 									"<thead class=\"thead-dark\">" +
 										"<tr>" +
 											"<th class=\"wrap_content\">No</th>" +
-											"<th>Item</th>" +
+											"<th style=\"width: 200px\">Item</th>" +
 											"<th>Nilai</th>" +
 											"<th class=\"wrap_content\">Satuan</td>" +
 											"<th class=\"wrap_content\">Nilai Min.</td>" +
@@ -3676,10 +3678,15 @@
 		//this variable will be used in action tambahTindakan; default is uid penjamin umum
 		var uid_penjamin_tindakan_lab = __UIDPENJAMINUMUM__;
 
-		$("#tindakan_lab").on('select2:select', function(){
+
+
+
+
+
+
+
+		/*$("#tindakan_lab").on('select2:select', function(){
 			let uidTindakanLab = $(this).val();
-			//console.log(__UIDPENJAMINUMUM__);
-			//console.log(pasien_penjamin_uid);
 
 			$("#lab_tindakan_notifier").html("");
 			if (pasien_penjamin_uid !== __UIDPENJAMINUMUM__){
@@ -3716,20 +3723,28 @@
 				$("#lab_tindakan_notifier").html(html);
 			}
 
-		});
+		});*/
 
 		$("body").on("change", ".lab_order_item_detail", function() {
+            if(listTindakanLabTerpilih[$("#tindakan_lab").val()] === undefined)
+            {
+                listTindakanLabTerpilih[$("#tindakan_lab").val()] = {
+                    "penjamin":"",
+                    "item":[]
+                };
+            }
+
 		    if($(this).is(":checked")) {
-                selectedLabItemList.push({
+                listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
                     "id": $(this).val(),
                     "nama": $("#label_item_" + $(this).val()).text()
                 });
             } else {
-		        for(var key in selectedLabItemList)
+		        for(var key in listTindakanLabTerpilih[$("#tindakan_lab").val()].item)
                 {
-                    if(selectedLabItemList[key].id === $(this).val())
+                    if(listTindakanLabTerpilih[$("#tindakan_lab").val()].item[key].id === $(this).val())
                     {
-                        delete selectedLabItemList[key];
+                        delete listTindakanLabTerpilih[$("#tindakan_lab").val()].item[key];
                     }
                 }
             }
@@ -3839,18 +3854,31 @@
 			let uidTindakanLab = $("#tindakan_lab").val();
 			let hargaPenjamin = number_format($("#tindakan_lab").attr("harga"), 2, ".", ",");
 
-			
+			if(listTindakanLabTerpilih[uidTindakanLab] === undefined)
+            {
+                listTindakanLabTerpilih[uidTindakanLab] = {
+                    "penjamin":"",
+                    "item":[]
+                };
+            }
+
 			if (
-			    selectedLabItemList.length > 0 &&
+                listTindakanLabTerpilih[uidTindakanLab].item.length > 0 &&
 			    uidTindakanLab != null
             ) {
                 $("#lab_nilai_order").html("");
 				let dataTindakan = $("#tindakan_lab").select2('data');
 				let namaPenjamin;
+
+
+
+                listTindakanLabTerpilih[uidTindakanLab].penjamin = pasien_penjamin_uid;
+                //listTindakanLabTerpilih[uidTindakanLab].item = selectedLabItemList;
+
 				var listItem = "<ol>";
-				for(var ItemLabKey in selectedLabItemList)
+				for(var ItemLabKey in listTindakanLabTerpilih[uidTindakanLab].item)
                 {
-                    listItem += "<li>" + selectedLabItemList[ItemLabKey].nama + "</li>";
+                    listItem += "<li>" + listTindakanLabTerpilih[uidTindakanLab].item[ItemLabKey].nama + "</li>";
                 }
                 listItem += "</ol>";
 
@@ -3873,13 +3901,10 @@
 
 				$("#table_tindakan_lab tbody").append(html);
 				$('#tindakan_lab').val('').trigger('change');
-				listTindakanLabTerpilih[uidTindakanLab] = pasien_penjamin_uid;
+
+
                 $("#tindakan_lab option[value='"+ uidTindakanLab +"']").remove();
 				$("#lab_tindakan_notifier").html("");
-
-				console.clear();
-                console.log(listTindakanLabTerpilih);
-
 				setNomorUrut('table_tindakan_lab', 'no_urut_lab');
 			}
 		});
@@ -3903,7 +3928,12 @@
 		$("#btnSubmitOrderLab").click(function(){
 			let dokterPJLabOrder = $("#dr_penanggung_jawab_lab").val();
 
-			if (dokterPJLabOrder != "" && Object.keys(listTindakanLabTerpilih).length > 0){
+			if (
+			    dokterPJLabOrder !== "" &&
+                dokterPJLabOrder !== undefined &&
+                dokterPJLabOrder !== null &&
+                Object.keys(listTindakanLabTerpilih).length > 0
+            ){
                 let formData = {
 					'request' : LabMode + '-order-lab',
 					'uid_antrian' : UID,
@@ -3923,8 +3953,8 @@
 					},
 					type: "POST",
 					success: function(response) {
-						if(response.response_package.response_result > 0) {
-							notification ("success", "Laboratorium Berhasil Diorder", 3000, "hasil_tambah_dev");
+					    if(response.response_package.response_result > 0) {
+                            notification ("success", "Laboratorium Berhasil Diorder", 3000, "hasil_tambah_dev");
 						} else {
 							notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
 						}

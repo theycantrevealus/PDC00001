@@ -24,6 +24,8 @@
 
     var __UIDFISIOTERAPI__ = <?php echo json_encode(__UIDFISIOTERAPI__); ?>;
 
+    var __UIDPETUGASLAB__ = <?php echo json_encode(__UIDPETUGASLAB__); ?>;
+
 	var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
