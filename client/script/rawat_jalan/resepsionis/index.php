@@ -3,10 +3,10 @@
 		var params;
 		var MODE = false;
 
-		//var dataFaskes = bpjs_load_faskes();
-		for(var faskesKey in dataFaskes) {
-			$("#txt_bpjs_faskes").append("<option></option>");
-		}
+        /*var dataFaskes = bpjs_load_faskes();
+        for(var faskesKey in dataFaskes) {
+            $("#txt_bpjs_faskes").append("<option></option>");
+        }*/
 
 		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{

@@ -34,7 +34,7 @@
                 </li>
                 <li class="nav-item sub_tab">
                     <a href="#tab-4" id="nav-tab-4" class="nav-link navTabs" data-toggle="tab" role="tab" aria-selected="false">
-                        Perawat
+                        Perawat / Terapis
                     </a>
                 </li>
             </ul>

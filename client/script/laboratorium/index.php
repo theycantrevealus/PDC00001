@@ -53,7 +53,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
                                     "<i class=\"fa fa-sign-out-alt\"></i>" +
                                 "</a>" +
@@ -68,5 +68,32 @@
 				}
 			]
 		});
+
+
+
+
+        //SOCKET
+        Sync.onmessage = function(evt) {
+            var signalData = JSON.parse(evt.data);
+            var command = signalData.protocols;
+            var type = signalData.type;
+            var sender = signalData.sender;
+            var receiver = signalData.receiver;
+            var time = signalData.time;
+            var parameter = signalData.parameter;
+
+            if(command !== undefined && command !== null && command !== "") {
+                protocolLib[command](command, type, parameter, sender, receiver, time);
+            }
+        }
+
+
+
+        var protocolLib = {
+            antrian_laboratorium_baru: function(protocols, type, parameter, sender, receiver, time) {
+                tableAntrianLabor.ajax.reload();
+                notification (type, parameter, 3000, "notif_lab_baru");
+            }
+        };
 	});
 </script>

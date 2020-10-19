@@ -30,7 +30,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-tindakan\" id=\"tindakan_edit_" + row["uid"] + "\">" +
 										"<i class=\"fa fa-edit\"></i> Edit" +
 									"</button>" +

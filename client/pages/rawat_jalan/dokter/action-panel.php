@@ -6,7 +6,7 @@
 		<button type="button" class="btn btn-info" id="btnRI">
 			<i class="fa fa-bed"></i> Rawat Inap
 		</button>
-		<button type="button" class="btn btn-warning" id="btnSelesai">
+		<button type="button" class="btn btn-warning" id="btnRujuk">
 			<i class="fa fa-ambulance"></i> Rujuk
 		</button>
 		<a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/dokter" class="btn btn-danger">

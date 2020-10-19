@@ -53,7 +53,7 @@
                                     <div class="form-row">
                                         <div class="col-12 col-md-4 mb-3">
                                             <label for="txt_no_rm">Nomor Rekam Medis</label>
-                                            <input type="text" autocomplete="off" class="form-control uppercase inputan no_rm" id="no_rm" name="no_rm" placeholder="00-00-00" required>
+                                            <input readonly type="text" autocomplete="off" class="form-control uppercase inputan no_rm" id="no_rm" name="no_rm" placeholder="00-00-00" required>
                                             <span style="color: #dc3545; font-size: 0.8rem;" id="error-no-rm"></span>
                                         </div>
                                     </div>

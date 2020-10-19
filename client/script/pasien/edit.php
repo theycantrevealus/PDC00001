@@ -308,6 +308,20 @@
 	                dataPasien = response.response_package.response_data[0];
 
 	                $.each(dataPasien, function(key, item){
+	                    if(key === "no_rm") {
+	                        $(".Card-number li#last-li").html(item.substr(0, 2));
+                            $(".Card-number li:eq(1)").html(item.substr(2, 2));
+                            $(".Card-number li#first-li").html(item.substr(4, 2));
+                        }
+
+	                    if(key === "nama") {
+	                        $("#kartu_nama").html(item);
+                        }
+
+	                    if(key === "periode") {
+                            $("#kartu_daftar").html(item);
+                        }
+
 	                	$("#" + key).val(item);
 	                });
 

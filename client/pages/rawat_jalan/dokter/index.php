@@ -9,9 +9,6 @@
 				</ol>
 			</nav>
 		</div>
-		<button class="btn btn-sm btn-info" id="tambah-satuan">
-			<i class="fa fa-plus"></i> Tambah
-		</button>
 	</div>
 </div>
 

@@ -11,14 +11,27 @@
 	var __HOSTAPI__ = <?php echo json_encode(__HOSTAPI__); ?>;
 	var __PAGES__ = <?php echo json_encode(__PAGES__); ?>;
 	var __HOST__ = <?php echo json_encode(__HOST__); ?>;
+
 	var __ME__ = <?php echo json_encode($_SESSION['uid']); ?>;
 	var __PROFILE_PIC__ = <?php echo json_encode($_SESSION['profile_pic']); ?>;
 	var __MY_NAME__ = <?php echo json_encode($_SESSION['nama']); ?>;
 	var __UNIT__ = <?php echo json_encode($_SESSION['unit']); ?>;
+
 	var __UIDPENJAMINUMUM__ = <?php echo json_encode(__UIDPENJAMINUMUM__); ?>;
 	var __UIDPENJAMINBPJS__ = <?php echo json_encode(__UIDPENJAMINBPJS__); ?>;
 	var __GUDANG_APOTEK__ = <?php echo json_encode(__GUDANG_APOTEK__); ?>;
 	var __GUDANG_UTAMA__ = <?php echo json_encode(__GUDANG_UTAMA__); ?>;
+
+    var __UIDFISIOTERAPI__ = <?php echo json_encode(__UIDFISIOTERAPI__); ?>;
+
+    var __UIDPETUGASLAB__ = <?php echo json_encode(__UIDPETUGASLAB__); ?>;
+
+	var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+	var __TODAY__  = mm + ' ' + monthNames[today.getMonth()] + ' ' + yyyy;
 	//Kelas
 	var __UID_KELAS_GENERAL_RJ__ = <?php echo json_encode(__UID_KELAS_GENERAL_RJ__); ?>;
 </script>
