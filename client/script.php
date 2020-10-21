@@ -15,7 +15,7 @@
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/flatpickr.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/settings.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/Chart.min.js"></script>
-<!-- <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/charts.js"></script> -->
+<script src="<?php echo __HOSTNAME__; ?>/template/assets/js/charts.js"></script>
 <!-- <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/page.dashboard.js"></script> -->
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/jquery.vmap.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/maps/jquery.vmap.world.js"></script>
