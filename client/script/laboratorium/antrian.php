@@ -29,6 +29,8 @@
 			var form_data = new FormData(this);
 			form_data.append("request", "update-hasil-lab");
 			form_data.append("uid_order", uid_order);
+			console.clear();
+			console.log(JSON.stringify(nilaiItemTindakan));
 			form_data.append('data_nilai', JSON.stringify(nilaiItemTindakan));
 			
 
@@ -229,9 +231,7 @@
                     let html = "";
                     if (response.response_package.response_result > 0){
                         dataItem = response.response_package.response_data;
-                        //console.log(response.response_data);
                         $.each(dataItem, function(key, item){
-
                             html = "<p><h7><b>"+ item.nama + "</b></h7></p>" +
                                 "<table class=\"table table-bordered table-striped largeDataType\">" +
                                 "<thead class=\"thead-dark\">" +
@@ -246,8 +246,12 @@
                                 "</thead>" +
                                 "<tbody>";
 
-                            if (item.nilai_item.length > 0){
 
+                            var requestedItem = item.request_item.split(",").map(function(intItem) {
+                                return parseInt(intItem, 10);
+                            });
+
+                            if (item.nilai_item.length > 0){
                                 let nomor = 1;
                                 $.each(item.nilai_item, function(key, items){
                                     let nilai = items.nilai;
@@ -257,16 +261,27 @@
                                     }
 
 									// id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                    html += "<tr>" +
-                                        "<td>"+ nomor +"</td>" +
-                                        "<td>" + items.keterangan + "</td>" +
-                                        "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + " value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
-                                        "<td>" + items.satuan + "</td>" +
-                                        "<td>" + items.nilai_min + "</td>" +
-                                        "<td>" + items.nilai_maks + "</td>" +
-                                    "</tr>";
-
-									nomor++;
+                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0)
+                                    {
+                                        /*html += "<tr class=\"strikethrough\">" +
+                                            "<td>"+ nomor +"</td>" +
+                                            "<td>" + items.keterangan + "</td>" +
+                                            "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + " value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                            "<td>" + items.satuan + "</td>" +
+                                            "<td>" + items.nilai_min + "</td>" +
+                                            "<td>" + items.nilai_maks + "</td>" +
+                                            "</tr>";*/
+                                    } else {
+                                        html += "<tr>" +
+                                            "<td>"+ nomor +"</td>" +
+                                            "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
+                                            "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                            "<td>" + items.satuan + "</td>" +
+                                            "<td>" + items.nilai_min + "</td>" +
+                                            "<td>" + items.nilai_maks + "</td>" +
+                                            "</tr>";
+                                        nomor++;
+                                    }
                                 });
                             }
 
