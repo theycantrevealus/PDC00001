@@ -337,7 +337,7 @@
 				success:function(response) {
 					perawatData = response.response_package.response_data;
 					$(target).find("option").remove();
-					$(target).append("<option class=\"text-muted\" value=\"none\">Pilih Perawat</option>");
+					$(target).append("<option class=\"text-muted\" value=\"none\">Pilih Perawat / Terapis</option>");
 					for(var a = 0; a < perawatData.length; a++) {
 						perawatData[a].autonum = (a + 1);
 						if(selectedData.indexOf(perawatData[a].uid) < 0) {

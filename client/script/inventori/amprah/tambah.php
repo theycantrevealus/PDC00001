@@ -1,6 +1,6 @@
 <script type="text/javascript">
 	$(function() {
-		$("#txt_tanggal").datepicker({
+	    $("#txt_tanggal").datepicker({
 			dateFormat: 'DD, dd MM yy',
 			autoclose: true
 		}).datepicker("setDate", new Date());
@@ -22,9 +22,54 @@
 			
 			var item = document.createElement("TD");
 			var itemSelector = document.createElement("SELECT");
-			load_product(itemSelector);
+			//load_product(itemSelector);
 			$(item).append(itemSelector);
-			$(itemSelector).select2().addClass("form-control item-amprah");
+			$(itemSelector).select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Barang tidak ditemukan";
+                    }
+                },
+                placeholder:"Cari Barang",
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/Inventori/get_item_select2",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.response_data;
+                        console.log(data);
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.uid,
+                                    satuan_terkecil: item.satuan_terkecil.nama
+                                }
+                            })
+                        };
+                    }
+                }
+            }).addClass("form-control item-amprah").on("select2:select", function(e) {
+                var data = e.params.data;
+                if(data.satuan_terkecil != undefined) {
+                    $(this).children("[value=\""+ data.id + "\"]").attr({
+                        "satuan-caption": data.satuan_terkecil
+                    });
+                } else {
+                    return false;
+                }
+            });
 
 			var satuan = document.createElement("TD");
 			var permintaan = document.createElement("TD");
@@ -123,7 +168,7 @@
 			};
 		}
 
-		$("body").on("change", ".item-amprah", function() {
+		$("body").on("select2:select", ".item-amprah", function() {
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
 			$("#satuan_" + id).html($(this).find("option:selected").attr("satuan-caption"));

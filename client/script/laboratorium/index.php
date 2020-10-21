@@ -53,7 +53,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
                                     "<i class=\"fa fa-sign-out-alt\"></i>" +
                                 "</a>" +
