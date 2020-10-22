@@ -692,16 +692,13 @@ class Asesmen extends Utility {
 					'class'=>__CLASS__
 				));
 
-				$worker = self::new_asesmen($parameter, $NewAsesmen, $PoliDetail['poli_asesmen']);
+				$worker = self::new_asesmen($parameter, $NewAsesmen, $PoliDetail['poli_asesmen'], $PoliDetail['uid']);
 
 				$returnResponse = $worker;
 			} else {
 				$returnResponse = $asesmen_poli;
 			}
 		}
-
-
-
 
 
 		//Tindakan Management
@@ -1278,9 +1275,6 @@ class Asesmen extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$NewAsesmenPoli = parent::gen_uuid();
 
-
-
-
         if($poli_uid === __UIDFISIOTERAPI__)
         {
             $selectedICD9 = array();
@@ -1405,6 +1399,8 @@ class Asesmen extends Utility {
 				'class'=>__CLASS__
 			));
 		}
+
+		$worker['response_unique'] = $NewAsesmenPoli;
 		return $worker;
 	}
 

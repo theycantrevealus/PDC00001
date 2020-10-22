@@ -283,7 +283,10 @@
 						} else {
 							//
 						}
-					}
+					},
+                    refresh: function(protocols, type, parameter, sender, receiver, time) {
+					    location.reload();
+                    }
 				};
 
 				Sync.onclose = function() {
@@ -319,6 +322,11 @@
 					location.reload();
 				}
 			}
+
+			$("body").on("click", "#refresh_protocol", function() {
+			    notification ("info", "Refresh page", 3000, "notif_update");
+                push_socket(__ME__, "refresh", "*", "Refresh page", "info");
+            });
 		});
 
 		function refresh_notification() {

@@ -185,6 +185,9 @@ class Inventori extends Utility
             case 'get_item_select2':
                 return self::get_item_select2($parameter);
                 break;
+            case 'satu_harga_profit':
+                return  self::satu_harga_profit($parameter);
+                break;
             default:
                 return $parameter;
                 break;
@@ -1255,7 +1258,7 @@ class Inventori extends Utility
         return $data;
     }
 
-    private function get_item_batch($parameter)
+    public function get_item_batch($parameter)
     {
         $data = self::$query->select('inventori_stok', array(
             'batch',
@@ -1290,9 +1293,15 @@ class Inventori extends Utility
         }
 
         //Sort Batch before return
-        $sorted = $data['response_data'];
+        /*$sorted = $data['response_data'];
         array_multisort($sorted, SORT_ASC, $data['response_data']);
-        $data['response_data'] = $sorted;
+        $data['response_data'] = $sorted;*/
+        usort($data['response_data'], function ($a, $b)
+        {
+            $t1 = strtotime($a['expired_sort']);
+            $t2 = strtotime($b['expired_sort']);
+            return $t1 - $t2;
+        });
         return $data;
     }
 
@@ -1360,6 +1369,10 @@ class Inventori extends Utility
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
+
+            //Text
+            $data['response_data'][$key]['id'] = $value['uid'];
+            $data['response_data'][$key]['text'] = $value['nama'];
 
             //Kategori Obat
             $data['response_data'][$key]['kategori_obat'] = self::get_kategori_obat_item($value['uid']);
@@ -4359,6 +4372,77 @@ class Inventori extends Utility
         $data['start'] = intval($parameter['start']);
 
         return $data;
+    }
+
+    private function satu_harga_profit($parameter)
+    {
+
+        $Penjamin = new Penjamin(self::$pdo);
+        $PenjaminData = $Penjamin::get_penjamin();
+        $proceedData = array();
+        $worker = self::$query->select('master_inv', array(
+            'uid'
+        ))
+            ->where(array(
+                'master_inv.deleted_at' => 'IS NULL'
+            ))
+            ->execute();
+
+        foreach ($worker['response_data'] as $key => $value)
+        {
+            foreach ($PenjaminData['response_data'] as $PKey => $PValue)
+            {
+                //Check
+                $Check = self::$query->select('master_inv_harga', array(
+                    'id'
+                ))
+                    ->where(array(
+                        'master_inv_harga.barang' => '= ?',
+                        'AND',
+                        'master_inv_harga.penjamin' => '= ?',
+                        'AND',
+                        'master_inv_harga.deleted_at' => 'IS NULL'
+                    ), array(
+                        $value['uid'],
+                        $PValue['uid']
+                    ))
+                    ->execute();
+
+                if(count($Check['response_data']) > 0)
+                {
+                    $proceedDataAction = self::$query->update('master_inv_harga', array(
+                        'profit' => floatval($parameter['profit']),
+                        'profit_type' => $parameter['profit_type']
+                    ))
+                        ->where(array(
+                            'master_inv_harga.barang' => '= ?',
+                            'AND',
+                            'master_inv_harga.penjamin' => '= ?',
+                            'AND',
+                            'master_inv_harga.deleted_at' => 'IS NULL'
+                        ), array(
+                            $value['uid'],
+                            $PValue['uid']
+                        ))
+                        ->execute();
+                } else
+                {
+                    $proceedDataAction = self::$query->insert('master_inv_harga', array(
+                        'barang' => $value['uid'],
+                        'penjamin' => $PValue['uid'],
+                        'profit' => floatval($parameter['profit']),
+                        'profit_type' => $parameter['profit_type'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+
+                array_push($proceedData, $proceedDataAction);
+            }
+        }
+
+        return $proceedData;
     }
 
 

@@ -16,13 +16,14 @@
 					email:$("#txt_email_pegawai").val(),
 					nama:$("#txt_nama_pegawai").val(),
 					jabatan:$("#txt_jabatan").val(),
+                    unit: $("#txt_unit").val()
 				},
 				type:"POST",
 				success:function(resp) {
 					if(resp.response_package.response_result > 0) {
 						location.href = __HOSTNAME__ + "/pegawai";
 					} else {
-						alert(resp.response_package.response_message);
+						console.log(resp);
 					}
 				},
 				error:function(resp) {

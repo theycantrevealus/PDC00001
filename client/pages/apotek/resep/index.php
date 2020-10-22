@@ -59,21 +59,17 @@
 				<div class="card-header card-header-large bg-white d-flex align-items-center">
 					<h5 class="card-header__title flex m-0">Apotek</h5>
 				</div>
-				<div class="card-header card-header-tabs-basic nav" role="tablist">
-					<a href="#list-resep" class="active" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">Resep</a>
-					<a href="#list-revisi" data-toggle="tab" role="tab" aria-selected="false">Revisi</a>
-				</div>
 				<div class="card-body tab-content">
 					<div class="tab-pane active show fade" id="list-resep">
-						<table class="table table-bordered table-striped" id="table-resep" style="font-size: 0.9rem;">
+						<table class="table table-bordered table-striped largeDataType" id="table-resep">
 							<thead class="thead-dark">
 								<tr>
-									<th width="2%">No</th>
+									<th class="wrap_content">No</th>
 									<th>Poliklinik</th>
 									<th>Pasien</th>
 									<th>Dokter</th>
 									<th>Penjamin</th>
-									<th>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody></tbody>

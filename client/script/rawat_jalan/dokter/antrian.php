@@ -80,11 +80,6 @@
 							//loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
 							loadPasien(UID);
 						}
-						/* else {
-							console.log(response.response_package.response_data[0]);
-							loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
-							loadPasien(UID);
-						}*/
 
 						if(response.response_package.response_data[0] === undefined) {
 							asesmen_detail = {};
@@ -1544,8 +1539,7 @@
 
 				//load_product_resep($(this).find("td:eq(1) select.resep-obat"), "");
 				if($(this).find("td:eq(1) select.resep-obat").val() != "none") {
-					console.log($(this).find("td:eq(1) select").html());
-				    /*var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
+					/*var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
 					checkPenjaminAvail(pasien_penjamin_uid, penjaminAvailable, id);*/
 				}
 
@@ -1925,7 +1919,6 @@
                         cache: true,
                         processResults: function (response) {
                             var data = response.response_package.response_data;
-                            console.log(data);
                             return {
                                 results: $.map(data, function (item) {
                                     return {
@@ -2517,7 +2510,6 @@
                         },
                         type:"POST",
                         success:function(response) {
-                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 $("#dokumen-viewer").printThis({
                                     importCSS: true,
@@ -2806,13 +2798,9 @@
 						},
 						type: "POST",
 						success: function(response) {
-							
 							console.log(response);
 
 							if(response.response_package.response_result > 0) {
-					//			orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
-					//			listTindakanRadiologiDihapus = [];		//set back to empty
-								
 								notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                                 push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
 								//location.href = __HOSTNAME__ + "/rawat_jalan/dokter";
@@ -4011,7 +3999,7 @@
 					});
 				},
 				error: function(response) {
-					console.log(response);
+
 				}
 			});*/
 
@@ -4043,7 +4031,6 @@
                 },
                 processResults: function (response) {
                     var data = response.response_package.response_data;
-                    console.log(data);
                     return {
                         results: $.map(data, function (item) {
                             return {
