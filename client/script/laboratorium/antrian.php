@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
 	$(function(){
 		var uid_order = __PAGES__[2];

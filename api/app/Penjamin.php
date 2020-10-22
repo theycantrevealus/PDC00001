@@ -70,7 +70,7 @@ class Penjamin extends Utility {
 
 
 	/*=======================GET FUNCTION======================*/
-	private function get_penjamin(){
+	public function get_penjamin(){
 		$data = self::$query
 					->select('master_penjamin', array(
 						'uid',

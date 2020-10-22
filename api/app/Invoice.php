@@ -884,7 +884,7 @@ class Invoice extends Utility
             } else if($goto_apotek) {
                 array_push($notifier_target, array(
                     'target' => __UIDAPOTEKER__,
-                    'message' => 'Antrian poli baru',
+                    'message' => 'Antrian apotek baru',
                     'protocol' => 'antrian_apotek_baru'
                 ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju apotek';
