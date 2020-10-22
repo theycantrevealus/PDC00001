@@ -143,8 +143,11 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                        /*return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button dokter=\"" + row.dokter.uid + "\" id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>" +
+                            "</div>";*/
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</a>" +
                             "</div>";
 					}
 				}
@@ -153,7 +156,7 @@
 
 		var targettedData = {};
 
-		$("body").on("click", ".btn-verfikasi", function() {
+		/*$("body").on("click", ".btn-verfikasi", function() {
 			var id = $(this).attr("id").split("_");
 			var dataRow = id[id.length - 1];
 			var resepUID = id[id.length - 2];
@@ -180,9 +183,7 @@
                     console.log(response);
                 }
             });
-
-
-		});
+		});*/
 
 		function loadDetailResep(data) {
 		    console.clear();

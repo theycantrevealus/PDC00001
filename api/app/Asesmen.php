@@ -714,6 +714,33 @@ class Asesmen extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+        //Check Invoice
+        $Invoice = new Invoice(self::$pdo);
+        $InvoiceCheck = self::$query->select('invoice', array(
+            'uid'
+        ))
+            ->where(array(
+                'invoice.kunjungan' => '= ?',
+                'AND',
+                'invoice.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['kunjungan']
+            ))
+            ->execute();
+
+        if(count($InvoiceCheck['response_data']) > 0) {
+            $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+        } else {
+            $InvMasterParam = array(
+                'kunjungan' => $parameter['kunjungan'],
+                'pasien' => $parameter['pasien'],
+                'keterangan' => 'Tagihan tindakan perobatan'
+            );
+            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $TargetInvoice = $NewInvoice['response_unique'];
+        }
+        
+
 		$check = self::$query->select('resep', array(
 			'uid'
 		))
