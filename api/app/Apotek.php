@@ -34,6 +34,9 @@ class Apotek extends Utility
             switch ($parameter[1]) {
                 case 'detail_resep':
                     return self::detail_resep($parameter[2]);
+                case 'detail_resep_lunas':
+                    return self::detail_resep($parameter[2], 'L');
+                    break;
                 case 'lunas':
                     return self::get_resep('L');
                     break;
@@ -55,6 +58,13 @@ class Apotek extends Utility
                 case 'verifikasi_resep':
                     return self::verifikasi_resep($parameter);
                     break;
+                case 'get_resep_backend':
+                    return self::get_resep_backend($parameter);
+                    break;
+                case 'get_resep_lunas_backend':
+                    $parameter['status'] = 'L';
+                    return self::get_resep_backend($parameter);
+                    break;
                 default:
                     return self::get_resep();
             }
@@ -66,6 +76,348 @@ class Apotek extends Utility
     private function revisi_resep($parameter)
     {
         //
+    }
+
+    private function detail_resep($parameter, $status = 'N')
+    {
+        $data = self::$query->select('resep', array(
+            'uid',
+            'kunjungan',
+            'antrian',
+            'asesmen',
+            'dokter',
+            'pasien',
+            'verifikator',
+            'total',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'resep.uid' => '= ?',
+                'AND',
+                'resep.deleted_at' => 'IS NULL',
+                'AND',
+                'resep.status_resep' => '= ?'
+            ), array(
+                $parameter,
+                $status
+            ))
+            ->execute();
+        $autonum = 1;
+        foreach ($data['response_data'] as $key => $value) {
+            //Dokter Info
+            $Pegawai = new Pegawai(self::$pdo);
+            $PegawaiInfo = $Pegawai::get_detail($value['dokter']);
+            $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
+
+            //Get Antrian Detail
+            $Antrian = new Antrian(self::$pdo);
+            $AntrianInfo = $Antrian::get_antrian_detail('antrian', $value['antrian']);
+
+            //Departemen Info
+            $Poli = new Poli(self::$pdo);
+            $PoliInfo = $Poli::get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
+            $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
+            $data['response_data'][$key]['antrian'] = $AntrianInfo['response_data'][0];
+
+            //Get resep detail
+            $resep_detail = self::$query->select('resep_detail', array(
+                'id',
+                'resep',
+                'obat',
+                'harga',
+                'signa_qty',
+                'signa_pakai',
+                'qty',
+                'satuan',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'resep_detail.resep' => '= ?',
+                    'AND',
+                    'resep_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
+                $Inventori = new Inventori(self::$pdo);
+                $InventoriInfo = $Inventori::get_item_detail($ResValue['obat']);
+                $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
+
+                //Batch Info
+                $Inventori = new Inventori(self::$pdo);
+                $InventoriBatch = $Inventori::get_item_batch($ResValue['obat']);
+                $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
+            }
+            $data['response_data'][$key]['detail'] = $resep_detail['response_data'];
+
+
+            //Racikan Item
+            $racikan = self::$query->select('racikan', array(
+                'uid',
+                'asesmen',
+                //'resep',
+                'kode',
+                'total',
+                'keterangan',
+                'signa_qty',
+                'signa_pakai',
+                'qty',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?',
+                    'AND',
+                    'racikan.status' => '= ?',
+                    'AND',
+                    'racikan.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['asesmen'],
+                    'N'
+                ))
+                ->execute();
+            foreach ($racikan['response_data'] as $RDKey => $RDValue) {
+                $racikan_detail = self::$query->select('racikan_detail', array(
+                    'id',
+                    'asesmen',
+                    //'resep',
+                    'obat',
+                    'ratio',
+                    'pembulatan',
+                    'harga',
+                    'racikan',
+                    'takar_bulat',
+                    'takar_decimal',
+                    'penjamin',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where(array(
+                        'racikan_detail.deleted_at' => 'IS NULL',
+                        /*'AND',
+                        'racikan_detail.resep' => '= ?',*/
+                        'AND',
+                        'racikan_detail.racikan' => '= ?'
+                    ), array(
+                        //$value['uid'],
+                        $RDValue['uid']
+                    ))
+                    ->execute();
+                foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
+                    $Inventori = new Inventori(self::$pdo);
+                    $InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
+                    $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
+
+                    $InventoriBacth = $Inventori::get_item_batch($RDIValue['obat']);
+                    $racikan_detail['response_data'][$RDIKey]['batch'] = $InventoriBacth['response_data'];
+                }
+                $racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];
+            }
+            $data['response_data'][$key]['racikan'] = $racikan['response_data'];
+
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        return $data;
+    }
+
+    private function get_resep_backend($parameter)
+    {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'resep.deleted_at' => 'IS NULL',
+                'AND',
+                'resep.status_resep' => '= ?'
+            );
+
+            $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
+        } else {
+            $paramData = array(
+                'resep.deleted_at' => 'IS NULL',
+                'AND',
+                'resep.status_resep' => '= ?'
+                //'resep.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('resep', array(
+                'uid',
+                'kunjungan',
+                'antrian',
+                'asesmen',
+                'dokter',
+                'pasien',
+                'verifikator',
+                'total',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('resep', array(
+                'uid',
+                'kunjungan',
+                'antrian',
+                'asesmen',
+                'dokter',
+                'pasien',
+                'verifikator',
+                'total',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+
+
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+
+        foreach ($data['response_data'] as $key => $value) {
+            //Dokter Info
+            $Pegawai = new Pegawai(self::$pdo);
+            $PegawaiInfo = $Pegawai::get_detail($value['dokter']);
+            $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
+
+            //Get Antrian Detail
+            $Antrian = new Antrian(self::$pdo);
+            $AntrianInfo = $Antrian::get_antrian_detail('antrian', $value['antrian']);
+
+            //Departemen Info
+            $Poli = new Poli(self::$pdo);
+            $PoliInfo = $Poli::get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
+            $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
+            $data['response_data'][$key]['antrian'] = $AntrianInfo['response_data'][0];
+
+            //Get resep detail
+            $resep_detail = self::$query->select('resep_detail', array(
+                'id',
+                'resep',
+                'obat',
+                'harga',
+                'signa_qty',
+                'signa_pakai',
+                'qty',
+                'satuan',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'resep_detail.resep' => '= ?',
+                    'AND',
+                    'resep_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
+                //Batch Info
+                $Inventori = new Inventori(self::$pdo);
+                $InventoriBatch = $Inventori::get_item_batch($ResValue['obat']);
+                $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
+
+                $Inventori = new Inventori(self::$pdo);
+                $InventoriInfo = $Inventori::get_item_detail($ResValue['obat']);
+                $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
+            }
+            $data['response_data'][$key]['detail'] = $resep_detail['response_data'];
+
+
+            //Racikan Item
+            $racikan = self::$query->select('racikan', array(
+                'uid',
+                'asesmen',
+                //'resep',
+                'kode',
+                'total',
+                'keterangan',
+                'signa_qty',
+                'signa_pakai',
+                'qty',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?',
+                    'AND',
+                    'racikan.status' => '= ?',
+                    'AND',
+                    'racikan.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['asesmen'],
+                    'N'
+                ))
+                ->execute();
+            foreach ($racikan['response_data'] as $RDKey => $RDValue) {
+                $racikan_detail = self::$query->select('racikan_detail', array(
+                    'id',
+                    'asesmen',
+                    //'resep',
+                    'obat',
+                    'ratio',
+                    'pembulatan',
+                    'harga',
+                    'racikan',
+                    'takar_bulat',
+                    'takar_decimal',
+                    'penjamin',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where(array(
+                        'racikan_detail.deleted_at' => 'IS NULL',
+                        /*'AND',
+                        'racikan_detail.resep' => '= ?',*/
+                        'AND',
+                        'racikan_detail.racikan' => '= ?'
+                    ), array(
+                        //$value['uid'],
+                        $RDValue['uid']
+                    ))
+                    ->execute();
+                foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
+                    $Inventori = new Inventori(self::$pdo);
+                    $InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
+
+                    $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
+                }
+                $racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];
+            }
+            $data['response_data'][$key]['racikan'] = $racikan['response_data'];
+
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('resep', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
     }
 
     private function get_resep($status = 'N')

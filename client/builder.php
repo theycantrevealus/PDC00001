@@ -7,7 +7,7 @@
 ?>
 <?php require 'head.php'; ?>
 <body class="layout-default">
-	
+
 	<?php
 		if(__PAGES__[0] == 'anjungan') {
 			require 'pages/anjungan/index.php';
@@ -145,35 +145,7 @@
 	}"></app-settings>
 	</div> -->
 	<?php require 'script.php'; ?>
-	<!-- <div class="bsod">
-		<div id="page">
-			<div id="container">
-				<h1>:(</h1>
-				<h2>Your PC ran into a problem and needs to restart. We're just collecting some error info, and then we'll restart for you.</h2>
-				<h2>
-					<span id="percentage">0</span>% complete
-				</h2>
-				<div id="details">
-					<div id="qr">
-						<div id="image">
-							<img src="http://xontab.com/experiments/Javascript/BSOD/qr.png" alt="QR Code" />
-						</div>
-					</div>
-					<div id="stopcode">
-						<h4>
-							MAMPOS!!!
-						</h4>
-						<h5>
-							If you call a support person, give them this info:<br/>Stop Code: 404 PAGE NOT FOUND
-						</h5>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div> -->
-
 	<script type="text/javascript">
-		var Sync;
 		$(function() {
 			$(".txt_tanggal").datepicker({
 				dateFormat: 'DD, dd MM yy',
@@ -311,7 +283,10 @@
 						} else {
 							//
 						}
-					}
+					},
+                    refresh: function(protocols, type, parameter, sender, receiver, time) {
+					    location.reload();
+                    }
 				};
 
 				Sync.onclose = function() {
@@ -347,6 +322,11 @@
 					location.reload();
 				}
 			}
+
+			$("body").on("click", "#refresh_protocol", function() {
+			    notification ("info", "Refresh page", 3000, "notif_update");
+                push_socket(__ME__, "refresh", "*", "Refresh page", "info");
+            });
 		});
 
 		function refresh_notification() {

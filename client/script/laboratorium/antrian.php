@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
 	$(function(){
 		var uid_order = __PAGES__[2];
@@ -29,6 +30,8 @@
 			var form_data = new FormData(this);
 			form_data.append("request", "update-hasil-lab");
 			form_data.append("uid_order", uid_order);
+			console.clear();
+			console.log(JSON.stringify(nilaiItemTindakan));
 			form_data.append('data_nilai', JSON.stringify(nilaiItemTindakan));
 			
 
@@ -96,6 +99,7 @@
 
 					if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){
 						notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
+						location.href = __HOSTNAME__ + "/laboratorium";
 					} else {
 						//notification ("danger", "Data Gagal Disimpan" /*response.response_package*/, 3000, "hasil_tambah_dev");
 					}
@@ -228,25 +232,27 @@
                     let html = "";
                     if (response.response_package.response_result > 0){
                         dataItem = response.response_package.response_data;
-                        //console.log(response.response_data);
                         $.each(dataItem, function(key, item){
+                            html = "<p><h7><b>"+ item.nama + "</b></h7></p>" +
+                                "<table class=\"table table-bordered table-striped largeDataType\">" +
+                                "<thead class=\"thead-dark\">" +
+                                    "<tr>" +
+                                        "<th class=\"wrap_content\">No</th>" +
+                                        "<th>Item</th>" +
+                                        "<th>Nilai</th>" +
+                                        "<th class=\"wrap_content\">Satuan</td>" +
+                                        "<th class=\"wrap_content\">Nilai Min.</td>" +
+                                        "<th class=\"wrap_content\">Nilai Maks.</td>" +
+                                    "</tr>" +
+                                "</thead>" +
+                                "<tbody>";
 
-                            html = '<p><h7><b>'+ item.nama +'</b></h7></p>\
-                                <table class="table table-bordered table-striped" style="font-size: 0.9rem;">\
-                                <thead>\
-                                    <tr>\
-                                        <th width="2%">No</th>\
-                                        <th width="10%">Item</th>\
-                                        <th width="40%">Nilai</th>\
-                                        <th width="10%">Satuan</td>\
-                                        <th width="15%">Nilai Min.</td>\
-                                        <th width="15%">Nilai Maks.</td>\
-                                    </tr>\
-                                </thead>\
-                                <tbody>';
+
+                            var requestedItem = item.request_item.split(",").map(function(intItem) {
+                                return parseInt(intItem, 10);
+                            });
 
                             if (item.nilai_item.length > 0){
-
                                 let nomor = 1;
                                 $.each(item.nilai_item, function(key, items){
                                     let nilai = items.nilai;
@@ -256,16 +262,27 @@
                                     }
 
 									// id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                    html += '<tr>\
-                                        <td>'+ nomor +'</td>\
-                                        <td>'+ items.keterangan +'</td>\
-                                        <td><input id="nilai_'+ items.uid_tindakan + '_'+ items.id_lab_nilai +'" value="'+ nilai +'" class="form-control inputItemTindakan" /></td>\
-                                        <td>'+ items.satuan +'</td>\
-                                        <td>'+ items.nilai_min +'</td>\
-                                        <td>'+ items.nilai_maks +'</td>\
-                                    </tr>';
-
-									nomor++;
+                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0)
+                                    {
+                                        /*html += "<tr class=\"strikethrough\">" +
+                                            "<td>"+ nomor +"</td>" +
+                                            "<td>" + items.keterangan + "</td>" +
+                                            "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + " value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                            "<td>" + items.satuan + "</td>" +
+                                            "<td>" + items.nilai_min + "</td>" +
+                                            "<td>" + items.nilai_maks + "</td>" +
+                                            "</tr>";*/
+                                    } else {
+                                        html += "<tr>" +
+                                            "<td>"+ nomor +"</td>" +
+                                            "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
+                                            "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                            "<td>" + items.satuan + "</td>" +
+                                            "<td>" + items.nilai_min + "</td>" +
+                                            "<td>" + items.nilai_maks + "</td>" +
+                                            "</tr>";
+                                        nomor++;
+                                    }
                                 });
                             }
 

@@ -25,8 +25,13 @@
 				$("#txt_nama").val(invData.nama);
 				$(".label_nama").html(invData.nama.toUpperCase());
 
-				$("#txt_kode").val(invData.kode_barang);
-				$(".label_kode").html(invData.kode_barang.toUpperCase());
+				if(invData.kode_barang == undefined) {
+                    $("#txt_kode").val("-");
+                    $(".label_kode").html("-");
+                } else {
+                    $("#txt_kode").val(invData.kode_barang);
+                    $(".label_kode").html(invData.kode_barang.toUpperCase());
+                }
 
 				load_kategori("#txt_kategori", invData.kategori);
 				$(".label_kategori").html($("#txt_kategori").find("option:selected").text().toUpperCase());
@@ -331,7 +336,7 @@
 					kategoriData = response.response_package.response_data;
 					$(target).find("option").remove();
 					for(var a = 0; a < kategoriData.length; a++) {
-						$(target).append("<option value=\"" + kategoriData[a].uid + "\">" + kategoriData[a].nama + "</option>");
+						$(target).append("<option " + ((kategoriData[a].uid == selected) ? "selected=\"selected\"" : "") +  " value=\"" + kategoriData[a].uid + "\">" + kategoriData[a].nama + "</option>");
 					}
 					$(".label_kategori").html($(target).find("option:selected").text().toUpperCase());
 				},

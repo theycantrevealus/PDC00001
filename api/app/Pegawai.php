@@ -47,6 +47,10 @@ class Pegawai extends Utility {
 
 			return self::get_all_dokter();
 
+        } else if($parameter[1] == 'get_all_dokter_select2') {
+
+            return self::get_all_dokter_select2();
+
 		} else {
 
 			//__HOST__/Pegawai
@@ -202,12 +206,19 @@ class Pegawai extends Utility {
 				$_SESSION['akses_halaman_meta'] = $moduleSelectedMeta['selected_meta'];
 				
 				$_SESSION['profile_pic'] = $profile_pic;
-				if(strtolower($_SESSION['jabatan']['response_data'][0]['nama']) == 'dokter') {
+				if($_SESSION['jabatan']['response_data'][0]['uid'] == __UIDDOKTER__) {
 					//Load Dokter Data
 					$Poli = new Poli(self::$pdo);
 					$PoliData = $Poli::get_poli_by_dokter($read[0]['uid']);
 					$_SESSION['poli'] = $PoliData;
 				}
+
+                if($_SESSION['jabatan']['response_data'][0]['uid'] == __UIDPERAWAT__) {
+                    //Load Perawat Data
+                    $Poli = new Poli(self::$pdo);
+                    $PoliData = $Poli::get_poli_by_perawat($read[0]['uid']);
+                    $_SESSION['poli'] = $PoliData;
+                }
 
 				$responseBuilder['response_result'] = $query->rowCount();
 				$responseBuilder['response_message'] = 'Login berhasil';
@@ -811,6 +822,41 @@ class Pegawai extends Utility {
 		
 		return $Dokter;
 	}
+
+    private function get_all_dokter_select2(){
+        $Dokter = self::$query->select('pegawai', array(
+                'uid',
+                'nama AS nama_dokter'
+            )
+        )
+            ->join('pegawai_jabatan', array(
+                    'uid AS uid_jabatan',
+                    'nama AS nama_jabatan'
+                )
+            )
+            ->on(
+                array(
+                    array('pegawai.jabatan', '=', 'pegawai_jabatan.uid')
+                )
+            )
+            ->where(
+                array(
+                    'pegawai.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                    'AND',
+                    'pegawai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai_jabatan.nama' => '= ?'
+                ), array(
+                    'Dokter'
+                )
+            )
+            ->limit(10)
+            ->execute();
+
+        return $Dokter;
+    }
+
+
 
 	public function get_detail_pegawai($parameter){
 		$pegawai = self::$query->select('pegawai', array(

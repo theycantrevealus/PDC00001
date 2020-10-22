@@ -70,7 +70,7 @@
 						<table class="table table-bordered table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
 							<thead class="thead-dark">
 								<tr>
-									<th width="2%">No</th>
+									<th class="wrap_content">No</th>
 									<th>Waktu Masuk</th>
 									<th>No. RM</th>
 									<th>Pasien</th>

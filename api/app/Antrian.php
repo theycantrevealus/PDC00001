@@ -865,7 +865,10 @@ class Antrian extends Utility
             $Terminologi = new Terminologi(self::$pdo);
             $Penjamin = new Penjamin(self::$pdo);
 
-            //Format Tanggal Lahir
+            $Poli = new Poli(self::$pdo);
+            $PoliData = $Poli::get_poli_detail($value['departemen']);
+            $data['response_data'][$key]['poli_info'] = $PoliData['response_data'][0];
+
             $PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
 
             //Terminologi Jenis Kelamin
@@ -911,6 +914,7 @@ class Antrian extends Utility
                     'pasien.created_at' => 'ASC'
                 )
             )
+            ->limit(10)
             ->execute();
 
         $autonum = 1;

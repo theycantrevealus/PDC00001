@@ -1168,6 +1168,27 @@ class Poli extends Utility {
 
 		return $CheckPoli;
 	}
+
+    public function get_poli_by_perawat($parameter) {
+        $CheckPoli = self::$query->select('master_poli_perawat', array(
+            'perawat',
+            'poli'
+        ))
+            ->where(array(
+                'deleted_at' => 'IS NULL',
+                'AND',
+                'perawat' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+
+        foreach ($CheckPoli['response_data'] as $key => $value) {
+            $CheckPoli['response_data'][$key]['poli'] = self::get_poli_detail($value['poli']);
+        }
+
+        return $CheckPoli;
+    }
 	
 
 	/*====================== PERAWAT ======================*/
