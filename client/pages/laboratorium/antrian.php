@@ -43,16 +43,17 @@
 					<div class="tab-pane show fade " id="tab-laboratorium-2">
 						<?php require 'gambar.php'; ?>
 					</div>
-
-					<br />
 					<div class="row">
 						<div class="col-md-12">
-							<button type="submit" class="btn btn-success" id="btnSimpan">
-								<i class="fa fa-check-circle"></i> Simpan
+							<button type="submit" class="btn btn-info" id="btnSimpan">
+								<i class="fa fa-save"></i> Simpan
 							</button>
-							<a href="<?php echo __HOSTNAME__; ?>/laboratorium" class="btn btn-danger">
+                            <a href="<?php echo __HOSTNAME__; ?>/laboratorium" class="btn btn-danger">
 								<i class="fa fa-ban"></i> Kembali
 							</a>
+                            <button type="submit" class="btn btn-success pull-right" id="btnSelesai">
+                                <i class="fa fa-check-circle"></i> Selesai
+                            </button>
 						</div>
 					</div>
 				</div>

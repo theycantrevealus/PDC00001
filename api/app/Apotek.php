@@ -176,7 +176,7 @@ class Apotek extends Utility
                     'racikan.deleted_at' => 'IS NULL'
                 ), array(
                     $value['asesmen'],
-                    'N'
+                    $status
                 ))
                 ->execute();
             foreach ($racikan['response_data'] as $RDKey => $RDValue) {
