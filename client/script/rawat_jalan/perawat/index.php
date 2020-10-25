@@ -149,6 +149,30 @@
 			}
 		});
 
+
+        Sync.onmessage = function(evt) {
+            var signalData = JSON.parse(evt.data);
+            var command = signalData.protocols;
+            var type = signalData.type;
+            var sender = signalData.sender;
+            var receiver = signalData.receiver;
+            var time = signalData.time;
+            var parameter = signalData.parameter;
+
+            if(command !== undefined && command !== null && command !== "") {
+                protocolLib[command](command, type, parameter, sender, receiver, time);
+            }
+        }
+
+
+
+        var protocolLib = {
+            antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
+                tableAntrianPerawat.ajax.reload();
+            }
+        };
+
 	});
 
 

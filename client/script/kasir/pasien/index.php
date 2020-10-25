@@ -272,6 +272,36 @@
 		});
 
 
+        Sync.onmessage = function(evt) {
+            var signalData = JSON.parse(evt.data);
+            var command = signalData.protocols;
+            var type = signalData.type;
+            var sender = signalData.sender;
+            var receiver = signalData.receiver;
+            var time = signalData.time;
+            var parameter = signalData.parameter;
+
+            if(command !== undefined && command !== null && command !== "") {
+                protocolLib[command](command, type, parameter, sender, receiver, time);
+            }
+        }
+
+
+
+        var protocolLib = {
+            userlist: function(protocols, type, parameter, sender, receiver, time) {
+                //
+            },
+            userlogin: function(protocols, type, parameter, sender, receiver, time) {
+                //
+            },
+            kasir_daftar_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", "Transaksi baru", 3000, "notif_pasien_baru");
+                tableAntrianBayar.ajax.reload();
+            }
+        };
+
+
 		$("#range_invoice").change(function() {
 			/*console.clear();
 			console.log(getDateRange());*/
@@ -328,7 +358,37 @@
 
 							$("#nomor-invoice").html(invoice_detail.nomor_invoice);
 							var invoice_detail_item = invoice_detail.invoice_detail;
+
+							var kategoriBayar = {
+							    "biaya_administrasi":{
+							        caption:"Biaya Administrasi",
+                                    item: []
+                                },
+                                "biaya_tindakan_tindakan_":{
+                                    caption:"Tindakan Poli",
+                                    item: []
+                                },
+                                "biaya_tindakan_pendukung":{
+                                    caption:"Tindakan Pendukung",
+                                    item: []
+                                },
+                                "biaya_obat":{
+                                    caption:"Biaya Obat",
+                                    item: []
+                                },
+                                "biaya_racikan":{
+                                    caption:"Biaya Racikan",
+                                    item: []
+                                }
+                            };
+
 							for(var invKey in invoice_detail_item) {
+							    console.log(invoice_detail_item[invKey]);
+							    if(invoice_detail_item[invKey].item_type === "master_tindakan")
+                                {
+                                    //Biaya Admnistrasi
+                                    //Biaya Tindakan
+                                }
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
 									status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
@@ -561,10 +621,10 @@
                 title: 'Sudah terima uang?',
                 showDenyButton: true,
                 type: 'warning',
-                confirmButtonText: `Ya`,
-                confirmButtonColor: `#ff2a2a`,
-                denyButtonText: `Batal`,
-                denyButtonColor: `#1297fb`
+                confirmButtonText: `Sudah`,
+                confirmButtonColor: `#1297fb`,
+                denyButtonText: `Belum`,
+                denyButtonColor: `#ff2a2a`
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
@@ -593,6 +653,11 @@
                                     response.response_package.response_message,
                                     'success'
                                 ).then((result) => {
+                                    var notifier_target = response.response_package.response_notifier;
+                                    for(var notifKey in notifier_target)
+                                    {
+                                        push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info");
+                                    }
                                     tableAntrianBayar.ajax.reload();
                                     tableKwitansi.ajax.reload();
                                     $("#form-invoice").modal("hide");

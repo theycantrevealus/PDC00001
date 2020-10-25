@@ -2,14 +2,15 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function() {
-		var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
-		var poliList = poliListRaw;
+		//var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
+        var poliListRaw = [];
+        var poliListRawList = <?php echo json_encode($_SESSION['poli']['response_data']); ?>;
+        var poliList = [];
 		//var allICD10 = load_icd_10();
         var allICD10 = [];
         var allICD9 = [];
 		var selectedICD10Kerja = [], selectedICD10Banding = [], selectedICD9 = [];
 
-		poliList.tindakan = [];
 		//Filter Rawat Jalan
 		for(var z in poliListRaw.tindakan) {
 			if(poliListRaw.tindakan[z].kelas == __UID_KELAS_GENERAL_RJ__) {
@@ -36,6 +37,14 @@
 			type:"GET",
 			success:function(response) {
 				antrianData = response.response_package.response_data[0];
+                for(var poliSetKey in poliListRawList)
+                {
+                    if(poliListRawList[poliSetKey].poli.response_data[0].uid == antrianData.departemen)
+                    {
+                        poliListRaw.push(poliListRawList[poliSetKey].poli.response_data[0]);
+                    }
+                }
+                poliList = poliListRaw;
 				$("#heading_nama_poli").html(antrianData.poli_info.nama);
 				pasien_uid = antrianData.pasien_info.uid;
 				pasien_nama = antrianData.pasien_info.nama;
@@ -80,11 +89,6 @@
 							//loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
 							loadPasien(UID);
 						}
-						/* else {
-							console.log(response.response_package.response_data[0]);
-							loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
-							loadPasien(UID);
-						}*/
 
 						if(response.response_package.response_data[0] === undefined) {
 							asesmen_detail = {};
@@ -528,6 +532,8 @@
                                 .catch( err => {
                                     //console.error( err.stack );
                                 } );
+                        } else {
+                            $(".special-tab-fisioterapi").hide();
                         }
 					},
 					error: function(response) {
@@ -568,7 +574,7 @@
 				allowAdd = true;
 			}
 
-			if(allowAdd) {
+			if(allowAdd && !isNaN(parseInt($("#txt_icd_10_kerja").val()))) {
 				$("#txt_diagnosa_kerja_list tbody").append(
 					"<tr targetICD=\"" + parseInt($("#txt_icd_10_kerja").val()) + "\">" +
 						"<td>" + ($("#txt_diagnosa_kerja_list tbody tr").length + 1) + "</td>" +
@@ -715,8 +721,7 @@
 		$("#current-poli").prepend(poliList[0]['nama']);
 
 		function generateTindakan(poliList, antrianData, selected = []) {
-
-			var tindakanMeta = {};
+		    var tindakanMeta = {};
 			$("#txt_tindakan option").remove();
 			var __UID_KONSULTASI__ = <?php echo json_encode(__UID_KONSULTASI__); ?>;
 			var __UID_KARTU__ = <?php echo json_encode(__UID_KARTU__); ?>;
@@ -1542,8 +1547,7 @@
 
 				//load_product_resep($(this).find("td:eq(1) select.resep-obat"), "");
 				if($(this).find("td:eq(1) select.resep-obat").val() != "none") {
-					console.log($(this).find("td:eq(1) select").html());
-				    /*var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
+					/*var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
 					checkPenjaminAvail(pasien_penjamin_uid, penjaminAvailable, id);*/
 				}
 
@@ -1923,7 +1927,6 @@
                         cache: true,
                         processResults: function (response) {
                             var data = response.response_package.response_data;
-                            console.log(data);
                             return {
                                 results: $.map(data, function (item) {
                                     return {
@@ -2515,7 +2518,6 @@
                         },
                         type:"POST",
                         success:function(response) {
-                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 $("#dokumen-viewer").printThis({
                                     importCSS: true,
@@ -2804,13 +2806,9 @@
 						},
 						type: "POST",
 						success: function(response) {
-							
 							console.log(response);
 
 							if(response.response_package.response_result > 0) {
-					//			orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
-					//			listTindakanRadiologiDihapus = [];		//set back to empty
-								
 								notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                                 push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
 								//location.href = __HOSTNAME__ + "/rawat_jalan/dokter";
@@ -3307,10 +3305,10 @@
 					console.log(response);
 				}
 			});
-			
+
 			return selectedTindakan;
 		}*/
-		
+
 		function loadLabOrder(uid_antrian){
 
 			$.ajax({
@@ -3351,7 +3349,7 @@
 					console.log(response);
 				}
 			});
-			
+
 		}
 
 		var dataTableLabOrder = $("#table_order_lab").DataTable({
@@ -3482,7 +3480,14 @@
 				});
 			}*/
 
-            $("#tindakan_lab").select2({
+            var listTindakanLabTerpilih = {};
+            var listTindakanLabDihapus = [];
+            var listPenjamin = loadDataPenjamin();
+            var LabMode;
+            var uid_lab_order;
+            var uid_penjamin_tindakan_lab = __UIDPENJAMINUMUM__;
+
+            $("#tindakan_lab").select2({ //Tindakan Lab Sini
                 minimumInputLength: 2,
                 "language": {
                     "noResults": function(){
@@ -3531,7 +3536,15 @@
                         });
                     }
                 }
+                $("#lab_nilai_order").html("");
 
+                if(listTindakanLabTerpilih[$("#tindakan_lab").val()] === undefined)
+                {
+                    listTindakanLabTerpilih[$("#tindakan_lab").val()] = {
+                        "penjamin":"",
+                        "item":[]
+                    };
+                }
 
                 for(var key in data.detail)
                 {
@@ -3540,11 +3553,16 @@
                         "<div class=\"flex\">" +
                         "<label for=\"lab_item_" + data.detail[key].id + "\" id=\"label_item_" + data.detail[key].id + "\">" + data.detail[key].keterangan + "</label>" +
                         "<div class=\"custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right\">" +
-                        "<input type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
+                        "<input checked=\"checked\" type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
                         "<label class=\"custom-control-label\" for=\"lab_item_" + data.detail[key].id + "\">Ya</label>" +
                         "</div>" +
                     "</div>");
                     $("#lab_nilai_order").append(LabSelectoriContainer);
+
+                    listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
+                        "id": data.detail[key].id,
+                        "nama": data.detail[key].keterangan
+                    });
                 }
             });
 		}
@@ -3597,7 +3615,7 @@
 									"<thead class=\"thead-dark\">" +
 										"<tr>" +
 											"<th class=\"wrap_content\">No</th>" +
-											"<th>Item</th>" +
+											"<th style=\"width: 200px\">Item</th>" +
 											"<th>Nilai</th>" +
 											"<th class=\"wrap_content\">Satuan</td>" +
 											"<th class=\"wrap_content\">Nilai Min.</td>" +
@@ -3621,27 +3639,21 @@
                                                 nilai = "";
                                             }
                                             // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                            html += '<tr>\
-                                                <td>'+ nomor +'</td>\
-                                                <td>'+ items.keterangan +'</td>\
-                                                <td><input id="nilai_'+ items.uid_tindakan + '_'+ items.id_lab_nilai +'" value="'+ nilai +'" readonly class="form-control inputItemTindakan" placeholder="-" /></td>\
-                                                <td>'+ items.satuan +'</td>\
-                                                <td>'+ items.nilai_min +'</td>\
-                                                <td>'+ items.nilai_maks +'</td>\
-                                            </tr>';
-
+                                            html += "<tr>" +
+                                                "<td>"+ nomor +"</td>" +
+                                                "<td>" + items.keterangan + "</td>" +
+                                                "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" readonly class=\"form-control inputItemTindakan\" placeholder=\"-\" /></td>" +
+                                                "<td>" + items.satuan + "</td>" +
+                                                "<td>" + items.nilai_min + "</td>" +
+                                                "<td>" + items.nilai_maks + "</td>"
+                                            "</tr>";
                                             nomor++;
                                         }
 									});
 								}
-
-								html += '</tbody>\
-									</table><hr />';
-								
-
+								html += "</tbody></table><hr />";
 								$("#lab_hasil_pemeriksaan").append(html);
 							});
-							
 						}
 					},
 					error: function(response) {
@@ -3651,85 +3663,29 @@
 			}
 		}
 
-
-		//loadLabOrder(UID);
-		
-		//initiate laboratorium tindakan data
-		//var listLabTindakan = loadLabTindakan();
 		setLabTindakan();
 
-		//variable for collect selected Tindakan
-		var listTindakanLabTerpilih = {};
-
-		//variable for collect deleted Tindakan
-		var listTindakanLabDihapus = [];
-
-		//variable for load penjamin
-		var listPenjamin = loadDataPenjamin();
-
-		//order lab action mode (new or edit)
-		var LabMode;
-
-		//for edit order lab
-		var uid_lab_order;
-
-		//this variable will be used in action tambahTindakan; default is uid penjamin umum
-		var uid_penjamin_tindakan_lab = __UIDPENJAMINUMUM__;
-
-		$("#tindakan_lab").on('select2:select', function(){
-			let uidTindakanLab = $(this).val();
-			//console.log(__UIDPENJAMINUMUM__);
-			//console.log(pasien_penjamin_uid);
-
-			$("#lab_tindakan_notifier").html("");
-			if (pasien_penjamin_uid !== __UIDPENJAMINUMUM__){
-				uid_penjamin_tindakan_lab = __UIDPENJAMINUMUM__;
-
-				let html = '<p><b class="badge badge-warning"><i class="fa fa-exclamation-circle" style="margin-right: 5px;"></i>Tindakan akan ditanggung Penjamin Umum</b></p>';
-
-				$.each(listLabTindakan, function(key_tindakan, item_tindakan){
-					let statusLoop = true;
-					
-					if (item_tindakan.uid === uidTindakanLab){
-
-						$.each(item_tindakan.harga, function(key_harga, item_harga){
-
-							if (pasien_penjamin_uid == item_harga.penjamin){
-								html = '<p><b class="badge badge-success"><i class="fa fa-check-circle" style="margin-right: 5px;"></i>Tindakan ditanggung Penjamin</b></p>';
-								
-								//setter jika dijamin
-								uid_penjamin_tindakan_lab = pasien_penjamin_uid; 
-								statusLoop = false;	
-								return false;
-							}
-
-							});
-
-							if (statusLoop === false){
-							return false;
-						}
-						
-					}
-
-				});
-
-				$("#lab_tindakan_notifier").html(html);
-			}
-
-		});
 
 		$("body").on("change", ".lab_order_item_detail", function() {
+            if(listTindakanLabTerpilih[$("#tindakan_lab").val()] === undefined)
+            {
+                listTindakanLabTerpilih[$("#tindakan_lab").val()] = {
+                    "penjamin":"",
+                    "item":[]
+                };
+            }
+
 		    if($(this).is(":checked")) {
-                selectedLabItemList.push({
+                listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
                     "id": $(this).val(),
                     "nama": $("#label_item_" + $(this).val()).text()
                 });
             } else {
-		        for(var key in selectedLabItemList)
+		        for(var key in listTindakanLabTerpilih[$("#tindakan_lab").val()].item)
                 {
-                    if(selectedLabItemList[key].id === $(this).val())
+                    if(listTindakanLabTerpilih[$("#tindakan_lab").val()].item[key].id === $(this).val())
                     {
-                        delete selectedLabItemList[key];
+                        delete listTindakanLabTerpilih[$("#tindakan_lab").val()].item[key];
                     }
                 }
             }
@@ -3739,14 +3695,10 @@
             $("#lab_nilai_order").html("");
 			$("#btnTambahTindakanLab").removeAttr("disabled");
 			$("#btnSubmitOrderLab").removeAttr("hidden");
-			
 			LabMode = "new";
 			uid_lab_order = "";
-
 			$("#table_tindakan_lab tbody").html("");
 			$("#dr_penanggung_jawab_lab").val("").trigger('change');
-			//setLabTindakan();
-
 			$("#form-tambah-order-lab").modal("show");
 
 			listTindakanLabTerpilih = {};
@@ -3839,18 +3791,34 @@
 			let uidTindakanLab = $("#tindakan_lab").val();
 			let hargaPenjamin = number_format($("#tindakan_lab").attr("harga"), 2, ".", ",");
 
-			
+            console.log(listTindakanLabTerpilih[uidTindakanLab]);
+			if(listTindakanLabTerpilih[uidTindakanLab] === undefined)
+            {
+                listTindakanLabTerpilih[uidTindakanLab] = {
+                    "penjamin":"",
+                    "item":[]
+                };
+            } else {
+			    alert();
+            }
+
 			if (
-			    selectedLabItemList.length > 0 &&
+                listTindakanLabTerpilih[uidTindakanLab].item.length > 0 &&
 			    uidTindakanLab != null
             ) {
                 $("#lab_nilai_order").html("");
 				let dataTindakan = $("#tindakan_lab").select2('data');
 				let namaPenjamin;
+
+
+
+                listTindakanLabTerpilih[uidTindakanLab].penjamin = pasien_penjamin_uid;
+                //listTindakanLabTerpilih[uidTindakanLab].item = selectedLabItemList;
+
 				var listItem = "<ol>";
-				for(var ItemLabKey in selectedLabItemList)
+				for(var ItemLabKey in listTindakanLabTerpilih[uidTindakanLab].item)
                 {
-                    listItem += "<li>" + selectedLabItemList[ItemLabKey].nama + "</li>";
+                    listItem += "<li>" + listTindakanLabTerpilih[uidTindakanLab].item[ItemLabKey].nama + "</li>";
                 }
                 listItem += "</ol>";
 
@@ -3873,15 +3841,15 @@
 
 				$("#table_tindakan_lab tbody").append(html);
 				$('#tindakan_lab').val('').trigger('change');
-				listTindakanLabTerpilih[uidTindakanLab] = pasien_penjamin_uid;
+
+
                 $("#tindakan_lab option[value='"+ uidTindakanLab +"']").remove();
 				$("#lab_tindakan_notifier").html("");
-
-				console.clear();
-                console.log(listTindakanLabTerpilih);
-
 				setNomorUrut('table_tindakan_lab', 'no_urut_lab');
 			}
+			else {
+			    console.log(listTindakanLabTerpilih[uidTindakanLab]);
+            }
 		});
 		
 		$("#table_tindakan_lab tbody").on('click', '.btnHapusTindakanLab', function(){
@@ -3900,10 +3868,15 @@
 		});
 
 
-		$("#btnSubmitOrderLab").click(function(){
+		/*$("#btnSubmitOrderLab").click(function(){
 			let dokterPJLabOrder = $("#dr_penanggung_jawab_lab").val();
 
-			if (dokterPJLabOrder != "" && Object.keys(listTindakanLabTerpilih).length > 0){
+			if (
+			    dokterPJLabOrder !== "" &&
+                dokterPJLabOrder !== undefined &&
+                dokterPJLabOrder !== null &&
+                Object.keys(listTindakanLabTerpilih).length > 0
+            ){
                 let formData = {
 					'request' : LabMode + '-order-lab',
 					'uid_antrian' : UID,
@@ -3913,7 +3886,7 @@
 					'uid_lab_order': uid_lab_order
 				}
 
-				
+
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Laboratorium",
@@ -3923,20 +3896,13 @@
 					},
 					type: "POST",
 					success: function(response) {
-						if(response.response_package.response_result > 0) {
-							notification ("success", "Laboratorium Berhasil Diorder", 3000, "hasil_tambah_dev");
+					    if(response.response_package.response_result > 0) {
+                            notification ("success", "Laboratorium Berhasil Diorder", 3000, "hasil_tambah_dev");
 						} else {
 							notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
 						}
 
 						dataTableLabOrder.ajax.reload();
-
-						// reset form
-						// $("#table_tindakan_lab tbody").empty();
-						// $("#dr_penanggung_jawab_lab").val('').trigger('change');
-
-						// $("#tindakan_lab").empty();
-						// setLabTindakan(listLabTindakan);
 						$("#form-tambah-order-lab").modal("hide");
 					},
 					error: function(response) {
@@ -3946,7 +3912,7 @@
 				});
 			}
 
-		});
+		});*/
 
 
 		/*==================== UNIVERSAL FUNCTION =====================*/
@@ -3968,7 +3934,7 @@
 						dokterPJ = response.response_package.response_data;
 						if (dokterPJ.length > 0){
 							for(i = 0; i < dokterPJ.length; i++){
-								
+
 			                    var selection = document.createElement("OPTION");
 			                    $(selection).attr("value", dokterPJ[i].uid).html(dokterPJ[i].nama_dokter);
 			                    $(".dr_penanggung_jawab").append(selection);
@@ -3981,7 +3947,7 @@
 					});
 				},
 				error: function(response) {
-					console.log(response);
+
 				}
 			});*/
 
@@ -4013,7 +3979,6 @@
                 },
                 processResults: function (response) {
                     var data = response.response_package.response_data;
-                    console.log(data);
                     return {
                         results: $.map(data, function (item) {
                             return {

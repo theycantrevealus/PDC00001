@@ -22,7 +22,10 @@
 	var __GUDANG_APOTEK__ = <?php echo json_encode(__GUDANG_APOTEK__); ?>;
 	var __GUDANG_UTAMA__ = <?php echo json_encode(__GUDANG_UTAMA__); ?>;
 
+
+    var __UIDADMIN__ = <?php echo json_encode(__UIDADMIN__); ?>;
     var __UIDFISIOTERAPI__ = <?php echo json_encode(__UIDFISIOTERAPI__); ?>;
+    var __UIDPETUGASLAB__ = <?php echo json_encode(__UIDPETUGASLAB__); ?>;
 
 	var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');

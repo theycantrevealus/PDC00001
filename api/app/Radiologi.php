@@ -280,7 +280,9 @@ class Radiologi extends Utility
                     'AND',
                     'rad_order.deleted_at' => 'IS NULL'
                 ), array(
-                    'P'
+                    'P
+                    
+                    '
                 )
             )
             ->order(

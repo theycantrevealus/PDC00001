@@ -14,7 +14,7 @@
 							<thead class="thead-dark">
 								<tr>
 									<th class="wrap_content">No</th>
-									<th class="wrap_content">Nomor Order</th>
+									<th class="wrap_content">Item Order</th>
                                     <th>Waktu Order</th>
 									<th>Dokter Penanggung Jawab</th>
 									<th class="wrap_content">Aksi</th>

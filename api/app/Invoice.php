@@ -847,19 +847,51 @@ class Invoice extends Utility
                 }
             }
 
+            $notifier_target = array();
             if($allowAntrian) {
+                array_push($notifier_target, array(
+                    'target' => __UIDPERAWAT__,
+                    'message' => 'Antrian poli baru',
+                    'protocol' => 'antrian_poli_baru'
+                ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju antrian poli';
             } else if($goto_lab) {
+                array_push($notifier_target, array(
+                    'target' => __UIDPETUGASLAB__,
+                    'message' => 'Permintaan pemeriksaan laboratorium',
+                    'protocol' => 'antrian_laboratorium_baru'
+                ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju laboratorium';
             } else if($goto_rad) {
+                array_push($notifier_target, array(
+                    'target' => __UIDPETUGASRAD__,
+                    'message' => 'Permintaan pemeriksaan radiologi',
+                    'protocol' => 'antrian_radiologi_baru'
+                ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi';
             } else if($goto_rad && $goto_lab) {
+                array_push($notifier_target, array(
+                    'target' => __UIDPETUGASLAB__,
+                    'message' => 'Permintaan pemeriksaan laboratorium',
+                    'protocol' => 'antrian_laboratorium_baru'
+                ));
+                array_push($notifier_target, array(
+                    'target' => __UIDPETUGASRAD__,
+                    'message' => 'Permintaan pemeriksaan radiologi',
+                    'protocol' => 'antrian_radiologi_baru'
+                ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi lalu laboratorium';
             } else if($goto_apotek) {
+                array_push($notifier_target, array(
+                    'target' => __UIDAPOTEKER__,
+                    'message' => 'Antrian apotek baru',
+                    'protocol' => 'antrian_apotek_baru'
+                ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju apotek';
             } else {
-                $worker['response_message'] = '[ARAHAN TIDAK DITEMUKANS]';
+                $worker['response_message'] = '[ARAHAN TIDAK DITEMUKAN]';
             }
+            $worker['response_notifier'] = $notifier_target;
             return $worker;
         } else {
             return $allowAntrian;
