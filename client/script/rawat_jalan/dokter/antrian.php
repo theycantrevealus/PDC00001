@@ -2,14 +2,15 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function() {
-		var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
-		var poliList = poliListRaw;
+		//var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
+        var poliListRaw = [];
+        var poliListRawList = <?php echo json_encode($_SESSION['poli']['response_data']); ?>;
+        var poliList = [];
 		//var allICD10 = load_icd_10();
         var allICD10 = [];
         var allICD9 = [];
 		var selectedICD10Kerja = [], selectedICD10Banding = [], selectedICD9 = [];
 
-		poliList.tindakan = [];
 		//Filter Rawat Jalan
 		for(var z in poliListRaw.tindakan) {
 			if(poliListRaw.tindakan[z].kelas == __UID_KELAS_GENERAL_RJ__) {
@@ -36,6 +37,14 @@
 			type:"GET",
 			success:function(response) {
 				antrianData = response.response_package.response_data[0];
+                for(var poliSetKey in poliListRawList)
+                {
+                    if(poliListRawList[poliSetKey].poli.response_data[0].uid == antrianData.departemen)
+                    {
+                        poliListRaw.push(poliListRawList[poliSetKey].poli.response_data[0]);
+                    }
+                }
+                poliList = poliListRaw;
 				$("#heading_nama_poli").html(antrianData.poli_info.nama);
 				pasien_uid = antrianData.pasien_info.uid;
 				pasien_nama = antrianData.pasien_info.nama;
@@ -565,7 +574,7 @@
 				allowAdd = true;
 			}
 
-			if(allowAdd) {
+			if(allowAdd && !isNaN(parseInt($("#txt_icd_10_kerja").val()))) {
 				$("#txt_diagnosa_kerja_list tbody").append(
 					"<tr targetICD=\"" + parseInt($("#txt_icd_10_kerja").val()) + "\">" +
 						"<td>" + ($("#txt_diagnosa_kerja_list tbody tr").length + 1) + "</td>" +
@@ -712,8 +721,7 @@
 		$("#current-poli").prepend(poliList[0]['nama']);
 
 		function generateTindakan(poliList, antrianData, selected = []) {
-
-			var tindakanMeta = {};
+		    var tindakanMeta = {};
 			$("#txt_tindakan option").remove();
 			var __UID_KONSULTASI__ = <?php echo json_encode(__UID_KONSULTASI__); ?>;
 			var __UID_KARTU__ = <?php echo json_encode(__UID_KARTU__); ?>;

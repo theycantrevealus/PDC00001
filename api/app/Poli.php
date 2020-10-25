@@ -202,24 +202,20 @@ class Poli extends Utility {
 	}
 
 	public function get_poli_detail($parameter) {
-		$data = self::$query
-				->select('master_poli', array(
-						'uid',
-						'nama',
-						'tindakan_konsultasi',
-						'poli_asesmen',
-						'created_at',
-						'updated_at'
-					)
-				)
-				->where(array(
-							'master_poli.deleted_at' => 'IS NULL',
-							'AND',
-							'master_poli.uid' => '= ?'
-						),
-						array($parameter)
-					)
-					->execute();
+		$data = self::$query->select('master_poli', array(
+            'uid',
+            'nama',
+            'tindakan_konsultasi',
+            'poli_asesmen',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'master_poli.deleted_at' => 'IS NULL',
+                'AND',
+                'master_poli.uid' => '= ?'
+            ), array($parameter))
+            ->execute();
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {

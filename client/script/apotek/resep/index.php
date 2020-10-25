@@ -32,15 +32,13 @@
             var selected = [];
             var productData;
             $.ajax({
-                url:__HOSTAPI__ + "/Inventori",
+                url:__HOSTAPI__ + "/Inventori/item_detail/" + selectedData,
                 async:false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 type:"GET",
                 success:function(response) {
-                    $(target).find("option").remove();
-                    $(target).append("<option value=\"none\">Pilih Obat</option>");
                     productData = response.response_package.response_data;
                     for (var a = 0; a < productData.length; a++) {
                         var penjaminList = [];
@@ -173,252 +171,81 @@
                 var newDetailRow = document.createElement("TR");
 
                 var newDetailCellID = document.createElement("TD");
-                $(newDetailCellID).addClass("text-center").html((a + 1))
-                /*.append("<button style=\"margin-top: 20px;\" class=\"btn btn-sm btn-info btnRevisi\" id=\"revisi_resep_" + data.detail[a].obat + "\"><i class=\"fa fa-pencil-alt\"></i></button>")*/;
+                $(newDetailCellID).addClass("text-center").html((a + 1));
 
                 var newDetailCellObat = document.createElement("TD");
                 var newObat = document.createElement("SELECT");
                 $(newDetailCellObat).append(newObat);
+
+                $(newObat).addClass("obatSelector form-control").select2();
+                $(newObat).append("<option value=\"" + data.detail[a].detail.uid + "\">" + data.detail[a].detail.nama + "</option>").val(data.detail[a].detail.uid).trigger("change");
                 var ObatData = load_product_resep(newObat, data.detail[a].detail.uid, false);
-
-                var newBatchSelector = document.createElement("SELECT");
-                $(newDetailCellObat).append("<b style=\"padding-top: 10px; display: block\">Batch</b>").append(newBatchSelector);
-
-                //$(newDetailCellObat).html(data.detail[a].detail.nama);
-                var batchDataUnique = [];
-                var batchData = [];
-                var setDiskon = 0;
-                var setDiskonType = "N";
-                var itemData = ObatData.data;
-
-                var parsedItemData = [];
-                var obatNavigator = [];
-                for(var dataKey in itemData) {
-                    if(itemData[dataKey].satuan_terkecil != undefined) {
-                        var penjaminList = [];
-                        var penjaminListData = itemData[dataKey].penjamin;
-
-
-                        for(var penjaminKey in penjaminListData) {
-                            if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
-                                penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
-
-                                if(penjaminListData[penjaminKey].penjamin.uid == $("#nama-pasien").attr("set-penjamin")) {
-                                    setDiskon = penjaminListData[penjaminKey].profit;
-                                    setDiskonType = penjaminListData[penjaminKey].profit_type;
-                                }
-                            }
-                        }
-
-                        var batchListData = itemData[dataKey].batch;
-                        for(var batchKey in batchListData) {
-                            if(batchDataUnique.indexOf(batchListData[batchKey].batch) < 0) {
-                                batchDataUnique.push(batchListData[batchKey].batch);
-                                batchData.push(batchListData[batchKey]);
-                            }
-                        }
-
-                        obatNavigator.push(itemData[dataKey].uid);
-
-                        parsedItemData.push({
-                            id: itemData[dataKey].uid,
-                            "jumlah": data.detail[a].qty,
-                            "penjamin-list": penjaminList,
-                            "satuan-caption": itemData[dataKey].satuan_terkecil.nama,
-                            "satuan-terkecil": itemData[dataKey].satuan_terkecil.uid,
-                            "signa-qty": data.detail[a].signa_qty,
-                            "signa-pakai": data.detail[a].signa_pakai,
-                            text: "<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + ";\">" + itemData[dataKey].nama.toUpperCase() + "</div>",
-                            html: 	"<div class=\"select2_item_stock\">" +
-                                "<div style=\"color:" + ((itemData[dataKey].stok > 0) ? "#12a500" : "#cf0000") + "\">" + itemData[dataKey].nama.toUpperCase() + "</div>" +
-                                "<div>" + itemData[dataKey].stok + "</div>" +
-                                "</div>",
-                            title: itemData[dataKey].nama
-                        });
-                    }
-                }
-
-                $(newDetailCellObat).attr({
-                    "disc": setDiskon,
-                    "disc-type": setDiskonType
-                });
-
-                $(newBatchSelector).addClass("form-control batch-loader").select2();
-
-                var newDetailCellSigna = document.createElement("TD");
-                $(newDetailCellSigna).html("<div class=\"input-group mb-3\">" +
-                    "<input value=\"" + data.detail[a].signa_qty + "\" type=\"text\" class=\"form-control signa\" placeholder=\"0\" aria-label=\"0\" aria-describedby=\"basic-addon1\" />" +
-                    "<div class=\"input-group-prepend\">" +
-                    "<span class=\"input-group-text\" id=\"basic-addon1\">&times;</span>" +
-                    "</div>" +
-                    "<input type=\"text\" value=\"" + data.detail[a].signa_pakai + "\" class=\"form-control signa\" placeholder=\"0\" aria-label=\"0\" aria-describedby=\"basic-addon1\" />" +
-                    "</div>");
-                $(newDetailCellSigna).find("input").inputmask({
-                    alias: 'decimal',
-                    rightAlign: true,
-                    placeholder: "0.00",
-                    prefix: "",
-                    autoGroup: false,
-                    digitsOptional: true
-                });
-
-                //$(newDetailCellSigna).html(data.detail[a].signa_qty + " &times; " + data.detail[a].signa_pakai);
-
-                var newDetailCellQty = document.createElement("TD");
-                //$(newDetailCellQty).html("<h6>" + data.detail[a].qty + " <span>" + parsedItemData[obatNavigator.indexOf(itemData[dataKey].uid)]['satuan-caption'] + "</span></h6>");
-                $(newDetailCellQty).html("<div class=\"input-group mb-3\">" +
-                    "<input value=\"" + data.detail[a].qty + "\" type=\"text\" class=\"form-control qty_resep\" placeholder=\"0\" aria-label=\"0\" aria-describedby=\"basic-addon1\" />" +
-                    "<div class=\"input-group-append\">" +
-                    "<span class=\"input-group-text\" id=\"basic-addon1\">" + parsedItemData[obatNavigator.indexOf(itemData[dataKey].uid)]['satuan-caption'] + "</span>" +
-                    "</div>" +
-                    "</div>");
-                $(newDetailCellQty).find("input").inputmask({
-                    alias: 'decimal',
-                    rightAlign: true,
-                    placeholder: "0.00",
-                    prefix: "",
-                    autoGroup: false,
-                    digitsOptional: true
-                });
-
-                var newDetailCellHarga = document.createElement("TD");
-                $(newDetailCellHarga).addClass("text-right");
-
-                var newDetailCellTotal = document.createElement("TD");
-                $(newDetailCellTotal).addClass("text-right");
-
-                //var newDetailCellPenjamin = document.createElement("TD");
-                var PenjaminAvailable = data.detail[a].detail.penjamin;
-                //var penjaminList = [];
-                for(var penjaminKey in PenjaminAvailable) {
-                    if(penjaminList.indexOf(PenjaminAvailable[penjaminKey].penjamin) < 0) {
-                        penjaminList.push(PenjaminAvailable[penjaminKey].penjamin);
-                    }
-                }
-
-                /*if(penjaminList.indexOf(data.antrian.penjamin) < 0) {
-                    $(newDetailCellPenjamin).html("<span class=\"badge badge-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Ya</span>");
-                } else {
-                    $(newDetailCellPenjamin).html("<span class=\"badge badge-success\"><i class=\"fa fa-check\" style=\"margin-right: 5px;\"></i> Tidak</span>");
-                }*/
-
-                var newDetailCellAksi = document.createElement("TD");
-
-                /*var newVerifButton = document.createElement("BUTTON");
-                $(newDetailCellAksi).append(newVerifButton);
-                $(newVerifButton).addClass("btn btn-sm btn-success").html("<i class=\"fa fa-check\"></i> Verifikasi");*/
-
-                for(var batchRKey in batchData) {
-                    if(batchData[batchRKey].barang == data.detail[a].detail.uid) {
-                        $(newBatchSelector).append("<option harga=\"" + batchData[batchRKey].harga + "\" value=\"" + batchData[batchRKey].batch + "\">" + batchData[batchRKey].kode + "</option>");
-                        $(newDetailCellHarga).html(((parseFloat(batchData[batchRKey].harga) > 0) ? number_format(batchData[batchRKey].harga, 2, ".", ",") : 0));
-                        $(newDetailCellTotal).html(((parseFloat(data.detail[a].qty * batchData[batchRKey].harga) > 0) ? number_format(data.detail[a].qty * batchData[batchRKey].harga, 2, ".", ",") : 0));
-                    }
-                }
-
-                /*var newRevisiButton = document.createElement("BUTTON");
-                $(newDetailCellAksi).append(newRevisiButton);
-                $(newRevisiButton).addClass("btn btn-sm btn-info").html("<i class=\"fa fa-receipt\"></i> Revisi");*/
-
-
-                //=======================================
-                $(newDetailRow).append(newDetailCellID);
-                $(newDetailRow).append(newDetailCellObat);
-                $(newDetailRow).append(newDetailCellSigna);
-                $(newDetailRow).append(newDetailCellQty);
-                $(newDetailRow).append(newDetailCellHarga);
-                $(newDetailRow).append(newDetailCellTotal);
-                //$(newDetailRow).append(newDetailCellPenjamin);
-                //$(newDetailRow).append(newDetailCellAksi);
-
-                $("#load-detail-resep tbody").append(newDetailRow);
-
-
-
-                $(newObat).addClass("form-control resep-obat").select2({
-                    data: parsedItemData,
-                    placeholder: "Pilih Obat",
-                    selectOnClose: true,
-                    val: data.detail[a].detail.uid,
-                    escapeMarkup: function(markup) {
-                        return markup;
-                    },
-                    templateResult: function(data) {
-                        return data.html;
-                    },
-                    templateSelection: function(data) {
-                        return data.text;
-                    }
-                }).on("select2:select", function(e) {
-                    var currentObat = $(this).val();
-                    checkRevisi(data);
-                    var dataObat = e.params.data;
-                    $(this).children("[value=\""+ dataObat['id'] + "\"]").attr({
-                        "data-value": dataObat["data-value"],
-                        "jumlah": dataObat["jumlah"],
-                        "signa-qty": dataObat["signa_qty"],
-                        "signa-pakai": dataObat["signa_pakai"],
-                        "penjamin-list": dataObat["penjamin-list"],
-                        "satuan-caption": dataObat["satuan-caption"],
-                        "satuan-terkecil": dataObat["satuan-terkecil"]
+                var selectedBatchResep = refreshBatch(data.detail[a].detail.uid);
+                if(selectedBatchResep.length > 0)
+                {
+                    $(newDetailCellObat).append("<b style=\"padding-top: 10px; display: block\">Batch</b><span class=\"selected_batch\" batch=\"" + selectedBatchResep[0].batch + "\">[" + selectedBatchResep[0].kode + "] " + selectedBatchResep[0].expired + "</span>");
+                    $(newDetailCellObat).attr({
+                        batch: selectedBatchResep[0].batch,
+                        harga: selectedBatchResep[0].harga,
+                        expired: selectedBatchResep[0].expired
                     });
 
-                    var penjaminAvailable = parsedItemData[obatNavigator.indexOf(currentObat)]['penjamin-list'];
-                    var diskonNilai = 0;
-                    var diskonType = "N";
-                    if(penjaminAvailable.length > 0) {
-                        if(penjaminAvailable.indexOf($("#nama-pasien").attr("set-penjamin")) >= 0) {
-                            var diskonNilai = parseInt($(this).parent().parent().find("td:eq(1)").attr("disc"));
-                            var diskonType = $(this).parent().parent().find("td:eq(1)").attr("disc-type");
-                            $(this).parent().parent().find("td:eq(6)").html("<span class=\"badge text-success\"><i class=\"fa fa-check\" style=\"margin-right: 5px;\"></i> Ya</span>");
-                        } else {
-                            $(this).parent().parent().find("td:eq(6)").html("<span class=\"badge text-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak</span>");
-                        }
-                    } else {
-                        $(this).parent().parent().find("td:eq(6)").html("<span class=\"badge text-danger\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak</span>");
-                    }
-                    $(this).parent().parent().find("td:eq(3) span").html(parsedItemData[obatNavigator.indexOf(currentObat)]['satuan-caption']);
+
+                    var newDetailCellSigna = document.createElement("TD");
+                    $(newDetailCellSigna).html("<div class=\"input-group mb-3\">" +
+                        "<input value=\"" + data.detail[a].signa_qty + "\" type=\"text\" class=\"form-control signa\" placeholder=\"0\" aria-label=\"0\" aria-describedby=\"basic-addon1\" />" +
+                        "<div class=\"input-group-prepend\">" +
+                        "<span class=\"input-group-text\" id=\"basic-addon1\">&times;</span>" +
+                        "</div>" +
+                        "<input type=\"text\" value=\"" + data.detail[a].signa_pakai + "\" class=\"form-control signa\" placeholder=\"0\" aria-label=\"0\" aria-describedby=\"basic-addon1\" />" +
+                        "</div>");
+
+                    $(newDetailCellSigna).find("input").inputmask({
+                        alias: 'decimal',
+                        rightAlign: true,
+                        placeholder: "0.00",
+                        prefix: "",
+                        autoGroup: false,
+                        digitsOptional: true
+                    });
+
+                    var newDetailCellQty = document.createElement("TD");
+                    var newQty = document.createElement("INPUT");
+                    $(newDetailCellQty).append(newQty);
+                    $(newQty).inputmask({
+                        alias: 'decimal',
+                        rightAlign: true,
+                        placeholder: "0.00",
+                        prefix: "",
+                        autoGroup: false,
+                        digitsOptional: true
+                    }).addClass("form-control");
+
+                    var newDetailCellHarga = document.createElement("TD");
+                    $(newDetailCellHarga).addClass("text-right number_style").html(number_format(selectedBatchResep[0].harga, 2, ",", "."));
+
+                    var newDetailCellTotal = document.createElement("TD");
+                    $(newDetailCellTotal).addClass("text-right");
+                    var newDetailCellAksi = document.createElement("TD");
+                    var newVerifButton = document.createElement("BUTTON");
+                    $(newDetailCellAksi).append(newVerifButton);
+                    $(newVerifButton).addClass("btn btn-sm btn-success").html("<i class=\"fa fa-check\"></i> Verifikasi");
+
+                    var newRevisiButton = document.createElement("BUTTON");
+                    $(newDetailCellAksi).append(newRevisiButton);
+                    $(newRevisiButton).addClass("btn btn-sm btn-info").html("<i class=\"fa fa-receipt\"></i> Revisi");
 
 
-                    var refreshBatchData = refreshBatch(currentObat);
-                    $(this).parent().find("select.batch-loader option").remove();
-                    for(var batchKeyD in refreshBatchData) {
-                        if(refreshBatchData[batchKeyD].gudang.uid == __GUDANG_APOTEK__) {
-                            $(this).parent().find("select.batch-loader").append("<option harga=\"" + refreshBatchData[batchKeyD].harga + "\" value=\"" + refreshBatchData[batchKeyD].batch + "\">[" + refreshBatchData[batchKeyD].gudang.nama + "] - " + refreshBatchData[batchKeyD].kode + " [" + refreshBatchData[batchKeyD].expired + "]</option>");
-                        } else {
-                            $(this).parent().find("select.batch-loader").append("<option harga=\"" + refreshBatchData[batchKeyD].harga + "\" value=\"" + refreshBatchData[batchKeyD].batch + "\">[" + refreshBatchData[batchKeyD].gudang.nama + "] - " + refreshBatchData[batchKeyD].kode + " [" + refreshBatchData[batchKeyD].expired + "] / AMPRAH</option>");
-                        }
-                    }
+                    //=======================================
+                    $(newDetailRow).append(newDetailCellID);
+                    $(newDetailRow).append(newDetailCellObat);
+                    $(newDetailRow).append(newDetailCellSigna);
+                    $(newDetailRow).append(newDetailCellQty);
+                    $(newDetailRow).append(newDetailCellHarga);
+                    $(newDetailRow).append(newDetailCellTotal);
 
-                    var setterHarga = $(this).parent().find("select.batch-loader option:selected").attr("harga");
-                    var setterQty = parseInt($(this).parent().parent().find("td:eq(3) input").inputmask("unmaskedvalue"));
-                    var setterHargaPenjamin = parseInt(setterHarga);
-                    if(setDiskonType == "P") {
-                        setterHargaPenjamin = setterHargaPenjamin + (diskonNilai / 100 * setterHargaPenjamin);
-                    } else if(setDiskonType == "A") {
-                        setterHargaPenjamin += diskonNilai;
-                    }
-
-                    var totalHargaPenjamin = setterQty * setterHargaPenjamin;
-
-                    $(this).parent().parent().find("td:eq(4)").html(number_format(setterHargaPenjamin, 2, ".", ","));
-                    $(this).parent().parent().find("td:eq(5)").html("<b>" + number_format(totalHargaPenjamin, 2, ".", ",") + "</b>");
-                });
-
-                $(newObat).val([data.detail[a].detail.uid]).trigger("change").trigger({
-                    type:"select2:select",
-                    params: {
-                        data: parsedItemData
-                    }
-                });
-
-                $(newObat).find("option:selected").attr({
-                    "data-value": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["data-value"],
-                    "jumlah": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["jumlah"],
-                    "penjamin-list": penjaminList,
-                    "satuan-caption": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["satuan-caption"],
-                    "satuan-terkecil": parsedItemData[obatNavigator.indexOf(data.detail[a].detail.uid)]["satuan-terkecil"]
-                });
+                    $("#load-detail-resep tbody").append(newDetailRow);
+                }
             }
 
 
@@ -657,28 +484,74 @@
             }
         }
 
-        $("body").on("change", ".batch-loader", function() {
-            var hargaSet = $(this).find("option:selected").attr("harga");
-            var disc = $(this).parent().parent().find("td:eq(1)").attr("disc");
-            var disc_type = $(this).parent().parent().find("td:eq(1)").attr("disc-type");
-            var hargaJual = 0;
-            var qty = $(this).parent().parent().find("td:eq(3) input").inputmask("unmaskedvalue");
 
-            if(disc_type == "P") {
-                hargaJual = parseFloat(hargaSet) + (disc / 100 * hargaSet);
-            } else if(dis_type == "A") {
-                hargaJual = parseFloat(hargaSet) + disc;
-            } else {
-                hargaJual = hargaSet;
-            }
-
-            $(this).parent().parent().find("td:eq(4)").html(number_format(hargaJual, 2, ".", ","));
-            $(this).parent().parent().find("td:eq(5) b").html(number_format((hargaJual * qty), 2, ".", ","));
+        $("body").on("DOMNodeInserted", "select", function () {
+            $(".obatSelector").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Barang tidak ditemukan";
+                    }
+                },
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/Inventori/get_item_select2",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var sel2ObatData = response.response_package.response_data;
+                        var parsedItemDataSel = [];
+                        for(var dataObatKey in sel2ObatData)
+                        {
+                            parsedItemDataSel.push({
+                                id: sel2ObatData[dataObatKey].uid,
+                                text: "<div style=\"color:" + ((sel2ObatData[dataObatKey].stok > 0) ? "#12a500" : "#cf0000") + ";\">" + sel2ObatData[dataObatKey].nama.toUpperCase() + "</div>",
+                                html: 	"<div class=\"select2_item_stock\">" +
+                                    "<div style=\"color:" + ((sel2ObatData[dataObatKey].stok > 0) ? "#12a500" : "#cf0000") + "\">" + sel2ObatData[dataObatKey].nama.toUpperCase() + "</div>" +
+                                    "<div>" + sel2ObatData[dataObatKey].stok + "</div>" +
+                                    "</div>",
+                                title: sel2ObatData[dataObatKey].nama
+                            });
+                        }
+                        return {
+                            results: $.map(parsedItemDataSel, function (item) {
+                                return {
+                                    id: item.id,
+                                    text: item.text,
+                                    html: item.html,
+                                    title: item.title
+                                }
+                            })
+                        };
+                    }
+                },
+                //selectOnClose: true,
+                placeholder: "Pilih Obat",
+                //val: data.detail[a].detail.uid,
+                escapeMarkup: function(markup) {
+                    return markup;
+                },
+                templateResult: function(data) {
+                    return data.html;
+                },
+                templateSelection: function(data) {
+                    return data.text;
+                }
+            });
         });
 
-        $("body").on("change", ".racikan-batch-loader", function() {
-            //
-        });
+
+
+
 
         $("body").on("keyup", ".qty_racikan", function() {
             //Ubah semua harga komposisi racikan
@@ -722,40 +595,7 @@
             $(this).parent().parent().parent().find("td:eq(5) b").html(number_format((hargaJual * qty), 2, ".", ","));
         });
 
-        /*$("body").on("click", ".btnRevisi", function() {
-            var ke_obat = $(this).parent().parent().find("td:eq(1) select:eq(0)").val();
-            var signa_qty = $(this).parent().parent().find("td:eq(2) input:eq(0)").inputmask("unmaskedvalue");
-            var signa_pakai = $(this).parent().parent().find("td:eq(2) input:eq(1)").inputmask("unmaskedvalue");
-            var qty = $(this).parent().parent().find("td:eq(3) input").inputmask("unmaskedvalue");
 
-            var uid = $(this).attr("id").split("_");
-            uid = uid[uid.length - 1];
-            var conf = confirm("Revisi resep?");
-            if(conf) {
-                $.ajax({
-                    url:__HOSTAPI__ + "/Apotek",
-                    beforeSend: function(request) {
-                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-					},
-					type:"POST",
-					data:{
-						request:"revisi_resep",
-						resep: targettedData.uid,
-						dari_obat:uid,
-						ke_obat: ke_obat,
-						signa_qty:signa_qty,
-						signa_pakai:signa_pakai,
-						qty: qty
-					},
-					success:function(response) {
-						//
-					},
-					error: function(response) {
-						console.log(response);
-					}
-				});
-			}
-		});*/
 
         $("#btnProsesResep").click(function() {
             //console.clear();
@@ -910,7 +750,7 @@
         }
     });
 </script>
-<div id="modal-verifikasi" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
+<div id="modal-verifikasi" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
