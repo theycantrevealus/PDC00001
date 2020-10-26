@@ -11,9 +11,13 @@
             type:"GET",
             success:function(response) {
                 targettedData = response.response_package.response_data[0];
+
                 $("#nama-pasien").attr({
                     "set-penjamin": targettedData.antrian.penjamin_data.uid
                 }).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
+                $("#jk-pasien").html(targettedData.antrian.pasien_info.jenkel_nama);
+                $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
+                $("#verifikator").html(targettedData.verifikator.nama);
                 loadDetailResep(targettedData);
 
             },
@@ -124,7 +128,7 @@
 
                     var newDetailCellObat = document.createElement("TD");
                     var newObat = document.createElement("SELECT");
-                    $(newDetailCellObat).append("<h5 class=\"text-info\">" + data.detail[a].detail.nama + "</h5");
+                    $(newDetailCellObat).append("<h5 class=\"text-info\">" + data.detail[a].detail.nama + "</h5>");
                     /*$(newObat).attr({
                         "id": "obat_selector_" + a
                     }).addClass("obatSelector resep-obat form-control").select2();
@@ -265,7 +269,7 @@
 
                         $(newCellRacikanID).attr("rowspan", racikanDetail.length).html(b + 1);
                         $(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
-                        $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5");
+                        $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
                         $(newCellRacikanJlh).addClass("text-center").attr("rowspan", racikanDetail.length);
 
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
@@ -378,7 +382,17 @@
         }
 
         $("#btnSelesai").click(function () {
-            //
+            Swal.fire({
+                title: 'Selesai Proses Resep?',
+                text: "Pastikan batch sudah sesuai. Setelah konfirmasi stok akan terpotong",
+                showDenyButton: true,
+                confirmButtonText: `Ya`,
+                denyButtonText: `Tidak`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //
+                }
+            });
         });
     });
 </script>

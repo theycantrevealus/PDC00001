@@ -112,6 +112,9 @@ class Apotek extends Utility
             $PegawaiInfo = $Pegawai::get_detail($value['dokter']);
             $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
 
+            $VerifikatorInfo = $Pegawai::get_detail($value['verifikator']);
+            $data['response_data'][$key]['verifikator'] = $VerifikatorInfo['response_data'][0];
+
             //Get Antrian Detail
             $Antrian = new Antrian(self::$pdo);
             $AntrianInfo = $Antrian::get_antrian_detail('antrian', $value['antrian']);

@@ -186,7 +186,10 @@ class Inventori extends Utility
                 return self::get_item_select2($parameter);
                 break;
             case 'satu_harga_profit':
-                return  self::satu_harga_profit($parameter);
+                return self::satu_harga_profit($parameter);
+                break;
+            case 'get_stok_back_end':
+                return self::get_stok_back_end($parameter);
                 break;
             default:
                 return $parameter;
@@ -4362,6 +4365,105 @@ class Inventori extends Utility
 
         $itemTotal = self::$query->select('master_inv', array(
             'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
+    private function get_stok_back_end($parameter)
+    {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'inventori_stok.gudang' => '= ?'
+            );
+
+            $paramValue = array($parameter['gudang']);
+        } else {
+            $paramData = array(
+                'inventori_stok.gudang' => '= ?'
+            );
+
+            $paramValue = array($parameter['gudang']);
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('inventori_stok', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'stok_terkini'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'stok_terkini'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $ItemDetail = self::get_item_detail($value['barang'])['response_data'][0];
+            $data['response_data'][$key]['detail'] = $ItemDetail;
+
+            if(file_exists('../images/produk/' . $value['barang'] . '.png')) {
+                $data['response_data'][$key]['image'] = 'images/produk/' . $value['barang'] . '.png';
+            } else {
+                $data['response_data'][$key]['image'] = 'images/product.png';
+            }
+
+            $kategori_obat = self::get_kategori_obat_item($value['barang']);
+            foreach ($kategori_obat as $KOKey => $KOValue) {
+                $kategori_obat[$KOKey]['kategori'] = self::get_kategori_obat_detail($KOValue['kategori'])['response_data'][0]['nama'];
+            }
+
+            $data['response_data'][$key]['kategori_obat'] = $kategori_obat;
+            $data['response_data'][$key]['satuan_terkecil'] = self::get_satuan_detail($value['satuan_terkecil'])['response_data'][0];
+            $data['response_data'][$key]['kategori'] = self::get_kategori_detail($value['kategori'])['response_data'][0];
+            $data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
+
+            //Data Penjamin
+            $PenjaminObat = new Penjamin(self::$pdo);
+            $ListPenjaminObat = $PenjaminObat::get_penjamin_obat($value['barang'])['response_data'];
+            foreach ($ListPenjaminObat as $PenjaminKey => $PenjaminValue) {
+                $ListPenjaminObat[$PenjaminKey]['profit'] = floatval($PenjaminValue['profit']);
+            }
+            $data['response_data'][$key]['penjamin'] = $ListPenjaminObat;
+
+            //Cek Ketersediaan Stok
+            $TotalStock = 0;
+            $InventoriStockPopulator = self::get_item_batch($value['barang']);
+            if (count($InventoriStockPopulator['response_data']) > 0) {
+                foreach ($InventoriStockPopulator['response_data'] as $TotalKey => $TotalValue) {
+                    $TotalStock += floatval($TotalValue['stok_terkini']);
+                }
+                $data['response_data'][$key]['stok'] = $TotalStock;
+                $data['response_data'][$key]['batch'] = $InventoriStockPopulator['response_data'];
+            } else {
+                $data['response_data'][$key]['stok'] = 0;
+            }
+
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('inventori_stok', array(
+            'id'
         ))
             ->where($paramData, $paramValue)
             ->execute();
