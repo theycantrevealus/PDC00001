@@ -649,9 +649,9 @@
                         success:function(response) {
                             if(response.response_package.response_result > 0) {
                                 Swal.fire(
-                                    'Pembayaran Berhasil!',
+                                    "Pembayaran Berhasil!",
                                     response.response_package.response_message,
-                                    'success'
+                                    "success"
                                 ).then((result) => {
                                     var notifier_target = response.response_package.response_notifier;
                                     for(var notifKey in notifier_target)

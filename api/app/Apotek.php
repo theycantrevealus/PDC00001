@@ -89,6 +89,8 @@ class Apotek extends Utility
             'pasien',
             'verifikator',
             'total',
+            'keterangan',
+            'keterangan_racikan',
             'created_at',
             'updated_at'
         ))
@@ -130,6 +132,7 @@ class Apotek extends Utility
                 'signa_pakai',
                 'qty',
                 'satuan',
+                'keterangan',
                 'created_at',
                 'updated_at'
             ))
@@ -165,6 +168,7 @@ class Apotek extends Utility
                 'signa_qty',
                 'signa_pakai',
                 'qty',
+                'keterangan',
                 'created_at',
                 'updated_at'
             ))
@@ -187,6 +191,7 @@ class Apotek extends Utility
                     'obat',
                     'ratio',
                     'pembulatan',
+                    'kekuatan',
                     'harga',
                     'racikan',
                     'takar_bulat',
@@ -936,7 +941,8 @@ class Apotek extends Utility
 
         //Update resep master menjadi kasir
         $Resep = self::$query->update('resep', array(
-            'status_resep' => 'K'
+            'status_resep' => 'K',
+            'verifikator' => $UserData['data']->uid
         ))
             ->where(array(
                 'resep.uid' => '= ?',

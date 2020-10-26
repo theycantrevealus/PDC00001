@@ -445,7 +445,8 @@ class Invoice extends Utility
 
 
         $ResepMaster = self::$query->select('resep', array(
-            'uid'
+            'uid',
+            'asesmen'
         ))
             ->where(array(
                 'resep.kunjungan' => '= ?',
@@ -459,6 +460,19 @@ class Invoice extends Utility
                 $parameter['kunjungan'],
                 $parameter['pasien'],
                 'K'
+            ))
+            ->execute();
+
+        $RacikanMaster = self::$query->select('racikan', array(
+            'uid',
+            'asesmen'
+        ))
+            ->where(array(
+                'racikan.asesmen' => '= ?',
+                'AND',
+                'racikan.deleted_at' => 'IS NULL',
+            ), array(
+                $ResepMaster['response_data'][0]['asesmen']
             ))
             ->execute();
 
@@ -525,6 +539,21 @@ class Invoice extends Utility
                         ), array(
                             $getPaymentDetail['response_data'][0]['item'],
                             $ResepMaster['response_data'][0]['uid']
+                        ))
+                        ->execute();
+
+                    $updateRacikan = self::$query->update('racikan_detail', array(
+                        'status' => 'L'
+                    ))
+                        ->where(array(
+                            'racikan_detail.racikan' => '= ?',
+                            'AND',
+                            'racikan_detail.asesmen' => '= ?',
+                            'AND',
+                            'racikan_detail.deleted_at' => 'IS NULL'
+                        ), array(
+                            $RacikanMaster['response_data'][0]['uid'],
+                            $ResepMaster['response_data'][0]['asesmen']
                         ))
                         ->execute();
                     $goto_apotek = true;
@@ -749,6 +778,19 @@ class Invoice extends Utility
                     $KunjunganUID,
                     $parameter['pasien'],
                     $ResepMaster['response_data'][0]['uid']
+                ))
+                ->execute();
+
+            $UpdateRacikanMaster = self::$query->update('racikan', array(
+                'status' => 'L',
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?',
+                    'AND',
+                    'racikan.deleted_at' => 'IS NULL'
+                ), array(
+                    $ResepMaster['response_data'][0]['asesmen']
                 ))
                 ->execute();
         }

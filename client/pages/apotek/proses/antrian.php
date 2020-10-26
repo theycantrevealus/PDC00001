@@ -29,13 +29,14 @@
                                     <div class="tab-pane active show fade" id="resep-biasa">
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <table id="load-detail-resep" class="table table-bordered table-striped largeDataType">
+                                                <table id="load-detail-resep" class="table table-bordered largeDataType">
                                                     <thead class="thead-dark">
                                                     <tr>
-                                                        <th class="wrap_content">No</th>
+                                                        <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
                                                         <th style="width: 40%;">Obat</th>
                                                         <th width="15%">Signa</th>
                                                         <th width="15%">Jumlah</th>
+                                                        <th>Keterangan</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody></tbody>
@@ -58,11 +59,12 @@
                                                 <table id="load-detail-racikan" class="table table-bordered largeDataType">
                                                     <thead class="thead-dark">
                                                     <tr>
-                                                        <th class="wrap_content">No</th>
+                                                        <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
                                                         <th style="width: 15%;">Racikan</th>
-                                                        <th>Signa</th>
+                                                        <th style="width: 15%;">Signa</th>
+                                                        <th style="width: 15%;">Jumlah</th>
                                                         <th>Obat</th>
-                                                        <th>Jumlah</th>
+                                                        <th>Keterangan</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody></tbody>
