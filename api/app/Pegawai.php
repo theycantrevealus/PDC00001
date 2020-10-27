@@ -206,14 +206,14 @@ class Pegawai extends Utility {
 				$_SESSION['akses_halaman_meta'] = $moduleSelectedMeta['selected_meta'];
 				
 				$_SESSION['profile_pic'] = $profile_pic;
-				if($_SESSION['jabatan']['response_data'][0]['uid'] == __UIDDOKTER__) {
+				if($read[0]['jabatan'] == __UIDDOKTER__) {
 					//Load Dokter Data
 					$Poli = new Poli(self::$pdo);
 					$PoliData = $Poli::get_poli_by_dokter($read[0]['uid']);
 					$_SESSION['poli'] = $PoliData;
 				}
 
-                if($_SESSION['jabatan']['response_data'][0]['uid'] == __UIDPERAWAT__) {
+                if($read[0]['jabatan'] == __UIDPERAWAT__) {
                     //Load Perawat Data
                     $Poli = new Poli(self::$pdo);
                     $PoliData = $Poli::get_poli_by_perawat($read[0]['uid']);

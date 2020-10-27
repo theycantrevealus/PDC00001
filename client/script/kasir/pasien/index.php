@@ -358,7 +358,37 @@
 
 							$("#nomor-invoice").html(invoice_detail.nomor_invoice);
 							var invoice_detail_item = invoice_detail.invoice_detail;
+
+							var kategoriBayar = {
+							    "biaya_administrasi":{
+							        caption:"Biaya Administrasi",
+                                    item: []
+                                },
+                                "biaya_tindakan_tindakan_":{
+                                    caption:"Tindakan Poli",
+                                    item: []
+                                },
+                                "biaya_tindakan_pendukung":{
+                                    caption:"Tindakan Pendukung",
+                                    item: []
+                                },
+                                "biaya_obat":{
+                                    caption:"Biaya Obat",
+                                    item: []
+                                },
+                                "biaya_racikan":{
+                                    caption:"Biaya Racikan",
+                                    item: []
+                                }
+                            };
+
 							for(var invKey in invoice_detail_item) {
+							    console.log(invoice_detail_item[invKey]);
+							    if(invoice_detail_item[invKey].item_type === "master_tindakan")
+                                {
+                                    //Biaya Admnistrasi
+                                    //Biaya Tindakan
+                                }
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
 									status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
@@ -619,9 +649,9 @@
                         success:function(response) {
                             if(response.response_package.response_result > 0) {
                                 Swal.fire(
-                                    'Pembayaran Berhasil!',
+                                    "Pembayaran Berhasil!",
                                     response.response_package.response_message,
-                                    'success'
+                                    "success"
                                 ).then((result) => {
                                     var notifier_target = response.response_package.response_notifier;
                                     for(var notifKey in notifier_target)

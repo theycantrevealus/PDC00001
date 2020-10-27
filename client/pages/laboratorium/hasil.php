@@ -29,23 +29,8 @@
 				</div>
 			</div>
 		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-12">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Hasil Pemeriksaan Lab <span class="title-pemeriksaan"></span></h5>
-			</div>
-            <div class="card-body">
-                <div id="hasil_pemeriksaan" class="hasil_pemeriksaan col-md-12">
-                
-                </div>
-            </div>
-		</div>
-	</div>
-</div>
+        <div id="hasil_pemeriksaan" class="hasil_pemeriksaan">
 
-<div class="row">
-	
+        </div>
+	</div>
 </div>

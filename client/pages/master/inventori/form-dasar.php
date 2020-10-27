@@ -7,6 +7,7 @@
 			<div class="card-header card-header-tabs-basic nav" role="tablist">
 				<a href="#info-dasar-1" class="active" data-toggle="tab" role="tab" aria-controls="asesmen-kerja" aria-selected="true">Umum</a>
 				<a href="#info-dasar-2" data-toggle="tab" role="tab" aria-selected="false">Kategori Obat</a>
+                <a href="#info-dasar-3" data-toggle="tab" role="tab" aria-selected="false">Kandungan Obat</a>
 			</div>
 			<div class="card-body tab-content">
 				<div class="tab-pane active show fade" id="info-dasar-1">
@@ -63,6 +64,18 @@
 						
 					</ul>
 				</div>
+                <div class="tab-pane show fade" id="info-dasar-3">
+                    <table class="table table-bordered largeDataType" id="load-kandungan-obat">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>Kandungan</th>
+                                <th class="wrap_content"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
 			</div>
 		</div>
 	</div>

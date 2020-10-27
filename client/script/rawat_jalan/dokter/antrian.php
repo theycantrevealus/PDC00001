@@ -2,14 +2,15 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function() {
-		var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
-		var poliList = poliListRaw;
+		//var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
+        var poliListRaw = [];
+        var poliListRawList = <?php echo json_encode($_SESSION['poli']['response_data']); ?>;
+        var poliList = [];
 		//var allICD10 = load_icd_10();
         var allICD10 = [];
         var allICD9 = [];
 		var selectedICD10Kerja = [], selectedICD10Banding = [], selectedICD9 = [];
 
-		poliList.tindakan = [];
 		//Filter Rawat Jalan
 		for(var z in poliListRaw.tindakan) {
 			if(poliListRaw.tindakan[z].kelas == __UID_KELAS_GENERAL_RJ__) {
@@ -36,6 +37,14 @@
 			type:"GET",
 			success:function(response) {
 				antrianData = response.response_package.response_data[0];
+                for(var poliSetKey in poliListRawList)
+                {
+                    if(poliListRawList[poliSetKey].poli.response_data[0].uid == antrianData.departemen)
+                    {
+                        poliListRaw.push(poliListRawList[poliSetKey].poli.response_data[0]);
+                    }
+                }
+                poliList = poliListRaw;
 				$("#heading_nama_poli").html(antrianData.poli_info.nama);
 				pasien_uid = antrianData.pasien_info.uid;
 				pasien_nama = antrianData.pasien_info.nama;
@@ -565,7 +574,7 @@
 				allowAdd = true;
 			}
 
-			if(allowAdd) {
+			if(allowAdd && !isNaN(parseInt($("#txt_icd_10_kerja").val()))) {
 				$("#txt_diagnosa_kerja_list tbody").append(
 					"<tr targetICD=\"" + parseInt($("#txt_icd_10_kerja").val()) + "\">" +
 						"<td>" + ($("#txt_diagnosa_kerja_list tbody tr").length + 1) + "</td>" +
@@ -712,8 +721,7 @@
 		$("#current-poli").prepend(poliList[0]['nama']);
 
 		function generateTindakan(poliList, antrianData, selected = []) {
-
-			var tindakanMeta = {};
+		    var tindakanMeta = {};
 			$("#txt_tindakan option").remove();
 			var __UID_KONSULTASI__ = <?php echo json_encode(__UID_KONSULTASI__); ?>;
 			var __UID_KARTU__ = <?php echo json_encode(__UID_KARTU__); ?>;
@@ -3297,10 +3305,10 @@
 					console.log(response);
 				}
 			});
-			
+
 			return selectedTindakan;
 		}*/
-		
+
 		function loadLabOrder(uid_antrian){
 
 			$.ajax({
@@ -3341,7 +3349,7 @@
 					console.log(response);
 				}
 			});
-			
+
 		}
 
 		var dataTableLabOrder = $("#table_order_lab").DataTable({
@@ -3472,6 +3480,13 @@
 				});
 			}*/
 
+            var listTindakanLabTerpilih = {};
+            var listTindakanLabDihapus = [];
+            var listPenjamin = loadDataPenjamin();
+            var LabMode;
+            var uid_lab_order;
+            var uid_penjamin_tindakan_lab = __UIDPENJAMINUMUM__;
+
             $("#tindakan_lab").select2({ //Tindakan Lab Sini
                 minimumInputLength: 2,
                 "language": {
@@ -3521,7 +3536,15 @@
                         });
                     }
                 }
+                $("#lab_nilai_order").html("");
 
+                if(listTindakanLabTerpilih[$("#tindakan_lab").val()] === undefined)
+                {
+                    listTindakanLabTerpilih[$("#tindakan_lab").val()] = {
+                        "penjamin":"",
+                        "item":[]
+                    };
+                }
 
                 for(var key in data.detail)
                 {
@@ -3530,11 +3553,16 @@
                         "<div class=\"flex\">" +
                         "<label for=\"lab_item_" + data.detail[key].id + "\" id=\"label_item_" + data.detail[key].id + "\">" + data.detail[key].keterangan + "</label>" +
                         "<div class=\"custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right\">" +
-                        "<input type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
+                        "<input checked=\"checked\" type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
                         "<label class=\"custom-control-label\" for=\"lab_item_" + data.detail[key].id + "\">Ya</label>" +
                         "</div>" +
                     "</div>");
                     $("#lab_nilai_order").append(LabSelectoriContainer);
+
+                    listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
+                        "id": data.detail[key].id,
+                        "nama": data.detail[key].keterangan
+                    });
                 }
             });
 		}
@@ -3611,27 +3639,21 @@
                                                 nilai = "";
                                             }
                                             // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                            html += '<tr>\
-                                                <td>'+ nomor +'</td>\
-                                                <td>'+ items.keterangan +'</td>\
-                                                <td><input id="nilai_'+ items.uid_tindakan + '_'+ items.id_lab_nilai +'" value="'+ nilai +'" readonly class="form-control inputItemTindakan" placeholder="-" /></td>\
-                                                <td>'+ items.satuan +'</td>\
-                                                <td>'+ items.nilai_min +'</td>\
-                                                <td>'+ items.nilai_maks +'</td>\
-                                            </tr>';
-
+                                            html += "<tr>" +
+                                                "<td>"+ nomor +"</td>" +
+                                                "<td>" + items.keterangan + "</td>" +
+                                                "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" readonly class=\"form-control inputItemTindakan\" placeholder=\"-\" /></td>" +
+                                                "<td>" + items.satuan + "</td>" +
+                                                "<td>" + items.nilai_min + "</td>" +
+                                                "<td>" + items.nilai_maks + "</td>"
+                                            "</tr>";
                                             nomor++;
                                         }
 									});
 								}
-
-								html += '</tbody>\
-									</table><hr />';
-								
-
+								html += "</tbody></table><hr />";
 								$("#lab_hasil_pemeriksaan").append(html);
 							});
-							
 						}
 					},
 					error: function(response) {
@@ -3641,77 +3663,8 @@
 			}
 		}
 
-
-		//loadLabOrder(UID);
-		
-		//initiate laboratorium tindakan data
-		//var listLabTindakan = loadLabTindakan();
 		setLabTindakan();
 
-		//variable for collect selected Tindakan
-		var listTindakanLabTerpilih = {};
-
-		//variable for collect deleted Tindakan
-		var listTindakanLabDihapus = [];
-
-		//variable for load penjamin
-		var listPenjamin = loadDataPenjamin();
-
-		//order lab action mode (new or edit)
-		var LabMode;
-
-		//for edit order lab
-		var uid_lab_order;
-
-		//this variable will be used in action tambahTindakan; default is uid penjamin umum
-		var uid_penjamin_tindakan_lab = __UIDPENJAMINUMUM__;
-
-
-
-
-
-
-
-
-		/*$("#tindakan_lab").on('select2:select', function(){
-			let uidTindakanLab = $(this).val();
-
-			$("#lab_tindakan_notifier").html("");
-			if (pasien_penjamin_uid !== __UIDPENJAMINUMUM__){
-				uid_penjamin_tindakan_lab = __UIDPENJAMINUMUM__;
-
-				let html = '<p><b class="badge badge-warning"><i class="fa fa-exclamation-circle" style="margin-right: 5px;"></i>Tindakan akan ditanggung Penjamin Umum</b></p>';
-
-				$.each(listLabTindakan, function(key_tindakan, item_tindakan){
-					let statusLoop = true;
-					
-					if (item_tindakan.uid === uidTindakanLab){
-
-						$.each(item_tindakan.harga, function(key_harga, item_harga){
-
-							if (pasien_penjamin_uid == item_harga.penjamin){
-								html = '<p><b class="badge badge-success"><i class="fa fa-check-circle" style="margin-right: 5px;"></i>Tindakan ditanggung Penjamin</b></p>';
-								
-								//setter jika dijamin
-								uid_penjamin_tindakan_lab = pasien_penjamin_uid; 
-								statusLoop = false;	
-								return false;
-							}
-
-							});
-
-							if (statusLoop === false){
-							return false;
-						}
-						
-					}
-
-				});
-
-				$("#lab_tindakan_notifier").html(html);
-			}
-
-		});*/
 
 		$("body").on("change", ".lab_order_item_detail", function() {
             if(listTindakanLabTerpilih[$("#tindakan_lab").val()] === undefined)
@@ -3742,14 +3695,10 @@
             $("#lab_nilai_order").html("");
 			$("#btnTambahTindakanLab").removeAttr("disabled");
 			$("#btnSubmitOrderLab").removeAttr("hidden");
-			
 			LabMode = "new";
 			uid_lab_order = "";
-
 			$("#table_tindakan_lab tbody").html("");
 			$("#dr_penanggung_jawab_lab").val("").trigger('change');
-			//setLabTindakan();
-
 			$("#form-tambah-order-lab").modal("show");
 
 			listTindakanLabTerpilih = {};
@@ -3842,12 +3791,15 @@
 			let uidTindakanLab = $("#tindakan_lab").val();
 			let hargaPenjamin = number_format($("#tindakan_lab").attr("harga"), 2, ".", ",");
 
+            console.log(listTindakanLabTerpilih[uidTindakanLab]);
 			if(listTindakanLabTerpilih[uidTindakanLab] === undefined)
             {
                 listTindakanLabTerpilih[uidTindakanLab] = {
                     "penjamin":"",
                     "item":[]
                 };
+            } else {
+			    alert();
             }
 
 			if (
@@ -3895,6 +3847,9 @@
 				$("#lab_tindakan_notifier").html("");
 				setNomorUrut('table_tindakan_lab', 'no_urut_lab');
 			}
+			else {
+			    console.log(listTindakanLabTerpilih[uidTindakanLab]);
+            }
 		});
 		
 		$("#table_tindakan_lab tbody").on('click', '.btnHapusTindakanLab', function(){
@@ -3913,7 +3868,7 @@
 		});
 
 
-		$("#btnSubmitOrderLab").click(function(){
+		/*$("#btnSubmitOrderLab").click(function(){
 			let dokterPJLabOrder = $("#dr_penanggung_jawab_lab").val();
 
 			if (
@@ -3931,7 +3886,7 @@
 					'uid_lab_order': uid_lab_order
 				}
 
-				
+
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Laboratorium",
@@ -3948,13 +3903,6 @@
 						}
 
 						dataTableLabOrder.ajax.reload();
-
-						// reset form
-						// $("#table_tindakan_lab tbody").empty();
-						// $("#dr_penanggung_jawab_lab").val('').trigger('change');
-
-						// $("#tindakan_lab").empty();
-						// setLabTindakan(listLabTindakan);
 						$("#form-tambah-order-lab").modal("hide");
 					},
 					error: function(response) {
@@ -3964,7 +3912,7 @@
 				});
 			}
 
-		});
+		});*/
 
 
 		/*==================== UNIVERSAL FUNCTION =====================*/
@@ -3986,7 +3934,7 @@
 						dokterPJ = response.response_package.response_data;
 						if (dokterPJ.length > 0){
 							for(i = 0; i < dokterPJ.length; i++){
-								
+
 			                    var selection = document.createElement("OPTION");
 			                    $(selection).attr("value", dokterPJ[i].uid).html(dokterPJ[i].nama_dokter);
 			                    $(".dr_penanggung_jawab").append(selection);
@@ -4057,6 +4005,147 @@
 			}
 			/*--------*/
 		}
+
+		$("#btnKonsul").click(function() {
+		    $("#form-konsul").modal("show");
+
+            loadPenjamin();
+            loadPoli();
+            loadPrioritas();
+        });
+
+        $("#konsul_departemen").on('change', function(){
+            var poli = $(this).val();
+
+            if (poli != ""){
+                loadDokter(poli);
+            }
+        });
+
+
+        function loadPenjamin(selected = "") {
+            var dataPenjamin = null;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Penjamin/penjamin",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            $("#konsul_penjamin").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataPenjamin;
+        }
+
+        function loadPoli(selected = ""){
+            var dataPoli = null;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Poli/poli-available",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            $("#konsul_departemen").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataPoli;
+        }
+
+        function loadPrioritas(selected = ""){
+            var term = 11;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + term,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+                            $("#konsul_prioritas").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
+
+        function loadDokter(poli, selected = ""){
+            resetSelectBox('konsul_dokter', 'Dokter');
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Poli/poli-set-dokter/" + poli,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].dokter).html(MetaData[i].nama);
+                            $("#konsul_dokter").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            })
+        }
+
+        $(".inputan_konsul").select2();
+
+        function resetSelectBox(selector, name){
+            $("#"+ selector +" option").remove();
+            var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
+            $("#" + selector).append(opti_null);
+        }
 	});
 
 </script>
@@ -4250,6 +4339,57 @@
                 <button type="button" class="btn btn-danger" data-dismiss="modal">
                     <i class="fa fa-ban"></i> Kembali
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="form-konsul" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Konsul Poliklinik</h5>
+            </div>
+            <div class="modal-body">
+                <div class="card card-form">
+                    <div class="row no-gutters">
+                        <div class="col-lg-12 card-body">
+                            <div class="form-row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Pembayaran <span class="red">*</span></label>
+                                    <select id="konsul_penjamin" class="form-control select2 inputan_konsul" required>
+                                        <option value="" disabled selected>Pilih Jenis Pembayaran</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Prioritas <span class="red">*</span></label>
+                                    <select id="konsul_prioritas" class="form-control select2 inputan_konsul" required>
+                                        <option value="" disabled selected>Pilih Prioritas</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Poliklinik <span class="red">*</span></label>
+                                    <select id="konsul_departemen" class="form-control select2 inputan_konsul" required>
+                                        <option value="" disabled selected>Pilih Poliklinik</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Dokter <span class="red">*</span></label>
+                                    <select id="konsul_dokter" class="form-control select2 inputan_konsul" required>
+                                        <option value="" disabled selected>Pilih Dokter</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnProsesKonsul">
+                    <i class="fa fa-check"></i> Proses Konsul
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
             </div>
         </div>
     </div>

@@ -139,7 +139,7 @@
 
 									html += "<tr disabled>" +
 												"<td class=\"wrap_content\">"+ item.autonum  +"</td>" +
-												"<td class=\"wrap_content\">"+ item.no_rm +"</td>" +
+												"<td>"+ item.no_rm +"</td>" +
 												"<td>"+ item.nama +"</td>" +
 												"<td>"+ nik +"</td>" +
 												"<td class=\"wrap_content\">"+ item.jenkel +"</td>" +

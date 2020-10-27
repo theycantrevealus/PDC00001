@@ -2,6 +2,7 @@
 
 namespace PondokCoder;
 
+use PondokCoder\Authorization as Authorization;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Penjamin as Penjamin;
@@ -54,8 +55,8 @@ class Laboratorium extends Utility {
 				case 'antrian':					
 					return self::get_antrian();		//-> get antrian labor_order
 					break;
-				
-				case 'get-data-pasien-antrian':
+
+                case 'get-data-pasien-antrian':
 					return self::get_data_pasien_antrian($parameter[2]);
 					break;
 
@@ -73,7 +74,7 @@ class Laboratorium extends Utility {
 				
 				case 'get-laboratorium-order':
 					return self::get_laboratorium_order($parameter[2]);
-					break; 
+					break;
 				
 				case 'get-laboratorium-order-detail':
 					return self::get_laboratorium_order_detail($parameter[2]);
@@ -127,7 +128,10 @@ class Laboratorium extends Utility {
 				case 'update-hasil-lab':
 					return self::update_hasil_lab($parameter);
 					break;
-					
+
+                case 'get-antrian-backend':
+                    return self::get_antrian_backend($parameter);
+                    break;
 			}	
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
@@ -1284,7 +1288,7 @@ class Laboratorium extends Utility {
 
 
 	/*==================== FUNCTION FOR PROCCESS LAB DATA =====================*/
-	private function get_antrian(){
+	private function get_antrian($parameter = 'P'){
 		$data = self::$query
 				->select('lab_order', 
 					array(
@@ -1341,7 +1345,7 @@ class Laboratorium extends Utility {
 						'AND',
 						'lab_order.deleted_at' 		=> 'IS NULL'
 					), array(
-						'P'
+                        $parameter
 					)
 				)
 				->order(
@@ -1360,6 +1364,204 @@ class Laboratorium extends Utility {
 
 		return $data;
 	}
+
+    private function get_antrian_backend($parameter)
+    {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            if($parameter['mode'] == 'history')
+            {
+                $paramData = array(
+                    'lab_order.deleted_at' => 'IS NULL',
+                    'AND',
+                    'lab_order.created_at' => 'BETWEEN ? AND ?',
+                    'AND',
+                    'lab_order.status' => '= ?'
+                );
+                $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
+            }
+            else
+            {
+                $paramData = array(
+                    'lab_order.deleted_at' => 'IS NULL',
+                    'AND',
+                    'lab_order.status' => '= ?'
+                );
+                $paramValue = array($parameter['status']);
+            }
+        } else {
+            if($parameter['mode'] == 'history')
+            {
+                $paramData = array(
+                    'lab_order.deleted_at' => 'IS NULL',
+                    'AND',
+                    'lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'AND',
+                    'lab_order.created_at' => 'BETWEEN ? AND ?',
+                    'AND',
+                    'lab_order.status' => '= ?'
+                );
+                $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
+            }
+            else {
+                $paramData = array(
+                    'lab_order.deleted_at' => 'IS NULL',
+                    'AND',
+                    'lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'AND',
+                    'lab_order.status' => '= ?'
+                );
+                $paramValue = array($parameter['status']);
+            }
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query
+                ->select('lab_order',
+                    array(
+                        'uid',
+                        'asesmen as uid_asesmen',
+                        'waktu_order'
+                    )
+                )
+                ->join('asesmen', array(
+                        'antrian as uid_antrian'
+                    )
+                )
+                ->join('antrian', array(
+                        'pasien as uid_pasien',
+                        'dokter as uid_dokter',
+                        'departemen as uid_poli',
+                        'penjamin as uid_penjamin',
+                        'waktu_masuk'
+                    )
+                )
+                ->join('pasien', array(
+                        'nama as pasien',
+                        'no_rm'
+                    )
+                )
+                ->join('master_poli', array(
+                        'nama as departemen'
+                    )
+                )
+                ->join('pegawai', array(
+                        'nama as dokter'
+                    )
+                )
+                ->join('master_penjamin', array(
+                        'nama as penjamin'
+                    )
+                )
+                ->join('kunjungan', array(
+                        'pegawai as uid_resepsionis'
+                    )
+                )
+                ->on(array(
+                        array('lab_order.asesmen', '=', 'asesmen.uid'),
+                        array('asesmen.antrian','=','antrian.uid'),
+                        array('pasien.uid','=','antrian.pasien'),
+                        array('master_poli.uid','=','antrian.departemen'),
+                        array('pegawai.uid','=','antrian.dokter'),
+                        array('master_penjamin.uid','=','antrian.penjamin'),
+                        array('kunjungan.uid','=','antrian.kunjungan')
+                    )
+                )
+                ->where($paramData, $paramValue)
+                ->order(
+                    array(
+                        'lab_order.waktu_order' => 'DESC'
+                    )
+                )
+                ->execute();
+        } else {
+            $data = self::$query
+                ->select('lab_order',
+                    array(
+                        'uid',
+                        'asesmen as uid_asesmen',
+                        'waktu_order'
+                    )
+                )
+                ->join('asesmen', array(
+                        'antrian as uid_antrian'
+                    )
+                )
+                ->join('antrian', array(
+                        'pasien as uid_pasien',
+                        'dokter as uid_dokter',
+                        'departemen as uid_poli',
+                        'penjamin as uid_penjamin',
+                        'waktu_masuk'
+                    )
+                )
+                ->join('pasien', array(
+                        'nama as pasien',
+                        'no_rm'
+                    )
+                )
+                ->join('master_poli', array(
+                        'nama as departemen'
+                    )
+                )
+                ->join('pegawai', array(
+                        'nama as dokter'
+                    )
+                )
+                ->join('master_penjamin', array(
+                        'nama as penjamin'
+                    )
+                )
+                ->join('kunjungan', array(
+                        'pegawai as uid_resepsionis'
+                    )
+                )
+                ->on(array(
+                        array('lab_order.asesmen', '=', 'asesmen.uid'),
+                        array('asesmen.antrian','=','antrian.uid'),
+                        array('pasien.uid','=','antrian.pasien'),
+                        array('master_poli.uid','=','antrian.departemen'),
+                        array('pegawai.uid','=','antrian.dokter'),
+                        array('master_penjamin.uid','=','antrian.penjamin'),
+                        array('kunjungan.uid','=','antrian.kunjungan')
+                    )
+                )
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->order(
+                    array(
+                        'lab_order.waktu_order' => 'DESC'
+                    )
+                )
+                ->execute();
+        }
+
+
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order'])) . ' - [' . date('H:i', strtotime($value['waktu_order'])) . ']';
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('lab_order', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
 
 	/*------------------- GET DATA PASIEN and ANTRIAN --------------------*/
 	private function get_data_pasien_antrian($parameter){
@@ -1394,6 +1596,8 @@ class Laboratorium extends Utility {
 		
 		return $result;
 	}
+
+
 
 	private function get_laboratorium_order_detail_item($parameter){
 		$data = self::$query
@@ -2664,9 +2868,24 @@ class Laboratorium extends Utility {
                         $result['order_detail'] = array();
                     }
 				}
-
 			}
-			
+
+		    if(isset($parameter['selesai'])) {
+		        if($parameter['selesai'] == 'Y')
+                {
+                    $selesai = self::$query->update('lab_order', array(
+                        'status' => 'D'
+                    ))
+                        ->where(array(
+                            'lab_order.uid' => '= ?',
+                            'AND',
+                            'lab_order.deleted_at' => 'IS NULL'
+                        ), array(
+                            $parameter['uid_order']
+                        ))
+                        ->execute();
+                }
+            }
 		}
 
 		//create new 

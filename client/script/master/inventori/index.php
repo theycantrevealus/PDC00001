@@ -55,7 +55,7 @@
 
 						return 		"<div class=\"row\">" +
 										"<div class=\"col-md-2\">" +
-											"<img style=\"border-radius: 5px;\" src=\"" + __HOST__ + row.image + "\" width=\"60\" height=\"60\" />" +
+											"<center><img style=\"border-radius: 5px;\" src=\"" + __HOST__ + row.image + "\" width=\"60\" height=\"60\" /></center>" +
 										"</div>" +
 										"<div class=\"col-md-10\">" +
 											"<b><i>" + ((row["kode_barang"] == undefined) ? "[KODE_BARANG]" : row["kode_barang"].toUpperCase()) + "</i></b><br />" +

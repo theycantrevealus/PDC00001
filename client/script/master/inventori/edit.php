@@ -1,5 +1,7 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
 	$(function() {
+	    //load-kandungan-obat
 		var MODE = "edit";
 		var UID = __PAGES__[3];
 		var selectedDariSatuanList = [];
