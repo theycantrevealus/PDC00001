@@ -4005,6 +4005,147 @@
 			}
 			/*--------*/
 		}
+
+		$("#btnKonsul").click(function() {
+		    $("#form-konsul").modal("show");
+
+            loadPenjamin();
+            loadPoli();
+            loadPrioritas();
+        });
+
+        $("#konsul_departemen").on('change', function(){
+            var poli = $(this).val();
+
+            if (poli != ""){
+                loadDokter(poli);
+            }
+        });
+
+
+        function loadPenjamin(selected = "") {
+            var dataPenjamin = null;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Penjamin/penjamin",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            $("#konsul_penjamin").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataPenjamin;
+        }
+
+        function loadPoli(selected = ""){
+            var dataPoli = null;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Poli/poli-available",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            $("#konsul_departemen").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataPoli;
+        }
+
+        function loadPrioritas(selected = ""){
+            var term = 11;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + term,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+                            $("#konsul_prioritas").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
+
+        function loadDokter(poli, selected = ""){
+            resetSelectBox('konsul_dokter', 'Dokter');
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Poli/poli-set-dokter/" + poli,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].dokter).html(MetaData[i].nama);
+                            $("#konsul_dokter").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            })
+        }
+
+        $(".inputan_konsul").select2();
+
+        function resetSelectBox(selector, name){
+            $("#"+ selector +" option").remove();
+            var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
+            $("#" + selector).append(opti_null);
+        }
 	});
 
 </script>
@@ -4198,6 +4339,57 @@
                 <button type="button" class="btn btn-danger" data-dismiss="modal">
                     <i class="fa fa-ban"></i> Kembali
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="form-konsul" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Konsul Poliklinik</h5>
+            </div>
+            <div class="modal-body">
+                <div class="card card-form">
+                    <div class="row no-gutters">
+                        <div class="col-lg-12 card-body">
+                            <div class="form-row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Pembayaran <span class="red">*</span></label>
+                                    <select id="konsul_penjamin" class="form-control select2 inputan_konsul" required>
+                                        <option value="" disabled selected>Pilih Jenis Pembayaran</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Prioritas <span class="red">*</span></label>
+                                    <select id="konsul_prioritas" class="form-control select2 inputan_konsul" required>
+                                        <option value="" disabled selected>Pilih Prioritas</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Poliklinik <span class="red">*</span></label>
+                                    <select id="konsul_departemen" class="form-control select2 inputan_konsul" required>
+                                        <option value="" disabled selected>Pilih Poliklinik</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Dokter <span class="red">*</span></label>
+                                    <select id="konsul_dokter" class="form-control select2 inputan_konsul" required>
+                                        <option value="" disabled selected>Pilih Dokter</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnProsesKonsul">
+                    <i class="fa fa-check"></i> Proses Konsul
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
             </div>
         </div>
     </div>

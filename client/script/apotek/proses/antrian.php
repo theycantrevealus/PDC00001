@@ -11,7 +11,6 @@
             type:"GET",
             success:function(response) {
                 targettedData = response.response_package.response_data[0];
-
                 $("#nama-pasien").attr({
                     "set-penjamin": targettedData.antrian.penjamin_data.uid
                 }).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
@@ -97,8 +96,10 @@
                             selectedBatchResep[bKey].used = kebutuhan;
                         }
                         kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
-
-                        selectedBatchList.push(selectedBatchResep[bKey]);
+                        if(selectedBatchResep[bKey].used > 0)
+                        {
+                            selectedBatchList.push(selectedBatchResep[bKey]);
+                        }
                     }
                 }
 
@@ -162,7 +163,14 @@
 
                     var newDetailCellQty = document.createElement("TD");
                     var newQty = document.createElement("INPUT");
-                    $(newDetailCellQty).addClass("text_center").append("<h5 class=\"text_center\">" + parseFloat(data.detail[a].qty + "</h5>"));
+                    var statusSedia = "";
+                    if(data.detail[a].qty < data.detail[a].sedia)
+                    {
+                        statusSedia = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + data.detail[a].sedia + "</b>";
+                    } else {
+                        statusSedia = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia" + data.detail[a].sedia + "</b>";
+                    }
+                    $(newDetailCellQty).addClass("text_center").append("<h5 class=\"text_center\">" + parseFloat(data.detail[a].qty) + "</h5>").append(statusSedia);
                     /*$(newQty).inputmask({
                         alias: "decimal",
                         rightAlign: true,
@@ -383,14 +391,41 @@
 
         $("#btnSelesai").click(function () {
             Swal.fire({
-                title: 'Selesai Proses Resep?',
+                title: "Selesai Proses Resep?",
                 text: "Pastikan batch sudah sesuai. Setelah konfirmasi stok akan terpotong",
                 showDenyButton: true,
-                confirmButtonText: `Ya`,
-                denyButtonText: `Tidak`,
+                confirmButtonText: "Ya",
+                denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    //
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Apotek",
+                        async:false,
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        data:{
+                            request: "proses_resep",
+                            resep: resepUID,
+                            asesmen: targettedData.asesmen
+                        },
+                        type:"POST",
+                        success:function(response) {
+                            if(response.response_package.response_result > 0)
+                            {
+                                Swal.fire(
+                                    "Pembayaran Berhasil!",
+                                    response.response_package.response_message,
+                                    "success"
+                                ).then((result) => {
+                                    location.href = __HOST
+                                });
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
                 }
             });
         });

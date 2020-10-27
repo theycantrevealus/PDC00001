@@ -3,8 +3,8 @@
 		<button type="button" class="btn btn-success" id="btnSelesai">
 			<i class="fa fa-check-circle"></i> Selesai
 		</button>
-		<button type="button" class="btn btn-info" id="btnRI">
-			<i class="fa fa-bed"></i> Rawat Inap
+		<button type="button" class="btn btn-info" id="btnKonsul">
+			<i class="fa fa-business-time"></i> Konsul
 		</button>
 		<button type="button" class="btn btn-warning" id="btnRujuk">
 			<i class="fa fa-ambulance"></i> Rujuk

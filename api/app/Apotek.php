@@ -65,6 +65,9 @@ class Apotek extends Utility
                     $parameter['status'] = 'L';
                     return self::get_resep_backend($parameter);
                     break;
+                case 'proses_resep':
+                    return self::proses_resep($parameter);
+                    break;
                 default:
                     return self::get_resep();
             }
@@ -78,8 +81,76 @@ class Apotek extends Utility
         //
     }
 
+    private function proses_resep($parameter)
+    {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $usedBatch = array();
+
+
+        //Potong Stok
+        $resepItem = self::$query->select('resep_detail', array(
+            'obat',
+            'qty',
+            'penjamin'
+        ))
+            ->where(array(
+                'resep_detail.uid' => '= ?',
+                'AND',
+                'resep_detail.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['resep']
+            ))
+            ->execute();
+        foreach ($resepItem['response_data'] as $key => $value)
+        {
+            //Potong Batch terdekat
+            $Inventori = new Inventori(self::$pdo);
+            $InventoriBatch = $Inventori::get_item_batch($value['obat']);
+
+            $kebutuhan = floatval($value['qty']);
+
+            //Batch terpotong
+            foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
+            {
+                if($bValue['gudang'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
+                {
+                    if($kebutuhan > $bValue['stok_terkini'])
+                    {
+                        $kebutuhan -= $bValue['stok_terkini'];
+                        array_push($usedBatch, array(
+                            'batch' => $bValue['batch'],
+                            'qty' => $bValue['stok_terkini']
+                        ));
+                    } else {
+                        array_push($usedBatch, array(
+                            'batch' => $bValue['batch'],
+                            'qty' => $kebutuhan
+                        ));
+                    }
+                }
+            }
+        }
+
+        $racikanData = self::$query->select('racikan', array(
+            'uid'
+        ))
+            ->where(array(
+                'racikan.asesmen' => '= ?',
+                'AND',
+                'racikan_deleted' => 'IS NULL'
+            ), array(
+                $parameter['asesmen']
+            ))
+            ->execute();
+    }
+
     private function detail_resep($parameter, $status = 'N')
     {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
         $data = self::$query->select('resep', array(
             'uid',
             'kunjungan',
@@ -156,6 +227,15 @@ class Apotek extends Utility
                 $Inventori = new Inventori(self::$pdo);
                 $InventoriBatch = $Inventori::get_item_batch($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
+                $total_sedia = 0;
+                foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
+                {
+                    if($bValue['gudang']['uid'] == $UserData['data']->gudang)
+                    {
+                        $total_sedia += $bValue['stok_terkini'];
+                    }
+                }
+                $resep_detail['response_data'][$ResKey]['sedia'] = $total_sedia;
             }
             $data['response_data'][$key]['detail'] = $resep_detail['response_data'];
 
