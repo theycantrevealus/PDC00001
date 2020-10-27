@@ -10,7 +10,7 @@
 			load_po(__PAGES__[3]);
 			$("#supplier").attr("disabled", "disabled");
 			loadGudang();
-			autoRow();
+			//autoRow();
 			/*loadItem(1);
 			loadSatuan(1);*/
 		} else {
@@ -88,7 +88,7 @@
 			var newAksi = document.createElement("TD");
 
 			var newItemSeletor = document.createElement("SELECT");
-			var itemData = loadItem();
+			var itemData = loadItem(selectedItem);
 			var selectedSatuan = "-";
 			$(newItemSeletor).append("<option satuan=\"-\" value=\"none\">Pilih Obat</option>");
 			for(var itemKey in itemData) {
@@ -98,7 +98,9 @@
 			}
 			if(!allowAdd) {
 				$(newItemSeletor).attr("disabled", "disabled");	
-			}
+			} else {
+                $(newItemSeletor).attr("disabled", "disabled");
+            }
 			$(newItem).append(newItemSeletor);
 			$(newItemSeletor).select2().addClass("itemSelection form-control");
 
@@ -221,12 +223,12 @@
 
 		}
 
-		function loadItem(){
+		function loadItem(selected){
 			var dataItem;
 
 			$.ajax({
 				async: false,
-				url:__HOSTAPI__ + "/Inventori",
+				url:__HOSTAPI__ + "/Inventori/item_detail/" + selected,
 				type: "GET",
 				 beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);

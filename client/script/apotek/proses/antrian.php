@@ -282,7 +282,14 @@
 
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
                         var newRacikanObat = document.createElement("SELECT");
-                        $(newCellRacikanObat).append("<h5 class=\"text-info\">" + RacikanObatData.data[0].nama + " <b class=\"text-danger text-right\">[" + racikanDetail[racDetailKey].kekuatan + "]</b></h5>");
+                        var statusSediaRacikan = "";
+                        if(data.racikan[b].qty < racikanDetail[racDetailKey].sedia)
+                        {
+                            statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + racikanDetail[racDetailKey].sedia + "</b>";
+                        } else {
+                            statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia" + racikanDetail[racDetailKey].sedia + "</b>";
+                        }
+                        $(newCellRacikanObat).append("<h5 class=\"text-info\">" + RacikanObatData.data[0].nama + " <b class=\"text-danger text-right\">[" + racikanDetail[racDetailKey].kekuatan + "]</b></h5>").append(statusSediaRacikan);
 
                         $(newRacikanObat).attr({
                             "id": "racikan_obat_" + data.racikan[b].uid + "_" + racDetailKey,
@@ -342,6 +349,9 @@
                             autoGroup: false,
                             digitsOptional: true
                         });*/
+
+
+
                         $(newCellRacikanJlh).html("<h5>" + data.racikan[b].qty + "<h5>");
                         $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
 
@@ -411,14 +421,16 @@
                         },
                         type:"POST",
                         success:function(response) {
-                            if(response.response_package.response_result > 0)
+                            console.clear();
+                            console.log(response);
+                            if(response.response_package.stok_result > 0)
                             {
                                 Swal.fire(
-                                    "Pembayaran Berhasil!",
-                                    response.response_package.response_message,
+                                    "Proses Berhasil!",
+                                    "resep berhasil diproses",
                                     "success"
                                 ).then((result) => {
-                                    location.href = __HOST
+                                    location.href = __HOSTNAME__ + "/apotek/proses";
                                 });
                             }
                         },

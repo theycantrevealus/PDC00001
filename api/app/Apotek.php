@@ -87,6 +87,7 @@ class Apotek extends Utility
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
         $usedBatch = array();
+        $rawBatch = array();
 
 
         //Potong Stok
@@ -96,7 +97,7 @@ class Apotek extends Utility
             'penjamin'
         ))
             ->where(array(
-                'resep_detail.uid' => '= ?',
+                'resep_detail.resep' => '= ?',
                 'AND',
                 'resep_detail.deleted_at' => 'IS NULL'
             ), array(
@@ -114,18 +115,22 @@ class Apotek extends Utility
             //Batch terpotong
             foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
             {
-                if($bValue['gudang'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
+                if($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
                 {
                     if($kebutuhan > $bValue['stok_terkini'])
                     {
                         $kebutuhan -= $bValue['stok_terkini'];
                         array_push($usedBatch, array(
                             'batch' => $bValue['batch'],
+                            'barang' => $value['obat'],
+                            'gudang' => $bValue['gudang']['uid'],
                             'qty' => $bValue['stok_terkini']
                         ));
                     } else {
                         array_push($usedBatch, array(
                             'batch' => $bValue['batch'],
+                            'barang' => $value['obat'],
+                            'gudang' => $bValue['gudang']['uid'],
                             'qty' => $kebutuhan
                         ));
                     }
@@ -133,17 +138,187 @@ class Apotek extends Utility
             }
         }
 
-        $racikanData = self::$query->select('racikan', array(
-            'uid'
+        $racikan = self::$query->select('racikan', array(
+            'uid',
+            'qty'
         ))
             ->where(array(
                 'racikan.asesmen' => '= ?',
                 'AND',
-                'racikan_deleted' => 'IS NULL'
+                'racikan.status' => '= ?',
+                'AND',
+                'racikan.deleted_at' => 'IS NULL'
             ), array(
-                $parameter['asesmen']
+                $parameter['asesmen'],
+                'L'
             ))
             ->execute();
+        foreach ($racikan['response_data'] as $rKey => $rValue)
+        {
+            $racikanItem = self::$query->select('racikan_detail', array(
+                'obat'
+            ))
+                ->where(array(
+                    'racikan_detail.racikan' => '= ?',
+                    'AND',
+                    'racikan_detail.asesmen' => '= ?',
+                    'AND',
+                    'racikan_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $rValue['uid'],
+                    $parameter['asesmen']
+                ))
+                ->execute();
+
+            foreach ($racikanItem['response_data'] as $rIKey => $rIValue)
+            {
+                //Potong Batch terdekat
+                $Inventori = new Inventori(self::$pdo);
+                $InventoriBatch = $Inventori::get_item_batch($rIValue['obat']);
+
+                $kebutuhan = floatval($rValue['qty']);
+
+                //Batch terpotong
+                foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
+                {
+                    if($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
+                    {
+                        if($kebutuhan > $bValue['stok_terkini'])
+                        {
+                            $kebutuhan -= $bValue['stok_terkini'];
+                            if($bValue['stok_terkini'] > 0) {
+                                if($bValue['stok_terkini'] > 0)
+                                {
+                                    array_push($usedBatch, array(
+                                        'batch' => $bValue['batch'],
+                                        'barang' => $rIValue['obat'],
+                                        'gudang' => $bValue['gudang']['uid'],
+                                        'qty' => $bValue['stok_terkini']
+                                    ));
+                                }
+                            }
+                        } else {
+                            if($kebutuhan > 0) {
+                                if($kebutuhan > 0)
+                                {
+                                    array_push($usedBatch, array(
+                                        'batch' => $bValue['batch'],
+                                        'barang' => $rIValue['obat'],
+                                        'gudang' => $bValue['gudang']['uid'],
+                                        'qty' => $kebutuhan
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $updateResult = 0;
+        $updateProgress = array();
+
+        foreach ($usedBatch as $bKey => $bValue)
+        {
+            //Stok Sebelum Update
+            $getStok = self::$query->select('inventori_stok', array(
+                'id',
+                'gudang',
+                'barang',
+                'stok_terkini'
+            ))
+                ->where(array(
+                    'inventori_stok.gudang' => '= ?',
+                    'AND',
+                    'inventori_stok.barang' => '= ?'
+                ), array(
+                    $bValue['gudang'],
+                    $bValue['barang']
+                ))
+                ->execute();
+
+
+            //Potong Stok
+            if(
+                floatval($bValue['qty']) > 0 &&
+                floatval($getStok['response_data'][0]['stok_terkini']) > floatval($bValue['qty'])
+            )
+            {
+                $updateStok = self::$query->update('inventori_stok', array(
+                    'stok_terkini' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($bValue['qty']))
+                ))
+                    ->where(array(
+                        'inventori_stok.gudang' => '= ?',
+                        'AND',
+                        'inventori_stok.barang' => '= ?',
+                        'AND',
+                        'inventori_stok.batch' => '= ?'
+                    ), array(
+                        $bValue['gudang'],
+                        $bValue['barang'],
+                        $bValue['batch']
+                    ))
+                    ->execute();
+                if($updateStok['response_result'] > 0)
+                {
+                    //Log Stok
+                    $stokLog = self::$query->insert('inventori_stok_log', array(
+                        'barang' => $bValue['barang'],
+                        'batch'=> $bValue['batch'],
+                        'gudang' => $bValue['gudang'],
+                        'masuk' => 0,
+                        'keluar' => floatval($bValue['qty']),
+                        'saldo' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($bValue['qty'])),
+                        'type' => __STATUS_BARANG_KELUAR__,
+                        'jenis_transaksi' => 'resep',
+                        'uid_foreign' => $parameter['resep'],
+                        'keterangan' => ''
+                    ))
+                        ->execute();
+                    $updateResult += $stokLog['response_result'];
+                }
+                array_push($updateProgress, $updateStok);
+            }
+        }
+
+        if($updateResult == count($usedBatch))
+        {
+            //Update Resep
+            $updateResep = self::$query->update('resep', array(
+                'status_resep' => 'D'
+            ))
+                ->where(array(
+                    'resep.uid' => '= ?'
+                ), array(
+                    $parameter['resep']
+                ))
+                ->execute();
+
+            //Update Racikan
+            $updateRacikan = self::$query->update('racikan', array(
+                'status' => 'D'
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?',
+                    'AND',
+                    'racikan.status' => '= ?',
+                    'AND',
+                    'racikan.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['asesmen'],
+                    'L'
+                ))
+                ->execute();
+        }
+
+        return array(
+            'result' => $usedBatch,
+            'resep' => $resepItem,
+            'racikan' => $racikan,
+            'raw_batch' => $rawBatch,
+            'stok_progress' => $updateProgress,
+            'stok_result' => ($updateResult == count($usedBatch)) ? 1 : 0
+        );
     }
 
     private function detail_resep($parameter, $status = 'N')
@@ -230,7 +405,7 @@ class Apotek extends Utility
                 $total_sedia = 0;
                 foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
                 {
-                    if($bValue['gudang']['uid'] == $UserData['data']->gudang)
+                    if($bValue['gudang']['uid'] === $UserData['data']->gudang)
                     {
                         $total_sedia += $bValue['stok_terkini'];
                     }
@@ -299,8 +474,18 @@ class Apotek extends Utility
                     $InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
 
-                    $InventoriBacth = $Inventori::get_item_batch($RDIValue['obat']);
-                    $racikan_detail['response_data'][$RDIKey]['batch'] = $InventoriBacth['response_data'];
+                    $InventoriBacthRacikan = $Inventori::get_item_batch($RDIValue['obat']);
+                    $racikan_detail['response_data'][$RDIKey]['batch'] = $InventoriBacthRacikan['response_data'];
+
+                    $total_sedia_racikan = 0;
+                    foreach ($InventoriBacthRacikan['response_data'] as $bRKey => $bRValue)
+                    {
+                        if($bRValue['gudang']['uid'] === $UserData['data']->gudang)
+                        {
+                            $total_sedia_racikan += floatval($bRValue['stok_terkini']);
+                        }
+                    }
+                    $racikan_detail['response_data'][$RDIKey]['sedia'] = $total_sedia_racikan;
                 }
                 $racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];
             }
