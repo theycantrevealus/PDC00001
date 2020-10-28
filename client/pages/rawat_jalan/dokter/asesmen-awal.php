@@ -1,5 +1,5 @@
 <?php
-if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === '5787593b-f840-4622-84f0-ce6a29fa62b8') {
+if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === __UIDFISIOTERAPI__) {
     ?>
     <div class="row">
         <div class="col-lg">

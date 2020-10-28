@@ -116,7 +116,13 @@
 				</div>
 				<div class="tab-pane show fade active" id="tab-poli-2">
 					<?php require 'info-pasien.php'; ?>
-					<?php require 'asesmen-awal.php'; ?>
+                    <?php
+                    if(in_array(__POLI_GIGI__, $PoliList)) {
+                        require 'asesmen-gigi.php';
+                    } else {
+                        require 'asesmen-awal.php';
+                    }
+                    ?>
 				</div>
                 <div class="tab-pane show fade" id="tab-poli-9">
                     <?php require 'info-pasien.php'; ?>
