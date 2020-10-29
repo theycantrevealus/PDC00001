@@ -4189,7 +4189,7 @@
         var currentOrdonMeta = {};
 
 
-        $(".ordo-top").click(function() {
+        $(".ordo-top").click(function(){
             modeOrdo = "free";
             targetWarnaOrdo = "";
             $(".set_gigi tr").each(function() {
@@ -4329,6 +4329,7 @@
 
         $(".side").click(function() {
             var id = activeSelected.attr("id");
+            var targetSide = $(this).attr("class").split(" ");
             var targetModeSet = $(this).attr("mode-set");
 
             if(id === "tambal_logam")
@@ -4356,9 +4357,19 @@
                 targetWarnaOrdo = "modeset_nonlogam";
             }
 
+            if(id === "car")
+            {
+                targetWarnaOrdo = "modeset_caries";
+            }
+
             var targetModeClass = targetWarnaOrdo;
 
             if(targetModeSet === undefined) {
+                //Clear old modeset
+                $(this).removeClass (function (index, className) {
+                    return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                }).removeAttr("mode-class").removeAttr("mode-set");
+
                 $(this).attr({
                     "mode-set": id,
                     "mode-class" : targetWarnaOrdo
