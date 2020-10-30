@@ -4189,16 +4189,19 @@
         var currentOrdonMeta = {};
 
 
-        $(".ordo-top").click(function(){
+        $(".ordo-top").click(function() {
             modeOrdo = "free";
             targetWarnaOrdo = "";
             $(".set_gigi tr").each(function() {
                 $(this).fadeIn();
             });
+
             setMord(".global_assigner", "", true);
+
             $(".perawatan_akar_sign").css({
                 "visibility": "hidden"
             });
+
             setMahkota(".single_gigi", "mahkota_logam", ["mahkota_nonlogam", "mahkota_logam"], true);
             setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_nonlogam", "mahkota_logam"], true);
             setPredefined("#predefined", "", true);
@@ -4538,6 +4541,10 @@
                 var settedPiece = $(this).attr("class").split(" ");
                 if(currentOrdonMeta[settedPiece[0]].tambal !== "")
                 {
+                    $(this).removeClass (function (index, className) {
+                        return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                    }).removeAttr("mode-class").removeAttr("mode-set");
+
                     if($(this).hasClass(settedPiece[0])) {
                         var getModeSet = currentOrdonMeta[settedPiece[0]].tambal.split("_");
 
