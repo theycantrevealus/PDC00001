@@ -11,12 +11,26 @@
         var allICD9 = [];
 		var selectedICD10Kerja = [], selectedICD10Banding = [], selectedICD9 = [];
 
+		var dataOdontogram = "";
+        var dataMukaSimetris = "";
+        var dataTMJ = "";
+        var dataBibir = "";
+        var dataLidah = "";
+        var dataMukosa = "";
+        var dataTorus = "";
+        var dataGingiva = "";
+        var dataFrenulum = "";
+        var dataKebersihanMulut = "";
+
+
 		//Filter Rawat Jalan
 		for(var z in poliListRaw.tindakan) {
 			if(poliListRaw.tindakan[z].kelas == __UID_KELAS_GENERAL_RJ__) {
 				poliList.tindakan.push(poliListRaw.tindakan);
 			}
 		}
+
+        var metaSelOrdo = {};
 
 		//Init
 		var editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorKeteranganResepRacikan, editorPlanning;
@@ -244,6 +258,64 @@
 								);
 							}
 						}
+
+						if(asesmen_detail.muka_simetris !== undefined) {
+                            $("input[name=\"simetris\"]").prop("checked", false);
+                            $("input[name=\"simetris\"][value=\"" + asesmen_detail.muka_simetris + "\"]").prop("checked", true);
+                        }
+
+                        if(asesmen_detail.tmj !== undefined) {
+                            $("input[name=\"sendi\"]").prop("checked", false);
+                            $("input[name=\"sendi\"][value=\"" + asesmen_detail.tmj + "\"]").prop("checked", true);
+                        }
+
+                        if(asesmen_detail.bibir !== undefined) {
+                            $("input[name=\"bibir\"]").prop("checked", false);
+                            $("input[name=\"bibir\"][value=\"" + asesmen_detail.bibir + "\"]").prop("checked", true);
+                        }
+
+                        if(asesmen_detail.lidah !== undefined) {
+                            $("input[name=\"lidah\"]").prop("checked", false);
+                            $("input[name=\"lidah\"][value=\"" + asesmen_detail.lidah + "\"]").prop("checked", true);
+                        }
+
+                        if(asesmen_detail.mukosa !== undefined) {
+                            $("input[name=\"mukosa\"]").prop("checked", false);
+                            $("input[name=\"mukosa\"][value=\"" + asesmen_detail.mukosa + "\"]").prop("checked", true);
+                        }
+
+                        if(asesmen_detail.torus !== undefined) {
+                            $("input[name=\"torus\"]").prop("checked", false);
+                            $("input[name=\"torus\"][value=\"" + asesmen_detail.torus + "\"]").prop("checked", true);
+                        }
+
+                        if(asesmen_detail.gingiva !== undefined) {
+                            $("input[name=\"gingiva\"]").prop("checked", false);
+                            $("input[name=\"gingiva\"][value=\"" + asesmen_detail.gingiva + "\"]").prop("checked", true);
+                        }
+
+                        if(asesmen_detail.frenulum !== undefined) {
+                            $("input[name=\"frenulum\"]").prop("checked", true);
+                            $("input[name=\"frenulum\"][value=\"" + asesmen_detail.frenulum + "\"]").prop("checked", true);
+                        }
+
+                        if(asesmen_detail.kebersihan_mulut !== undefined) {
+                            $("input[name=\"mulut_bersih\"]").prop("checked", false);
+                            $("input[name=\"mulut_bersih\"][value=\"" + asesmen_detail.kebersihan_mulut + "\"]").prop("checked", true);
+                        }
+
+                        dataOdontogram = asesmen_detail.odontogram;
+                        dataMukaSimetris = asesmen_detail.muka_simetris;
+                        dataTMJ = asesmen_detail.tmj;
+                        dataBibir = asesmen_detail.bibir;
+                        dataLidah = asesmen_detail.lidah;
+                        dataMukosa = asesmen_detail.mukosa;
+                        dataTorus = asesmen_detail.torus;
+                        dataGingiva = asesmen_detail.gingiva;
+                        dataFrenulum = asesmen_detail.frenulum;
+                        dataKebersihanMulut = asesmen_detail.kebersihan_mulut;
+
+
 						
 						parse_icd_10("#txt_icd_10_kerja", allICD10, rawSelectedKerja);
 						parse_icd_10("#txt_icd_10_banding", allICD10, rawSelectedBanding);
@@ -403,9 +475,18 @@
 								//console.error( err.stack );
 							} );
 
+                        if(antrianData.poli_info.uid === __POLI_MATA__) {
+                            var readMetaResepMata = JSON.parse(asesmen_detail.meta_resep);
+                            for(var mataKey in readMetaResepMata)
+                            {
+                                $("#" + mataKey).val(readMetaResepMata[mataKey]);
+                            }
 
-
-
+                            var tujuanMata = asesmen_detail.tujuan_resep.split(",");
+                            for(tujuanMataKey in tujuanMata) {
+                                $(".tujuan_resep[value=\"" + tujuanMata[tujuanMataKey] + "\"]").prop("checked", true);
+                            }
+                        }
 
 						//Terapis CKEDITOR
                         if(antrianData.poli_info.uid === __UIDFISIOTERAPI__) {
@@ -1568,14 +1649,6 @@
 				});
 			});
 		}
-
-
-
-
-
-
-
-
 		
 		function checkGenerateRacikan(id = 0) {
 			if($(".last-racikan").length == 0) {
@@ -1597,7 +1670,6 @@
 				}
 			}
 		}
-
 
 		function autoRacikan(setter = {
 			"nama": "",
@@ -2727,21 +2799,137 @@
                     icd10_banding: selectedICD10Banding,
                     diagnosa_banding: diagnosaBandingData,
                     planning: planningData,
-                    anamnesa:terapisAnamnesa,
+                    anamnesa: terapisAnamnesa,
                     tataLaksana: terapisTataLaksana,
                     evaluasi: terapisEvaluasi,
                     anjuranBulan: parseFloat(terapisAnjuranBulan),
                     anjuranMinggu: parseFloat(terapisAnjuranMinggu),
                     suspek: terapisSuspek,
-                    hasil:terapisHasil,
-                    kesimpulan:terapisKesimpulan,
-                    rekomendasi:terapisRekomendasi,
+                    hasil: terapisHasil,
+                    kesimpulan: terapisKesimpulan,
+                    rekomendasi: terapisRekomendasi,
                     //==============================
-                    tindakan:tindakan,
+                    tindakan: tindakan,
                     resep: resep,
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan
+                };
+            } else if(antrianData.poli_info.uid === __POLI_GIGI__) {
+                var simetris = $("input[name=\"simetris\"]:checked").val();
+                var sendi = $("input[name=\"sendi\"]:checked").val();
+                var bibir = $("input[name=\"bibir\"]:checked").val();
+                var lidah = $("input[name=\"lidah\"]:checked").val();
+                var mukosa = $("input[name=\"mukosa\"]:checked").val();
+                var torus = $("input[name=\"torus\"]:checked").val();
+                var gingiva = $("input[name=\"gingiva\"]:checked").val();
+                var frenulum = $("input[name=\"frenulum\"]:checked").val();
+                var mulut_bersih = $("input[name=\"mulut_bersih\"]:checked").val();
+
+                var formData = {
+                    request: "update_asesmen_medis",
+                    kunjungan: kunjungan,
+                    antrian: antrian,
+                    penjamin: penjamin,
+                    pasien: pasien,
+                    poli: poli,
+                    //==============================
+                    keluhan_utama: keluhanUtamaData,
+                    keluhan_tambahan: keluhanTambahanData,
+                    tekanan_darah: parseFloat(tekananDarah),
+                    nadi: parseFloat(nadi),
+                    suhu: parseFloat(suhu),
+                    pernafasan: parseFloat(pernafasan),
+                    berat_badan: parseFloat(beratBadan),
+                    tinggi_badan: parseFloat(tinggiBadan),
+                    lingkar_lengan_atas: parseFloat(lingkarLengan),
+                    icd9: selectedICD9,
+                    pemeriksaan_fisik: pemeriksaanFisikData,
+                    icd10_kerja: selectedICD10Kerja,
+                    diagnosa_kerja: diagnosaKerjaData,
+                    icd10_banding: selectedICD10Banding,
+                    diagnosa_banding: diagnosaBandingData,
+                    planning: planningData,
+                    anamnesa: terapisAnamnesa,
+                    tataLaksana: terapisTataLaksana,
+                    evaluasi: terapisEvaluasi,
+                    anjuranBulan: parseFloat(terapisAnjuranBulan),
+                    anjuranMinggu: parseFloat(terapisAnjuranMinggu),
+                    suspek: terapisSuspek,
+                    hasil: terapisHasil,
+                    kesimpulan: terapisKesimpulan,
+                    rekomendasi: terapisRekomendasi,
+                    //==============================
+                    tindakan: tindakan,
+                    resep: resep,
+                    keteranganResep: keteranganResep,
+                    keteranganRacikan: keteranganRacikan,
+                    racikan: racikan,
+
+                    simetris: simetris,
+                    sendi: sendi,
+                    bibir: bibir,
+                    lidah: lidah,
+                    mukosa: mukosa,
+                    torus: torus,
+                    gingiva: gingiva,
+                    frenulum: frenulum,
+                    mulut_bersih: mulut_bersih,
+
+                    odontogram: JSON.stringify(metaSelOrdo)
+                };
+            } else if(antrianData.poli_info.uid === __POLI_MATA__) {
+                var mataDataList =  {};
+                $(".mata_input").each(function() {
+                    if(mataDataList[$(this).attr("id")] === undefined) {
+                        mataDataList[$(this).attr("id")] = 0
+                    }
+
+                    mataDataList[$(this).attr("id")] = $(this).inputmask("unmaskedvalue");
+                });
+
+                var tujuan_resep = [];
+                $(".tujuan_resep").each(function() {
+                    if($(this).is(":checked")) {
+                        tujuan_resep.push($(this).val())
+                    }
+                });
+
+                var formData = {
+                    request: "update_asesmen_medis",
+                    kunjungan: kunjungan,
+                    antrian: antrian,
+                    penjamin: penjamin,
+                    pasien: pasien,
+                    poli: poli,
+                    //==============================
+                    keluhan_utama: keluhanUtamaData,
+                    keluhan_tambahan: keluhanTambahanData,
+                    tekanan_darah: parseFloat(tekananDarah),
+                    nadi: parseFloat(nadi),
+                    suhu: parseFloat(suhu),
+                    pernafasan: parseFloat(pernafasan),
+                    berat_badan: parseFloat(beratBadan),
+                    tinggi_badan: parseFloat(tinggiBadan),
+                    lingkar_lengan_atas: parseFloat(lingkarLengan),
+                    icd9: selectedICD9,
+                    pemeriksaan_fisik: pemeriksaanFisikData,
+                    //icd10_kerja: parseInt(icd10Kerja),
+                    icd10_kerja: selectedICD10Kerja,
+                    diagnosa_kerja: diagnosaKerjaData,
+                    //icd10_banding: parseInt(icd10Banding),
+                    icd10_banding: selectedICD10Banding,
+                    diagnosa_banding: diagnosaBandingData,
+                    planning: planningData,
+
+                    tindakan:tindakan,
+                    resep: resep,
+                    keteranganResep: keteranganResep,
+                    keteranganRacikan: keteranganRacikan,
+                    racikan: racikan,
+
+                    mata_data: JSON.stringify(mataDataList),
+                    tujuan_resep: tujuan_resep.join(",")
                 };
             } else {
                 var formData = {
@@ -2806,6 +2994,7 @@
 						},
 						type: "POST",
 						success: function(response) {
+                            console.clear();
 							console.log(response);
 
 							if(response.response_package.response_result > 0) {
@@ -2813,7 +3002,7 @@
                                 push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
 								//location.href = __HOSTNAME__ + "/rawat_jalan/dokter";
 							} else {
-								notification ("danger", response.response_package, 3000, "hasil_tambah_dev");
+								notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
 							}
 						},
 						error: function(response) {
@@ -3553,7 +3742,7 @@
                         "<div class=\"flex\">" +
                         "<label for=\"lab_item_" + data.detail[key].id + "\" id=\"label_item_" + data.detail[key].id + "\">" + data.detail[key].keterangan + "</label>" +
                         "<div class=\"custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right\">" +
-                        "<input checked=\"checked\" type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
+                        "<input type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
                         "<label class=\"custom-control-label\" for=\"lab_item_" + data.detail[key].id + "\">Ya</label>" +
                         "</div>" +
                     "</div>");
@@ -3798,8 +3987,6 @@
                     "penjamin":"",
                     "item":[]
                 };
-            } else {
-			    alert();
             }
 
 			if (
@@ -3822,12 +4009,12 @@
                 }
                 listItem += "</ol>";
 
-				$.each(listPenjamin, function(key, item) {
+				/*$.each(listPenjamin, function(key, item) {
 					if (item.uid == uid_penjamin_tindakan_lab){
 						namaPenjamin = item.nama;
 						return false;
 					}
-				});
+				});*/
 
 				let html = "<tr>" +
 						"<td class=\"no_urut_lab\"></td>" +
@@ -4141,52 +4328,117 @@
 
         $(".inputan_konsul").select2();
 
+        
+        if(dataOdontogram === undefined)
+        {
+            $(".ordo-top").each(function() {
+                var id = $(this).attr("id").split("_");
+                id = id[id.length - 1];
+                if(metaSelOrdo[id] === undefined)
+                {
+                    metaSelOrdo[id] = {
+                        "top" : {
+                            "tambal": "",
+                            "caries": false
+                        },
+                        "left" : {
+                            "tambal": "",
+                            "caries": false
+                        },
+                        "middle" : {
+                            "tambal": "",
+                            "caries": false
+                        },
+                        "right" : {
+                            "tambal": "",
+                            "caries": false
+                        },
+                        "bottom" : {
+                            "tambal": "",
+                            "caries": false
+                        },
+                        "mahkota": {
+                            "type": ""
+                        },
+                        "predefined": "",
+                        "sel_akar": false,
+                        "hilang": false,
+                        "sisa_akar": false,
+                        "fracture": false
+                    };
+                }
+            });
+        } else {
+            metaSelOrdo = JSON.parse(dataOdontogram);
+            // ParseView
 
-        var metaSelOrdo = {};
 
-        //init gigi sehat
-        $(".ordo-top").each(function() {
-            var id = $(this).attr("id").split("_");
-            id = id[id.length - 1];
-            if(metaSelOrdo[id] === undefined)
-            {
-                metaSelOrdo[id] = {
-                    "top" : {
-                        "tambal": "",
-                        "caries": false
-                    },
-                    "left" : {
-                        "tambal": "",
-                        "caries": false
-                    },
-                    "middle" : {
-                        "tambal": "",
-                        "caries": false
-                    },
-                    "right" : {
-                        "tambal": "",
-                        "caries": false
-                    },
-                    "bottom" : {
-                        "tambal": "",
-                        "caries": false
-                    },
-                    "mahkota": {
-                        "type": ""
-                    },
-                    "predefined": "",
-                    "sel_akar": false,
-                    "hilang": false,
-                    "sisa_akar": false,
-                    "fracture": false
-                };
+            for(var dbT in metaSelOrdo) {
+                //Render Result
+                $("#gigi_" + dbT + " .single_gigi_small .side_small").each(function() {
+                    var settedPiece = $(this).attr("class").split(" ");
+                    if(metaSelOrdo[dbT][settedPiece[0]].tambal !== "")
+                    {
+                        $(this).removeClass (function (index, className) {
+                            return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                        }).removeAttr("mode-class").removeAttr("mode-set");
+
+                        if($(this).hasClass(settedPiece[0])) {
+                            var getModeSet = metaSelOrdo[dbT][settedPiece[0]].tambal.split("_");
+
+                            $(this).addClass("modeset_" + getModeSet[getModeSet.length - 1]).attr({
+                                "mode-class": metaSelOrdo[dbT][settedPiece[0]].tambal,
+                                "mode-set": "modeset_" + getModeSet[getModeSet.length - 1]
+                            });
+                        }
+                    } else {
+                        $(this).removeClass (function (index, className) {
+                            return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                        }).removeAttr("mode-class").removeAttr("mode-set");
+                    }
+                });
+
+                if(metaSelOrdo[dbT].hilang) {
+                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-times text-danger\"></i>");
+                } else if(metaSelOrdo[dbT].fracture) {
+                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-hashtag text-info\"></i>");
+                } else if(metaSelOrdo[dbT].sisa_akar) {
+                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"text-primary\">&radic;</i>");
+                } else {
+                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "", true);
+                }
+
+                if(metaSelOrdo[dbT].sel_akar) {
+                    $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
+                        "visibility": "visible"
+                    });
+                } else {
+                    $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
+                        "visibility": "hidden"
+                    });
+                }
+
+                if(metaSelOrdo[dbT].mahkota.type === "mahkota_logam") {
+                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam"]);
+                } else if(metaSelOrdo[dbT].mahkota.type === "mahkota_nonlogam") {
+                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam"]);
+                } else {
+                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
+                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
+                }
+
+                $("#gigi_" + dbT + " .predefined_small").html(metaSelOrdo[dbT].predefined);
             }
-        });
+        }
+        
+        
 
 
         var selected_teeth = "";
         var odon_mode = "";
         var currentOrdonMeta = {};
+
+
 
 
         $(".ordo-top").click(function() {
@@ -4533,9 +4785,6 @@
                 currentOrdonMeta[settedPiece[0]].caries = "";
             });
 
-            console.clear();
-            console.log(currentOrdonMeta);
-
             //Render Result
             $("#gigi_" + selected_teeth + " .single_gigi_small .side_small").each(function() {
                 var settedPiece = $(this).attr("class").split(" ");
@@ -4610,10 +4859,24 @@
             $("#form-ordonto").modal("hide");
         });
 
-        function resetSelectBox(selector, name) {
-            $("#"+ selector +" option").remove();
-            var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
-            $("#" + selector).append(opti_null);
+
+        if($("#mata-loader").length > 0) {
+            for(var mKey = 1; mKey <= 2; mKey++)
+            {
+                $("#mata-loader").append("<div style=\"position: relative; min-height: 280px; " + ((mKey == 1) ? "border-right: solid 1px  #000" : "border-left: solid 1px  #000") + "\" class=\"col-md-6 eye-side-" + mKey + "\">" +
+                        "<div style=\"" + ((mKey === 1) ? " right: 40px" : "left: 40px") + "; position: absolute; top: -40px; background: url('" + __HOST__ + "images/protractor.png') no-repeat; width: 400px; height: 400px; background-size: contain; background-position: center\"></div>" +
+                        "<div style=\"" + ((mKey === 1) ? " right: 140px" : "left: 140px") + ";\" class=\"ocular-mata\"></div>" +
+                    "</div>");
+            }
+
+            $(".mata_input").inputmask({
+                alias: 'decimal',
+                rightAlign: true,
+                placeholder: "0.00",
+                prefix: "",
+                autoGroup: false,
+                digitsOptional: true
+            });
         }
 	});
 

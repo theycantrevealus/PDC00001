@@ -28,8 +28,6 @@ class Migration extends Utility
             ->execute();
         return $tables;
 
-
-
     }
 }
 
