@@ -43,3 +43,4 @@ config.php
 *.crt
 *.sql
 *.png
+*.zip

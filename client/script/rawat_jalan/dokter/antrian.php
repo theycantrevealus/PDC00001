@@ -4141,7 +4141,476 @@
 
         $(".inputan_konsul").select2();
 
-        function resetSelectBox(selector, name){
+
+        var metaSelOrdo = {};
+
+        //init gigi sehat
+        $(".ordo-top").each(function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+            if(metaSelOrdo[id] === undefined)
+            {
+                metaSelOrdo[id] = {
+                    "top" : {
+                        "tambal": "",
+                        "caries": false
+                    },
+                    "left" : {
+                        "tambal": "",
+                        "caries": false
+                    },
+                    "middle" : {
+                        "tambal": "",
+                        "caries": false
+                    },
+                    "right" : {
+                        "tambal": "",
+                        "caries": false
+                    },
+                    "bottom" : {
+                        "tambal": "",
+                        "caries": false
+                    },
+                    "mahkota": {
+                        "type": ""
+                    },
+                    "predefined": "",
+                    "sel_akar": false,
+                    "hilang": false,
+                    "sisa_akar": false,
+                    "fracture": false
+                };
+            }
+        });
+
+
+        var selected_teeth = "";
+        var odon_mode = "";
+        var currentOrdonMeta = {};
+
+
+        $(".ordo-top").click(function() {
+            modeOrdo = "free";
+            targetWarnaOrdo = "";
+            $(".set_gigi tr").each(function() {
+                $(this).fadeIn();
+            });
+
+            setMord(".global_assigner", "", true);
+
+            $(".perawatan_akar_sign").css({
+                "visibility": "hidden"
+            });
+
+            setMahkota(".single_gigi", "mahkota_logam", ["mahkota_nonlogam", "mahkota_logam"], true);
+            setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_nonlogam", "mahkota_logam"], true);
+            setPredefined("#predefined", "", true);
+
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+            $("#target_gigi").html(id);
+
+            //Jika Gigi Seri
+            if(parseInt(id.substr(1,1)) < 4) {
+                $(".single_gigi .middle").hide();
+            } else {
+                $(".single_gigi .middle").show();
+            }
+
+            selected_teeth = id;
+            currentOrdonMeta = metaSelOrdo[selected_teeth];
+            $(".set_gigi tr").removeClass("selected_ordon");
+            //Render currentOrdoMeta
+            $(".single_gigi .side").each(function() {
+                var settedPiece = $(this).attr("class").split(" ");
+                if(currentOrdonMeta[settedPiece[0]].tambal !== "")
+                {
+                    if($(this).hasClass(settedPiece[0])) {
+                        var getModeSet = currentOrdonMeta[settedPiece[0]].tambal.split("_");
+                        //$(".set_gigi tr#tambal_" + getModeSet[getModeSet.length - 1]).addClass("selected_ordon");
+                        $(this).addClass("modeset_" + getModeSet[getModeSet.length - 1]).attr({
+                            "mode-class": currentOrdonMeta[settedPiece[0]].tambal,
+                            "mode-set": "modeset_" + getModeSet[getModeSet.length - 1]
+                        });
+                    }
+                } else {
+                    $(this).removeClass (function (index, className) {
+                        return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                    }).removeAttr("mode-class").removeAttr("mode-set");
+                }
+            });
+
+            if(currentOrdonMeta.hilang) {
+                $(".set_gigi tr#gigi_hilang").addClass("selected_ordon");
+                setMord(".global_assigner", "<i class=\"fa fa-times text-danger\"></i>");
+            } else if(currentOrdonMeta.fracture) {
+                $(".set_gigi tr#fracture").addClass("selected_ordon");
+                setMord(".global_assigner", "<i class=\"fa fa-hashtag text-info\"></i>");
+            } else if(currentOrdonMeta.sisa_akar) {
+                $(".set_gigi tr#sisa_akar").addClass("selected_ordon");
+                setMord(".global_assigner", "<i class=\"text-primary\">&radic;</i>");
+            } else {
+                setMord(".global_assigner", "", true);
+            }
+
+            if(currentOrdonMeta.sel_akar) {
+                $(".set_gigi tr#sel_akar").addClass("selected_ordon");
+                $(".perawatan_akar_sign").css({
+                    "visibility": "visible"
+                });
+            } else {
+                $(".perawatan_akar_sign").css({
+                    "visibility": "hidden"
+                });
+            }
+
+            if(currentOrdonMeta.mahkota.type === "mahkota_logam") {
+                $(".set_gigi tr#mahkota_logam").addClass("selected_ordon");
+                setMahkota(".single_gigi", "mahkota_logam", ["mahkota_nonlogam"]);
+            } else if(currentOrdonMeta.mahkota.type === "mahkota_nonlogam") {
+                $(".set_gigi tr#mahkota_nonlogam").addClass("selected_ordon");
+                setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_logam"]);
+            } else {
+                setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
+            }
+
+            setPredefined("#predefined", currentOrdonMeta.predefined.toUpperCase());
+            if(currentOrdonMeta.predefined !== "") {
+                $(".set_gigi tr#" + currentOrdonMeta.predefined).addClass("selected_ordon");
+            }
+
+            $("#form-ordonto").modal("show");
+
+
+        });
+
+        function setMahkota(target_gigi, jenis = "mahkota_logam", removal_item = [], removal = false) {
+            if(removal)
+            {
+                $("#" + jenis).removeClass("selected_ordon");
+                $(target_gigi).removeClass("active_" + jenis);
+            } else
+            {
+                $("#" + jenis).addClass("selected_ordon");
+                $(target_gigi).addClass("active_" + jenis);
+                for(var a in removal_item)
+                {
+                    $(target_gigi).removeClass("active_" + removal_item[a]);
+                    $(removal_item[a]).removeClass("selected_ordon");
+                }
+            }
+        }
+
+        function setMord(target_gigi, targetMord, removal = false) {
+            if(removal)
+            {
+                $(target_gigi).css({
+                    "visibility": "hidden"
+                });
+                $(target_gigi).html("");
+            } else {
+                $(target_gigi).css({
+                    "visibility": "visible"
+                });
+                $(target_gigi).html(targetMord);
+            }
+        }
+
+        function setPredefined(target_predefined, defined, removal = false)
+        {
+            if(removal)
+            {
+                $(target_predefined).html("");
+            } else {
+                $(target_predefined).html(defined);
+            }
+        }
+
+        var activeSelected;
+        var modeOrdo = "free";
+        var targetWarnaOrdo = "";
+
+        $(".side").click(function() {
+            var id = activeSelected.attr("id");
+            var targetSide = $(this).attr("class").split(" ");
+            var targetModeSet = $(this).attr("mode-set");
+
+            if(id === "tambal_logam")
+            {
+                targetWarnaOrdo = "modeset_logam";
+            }
+
+            if(id === "tambal_emas")
+            {
+                targetWarnaOrdo = "modeset_emas";
+            }
+
+            if(id === "tambal_pencega")
+            {
+                targetWarnaOrdo = "modeset_pencega";
+            }
+
+            if(id === "tambal_sewarna")
+            {
+                targetWarnaOrdo = "modeset_sewarna";
+            }
+
+            if(id === "tambal_nonlogam")
+            {
+                targetWarnaOrdo = "modeset_nonlogam";
+            }
+
+            if(id === "car")
+            {
+                targetWarnaOrdo = "modeset_caries";
+            }
+
+            var targetModeClass = targetWarnaOrdo;
+
+            if(targetModeSet === undefined) {
+                //Clear old modeset
+                $(this).removeClass (function (index, className) {
+                    return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                }).removeAttr("mode-class").removeAttr("mode-set");
+
+                $(this).attr({
+                    "mode-set": id,
+                    "mode-class" : targetWarnaOrdo
+                });
+
+                if(modeOrdo === "selection")
+                {
+                    $(this).addClass(targetWarnaOrdo);
+                }
+            } else {
+                $(this).removeClass(targetWarnaOrdo).removeAttr("mode-class").removeAttr("mode-set");
+            }
+        });
+
+        $(".set_gigi tr").click(function() {
+            var id = $(this).attr("id");
+
+            if($(this).hasClass("selected_ordon"))
+            {
+                $(this).removeClass("selected_ordon");
+                if(
+                    id === "une" ||
+                    id === "pre" ||
+                    id === "ano"
+                )
+                {
+                    setPredefined("#predefined", id.toUpperCase(), true);
+                    currentOrdonMeta.predefined = "";
+                }
+
+                if(
+                    id === "mahkota_logam"
+                )
+                {
+                    setMahkota(".single_gigi", id, ["mahkota_nonlogam"], true);
+                    currentOrdonMeta.mahkota.type = "";
+                }
+
+                if(id === "mahkota_nonlogam")
+                {
+                    setMahkota(".single_gigi", id, ["mahkota_logam"], true);
+                    currentOrdonMeta.mahkota.type = "";
+                }
+
+                if(id === "sel_akar"){
+                    currentOrdonMeta.sel_akar = false;
+                    $(".perawatan_akar_sign").css({
+                        "visibility": "hidden"
+                    });
+                }
+
+                if(id === "fracture"){
+                    setMord(".global_assigner", "<i class=\"fa fa-hashtag text-info\"></i>", true);
+                    currentOrdonMeta.fracture = false;
+                }
+
+                if(id === "gigi_hilang"){
+                    setMord(".global_assigner", "<i class=\"fa fa-times text-danger\"></i>", true);
+                    currentOrdonMeta.hilang = false;
+                }
+
+                if(id === "sisa_akar"){
+                    setMord(".global_assigner", "<i class=\"text-primary\">&radic;</i>", true);
+                    currentOrdonMeta.sisa_akar = false;
+                }
+
+                if($(this).hasClass("need_selection"))
+                {
+                    modeOrdo = "free";
+                    $(".set_gigi tr").each(function() {
+                        $(this).fadeIn();
+                    });
+                }
+
+            } else {
+                var GroupSel = $(this).attr("group-selection");
+                if(GroupSel !== "")
+                {
+                    $("tr[group-selection=\"" + GroupSel + "\"]").each(function() {
+                        $(this).removeClass("selected_ordon");
+                    });
+                    $(this).addClass("selected_ordon");
+                }
+
+                if(
+                    id === "une" ||
+                    id === "pre" ||
+                    id === "ano"
+                )
+                {
+                    setPredefined("#predefined", id.toUpperCase());
+                    currentOrdonMeta.predefined = id;
+                }
+
+                if(
+                    id === "mahkota_logam"
+                )
+                {
+                    setMahkota(".single_gigi", id, ["mahkota_nonlogam"]);
+                    currentOrdonMeta.mahkota.type = id;
+                }
+
+                if(id === "mahkota_nonlogam")
+                {
+                    setMahkota(".single_gigi", id, ["mahkota_logam"]);
+                    currentOrdonMeta.mahkota.type = id;
+                }
+
+                if(id === "sel_akar")
+                {
+                    $(".perawatan_akar_sign").css({
+                        "visibility": "visible"
+                    });
+                    currentOrdonMeta.sel_akar = true;
+                }
+
+                if(id === "fracture"){
+                    setMord(".global_assigner", "<i class=\"fa fa-hashtag text-info\"></i>");
+                    currentOrdonMeta.fracture = true;
+                    currentOrdonMeta.hilang = false;
+                    currentOrdonMeta.sisa_akar = false;
+                }
+
+                if(id === "gigi_hilang"){
+                    setMord(".global_assigner", "<i class=\"fa fa-times text-danger\"></i>");
+                    currentOrdonMeta.hilang = true;
+                    currentOrdonMeta.fracture = false;
+                    currentOrdonMeta.sisa_akar = false;
+                }
+
+                if(id === "sisa_akar"){
+                    setMord(".global_assigner", "<i class=\"text-primary\">&radic;</i>");
+                    currentOrdonMeta.sisa_akar = true;
+                    currentOrdonMeta.hilang = false;
+                    currentOrdonMeta.fracture = false;
+                }
+
+                if($(this).hasClass("need_selection"))
+                {
+                    modeOrdo = "selection";
+                    $(".set_gigi tr").each(function() {
+                        if($(this).attr("id") !== id) {
+                            $(this).fadeOut();
+                        } else {
+                            activeSelected = $(this);
+                        }
+                    });
+                }
+            }
+        });
+
+        $("#btnUpdateOrdo").click(function() {
+            //Save MSODL
+            $(".single_gigi .side").each(function() {
+                var tambal = $(this).attr("mode-class");
+                var settedPiece = $(this).attr("class").split(" ");
+                currentOrdonMeta[settedPiece[0]].tambal = (tambal === undefined) ? "" : tambal;
+                currentOrdonMeta[settedPiece[0]].caries = "";
+            });
+
+            console.clear();
+            console.log(currentOrdonMeta);
+
+            //Render Result
+            $("#gigi_" + selected_teeth + " .single_gigi_small .side_small").each(function() {
+                var settedPiece = $(this).attr("class").split(" ");
+                if(currentOrdonMeta[settedPiece[0]].tambal !== "")
+                {
+                    $(this).removeClass (function (index, className) {
+                        return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                    }).removeAttr("mode-class").removeAttr("mode-set");
+
+                    if($(this).hasClass(settedPiece[0])) {
+                        var getModeSet = currentOrdonMeta[settedPiece[0]].tambal.split("_");
+
+                        $(this).addClass("modeset_" + getModeSet[getModeSet.length - 1]).attr({
+                            "mode-class": currentOrdonMeta[settedPiece[0]].tambal,
+                            "mode-set": "modeset_" + getModeSet[getModeSet.length - 1]
+                        });
+                    }
+                } else {
+                    $(this).removeClass (function (index, className) {
+                        return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                    }).removeAttr("mode-class").removeAttr("mode-set");
+                }
+            });
+
+            if(currentOrdonMeta.hilang) {
+                setMord("#gigi_" + selected_teeth + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-times text-danger\"></i>");
+            } else if(currentOrdonMeta.fracture) {
+                setMord("#gigi_" + selected_teeth + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-hashtag text-info\"></i>");
+            } else if(currentOrdonMeta.sisa_akar) {
+                setMord("#gigi_" + selected_teeth + " .single_gigi_small .global_assigner_small", "<i class=\"text-primary\">&radic;</i>");
+            } else {
+                setMord("#gigi_" + selected_teeth + " .single_gigi_small .global_assigner_small", "", true);
+            }
+
+            if(currentOrdonMeta.sel_akar) {
+                $("#gigi_" + selected_teeth + " .perawatan_akar_sign_small").css({
+                    "visibility": "visible"
+                });
+            } else {
+                $("#gigi_" + selected_teeth + " .perawatan_akar_sign_small").css({
+                    "visibility": "hidden"
+                });
+            }
+
+            if(currentOrdonMeta.mahkota.type === "mahkota_logam") {
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam"]);
+            } else if(currentOrdonMeta.mahkota.type === "mahkota_nonlogam") {
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam"]);
+            } else {
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
+            }
+
+            $("#gigi_" + selected_teeth + " .predefined_small").html(currentOrdonMeta.predefined);
+
+            metaSelOrdo[selected_teeth] = currentOrdonMeta;
+
+            //Reset Operation
+            currentOrdonMeta = {};
+            modeOrdo = "free";
+            targetWarnaOrdo = "";
+            $(".set_gigi tr").each(function() {
+                $(this).fadeIn();
+            });
+            setMord(".global_assigner", "", true);
+            $(".perawatan_akar_sign").css({
+                "visibility": "hidden"
+            });
+            setMahkota(".single_gigi", "mahkota_logam", ["mahkota_nonlogam", "mahkota_logam"], true);
+            setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_nonlogam", "mahkota_logam"], true);
+            setPredefined("#predefined", "", true);
+            $("#form-ordonto").modal("hide");
+        });
+
+        function resetSelectBox(selector, name) {
             $("#"+ selector +" option").remove();
             var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
             $("#" + selector).append(opti_null);
@@ -4389,6 +4858,154 @@
                 <button type="button" class="btn btn-success" id="btnProsesKonsul">
                     <i class="fa fa-check"></i> Proses Konsul
                 </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div id="form-ordonto" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title"><i class="fa fa-hashtag"></i> <b id="target_gigi"></b></h5>
+            </div>
+            <div class="modal-body">
+                <div class="col-md-12 row form-group">
+                    <div class="col-md-4" style="position: relative; padding-top: 10px">
+                        <h3 class="text-center" id="predefined" style="padding-bottom: 120px;">&nbsp;</h3>
+                        <div class="single_gigi">
+                            <div class="top side"></div>
+                            <div class="left side"></div>
+                            <div class="bottom side"></div>
+                            <div class="right side"></div>
+                            <div class="middle side"></div>
+                            <div class="global_assigner fa"></div>
+                        </div>
+                        <div class="perawatan_akar_sign"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <table class="table table-striped table-bordered set_gigi">
+                            <tr id="une" group-selection="mordor1">
+                                <td class="wrap_content">UNE</td>
+                                <td>Belum Erupsi</td>
+                            </tr>
+                            <tr id="pre" group-selection="mordor1">
+                                <td>PRE</td>
+                                <td>Erupsi Sebagian</td>
+                            </tr>
+                            <tr id="ano" group-selection="mordor1">
+                                <td>ANO</td>
+                                <td>Anomali Bentuk</td>
+                            </tr>
+                            <tr id="car" class="need_selection">
+                                <td class="wrap_content">
+                                    <i class="fa fa-qrcode"></i>
+                                </td>
+                                <td>Caries</td>
+                            </tr>
+                            <tr id="mahkota_logam" group-selection="mordor2">
+                                <td>
+                                    <i class="fa fa-vector-square mlogam"></i>
+                                </td>
+                                <td>Mahkota Logam</td>
+                            </tr>
+                            <tr id="mahkota_nonlogam" group-selection="mordor2">
+                                <td>
+                                    <i class="fa fa-stop mnonlogam"></i>
+                                </td>
+                                <td>Mahkota Non Logam</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fa fa-arrow-left">
+                                </td>
+                                <td>Migrasi Kiri</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fa fa-arrow-right">
+                                </td>
+                                <td>Migrasi Kanan</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fa fa-reply">
+                                </td>
+                                <td>Rotasi Kiri</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fa fa-reply flip">
+                                </td>
+                                <td>Rotasi Kanan</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <table class="table table-striped table-bordered set_gigi">
+                            <tr id="tambal_logam" class="need_selection" group-selection="mordor4">
+                                <td class="wrap_content">
+                                    <i class="fa fa-stop logam"></i>
+                                </td>
+                                <td>Tambalan Logam</td>
+                            </tr>
+                            <tr id="tambal_emas" class="need_selection" group-selection="mordor4">
+                                <td class="wrap_content">
+                                    <i class="fa fa-stop emas"></i>
+                                </td>
+                                <td>Tambalan Emas</td>
+                            </tr>
+                            <tr id="tambal_sewarna" class="need_selection" group-selection="mordor4">
+                                <td class="wrap_content">
+                                    <i class="fa fa-stop sewarna"></i>
+                                </td>
+                                <td>Tambalan Sewarna</td>
+                            </tr>
+                            <tr id="tambal_pencega" class="need_selection" group-selection="mordor4">
+                                <td class="wrap_content">
+                                    <i class="fa fa-stop pencega"></i>
+                                </td>
+                                <td>Tambalan Pencega</td>
+                            </tr>
+                            <tr id="tambal_nonlogam" class="need_selection" group-selection="mordor4">
+                                <td class="wrap_content">
+                                    <i class="fa fa-stop nonlogam"></i>
+                                </td>
+                                <td>Tambalan Non Logam</td>
+                            </tr>
+                            <tr id="sel_akar">
+                                <td>
+                                    <i class="fa fa-caret-down"></i>
+                                </td>
+                                <td>Perawatan Sal. Akar</td>
+                            </tr>
+                            <tr id="gigi_hilang" group-selection="mordor3">
+                                <td>
+                                    <i class="fa fa-times text-danger"></i>
+                                </td>
+                                <td>Gigi Hilang</td>
+                            </tr>
+                            <tr id="sisa_akar" group-selection="mordor3">
+                                <td>
+                                    <span class="text-primary">&radic;</span>
+                                </td>
+                                <td>Sisa Akar</td>
+                            </tr>
+                            <tr id="fracture" group-selection="mordor3">
+                                <td><i class="fa fa-hashtag text-info"></i></td>
+                                <td>Fracture</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnUpdateOrdo" class="btn btn-success">Simpan</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
             </div>
         </div>
