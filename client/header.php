@@ -17,7 +17,19 @@
 				</a>
 				
 				<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
-					<li class="nav-item dropdown">
+                    <?php
+                        if($_SESSION['jabatan']['response_data'][0]['uid'] == __UIDADMIN__)
+                        {
+                            ?>
+                            <li class="nav-item dropdown">
+                                <a href="#" id="refresh_protocol" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
+                                    <i class="material-icons nav-icon" id="counter-notif-identifier">refresh</i>
+                                </a>
+                            </li>
+                            <?php
+                        }
+                    ?>
+                    <li class="nav-item dropdown">
 						<a href="#notifications_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
 							<i class="material-icons nav-icon" id="counter-notif-identifier">notifications</i>
 						</a>
@@ -34,7 +46,7 @@
 					</li>
 					<li class="nav-item dropdown">
 						<a href="<?php echo __HOSTNAME__; ?>/template/#account_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
-							<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/avatar/demi.png" class="rounded-circle" width="32" alt="Frontted" />
+							<img src="<?php echo __HOST__ . $_SESSION['profile_pic']; ?>?d=<?php echo date('H:i:s'); ?>" class="rounded-circle" width="32" alt="Frontted" />
 							<span class="ml-1 d-flex-inline">
 								<span class="text-light"><?php echo $_SESSION['nama']; ?></span>
 							</span>

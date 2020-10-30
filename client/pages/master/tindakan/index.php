@@ -23,9 +23,9 @@
 				<table class="table table-bordered" id="table-tindakan">
 					<thead class="thead-dark">
 						<tr>
-							<th style="width: 20px;">No</th>
+							<th class="wrap_content">No</th>
 							<th>Nama Tindakan</th>
-							<th>Aksi</th>
+							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>

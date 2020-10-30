@@ -1,5 +1,7 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
 	$(function() {
+	    //load-kandungan-obat
 		var MODE = "edit";
 		var UID = __PAGES__[3];
 		var selectedDariSatuanList = [];
@@ -16,15 +18,22 @@
 			},
 			type:"GET",
 			success:function(response) {
-				if(response.response_package.response_data !== undefined) {
+			    console.clear();
+			    console.log(response);
+			    if(response.response_package.response_data !== undefined) {
 					invData = response.response_package.response_data[0];
 				}
 
 				$("#txt_nama").val(invData.nama);
 				$(".label_nama").html(invData.nama.toUpperCase());
 
-				$("#txt_kode").val(invData.kode_barang);
-				$(".label_kode").html(invData.kode_barang.toUpperCase());
+				if(invData.kode_barang == undefined) {
+                    $("#txt_kode").val("-");
+                    $(".label_kode").html("-");
+                } else {
+                    $("#txt_kode").val(invData.kode_barang);
+                    $(".label_kode").html(invData.kode_barang.toUpperCase());
+                }
 
 				load_kategori("#txt_kategori", invData.kategori);
 				$(".label_kategori").html($("#txt_kategori").find("option:selected").text().toUpperCase());
@@ -65,10 +74,7 @@
 					$(".load-kategori-obat-badge").append("<div style=\"margin:5px;\" class=\"badge badge-info\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + $("#label_kategori_obat_" + selectedKategoriObat[b]).html() + "</div>");
 				}
 
-				autoGudang(invData.lokasi);
-
-				
-				
+				autoGudang(invData.lokasi, invData.monitoring);
 
 				ClassicEditor.create(document.querySelector("#txt_keterangan"), {
 					extraPlugins: [ MyCustomUploadAdapterPlugin ],
@@ -177,12 +183,12 @@
 				    reader.onload = () => resolve(reader.result);
 				    reader.onerror = error => reject(error);
 				});
-				var Axhr = this.xhr;
+
+		    	var Axhr = this.xhr;
 				
 				async function doSomething(fileTarget) {
 					fileTarget.then(function(result) {
 						var ImageName = result.name;
-
 						toBase64(result).then(function(renderRes) {
 							const data = new FormData();
 							data.append( 'upload', renderRes);
@@ -211,7 +217,7 @@
 		    editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
 		        var MyCust = new MyUploadAdapter( loader );
 		        var dataToPush = MyCust.imageList;
-		        hiJackImage(dataToPush);
+		        hiJackImage( dataToPush );
 		        return MyCust;
 		    };
 		}
@@ -249,7 +255,7 @@
 			});
 		}
 
-		$("#upload-image").change(function(){
+		$("#upload-image").change(function() {
 			readURL(this, basic);
 		});
 
@@ -260,7 +266,6 @@
 				var reader = new FileReader();
 
 				reader.onload = function (e) {
-					
 					cropper.croppie('bind', {
 						url: e.target.result
 					});
@@ -333,7 +338,7 @@
 					kategoriData = response.response_package.response_data;
 					$(target).find("option").remove();
 					for(var a = 0; a < kategoriData.length; a++) {
-						$(target).append("<option value=\"" + kategoriData[a].uid + "\">" + kategoriData[a].nama + "</option>");
+						$(target).append("<option " + ((kategoriData[a].uid == selected) ? "selected=\"selected\"" : "") +  " value=\"" + kategoriData[a].uid + "\">" + kategoriData[a].nama + "</option>");
 					}
 					$(".label_kategori").html($(target).find("option:selected").text().toUpperCase());
 				},
@@ -464,6 +469,7 @@
 		}
 
 		function autoHarga(setData = {}) {
+		    console.log(setData);
 			var penjaminData;
 			$("#table-penjamin tbody tr").remove();
 			$.ajax({
@@ -517,7 +523,7 @@
 							autoGroup: false,
 							digitsOptional: true
 						}).val((setData[penjaminData[a].uid] == undefined) ? 0 : setData[penjaminData[a].uid].profit);
-
+						//console.log(setData[penjaminData[a].uid].profit);
 						$(newHargaRow).append(newCellPenjaminID);
 						$(newHargaRow).append(newCellPenjaminName);
 						$(newHargaRow).append(newCellPenjaminName);
@@ -536,7 +542,7 @@
 
 
 
-		function autoGudang(lokasi) {
+		function autoGudang(lokasi, monitoring) {
 			var gudangData;
 			$("#table-lokasi-gudang tbody tr").remove();
 			$("#table-monitoring tbody tr").remove();
@@ -582,6 +588,7 @@
 						$(newMonitoringRow).attr({
 							"id": "monitoring_row_" + gudangData[a].uid
 						});
+
 						var newMonitoringCellGudangID = document.createElement("TD");
 						var newMonitoringCellGudangName = document.createElement("TD");
 						var newMonitoringCellGudangMinimum = document.createElement("TD");
@@ -590,6 +597,15 @@
 
 						$(newMonitoringCellGudangID).html((a + 1));
 						$(newMonitoringCellGudangName).html(gudangData[a].nama);
+
+						var nilaiMin = 0;
+                        var nilaiMax = 0;
+                        if(monitoring.length > 0) {
+                            if(gudangData[a].uid == monitoring[a].gudang) {
+                                nilaiMin = parseFloat(monitoring[a].min);
+                                nilaiMax = parseFloat(monitoring[a].max);
+                            }
+                        }
 						
 						var newMonitoringMinimum = document.createElement("INPUT");
 						$(newMonitoringCellGudangMinimum).append(newMonitoringMinimum);
@@ -600,7 +616,7 @@
 							prefix: "",
 							autoGroup: false,
 							digitsOptional: true
-						});
+						}).val(nilaiMin);
 
 						var newMonitoringMaximum = document.createElement("INPUT");
 						$(newMonitoringCellGudangMaximum).append(newMonitoringMaximum);
@@ -611,7 +627,7 @@
 							prefix: "",
 							autoGroup: false,
 							digitsOptional: true
-						});
+						}).val(nilaiMax);
 
 						$(newMonitoringCellGudangSatuan).html($("#txt_satuan_terkecil").find("option:selected").text());
 
@@ -736,7 +752,6 @@
 						type: 'canvas',
 						size: 'viewport'
 					}).then(function (image) {
-
 						var kategori = $("#txt_kategori").val();
 						var manufacture = $("#txt_manufacture").val();
 						var keterangan = editorKeterangan.getData();
@@ -803,10 +818,8 @@
 								});
 							}
 						});
-
-
-
-
+                        console.log("Image Mode");
+                        console.log(monitoring);
 						$.ajax({
 							url:__HOSTAPI__ + "/Inventori",
 							async:false,
@@ -858,7 +871,7 @@
 					
 					var satuanKonversi = [];
 					//Satuan
-					$("#table-konversi-satuan tbody tr").each(function(){
+					$("#table-konversi-satuan tbody tr").each(function() {
 						var dari = $(this).find("td:eq(1) select").val();
 						var ke = $(this).find("td:eq(2) select").val();
 						var rasio = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
@@ -873,7 +886,7 @@
 
 					var penjaminList = [];
 					//Penjamin
-					$("#table-penjamin tbody tr").each(function(){
+					$("#table-penjamin tbody tr").each(function() {
 						var id = $(this).attr("id").split("_");
 						id = id[id.length - 1];
 						var marginType = $(this).find("td:eq(2) select").val();
@@ -901,7 +914,7 @@
 
 					var monitoring = [];
 					//Monitoring
-					$("#table-monitoring tbody tr").each(function(){
+					$("#table-monitoring tbody tr").each(function() {
 						var id = $(this).attr("id").split("_");
 						id = id[id.length - 1];
 
@@ -916,7 +929,8 @@
 							});
 						}
 					});
-
+                    console.log("Non Image Mode");
+					console.log(monitoring);
 					$.ajax({
 						url:__HOSTAPI__ + "/Inventori",
 						async:false,

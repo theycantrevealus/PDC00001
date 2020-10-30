@@ -59,6 +59,10 @@
 									<input type="text" class="form-control" id="txt_nama_pegawai" placeholder="Nama Pegawai">
 								</div>
 								<div class="form-group">
+									<label for="txt_unit">Unit:</label>
+									<select class="form-control" id="txt_unit"></select>
+								</div>
+								<div class="form-group">
 									<label for="txt_jabatan">Jabatan:</label>
 									<select class="form-control" id="txt_jabatan"></select>
 								</div>

@@ -3,10 +3,10 @@
 		var params;
 		var MODE = false;
 
-		var dataFaskes = bpjs_load_faskes();
-		for(var faskesKey in dataFaskes) {
-			$("#txt_bpjs_faskes").append("<option></option>");
-		}
+        /*var dataFaskes = bpjs_load_faskes();
+        for(var faskesKey in dataFaskes) {
+            $("#txt_bpjs_faskes").append("<option></option>");
+        }*/
 
 		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
@@ -134,15 +134,15 @@
 									var buttonAksi = "<td style='text-align:center;'><button id=\"btn_daftar_pasient_" + item.uid + "\" class=\"btn btn-sm btn-info btnDaftarPasien\" data-toggle=\"tooltip\" title=\"Tambah ke Antrian\"><i class=\"fa fa-user-plus\"></i></button></td>";
 
 									if (item.berobat == true){
-										buttonAksi = "<td style=\"text-align:center;\"><span class=\"badge badge-warning\">Sedang Berobat</span></td>";
+										buttonAksi = "<td clsas=\"wrap_content\" style=\"text-align:center;\"><span class=\"badge badge-warning\">Sedang Berobat</span></td>";
 									}
 
 									html += "<tr disabled>" +
-												"<td>"+ item.autonum  +"</td>" +
+												"<td class=\"wrap_content\">"+ item.autonum  +"</td>" +
 												"<td>"+ item.no_rm +"</td>" +
 												"<td>"+ item.nama +"</td>" +
 												"<td>"+ nik +"</td>" +
-												"<td>"+ item.jenkel +"</td>" +
+												"<td class=\"wrap_content\">"+ item.jenkel +"</td>" +
 												buttonAksi +
 											"</tr>";
 								});
@@ -479,12 +479,12 @@
 					<table class="table table-bordered table-striped" id="table-list-pencarian">
 						<thead class="thead-dark">
 							<tr>
-								<th width="2%">No</th>
+								<th class="wrap_content">No</th>
 								<th>No. RM</th>
 								<th>Nama</th>
 								<th>NIK</th>
-								<th>Jenis Kelamin</th>
-								<th>Aksi</th>
+								<th class="wrap_content">Jenis Kelamin</th>
+								<th class="wrap_content">Aksi</th>
 							</tr>
 						</thead>
 						<tbody>

@@ -92,8 +92,32 @@ class Asesmen extends Utility {
 			$parameter
 		))
 		->execute();
+        $AsesmenMaster = self::$query->select('asesmen', array(
+            'uid',
+            'status'
+        ))
+            ->where(array(
+                'asesmen.deleted_at' => 'IS NULL',
+                'AND',
+                'asesmen.kunjungan' => '= ?',
+                'AND',
+                'asesmen.antrian' => '= ?',
+                'AND',
+                'asesmen.pasien' => '= ?',
+                'AND',
+                'asesmen.dokter' => '= ?'
+            ), array(
+                $antrian['response_data'][0]['kunjungan'],
+                $antrian['response_data'][0]['uid'],
+                $antrian['response_data'][0]['pasien'],
+                $antrian['response_data'][0]['dokter']
+            ))
+            ->execute();
 
 		if(count($antrian['response_data']) > 0) {
+
+
+
 			//Poli Info
 			$Poli = new Poli(self::$pdo);
 			$PoliDetail = $Poli::get_poli_detail($antrian['response_data'][0]['departemen'])['response_data'][0];
@@ -109,52 +133,113 @@ class Asesmen extends Utility {
 			))
 			->execute();
 
-			$data = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
-				'uid',
-				'kunjungan',
-				'antrian',
-				'pasien',
-				'dokter',
-				'keluhan_utama',
-				'keluhan_tambahan',
-				'tekanan_darah',
-				'nadi',
-				'pernafasan',
-				'berat_badan',
-				'tinggi_badan',
-				'lingkar_lengan_atas',
-				'pemeriksaan_fisik',
-				'diagnosa_kerja',
-				'diagnosa_banding',
-				'planning',
-				'asesmen',
-				'suhu',
-				'icd10_kerja',
-				'icd10_banding',
-				'created_at',
-				'updated_at'
-			))
-			->where(array(
-				'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
-				'AND',
-				'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.kunjungan' => '= ?',
-				'AND',
-				'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?',
-				'AND',
-				'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.pasien' => '= ?',
-				'AND',
-				'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.dokter' => '= ?'
-			), array(
-				$antrian['response_data'][0]['kunjungan'],
-				$antrian['response_data'][0]['uid'],
-				$antrian['response_data'][0]['pasien'],
-				$antrian['response_data'][0]['dokter']
-			))
-			->execute();
+
+			if($antrian['response_data'][0]['departemen'] === __UIDFISIOTERAPI__)
+            {
+                $data = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'pasien',
+                    'dokter',
+                    'keluhan_utama',
+                    'keluhan_tambahan',
+                    'tekanan_darah',
+                    'nadi',
+                    'pernafasan',
+                    'berat_badan',
+                    'tinggi_badan',
+                    'lingkar_lengan_atas',
+                    'pemeriksaan_fisik',
+                    'diagnosa_kerja',
+                    'diagnosa_banding',
+                    'planning',
+                    'asesmen',
+                    'suhu',
+                    'icd10_kerja',
+                    'icd10_banding',
+                    'icd9',
+                    'anamnesa',
+                    'tatalaksana',
+                    'evaluasi',
+                    'anjuran_bulan',
+                    'anjuran_minggu',
+                    'suspek_akibat_kerja',
+                    'hasil',
+                    'kesimpulan',
+                    'rekomendasi',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where(array(
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.kunjungan' => '= ?',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.pasien' => '= ?',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.dokter' => '= ?'
+                    ), array(
+                        $antrian['response_data'][0]['kunjungan'],
+                        $antrian['response_data'][0]['uid'],
+                        $antrian['response_data'][0]['pasien'],
+                        $antrian['response_data'][0]['dokter']
+                    ))
+                    ->execute();
+            } else {
+                $data = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'pasien',
+                    'dokter',
+                    'keluhan_utama',
+                    'keluhan_tambahan',
+                    'tekanan_darah',
+                    'nadi',
+                    'pernafasan',
+                    'berat_badan',
+                    'tinggi_badan',
+                    'lingkar_lengan_atas',
+                    'pemeriksaan_fisik',
+                    'diagnosa_kerja',
+                    'diagnosa_banding',
+                    'planning',
+                    'asesmen',
+                    'suhu',
+                    'icd10_kerja',
+                    'icd10_banding',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where(array(
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.kunjungan' => '= ?',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.pasien' => '= ?',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.dokter' => '= ?'
+                    ), array(
+                        $antrian['response_data'][0]['kunjungan'],
+                        $antrian['response_data'][0]['uid'],
+                        $antrian['response_data'][0]['pasien'],
+                        $antrian['response_data'][0]['dokter']
+                    ))
+                    ->execute();
+            }
+
+
+
+
 			if(count($data['response_data']) > 0) {
 
 				//Parse ICDData
-				foreach ($data['response_data'] as $ICD10Key => $ICD10Value) {
+                foreach ($data['response_data'] as $ICD10Key => $ICD10Value) {
 					$ICD10KerjaRaw = explode(',', $ICD10Value['icd10_kerja']);
 					$ICD10KerjaJoined = array();
 					foreach ($ICD10KerjaRaw as $ICD10KRKey => $ICD10KRValue) {
@@ -183,7 +268,32 @@ class Asesmen extends Utility {
 						}
 					}
 					$data['response_data'][$ICD10Key]['icd10_banding'] = $ICD10BandingJoined;
+
+                    if($antrian['response_data'][0]['departemen'] === __UIDFISIOTERAPI__)
+                    {
+                        $ICD9Raw = explode(',', $ICD10Value['icd9']);
+                        $ICD9Joined = array();
+                        foreach ($ICD9Raw as $ICD9Key => $ICD9Value) {
+                            $ICD9 = new Icd(self::$pdo);
+                            $parseICD9 = $ICD9::get_icd_detail('master_icd_9', $ICD9Value);
+                            if(count($parseICD9['response_data']) > 0) {
+                                array_push($ICD9Joined, array(
+                                    'id' => $ICD9Value,
+                                    'nama' => $parseICD9['response_data'][0]['kode'] . ' - ' .$parseICD9['response_data'][0]['nama']
+                                ));
+                            }
+                        }
+                        $data['response_data'][$ICD10Key]['icd9'] = $ICD9Joined;
+                    }
 				}
+
+
+
+
+
+
+
+
 				//Tindakan Detail
 				$tindakan = self::$query->select('asesmen_tindakan', array(
 					'tindakan'
@@ -259,6 +369,10 @@ class Asesmen extends Utility {
 						$value['uid']
 					))
 					->execute();
+					foreach ($resepDetail['response_data'] as $RDKey => $RDValue) {
+					    $Inventori = new Inventori(self::$pdo);
+                        $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori::get_item_detail($RDValue['obat'])['response_data'][0];
+                    }
 					$resep['response_data'][$key]['resep_detail'] = $resepDetail['response_data'];
 
 					//Racikan Detail
@@ -323,6 +437,7 @@ class Asesmen extends Utility {
 				$data['response_data'][0]['racikan'] = $racikanData;
 				$data['response_data'][0]['resep'] = $resep['response_data'];
 				$data['response_data'][0]['asesmen_rawat'] = $Rawat['response_data'][0]['uid'];
+                $data['response_data'][0]['status_asesmen'] = $AsesmenMaster['response_data'][0];
 				return $data;
 			} else {
 				$Rawat = self::$query->select('asesmen_rawat_' . $PoliDetail['poli_asesmen'], array(
@@ -335,9 +450,11 @@ class Asesmen extends Utility {
 				))
 				->execute();
 				$antrian['response_data'][0]['asesmen_rawat'] = $Rawat['response_data'][0]['uid'];
+                $antrian['response_data'][0]['status_asesmen'] = $AsesmenMaster['response_data'][0];
 				return $antrian;
 			}
 		} else {
+            $antrian['response_data'][0]['status_asesmen'] = $AsesmenMaster['response_data'][0];
 			return $antrian;
 		}
 	}
@@ -393,8 +510,14 @@ class Asesmen extends Utility {
 			->execute();
 
 			if(count($poli_check['response_data']) > 0) {
-				$selectedICD10Kerja = array();
+                $selectedICD9 = array();
+			    $selectedICD10Kerja = array();
 				$selectedICD10Banding = array();
+
+                foreach ($parameter['icd9'] as $ICD9BK => $ICD9BV) {
+                    array_push($selectedICD9, $ICD9BV['id']);
+                }
+
 				foreach ($parameter['icd10_kerja'] as $ICD10KK => $ICD10KV) {
 					array_push($selectedICD10Kerja, $ICD10KV['id']);
 				}
@@ -403,27 +526,67 @@ class Asesmen extends Utility {
 					array_push($selectedICD10Banding, $ICD10BV['id']);
 				}
 
+
+
+
+				//Kasus Spesial FisioTerapi. Memang beda sendiri dia. aut of de boks. Paten kaleee
+                if($PoliDetail['uid'] === __UIDFISIOTERAPI__)
+                {
+                    $saveParam = array(
+                        'keluhan_utama' => $parameter['keluhan_utama'],
+                        'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                        'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                        'nadi' => floatval($parameter['nadi']),
+                        'suhu' => floatval($parameter['suhu']),
+                        'pernafasan' => floatval($parameter['pernafasan']),
+                        'berat_badan' => floatval($parameter['berat_badan']),
+                        'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                        'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                        'icd9' => implode(',', $selectedICD9),
+                        'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                        //'icd10_kerja' => intval($parameter['icd10_kerja']),
+                        'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                        'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                        //'icd10_banding' => intval($parameter['icd10_banding']),
+                        'icd10_banding' => implode(',', $selectedICD10Banding),
+                        'diagnosa_banding' => $parameter['diagnosa_banding'],
+                        'planning' => $parameter['planning'],
+                        'anamnesa' => $parameter['anamnesa'],
+                        'tatalaksana' => $parameter['tataLaksana'],
+                        'evaluasi' => $parameter['evaluasi'],
+                        'anjuran_bulan' => floatval($parameter['anjuranBulan']),
+                        'anjuran_minggu' => floatval($parameter['anjuranMinggu']),
+                        'suspek_akibat_kerja' => $parameter['suspek'],
+                        'hasil' => $parameter['hasil'],
+                        'kesimpulan' => $parameter['kesimpulan'],
+                        'rekomendasi' => $parameter['rekomendasi'],
+                        'updated_at' => parent::format_date()
+                    );
+                } else // Non Fisio Terapi
+                {
+                    $saveParam = array(
+                        'keluhan_utama' => $parameter['keluhan_utama'],
+                        'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                        'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                        'nadi' => floatval($parameter['nadi']),
+                        'suhu' => floatval($parameter['suhu']),
+                        'pernafasan' => floatval($parameter['pernafasan']),
+                        'berat_badan' => floatval($parameter['berat_badan']),
+                        'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                        'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                        'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                        //'icd10_kerja' => intval($parameter['icd10_kerja']),
+                        'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                        'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                        //'icd10_banding' => intval($parameter['icd10_banding']),
+                        'icd10_banding' => implode(',', $selectedICD10Banding),
+                        'diagnosa_banding' => $parameter['diagnosa_banding'],
+                        'planning' => $parameter['planning'],
+                        'updated_at' => parent::format_date()
+                    );
+                }
 				//Update
-				$worker = self::$query->update('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
-					'keluhan_utama' => $parameter['keluhan_utama'],
-					'keluhan_tambahan' => $parameter['keluhan_tambahan'],
-					'tekanan_darah' => floatval($parameter['tekanan_darah']),
-					'nadi' => floatval($parameter['nadi']),
-					'suhu' => floatval($parameter['suhu']),
-					'pernafasan' => floatval($parameter['pernafasan']),
-					'berat_badan' => floatval($parameter['berat_badan']),
-					'tinggi_badan' => floatval($parameter['tinggi_badan']),
-					'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
-					'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
-					//'icd10_kerja' => intval($parameter['icd10_kerja']),
-					'icd10_kerja' => implode(',', $selectedICD10Kerja),
-					'diagnosa_kerja' => $parameter['diagnosa_kerja'],
-					//'icd10_banding' => intval($parameter['icd10_banding']),
-					'icd10_banding' => implode(',', $selectedICD10Banding),
-					'diagnosa_banding' => $parameter['diagnosa_banding'],
-					'planning' => $parameter['planning'],
-					'updated_at' => parent::format_date()
-				))
+				$worker = self::$query->update('asesmen_medis_' . $PoliDetail['poli_asesmen'], $saveParam)
 				->where(array(
 					'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
 					'AND',
@@ -485,7 +648,7 @@ class Asesmen extends Utility {
 					));
 				}
 			} else {
-				$worker = self::new_asesmen($parameter, $check['response_data'][0]['uid'], $PoliDetail['poli_asesmen']);
+				$worker = self::new_asesmen($parameter, $check['response_data'][0]['uid'], $PoliDetail['poli_asesmen'], $PoliDetail['uid']);
 			}
 
 			$returnResponse = $worker;
@@ -529,16 +692,13 @@ class Asesmen extends Utility {
 					'class'=>__CLASS__
 				));
 
-				$worker = self::new_asesmen($parameter, $NewAsesmen, $PoliDetail['poli_asesmen']);
+				$worker = self::new_asesmen($parameter, $NewAsesmen, $PoliDetail['poli_asesmen'], $PoliDetail['uid']);
 
 				$returnResponse = $worker;
 			} else {
 				$returnResponse = $asesmen_poli;
 			}
 		}
-
-
-
 
 
 		//Tindakan Management
@@ -553,6 +713,33 @@ class Asesmen extends Utility {
 	private function set_resep_asesment($parameter, $MasterAsesmen) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        //Check Invoice
+        $Invoice = new Invoice(self::$pdo);
+        $InvoiceCheck = self::$query->select('invoice', array(
+            'uid'
+        ))
+            ->where(array(
+                'invoice.kunjungan' => '= ?',
+                'AND',
+                'invoice.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['kunjungan']
+            ))
+            ->execute();
+
+        if(count($InvoiceCheck['response_data']) > 0) {
+            $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+        } else {
+            $InvMasterParam = array(
+                'kunjungan' => $parameter['kunjungan'],
+                'pasien' => $parameter['pasien'],
+                'keterangan' => 'Tagihan tindakan perobatan'
+            );
+            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $TargetInvoice = $NewInvoice['response_unique'];
+        }
+        
 
 		$check = self::$query->select('resep', array(
 			'uid'
@@ -828,6 +1015,7 @@ class Asesmen extends Utility {
 					'kode' => $value['nama'],
 					'total' => 0,
 					'signa_qty' => $value['signaKonsumsi'],
+                    'keterangan' => $value['keterangan'],
 					'signa_pakai' => $value['signaTakar'],
 					'aturan_pakai' => intval($value['aturanPakai']),
 					'qty' => $value['signaHari'],
@@ -916,6 +1104,7 @@ class Asesmen extends Utility {
 						'kode' => $value['nama'],
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
+                        'keterangan' => $value['keterangan'],
 						'aturan_pakai' => intval($value['aturanPakai']),
 						'qty' => $value['signaHari'],
 						'total' => 0,
@@ -1049,30 +1238,6 @@ class Asesmen extends Utility {
 		}
 
 		foreach ($parameter['tindakan'] as $key => $value) {
-			/*$Penjamin = self::$query->select('master_poli_tindakan_penjamin', array(
-				'id',
-				'harga',
-				'uid_poli',
-				'uid_tindakan',
-				'uid_penjamin',
-				'created_at',
-				'updated_at'
-			))
-			->where(array(
-				'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
-				'AND',
-				'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
-				'AND',
-				'master_poli_tindakan_penjamin.uid_penjamin' => '= ?',
-				'AND',
-				'master_poli_tindakan_penjamin.uid_poli' => '= ?'
-			), array(
-				$value['item'],
-				$value['penjamin'],
-				$value['poli']
-			))
-			->execute();*/
-
 			$HargaTindakan = self::$query->select('master_tindakan_kelas_harga', array(
 				'id',
 				'tindakan',
@@ -1089,56 +1254,42 @@ class Asesmen extends Utility {
 				'AND',
 				'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
 			), array(
-				$value['penjamin'],
-				$value['kelas'],
+				$parameter['penjamin'],
+				__UID_KELAS_GENERAL_RJ__,	//Fix 1 harga kelas GENERAL
 				$value['item']
 			))
 			->execute();
-
-			$new_asesmen_uid = parent::gen_uuid();
+			$HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
 			$new_asesmen_tindakan = self::$query->insert('asesmen_tindakan', array(
-				'uid' => $new_asesmen_uid,
 				'kunjungan' => $value['kunjungan'],
 				'antrian' => $value['antrian'],
 				'asesmen' => $MasterAsesmen,
 				'tindakan' => $value['item'],
-				'penjamin' => $value['penjamin'],
-				'kelas' => $value['kelas'],
-				'harga' => $HargaTindakan['response_data'][0]['harga'],
+				'penjamin' => $parameter['penjamin'],
+				'kelas' => __UID_KELAS_GENERAL_RJ__,
+				'harga' => $HargaFinal,
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))
 			->execute();
+
 			if($new_asesmen_tindakan['response_result'] > 0) {
 				$InvoiceDetail = $Invoice::append_invoice(array(
 					'invoice' => $TargetInvoice,
 					'item' => $value['item'],
 					'item_origin' => 'master_tindakan',
 					'qty' => 1,
-					'harga' => $HargaTindakan['response_data'][0]['harga'],
+					'harga' => $HargaFinal,
 					'status_bayar' => 'N',
-					'subtotal' => $HargaTindakan['response_data'][0]['harga'],
+					'subtotal' => $HargaFinal,
 					'discount' => 0,
 					'discount_type' => 'N',
 					'pasien' => $parameter['pasien'],
-					'penjamin' => $value['penjamin'],
+					'penjamin' => $parameter['penjamin'],
 					'keterangan' => 'Biaya Tindakan Perobatan'
 				));
 
 				array_push($returnResponse, $InvoiceDetail);
-				
-				/*'invoice' => $parameter['invoice'],
-				'item' => $parameter['item'],
-				'item_type' => $parameter['item_origin'],
-				'qty' => $parameter['qty'],
-				'harga' => $parameter['harga'],
-				'status_bayar' => isset($parameter['status_bayar']) ? $parameter['status_bayar'] : 'N',
-				'subtotal' => $parameter['subtotal'],
-				'discount' => $parameter['discount'],
-				'discount_type' => $parameter['discount_type'],
-				'pasien' => $parameter['pasien'],
-				'penjamin' => $parameter['penjamin'],
-				'keterangan' => $parameter['keterangan']*/
 			}
 			array_push($returnResponse, $new_asesmen_tindakan);
 		}
@@ -1146,36 +1297,107 @@ class Asesmen extends Utility {
 		return $returnResponse;
 	}
 
-	private function new_asesmen($parameter, $parent, $poli) {
+	private function new_asesmen($parameter, $parent, $poli, $poli_uid) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$NewAsesmenPoli = parent::gen_uuid();
+
+        if($poli_uid === __UIDFISIOTERAPI__)
+        {
+            $selectedICD9 = array();
+            $selectedICD10Kerja = array();
+            $selectedICD10Banding = array();
+
+            foreach ($parameter['icd9'] as $ICD9BK => $ICD9BV) {
+                array_push($selectedICD9, $ICD9BV['id']);
+            }
+
+            foreach ($parameter['icd10_kerja'] as $ICD10KK => $ICD10KV) {
+                array_push($selectedICD10Kerja, $ICD10KV['id']);
+            }
+
+            foreach ($parameter['icd10_banding'] as $ICD10BK => $ICD10BV) {
+                array_push($selectedICD10Banding, $ICD10BV['id']);
+            }
+
+            $saveParam = array(
+                'uid' => $NewAsesmenPoli,
+                'asesmen' => $parent,
+                'kunjungan' => $parameter['kunjungan'],
+                'antrian' => $parameter['antrian'],
+                'pasien' => $parameter['pasien'],
+                'dokter' => $UserData['data']->uid,
+                'keluhan_utama' => $parameter['keluhan_utama'],
+                'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                'nadi' => floatval($parameter['nadi']),
+                'suhu' => floatval($parameter['suhu']),
+                'pernafasan' => floatval($parameter['pernafasan']),
+                'berat_badan' => floatval($parameter['berat_badan']),
+                'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                'icd9' => implode(',', $selectedICD9),
+                'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                'icd10_banding' => implode(',', $selectedICD10Banding),
+                'diagnosa_banding' => $parameter['diagnosa_banding'],
+                'planning' => $parameter['planning'],
+
+                'anamnesa' => $parameter['anamnesa'],
+                'tatalaksana' => $parameter['tataLaksana'],
+                'evaluasi' => $parameter['evaluasi'],
+                'anjuran_bulan' => floatval($parameter['anjuranBulan']),
+                'anjuran_minggu' => floatval($parameter['anjuranMinggu']),
+                'suspek_akibat_kerja' => $parameter['suspek'],
+                'hasil' => $parameter['hasil'],
+                'kesimpulan' => $parameter['kesimpulan'],
+                'rekomendasi' => $parameter['rekomendasi'],
+
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            );
+        } else // Non Fisio Terapi
+        {
+            $selectedICD10Kerja = array();
+            $selectedICD10Banding = array();
+
+            foreach ($parameter['icd10_kerja'] as $ICD10KK => $ICD10KV) {
+                array_push($selectedICD10Kerja, $ICD10KV['id']);
+            }
+
+            foreach ($parameter['icd10_banding'] as $ICD10BK => $ICD10BV) {
+                array_push($selectedICD10Banding, $ICD10BV['id']);
+            }
+
+            $saveParam = array(
+                'uid' => $NewAsesmenPoli,
+                'asesmen' => $parent,
+                'kunjungan' => $parameter['kunjungan'],
+                'antrian' => $parameter['antrian'],
+                'pasien' => $parameter['pasien'],
+                'dokter' => $UserData['data']->uid,
+                'keluhan_utama' => $parameter['keluhan_utama'],
+                'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                'nadi' => floatval($parameter['nadi']),
+                'suhu' => floatval($parameter['suhu']),
+                'pernafasan' => floatval($parameter['pernafasan']),
+                'berat_badan' => floatval($parameter['berat_badan']),
+                'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                'icd10_banding' => implode(',', $selectedICD10Banding),
+                'diagnosa_banding' => $parameter['diagnosa_banding'],
+                'planning' => $parameter['planning'],
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            );
+        }
 		//insert
-		$worker = self::$query->insert('asesmen_medis_' . $poli, array(
-			'uid' => $NewAsesmenPoli,
-			'asesmen' => $parent,
-			'kunjungan' => $parameter['kunjungan'],
-			'antrian' => $parameter['antrian'],
-			'pasien' => $parameter['pasien'],
-			'dokter' => $UserData['data']->uid,
-			'keluhan_utama' => $parameter['keluhan_utama'],
-			'keluhan_tambahan' => $parameter['keluhan_tambahan'],
-			'tekanan_darah' => floatval($parameter['tekanan_darah']),
-			'nadi' => floatval($parameter['nadi']),
-			'suhu' => floatval($parameter['suhu']),
-			'pernafasan' => floatval($parameter['pernafasan']),
-			'berat_badan' => floatval($parameter['berat_badan']),
-			'tinggi_badan' => floatval($parameter['tinggi_badan']),
-			'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
-			'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
-			'icd10_kerja' => intval($parameter['icd10_kerja']),
-			'diagnosa_kerja' => $parameter['diagnosa_kerja'],
-			'icd10_banding' => intval($parameter['icd10_banding']),
-			'diagnosa_banding' => $parameter['diagnosa_banding'],
-			'planning' => $parameter['planning'],
-			'created_at' => parent::format_date(),
-			'updated_at' => parent::format_date()
-		))
+		$worker = self::$query->insert('asesmen_medis_' . $poli, $saveParam)
 		->execute();
 
 		if($worker['response_result'] > 0) {
@@ -1194,7 +1416,7 @@ class Asesmen extends Utility {
 				'value'=>array(
 					$parent,
 					$UserData['data']->uid,
-					'asesmen_medis_' . $PoliDetail['poli_asesmen'],
+					'asesmen_medis_' . $poli,
 					'I',
 					json_encode($parameter),
 					parent::format_date(),
@@ -1204,6 +1426,8 @@ class Asesmen extends Utility {
 				'class'=>__CLASS__
 			));
 		}
+
+		$worker['response_unique'] = $NewAsesmenPoli;
 		return $worker;
 	}
 
@@ -1613,6 +1837,7 @@ class Asesmen extends Utility {
 		$penjamin = new Penjamin(self::$pdo);
 		$param = ['','penjamin-detail', $dataAntrian['penjamin']];
 		$get_penjamin = $penjamin->__GET__($param);
+        $dataAntrian['uid_penjamin'] = $dataAntrian['penjamin'];
 		$dataAntrian['nama_penjamin'] = $get_penjamin['response_data'][0]['nama'];
 
 		$poli = new Poli(self::$pdo);
@@ -1669,14 +1894,17 @@ class Asesmen extends Utility {
 		$get_panggilan = $term->__GET__($param);
 
 		$result = array(
-					'uid'=>$get_pasien['response_data'][0]['uid'],
-					'no_rm'=>$get_pasien['response_data'][0]['no_rm'],
-					'nama'=>$get_pasien['response_data'][0]['nama'],
-					'tanggal_lahir'=>$get_pasien['response_data'][0]['tanggal_lahir'],
-					'jenkel'=>$get_jenkel['response_data'][0]['nama'],
-					'id_jenkel'=>$get_pasien['response_data'][0]['jenkel'],
-					'panggilan'=>$get_panggilan['response_data'][0]['nama']
-				);
+            'uid'=>$get_pasien['response_data'][0]['uid'],
+            'no_rm'=>$get_pasien['response_data'][0]['no_rm'],
+            'nama'=>$get_pasien['response_data'][0]['nama'],
+            'tanggal_lahir'=>date('d F Y', strtotime($get_pasien['response_data'][0]['tanggal_lahir'])),
+            'jenkel'=>$get_jenkel['response_data'][0]['nama'],
+            'usia'=>$get_pasien['response_data'][0]['usia'],
+            'alamat'=>$get_pasien['response_data'][0]['alamat'],
+            'no_telp'=>$get_pasien['response_data'][0]['kontak'],
+            'id_jenkel'=>$get_pasien['response_data'][0]['jenkel'],
+            'panggilan'=>$get_panggilan['response_data'][0]['nama']
+        );
 
 		return $result;
 	}

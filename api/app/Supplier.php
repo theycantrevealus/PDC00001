@@ -26,6 +26,11 @@ class Supplier extends Utility {
 				case 'detail':
 					return self::get_detail($parameter[2]);
 					break;
+
+                case 'get_supplier_select2':
+                    return self::get_supplier_select2();
+                    break;
+
 				default:
 					return self::get_all();
 			}
@@ -48,6 +53,52 @@ class Supplier extends Utility {
 		}
 	}
 
+	public function __DELETE__($parameter = array()) {
+		return self::delete($parameter);
+	}
+
+	private function get_supplier_select2() {
+        $data = self::$query
+            ->select('master_supplier', array(
+                'uid',
+                'nama',
+                'email',
+                'alamat',
+                'kontak',
+                'created_at',
+                'updated_at'
+            ))
+            ->where(array(
+                'master_supplier.deleted_at' => 'IS NULL',
+                'AND',
+                'master_supplier.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\''
+            ))
+            ->execute();
+        $autonum = 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['nama'] = strtoupper($value['nama']);
+            $data['response_data'][$key]['autonum'] = $autonum;
+
+            $relasi_data = self::$query->select('inventori_po', array(
+                'uid',
+                'nomor_po'
+            ))
+                ->where(array(
+                    'inventori_po.deleted_at' => 'IS NULL',
+                    'AND',
+                    'inventori_po.supplier' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+
+            $data['response_data'][$key]['relasi_po'] = $relasi_data['response_data'];
+
+            $autonum++;
+        }
+        return $data;
+    }
+
 	private function get_all() {
 		$data = self::$query
 		->select('master_supplier', array(
@@ -67,6 +118,22 @@ class Supplier extends Utility {
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['nama'] = strtoupper($value['nama']);
 			$data['response_data'][$key]['autonum'] = $autonum;
+
+			$relasi_data = self::$query->select('inventori_po', array(
+				'uid',
+				'nomor_po'
+			))
+			->where(array(
+				'inventori_po.deleted_at' => 'IS NULL',
+				'AND',
+				'inventori_po.supplier' => '= ?'
+			), array(
+				$value['uid']
+			))
+			->execute();
+
+			$data['response_data'][$key]['relasi_po'] = $relasi_data['response_data'];
+
 			$autonum++;
 		}
 		return $data;
@@ -152,6 +219,7 @@ class Supplier extends Utility {
 			'table' => 'master_supplier',
 			'check' => $parameter['nama']
 		));
+
 		if(count($check['response_data']) > 0) {
 			$check['response_message'] = 'Duplicate data detected';
 			$check['response_result'] = 0;
@@ -215,5 +283,44 @@ class Supplier extends Utility {
 			$parameter['check']
 		))
 		->execute();
+	}
+
+	private function delete($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		$worker = self::$query
+		->delete($parameter[6])
+		->where(array(
+			$parameter[6] . '.uid' => '= ?'
+		), array(
+			$parameter[7]
+		))
+		->execute();
+		if($worker['response_result'] > 0) {
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter[7],
+					$UserData['data']->uid,
+					$parameter[6],
+					'D',
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+		return $worker;
 	}
 }

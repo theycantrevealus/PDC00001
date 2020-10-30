@@ -4,6 +4,7 @@
 		let targetID = "";
 		var accessData = reload_access_data(targetID);
 		reload_jabatan("");
+		reload_unit("");
 		$("form").submit(function() {
 			$.ajax({
 				url:__HOSTAPI__ + "/Pegawai",
@@ -15,13 +16,14 @@
 					email:$("#txt_email_pegawai").val(),
 					nama:$("#txt_nama_pegawai").val(),
 					jabatan:$("#txt_jabatan").val(),
+                    unit: $("#txt_unit").val()
 				},
 				type:"POST",
 				success:function(resp) {
 					if(resp.response_package.response_result > 0) {
 						location.href = __HOSTNAME__ + "/pegawai";
 					} else {
-						alert(resp.response_package.response_message);
+						console.log(resp);
 					}
 				},
 				error:function(resp) {
@@ -60,6 +62,36 @@
 				}
 			});
 			return jabatanData;
+		}
+
+		function reload_unit(selected){
+			var unitData;
+			$.ajax({
+				url:__HOSTAPI__ + "/Unit/get_unit",
+				async:false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				type:"GET",
+				success:function(resp) {
+					$("#txt_unit option").remove();
+					unitData = resp.response_package.response_data;
+					for(var a = 0; a < unitData.length; a++) {
+						var newOption = document.createElement("OPTION");
+						$(newOption).attr({
+							"value": unitData[a].uid
+						}).html(unitData[a].kode + " - " + unitData[a].nama);
+						if(unitData[a].uid == selected) {
+							$(newOption).attr({
+								"selected":"selected"
+							});
+						}
+						$("#txt_unit").append(newOption);
+					}
+					$("#txt_unit").select2();
+				}
+			});
+			return unitData;
 		}
 
 		

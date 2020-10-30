@@ -40,9 +40,6 @@
 					</li>
 				</ul>
 			</div>
-			<?php
-				$day=new DateTime('last day of this month');
-			?>
 			<div class="card card-body tab-content">
 				<div class="tab-pane show fade active" id="tab-tagihan">
 					<div class="row">
@@ -59,7 +56,7 @@
 												<th>Poliklinik</th>
 												<th class="wrap_content">Staf Pendaftaran</th>
 												<th>Total Biaya</th>
-												<th>Aksi</th>
+												<th class="wrap_content">Aksi</th>
 											</tr>
 										</thead>
 										<tbody></tbody>

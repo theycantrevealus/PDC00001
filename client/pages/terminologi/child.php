@@ -24,11 +24,11 @@
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
 				<div class="table-responsive border-bottom" data-toggle="lists">
 					<table class="table mb-0 thead-border-top-0" id="table-terminologiItem">
-						<thead>
+						<thead class="thead-dark">
 							<tr>
-								<th style="width: 20px;">No</th>
+								<th class="wrap_content">No</th>
 								<th>Item</th>
-								<th width="30%">Aksi</th>
+								<th class="wrap_content">Aksi</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
