@@ -119,9 +119,10 @@
                     <?php
                     if(in_array(__POLI_GIGI__, $PoliList)) {
                         require 'asesmen-gigi.php';
-                    } else {
-                        require 'asesmen-awal.php';
+                    } else if(in_array(__POLI_MATA__, $PoliList)) {
+                        require 'asesmen-mata.php';
                     }
+                    require 'asesmen-awal.php';
                     ?>
 				</div>
                 <div class="tab-pane show fade" id="tab-poli-9">
