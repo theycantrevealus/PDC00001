@@ -65,8 +65,6 @@
 					success:function(resp) {
 						if(resp.response_package.response_result > 0) {
 							location.href = __HOSTNAME__ + "/pegawai";
-						} else {
-							alert(resp.response_package.response_message);
 						}
 					},
 					error:function(resp) {

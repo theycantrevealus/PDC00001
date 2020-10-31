@@ -606,6 +606,7 @@ class Pegawai extends Utility {
 					'class' => __CLASS__
 				));
 			}
+			$worker['response_unique'] = $uid;
 			return $worker;
 		}
 	}

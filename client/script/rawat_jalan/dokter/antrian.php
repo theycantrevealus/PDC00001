@@ -4055,7 +4055,7 @@
 		});
 
 
-		/*$("#btnSubmitOrderLab").click(function(){
+		$("#btnSubmitOrderLab").click(function(){
 			let dokterPJLabOrder = $("#dr_penanggung_jawab_lab").val();
 
 			if (
@@ -4099,7 +4099,7 @@
 				});
 			}
 
-		});*/
+		});
 
 
 		/*==================== UNIVERSAL FUNCTION =====================*/
