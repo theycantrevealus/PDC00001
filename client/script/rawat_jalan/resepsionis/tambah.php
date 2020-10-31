@@ -35,8 +35,6 @@
 				dataObj.currentPasien = currentPasien;
 				dataObj.currentAntrianID = currentAntrianID;
 
-				console.log(dataObj);
-
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 					if(dataObj.penjamin == __UIDPENJAMINBPJS__) {
 						$("#modal-sep").modal("show");

@@ -41,6 +41,7 @@
 		var pasien_penjamin, pasien_penjamin_uid;
 		var pasien_uid, pasien_nama, pasien_kontak, pasien_alamat, pasien_usia, pasien_rm, pasien_jenkel, pasien_tanggal_lahir, pasien_penjamin, pasien_penjamin_uid, pasien_tempat_lahir;
 		var UID = __PAGES__[3];
+		var kunjungan = {};
 		$("#info-pasien-perawat").remove();
 		$.ajax({
 			url:__HOSTAPI__ + "/Antrian/antrian-detail/" + UID,
@@ -51,6 +52,7 @@
 			type:"GET",
 			success:function(response) {
 				antrianData = response.response_package.response_data[0];
+                kunjungan = antrianData.kunjungan_detail;
                 for(var poliSetKey in poliListRawList)
                 {
                     if(poliListRawList[poliSetKey].poli.response_data[0].uid == antrianData.departemen)
@@ -109,6 +111,7 @@
 							tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
 						} else {
 							asesmen_detail = response.response_package.response_data[0];
+
 							if(asesmen_detail.tindakan !== undefined) {
 								if(asesmen_detail.tindakan.length > 0) {
 									for(var tindakanKey in asesmen_detail.tindakan) {
@@ -4297,6 +4300,72 @@
                 }
             });
         }
+
+        function resetSelectBox(selector, name){
+            $("#"+ selector +" option").remove();
+            var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
+            $("#" + selector).append(opti_null);
+        }
+
+        $("#btnProsesKonsul").click(function() {
+            var dataObj = {};
+            $('.inputan_konsul').each(function() {
+                var key = $(this).attr("id").split("_");
+                var value = $(this).val();
+
+                dataObj[key[1]] = value;
+            });
+
+            dataObj.pasien = pasien_uid;
+            dataObj.currentPasien = pasien_uid;
+            dataObj.currentAntrianID = UID;
+            dataObj.konsul = true;
+            dataObj.kunjungan = kunjungan.uid;
+            dataObj.pj_pasien = kunjungan.pj_pasien;
+            dataObj.info_didapat_dari = kunjungan.info_didapat_dari;
+
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Antrian",
+                data: {
+                    request : "tambah-kunjungan",
+                    dataObj : dataObj
+                },
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                success: function(response){
+                    console.clear();
+                    console.log(response);
+                    if(response.response_package.response_notif == 'K') {
+                        push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum konsul", "warning");
+                        Swal.fire(
+                            'Berhasil konsul!',
+                            'Silahkan arahkan pasien ke kasir',
+                            'success'
+                        ).then((result) => {
+                            location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                        });
+                    } else if(response.response_package.response_notif == 'P') {
+                        Swal.fire(
+                            'Berhasil konsul!',
+                            'Silahkan arahkan pasien ke poli tujuan',
+                            'success'
+                        ).then((result) => {
+                            location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                        });
+                    } else {
+                        console.log("command not found");
+                    }
+
+                },
+                error: function(response) {
+                    console.log("Error : ");
+                    console.log(response);
+                }
+            });
+        });
 
         function loadDokter(poli, selected = ""){
             resetSelectBox('konsul_dokter', 'Dokter');
