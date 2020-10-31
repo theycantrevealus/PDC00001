@@ -7,6 +7,9 @@
 			<div class="card-body tab-content">
 				<div class="tab-pane active show fade" id="resep-biasa">
 					<div class="row">
+                        <div class="col-md-12">
+
+                        </div>
 						<div class="col-md-12">
 							
 
@@ -44,15 +47,16 @@
 
 
 							<div id="cppt_loader">
-								<?php
-									//require 'cppt-single.php';
-								?>
+
 							</div>
 
 							<div class="mt-4">
 
+                                <ul class="pagination justify-content-center" id="pagin">
 
-								<ul class="pagination justify-content-center ">
+                                </ul>
+
+								<!--<ul class="pagination justify-content-center">
 
 									<li class="page-item disabled">
 										<a class="page-link" href="#" aria-label="Previous">
@@ -110,7 +114,7 @@
 										</a>
 									</li>
 
-								</ul>
+								</ul>-->
 
 							</div>
 
