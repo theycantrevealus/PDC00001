@@ -8,6 +8,7 @@ use PondokCoder\QueryException as QueryException;
 use PondokCoder\PO as PO;
 use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Pegawai as Pegawai;
+use PondokCoder\Pasien as Pasien;
 use PondokCoder\Unit as Unit;
 use PondokCoder\Utility as Utility;
 
@@ -51,6 +52,14 @@ class Inventori extends Utility
                     break;
                 case 'item_detail':
                     return self::get_item_detail($parameter[2]);
+                    break;
+                case 'kartu_stok':
+
+                    $ItemDetail = self::get_item_detail($parameter[2]);
+                    $ItemStokLog = self::get_item_stok_log($parameter[2], $parameter[3]);
+                    $ItemDetail['response_data'][0]['log'] = $ItemStokLog['response_data'];
+                    return $ItemDetail;
+
                     break;
                 case 'manufacture':
                     return self::get_manufacture();
@@ -1342,9 +1351,91 @@ class Inventori extends Utility
                 $data['response_data'][$key]['harga'] = 0;
             }
         }
+
         return $data;
     }
 
+
+    /**
+     * @param uid $parameter Barang
+     * @param uid $gudang Gudang
+     * @return array Data is response_data
+     */
+    public function  get_item_stok_log($parameter, $gudang) {
+        $data = self::$query->select('inventori_stok_log', array(
+            'id',
+            'masuk',
+            'keluar',
+            'saldo',
+            'type',
+            'logged_at',
+            'jenis_transaksi',
+            'uid_foreign',
+            'keterangan'
+        ))
+            ->where(array(
+                'inventori_stok_log.gudang' => '= ?',
+                'AND',
+                'inventori_stok_log.barang' => '= ?'
+            ), array(
+                $gudang,
+                $parameter
+            ))
+            ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            //Terminologi Item
+            $Termi = self::$query->select('terminologi_item', array(
+                'id',
+                'nama'
+            ))
+                ->where(array(
+                    'terminologi_item.id' => '= ?',
+                    'AND',
+                    'terminologi_item.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['type']
+                ))
+                ->execute();
+            $data['response_data'][$key]['type'] = $Termi['response_data'][0];
+
+            $data['response_data'][$key]['logged_at'] = date('d M Y', strtotime($value['logged_at']));
+
+            if($value['uid_foreign'] !== null && $value['uid_foreign'] !== '')
+            {
+                //Get Foreign dokumen
+                if($value['jenis_transaksi'] === 'resep') {
+                    //get resep
+                    $Resep = self::$query->select('resep', array(
+                        'pasien'
+                    ))
+                        ->where(array(
+                            'resep.deleted_at' => 'IS NULL',
+                            'AND',
+                            'resep.uid' => '= ?'
+                        ), array(
+                            $value['uid_foreign']
+                        ))
+                        ->execute();
+                    //get pasien
+                    $Pasien = new Pasien(self::$pdo);
+                    $PasienInfo = $Pasien::get_pasien_detail($Resep['response_data'][0]['pasien']);
+
+                    $data['response_data'][$key]['dokumen'] = 'Resep Asesmen ' . $PasienInfo['response_data'][0]['nama'];
+                } else {
+                    $data['response_data'][$key]['dokumen'] = '-';
+                }
+            } else {
+                $data['response_data'][$key]['dokumen'] = '-';
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param $parameter Require item uid
+     * @return array
+     */
     public function get_item_detail($parameter)
     {
         $data = self::$query
@@ -1394,6 +1485,9 @@ class Inventori extends Utility
 
             //Monitoring
             $data['response_data'][$key]['monitoring'] = self::get_monitoring($value['uid']);
+
+            //Satuan Terkecil
+            $data['response_data'][$key]['satuan_terkecil_info'] = self::get_satuan_detail($value['satuan_terkecil'])['response_data'][0];
         }
         return $data;
     }
@@ -2946,7 +3040,10 @@ class Inventori extends Utility
                                 'masuk' => 0,
                                 'keluar' => $BValue['disetujui'],
                                 'saldo' => $terkiniMinus,
-                                'type' => __STATUS_AMPRAH__
+                                'type' => __STATUS_AMPRAH__,
+                                'jenis_transaksi' => 'inventori_amprah_proses',
+                                'uid_foreign' => $uid,
+                                'keterangan' => 'Proses amprah'
                             ))
                                 ->execute();
                         }
@@ -3017,7 +3114,10 @@ class Inventori extends Utility
                                 'masuk' => $BValue['disetujui'],
                                 'keluar' => 0,
                                 'saldo' => $terkiniPlus,
-                                'type' => __STATUS_AMPRAH__
+                                'type' => __STATUS_AMPRAH__,
+                                'jenis_transaksi' => 'inventori_amprah_proses',
+                                'uid_foreign' => $uid,
+                                'keterangan' => 'Proses amprah'
                             ))
                                 ->execute();
                         }

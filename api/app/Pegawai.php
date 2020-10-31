@@ -39,7 +39,8 @@ class Pegawai extends Utility {
 			return self::get_access(array(
 				'uid' => $parameter[2]
 			));
-		} else if($parameter[1] == 'get_module') {
+
+        } else if($parameter[1] == 'get_module') {
 
 			return self::get_module($parameter[2]);
 

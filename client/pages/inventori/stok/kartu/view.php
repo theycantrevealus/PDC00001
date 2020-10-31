@@ -52,10 +52,10 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="tab-pane active show fade">
-                                    <table class="table table-bordered largeDataType" id="table-item">
+                                    <table class="table table-bordered largeDataType" id="table-item-log">
                                         <thead class="thead-dark">
                                         <tr>
-                                            <th class="wrap_content">Tanggal</th>
+                                            <th width="10%">Tanggal</th>
                                             <th style="width: 10%;">Dokumen</th>
                                             <th style="wrap_content">Uraian</th>
                                             <th class="wrap_content">Masuk</th>
