@@ -13,7 +13,6 @@
         $("#access-tab").hide();
 
         //INIT DATA
-        //var accessData = reload_access_data(targetID);
         reload_jabatan();
         reload_unit();
 
