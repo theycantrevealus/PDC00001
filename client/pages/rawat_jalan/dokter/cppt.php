@@ -7,9 +7,6 @@
 			<div class="card-body tab-content">
 				<div class="tab-pane active show fade" id="resep-biasa">
 					<div class="row">
-                        <div class="col-md-12">
-
-                        </div>
 						<div class="col-md-12">
 							
 
@@ -46,9 +43,11 @@
 							</div>
 
 
-							<div id="cppt_loader">
-
+                            <div id="cppt_pagination">
+                            </div>
+                            <div id="cppt_loader">
 							</div>
+
 
 							<div class="mt-4">
 
