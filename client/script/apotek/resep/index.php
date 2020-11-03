@@ -162,9 +162,8 @@
             $("#nama-pasien").attr({
                 "set-penjamin": targettedData.antrian.penjamin_data.uid
             }).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name !== null)? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
+
             loadDetailResep(targettedData);
-
-
 
             $(".obatSelector").select2({
                 minimumInputLength: 2,
@@ -280,17 +279,19 @@
                     }
                 }
 
-                if(selectedBatchResep.length > 0)
+                if(selectedBatchResep.length >= 0)
                 {
                     var profit = 0;
                     var profit_type = "N";
 
-                    for(var batchDetail in selectedBatchResep[0].profit)
-                    {
-                        if(selectedBatchResep[0].profit[batchDetail].penjamin === $("#nama-pasien").attr("set-penjamin"))
+                    if(selectedBatchResep.length > 0) {
+                        for(var batchDetail in selectedBatchResep[0].profit)
                         {
-                            profit = parseFloat(selectedBatchResep[0].profit[batchDetail].profit);
-                            profit_type = selectedBatchResep[0].profit[batchDetail].profit_type;
+                            if(selectedBatchResep[0].profit[batchDetail].penjamin === $("#nama-pasien").attr("set-penjamin"))
+                            {
+                                profit = parseFloat(selectedBatchResep[0].profit[batchDetail].profit);
+                                profit_type = selectedBatchResep[0].profit[batchDetail].profit_type;
+                            }
                         }
                     }
 
@@ -375,7 +376,7 @@
                     $(newDetailCellHarga).attr({
                         "id": "harga_resep_" + a,
                         "harga": totalObat,
-                        "harga_before": parseFloat(selectedBatchResep[0].harga)
+                        "harga_before": parseFloat((selectedBatchResep.length > 0) ? selectedBatchResep[0].harga : 0)
                     }).addClass("text-right number_style").html(number_format(totalObat, 2, ",", "."));
 
                     var newDetailCellTotal = document.createElement("TD");
