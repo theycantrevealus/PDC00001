@@ -436,17 +436,19 @@
                         }
                     }
 
-                    if(selectedBatchRacikan.length > 0)
+                    if(selectedBatchRacikan.length >= 0)
                     {
                         var profit_racikan = 0;
                         var profit_type_racikan = "N";
 
-                        for(var batchDetail in selectedBatchRacikan[0].profit)
-                        {
-                            if(selectedBatchRacikan[0].profit[batchDetail].penjamin === $("#nama-pasien").attr("set-penjamin"))
+                        if(selectedBatchRacikan.length > 0) {
+                            for(var batchDetail in selectedBatchRacikan[0].profit)
                             {
-                                profit_racikan = parseFloat(selectedBatchRacikan[0].profit[batchDetail].profit);
-                                profit_type_racikan = selectedBatchRacikan[0].profit[batchDetail].profit_type;
+                                if(selectedBatchRacikan[0].profit[batchDetail].penjamin === $("#nama-pasien").attr("set-penjamin"))
+                                {
+                                    profit_racikan = parseFloat(selectedBatchRacikan[0].profit[batchDetail].profit);
+                                    profit_type_racikan = selectedBatchRacikan[0].profit[batchDetail].profit_type;
+                                }
                             }
                         }
 
@@ -812,20 +814,23 @@
                             var total_racikan = $(this).find("td:eq(2)").attr("total");
                         }
 
-                        racikan.push({
-                            group_racikan: racikanIdentifierGroup,
-                            signa_qty:signa_qty_racikan,
-                            signa_pakai:signa_pakai_racikan,
-                            obat: obat_racikan,
-                            batch: batch_racikan,
-                            harga: parseFloat(harga_racikan),
-                            jumlah: parseFloat(jumlah_racikan),
-                            bulat: parseFloat(bulat_racikan),
-                            pembulatan: pembulatan_racikan,
-                            decimal: parseFloat(decimal_racikan),
-                            ratio: parseFloat(ratio_racikan),
-                            total:total_racikan
-                        });
+
+                        if(batch_racikan !== undefined) {
+                            racikan.push({
+                                group_racikan: racikanIdentifierGroup,
+                                signa_qty:signa_qty_racikan,
+                                signa_pakai:signa_pakai_racikan,
+                                obat: obat_racikan,
+                                batch: batch_racikan,
+                                harga: parseFloat(harga_racikan),
+                                jumlah: parseFloat(jumlah_racikan),
+                                bulat: parseFloat(bulat_racikan),
+                                pembulatan: pembulatan_racikan,
+                                decimal: parseFloat(decimal_racikan),
+                                ratio: parseFloat(ratio_racikan),
+                                total:total_racikan
+                            });
+                        }
                     });
 
 

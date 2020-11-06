@@ -191,8 +191,38 @@ class Pasien extends Utility
 
             $data['response_data'][$key]['usia'] = date("Y") - date("Y", strtotime($value['tanggal_lahir']));
             $data['response_data'][$key]['periode'] = date('m/y', strtotime($value['created_at']));
-            $data['response_data'][$key]['autonum'] = $autonum;
 
+            //Penjamin Pasien
+            $Detail = self::$query->select('pasien_penjamin', array(
+                'penjamin',
+                'valid_awal',
+                'valid_akhir',
+                'rest_meta',
+                'terdaftar'
+            ))
+                ->where(array(
+                    'pasien_penjamin.pasien' => '= ?',
+                    'AND',
+                    'pasien_penjamin.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($Detail['response_data'] as $DKey => $DValue)
+            {
+                //Detail Penjamin
+                $Penjamin = new Penjamin(self::$pdo);
+                $PenjaminDetail = $Penjamin::get_penjamin_detail($DValue['penjamin']);
+                $Detail['response_data'][$DKey]['penjamin_detail'] = $PenjaminDetail['response_data'][0];
+
+                $Detail['response_data'][$DKey]['valid_awal'] = date('d F Y', strtotime($DValue['valid_awal']));
+                $Detail['response_data'][$DKey]['valid_akhir'] = date('d F Y', strtotime($DValue['valid_akhir']));
+                $Detail['response_data'][$DKey]['terdaftar'] = date('d F Y', strtotime($DValue['terdaftar']));
+            }
+            $data['response_data'][$key]['history_penjamin'] = $Detail['response_data'];
+
+
+            $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
         }
 
@@ -610,17 +640,17 @@ class Pasien extends Utility
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
-                'pasien.deleted_at' => 'IS NULL'
-            );
-
-            $paramValue = array();
-        } else {
-            $paramData = array(
                 'pasien.deleted_at' => 'IS NULL',
                 'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
                 'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'pasien.deleted_at' => 'IS NULL'
             );
 
             $paramValue = array();

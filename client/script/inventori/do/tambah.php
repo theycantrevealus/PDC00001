@@ -22,6 +22,7 @@
 			autoRow();
 			renderPO(poData);
 		}
+		}
 
 		function load_po(parameter) {
 			$.ajax({

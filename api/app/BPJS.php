@@ -30,9 +30,10 @@ class BPJS extends Utility {
 		self::$pdo = $connection;
 		self::$query = new Query(self::$pdo);
 		self::$kodePPK = __KODE_PPK__;
-		self::$data_api = __DATA_API_STAGING__;
-		self::$secretKey_api = __SECRET_KEY_STAGING_BPJS__;
-		self::$base_url = __BASE_STAGING_BPJS__;
+		self::$data_api = __DATA_API_LIVE__;
+		self::$secretKey_api = __SECRET_KEY_LIVE_BPJS__;
+		self::$base_url = __BASE_LIVE_BPJS__;
+        //self::$base_url = __BASE_STAGING_BPJS__;
 
 
 		date_default_timezone_set('UTC');
@@ -63,7 +64,18 @@ class BPJS extends Utility {
 			switch($parameter[1]) {
 				case 'get_faskes':
 					return self::get_faskes();
+                case 'get_diagnosa':
+                    return self::get_diagnosa($parameter[2]);
 					break;
+                case 'get_provinsi':
+                    return self::get_provinsi();
+                    break;
+                case 'get_faskes_select2':
+                    return self::get_faskes_select2();
+                    break;
+                case 'get_kelas_rawat_select2':
+                    return self::get_kelas_rawat_select2();
+                    break;
 				default:
 					return 'Unknown request';
 			}
@@ -87,11 +99,31 @@ class BPJS extends Utility {
 		}
 	}
 
+	private function get_diagnosa($parameter) {
+        $content = self::launchUrl('/new-vclaim-rest/referensi/diagnosa/' . $parameter . '/');
+        return $content;
+    }
+
+    private function get_provinsi() {
+        $content = self::launchUrl('/new-vclaim-rest/referensi/propinsi');
+        return $content;
+    }
+
+    private function get_faskes_select2() {
+        $content = self::launchUrl('/new-vclaim-rest/referensi/faskes/' . $_GET['search'] . '/' . $_GET['type']);
+        return $content;
+    }
+
+    private function get_kelas_rawat_select2() {
+        $content = self::launchUrl('/new-vclaim-rest/referensi/kelasrawat');
+        return $content;
+    }
+
 	private function get_faskes() {
 		$hasil = array();
 		for($a = 1; $a < 30; $a++) {
 			//curl_setopt(self::$ch, CURLOPT_URL, self::$base_url . '/VClaim-rest/referensi/dokter/pelayanan/1/tglPelayanan/' . date('Y-m-d') . '/Spesialis/' . $a);
-			curl_setopt(self::$ch, CURLOPT_URL, self::$base_url . '/VClaim-rest/referensi/spesialistik');
+			curl_setopt(self::$ch, CURLOPT_URL, self::$base_url . '/new-vclaim-rest/referensi/spesialistik');
 			$content = curl_exec(self::$ch);
 			$err = curl_error(self::$ch);
 			if (curl_errno(self::$ch)){
@@ -112,23 +144,62 @@ class BPJS extends Utility {
 
 	private function cek_peserta($parameter) {
 		$no_bpjs = $parameter['no_bpjs'];
-		$tglSEP = date("Y-m-d");
+		$tglSEP = strval(date("Y-m-d"));
 		
-		curl_setopt(self::$ch, CURLOPT_URL, self::$base_url . '/VClaim-rest/Peserta/nokartu/' . $no_bpjs . '/tglSEP/' . $tglSEP . '');
-		$content = curl_exec(self::$ch);
-		$err = curl_error(self::$ch);
+		/*curl_setopt(self::$ch, CURLOPT_URL, self::$base_url . '/VClaim-rest/Peserta/nokartu/' . $no_bpjs . '/tglSEP/' . $tglSEP . '');
+		$content = curl_exec(self::$ch);*/
+
+        $content = self::launchUrl('/new-vclaim-rest/Peserta/nokartu/' . $no_bpjs . '/tglSEP/' . $tglSEP . '');
+
+		/*$err = curl_error(self::$ch);
 		
-		if (curl_errno(self::$ch)){
+		if (curl_errno(self::$ch)) {
 			$jlh=1;
 		}
 		else{
 			$jlh=0;
 		}
-		
+
 		$content = json_decode($content, TRUE);
 		$content['response']['peserta']['tglLahir'] = date('d F Y', strtotime($content['response']['peserta']['tglLahir']));
-		$content['response']['peserta']['tglCetakKartu'] = date('d F Y', strtotime($content['response']['peserta']['tglCetakKartu']));
+		$content['response']['peserta']['tglCetakKartu'] = date('d F Y', strtotime($content['response']['peserta']['tglCetakKartu']));*/
+
 		return $content;
 	}
+
+    public function launchUrl($extended_url){
+        $url = self::$base_url . $extended_url;
+
+        date_default_timezone_set('UTC');
+        $tStamp = strval(time()-strtotime('1970-01-01 00:00:00'));
+        $signature = hash_hmac('sha256', self::$data_api ."&". $tStamp , self::$secretKey_api, true);
+        $encodedSignature = base64_encode($signature);
+        $headers = array(
+            "X-cons-id: " . self::$data_api ." ",
+            "X-timestamp: " .$tStamp ." ",
+            "X-signature: " .$encodedSignature,
+            "Content-Type: application/json; charset=utf-8"
+        );
+
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_HTTPGET, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+
+        $content = curl_exec($ch);
+        $err = curl_error($ch);
+
+        $result = json_decode($content, true);
+        $return_value = array("content"=>$result, "error"=>$err);
+
+        return $return_value;
+    }
 }
 ?>

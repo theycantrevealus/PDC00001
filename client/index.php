@@ -28,6 +28,7 @@
     var __UIDPETUGASLAB__ = <?php echo json_encode(__UIDPETUGASLAB__); ?>;
     var __POLI_GIGI__ = <?php echo json_encode(__POLI_GIGI__); ?>;
     var __POLI_MATA__ = <?php echo json_encode(__POLI_MATA__); ?>;
+    var __POLI_INAP__ = <?php echo json_encode(__POLI_INAP__); ?>;
 
 	var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');

@@ -37,6 +37,7 @@
         var editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorKerja, editorBanding, editorKeteranganResep, editorKeteranganResepRacikan, editorPlanning;
         var editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi;
         var antrianData, asesmen_detail;
+        var prioritas_antrian = 0;
         var tindakanMeta = [];
         var usedTindakan = [];
         var pasien_penjamin, pasien_penjamin_uid;
@@ -53,6 +54,8 @@
             type:"GET",
             success:function(response) {
                 antrianData = response.response_package.response_data[0];
+                console.log(antrianData);
+                prioritas_antrian = antrianData.prioritas;
                 kunjungan = antrianData.kunjungan_detail;
                 for(var poliSetKey in poliListRawList)
                 {
@@ -62,6 +65,16 @@
                     }
                 }
                 poliList = poliListRaw;
+                
+                if(antrianData.poli_info.uid === __POLI_GIGI__) {
+                    $("#gigi_loader").show();
+                } else if(antrianData.poli_info.uid === __POLI_MATA__) {
+                    $("#mata_loader").show();
+                } else {
+                    $("#gigi_loader").hide();
+                    $("#mata_loader").hide();
+                }
+
                 $("#heading_nama_poli").html(antrianData.poli_info.nama);
                 pasien_uid = antrianData.pasien_info.uid;
                 pasien_nama = antrianData.pasien_info.nama;
@@ -91,8 +104,6 @@
                         }
                     },
                     callback: function(data, pagination) {
-                        console.clear();
-                        console.log(data);
                         var dataHtml = "<ul style=\"list-style-type: none;\">";
 
                         $.each(data, function (index, item) {
@@ -3029,12 +3040,11 @@
                         type: "POST",
                         success: function(response) {
                             console.clear();
-                            console.log(response);
 
                             if(response.response_package.response_result > 0) {
                                 notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                                 push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
-                                //location.href = __HOSTNAME__ + "/rawat_jalan/dokter";
+                                location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                             } else {
                                 notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                             }
@@ -3998,7 +4008,6 @@
             let uidTindakanLab = $("#tindakan_lab").val();
             let hargaPenjamin = number_format($("#tindakan_lab").attr("harga"), 2, ".", ",");
 
-            console.log(listTindakanLabTerpilih[uidTindakanLab]);
             if(listTindakanLabTerpilih[uidTindakanLab] === undefined)
             {
                 listTindakanLabTerpilih[uidTindakanLab] = {
@@ -4214,21 +4223,28 @@
         $("#btnKonsul").click(function() {
             $("#form-konsul").modal("show");
 
-            loadPenjamin();
-            loadPoli();
-            loadPrioritas();
+            loadPenjamin("konsul", pasien_penjamin_uid);
+            loadPoli("konsul");
+            loadPrioritas(prioritas_antrian);
+        });
+
+        $("#btnInap").click(function() {
+            $("#form-inap").modal("show");
+            loadPenjamin("inap", pasien_penjamin_uid);
+            loadPoli("inap");
+            loadDokter("inap", __POLI_INAP__);
         });
 
         $("#konsul_departemen").on('change', function(){
             var poli = $(this).val();
 
             if (poli != ""){
-                loadDokter(poli);
+                loadDokter("konsul", poli);
             }
         });
 
 
-        function loadPenjamin(selected = "") {
+        function loadPenjamin(target_ui, selected = "") {
             var dataPenjamin = null;
 
             $.ajax({
@@ -4244,9 +4260,11 @@
                     if (MetaData != ""){
                         for(i = 0; i < MetaData.length; i++){
                             var selection = document.createElement("OPTION");
-
                             $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
-                            $("#konsul_penjamin").append(selection);
+                            if(MetaData[i].uid === selected) {
+                                $(selection).attr("selected", "selected");
+                            }
+                            $("#" + target_ui + "_penjamin").append(selection);
                         }
                     }
                 },
@@ -4258,7 +4276,7 @@
             return dataPenjamin;
         }
 
-        function loadPoli(selected = ""){
+        function loadPoli(target_ui, selected = ""){
             var dataPoli = null;
 
             $.ajax({
@@ -4276,7 +4294,7 @@
                             var selection = document.createElement("OPTION");
 
                             $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
-                            $("#konsul_departemen").append(selection);
+                            $("#" + target_ui + "_departemen").append(selection);
                         }
                     }
                 },
@@ -4288,7 +4306,7 @@
             return dataPoli;
         }
 
-        function loadPrioritas(selected = ""){
+        function loadPrioritas(selected = 0){
             var term = 11;
 
             $.ajax({
@@ -4306,6 +4324,9 @@
                             var selection = document.createElement("OPTION");
 
                             $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+                            if(MetaData[i].id === selected) {
+                                $(selection).attr("selected", "selected");
+                            }
                             $("#konsul_prioritas").append(selection);
                         }
                     }
@@ -4335,6 +4356,7 @@
             dataObj.currentPasien = pasien_uid;
             dataObj.currentAntrianID = UID;
             dataObj.konsul = true;
+            dataObj.antrian = UID;
             dataObj.kunjungan = kunjungan.uid;
             dataObj.pj_pasien = kunjungan.pj_pasien;
             dataObj.info_didapat_dari = kunjungan.info_didapat_dari;
@@ -4382,8 +4404,8 @@
             });
         });
 
-        function loadDokter(poli, selected = ""){
-            resetSelectBox('konsul_dokter', 'Dokter');
+        function loadDokter(target_ui, poli, selected = ""){
+            resetSelectBox(target_ui + "_dokter", "Dokter");
 
             $.ajax({
                 async: false,
@@ -4400,7 +4422,7 @@
                             var selection = document.createElement("OPTION");
 
                             $(selection).attr("value", MetaData[i].dokter).html(MetaData[i].nama);
-                            $("#konsul_dokter").append(selection);
+                            $("#" + target_ui + "_dokter").append(selection);
                         }
                     }
                 },
@@ -4411,7 +4433,7 @@
         }
 
         $(".inputan_konsul").select2();
-
+        $(".inputan_inap").select2();
 
         if(dataOdontogram === undefined)
         {
@@ -5175,13 +5197,13 @@
                             <div class="form-row">
                                 <div class="col-12 col-md-6 mb-3">
                                     <label>Pembayaran <span class="red">*</span></label>
-                                    <select id="konsul_penjamin" class="form-control select2 inputan_konsul" required>
+                                    <select id="konsul_penjamin" class="form-control select2 inputan_konsul" required disabled>
                                         <option value="" disabled selected>Pilih Jenis Pembayaran</option>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 mb-3">
                                     <label>Prioritas <span class="red">*</span></label>
-                                    <select id="konsul_prioritas" class="form-control select2 inputan_konsul" required>
+                                    <select id="konsul_prioritas" class="form-control select2 inputan_konsul" required disabled>
                                         <option value="" disabled selected>Pilih Prioritas</option>
                                     </select>
                                 </div>
@@ -5205,6 +5227,64 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="btnProsesKonsul">
                     <i class="fa fa-check"></i> Proses Konsul
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+<div id="form-inap" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Pindah Rawat Inap</h5>
+            </div>
+            <div class="modal-body">
+                <div class="card card-form">
+                    <div class="row no-gutters">
+                        <div class="col-lg-12 card-body">
+                            <div class="form-row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Pembayaran <span class="red">*</span></label>
+                                    <select id="inap_penjamin" class="form-control select2 inputan_inap" required disabled>
+                                        <option value="" disabled selected>Pilih Jenis Pembayaran</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Dokter <span class="red">*</span></label>
+                                    <select id="inap_dokter" class="form-control select2 inputan_inap" required>
+                                        <option value="" disabled selected>Pilih Dokter</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Kamar <span class="red">*</span></label>
+                                    <select id="inap_kamar" class="form-control select2 inputan_inap" required>
+                                        <option value="" disabled selected>Pilih Kamar</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Bangsal <span class="red">*</span></label>
+                                    <select id="inap_bed" class="form-control select2 inputan_inap" required>
+                                        <option value="" disabled selected>Pilih Bangsal</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnProsesKonsul">
+                    <i class="fa fa-check"></i> Pindah Rawat Inap
                 </button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
             </div>

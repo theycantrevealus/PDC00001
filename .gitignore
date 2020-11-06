@@ -7,7 +7,7 @@ sync.php
 .htaccess
 composer.lock
 composer.json
-
+vendor
 node_modules/
 images/produk/
 images/pegawai/
@@ -24,7 +24,7 @@ api/sync.php
 api/constant.php
 api/app/Connection.php
 api/app/Utility.php
-api/vendor/
+api/vendor
 api/email_template/
 api/*.txt
 api/*.pem

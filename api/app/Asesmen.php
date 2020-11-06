@@ -856,6 +856,21 @@ class Asesmen extends Utility {
 		//Resep dan Racikan
 		$returnResponse['resep_response'] = self::set_resep_asesment($parameter, $MasterUID);
 
+		if($parameter['poli'] !== __POLI_INAP__) {
+            //Pasien Keluar Poli
+            $keluar = self::$query->update('antrian', array(
+                'waktu_keluar' => parent::format_date()
+            ))
+                ->where(array(
+                    'antrian.uid' => '= ?',
+                    'AND',
+                    'antrian.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['antrian']
+                ))
+                ->execute();
+        }
+
 		return $returnResponse;
 	}
 

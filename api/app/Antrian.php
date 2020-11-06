@@ -190,6 +190,19 @@ class Antrian extends Utility
 
                 unset($parameter['dataObj']['currentPasien']);
 
+                //Keluar dari poli
+                $keluar = self::$query->update('antrian', array(
+                    'waktu_keluar' => parent::format_date()
+                ))
+                    ->where(array(
+                        'antrian.uid' => '= ?',
+                        'AND',
+                        'antrian.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['dataObj']['antrian']
+                    ))
+                    ->execute();
+
                 $antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
                 $antrian['response_notif'] = 'P';
                 return $antrian;
@@ -418,6 +431,62 @@ class Antrian extends Utility
                     }
 
                 } else { // Jika selain umum
+
+
+
+                    //Simpan Data Non Umum
+
+                    $CheckNonUmum = self::$query->select('pasien_penjamin', array(
+                        'id'
+                    ))
+                        ->where(array(
+                            'pasien_penjamin.penjamin' => '= ?',
+                            'AND',
+                            'pasien_penjamin.pasien' => '= ?'
+                        ), array(
+                            $parameter['dataObj']['penjamin'],
+                            $parameter['dataObj']['pasien']
+                        ))
+                        ->execute();
+
+                    if($parameter['dataObj']['penjamin'] === __UIDPENJAMINBPJS__) { //META BPJS
+                        if(count($CheckNonUmum['response_data']) > 0) {
+                            $RekamPenjamin = self::$query->update('pasien_penjamin', array(
+                                'valid_awal' => $parameter['dataObj']['valid_start'],
+                                'valid_akhir' => $parameter['dataObj']['valid_end'],
+                                'rest_meta' => $parameter['dataObj']['penjaminMeta'],
+                                'terdaftar' => parent::format_date(),
+                                'updated_at' => parent::format_date(),
+                                'deleted_at' => NULL
+                            ))
+                                ->where(array(
+                                    'pasien_penjamin.penjamin' => '= ?',
+                                    'AND',
+                                    'pasien_penjamin.pasien' => '= ?'
+                                ), array(
+                                    $parameter['dataObj']['penjamin'],
+                                    $parameter['dataObj']['pasien']
+                                ))
+                                ->execute();
+                        } else {
+                            $RekamPenjamin = self::$query->insert('pasien_penjamin', array(
+                                'penjamin' => $parameter['dataObj']['penjamin'],
+                                'pasien' => $parameter['dataObj']['pasien'],
+                                'valid_awal' => $parameter['dataObj']['valid_start'],
+                                'valid_akhir' => $parameter['dataObj']['valid_end'],
+                                'rest_meta' => $parameter['dataObj']['penjaminMeta'],
+                                'terdaftar' => parent::format_date(),
+                                'created_at' => parent::format_date(),
+                                'updated_at' => parent::format_date()
+                            ))
+                                ->execute();
+                        }
+                    } else {
+                        //TODO: Meta Penjamin Lainnya
+                    }
+
+
+
 
                     //Invoice Manager
                     $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
@@ -900,7 +969,8 @@ class Antrian extends Utility
                     'dokter as uid_dokter',
                     'departemen as uid_poli',
                     'penjamin as uid_penjamin',
-                    'waktu_masuk'
+                    'waktu_masuk',
+                    'waktu_keluar'
                 )
             )
             ->join('pasien', array(
@@ -933,8 +1003,8 @@ class Antrian extends Utility
                 )
             )
             ->where(array(
-                    $table . '.waktu_keluar' => 'IS NULL',
-                    'AND',
+                    /*$table . '.waktu_keluar' => 'IS NULL',
+                    'AND',*/
                     $table . '.deleted_at' => 'IS NULL'
                 )
             )
@@ -1022,7 +1092,9 @@ class Antrian extends Utility
                     'departemen',
                     'penjamin',
                     'dokter',
-                    'waktu_masuk'
+                    'waktu_masuk',
+                    'waktu_keluar',
+                    'prioritas'
                 )
             )
             ->where(array(
