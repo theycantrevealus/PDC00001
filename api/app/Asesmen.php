@@ -536,6 +536,10 @@ class Asesmen extends Utility {
 				$data['response_data'][0]['resep'] = $resep['response_data'];
 				$data['response_data'][0]['asesmen_rawat'] = $Rawat['response_data'][0]['uid'];
                 $data['response_data'][0]['status_asesmen'] = $AsesmenMaster['response_data'][0];
+
+                $Pasien = new Pasien(self::$pdo);
+                $PasienDetail = $Pasien->get_pasien_detail('pasien', $data['response_data'][0]['pasien']);
+                $data['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
 				return $data;
 			} else {
 				$Rawat = self::$query->select('asesmen_rawat_' . $PoliDetail['poli_asesmen'], array(

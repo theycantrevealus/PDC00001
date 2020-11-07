@@ -65,10 +65,19 @@ class BPJS extends Utility {
 				case 'get_faskes':
 					return self::get_faskes();
                 case 'get_diagnosa':
-                    return self::get_diagnosa($parameter[2]);
+                    return self::get_diagnosa();
 					break;
+                case 'get_poli':
+                    return self::get_poli();
+                    break;
                 case 'get_provinsi':
                     return self::get_provinsi();
+                    break;
+                case 'get_kabupaten':
+                    return self::get_kabupaten($parameter[2]);
+                    break;
+                case 'get_kecamatan':
+                    return self::get_kecamatan($parameter[2]);
                     break;
                 case 'get_faskes_select2':
                     return self::get_faskes_select2();
@@ -91,6 +100,9 @@ class BPJS extends Utility {
 				case 'cek_peserta':
 					return self::cek_peserta($parameter);
 					break;
+                case 'sep':
+                    return self::get_sep($parameter);
+                    break;
 				default:
 					return 'Unknown request';
 			}
@@ -99,13 +111,28 @@ class BPJS extends Utility {
 		}
 	}
 
-	private function get_diagnosa($parameter) {
-        $content = self::launchUrl('/new-vclaim-rest/referensi/diagnosa/' . $parameter . '/');
+    private function get_poli() {
+        $content = self::launchUrl('/new-vclaim-rest/referensi/poli/' . $_GET['search']);
+        return $content;
+    }
+
+	private function get_diagnosa() {
+        $content = self::launchUrl('/new-vclaim-rest/referensi/diagnosa/' . $_GET['search']);
         return $content;
     }
 
     private function get_provinsi() {
         $content = self::launchUrl('/new-vclaim-rest/referensi/propinsi');
+        return $content;
+    }
+
+    private function get_kabupaten($parameter) {
+        $content = self::launchUrl('/new-vclaim-rest/referensi/kabupaten/propinsi/' . $parameter);
+        return $content;
+    }
+
+    private function get_kecamatan($parameter) {
+        $content = self::launchUrl('/new-vclaim-rest/referensi/kecamatan/kabupaten/' . $parameter);
         return $content;
     }
 
@@ -116,6 +143,11 @@ class BPJS extends Utility {
 
     private function get_kelas_rawat_select2() {
         $content = self::launchUrl('/new-vclaim-rest/referensi/kelasrawat');
+        return $content;
+    }
+
+    private function get_sep($parameter) {
+        $content = self::launchUrl('/new-vclaim-rest/SEP/' . $parameter['search']['value']);
         return $content;
     }
 
