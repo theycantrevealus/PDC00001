@@ -824,6 +824,7 @@ class Antrian extends Utility
                 'nama as penjamin'
             ))
             ->join('kunjungan', array(
+                'uid as uid_kunjungan',
                 'pegawai as uid_resepsionis'
             ))
             ->on(array(

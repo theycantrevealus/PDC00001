@@ -95,6 +95,45 @@
                 $("#modal-rujuk-bpjs").modal("show");
             }
         });
+
+
+        $("#txt_bpjs_nomor_sep").select2({
+            minimumInputLength: 1,
+            "language": {
+                "noResults": function(){
+                    return "SEP tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-rujuk-bpjs"),
+            ajax: {
+                dataType: "json",
+                headers:{
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_sep_select2",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.noSep,
+                                id: item.noSep
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
     });
 </script>
 

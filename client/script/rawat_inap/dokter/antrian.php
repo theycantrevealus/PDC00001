@@ -75,7 +75,7 @@
                     $("#mata_loader").hide();
                 }
 
-                $("#heading_nama_poli").html(antrianData.poli_info.nama);
+                //$("#heading_nama_poli").html(antrianData.poli_info.nama);
                 pasien_uid = antrianData.pasien_info.uid;
                 pasien_nama = antrianData.pasien_info.nama;
                 pasien_usia = antrianData.pasien_info.usia;
@@ -116,6 +116,7 @@
                     }
                 });
 
+                $("#target_pasien").html(pasien_nama);
                 $(".nama_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
                 $(".jk_pasien").html(pasien_jenkel);
                 $(".tanggal_lahir_pasien").html(pasien_tanggal_lahir);
@@ -3043,8 +3044,7 @@
 
                             if(response.response_package.response_result > 0) {
                                 notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-                                push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
-                                location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                location.href = __HOSTNAME__ + "/rawat_inap/dokter/index/" + pasien_uid + "/" + __PAGES__[5] + "/" + pasien_penjamin_uid;
                             } else {
                                 notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                             }
@@ -4262,7 +4262,6 @@
                             penjamin: $("#inap_penjamin").val(),
                             bed: $("#inap_bed").val(),
                             dokter: $("#inap_dokter").val(),
-                            kunjungan: kunjungan.uid,
                             keterangan: $("#inap_keterangan").val()
                         },
                         beforeSend: function(request) {

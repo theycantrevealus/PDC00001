@@ -117,7 +117,7 @@ class Bed extends Utility {
 		return $data;
 	}
 
-	private function get_bed_detail($table, $parameter){
+	public function get_bed_detail($table, $parameter){
 		$data = self::$query
 					->select($table, 
 						array(
