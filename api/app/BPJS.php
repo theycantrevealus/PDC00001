@@ -184,7 +184,11 @@ class BPJS extends Utility {
 
     private function get_sep_select2() {
         $content = self::launchUrl('/new-vclaim-rest/SEP/' . $_GET['search']);
-        return $content;
+        if($content['metaData']['code'] === '200') {
+            return array($content['response']);
+        } else {
+            return array();
+        }
     }
 
     private function get_rujukan_list($parameter) {

@@ -1989,6 +1989,10 @@ class Asesmen extends Utility {
 				$antrian['response_data'][$key]['uid_asesmen_medis'] = $cek_asesment['response_data'][0]['uid'];
 				$antrian['response_data'][$key]['status_asesmen'] = true; 
 			}
+			//Pasien Detail
+            $Pasien = new Pasien(self::$pdo);
+			$PasienDetail = $Pasien->get_pasien_detail('pasien', $value['uid_pasien']);
+            $antrian['response_data'][$key]['pasien_detail'] = $PasienDetail['response_data'][0];
 
 			$antrian['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;

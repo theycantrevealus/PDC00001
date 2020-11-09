@@ -158,6 +158,7 @@
         });
 
         $("#txt_bpjs_nomor_rujukan").select2({
+            autoclose: true,
             dropdownParent: $("#group_nomor_rujukan")
         });
 
@@ -554,6 +555,7 @@
                                 ).then((result) => {
                                     console.clear();
                                     console.log(response);
+                                    $("#modal-sep-new").modal("hide");
                                 });
                             }
                         },
@@ -1238,6 +1240,7 @@
                                         <div class="col-12 col-md-6 mb-4 form-group" id="group_nomor_rujukan">
                                             <label for="">Nomor Rujukan</label>
                                             <select data-width="100%" class="form-control uppercase" id="txt_bpjs_nomor_rujukan"></select>
+                                            <!--<input type="text" class="form-control uppercase" id="txt_bpjs_nomor_rujukan" />-->
                                         </div>
                                         <div class="col-12 col-md-4 mb-4 form-group">
                                             <label for="">Jenis Asal Rujukan</label>
@@ -1252,7 +1255,7 @@
                                         </div>
                                         <div class="col-12 col-md-5 mb-4 form-group">
                                             <label for="">Tanggal Rujukan</label>
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tanggal_rujukan" readonly>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tanggal_rujukan">
                                         </div>
 
                                         <div class="informasi_rujukan">
