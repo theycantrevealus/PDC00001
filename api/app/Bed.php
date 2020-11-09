@@ -37,7 +37,10 @@ class Bed extends Utility {
 				/*case 'ruangan-lantai':
 					return self::get_ruangan_lantai('master_unit_ruangan', $parameter[2]);
 					break;*/
-
+                
+                case 'bed-ruangan':
+                    return self::get_bed_ruangan('master_unit_bed', $parameter[2]);
+                    break;
 				default:
 					# code...
 					break;
@@ -151,6 +154,7 @@ class Bed extends Utility {
 							'uid',
 							'nama',
 							'uid_lantai',
+							'uid_ruangan',
 							'created_at',
 							'updated_at'
 						)
@@ -158,7 +162,7 @@ class Bed extends Utility {
 					->where(array(
 							$table . '.deleted_at' => 'IS NULL',
 							'AND',
-							$table . '.uid_lantai' => '= ?'
+							$table . '.uid_ruangan' => '= ?'
 						),
 						array($parameter)
 					)
@@ -248,12 +252,11 @@ class Bed extends Utility {
 
 		$old = self::get_bed_detail('master_unit_bed', $parameter['uid']);
 
-		$arr = ['','ruangan-detail', $parameter['ruangan']];
 		$ruangan = new Ruangan(self::$pdo);
-		$get_ruangan = $ruangan::__GET__($arr);
+		$get_ruangan = $ruangan::get_ruangan_detail('master_unit_ruangan', $parameter['ruangan']);
 
 		$ruangan_res = $get_ruangan['response_data'][0];
-		$uid_lantai = $ruangan_res['uid_lantai'];
+		$uid_lantai = $ruangan_res['lantai'];
 
 		$bed = self::$query
 				->update($table, array(

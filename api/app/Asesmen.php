@@ -73,7 +73,7 @@ class Asesmen extends Utility {
 		}
 	}
 
-	private function get_asesmen_medis($parameter) { //uid antrian
+	public function get_asesmen_medis($parameter) { //uid antrian
 		//prepare antrian
 		$antrian = self::$query->select('antrian', array(
 			'uid',

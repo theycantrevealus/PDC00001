@@ -54,7 +54,7 @@
             type:"GET",
             success:function(response) {
                 antrianData = response.response_package.response_data[0];
-                console.log(antrianData);
+
                 prioritas_antrian = antrianData.prioritas;
                 kunjungan = antrianData.kunjungan_detail;
                 for(var poliSetKey in poliListRawList)
@@ -4228,11 +4228,70 @@
             loadPrioritas(prioritas_antrian);
         });
 
+        $("#inap_kamar").change(function() {
+            loadBangsal("inap", $("#inap_kamar").val());
+        });
+
         $("#btnInap").click(function() {
             $("#form-inap").modal("show");
             loadPenjamin("inap", pasien_penjamin_uid);
             loadPoli("inap");
+            loadKamar("inap");
+            loadBangsal("inap", $("#inap_kamar").val());
             loadDokter("inap", __POLI_INAP__);
+        });
+
+        $("#btnRujuk").click(function() {
+            $("#form-rujuk").modal("show");
+            loadPenjamin("rujuk", pasien_penjamin_uid);
+        });
+
+        $("#btnProsesRujuk").click(function() {
+            Swal.fire({
+                title: 'Data sudah benar?',
+                showDenyButton: true,
+                confirmButtonText: `Ya. Cetak`,
+                denyButtonText: `Belum`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        async: false,
+                        url:__HOSTAPI__ + "/Rujukan",
+                        type: "POST",
+                        data: {
+                            request: "tambah_rujukan",
+                            antrian: UID,
+                            pasien: pasien_uid,
+                            poli: antrianData.poli_info.uid,
+                            jenis: $("#rujuk_jenis").val(),
+                            tipe: $("#rujuk_tipe").val(),
+                            penjamin: $("#rujuk_penjamin").val(),
+                            keterangan: $("#rujuk_catatan").val()
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function(response){
+                            if(response.response_package.response_result > 0) {
+                                Swal.fire(
+                                    'Permintaan Rujuk',
+                                    'Permintaan rujuk berhasil ditambahkan. Silahkan isi asesmen untuk informasi rujukan lanjutan',
+                                    'success'
+                                ).then((result) => {
+                                    $("#form-rujuk").modal("hide");
+                                });
+                            } else {
+                                console.log(response);
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                } else if (result.isDenied) {
+
+                }
+            });
         });
 
         $("#konsul_departemen").on('change', function(){
@@ -4432,8 +4491,70 @@
             })
         }
 
+
+        
+
+
+        function loadKamar(target_ui, selected = ""){
+            resetSelectBox(target_ui + "_kamar", "Ruangan");
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Ruangan",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData !== undefined) {
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].dokter).html(MetaData[i].nama);
+                            $("#" + target_ui + "_kamar").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            })
+        }
+
+        function loadBangsal(target_ui, kamar, selected = ""){
+            resetSelectBox(target_ui + "_bed", "Dokter");
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Bed/bed-ruangan/" + kamar,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    console.log(response);
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData !== undefined){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].dokter).html(MetaData[i].nama);
+                            $("#" + target_ui + "_bed").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            })
+        }
+
         $(".inputan_konsul").select2();
         $(".inputan_inap").select2();
+        $(".inputan_rujuk").select2();
 
         if(dataOdontogram === undefined)
         {
@@ -5285,6 +5406,68 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="btnProsesKonsul">
                     <i class="fa fa-check"></i> Pindah Rawat Inap
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<div id="form-rujuk" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Pengajuan Rujuk</h5>
+            </div>
+            <div class="modal-body">
+                <div class="card card-form">
+                    <div class="row no-gutters">
+                        <div class="col-lg-12 card-body">
+                            <div class="form-row">
+                                <div class="col-12 col-md-6 form-group">
+                                    <label>Pembayaran <span class="red">*</span></label>
+                                    <select id="rujuk_penjamin" class="form-control select2 inputan_rujuk" required disabled>
+                                        <option value="" disabled selected>Pilih Jenis Pembayaran</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-4 form-group">
+                                    <label>Jenis Pelayanan <span class="red">*</span></label>
+                                    <select id="rujuk_jenis" class="form-control select2 inputan_rujuk" required>
+                                        <option value="2">Rawat Jalan</option>
+                                        <option value="1">Rawat Inap</option>
+                                    </select>
+                                </div>
+                                <div class="col-7 form-group">
+                                    <label>Tipe Rujukan <span class="red">*</span></label>
+                                    <select id="rujuk_tipe" class="form-control select2 inputan_rujuk" required>
+                                        <option value="0" selected>Penuh</option>
+                                        <option value="1" selected>Partial</option>
+                                        <option value="2" selected>Rujuk Balik</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-12 form-group">
+                                    <label>Catatan <span class="red">*</span></label>
+                                    <textarea class="form-control" id="rujuk_catatan" style="min-height: 150px"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnProsesRujuk">
+                    <i class="fa fa-check"></i> Ajukan Rujukan
                 </button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
             </div>

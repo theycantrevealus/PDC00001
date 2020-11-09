@@ -39,7 +39,7 @@ class Ruangan extends Utility {
 					break;
 
 				default:
-					# code...
+                    return self::get_ruangan('master_unit_ruangan');
 					break;
 			}
 		} catch (QueryException $e) {

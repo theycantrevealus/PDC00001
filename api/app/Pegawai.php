@@ -180,6 +180,7 @@ class Pegawai extends Utility {
 					'gudang' => $Unit_Info['response_data'][0]['gudang'],
 					'jabatan' => $read[0]['jabatan'],
 					'email' => $read[0]['email'],
+                    'nama' => $read[0]['nama'],
 					'log_id' => $log
 				);
 				//$secret_key = bin2hex(random_bytes(32));

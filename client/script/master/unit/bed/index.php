@@ -147,6 +147,7 @@
 					},
 					type: "POST",
 					success: function(response){
+					    console.log(response);
 						$("#txt_nama").val("");
 						$("#ruangan").val("");
 						$("#ruangan").trigger('change');
@@ -189,10 +190,9 @@
         });
 	}
 </script>
-</script>
 
 <div id="form-tambah" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog modal-md bg-danger" role="document">
+	<div class="modal-dialog modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modal-large-title">Tambah Penjamin</h5>
