@@ -4,10 +4,10 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">BPJS Claim</li>
+                    <li class="breadcrumb-item active" aria-current="page">BPJS Rujukan</li>
                 </ol>
             </nav>
-            <h4 class="m-0">Resep</h4>
+            <h4 class="m-0">Permintaan Rujukan</h4>
         </div>
     </div>
 </div>
@@ -18,20 +18,22 @@
         <div class="col-lg-12 col-md-12">
             <div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">VClaim BPJS</h5>
+                    <h5 class="card-header__title flex m-0">Rujukan BPJS</h5>
                 </div>
                 <div class="card-body tab-content">
                     <div class="tab-pane active show fade" id="list-resep">
-                        <table class="table table-bordered table-striped" id="table-sep" style="font-size: 0.9rem;">
+                        <table class="table table-bordered table-striped largeDataType" id="table-rujukan" style="font-size: 0.9rem;">
                             <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th>No. RM</th>
-                                    <th>Pasien</th>
-                                    <th>No. SEP</th>
-                                    <th>Poli</th>
-                                    <th>Aksi</th>
-                                </tr>
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>Penjamin</th>
+                                <th class="wrap_content">No. RM</th>
+                                <th>Pasien</th>
+                                <th>Poli</th>
+                                <th>Dokter</th>
+                                <th>No. SEP</th>
+                                <th>Aksi</th>
+                            </tr>
                             </thead>
                             <tbody></tbody>
                         </table>

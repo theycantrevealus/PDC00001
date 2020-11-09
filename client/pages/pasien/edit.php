@@ -20,7 +20,7 @@
             <div class="z-0">
                 <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
                     <li class="nav-item">
-                        <a href="#tab-poli-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                        <a href="#tab-info" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-info" >
 							<span class="nav-link__count">
 								01
 								<!--<b class="inv-tab-status text-success" id="status-rawat"><i class="fa fa-check-circle"></i></b>-->
@@ -29,19 +29,19 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                        <a href="#tab-penjamin" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-penjamin" >
 							<span class="nav-link__count">
 								02
                                 <!--<b class="inv-tab-status text-success" id="status-rawat"><i class="fa fa-check-circle"></i></b>-->
 							</span>
-                            Dokumen
+                            Penjamin
                         </a>
                     </li>
                 </ul>
             </div>
             <div class="card card-body tab-content">
 
-                <div class="tab-pane show fade perawat active" id="tab-poli-1">
+                <div class="tab-pane show fade active" id="tab-info">
                     <form>
                         <div class="card card-form">
                             <div class="row no-gutters">
@@ -246,6 +246,21 @@
                             </div>
                         </div>
                     </form>
+                </div>
+                <div class="tab-pane show fade" id="tab-penjamin">
+                    <table class="table largeDataType table-bordered" id="penjamin_pasien">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>Penjamin</th>
+                                <th>Digunakan sejak</th>
+                                <th>Tanggal Berlaku</th>
+                                <th>Tanggal Berakhir</th>
+                                <th>Bridging</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>

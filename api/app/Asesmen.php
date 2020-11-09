@@ -73,7 +73,7 @@ class Asesmen extends Utility {
 		}
 	}
 
-	private function get_asesmen_medis($parameter) { //uid antrian
+	public function get_asesmen_medis($parameter) { //uid antrian
 		//prepare antrian
 		$antrian = self::$query->select('antrian', array(
 			'uid',
@@ -536,6 +536,10 @@ class Asesmen extends Utility {
 				$data['response_data'][0]['resep'] = $resep['response_data'];
 				$data['response_data'][0]['asesmen_rawat'] = $Rawat['response_data'][0]['uid'];
                 $data['response_data'][0]['status_asesmen'] = $AsesmenMaster['response_data'][0];
+
+                $Pasien = new Pasien(self::$pdo);
+                $PasienDetail = $Pasien->get_pasien_detail('pasien', $data['response_data'][0]['pasien']);
+                $data['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
 				return $data;
 			} else {
 				$Rawat = self::$query->select('asesmen_rawat_' . $PoliDetail['poli_asesmen'], array(
@@ -855,6 +859,21 @@ class Asesmen extends Utility {
 
 		//Resep dan Racikan
 		$returnResponse['resep_response'] = self::set_resep_asesment($parameter, $MasterUID);
+
+		if($parameter['poli'] !== __POLI_INAP__) {
+            //Pasien Keluar Poli
+            $keluar = self::$query->update('antrian', array(
+                'waktu_keluar' => parent::format_date()
+            ))
+                ->where(array(
+                    'antrian.uid' => '= ?',
+                    'AND',
+                    'antrian.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['antrian']
+                ))
+                ->execute();
+        }
 
 		return $returnResponse;
 	}

@@ -1074,6 +1074,7 @@ class Invoice extends Utility
                 $AnjunganInfo = $Anjungan::get_loket_detail($AKValue['loket']);
                 $AntrianKunjungan['response_data'][$AKKey]['loket'] = $AnjunganInfo['response_data'][0];
             }
+
             $data['response_data'][$key]['antrian_kunjungan'] = $AntrianKunjungan['response_data'][0];
 
             $data['response_data'][$key]['autonum'] = $autonum;

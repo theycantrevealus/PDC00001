@@ -2,6 +2,7 @@
 	$(function(){
 		var currentPasien = localStorage.getItem("currentPasien");
 		var currentAntrianID = localStorage.getItem("currentAntrianID");
+		var penjaminMetaData;
 
 		/*alert(currentPasien);
 		alert(currentAntrianID);*/
@@ -35,12 +36,11 @@
 				dataObj.currentPasien = currentPasien;
 				dataObj.currentAntrianID = currentAntrianID;
 
-				console.log(dataObj);
-
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 					if(dataObj.penjamin == __UIDPENJAMINBPJS__) {
 						$("#modal-sep").modal("show");
 						$("#btnProsesPasien").hide();
+                        $("#btnProsesSEP").hide();
 						$("#hasil_bpjs").hide();
 					} else {
 						$.ajax({
@@ -106,6 +106,12 @@
 			dataObj.pasien = uid_pasien;
 			dataObj.currentPasien = currentPasien;
 			dataObj.currentAntrianID = currentAntrianID;
+			if(dataObj.penjamin === __UIDPENJAMINBPJS__) {
+			    //Add SEP Info
+                dataObj.valid_start = penjaminMetaData.response.peserta.tglTMT;
+                dataObj.valid_end = penjaminMetaData.response.peserta.tglTAT;
+                dataObj.penjaminMeta = JSON.stringify(penjaminMetaData);
+            }
 			if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 				$.ajax({
 					async: false,
@@ -142,6 +148,10 @@
 
 		$(".select2").select2({});
 
+
+
+
+
 		$("#hasil_bpjs").hide();
 		$("#btnProsesPasien").hide();
 
@@ -160,7 +170,11 @@
 				},
 				type: "POST",
 				success: function(response){
-					var data = response.response_package;
+				    var data = response.response_package.content;
+
+				    penjaminMetaData = data;
+				    console.log(penjaminMetaData);
+
 					if(data.metaData.code == 200) {
 
 						$("#hasil_bpjs").fadeIn();
@@ -191,6 +205,13 @@
 
 						//TAT Tanggal Akhir Kartu
 						//TMT Tanggal Mulai Kartu
+
+
+                        $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
+                        $("#txt_bpjs_nik").val(pasienData.nik);
+                        $("#txt_bpjs_nama").val(pasienData.nama);
+                        $("#txt_bpjs_rm").val($("#no_rm").val());
+
 
 					} else if(data.metaData.code == 201) {
 						//Tidak tidak ditemukan
@@ -280,9 +301,10 @@
                 if (MetaData != ""){ 
                 	for(i = 0; i < MetaData.length; i++){
 	                    var selection = document.createElement("OPTION");
-
-	                    $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
-	                    $("#departemen").append(selection);
+	                    if(MetaData[i].uid !== __POLI_INAP__) {
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            $("#departemen").append(selection);
+                        }
 	                }
                 }
             },
@@ -350,6 +372,33 @@
     	})
     }
 
+    function loadKelasRawat(){
+        $.ajax({
+            async: false,
+            url:__HOSTAPI__ + "/BPJS/get_kelas_rawat_select2",
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                var data = response.response_package.content.response.list;
+
+                $("#txt_bpjs_kelas_rawat option").remove();
+                for(var a = 0; a < data.length; a++) {
+                    var selection = document.createElement("OPTION");
+
+                    $(selection).attr("value", data[a].kode).html(data[a].nama);
+                    $("#txt_bpjs_kelas_rawat").append(selection);
+                }
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+    }
+
+
+
     function resetSelectBox(selector, name){
 		$("#"+ selector +" option").remove();
 		var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
@@ -402,12 +451,138 @@
 				
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-success" id="btnProsesPasien">
-					<i class="fa fa-check"></i> Proses
-				</button>
+
+                <button class="btn btn-success" id="btnProsesPasien">
+                    <i class="fa fa-check"></i> Proses
+                </button>
 				
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 			</div>
 		</div> 
 	</div> 
+</div>
+
+
+
+<div id="modal-sep-new" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> Surat Eligibilitas Peserta
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12">
+                    <div class="form-row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                    <h5 class="card-header__title flex m-0 text-info"><i class="fa fa-hashtag"></i> Informasi Pasien</h5>
+                                </div>
+                                <div class="card-body row">
+                                    <div class="col-12 col-md-3 mb-3 form-group">
+                                        <label for="">No Kartu</label>
+                                        <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nomor" readonly>
+                                    </div>
+                                    <div class="col-12 col-md-3 mb-3 form-group">
+                                        <label for="">NIK Pasien</label>
+                                        <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nik" readonly>
+                                    </div>
+                                    <div class="col-12 col-md-6 mb-6 form-group">
+                                        <label for="">Nama Pasien</label>
+                                        <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                    <h5 class="card-header__title flex m-0 text-info"><i class="fa fa-hashtag"></i> Informasi Rujukan</h5>
+                                </div>
+                                <div class="card-body row">
+                                    <div class="col-12 col-md-6 mb-6">
+                                        <div class="col-12 col-md-8 mb-4 form-group">
+                                            <label for="">Nomor Medical Record (MR)</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rm" readonly>
+                                        </div>
+
+                                        <div class="col-12 col-md-7 form-group">
+                                            <label for="">Tanggal SEP</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tgl_sep" readonly value="<?php echo date('d F Y'); ?>">
+                                        </div>
+                                        <div class="col-12 col-md-9 form-group">
+                                            <label for="">Faskes</label>
+                                            <select class="form-control sep" id="txt_bpjs_faskes">
+                                                <option value="<?php echo __KODE_PPK__; ?>">RSUD KAB. BINTAN - KAB. BINTAN (KEPRI)</option>
+                                            </select>
+                                        </div>
+
+
+                                        <div class="col-12 col-md-8 form-group">
+                                            <label for="">Jenis Pelayanan</label>
+                                            <select class="form-control sep" id="txt_bpjs_jenis_layanan">
+                                                <option value="2">Rawat Jalan</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-9 mb-9 form-group">
+                                            <label for="">Kelas Rawat</label>
+                                            <select class="form-control sep" id="txt_bpjs_kelas_rawat"></select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6 mb-6">
+                                        <div class="col-12 col-md-4 mb-4 form-group">
+                                            <label for="">Jenis Asal Rujukan</label>
+                                            <select class="form-control uppercase sep" id="txt_bpjs_jenis_asal_rujukan">
+                                                <option value="1">Puskesmas</option>
+                                                <option value="2">Rumah Sakit</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-8 mb-4 form-group">
+                                            <label for="">Asal Rujukan</label>
+                                            <select class="form-control uppercase sep" id="txt_bpjs_asal_rujukan"></select>
+                                        </div>
+                                        <div class="col-12 col-md-5 mb-4 form-group">
+                                            <label for="">Tanggal Rujukan</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tanggal_rujukan">
+                                        </div>
+                                        <div class="col-12 col-md-6 mb-4 form-group">
+                                            <label for="">Nomor Rujukan</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nomor_rujukan" />
+                                        </div>
+                                        <div class="col-12 col-md-12 form-group">
+                                            <label for="">Catatan</label>
+                                            <textarea class="form-control" id="txt_bpjs_catatan"></textarea>
+                                        </div>
+                                        <div class="col-12 col-md-12 form-group">
+                                            <label for="">Diagnosa Awal</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_diagnosa_awal" readonly>
+                                        </div>
+                                        <div class="col-12 col-md-8 mb-4 form-group">
+                                            <label for="">Poli Tujuan</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_poli_tujuan" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnProsesPasien">
+                    <i class="fa fa-check"></i> Proses
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>

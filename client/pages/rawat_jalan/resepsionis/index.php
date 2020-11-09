@@ -72,7 +72,7 @@
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Waktu Masuk</th>
-									<th>No. RM</th>
+									<th class="wrap_content">No. RM</th>
 									<th>Pasien</th>
 									<th>Poliklinik</th>
 									<th>Dokter</th>

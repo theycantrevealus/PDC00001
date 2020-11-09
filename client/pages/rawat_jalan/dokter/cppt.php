@@ -43,16 +43,19 @@
 							</div>
 
 
-							<div id="cppt_loader">
-								<?php
-									//require 'cppt-single.php';
-								?>
+                            <div id="cppt_pagination">
+                            </div>
+                            <div id="cppt_loader">
 							</div>
+
 
 							<div class="mt-4">
 
+                                <ul class="pagination justify-content-center" id="pagin">
 
-								<ul class="pagination justify-content-center ">
+                                </ul>
+
+								<!--<ul class="pagination justify-content-center">
 
 									<li class="page-item disabled">
 										<a class="page-link" href="#" aria-label="Previous">
@@ -61,14 +64,12 @@
 										</a>
 									</li>
 
-
 									<li class="page-item disabled">
 										<a class="page-link" href="#" aria-label="Previous">
 											<span aria-hidden="true" class="material-icons">chevron_left</span>
 											<span class="sr-only">Prev</span>
 										</a>
 									</li>
-
 
 									<li class="page-item active">
 										<a class="page-link" href="#" aria-label="1">
@@ -94,7 +95,6 @@
 										</a>
 									</li>
 
-
 									<li class="page-item">
 										<a class="page-link" href="#" aria-label="Next">
 											<span class="sr-only">Next</span>
@@ -102,23 +102,14 @@
 										</a>
 									</li>
 
-
 									<li class="page-item">
 										<a class="page-link" href="#" aria-label="Next">
 											<span class="sr-only">Last</span>
 											<span aria-hidden="true" class="material-icons">last_page</span>
 										</a>
 									</li>
-
-								</ul>
-
+								</ul>-->
 							</div>
-
-
-
-
-
-
 						</div>
 					</div>
 				</div>

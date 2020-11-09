@@ -331,6 +331,40 @@
 	                loadSelected("alamat_kelurahan", 'kelurahan', dataPasien.alamat_kecamatan, dataPasien.alamat_kelurahan);
 
 	                checkedRadio('jenkel', dataPasien['jenkel']);
+	                for(var b = 0; b < dataPasien.history_penjamin.length; b++)
+                    {
+                        var newRowPenjamin = document.createElement("TR");
+
+                        var newIDPenjamin = document.createElement("TD");
+                        var newNamaPenjamin = document.createElement("TD");
+                        var newStartPenjamin = document.createElement("TD");
+                        var newEndPenjamin = document.createElement("TD");
+                        var newUsedPenjamin = document.createElement("TD");
+                        var newAksiPenjamin = document.createElement("TD");
+
+                        $(newIDPenjamin).html((b + 1));
+                        $(newNamaPenjamin).html(dataPasien.history_penjamin[b].penjamin_detail.nama);
+                        $(newUsedPenjamin).html(dataPasien.history_penjamin[b].terdaftar);
+                        $(newStartPenjamin).html(dataPasien.history_penjamin[b].valid_awal);
+                        $(newEndPenjamin).html(dataPasien.history_penjamin[b].valid_akhir);
+
+                        var metaData = JSON.parse(dataPasien.history_penjamin[b].rest_meta);
+                        for(var key in metaData.response.peserta) {
+                            $(newAksiPenjamin).append("<h6>" + key + " : " + metaData.response.peserta[key] + "</h6>");
+                        }
+
+                        //$(newAksiPenjamin).html("<code><pre>" + dataPasien.history_penjamin[b].rest_meta + "</pre></code>");
+
+                        $(newRowPenjamin).append(newIDPenjamin);
+                        $(newRowPenjamin).append(newNamaPenjamin);
+                        $(newRowPenjamin).append(newUsedPenjamin);
+                        $(newRowPenjamin).append(newStartPenjamin);
+                        $(newRowPenjamin).append(newEndPenjamin);
+                        $(newRowPenjamin).append(newAksiPenjamin);
+
+
+                        $("#penjamin_pasien").append(newRowPenjamin);
+                    }
 	            },
 	            error: function(response) {
 	                console.log(response);
@@ -401,6 +435,10 @@
             }
         });
 	}
+
+	/*function loadPenjamin() {
+        //$("#penjamin_pasien").DataTable();
+    }*/
 
 	function resetSelectBox(selector, name){
 		$("#"+ selector +" option").remove();

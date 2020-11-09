@@ -9,12 +9,6 @@
 			</nav>
 			<h4 class="m-0">Data Pasien</h4>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/pasien/tambah" class="btn btn-info btn-sm ml-3">
-			<i class="fa fa-plus"></i> Tambah Pasien
-		</a>
-		<!-- <button class="btn btn-sm btn-info" id="tambah-pasien">
-			<i class="fa fa-plus"></i> Tambah
-		</button> -->
 	</div>
 </div>
 
@@ -26,6 +20,9 @@
                     <div class="card">
                         <div class="card-header card-header-large bg-white d-flex align-items-center">
                             <h5 class="card-header__title flex m-0">Data Pasien</h5>
+                            <a href="<?php echo __HOSTNAME__; ?>/pasien/tambah" class="btn btn-info pull-right ml-3">
+                                <i class="fa fa-plus"></i> Tambah Pasien
+                            </a>
                         </div>
                         <div class="card-header card-header-tabs-basic nav d-flex align-items-center" role="tablist">
                             <!--<a style="width: auto;">
@@ -61,7 +58,7 @@
                                                     <th>Tanggal Lahir</th>
                                                     <th>Jenis Kelamin</th>
                                                     <th>Tanggal Daftar</th>
-                                                    <th>Aksi</th>
+                                                    <th class="wrap_content">Aksi</th>
                                                 </tr>
                                             </thead>
                                             <tbody>

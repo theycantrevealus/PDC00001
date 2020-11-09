@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" id="gigi_loader">
     <div class="col-lg">
         <div class="card">
             <div class="card-header card-header-large bg-white d-flex align-items-center">
