@@ -1,6 +1,7 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function() {
-	    var selectedKunjungan = "", selectedPenjamin = "";
+	    var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "";
 		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis",
@@ -11,6 +12,7 @@
 				dataSrc:function(response) {
 				    var filteredData = [];
 				    var data = response.response_package.response_data;
+
 				    for(var a = 0; a < data.length; a++) {
 				        if(
 				            data[a].uid_pasien === __PAGES__[3] &&
@@ -20,14 +22,19 @@
 				            filteredData.push(data[a]);
                         }
                     }
+
 				    if(filteredData.length > 0) {
 				        selectedKunjungan = filteredData[0].uid_kunjungan;
 				        selectedPenjamin = filteredData[0].uid_penjamin;
-
-
+                        selected_waktu_masuk = filteredData[0].waktu_masuk;
+                        console.log(filteredData[0].pasien_detail);
 				        $("#target_pasien").html(filteredData[0].pasien);
-                        $("#nama_pasien").html("<span class=\"text-info\">[" + filteredData[0].no_rm + "]</span> " + filteredData[0].pasien);
+				        $("#rm_pasien").html(filteredData[0].no_rm);
+                        $("#nama_pasien").html((filteredData[0].pasien_detail.panggilan_name === null) ? filteredData[0].pasien_detail.nama : filteredData[0].pasien_detail.panggilan_name + " " +  filteredData[0].pasien_detail.nama);
                         $("#jenkel_pasien").html(filteredData[0].pasien_detail.jenkel_detail.nama);
+                        $("#tempat_lahir_pasien").html(filteredData[0].pasien_detail.tempat_lahir);
+                        $("#alamat_pasien").html(filteredData[0].pasien_detail.alamat);
+                        $("#usia_pasien").html(filteredData[0].pasien_detail.usia);
                         $("#tanggal_lahir_pasien").html(filteredData[0].pasien_detail.tanggal_lahir_parsed);
                     } else {
 				        //Pasien Detail
@@ -40,10 +47,16 @@
                             type:"GET",
                             success:function(response) {
                                 var pasienData = response.response_package.response_data;
+                                console.log(pasienData);
+
                                 $("#target_pasien").html(pasienData[0].nama);
-                                $("#nama_pasien").html("<span class=\"text-info\">[" + pasienData[0].no_rm + "]</span> " + pasienData[0].nama);
+                                $("#rm_pasien").html(pasienData[0].no_rm);
+                                $("#nama_pasien").html((pasienData[0].panggilan_name === null) ? pasienData[0].nama : pasienData[0].panggilan_name + " " +  pasienData[0].nama);
+                                $("#usia_pasien").html(pasienData[0].usia);
                                 $("#jenkel_pasien").html(pasienData[0].jenkel_detail.nama);
                                 $("#tanggal_lahir_pasien").html(pasienData[0].tanggal_lahir_parsed);
+                                $("#tempat_lahir_pasien").html(pasienData[0].tempat_lahir);
+                                $("#alamat_pasien").html(pasienData[0].alamat);
                             },
                             error: function(response) {
                                 console.log(response);
@@ -112,5 +125,74 @@
                 }
             });
         });
+
+
+
+		$(".print_manager").click(function() {
+		    var targetSurat = $(this).attr("id");
+		    $("#target-judul-cetak").html("CETAK " + targetSurat.toUpperCase() + " PASIEN");
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/pasien_" + targetSurat + ".php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    pc_customer: __PC_CUSTOMER__,
+                    no_rm:$("#rm_pasien").html(),
+                    pasien: "An. " + $("#nama_pasien").html(),
+                    tanggal_lahir: $("#tanggal_lahir_pasien").html(),
+                    usia: $("#usia_pasien").html() + " tahun",
+                    dokter: __MY_NAME__,
+                    waktu_masuk: selected_waktu_masuk,
+                    alamat: $("#alamat_pasien").html(),
+                    tempat_lahir: $("#tempat_lahir_pasien").html()
+                },
+                success: function (response) {
+                    $("#dokumen-viewer").html(response);
+                    $("#cetak").modal("show");
+                }
+            });
+        });
+
+		$("#btnCetak").click(function () {
+            $("#dokumen-viewer").printThis({
+                importCSS: true,
+                base: false,
+                pageTitle: "rawat_inap",
+                afterPrint: function() {
+                    $("#cetak").modal("hide");
+                    $("#dokumen-viewer").html("");
+                }
+            });
+        });
 	});
 </script>
+
+
+
+<div id="cetak" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="target-judul-cetak"></h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="dokumen-viewer"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnCetak">
+                    <i class="fa fa-print"></i> Cetak
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-ban"></i> Kembali
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

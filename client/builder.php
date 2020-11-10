@@ -125,11 +125,11 @@
 				?>
 			</div>
 			<div class="content-shimmer">
-				<span>
-					<img width="80" height="80" src="<?php echo __HOSTNAME__; ?>/template/assets/images/preloader4.gif" />
+				<center>
+					<img width="240" height="220" src="<?php echo __HOSTNAME__; ?>/template/assets/images/preloader.gif" />
 					<br />
 					Loading...
-				</span>
+				</center>
 			</div>
 		</div>
 	</div>

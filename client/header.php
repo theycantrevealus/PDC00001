@@ -12,8 +12,10 @@
 
 
 				<!-- Navbar Brand -->
-				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand" style="padding: 10px 20px;">
-					<img class="navbar-brand-icon" style="position: absolute; margin-top: 20px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="160" height="160" alt="SIMRS PETALA BUMI">
+				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand" style="padding: 10px;">
+					<!--<img class="navbar-brand-icon" style="position: absolute; margin-top: 20px;" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-white.png" width="160" height="160" alt="SIMRS PETALA BUMI">-->
+                    <img class="navbar-brand-icon" style="position: absolute; margin-top: 0px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="50" height="50" alt="SIMRS Bintan">
+                    <h3 style="padding-left: 60px !important; color: #fff;">SIMRS RSUD Bintan</h3>
 				</a>
 				
 				<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">

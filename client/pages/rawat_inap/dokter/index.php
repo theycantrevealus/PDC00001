@@ -19,13 +19,35 @@
 			<div class="card-group">
 				<div class="card card-body">
 					<div class="d-flex flex-row">
-						<div class="col-md-12">
-							<b id="nama_pasien"></b>
+						<div class="col-md-3">
+                            <span id="rm_pasien" class="text-info"></span>
+                            <br />
+                            <b id="nama_pasien"></b>
+                            <br />
+                            <span id="tempat_lahir_pasien"></span>, <span id="tanggal_lahir_pasien"></span> (<span id="usia_pasien"></span> tahun)
 							<br />
 							<span id="jenkel_pasien"></span>
 							<br />
-							<span id="tanggal_lahir_pasien"></span>
+							<span id="alamat_pasien"></span>
 						</div>
+                        <div class="col-md-9">
+                            <div class="form-row" data-toggle="dragula">
+                                <div class="col-md col-lg-4 handy print_manager" id="gelang">
+                                    <div class="card form-row__card text-white bg-primary">
+                                        <div class="card-body">
+                                            <h6 class="text-white"><i class="fa fa-print"></i> Gelang Pasien</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md col-lg-4 handy print_manager" id="kartu">
+                                    <div class="card form-row__card bg-success text-white">
+                                        <div class="card-body">
+                                            <h6 class="text-white"><i class="fa fa-print"></i> Kartu Pasien</h6>
+                                        </div> <!-- end card-body-->
+                                    </div> <!-- end card-->
+                                </div>
+                            </div>
+                        </div>
 					</div>
 				</div>
 			</div>

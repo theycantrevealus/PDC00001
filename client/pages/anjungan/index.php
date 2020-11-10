@@ -11,11 +11,12 @@
 							<table style="margin-top: 50px;">
 								<tr>
 									<td>
-										<img width="150" height="150" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.png" />
+										<img width="120" height="120" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.png" />
 									</td>
 									<td>
-										<h3>RUMAH SAKIT UMUM DAERAH PETALA BUMI</h3>
-										<i class="fa fa-map-marker" style="color: red;"></i> Jalan Dr. Soetomo No. 65, Sekip, LimaPuluh, Kota Pekanbaru, Riau 28155. Telp. (0761)23024
+										<h3>RUMAH SAKIT UMUM DAERAH BINTAN</h3>
+										<!--<i class="fa fa-map-marker" style="color: red;"></i> Jalan Dr. Soetomo No. 65, Sekip, LimaPuluh, Kota Pekanbaru, Riau 28155. Telp. (0761)23024-->
+                                        <i class="fa fa-map-marker" style="color: red;"></i> Jl.Kesehatan No.1 Kijang Kota 29151
 									</td>
 								</tr>
 							</table>
