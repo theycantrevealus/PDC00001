@@ -47,7 +47,6 @@
                             type:"GET",
                             success:function(response) {
                                 var pasienData = response.response_package.response_data;
-                                console.log(pasienData);
 
                                 $("#target_pasien").html(pasienData[0].nama);
                                 $("#rm_pasien").html(pasienData[0].no_rm);
@@ -150,49 +149,20 @@
                     tempat_lahir: $("#tempat_lahir_pasien").html()
                 },
                 success: function (response) {
-                    $("#dokumen-viewer").html(response);
-                    $("#cetak").modal("show");
-                }
-            });
-        });
-
-		$("#btnCetak").click(function () {
-            $("#dokumen-viewer").printThis({
-                importCSS: true,
-                base: false,
-                pageTitle: "rawat_inap",
-                afterPrint: function() {
-                    $("#cetak").modal("hide");
-                    $("#dokumen-viewer").html("");
+                    //$("#dokumen-viewer").html(response);
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        pageTitle: "rawat_inap",
+                        afterPrint: function() {
+                            $("#cetak").modal("hide");
+                            $("#dokumen-viewer").html("");
+                        }
+                    });
                 }
             });
         });
 	});
 </script>
-
-
-
-<div id="cetak" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="target-judul-cetak"></h5>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div id="dokumen-viewer"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" id="btnCetak">
-                    <i class="fa fa-print"></i> Cetak
-                </button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal">
-                    <i class="fa fa-ban"></i> Kembali
-                </button>
-            </div>
-        </div>
-    </div>
-</div>

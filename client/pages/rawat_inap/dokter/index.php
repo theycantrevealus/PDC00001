@@ -32,19 +32,26 @@
 						</div>
                         <div class="col-md-9">
                             <div class="form-row" data-toggle="dragula">
-                                <div class="col-md col-lg-4 handy print_manager" id="gelang">
+                                <div class="col-md col-lg-3 handy print_manager" id="gelang">
                                     <div class="card form-row__card text-white bg-primary">
                                         <div class="card-body">
-                                            <h6 class="text-white"><i class="fa fa-print"></i> Gelang Pasien</h6>
+                                            <h6 class="text-white"><i class="fa fa-band-aid"></i>&nbsp;&nbsp;&nbsp;Gelang Pasien</h6>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md col-lg-4 handy print_manager" id="kartu">
+                                <div class="col-md col-lg-3 handy print_manager" id="kartu">
                                     <div class="card form-row__card bg-success text-white">
                                         <div class="card-body">
-                                            <h6 class="text-white"><i class="fa fa-print"></i> Kartu Pasien</h6>
-                                        </div> <!-- end card-body-->
-                                    </div> <!-- end card-->
+                                            <h6 class="text-white"><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;Kartu Pasien</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md col-lg-3 handy print_manager" id="kartu">
+                                    <div class="card form-row__card bg-purple text-white">
+                                        <div class="card-body">
+                                            <h6 class="text-white"><i class="fa fa-flask"></i>&nbsp;&nbsp;&nbsp;Label Lab Pasien</h6>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
