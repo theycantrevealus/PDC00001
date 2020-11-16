@@ -122,17 +122,61 @@
 						return row["user_resepsionis"];
 					}
 				},
-				/*{
+				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button id=\"penjamin_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-antrian\">" +
-										"<i class=\"fa fa-trash\"></i>" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+									"<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-info btn-sm btn-pasien-pulang\">" +
+										"<i class=\"fa fa-check\"></i> Pulangkan Pasien" +
 									"</button>" +
 								"</div>";
 					}
-				}*/
+				}
 			]
 		});
+
+		$("body").on("click", ".btn-pasien-pulang", function() {
+		    var id = $(this).attr("id").split("_");
+		    id = id[id.length - 1];
+
+            Swal.fire({
+                title: "Pulangkan pasien?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        async: false,
+                        url:__HOSTAPI__ + "/Antrian",
+                        type: "POST",
+                        data: {
+                            request: "pulangkan_pasien",
+                            uid: id
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function(response){
+                            if(response.response_package.response_result > 0) {
+                                tableAntrian.ajax.reload();
+                            } else {
+                                Swal.fire(
+                                    "Pulangkan pasien",
+                                    "Pasien gagal dipulangkan",
+                                    "error"
+                                ).then((result) => {
+                                    //
+                                });
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            });
+		    return false;
+        });
 
 
         loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");

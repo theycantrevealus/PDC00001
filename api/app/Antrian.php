@@ -37,10 +37,44 @@ class Antrian extends Utility
             case 'ubah_dokter_antrian':
                 return self::ubah_dokter_antrian($parameter);
                 break;
+            case 'pulangkan_pasien':
+                return self::pulangkan_pasien($parameter);
+                break;
             default:
                 # code...
                 break;
         }
+    }
+
+    private function pulangkan_pasien($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $antrian = self::$query->select('antrian', array(
+            'kunjungan'
+        ))
+            ->where(array(
+                'antrian.uid' => '= ?',
+                'AND',
+                'antrian.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
+        $worker = self::$query->update('kunjungan', array(
+            'waktu_keluar' => parent::format_date()
+        ))
+            ->where(array(
+                'kunjungan.uid' => '= ?',
+                'AND',
+                'kunjungan.deleted_at' => 'IS NULL'
+            ), array(
+                $antrian['response_data'][0]['kunjungan']
+            ))
+            ->execute();
+
+        return $worker;
     }
 
     private function tambah_kunjungan($table, $parameter)
@@ -1004,8 +1038,8 @@ class Antrian extends Utility
                 )
             )
             ->where(array(
-                    /*$table . '.waktu_keluar' => 'IS NULL',
-                    'AND',*/
+                    $table . '.waktu_keluar' => 'IS NULL',
+                    'AND',
                     $table . '.deleted_at' => 'IS NULL'
                 )
             )

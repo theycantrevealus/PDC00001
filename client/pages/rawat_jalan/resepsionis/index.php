@@ -78,7 +78,7 @@
 									<th>Dokter</th>
 									<th>Penjamin</th>
 									<th>Oleh</th>
-									<!-- <th>Aksi</th> -->
+									<th>Aksi</th>
 								</tr>
 							</thead>
 							<tbody>

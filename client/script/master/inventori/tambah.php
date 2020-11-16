@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
 	$(function() {
 		var MODE = "tambah";
@@ -409,6 +410,80 @@
 			}
 		}
 
+        autoKandungan();
+
+        function autoKandungan(setter = {
+            kandungan: "",
+            keterangan: ""
+        }) {
+            $("#load-kandungan-obat tbody tr").removeClass("last_kandungan");
+
+            var newKandunganRow = document.createElement("TR");
+
+            var newKandunganID = document.createElement("TD");
+            var newKandunganName = document.createElement("TD");
+            var newKandunganKeterangan = document.createElement("TD");
+            var newKandunganAksi = document.createElement("TD");
+
+            $(newKandunganRow).append(newKandunganID);
+            $(newKandunganRow).append(newKandunganName);
+            var newKandunganNameInput = document.createElement("input");
+            $(newKandunganNameInput).addClass("form-control kandungan-check").attr("placeholder", "Kandungan Obat");
+            $(newKandunganName).append(newKandunganNameInput);
+            $(newKandunganNameInput).val(setter.kandungan);
+
+            $(newKandunganRow).append(newKandunganKeterangan);
+            var newKandunganKeteranganInput = document.createElement("input");
+            $(newKandunganKeteranganInput).addClass("form-control kandungan-check").attr("placeholder", "Keterangan");
+            $(newKandunganKeterangan).append(newKandunganKeteranganInput);
+            $(newKandunganKeteranganInput).val(setter.keterangan);
+
+            $(newKandunganRow).append(newKandunganAksi);
+            var newKandunganDelete = document.createElement("button");
+            $(newKandunganDelete).addClass("btn btn-sm btn-danger btn-delete-kandungan").html("<i class=\"fa fa-trash\"></i>");
+            $(newKandunganAksi).append(newKandunganDelete);
+
+
+            $(newKandunganRow).addClass("last_kandungan");
+
+            $("#load-kandungan-obat tbody").append(newKandunganRow);
+
+            rebaseKandungan();
+        }
+
+        $("body").on("keyup", ".kandungan-check", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            if(
+                $("#nama_kandungan_" + id).val() !== "" &&
+                $("#row_kandungan_" + id).hasClass("last_kandungan")
+            ) {
+                autoKandungan();
+            }
+        });
+
+        $("body").on("click", ".btn-delete-kandungan", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            if(!$("#row_kandungan_" + id).hasClass("last_kandungan")) {
+                $("#row_kandungan_" + id).remove();
+                rebaseKandungan();
+            }
+        });
+
+        function rebaseKandungan() {
+            $("#load-kandungan-obat tbody tr").each(function(e) {
+                var currentID = (e + 1);
+                $(this).attr("id", "row_kandungan_" + currentID);
+                $(this).find("td:eq(0)").html(currentID);
+                $(this).find("td:eq(1) input").attr("id", "nama_kandungan_" + currentID);
+                $(this).find("td:eq(2) input").attr("id", "keterangan_kandungan_" + currentID);
+                $(this).find("td:eq(3) button").attr("id", "delete_kandungan_" + currentID);
+            });
+        }
+
 		function autoHarga() {
 			var penjaminData;
 			$("#table-penjamin tbody tr").remove();
@@ -730,6 +805,19 @@
 							}
 						});
 
+                        var kandungan = [];
+                        $("#load-kandungan-obat tbody tr").each(function() {
+                            if(
+                                !$(this).hasClass("last_kandungan") &&
+                                $(this).find("td:eq(1) input").val() !== ""
+                            ) {
+                                kandungan.push({
+                                    kandungan: $(this).find("td:eq(1) input").val(),
+                                    keterangan: $(this).find("td:eq(2) input").val()
+                                });
+                            }
+                        });
+
 
 
 
@@ -747,6 +835,7 @@
 								kategori:kategori,
 								keterangan:keterangan,
 								manufacture:manufacture,
+                                kandungan: kandungan,
 								satuan_terkecil:satuan_terkecil,
 								listKategoriObat:listKategoriObat,
 								satuanKonversi:satuanKonversi,
@@ -838,6 +927,19 @@
 						}
 					});
 
+                    var kandungan = [];
+                    $("#load-kandungan-obat tbody tr").each(function() {
+                        if(
+                            !$(this).hasClass("last_kandungan") &&
+                            $(this).find("td:eq(1) input").val() !== ""
+                        ) {
+                            kandungan.push({
+                                kandungan: $(this).find("td:eq(1) input").val(),
+                                keterangan: $(this).find("td:eq(2) input").val()
+                            });
+                        }
+                    });
+
 					$.ajax({
 						url:__HOSTAPI__ + "/Inventori",
 						async:false,
@@ -851,6 +953,7 @@
 							image:settedImage,
 							kategori:kategori,
 							keterangan:keterangan,
+                            kandungan: kandungan,
 							manufacture:manufacture,
 							satuan_terkecil:satuan_terkecil,
 							listKategoriObat:listKategoriObat,

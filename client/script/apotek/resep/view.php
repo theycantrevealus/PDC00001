@@ -509,6 +509,8 @@
                                     $("#batch_obat_" + rowTarget).append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ") - " + selectedBatchList[batchSelKey].gudang.nama + "</li>");
                                 }
 
+                                $("#batch_obat_" + rowTarget).attr("harga", finalTotal);
+
                                 //Calculate harga
                                 $("#harga_obat_" + rowTarget).html(number_format(finalTotal * total_kebutuhan, 2, ".", ","));
                             }
@@ -572,7 +574,7 @@
 
                                 //Racikan session
                                 $("#obat_komposisi_batch_" + rowTarget).attr({
-                                    "harga": finalTotal * total_kebutuhan
+                                    "harga": finalTotal
                                 });
 
                                 $("#obat_komposisi_batch_" + rowTarget + " li").remove();
@@ -585,7 +587,7 @@
                                 $("#komposisi_" + groupExplitor + " tbody tr").each(function() {
                                     var attrHarga = $(this).find("td:eq(1) ol").attr("harga");
                                     if (typeof attrHarga !== typeof undefined && attrHarga !== false) {
-                                        totalKalkulasi += parseFloat($(this).find("td:eq(1) ol").attr("harga"));
+                                        totalKalkulasi += parseFloat($(this).find("td:eq(1) ol").attr("harga")) * total_kebutuhan;
                                     }
                                 });
 
@@ -1275,7 +1277,7 @@
                                 "signa_qty": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
                                 "signa_pakai": parseFloat($(this).find("td:eq(4) input").inputmask("unmaskedvalue")),
                                 "jumlah": parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")),
-                                "harga": parseFloat($(this).find("td:eq(7)").html().replace(/(,)/g, "")),
+                                "harga": parseFloat($(this).find("td:eq(1) ol").attr("harga")),
                                 "aturan_pakai": $(this).find("td:eq(1) select:eq(1)").val(),
                                 "keterangan": $(this).find("td:eq(1) textarea").val()
                             });
@@ -1288,9 +1290,15 @@
                         if(racikan_nama !== undefined && racikan_nama !== "") {
                             var komposisi = [];
                             $(this).find("td:eq(1) table tbody tr").each(function() {
+                                var hargaPerObatRacikan = 0;
+                                if($(this).find("td:eq(1) ol").length > 0) {
+                                    hargaPerObatRacikan = $(this).find("td:eq(1) ol").attr("harga");
+                                }
+
                                 komposisi.push({
                                     "obat": $(this).find("td:eq(1) h6").attr("uid-obat"),
-                                    "kekuatan": $(this).find("td:eq(2)").html()
+                                    "kekuatan": $(this).find("td:eq(2)").html(),
+                                    "harga": parseFloat(hargaPerObatRacikan)
                                 });
                             });
 
@@ -1311,9 +1319,13 @@
                     /*console.clear();
                     console.log({
                         request: "verifikasi_resep_2",
-                        uid: __PAGES__[3],
-                        resep: resepItem,
-                        racikan: racikanItem
+                            uid: __PAGES__[3],
+                            kunjungan: currentMetaData.kunjungan,
+                            antrian:currentMetaData.uid,
+                            pasien:currentMetaData.pasien.uid,
+                            penjamin: currentMetaData.penjamin.uid,
+                            resep: resepItem,
+                            racikan: racikanItem
                     });*/
 
                     $.ajax({
@@ -1334,9 +1346,24 @@
                             racikan: racikanItem
                         },
                         success:function(response) {
-                            console.log(response.response_package.antrian);
                             if(response.response_package.antrian.response_result > 0) {
-                                location.href = __HOSTNAME__ + "/apotek/resep/";
+                                if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
+                                    Swal.fire(
+                                        "Verifikasi Berhasil!",
+                                        "Silahkan pasien menuju kasir",
+                                        "success"
+                                    ).then((result) => {
+                                        location.href = __HOSTNAME__ + "/apotek/resep/";
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        "Verifikasi Berhasil!",
+                                        "Silahkan minta pasien menunggu proses persiapan obat",
+                                        "success"
+                                    ).then((result) => {
+                                        location.href = __HOSTNAME__ + "/apotek/resep/";
+                                    });
+                                }
                             }
                         },
                         error: function(response) {
