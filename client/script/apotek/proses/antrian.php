@@ -11,6 +11,7 @@
             type:"GET",
             success:function(response) {
                 targettedData = response.response_package.response_data[0];
+                //console.log(targettedData);
                 $("#nama-pasien").attr({
                     "set-penjamin": targettedData.antrian.penjamin_data.uid
                 }).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
@@ -73,6 +74,7 @@
         function loadDetailResep(data) {
             $("#load-detail-resep tbody tr").remove();
             for(var a = 0; a < data.detail.length; a++) {
+                console.log(data.detail[a]);
                 var ObatData = load_product_resep(newObat, data.detail[a].detail.uid, false);
                 var selectedBatchResep = refreshBatch(data.detail[a].detail.uid);
                 var selectedBatchList = [];

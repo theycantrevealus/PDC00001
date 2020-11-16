@@ -63,7 +63,7 @@
             }
         </style>
     </head>
-    <body onload="myFunction()">
+    <body>
     <div class="body">
         <div class="left" style="margin-top:1.69cm !important;"><b><?php echo $_POST['pasien']; ?></b></div>
         <div class="left"><?php echo $_POST['alamat']; ?></div>
@@ -72,7 +72,8 @@
         <br><br>
         <div class="left1">
             <?php
-                $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
+            //Sentry\init(['dsn' => 'https://9754244694444cccaf869914e1e4f5a3@o412931.ingest.sentry.io/5294475' ]);
+            $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
                 echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($_POST['no_rm'], $generator::TYPE_CODE_128, 25, 350)) . '" width="100px !important">';
             ?>
         </div>

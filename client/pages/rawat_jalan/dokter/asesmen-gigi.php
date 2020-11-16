@@ -71,7 +71,7 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="bibir" value="n" />
+                                                        <input class="form-check-input" type="radio" name="bibir" value="n" checked />
                                                         <label class="form-check-label">
                                                             Normal
                                                         </label>
@@ -79,7 +79,7 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="bibir" value="a" checked>
+                                                        <input class="form-check-input" type="radio" name="bibir" value="a" />
                                                         <label class="form-check-label">
                                                             Ada Kelainan
                                                         </label>
@@ -92,7 +92,7 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="lidah" value="n" />
+                                                        <input class="form-check-input" type="radio" name="lidah" value="n" checked />
                                                         <label class="form-check-label">
                                                             Normal
                                                         </label>
@@ -100,7 +100,7 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="lidah" value="a" checked>
+                                                        <input class="form-check-input" type="radio" name="lidah" value="a" />
                                                         <label class="form-check-label">
                                                             Ada Kelainan
                                                         </label>
@@ -113,7 +113,7 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="mukosa" value="n" />
+                                                        <input class="form-check-input" type="radio" name="mukosa" value="n" checked />
                                                         <label class="form-check-label">
                                                             Normal
                                                         </label>
@@ -121,7 +121,7 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="mukosa" value="a" checked>
+                                                        <input class="form-check-input" type="radio" name="mukosa" value="a" />
                                                         <label class="form-check-label">
                                                             Ada Kelainan
                                                         </label>

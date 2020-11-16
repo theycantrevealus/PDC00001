@@ -2596,10 +2596,10 @@
 
         $("#btnCetakSurat").click(function() {
             Swal.fire({
-                title: 'Data sudah benar?',
+                title: "Data sudah benar?",
                 showDenyButton: true,
-                confirmButtonText: `Ya. Cetak`,
-                denyButtonText: `Belum`,
+                confirmButtonText: "Ya. Cetak",
+                denyButtonText: "Belum",
             }).then((result) => {
                 if (result.isConfirmed) {
                     var kunjungan = antrianData.kunjungan;

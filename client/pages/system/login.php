@@ -87,11 +87,11 @@
 		<div class="layout-login__form" data-simplebar>
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
 				<a href="<?php echo __HOSTNAME__; ?>/" class="navbar-brand" style="min-width: 0">
-					<!--<img class="navbar-brand-icon" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-black.png" width="280" height="280" alt="SIMRS RSUD Petala Bumi">-->
-                    <img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" width="180" height="180" alt="SIMRS RSUD Bintan">
+					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" width="280" height="280" alt="<?php echo __PC_CUSTOMER__; ?>">
+                    <!--<img class="navbar-brand-icon" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-black.png" width="180" height="180" alt="<?php echo __PC_CUSTOMER__; ?>">-->
 				</a>
 			</div>
-            <h4 class="m-0">RSUD Bintan</h4>
+            <h4 class="m-0"><?php echo __PC_CUSTOMER__; ?></h4>
 			<p class="mb-5 text-muted">SIMRS Integrated System</p>
 
 
@@ -135,9 +135,9 @@
 			<div class="copyright-panel">
                 <small class="text-secondary">Powered By</small><br />
                 <div class="row">
-                    <div class="col-6">
-                        <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/icon.jpg" width="60" />
-                    </div>
+                    <!--<div class="col-6">
+                        <img src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/icon.jpg" width="60" />
+                    </div>-->
                     <div class="col-6" style="padding-top: 10px;">
                         <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/pondokcoder1280.svg" width="120" />
                     </div>

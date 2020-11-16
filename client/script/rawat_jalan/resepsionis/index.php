@@ -134,7 +134,7 @@
 			]
 		});
 
-        loadKelasRawat();
+
         loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
         loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val());
         loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val());
@@ -189,16 +189,6 @@
         $("#txt_bpjs_nomor_rujukan").change(function() {
             loadInformasiRujukan(selectedListRujukan[$(this).find("option:selected").index()]);
         });
-
-
-
-
-
-
-
-        
-
-        
 
         /*$("#txt_bpjs_asal_rujukan").select2({
             minimumInputLength: 2,
@@ -349,7 +339,7 @@
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                success: function(response){
+                success: function(response) {
                     var data = response.response_package.response_data[0];
                     selectedSEPAntriamMeta = data;
 
@@ -370,6 +360,7 @@
                             var metaDataBPJS = JSON.parse(data.pasien_detail.history_penjamin[pKey].rest_meta);
                             selectedSEPNoKartu = metaDataBPJS.response.peserta.noKartu;
                             $("#txt_bpjs_nomor").val(metaDataBPJS.response.peserta.noKartu);
+                            loadKelasRawat(metaDataBPJS.response.peserta.hakKelas.keterangan);
                         }
                     }
 
@@ -418,7 +409,7 @@
                                 isRujukan = false
                                 $(".informasi_rujukan").hide();
                                 $("#panel-rujukan").hide();
-                                //$("#btnProsesSEP").hide();
+                                $("#btnProsesSEP").hide();
                             }
                         },
                         error: function(response) {
@@ -448,7 +439,6 @@
         });
 
         $("#btnProsesSEP").click(function () {
-
             Swal.fire({
                 title: 'Data sudah benar?',
                 showDenyButton: true,
@@ -545,7 +535,6 @@
                                     response.response_package.content.metaData.message,
                                     "warning"
                                 ).then((result) => {
-
                                 });
                             } else {
                                 Swal.fire(
@@ -673,7 +662,7 @@
 		});
 
 
-        function loadKelasRawat(){
+        function loadKelasRawat(selected = ""){
             $.ajax({
                 async: false,
                 url:__HOSTAPI__ + "/BPJS/get_kelas_rawat_select2",
@@ -689,6 +678,9 @@
                         var selection = document.createElement("OPTION");
 
                         $(selection).attr("value", data[a].kode).html(data[a].nama);
+                        if(data[a].nama.toUpperCase() === selected.toUpperCase()) {
+                            $(selection).attr("selected", "selected");
+                        }
                         $("#txt_bpjs_kelas_rawat").append(selection);
                     }
                 },

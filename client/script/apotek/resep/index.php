@@ -11,6 +11,8 @@
                 },
                 type:"GET",
                 success:function(response) {
+                    console.clear();
+                    console.log(response);
                     var resepDataRaw = response.response_package.response_data;
                     for(var resepKey in resepDataRaw) {
                         if(
@@ -144,7 +146,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
+                        //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<a class=\"btn btn-info btn-sm btn-edit-mesin\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                                "<i class=\"fa fa-check-double\"></i> Verifikasi" +
+                                "</a>" +
+                            "</div>";
                     }
                 }
             ]

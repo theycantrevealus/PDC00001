@@ -43,15 +43,24 @@
 				},
 				dataSrc:function(response) {
 					var dataSet = response.response_package.response_data;
+					var dataResponse = [];
 					if(dataSet == undefined) {
 						dataSet = [];
 					}
 
+					for(var kwitansiKey in dataSet) {
+					    if(
+					        dataSet[kwitansiKey].pasien !== null &&
+                            dataSet[kwitansiKey].pasien !== undefined
+                        ) {
+					        dataResponse.push(dataSet[kwitansiKey]);
+                        }
+                    }
+
 					response.draw = parseInt(response.response_package.response_draw);
-					//console.log(response);
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = response.response_package.recordsFiltered;
-					return dataSet;
+					return dataResponse;
 				}
 			},
 			autoWidth: false,
