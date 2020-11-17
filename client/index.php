@@ -5,6 +5,7 @@
 ?>
 
 <script type="text/javascript">
+    var __PC_CUSTOMER__ = <?php echo json_encode(__PC_CUSTOMER__); ?>;
 	var __SYNC__ = <?php echo json_encode(__SYNC__); ?>;
 	var __SYNC_PORT__ = <?php echo json_encode(__SYNC_PORT__); ?>;
 	var __HOSTNAME__ = <?php echo json_encode(__HOSTNAME__); ?>;

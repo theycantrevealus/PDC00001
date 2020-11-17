@@ -1418,7 +1418,7 @@ class Inventori extends Utility
                         ->execute();
                     //get pasien
                     $Pasien = new Pasien(self::$pdo);
-                    $PasienInfo = $Pasien::get_pasien_detail($Resep['response_data'][0]['pasien']);
+                    $PasienInfo = $Pasien::get_pasien_detail('pasien', $Resep['response_data'][0]['pasien']);
 
                     $data['response_data'][$key]['dokumen'] = 'Resep Asesmen ' . $PasienInfo['response_data'][0]['nama'];
                 } else {
@@ -1488,7 +1488,26 @@ class Inventori extends Utility
 
             //Satuan Terkecil
             $data['response_data'][$key]['satuan_terkecil_info'] = self::get_satuan_detail($value['satuan_terkecil'])['response_data'][0];
+
+            //Kandungan
+            $data['response_data'][$key]['kandungan'] = self::get_kandungan($value['uid'])['response_data'];
         }
+        return $data;
+    }
+
+    public function get_kandungan($parameter) {
+        $data = self::$query->select('master_inv_obat_kandungan', array(
+            'id', 'kandungan', 'keterangan'
+        ))
+            ->where(array(
+                'master_inv_obat_kandungan.uid_obat' => '= ?',
+                'AND',
+                'master_inv_obat_kandungan.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+
         return $data;
     }
 
@@ -1847,6 +1866,20 @@ class Inventori extends Utility
                         $error_count++;
                     }
                 }
+
+
+
+                foreach ($parameter['kandungan'] as $KandKey => $KandValue) {
+                    $kandungan_worker = self::$query->insert('master_inv_obat_kandungan', array(
+                        'uid_obat' => $uid,
+                        'kandungan' => $KandValue['kandungan'],
+                        'keterangan' => $KandValue['keterangan'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+
             } else {
                 $error_count++;
             }
@@ -2526,6 +2559,31 @@ class Inventori extends Utility
                     }
                 }
             }
+
+
+
+            //Kandungan
+
+            //hard_delete
+            $old_kandungan = self::$query->hard_delete('master_inv_obat_kandungan')
+                ->where(array(
+                    'master_inv_obat_kandungan.uid_obat' => '= ?'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+
+            foreach ($parameter['kandungan'] as $KandKey => $KandValue) {
+                $kandungan_worker = self::$query->insert('master_inv_obat_kandungan', array(
+                    'uid_obat' => $uid,
+                    'kandungan' => $KandValue['kandungan'],
+                    'keterangan' => $KandValue['keterangan'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
         } else {
             $error_count++;
         }

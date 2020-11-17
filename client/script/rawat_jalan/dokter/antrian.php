@@ -2596,10 +2596,10 @@
 
         $("#btnCetakSurat").click(function() {
             Swal.fire({
-                title: 'Data sudah benar?',
+                title: "Data sudah benar?",
                 showDenyButton: true,
-                confirmButtonText: `Ya. Cetak`,
-                denyButtonText: `Belum`,
+                confirmButtonText: "Ya. Cetak",
+                denyButtonText: "Belum",
             }).then((result) => {
                 if (result.isConfirmed) {
                     var kunjungan = antrianData.kunjungan;
@@ -2666,13 +2666,11 @@
 
 
 
-
-
-
-
-
-
-        $("body").on("click", "#btnSelesai", function() {
+        function simpanAsesmen(
+            antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi,
+            editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan
+        ) {
+            var savingResult;
             var kunjungan = antrianData.kunjungan;
             var antrian = UID;
             var penjamin = antrianData.penjamin;
@@ -2737,9 +2735,9 @@
                 var signaHari = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
                 //var penjamin = $(this).find("td:eq(6) select").val();
                 if(
-                    obat != undefined &&
-                    obat != "none" &&
-                    obat != "" &&
+                    obat !== undefined &&
+                    obat !== "none" &&
+                    obat !== "" &&
 
                     parseFloat(signaKonsumsi) > 0 &&
                     parseFloat(signaTakar) > 0 &&
@@ -3021,6 +3019,33 @@
                 };
             }
 
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Asesmen",
+                data: formData,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                success: function(response) {
+                    savingResult = response;
+                },
+                error: function(response) {
+                    console.clear();
+                    console.log(response);
+                }
+            });
+
+            orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
+            listTindakanRadiologiDihapus = [];		//set back to empty
+            return savingResult;
+        }
+
+
+
+
+
+        $("body").on("click", "#btnSelesai", function() {
             Swal.fire({
                 title: 'Selesai isi asesmen rawat?',
                 showDenyButton: true,
@@ -3029,39 +3054,21 @@
                 denyButtonText: `Belum`,
             }).then((result) => {
                 if (result.isConfirmed) {
-                    //Validation
-                    $.ajax({
-                        async: false,
-                        url: __HOSTAPI__ + "/Asesmen",
-                        data: formData,
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        type: "POST",
-                        success: function(response) {
-                            console.clear();
-
-                            if(response.response_package.response_result > 0) {
-                                notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-                                push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
-                                location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
-                            } else {
-                                notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
-                            }
-                        },
-                        error: function(response) {
-                            console.clear();
-                            console.log(response);
+                    const simpanDataProcess = new Promise(function(resolve, reject) {
+                        resolve(simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan));
+                    }).then(function(result) {
+                        if(result.response_package.response_result > 0) {
+                            notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
+                            push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                            location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                        } else {
+                            notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                         }
                     });
-
-                    orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus);
-                    listTindakanRadiologiDihapus = [];		//set back to empty
                 } else if (result.isDenied) {
                     //Swal.fire('Changes are not saved', '', 'info')
                 }
             });
-            return false;
         });
 
 
@@ -4453,38 +4460,72 @@
         }
 
         $("#btnProsesKonsul").click(function() {
-            var dataObj = {};
-            $('.inputan_konsul').each(function() {
-                var key = $(this).attr("id").split("_");
-                var value = $(this).val();
+            const proses_konsul = new Promise(function(proceed, reject) {
+                var dataObj = {};
+                $('.inputan_konsul').each(function() {
+                    var key = $(this).attr("id").split("_");
+                    var value = $(this).val();
 
-                dataObj[key[1]] = value;
-            });
+                    dataObj[key[1]] = value;
+                });
 
-            dataObj.pasien = pasien_uid;
-            dataObj.currentPasien = pasien_uid;
-            dataObj.currentAntrianID = UID;
-            dataObj.konsul = true;
-            dataObj.antrian = UID;
-            dataObj.kunjungan = kunjungan.uid;
-            dataObj.pj_pasien = kunjungan.pj_pasien;
-            dataObj.info_didapat_dari = kunjungan.info_didapat_dari;
+                dataObj.pasien = pasien_uid;
+                dataObj.currentPasien = pasien_uid;
+                dataObj.currentAntrianID = UID;
+                dataObj.konsul = true;
+                dataObj.antrian = UID;
+                dataObj.kunjungan = kunjungan.uid;
+                dataObj.pj_pasien = kunjungan.pj_pasien;
+                dataObj.info_didapat_dari = kunjungan.info_didapat_dari;
 
-            $.ajax({
-                async: false,
-                url: __HOSTAPI__ + "/Antrian",
-                data: {
-                    request : "tambah-kunjungan",
-                    dataObj : dataObj
-                },
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                type: "POST",
-                success: function(response){
-                    console.clear();
-                    console.log(response);
-                    if(response.response_package.response_notif == 'K') {
+                Swal.fire({
+                    title: 'Data sudah benar?',
+                    showDenyButton: true,
+                    confirmButtonText: `Ya. Cetak`,
+                    denyButtonText: `Belum`,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        const simpanDataProcess = new Promise(function(resolve, reject) {
+                            resolve(simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan));
+                        }).then(function(result) {
+                            if(result.response_package.response_result > 0) {
+                                $.ajax({
+                                    async: false,
+                                    url: __HOSTAPI__ + "/Antrian",
+                                    data: {
+                                        request : "tambah-kunjungan",
+                                        dataObj : dataObj
+                                    },
+                                    beforeSend: function(request) {
+                                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                    },
+                                    type: "POST",
+                                    success: function(response){
+                                        proceed(response);
+                                    },
+                                    error: function(response) {
+                                        console.log("Error : ");
+                                        console.log(response);
+                                    }
+                                });
+                            } else {
+                                notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
+                            }
+                        });
+
+                        //simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan);
+
+
+                    } else if(result.isDenied) {
+                        reject();
+                    }
+                });
+            }).then(function(result) {
+                var expected_response = ['K', 'P'];
+
+                if(expected_response.indexOf(result.response_package.response_notif) >= 0) {
+                    if(result.response_package.response_notif === 'K') {
                         push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum konsul", "warning");
                         Swal.fire(
                             'Berhasil konsul!',
@@ -4493,7 +4534,7 @@
                         ).then((result) => {
                             location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                         });
-                    } else if(response.response_package.response_notif == 'P') {
+                    } else if(result.response_package.response_notif === 'P') {
                         Swal.fire(
                             'Berhasil konsul!',
                             'Silahkan arahkan pasien ke poli tujuan',
@@ -4504,11 +4545,8 @@
                     } else {
                         console.log("command not found");
                     }
-
-                },
-                error: function(response) {
-                    console.log("Error : ");
-                    console.log(response);
+                } else {
+                    console.log(result);
                 }
             });
         });

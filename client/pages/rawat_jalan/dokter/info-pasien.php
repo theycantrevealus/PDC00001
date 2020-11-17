@@ -2,7 +2,9 @@
 	<div class="card card-body">
 		<div class="d-flex flex-row">
 			<div class="col-md-2">
-				<i class="material-icons icon-muted icon-30pt">account_circle</i>
+                <center>
+                    <i class="material-icons icon-muted icon-30pt">account_circle</i>
+                </center>
 			</div>
 			<div class="col-md-10">
 				<b class="nama_pasien"></b>

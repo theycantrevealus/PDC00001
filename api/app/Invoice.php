@@ -2,6 +2,7 @@
 
 namespace PondokCoder;
 
+use PondokCoder\Authorization as Authorization;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Pasien as Pasien;
@@ -1326,6 +1327,9 @@ class Invoice extends Utility
 
     public function append_invoice($parameter)
     {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
         $Invoice = self::$query->insert('invoice_detail', array(
             'invoice' => $parameter['invoice'],
             'item' => $parameter['item'],
