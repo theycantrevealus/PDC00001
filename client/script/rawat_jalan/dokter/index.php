@@ -102,9 +102,9 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<a href=\"" + __HOSTNAME__ + "/rawat_jalan/dokter/antrian/" + row['uid'] + "\" class=\"btn btn-success btn-sm\">" +
-										"<i class=\"fa fa-sign-out-alt\"></i>" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+									"<a href=\"" + __HOSTNAME__ + "/rawat_jalan/dokter/antrian/" + row['uid'] + "\" class=\"btn btn-success\">" +
+										"<i class=\"fa fa-sign-out-alt\"></i> Proses Perobatan" +
 									"</a>" +
 								"</div>";
 					}

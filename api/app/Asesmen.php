@@ -1462,6 +1462,38 @@ class Asesmen extends Utility {
 			array_push($returnResponse, $new_asesmen_tindakan);
 		}
 
+		$AsesmenInfo = self::$query->select('asesmen', array(
+            'kunjungan',
+            'antrian',
+            'pasien'
+        ))
+            ->where(array(
+                'asesmen.uid' => '= ?',
+                'AND',
+                'asesmen.deleted_at' => 'IS NULL'
+            ), array(
+                $MasterAsesmen
+            ))
+            ->execute();
+
+		//Status Antrian
+
+        $antrian_status = self::$query->update('antrian_nomor', array(
+            'status' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P'
+        ))
+            ->where(array(
+                'antrian_nomor.kunjungan' => '= ?',
+                'AND',
+                'antrian_nomor.antrian' => '= ?',
+                'AND',
+                'antrian_nomor.pasien' => '= ?'
+            ), array(
+                $AsesmenInfo['response_data'][0]['kunjungan'],
+                $AsesmenInfo['response_data'][0]['antrian'],
+                $AsesmenInfo['response_data'][0]['pasien']
+            ))
+            ->execute();
+
 		return $returnResponse;
 	}
 

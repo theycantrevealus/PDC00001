@@ -2471,6 +2471,24 @@ class Laboratorium extends Utility {
 							)
 						)
 						->execute();
+
+
+					//update status antrian
+                    $antrian_status = self::$query->update('antrian_nomor', array(
+                        'status' => ($data_antrian['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P'
+                    ))
+                        ->where(array(
+                            'antrian_nomor.kunjungan' => '= ?',
+                            'AND',
+                            'antrian_nomor.antrian' => '= ?',
+                            'AND',
+                            'antrian_nomor.pasien' => '= ?'
+                        ), array(
+                            $data_antrian['kunjungan'],
+                            $parameter['uid_antrian'],
+                            $data_antrian['pasien']
+                        ))
+                        ->execute();
 				}
 
 			}
