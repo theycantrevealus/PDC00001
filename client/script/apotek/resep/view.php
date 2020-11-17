@@ -1268,10 +1268,19 @@
                 if (result.isConfirmed) {
                     //Populate Resep
 
+                    var allowSave = false;
+
                     var resepItem = [];
                     $("#table-resep tbody tr").each(function() {
                         var obat = $(this).find("td:eq(1) select:eq(0)").val();
                         if(obat !== null) {
+                            if($(this).find("td:eq(1) ol li").length === 0) {
+                                allowSave = false;
+                                return false;
+                            } else {
+                                allowSave = true;
+                            }
+
                             resepItem.push({
                                 "obat": $(this).find("td:eq(1) select:eq(0)").val(),
                                 "signa_qty": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
@@ -1293,6 +1302,13 @@
                                 var hargaPerObatRacikan = 0;
                                 if($(this).find("td:eq(1) ol").length > 0) {
                                     hargaPerObatRacikan = $(this).find("td:eq(1) ol").attr("harga");
+
+                                    if($(this).find("td:eq(1) ol li").length === 0) {
+                                        allowSave = false;
+                                        return false;
+                                    } else {
+                                        allowSave = true;
+                                    }
                                 }
 
                                 komposisi.push({
@@ -1328,48 +1344,59 @@
                             racikan: racikanItem
                     });*/
 
-                    $.ajax({
-                        url:__HOSTAPI__ + "/Apotek",
-                        async:false,
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        type:"POST",
-                        data:{
-                            request: "verifikasi_resep_2",
-                            uid: __PAGES__[3],
-                            kunjungan: currentMetaData.kunjungan,
-                            antrian:currentMetaData.uid,
-                            pasien:currentMetaData.pasien.uid,
-                            penjamin: currentMetaData.penjamin.uid,
-                            resep: resepItem,
-                            racikan: racikanItem
-                        },
-                        success:function(response) {
-                            if(response.response_package.antrian.response_result > 0) {
-                                if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
-                                    Swal.fire(
-                                        "Verifikasi Berhasil!",
-                                        "Silahkan pasien menuju kasir",
-                                        "success"
-                                    ).then((result) => {
-                                        location.href = __HOSTNAME__ + "/apotek/resep/";
-                                    });
-                                } else {
-                                    Swal.fire(
-                                        "Verifikasi Berhasil!",
-                                        "Silahkan minta pasien menunggu proses persiapan obat",
-                                        "success"
-                                    ).then((result) => {
-                                        location.href = __HOSTNAME__ + "/apotek/resep/";
-                                    });
+
+                    if(allowSave) {
+                        $.ajax({
+                            url:__HOSTAPI__ + "/Apotek",
+                            async:false,
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type:"POST",
+                            data:{
+                                request: "verifikasi_resep_2",
+                                uid: __PAGES__[3],
+                                kunjungan: currentMetaData.kunjungan,
+                                antrian:currentMetaData.uid,
+                                pasien:currentMetaData.pasien.uid,
+                                penjamin: currentMetaData.penjamin.uid,
+                                resep: resepItem,
+                                racikan: racikanItem
+                            },
+                            success:function(response) {
+                                if(response.response_package.antrian.response_result > 0) {
+                                    if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
+                                        Swal.fire(
+                                            "Verifikasi Berhasil!",
+                                            "Silahkan pasien menuju kasir",
+                                            "success"
+                                        ).then((result) => {
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    } else {
+                                        Swal.fire(
+                                            "Verifikasi Berhasil!",
+                                            "Silahkan minta pasien menunggu proses persiapan obat",
+                                            "success"
+                                        ).then((result) => {
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    }
                                 }
+                            },
+                            error: function(response) {
+                                console.log(response);
                             }
-                        },
-                        error: function(response) {
-                            console.log(response);
-                        }
-                    });
+                        });
+                    } else {
+                        Swal.fire(
+                            "Verifikasi Gagal!",
+                            "Pastikan semua obat memiliki stok tersedia",
+                            "warning"
+                        ).then((result) => {
+                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                        });
+                    }
                 }
             });
         });

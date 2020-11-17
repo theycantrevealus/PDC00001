@@ -160,10 +160,11 @@
                                         if(usedTindakan.indexOf(asesmen_detail.tindakan[tindakanKey].uid) < 0) {
                                             usedTindakan.push(asesmen_detail.tindakan[tindakanKey].uid);
                                             tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
-
+                                            var hargaTindakan = generateTindakan2(asesmen_detail.tindakan[tindakanKey].uid, pasien_penjamin_uid);
                                             autoTindakan(tindakanMeta, {
                                                 uid: asesmen_detail.tindakan[tindakanKey].uid,
-                                                nama: asesmen_detail.tindakan[tindakanKey].nama
+                                                nama: asesmen_detail.tindakan[tindakanKey].nama,
+                                                harga: hargaTindakan.harga
                                             }, antrianData);
                                         }
                                     }
@@ -846,6 +847,30 @@
 
         $("#current-poli").prepend(poliList[0]['nama']);
 
+        function generateTindakan2(target, penjamin) {
+            var returnedData;
+            $.ajax({
+                url:__HOSTAPI__ + "/Tindakan/get-harga-per-kelas/RJ/" + penjamin,
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    var tinData = response.response_package;
+                    for(var tinKey in tinData) {
+                        if(tinData[tinKey].tindakan === target) {
+                            returnedData = tinData[tinKey];
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return returnedData;
+        }
+
         function generateTindakan(poliList, antrianData, selected = []) {
             var tindakanMeta = {};
             $("#txt_tindakan option").remove();
@@ -883,15 +908,19 @@
         $("#txt_tindakan").select2();
 
         $("#btnTambahTindakan").click(function(){
-            autoTindakan(tindakanMeta, {
-                uid: $("#txt_tindakan").val(),
-                nama: $("#txt_tindakan option:selected").text(),
-                kelas: $("#txt_tindakan option:selected").attr("kelas"),
-            }, antrianData);
+            var hargaTindakan = generateTindakan2($("#txt_tindakan").val(), pasien_penjamin_uid);
+            if(parseFloat(hargaTindakan.harga) > 0) {
+                autoTindakan(tindakanMeta, {
+                    uid: $("#txt_tindakan").val(),
+                    nama: $("#txt_tindakan option:selected").text(),
+                    kelas: $("#txt_tindakan option:selected").attr("kelas"),
+                    harga : parseFloat(hargaTindakan.harga)
+                }, antrianData);
 
-            if(usedTindakan.indexOf($("#txt_tindakan").val()) < 0) {
-                usedTindakan.push($("#txt_tindakan").val());
-                tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
+                if(usedTindakan.indexOf($("#txt_tindakan").val()) < 0) {
+                    usedTindakan.push($("#txt_tindakan").val());
+                    tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
+                }
             }
 
             return false;
@@ -916,16 +945,15 @@
             $(newCellTindakanTindakan).html(setTindakan.nama).attr({
                 "set-tindakan": setTindakan.uid
             }).attr("kelas", setTindakan.kelas);
-            var newPenjamin = document.createElement("SELECT");
+            /*var newPenjamin = document.createElement("SELECT");
 
             for(var a = 0; a < penjaminMeta[setTindakan.uid].length; a++) {
                 if(penjaminMeta[setTindakan.uid][a].uid == antrianData.penjamin) {
                     $(newPenjamin).append("<option " + ((penjaminMeta[setTindakan.uid][a].uid == selectedPenjamin.penjamin) ? "selected=\"selected\"" : "") + " value=\"" + penjaminMeta[setTindakan.uid][a].uid + "\">" + penjaminMeta[setTindakan.uid][a].nama + "</option>");
                 }
-            }
+            }*/
 
-            $(newCellTindakanPenjamin).append(newPenjamin);
-            $(newPenjamin).addClass("form-control").select2();
+            $(newCellTindakanPenjamin).addClass("number_style").html(number_format(setTindakan.harga, 2, ".", ","));
 
 
             var newPenjaminDelete = document.createElement("BUTTON");
