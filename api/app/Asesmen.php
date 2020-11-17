@@ -65,6 +65,10 @@ class Asesmen extends Utility {
 					return self::update_asesmen_rawat($parameter);
 					break;
 
+                case 'pasien_saya':
+                    return self::pasien_saya($parameter);
+                    break;
+
 				default:
 					return 'Unknown request';
 			}
@@ -72,6 +76,168 @@ class Asesmen extends Utility {
 			return 'Error => ' . $e;
 		}
 	}
+
+	private function pasien_saya($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'asesmen.deleted_at' => 'IS NULL',
+                'AND',
+                'asesmen.created_at' => 'BETWEEN ? AND ?',
+                'AND',
+                'asesmen.dokter' => '= ?',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+
+            $paramValue = array(
+                date('Y-m-d', strtotime($parameter['from']) - 86400), date('Y-m-d', strtotime($parameter['to']) + 86400), $UserData['data']->uid
+            );
+        } else {
+            $paramData = array(
+                'asesmen.deleted_at' => 'IS NULL',
+                'AND',
+                'asesmen.created_at' => 'BETWEEN ? AND ?',
+                'AND',
+                'asesmen.dokter' => '= ?'
+            );
+
+            $paramValue = array(
+                date('Y-m-d', strtotime($parameter['from']) - 86400), date('Y-m-d', strtotime($parameter['to']) + 86400), $UserData['data']->uid
+            );
+        }
+
+        if (intval($parameter['length']) > -1) {
+            $data = self::$query->select('asesmen', array(
+                'uid',
+                'poli',
+                'kunjungan',
+                'pasien',
+                'antrian',
+                'dokter',
+                'perawat',
+                'status',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->join('pasien', array(
+                    'nama',
+                    'nik',
+                    'no_rm'
+                ))
+                ->on(array(
+                    array('asesmen.pasien', '=', 'pasien.uid')
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('asesmen', array(
+                'uid',
+                'poli',
+                'kunjungan',
+                'pasien',
+                'antrian',
+                'dokter',
+                'perawat',
+                'status',
+                'created_at',
+                'updated_at'
+            ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->join('pasien', array(
+                    'nama',
+                    'nik',
+                    'no_rm'
+                ))
+                ->on(array(
+                    array('asesmen.pasien', '=', 'pasien.uid')
+                ))
+                ->execute();
+        }
+
+        $data['response_draw'] = intval($parameter['draw']);
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+
+            //Pasien
+            $Pasien = new Pasien(self::$pdo);
+            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
+
+            //Poli
+            $Poli = new Poli(self::$pdo);
+            $PoliInfo = $Poli::get_poli_detail($value['poli']);
+            $data['response_data'][$key]['poli'] = $PoliInfo['response_data'][0];
+
+            //Lab Order
+            $lab = self::$query->select('lab_order', array(
+                'uid',
+                'dr_penanggung_jawab',
+                'no_order',
+                'status'
+            ))
+                ->where(array(
+                    'lab_order.asesmen' => '= ?',
+                    'AND',
+                    'lab_order.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $data['response_data'][$key]['lab_order'] = $lab['response_data'];
+
+            //Rad Order
+            $rad = self::$query->select('rad_order', array(
+                'uid',
+                'petugas',
+                'no_order',
+                'selesai'
+            ))
+                ->where(array(
+                    'rad_order.asesmen' => '= ?',
+                    'AND',
+                    'rad_order.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $data['response_data'][$key]['rad_order'] = $rad['response_data'];
+
+
+            $data['response_data'][$key]['tanggal_kunjungan'] = date('d F Y', strtotime($value['created_at']));
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        $PasienTotal = self::$query->select('asesmen', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->join('pasien', array(
+                'uid',
+                'nama',
+                'nik',
+                'no_rm'
+            ))
+            ->on(array(
+                array('asesmen.pasien', '=', 'pasien.uid')
+            ))
+            ->execute();
+
+
+        $data['recordsTotal'] = count($PasienTotal['response_data']);
+        $data['recordsFiltered'] = count($data);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
 
 	public function get_asesmen_medis($parameter) { //uid antrian
 		//prepare antrian

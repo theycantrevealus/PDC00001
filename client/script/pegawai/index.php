@@ -37,7 +37,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<a href=\"" + __HOSTNAME__ + "/pegawai/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm\">" +
 										"<i class=\"fa fa-pencil\"></i> Edit" +
 									"</a>" +

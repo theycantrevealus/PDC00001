@@ -49,9 +49,11 @@ class CPPT extends Utility {
 		// Jika range tidak ada maka akan diambil min 3 data terakhir
 
 		//	List dari tabel antrian => karena jika sudah bayar maka masuk ke antrian (antrian poli)
-		$UIDPasien = $parameter[2];
+        $CurrentAntrian = $parameter[2];
+        $UIDPasien = $parameter[3];
 
-		if(isset($parameter[3]) && isset($parameter[4])) {//Filter Tanggal
+
+		if(isset($parameter[4]) && isset($parameter[5])) {//Filter Tanggal
 			$antrian = self::$query->select('antrian', array(
 				'uid',
 				'departemen',
@@ -67,9 +69,11 @@ class CPPT extends Utility {
                 ->where(array(
                     'antrian.pasien' => '= ?',
                     'AND',
-                    'antrian.deleted_at' => 'IS NULL'
+                    'antrian.deleted_at' => 'IS NULL',
+                    'AND',
+                    'NOT antrian.uid' => '= ?'
                 ), array(
-                    $UIDPasien
+                    $UIDPasien, $CurrentAntrian
                 ))
                 ->order(array(
                     'created_at' => 'DESC'
@@ -91,9 +95,11 @@ class CPPT extends Utility {
                 ->where(array(
                     'antrian.pasien' => '= ?',
                     'AND',
-                    'antrian.deleted_at' => 'IS NULL'
+                    'antrian.deleted_at' => 'IS NULL',
+                    'AND',
+                    'NOT antrian.uid' => '= ?'
                 ), array(
-                    $UIDPasien
+                    $UIDPasien, $CurrentAntrian
                 ))
                 ->order(array(
                     'created_at' => 'DESC'
@@ -115,9 +121,11 @@ class CPPT extends Utility {
             ->where(array(
                 'antrian.pasien' => '= ?',
                 'AND',
-                'antrian.deleted_at' => 'IS NULL'
+                'antrian.deleted_at' => 'IS NULL',
+                'AND',
+                'NOT antrian.uid' => '= ?'
             ), array(
-                $UIDPasien
+                $UIDPasien, $CurrentAntrian
             ))
             ->order(array(
                 'created_at' => 'DESC'
@@ -167,7 +175,9 @@ class CPPT extends Utility {
 				'keluhan_utama',
 				'keluhan_tambahan',
 				'diagnosa_kerja',
-				'diagnosa_banding'
+				'diagnosa_banding',
+                'planning',
+                'pemeriksaan_fisik'
 			))
 			->where(array(
 				'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.asesmen' => '= ?'

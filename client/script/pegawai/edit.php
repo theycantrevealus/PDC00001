@@ -9,7 +9,7 @@
 		});
 
 		//INIT DATA
-		let targetID = <?php echo json_encode($targetID); ?>;
+		let targetID = __PAGES__[2];
 		var accessData = reload_access_data(targetID);
 		$.ajax({
 			url:__HOSTAPI__ + "/Pegawai/detail/" + targetID,
@@ -22,7 +22,8 @@
 				$("#txt_nama_pegawai").val(resp.response_package.response_data[0].nama);
 				basic.croppie('bind', {
 					url: __HOST__ + resp.response_package.response_data[0].profile_pic,
-					points: [0, 0, 200, 200]
+					points: [0, 0, 200, 200],
+                    zoom: 1
 				}).then(function() {
 					//
 				});

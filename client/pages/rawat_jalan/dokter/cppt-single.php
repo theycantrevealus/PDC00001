@@ -202,7 +202,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="card-header card-header-large bg-white  
+			<div class="card-header card-header-large bg-white">
 				<div class="row">
 					<div class="col-12">
 						<div class="segmen_racikan">

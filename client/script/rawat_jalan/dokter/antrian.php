@@ -91,7 +91,7 @@
                 /*========================= CPPT ==========================*/
 
                 $("#cppt_pagination").pagination({
-                    dataSource: __HOSTAPI__ + "/CPPT/semua/" + pasien_uid,
+                    dataSource: __HOSTAPI__ + "/CPPT/semua/" + __PAGES__[3] + "/" + pasien_uid,
                     locator: 'response_package.response_data',
                     totalNumberLocator: function(response) {
                         return response.response_package.response_total;
@@ -107,7 +107,9 @@
                         var dataHtml = "<ul style=\"list-style-type: none;\">";
 
                         $.each(data, function (index, item) {
-                            dataHtml += "<li>" + load_cppt(item) + "</li>";
+                            if(item.uid !== __PAGES__[3]) {
+                                dataHtml += "<li>" + load_cppt(item) + "</li>";
+                            }
                         });
 
                         dataHtml += "</ul>";
@@ -3230,15 +3232,6 @@
         }
 
 
-
-
-
-
-
-
-
-
-        //load_cppt(pasien_uid);
 
         function load_cppt(data) {
             var returnHTML = "";

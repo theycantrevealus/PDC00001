@@ -346,7 +346,7 @@
                 url:__HOSTAPI__ + "/Inventori/item_batch/" + item,
                 async:false,
                 beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    request.setRequestHeader("Authorization"rer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 type:"GET",
                 success:function(response) {

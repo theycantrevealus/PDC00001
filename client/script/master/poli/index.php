@@ -11,7 +11,19 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+				    var returnData = [];
+				    var rawData = response.response_package.response_data;
+				    for(var polKey in rawData) {
+				        if(
+				            rawData[polKey].uid !== __UIDFISIOTERAPI__ &&
+                            rawData[polKey].uid !== __POLI_INAP__ &&
+                            rawData[polKey].uid !== __POLI_IGD__ &&
+                            rawData[polKey].uid !== __POLI_LAB__
+                        ) {
+				            returnData.push(rawData[polKey]);
+                        }
+                    }
+					return returnData;
 				}
 			},
 			autoWidth: false,

@@ -50,6 +50,19 @@ class Antrian extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+        //Keluar Antrian
+        $update_antrian = self::$query->update('antrian', array(
+            'waktu_keluar' => parent::format_date()
+        ))
+            ->where(array(
+                'antrian.uid' => '= ?',
+                'AND',
+                'antrian.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
         $antrian = self::$query->select('antrian', array(
             'kunjungan'
         ))

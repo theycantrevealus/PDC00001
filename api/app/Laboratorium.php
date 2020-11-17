@@ -2184,9 +2184,9 @@ class Laboratorium extends Utility {
 
 			if ($uidAsesmen != ""){
 				$tahun = date('Y');
-				$thn = substr($tahun,-2);
+				$thn = date('Y');
 
-				$no_order = "LO" . $thn;
+				$no_order = "LO/" . $thn . '/';
 
 				//perlu query select max
 				$dataMax = self::$query

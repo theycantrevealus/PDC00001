@@ -280,9 +280,7 @@ class Radiologi extends Utility
                     'AND',
                     'rad_order.deleted_at' => 'IS NULL'
                 ), array(
-                    'P
-                    
-                    '
+                    'P'
                 )
             )
             ->order(
@@ -879,6 +877,17 @@ class Radiologi extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+        //GET Last Invoice
+        $lastNumber = self::$query->select('rad_order', array(
+            'no_order'
+        ))
+            ->where(array(
+                'EXTRACT(month FROM created_at)' => '= ?'
+            ), array(
+                intval(date('m'))
+            ))
+            ->execute();
+
         $get_antrian = new Antrian(self::$pdo);
         $antrian = $get_antrian->get_antrian_detail('antrian', $parameter['uid_antrian']);
 
@@ -1055,6 +1064,7 @@ class Radiologi extends Utility
                                 'uid' => $uidRadiologiOrder,
                                 'asesmen' => $uidAsesmen,
                                 'waktu_order' => parent::format_date(),
+                                'no_order' => 'RO/' . date('Y/m') . '/' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT),
                                 'selesai' => 'false',
                                 'status' => $status_lunas,
                                 'pasien' => $data_antrian['pasien'],
@@ -1239,6 +1249,24 @@ class Radiologi extends Utility
                         }
                     }
                 }
+
+                //update status antrian
+                $antrian_status = self::$query->update('antrian_nomor', array(
+                    'status' => ($data_antrian['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P'
+                ))
+                    ->where(array(
+                        'antrian_nomor.kunjungan' => '= ?',
+                        'AND',
+                        'antrian_nomor.antrian' => '= ?',
+                        'AND',
+                        'antrian_nomor.pasien' => '= ?'
+                    ), array(
+                        $data_antrian['kunjungan'],
+                        $parameter['uid_antrian'],
+                        $data_antrian['pasien']
+                    ))
+                    ->execute();
+
                 $result['new_radiologi_detail'] = $DetailResult;
                 $result['invoice_detail'] = $InvoiceResult;
             }
