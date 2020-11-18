@@ -30,6 +30,7 @@
 			bPaginate: true,
 			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
 			serverMethod: "POST",
+            "order": [[ 1, "desc" ]],
 			"ajax":{
 				url: __HOSTAPI__ + "/Invoice",
 				type: "POST",
@@ -37,12 +38,13 @@
 					d.request = "kwitansi_data";
 					d.from = getDateRange("#range_kwitansi")[0];
 					d.to = getDateRange("#range_kwitansi")[1];
+					d.column_set = ['created_at', 'nomor_kwitansi', 'created_at', 'metode_bayar', 'pegawai', 'terbayar'];
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					var dataSet = response.response_package.response_data;
+				    var dataSet = response.response_package.response_data;
 					var dataResponse = [];
 					if(dataSet == undefined) {
 						dataSet = [];
@@ -158,7 +160,7 @@
 							for(var historyKey in historyDetail) {
 								$("#invoice_detail_history tbody").append(
 									"<tr>" +
-										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
+										"<td>" + ((historyDetail[historyKey].status == "P") ? ((historyDetail[historyKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
 										"<td>" + historyDetail[historyKey].item.toUpperCase() + "</td>" +
 										"<td>" + historyDetail[historyKey].qty + "</td>" +
@@ -783,7 +785,7 @@
 							payment:selectedUIDKwitansi
 						},
 						success: function(response) {
-							console.log(selectedUID);
+							console.clear();
 							console.log(response);
 							var resultCheck = 0;
 							

@@ -26,7 +26,7 @@
                     </div>
                     <div class="card-body tab-content">
                         <div class="tab-pane active show fade" id="pegawai-modul">
-                            <table class="table table-bordered" id="table-pegawai">
+                            <table class="table table-bordered table-striped" id="table-pegawai">
                                 <thead class="thead-dark">
                                     <tr>
                                         <th class="wrap_content">No</th>

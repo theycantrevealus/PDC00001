@@ -112,6 +112,9 @@ class Invoice extends Utility
                 'metode_bayar',
                 'tanggal_bayar'
             ))
+                ->order(array(
+                    $parameter['column_set'][$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -127,6 +130,9 @@ class Invoice extends Utility
                 'metode_bayar',
                 'tanggal_bayar'
             ))
+                ->order(array(
+                    $parameter['column_set'][$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+                ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))
@@ -372,6 +378,19 @@ class Invoice extends Utility
             ))
             ->execute();
 
+        $InvoiceData = self::$query->select('invoice', array(
+            'kunjungan',
+            'pasien'
+        ))
+            ->where(array(
+                'invoice.uid' => '= ?',
+                'AND',
+                'invoice.deleted-at' => 'IS NULL'
+            ), array(
+                $payment['response_data'][0]['invoice']
+            ))
+            ->execute();
+
         foreach ($payment['response_data'] as $key => $value) {
             //get payment detail
             $payment_detail = self::$query->select('invoice_payment_detail', array(
@@ -411,6 +430,44 @@ class Invoice extends Utility
                 $payment_detail['response_data'][$PDKey]['harga'] = floatval($PDValue['harga']);
                 $payment_detail['response_data'][$PDKey]['subtotal'] = floatval($PDValue['subtotal']);
                 $payment_detail['response_data'][$PDKey]['discount'] = floatval($PDValue['discount']);
+
+                $allowReturn = false;
+                if(
+                    $PDValue['item'] === __UID_KARTU__
+                ) {
+                    $allowReturn = false;
+                } else {
+                    if(
+                        $PDValue['item'] === __UIDKONSULDOKTER__ ||
+                        $PDValue['item'] === __UIDKONSULDOKTER_GIGI__ ||
+                        $PDValue['item'] === __UIDKONSULDOKTER_SPESIALIS__
+                    ) {
+                        $AsesmenCheck = self::$query->select('asesmen', array(
+                            'uid'
+                        ))
+                            ->where(array(
+                                'asesmen.kunjungan' => '= ?',
+                                'AND',
+                                'asesmen.pasien' => '= ?',
+                                'AND',
+                                'asesmen.deleted_at' => 'IS NULL',
+                                'AND',
+                                'DATE(asesmen.created_at)' => '= ?'
+                            ), array(
+                                $InvoiceData['response_data'][0]['kunjungan'],
+                                $InvoiceData['response_data'][0]['pasien'],
+                                date('Y-m-d')
+                            ))
+                            ->execute();
+
+                        if(count($AsesmenCheck['response_data']) > 0) {
+                            $allowReturn = false;
+                        } else {
+                            $allowReturn = true;
+                        }
+                    }
+                }
+                $payment_detail['response_data'][$PDKey]['allow_retur'] = $allowReturn;
             }
             $payment['response_data'][$key]['detail'] = $payment_detail['response_data'];
 
@@ -945,9 +1002,11 @@ class Invoice extends Utility
     private function retur_biaya($parameter)
     {
         $PaymentUID = parent::gen_uuid();
+
         //Get Invoice
         $InvoicePayment = self::$query->select('invoice_payment', array(
-            'uid'
+            'uid',
+            'invoice'
         ))
             ->where(array(
                 'invoice_payment.invoice' => '= ?',
@@ -958,26 +1017,106 @@ class Invoice extends Utility
                 $parameter['payment']
             ))
             ->execute();
-        if (count($InvoicePayment['response_data'])) {
-            $detailUpdate = array();
-            foreach ($parameter['item'] as $key => $value) {
-                $worker = self::$query->update('invoice_payment_detail', array(
-                    'status' => 'R'
+        if (count($InvoicePayment['response_data']) > 0) {
+            $InvoiceData = self::$query->select('invoice', array(
+                'kunjungan',
+                'pasien'
+            ))
+                ->where(array(
+                    'invoice.uid' => '= ?',
+                    'AND',
+                    'invoice.deleted_at' => 'IS NULL'
+                ), array(
+                    $InvoicePayment['response_data'][0]['invoice']
                 ))
-                    ->where(array(
-                        'invoice_payment_detail.invoice_payment' => '= ?',
-                        'AND',
-                        'invoice_payment_detail.item' => '= ?'
-                    ), array(
-                        $InvoicePayment['response_data'][0]['uid'],
-                        $value
-                    ))
-                    ->execute();
-                array_push($detailUpdate, $worker);
+                ->execute();
+
+            if(count($InvoiceData['response_data']) > 0) {
+                $detailUpdate = array();
+                foreach ($parameter['item'] as $key => $value) {
+                    if($value !== __UID_KARTU__) { //Kartu tidak bisa return
+                        $worker = self::$query->update('invoice_payment_detail', array(
+                            'status' => 'R'
+                        ))
+                            ->where(array(
+                                'invoice_payment_detail.invoice_payment' => '= ?',
+                                'AND',
+                                'invoice_payment_detail.item' => '= ?'
+                            ), array(
+                                $InvoicePayment['response_data'][0]['uid'],
+                                $value
+                            ))
+                            ->execute();
+
+                        if(
+                            $value === __UIDKONSULDOKTER__ ||
+                            $value === __UIDKONSULDOKTER_GIGI__ ||
+                            $value === __UIDKONSULDOKTER_SPESIALIS__
+                        ) {
+                            //Check status asesmen. jika sudah asesmen tidak bisa return lagi
+                            $AsesmenCheck = self::$query->select('asesmen', array(
+                                'uid'
+                            ))
+                                ->where(array(
+                                    'asesmen.kunjungan' => '= ?',
+                                    'AND',
+                                    'asesmen.pasien' => '= ?',
+                                    'AND',
+                                    'asesmen.deleted_at' => 'IS NULL',
+                                    'AND',
+                                    'DATE(asesmen.created_at)' => '= ?'
+                                ), array(
+                                    $InvoiceData['response_data'][0]['kunjungan'],
+                                    $InvoiceData['response_data'][0]['pasien'],
+                                    date('Y-m-d')
+                                ))
+                                ->execute();
+
+                            if(count($AsesmenCheck['response_data']) > 0) {
+                                //Sudah di asesmen, tidak bisa retur lagi
+                                $worker['message'] = 'Sudah di asesmen, tidak bisa retur lagi';
+                            } else {
+                                //Cancel antrian
+                                $updateKunjungan = self::$query->update('kunjungan', array(
+                                    'waktu_keluar' => parent::format_date()
+                                ))
+                                    ->where(array(
+                                        'kunjungan.uid' => '= ?',
+                                        'AND',
+                                        'kunjungan.deleted_at' => 'IS NULL'
+                                    ), array(
+                                        $InvoiceData['response_data'][0]['kunjungan']
+                                    ))
+                                    ->execute();
+
+                                $updateAntrian = self::$query->update('antrian', array(
+                                    'waktu_keluar' => parent::format_date(),
+                                    'deleted_at' => parent::format_date()
+                                ))
+                                    ->where(array(
+                                        'antrian.kunjungan' => '= ?',
+                                        'AND',
+                                        'antrian.pasien' => '= ?',
+                                        'AND',
+                                        'antrian.deleted_at' => 'IS NULL'
+                                    ), array(
+                                        $InvoiceData['response_data'][0]['kunjungan'],
+                                        $InvoiceData['response_data'][0]['pasien']
+                                    ))
+                                    ->execute();
+
+                                $worker['message'] = $updateAntrian;
+                            }
+                        } else {
+                            $worker['message'] = '';
+                        }
+                        array_push($detailUpdate, $worker);
+                    }
+                }
+                return $detailUpdate;
+            } else {
+                return $InvoiceData;
             }
-            return $detailUpdate;
-        } else {
-            //
         }
     }
 

@@ -132,6 +132,10 @@ class Laboratorium extends Utility {
                 case 'get-antrian-backend':
                     return self::get_antrian_backend($parameter);
                     break;
+
+                case 'charge_invoice_item':
+                    return self::charge_invoice_item($parameter);
+                    break;
 			}	
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
@@ -141,6 +145,110 @@ class Laboratorium extends Utility {
 	public function __DELETE__($parameter = array()) {
 		return self::delete($parameter);
 	}
+
+	public function charge_invoice_item($parameter) {
+	    $charge_result = array();
+	    //Ambil semua item untuk asesmen sekarang
+        $LabOrder = self::$query->select('lab_order', array(
+            'uid',
+            'pasien'
+        ))
+            ->where(array(
+                'lab_order.asesmen' => '= ?',
+                'AND',
+                'lab_order.selesai' => '= ?',
+                'AND',
+                'lab_order.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['asesmen'],
+                'false'
+            ))
+            ->execute();
+
+        $Invoice = new Invoice(self::$pdo);
+
+        $InvoiceCheck = self::$query->select('invoice', array(
+            'uid'
+        ))
+            ->where(array(
+                'invoice.kunjungan' => '= ?',
+                'AND',
+                'invoice.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['kunjungan']
+            ))
+            ->execute();
+
+        if (count($InvoiceCheck['response_data']) > 0) {
+            $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+        } else {
+            $InvMasterParam = array(
+                'kunjungan' => $parameter['kunjungan'],
+                'pasien' => $parameter['pasien'],
+                'keterangan' => 'Tagihan laboratorium'
+            );
+            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $TargetInvoice = $NewInvoice['response_unique'];
+        }
+
+        foreach ($LabOrder['response_data'] as $key => $value) {
+            //Get Detail
+            $Detail = self::$query->select('lab_order_detail', array(
+                'tindakan',
+                'penjamin'
+            ))
+                ->where(array(
+                    'lab_order_detail.lab_order' => '= ?',
+                    'AND',
+                    'lab_order_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($Detail['response_data'] as $DKey => $DValue) {
+                $HargaTindakan = self::$query->select('master_tindakan_kelas_harga', array(
+                    'id',
+                    'tindakan',
+                    'kelas',
+                    'penjamin',
+                    'harga'
+                ))
+                    ->where(array(
+                        'master_tindakan_kelas_harga.penjamin' => '= ?',
+                        'AND',
+                        'master_tindakan_kelas_harga.kelas' => '= ?',
+                        'AND',
+                        'master_tindakan_kelas_harga.tindakan' => '= ?',
+                        'AND',
+                        'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+                    ), array(
+                        $DValue['penjamin'],
+                        __UID_KELAS_GENERAL_LAB__,    //Fix 1 harga kelas GENERAL
+                        $DValue['tindakan']
+                    ))
+                    ->execute();
+                $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
+
+                $InvoiceDetail = $Invoice::append_invoice(array(
+                    'invoice' => $TargetInvoice,
+                    'item' => $DValue['tindakan'],
+                    'item_origin' => 'master_tindakan',
+                    'qty' => 1,
+                    'harga' => $HargaFinal,
+                    'status_bayar' => ($DValue['penjamin'] == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                    'subtotal' => $HargaFinal,
+                    'discount' => 0,
+                    'discount_type' => 'N',
+                    'pasien' => $value['pasien'],
+                    'penjamin' => $DValue['penjamin'],
+                    'keterangan' => 'Biaya Laboratorium'
+                ));
+
+                array_push($charge_result, $InvoiceDetail);
+            }
+        }
+        return $charge_result;
+    }
 
 	private function get_kategori(){
 		$data = self::$query->select('master_lab_kategori', array(
@@ -2358,21 +2466,23 @@ class Laboratorium extends Utility {
 									))
 									->execute();
 								$HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
-	
-								$InvoiceDetail = $Invoice->append_invoice(array(
-									'invoice' => $TargetInvoice,
-									'item' => $keyTindakan,
-									'item_origin' => 'master_tindakan',
-									'qty' => 1,
-									'harga' => $HargaFinal,
-									'status_bayar' => ($valueTindakan['penjamin'] == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
-									'subtotal' => $HargaFinal,
-									'discount' => 0,
-									'discount_type' => 'N',
-									'pasien' => $data_antrian['pasien'],
-									'penjamin' => $valueTindakan['penjamin'],
-									'keterangan' => 'Biaya Laboratorium'
-								));
+
+								if($parameter['charge_invoice'] === 'Y') {
+                                    $InvoiceDetail = $Invoice->append_invoice(array(
+                                        'invoice' => $TargetInvoice,
+                                        'item' => $keyTindakan,
+                                        'item_origin' => 'master_tindakan',
+                                        'qty' => 1,
+                                        'harga' => $HargaFinal,
+                                        'status_bayar' => ($valueTindakan['penjamin'] == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                                        'subtotal' => $HargaFinal,
+                                        'discount' => 0,
+                                        'discount_type' => 'N',
+                                        'pasien' => $data_antrian['pasien'],
+                                        'penjamin' => $valueTindakan['penjamin'],
+                                        'keterangan' => 'Biaya Laboratorium'
+                                    ));
+                                }
 
 								$log = parent::log(array(
 									'type'=>'activity',

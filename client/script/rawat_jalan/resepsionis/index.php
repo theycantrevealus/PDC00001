@@ -179,73 +179,83 @@
         });
 
 
-        loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
-        loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val());
-        loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val());
-        loadSpesialistik("#txt_bpjs_dpjp_spesialistik");
+        
+
+        var selectedSEPAntrian = "";
+        var selectedSEPAntriamMeta;
+        var selectedSEPNoKartu = "";
+
+        var isRujukan = false;
+
+        $("body").on("click", ".daftar_sep", function() {
+
+            loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
+            loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val());
+            loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val());
+            loadSpesialistik("#txt_bpjs_dpjp_spesialistik");
 
 
-        $("#txt_bpjs_laka_suplesi_provinsi").select2({
-            dropdownParent: $("#group_provinsi")
-        });
+            $("#txt_bpjs_laka_suplesi_provinsi").select2({
+                dropdownParent: $("#group_provinsi")
+            });
 
-        $("#txt_bpjs_dpjp_spesialistik").select2({
-            dropdownParent: $("#group_spesialistik")
-        });
+            $("#txt_bpjs_dpjp_spesialistik").select2({
+                dropdownParent: $("#group_spesialistik")
+            });
 
-        $("#txt_bpjs_laka_suplesi_kabupaten").select2({
-            dropdownParent: $("#group_kabupaten")
-        });
+            $("#txt_bpjs_laka_suplesi_kabupaten").select2({
+                dropdownParent: $("#group_kabupaten")
+            });
 
-        $("#txt_bpjs_laka_suplesi_kecamatan").select2({
-            dropdownParent: $("#group_kecamatan")
-        });
+            $("#txt_bpjs_laka_suplesi_kecamatan").select2({
+                dropdownParent: $("#group_kecamatan")
+            });
 
-        $("#txt_bpjs_nomor_rujukan").select2({
-            autoclose: true,
-            dropdownParent: $("#group_nomor_rujukan")
-        });
+            $("#txt_bpjs_nomor_rujukan").select2({
+                autoclose: true,
+                dropdownParent: $("#group_nomor_rujukan")
+            });
 
-        $("#txt_bpjs_dpjp").select2({
-            dropdownParent: $("#group_dpjp")
-        });
+            $("#txt_bpjs_dpjp").select2({
+                dropdownParent: $("#group_dpjp")
+            });
 
-        $("#txt_bpjs_kelas_rawat").select2({
-            dropdownParent: $("#group_kelas_rawat")
-        });
+            $("#txt_bpjs_kelas_rawat").select2({
+                dropdownParent: $("#group_kelas_rawat")
+            });
 
-        $("#txt_bpjs_asal_rujukan").select2({disabled:"readonly"});
+            $("#txt_bpjs_asal_rujukan").select2({disabled:"readonly"});
 
-        $("#txt_bpjs_jenis_asal_rujukan").select2({disabled:"readonly"});
-
-
+            $("#txt_bpjs_jenis_asal_rujukan").select2({disabled:"readonly"});
 
 
 
-        $("#txt_bpjs_jenis_asal_rujukan").change(function() {
-            loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
-        });
 
-        $("#txt_bpjs_dpjp_spesialistik").change(function() {
-            loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
-        });
 
-        $("#txt_bpjs_nomor_rujukan").change(function() {
-            loadInformasiRujukan(selectedListRujukan[$(this).find("option:selected").index()]);
-        });
+            $("#txt_bpjs_jenis_asal_rujukan").change(function() {
+                loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+            });
 
-        /*$("#txt_bpjs_asal_rujukan").select2({
-            minimumInputLength: 2,
-            "language": {
-                "noResults": function(){
-                    return "Faskes tidak ditemukan";
-                }
-            },
-            dropdownParent: $("#modal-sep-new"),
-            ajax: {
-                dataType: "json",
-                headers:{
-                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+            $("#txt_bpjs_dpjp_spesialistik").change(function() {
+                loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+            });
+
+            $("#txt_bpjs_nomor_rujukan").change(function() {
+                loadInformasiRujukan(selectedListRujukan[$(this).find("option:selected").index()]);
+            });
+
+            /*$("#txt_bpjs_asal_rujukan").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Faskes tidak ditemukan";
+                    }
+                },
+                dropdownParent: $("#modal-sep-new"),
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
                     "Content-Type" : "application/json",
                 },
                 url:__HOSTAPI__ + "/BPJS/get_faskes_select2/",
@@ -273,89 +283,86 @@
             //
         });*/
 
-        $("#txt_bpjs_diagnosa_awal").select2({
-            minimumInputLength: 2,
-            "language": {
-                "noResults": function(){
-                    return "Diagnosa tidak ditemukan";
-                }
-            },
-            dropdownParent: $("#group_diagnosa"),
-            ajax: {
-                dataType: "json",
-                headers:{
-                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                    "Content-Type" : "application/json",
+            $("#txt_bpjs_diagnosa_awal").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Diagnosa tidak ditemukan";
+                    }
                 },
-                url:__HOSTAPI__ + "/BPJS/get_diagnosa",
-                type: "GET",
-                data: function (term) {
-                    return {
-                        search:term.term
-                    };
-                },
-                cache: true,
-                processResults: function (response) {
-                    var data = response.response_package.content.response.diagnosa;
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.nama,
-                                id: item.kode
-                            }
-                        })
-                    };
+                dropdownParent: $("#group_diagnosa"),
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/BPJS/get_diagnosa",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.content.response.diagnosa;
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    }
                 }
-            }
-        }).addClass("form-control").on("select2:select", function(e) {
-            //
-        });
+            }).addClass("form-control").on("select2:select", function(e) {
+                //
+            });
 
-        $("#txt_bpjs_poli_tujuan").select2({
-            minimumInputLength: 2,
-            "language": {
-                "noResults": function(){
-                    return "Faskes tidak ditemukan";
-                }
-            },
-            dropdownParent: $("#group_poli"),
-            ajax: {
-                dataType: "json",
-                headers:{
-                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                    "Content-Type" : "application/json",
+            $("#txt_bpjs_poli_tujuan").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Faskes tidak ditemukan";
+                    }
                 },
-                url:__HOSTAPI__ + "/BPJS/get_poli",
-                type: "GET",
-                data: function (term) {
-                    return {
-                        search:term.term
-                    };
-                },
-                cache: true,
-                processResults: function (response) {
-                    var data = response.response_package.content.response.poli;
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.nama,
-                                id: item.kode
-                            }
-                        })
-                    };
+                dropdownParent: $("#group_poli"),
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/BPJS/get_poli",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.content.response.poli;
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    }
                 }
-            }
-        }).addClass("form-control").on("select2:select", function(e) {
-            //
-        });
-
-        var selectedSEPAntrian = "";
-        var selectedSEPAntriamMeta;
-        var selectedSEPNoKartu = "";
-
-        var isRujukan = false;
-
-        $("body").on("click", ".daftar_sep", function() {
+            }).addClass("form-control").on("select2:select", function(e) {
+                //
+            });
+            
+            
+            //======================================================================
+            
+            
             var SEPButton = $(this);
             SEPButton.html("Memuat SEP...").removeClass("btn-info").addClass("btn-warning");
 

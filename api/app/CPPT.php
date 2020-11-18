@@ -49,7 +49,7 @@ class CPPT extends Utility {
 		// Jika range tidak ada maka akan diambil min 3 data terakhir
 
 		//	List dari tabel antrian => karena jika sudah bayar maka masuk ke antrian (antrian poli)
-        $CurrentAntrian = $parameter[2];
+        $CurrentAntrian = ($parameter[2] === 'all') ? parent::gen_uuid() : $parameter[2];
         $UIDPasien = $parameter[3];
 
 

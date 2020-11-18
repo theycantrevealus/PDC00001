@@ -3,7 +3,10 @@
 		<button type="button" class="btn btn-success" id="btnSelesai">
 			<i class="fa fa-check-circle"></i> Selesai
 		</button>
-		<button type="button" class="btn btn-info" id="btnKonsul">
+        <button type="button" class="btn btn-info" id="btnSimpan">
+            <i class="fa fa-save"></i> Simpan
+        </button>
+		<button type="button" class="btn btn-primary" id="btnKonsul">
 			<i class="fa fa-business-time"></i> Konsul
 		</button>
 		<button type="button" class="btn btn-warning" id="btnRujuk">
