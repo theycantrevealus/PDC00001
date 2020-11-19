@@ -71,22 +71,26 @@
 				var ruanganMeta = {};
 				for(var key in data) {
 
-					if(ruanganMeta[data[key].kodekelas] == undefined) {
-						ruanganMeta[data[key].kodekelas] = []
-					}
+				    if(data[key] !== null) {
+				        if(data[key].detailRuangan !== undefined) {
+                            if(ruanganMeta[data[key].kodekelas] === undefined) {
+                                ruanganMeta[data[key].kodekelas] = []
+                            }
 
-					ruanganMeta[data[key].kodekelas].push({
-						"nama": data[key].nama,
-						"uid_ruangan": data[key].uid_ruangan,
-						"kode_ruangan": data[key].koderuang,
-						"kodekelas": data[key].kodekelas,
-						"kapasitas": data[key].kapasitas,
-						"tersedia": data[key].tersedia,
-						"tersediapria": data[key].tersediapria,
-						"tersediawanita": data[key].tersediawanita,
-						"tersediapriawanita": data[key].tersediapriawanita,
-						"nama_kelas": data[key].detailRuangan.kelas.nama
-					});
+                            ruanganMeta[data[key].kodekelas].push({
+                                "nama": data[key].nama,
+                                "uid_ruangan": data[key].uid_ruangan,
+                                "kode_ruangan": data[key].koderuang,
+                                "kodekelas": data[key].kodekelas,
+                                "kapasitas": data[key].kapasitas,
+                                "tersedia": data[key].tersedia,
+                                "tersediapria": data[key].tersediapria,
+                                "tersediawanita": data[key].tersediawanita,
+                                "tersediapriawanita": data[key].tersediapriawanita,
+                                "nama_kelas": data[key].detailRuangan.kelas.nama
+                            });
+                        }
+                    }
 				}
 				var auto = 1;
 				
@@ -261,6 +265,7 @@
 				i = 0;
 				console.log("Finished");
 			} else {
+                console.log("Palying : " + playlist[i]);
 				audio.src = playlist[i];
 				audio.play();
 			}

@@ -415,6 +415,8 @@
                         $("#txt_tanda_vital_n").val(asesmen_detail.nadi);
                         $("#txt_tanda_vital_rr").val(asesmen_detail.pernafasan);
                         $("#txt_berat_badan").val(asesmen_detail.berat_badan);*/
+                        /*alert(asesmen_detail.tinggi_badan);
+                        alert(asesmen_detail.lingkar_lengan_atas);*/
                         $("#txt_tinggi_badan").val(asesmen_detail.tinggi_badan);
                         $("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
 
@@ -3169,6 +3171,7 @@
         }
 
         function loadPasien(params){
+            console.log("TOL!!");
             var MetaData = null;
 
             if (params != ""){
@@ -3200,9 +3203,28 @@
                             if (MetaData.asesmen_rawat != ""){
                                 $.each(MetaData.asesmen_rawat, function(key, item){
                                     $("#" + key).val(item);
-                                    /*alert("#txt_" + key);
-                                    alert(item);*/
-                                    $("#txt_" + key).val(item);
+
+                                    if(key === "tinggi_badan") {
+                                        $("#txt_" + key).css({
+                                            "background": "red"
+                                        });
+                                        console.log(key + " - " + item);
+                                        if(parseFloat($("#txt_" + key).val()) == 0) {
+                                            $("#txt_" + key).val(item);
+                                        }
+                                        if(item === 0) {
+                                            alert("TOL!!");
+                                        }
+                                    } else {
+                                        $("#txt_" + key).css({
+                                            "background": "lime"
+                                        });
+                                        if(item === 0) {
+                                            alert("TOL!!");
+                                        }
+                                        $("#txt_" + key).val(item);
+                                    }
+
                                     checkedRadio(key, item);
                                     checkedCheckbox(key, item);
                                 });
