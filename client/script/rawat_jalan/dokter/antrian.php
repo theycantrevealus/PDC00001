@@ -3171,7 +3171,6 @@
         }
 
         function loadPasien(params){
-            console.log("TOL!!");
             var MetaData = null;
 
             if (params != ""){
@@ -3212,16 +3211,12 @@
                                         if(parseFloat($("#txt_" + key).val()) == 0) {
                                             $("#txt_" + key).val(item);
                                         }
-                                        if(item === 0) {
-                                            alert("TOL!!");
-                                        }
+
                                     } else {
                                         $("#txt_" + key).css({
                                             "background": "lime"
                                         });
-                                        if(item === 0) {
-                                            alert("TOL!!");
-                                        }
+
                                         $("#txt_" + key).val(item);
                                     }
 
