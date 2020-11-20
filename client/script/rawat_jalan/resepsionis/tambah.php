@@ -170,27 +170,24 @@
 				},
 				type: "POST",
 				success: function(response){
-				    console.log(response);
 				    var data = response.response_package.content;
 
 				    penjaminMetaData = data;
 				    console.log(penjaminMetaData);
 
-					if(data.metaData.code == 200) {
+					if(parseInt(data.metaData.code) === 200) {
 
 						$("#hasil_bpjs").fadeIn();
 						var pasienData = data.response.peserta;
-						if(pasienData.statusPeserta.keterangan == "AKTIF") {
+						if(pasienData.statusPeserta.keterangan === "AKTIF") {
 							if(pasienData.nik != dataPasien.nik) { //Cek NIK
-								$("#status_bpjs").addClass("text-danger").removeClass("text-success");
-								$("#status_bpjs").html("NIK tidak sama");
+								$("#status_bpjs").addClass("text-danger").removeClass("text-success").html("NIK tidak sama");
 							} else {
-								$("#status_bpjs").addClass("text-success").removeClass("text-danger");
+								$("#status_bpjs").addClass("text-success").removeClass("text-danger").html(pasienData.statusPeserta.keterangan);
 								$("#btnProsesPasien").show();
-								$("#status_bpjs").html(pasienData.statusPeserta.keterangan);
 							}
 						} else {
-							$("#status_bpjs").addClass("text-danger").removeClass("text-success");
+							$("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
 						}
 						$("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
 						$("#nama_pasien").html(pasienData.nama);
