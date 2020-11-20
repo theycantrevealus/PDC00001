@@ -760,10 +760,9 @@ class BPJS extends Utility {
 
         $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/Peserta/nokartu/' . $no_bpjs . '/tglSEP/' . $tglSEP . '');
 
-		$content = json_decode($content, TRUE);
-		$content['response']['peserta']['tglLahir'] = date('d F Y', strtotime($content['response']['peserta']['tglLahir']));
-		$content['response']['peserta']['tglCetakKartu'] = date('d F Y', strtotime($content['response']['peserta']['tglCetakKartu']));
-
+		/*$content = json_decode($content, TRUE);*/
+		$content['content']['response']['peserta']['tglLahir'] = date('d F Y', strtotime($content['content']['response']['peserta']['tglLahir']));
+		$content['content']['response']['peserta']['tglCetakKartu'] = date('d F Y', strtotime($content['content']['response']['peserta']['tglCetakKartu']));
 		return $content;
 	}
 

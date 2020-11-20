@@ -170,6 +170,7 @@
 				},
 				type: "POST",
 				success: function(response){
+				    console.log(response);
 				    var data = response.response_package.content;
 
 				    penjaminMetaData = data;

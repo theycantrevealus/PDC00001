@@ -417,8 +417,8 @@
                         $("#txt_berat_badan").val(asesmen_detail.berat_badan);*/
                         /*alert(asesmen_detail.tinggi_badan);
                         alert(asesmen_detail.lingkar_lengan_atas);*/
-                        $("#txt_tinggi_badan").val(asesmen_detail.tinggi_badan);
-                        $("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
+                        //$("#txt_tinggi_badan").val(asesmen_detail.tinggi_badan);
+                        //$("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
 
                         ClassicEditor
                             .create( document.querySelector( '#txt_pemeriksaan_fisik' ), {
@@ -3204,19 +3204,9 @@
                                     $("#" + key).val(item);
 
                                     if(key === "tinggi_badan") {
-                                        $("#txt_" + key).css({
-                                            "background": "red"
-                                        });
-                                        console.log(key + " - " + item);
-                                        if(parseFloat($("#txt_" + key).val()) == 0) {
-                                            $("#txt_" + key).val(item);
-                                        }
+                                        $("#txt_" + key).val(item);
 
                                     } else {
-                                        $("#txt_" + key).css({
-                                            "background": "lime"
-                                        });
-
                                         $("#txt_" + key).val(item);
                                     }
 
