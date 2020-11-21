@@ -540,12 +540,64 @@ class Radiologi extends Utility
             case 'charge_invoice_item':
                 return self::charge_invoice_item($parameter);
                 break;
+            case 'verifikasi_hasil':
+                return self::verifikasi_hasil($parameter);
+                break;
             default:
                 # code...
                 break;
         }
     }
 
+    private function verifikasi_hasil($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $update = self::$query->update('rad_order', array(
+            'selesai' => 'true',
+            'status' => 'D'
+        ))
+            ->where(array(
+                'rad_order.uid' => '= ?',
+                'AND',
+                'rad_order.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
+        if($update['response_result'] > 0) {
+            $log = parent::log(array(
+                    'type' => 'activity',
+                    'column' => array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'old_value',
+                        'new_value',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value' => array(
+                        $parameter['uid'],
+                        $UserData['data']->uid,
+                        'rad_order',
+                        'U',
+                        'status',
+                        json_encode($parameter),
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class' => __CLASS__
+                )
+            );
+        }
+
+        return $update;
+    }
 
     public function charge_invoice_item($parameter) {
         $charge_result = array();

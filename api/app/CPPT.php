@@ -39,6 +39,11 @@ class CPPT extends Utility {
 	}
 
 
+	public function get_cppt_single($parameter) {
+	    //
+    }
+
+
 	public function get_cppt($parameter) {
 
 		//Komposisi parameter

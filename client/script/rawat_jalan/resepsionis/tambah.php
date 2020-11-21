@@ -125,7 +125,7 @@
 					},
 					type: "POST",
 					success: function(response){
-						//console.log(response)
+						console.log(response)
 						if(response.response_package.response_notif == 'K') {
 							push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
 						} else if(response.response_package.response_notif == 'P') {
@@ -136,7 +136,7 @@
 
 						localStorage.getItem("currentPasien");
 						localStorage.getItem("currentAntrianID");
-						location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+						//location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
 					},
 					error: function(response) {
 						console.log("Error : ");
@@ -189,6 +189,7 @@
 						} else {
 							$("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
 						}
+
 						$("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
 						$("#nama_pasien").html(pasienData.nama);
 						$("#nik_pasien").html(pasienData.nik);
@@ -211,8 +212,14 @@
                         $("#txt_bpjs_rm").val($("#no_rm").val());
 
 
-					} else if(data.metaData.code == 201) {
-						//Tidak tidak ditemukan
+					} else {
+                        Swal.fire(
+                            'BPJS',
+                            data.metaData.message,
+                            'warning'
+                        ).then((result) => {
+                            $("#txt_no_bpjs").focus();
+                        });
 					}
 				},
 				error: function(response) {

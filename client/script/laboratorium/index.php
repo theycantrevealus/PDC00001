@@ -79,7 +79,7 @@
                                 "<a href=\"" + __HOSTNAME__ + "/laboratorium/cetak/" + row['uid'] + "\" target='_blank' class=\"btn btn-primary btn-sm\">" +
                                     "<i class=\"fa fa-print\"></i>" +
                                 "</a>" +
-                                "<button type='button' class=\"btn btn-success btn-sm\" data-toggle='tooltip' title='Tandai selesai'>" +
+                                "<button type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-success btn-sm btn-selesai\" data-toggle='tooltip' title='Tandai selesai'>" +
                                     "<i class=\"fa fa-check\"></i>" +
                                 "</a>" +
                             "</div>";
@@ -87,6 +87,55 @@
 				}
 			]
 		});
+
+        $("body").on("click", ".btn-selesai", function() {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+
+            Swal.fire({
+                title: "Apakah Anda yakin?",
+                text: "Orderan selesai akan langsung terkirim pada dokter yang melakukan permintaan pemeriksaan laboratorium dan tidak dapat diubah lagi. Mohon pastikan data sudah benar",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Belum",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: __HOSTAPI__ + "/Laboratorium",
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        data: {
+                            request: "verifikasi_hasil",
+                            uid: uid
+                        },
+                        success:function(response) {
+                            if(response.response_package.response_result > 0) {
+                                Swal.fire(
+                                    "Order Laboratorium",
+                                    "Pemeriksaan berhasil terkirim",
+                                    "success"
+                                ).then((result) => {
+                                    tableAntrianLabor.ajax.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    "Order Laboratorium",
+                                    "Order gagal diproses",
+                                    "error"
+                                ).then((result) => {
+                                    //
+                                });
+                            }
+                        },
+                        error:function(response) {
+                            //
+                        }
+                    });
+                }
+            });
+        });
 
 
 

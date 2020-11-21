@@ -120,6 +120,8 @@
                 $("a[href=\"#tab-poli-3\"]").hide();
             }
 
+            //Get Detail Asesmen
+
             $("#modal-detail-asesmen").modal("show");
         });
 

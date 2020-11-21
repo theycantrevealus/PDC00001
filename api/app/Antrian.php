@@ -237,7 +237,7 @@ class Antrian extends Utility
 
                 unset($parameter['dataObj']['currentPasien']);
 
-                //Keluar dari poli
+                /*//Keluar dari poli
                 $keluar = self::$query->update('antrian', array(
                     'waktu_keluar' => parent::format_date()
                 ))
@@ -248,7 +248,7 @@ class Antrian extends Utility
                     ), array(
                         $parameter['dataObj']['antrian']
                     ))
-                    ->execute();
+                    ->execute();*/
 
                 $antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
                 $antrian['response_notif'] = 'P';
