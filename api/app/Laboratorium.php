@@ -451,7 +451,7 @@ class Laboratorium extends Utility {
 		return $data;
 	}
 
-	private function get_lab_detail($parameter){
+	public function get_lab_detail($parameter){
 		$data = self::$query->select('master_lab', array(
 			'uid',
 			'kode',
@@ -2344,38 +2344,15 @@ class Laboratorium extends Utility {
 			}
 
 			if ($uidAsesmen != ""){
-				$tahun = date('Y');
-				$thn = date('Y');
-
-				$no_order = "LO/" . $thn . '/';
-
-				//perlu query select max
-				$dataMax = self::$query
-					->select('lab_order', array(
-							'no_order'	
-						)
-					)
-					->where(array(
-							'lab_order.deleted_at' => 'IS NULL'
-						)
-					)
-					->order(
-						array(
-							'no_order' => 'DESC'
-						)
-					)
-					->execute();
-				
-				$no_order_before = substr($dataMax['response_data'][0]['no_order'], 0, 4);
-
-				if($no_order_before == $no_order){
-					$no_urut = (int) substr($dataMax['response_data'][0]['no_order'], 4, 9);
-					$no_urut++;
-					$no_order_new = $no_order_before.sprintf("%06s", $no_urut);
-				  }
-				  else{
-					$no_order_new = $no_order.sprintf("%06s", 1);
-				  }
+                $lastNumber = self::$query->select('lab_order', array(
+                    'no_order'
+                ))
+                    ->where(array(
+                        'EXTRACT(month FROM created_at)' => '= ?'
+                    ), array(
+                        intval(date('m'))
+                    ))
+                    ->execute();
 					
 				$uidLabOrder = parent::gen_uuid();
 				$labOrder = self::$query
@@ -2387,7 +2364,7 @@ class Laboratorium extends Utility {
 							'selesai'				=>	'false',
 							'dr_pengirim'			=>	$UserData['data']->uid,
 							'dr_penanggung_jawab'	=>	$parameter['dokterPJ'],
-							'no_order'				=>	$no_order_new,
+							'no_order'				=>	'LO/' . date('Y/m') . '/' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT),
 							'status'				=>	'P',
 							'pasien'				=>	$data_antrian['pasien'],
 							'kunjungan'				=>	$data_antrian['kunjungan'],
@@ -2954,6 +2931,7 @@ class Laboratorium extends Utility {
                         {
                             $workerData = self::$query->update('lab_order_nilai', array(
                                 'nilai' =>	$value_nilai,
+                                'petugas' => $UserData['data']->uid,
                                 'updated_at' =>	parent::format_date()
                             ))
                                 ->where(array(
@@ -3008,6 +2986,7 @@ class Laboratorium extends Utility {
                                 'nilai' => $value_nilai,
                                 'tindakan' => $key_tindakan,
                                 'id_lab_nilai' => $key_nilai,
+                                'petugas' => $UserData['data']->uid,
                                 'created_at' => parent::format_date(),
                                 'updated_at' =>	parent::format_date()
                             ))

@@ -47,7 +47,8 @@ class Asesmen extends Utility {
 					break;
 
 				default:
-					return self::get_asesmen_medis($parameter[2]);
+					//return self::get_asesmen_medis($parameter[2]);
+                    return 'Unknown Request';
 			}
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
@@ -80,6 +81,8 @@ class Asesmen extends Utility {
 	private function pasien_saya($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $Laboratorium = new Laboratorium(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -180,7 +183,8 @@ class Asesmen extends Utility {
                 'uid',
                 'dr_penanggung_jawab',
                 'no_order',
-                'status'
+                'status',
+                'created_at'
             ))
                 ->where(array(
                     'lab_order.asesmen' => '= ?',
@@ -190,6 +194,81 @@ class Asesmen extends Utility {
                     $value['uid']
                 ))
                 ->execute();
+
+
+
+            //Order Detail
+            foreach($lab['response_data'] as $LabKey => $LabValue) {
+                $Petugas = array();
+                $PetugasChecker = array();
+
+                $detailLaborOrder = self::$query->select('lab_order_detail', array(
+                    'tindakan',
+                    'keterangan'
+                ))
+                    ->where(array(
+                        'lab_order_detail.lab_order' => '= ?',
+                        'AND',
+                        'lab_order_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $LabValue['uid']
+                    ))
+                    ->execute();
+
+                foreach ($detailLaborOrder['response_data'] as $LabDetailKey => $LabDetailValue) {
+                    $LabTindakan = $Laboratorium::get_lab_detail($LabDetailValue['tindakan']);
+                    $detailLaborOrder['response_data'][$LabDetailKey]['tindakan'] = $LabTindakan['response_data'][0];
+
+                    $nilaiLaborOrder = self::$query->select('lab_order_nilai', array(
+                        'tindakan',
+                        'id_lab_nilai',
+                        'nilai',
+                        'petugas'
+                    ))
+                        ->where(array(
+                            'lab_order_nilai.lab_order' => '= ?',
+                            'AND',
+                            'lab_order_nilai.deleted_at' => 'IS NULL'
+                        ), array(
+                            $LabValue['uid']
+                        ))
+                        ->execute();
+                    foreach ($nilaiLaborOrder['response_data'] as $LabOrderDetailItemKey => $LabOrderDetailItemValue) {
+
+                        if(!in_array($LabOrderDetailItemValue['petugas'], $PetugasChecker)) {
+                            $PetugasDetail = $Pegawai->get_detail_pegawai($LabOrderDetailItemValue['petugas'])['response_data'][0];
+                            array_push($Petugas, $PetugasDetail);
+                            array_push($PetugasChecker, $LabOrderDetailItemValue['petugas']);
+                        }
+
+
+                        $LabItem = self::$query->select('master_lab_nilai', array(
+                            'satuan',
+                            'nilai_maks',
+                            'nilai_min',
+                            'keterangan'
+                        ))
+                            ->where(array(
+                                'master_lab_nilai.id' => '= ?',
+                                'AND',
+                                'master_lab_nilai.deleted_at' => 'IS NULL'
+                            ), array(
+                                $LabOrderDetailItemValue['id_lab_nilai']
+                            ))
+                            ->execute();
+
+                        $nilaiLaborOrder['response_data'][$LabOrderDetailItemKey]['lab_nilai'] = $LabItem['response_data'][0];
+                    }
+
+                    $detailLaborOrder['response_data'][$LabDetailKey]['hasil'] = $nilaiLaborOrder['response_data'];
+                }
+
+                $lab['response_data'][$LabKey]['detail'] = $detailLaborOrder['response_data'];
+                $lab['response_data'][$LabKey]['petugas'] = $Petugas;
+                $lab['response_data'][$LabKey]['parse_tanggal'] = date('d F Y', strtotime($LabValue['created_at']));
+                $lab['response_data'][$LabKey]['dr_penanggung_jawab'] = $Pegawai->get_detail_pegawai($LabValue['dr_penanggung_jawab'])['response_data'][0];
+            }
+
             $data['response_data'][$key]['lab_order'] = $lab['response_data'];
 
             //Rad Order
@@ -260,7 +339,8 @@ class Asesmen extends Utility {
 		->execute();
         $AsesmenMaster = self::$query->select('asesmen', array(
             'uid',
-            'status'
+            'status',
+            'created_at'
         ))
             ->where(array(
                 'asesmen.deleted_at' => 'IS NULL',
@@ -702,6 +782,7 @@ class Asesmen extends Utility {
 				$data['response_data'][0]['resep'] = $resep['response_data'];
 				$data['response_data'][0]['asesmen_rawat'] = $Rawat['response_data'][0]['uid'];
                 $data['response_data'][0]['status_asesmen'] = $AsesmenMaster['response_data'][0];
+                $data['response_data'][0]['tanggal_parsed'] = date('d F Y', strtotime($AsesmenMaster['response_data'][0]['created_at']));
 
                 $Pasien = new Pasien(self::$pdo);
                 $PasienDetail = $Pasien->get_pasien_detail('pasien', $data['response_data'][0]['pasien']);

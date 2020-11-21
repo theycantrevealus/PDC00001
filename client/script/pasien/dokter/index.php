@@ -9,6 +9,10 @@
             }
         }
 
+        var dataSetAll = [];
+        var dataSetSelector = [];
+        var selectedData = {};
+
         var pasienTable = $("#table-pasien").DataTable({
             processing: true,
             lengthMenu: [[10, 15, -1], [10, 15, "All"]],
@@ -26,6 +30,7 @@
                 },
                 dataSrc:function(response) {
                     var dataSet = response.response_package.response_data;
+
                     /*var dataResponse = [];
                     if(dataSet == undefined) {
                         dataSet = [];
@@ -36,6 +41,11 @@
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;*/
+                    dataSetAll = dataSet
+                    for(var key in dataSet) {
+                        dataSetSelector.push(dataSet[key].uid);
+                    }
+
                     return dataSet;
                 }
             },
@@ -104,6 +114,12 @@
         });
 
         $("body").on("click", ".btnDetailPemeriksaan", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            var selectionKey = dataSetSelector.indexOf(id);
+            selectedData = dataSetAll[selectionKey];
+
             var antrian = $(this).attr("antrian");
             var lab = $(this).attr("lab");
             var rad = $(this).attr("rad");
@@ -122,18 +138,90 @@
 
             //Get Detail Asesmen
 
-            $("#modal-detail-asesmen").modal("show");
+            $.ajax({
+                url:__HOSTAPI__ + "/Asesmen/antrian-detail/" + antrian,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    var data = response.response_package.response_data[0];
+
+                    var icd10Kerja = "<ol type=\"1\">";
+                    var icd10Banding = "<ol type=\"1\">";
+
+                    for(var icdKerjaKey in data.icd10_kerja) {
+                        icd10Kerja += "<li>" + data.icd10_kerja[icdKerjaKey].nama + "</li>";
+                    }
+
+                    for(var icd10BandingKey in data.icd10_banding) {
+                        icd10Banding += "<li>" + data.icd10_banding[icd10BandingKey].nama + "</li>";
+                    }
+
+                    icd10Kerja += "</ol>";
+                    icd10Banding += "</ol>";
+
+                    $(".txt_keluhan_utama").html(data.keluhan_utama);
+                    $(".txt_keluhan_tambahan").html(data.keluhan_tambahan);
+                    $(".txt_pemeriksaan_fisik").html(data.pemeriksaan_fisik);
+                    $(".txt_diagnosa_kerja").html(icd10Kerja + data.diagnosa_kerja);
+                    $(".txt_diagnosa_banding").html(icd10Banding + data.diagnosa_banding);
+                    $(".txt_planning").html(data.planning);
+                    $("#tanggal_periksa").html(data.tanggal_parsed);
+
+                    //Parse Laboratorium
+                    for(var labKey in selectedData.lab_order) {
+                        console.log(selectedData.lab_order[labKey]);
+                        var LabBuild = load_laboratorium(selectedData.lab_order[labKey]);
+                        $(".lab_loader").append(LabBuild);
+                    }
+
+                    //Parse Radiologi
+
+                    $("#modal-detail-asesmen").modal("show");
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
         });
 
         $("#range_pasien").change(function() {
             pasienTable.ajax.reload();
         });
+
+        function load_laboratorium(data) {
+            var listPetugas = [];
+            for(petugasKey in data.petugas) {
+                listPetugas.push(data.petugas[petugasKey].nama);
+            }
+
+            data['petugas_parse'] = listPetugas.join(",");
+
+            var returnHTML = "";
+            $.ajax({
+                url: __HOSTNAME__ + "/pages/pasien/dokter/lab-single.php",
+                async:false,
+                data: data,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"POST",
+                success:function(response_html) {
+                    returnHTML = response_html;
+                },
+                error: function(response_html) {
+                    console.log(response_html);
+                }
+            });
+            return returnHTML;
+        }
     });
 </script>
 
 
 
-<div id="modal-detail-asesmen" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
+<div id="modal-detail-asesmen" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -176,40 +264,42 @@
                             </div>
                             <div class="card card-body tab-content">
                                 <div class="tab-pane show fade active" id="tab-poli-1">
-                                    <p class="text-dark-gray d-flex align-items-center mt-3">
-                                        <i class="material-icons icon-muted mr-2">event</i>
-                                        <strong>Jam</strong>
-                                    </p>
-                                    <div class="row projects-item mb-1">
-                                        <div class="col-1">
-                                            <br />
-                                            <div class="text-dark-gray">Subjective</div>
-                                        </div>
-                                        <div class="col-11">
-                                            <div class="card">
-                                                <div class="card-header card-header-large bg-white">
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <div class="segmen_keluhan_utama">
-                                                                <div class="d-flex align-items-center">
-                                                                    <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Keluhan Utama</strong></a>
-                                                                </div>
-                                                                <div class="card-body">
-                                                                    <p class="txt_keluhan_utama">
+                                    <div class="card-body">
+                                        <p class="text-dark-gray d-flex align-items-center mt-3">
+                                            <i class="material-icons icon-muted mr-2">event</i>
+                                            <strong id="tanggal_periksa"></strong>
+                                        </p>
+                                        <div class="row projects-item mb-1">
+                                            <div class="col-1">
+                                                <br />
+                                                <div class="text-dark-gray">Subjective</div>
+                                            </div>
+                                            <div class="col-11">
+                                                <div class="card">
+                                                    <div class="card-header card-header-large bg-white">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="segmen_keluhan_utama">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Keluhan Utama</strong></a>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <p class="txt_keluhan_utama">
 
-                                                                    </p>
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <div class="segmen_keluhan_tambahan">
-                                                                <div class="d-flex align-items-center">
-                                                                    <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Keluhan Tambahan</strong></a>
-                                                                </div>
-                                                                <div class="card-body">
-                                                                    <p class="txt_keluhan_tambahan">
+                                                            <div class="col-6">
+                                                                <div class="segmen_keluhan_tambahan">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Keluhan Tambahan</strong></a>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <p class="txt_keluhan_tambahan">
 
-                                                                    </p>
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -217,25 +307,25 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row projects-item mb-1">
-                                        <div class="col-1">
-                                            <br />
-                                            <div class="text-dark-gray">Objective</div>
-                                        </div>
-                                        <div class="col-11">
-                                            <div class="card">
-                                                <div class="card-header card-header-large bg-white">
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <div class="segmen_keluhan_utama">
-                                                                <div class="d-flex align-items-center">
-                                                                    <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Pemeriksaan Fisik</strong></a>
-                                                                </div>
-                                                                <div class="card-body">
-                                                                    <p class="txt_keluhan_utama">
+                                        <div class="row projects-item mb-1">
+                                            <div class="col-1">
+                                                <br />
+                                                <div class="text-dark-gray">Objective</div>
+                                            </div>
+                                            <div class="col-11">
+                                                <div class="card">
+                                                    <div class="card-header card-header-large bg-white">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="segmen_keluhan_utama">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Pemeriksaan Fisik</strong></a>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <p class="txt_pemeriksaan_fisik">
 
-                                                                    </p>
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -243,37 +333,37 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row projects-item mb-1">
-                                        <div class="col-1">
-                                            <br />
-                                            <div class="text-dark-gray">Asesmen</div>
-                                        </div>
-                                        <div class="col-11">
-                                            <div class="card">
-                                                <div class="card-header card-header-large bg-white">
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <div class="segmen_diagnosa_utama">
-                                                                <div class="d-flex align-items-center">
-                                                                    <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Diagnosa Kerja</strong></a>
-                                                                </div>
-                                                                <div class="card-body">
-                                                                    <p class="txt_diagnosa_kerja">
+                                        <div class="row projects-item mb-1">
+                                            <div class="col-1">
+                                                <br />
+                                                <div class="text-dark-gray">Asesmen</div>
+                                            </div>
+                                            <div class="col-11">
+                                                <div class="card">
+                                                    <div class="card-header card-header-large bg-white">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="segmen_diagnosa_utama">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Diagnosa Kerja</strong></a>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <p class="txt_diagnosa_kerja">
 
-                                                                    </p>
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <div class="segmen_diagnosa_banding">
-                                                                <div class="d-flex align-items-center">
-                                                                    <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Diagnosa Banding</strong></a>
-                                                                </div>
-                                                                <div class="card-body">
-                                                                    <p class="txt_diagnosa_banding">
+                                                            <div class="col-6">
+                                                                <div class="segmen_diagnosa_banding">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Diagnosa Banding</strong></a>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <p class="txt_diagnosa_banding">
 
-                                                                    </p>
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -281,25 +371,25 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row projects-item mb-1">
-                                        <div class="col-1">
-                                            <br />
-                                            <div class="text-dark-gray">Planning</div>
-                                        </div>
-                                        <div class="col-11">
-                                            <div class="card">
-                                                <div class="card-header card-header-large bg-white">
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <div class="segmen_keluhan_utama">
-                                                                <div class="d-flex align-items-center">
-                                                                    <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Planning</strong></a>
-                                                                </div>
-                                                                <div class="card-body">
-                                                                    <p class="txt_keluhan_utama">
+                                        <div class="row projects-item mb-1">
+                                            <div class="col-1">
+                                                <br />
+                                                <div class="text-dark-gray">Planning</div>
+                                            </div>
+                                            <div class="col-11">
+                                                <div class="card">
+                                                    <div class="card-header card-header-large bg-white">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <div class="segmen_keluhan_utama">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Planning</strong></a>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <p class="txt_planning">
 
-                                                                    </p>
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -307,59 +397,59 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row projects-item mb-1">
-                                        <div class="col-1">
-                                            <br />
-                                            <div class="text-dark-gray">Resep & Racikan</div>
-                                        </div>
-                                        <div class="col-11">
-                                            <div class="card">
-                                                <div class="card-header card-header-large bg-white">
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <div class="segmen_resep">
-                                                                <div class="d-flex align-items-center">
-                                                                    <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Resep</strong></a>
+                                        <div class="row projects-item mb-1">
+                                            <div class="col-1">
+                                                <br />
+                                                <div class="text-dark-gray">Resep & Racikan</div>
+                                            </div>
+                                            <div class="col-11">
+                                                <div class="card">
+                                                    <div class="card-header card-header-large bg-white">
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <div class="segmen_resep">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Resep</strong></a>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="card-body">
-                                                                <table class="table table-bordered">
-                                                                    <thead class="thead-dark">
-                                                                    <tr>
-                                                                        <th class="wrap_content">No</th>
-                                                                        <th>Obat</th>
-                                                                        <th>Signa</th>
-                                                                        <th>Jlh</th>
-                                                                    </tr>
-                                                                    </thead>
-                                                                    <tbody></tbody>
-                                                                </table>
+                                                                <div class="card-body">
+                                                                    <table class="table table-bordered">
+                                                                        <thead class="thead-dark">
+                                                                        <tr>
+                                                                            <th class="wrap_content">No</th>
+                                                                            <th>Obat</th>
+                                                                            <th>Signa</th>
+                                                                            <th>Jlh</th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody></tbody>
+                                                                    </table>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="card-header card-header-large bg-white">
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <div class="segmen_racikan">
-                                                                <div class="d-flex align-items-center">
-                                                                    <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Racikan</strong></a>
+                                                    <div class="card-header card-header-large bg-white">
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <div class="segmen_racikan">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Racikan</strong></a>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="card-body">
-                                                                <table class="table table-bordered">
-                                                                    <thead class="thead-dark">
-                                                                    <tr>
-                                                                        <th class="wrap_content">No</th>
-                                                                        <th>Racikan</th>
-                                                                        <th>Komposisi</th>
-                                                                        <th>Signa</th>
-                                                                        <th>Jlh</th>
-                                                                    </tr>
-                                                                    </thead>
-                                                                    <tbody></tbody>
-                                                                </table>
+                                                                <div class="card-body">
+                                                                    <table class="table table-bordered">
+                                                                        <thead class="thead-dark">
+                                                                        <tr>
+                                                                            <th class="wrap_content">No</th>
+                                                                            <th>Racikan</th>
+                                                                            <th>Komposisi</th>
+                                                                            <th>Signa</th>
+                                                                            <th>Jlh</th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody></tbody>
+                                                                    </table>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -369,10 +459,17 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane show fade" id="tab-poli-2">
-                                    Lab
+                                    <div class="row lab_loader"></div>
                                 </div>
                                 <div class="tab-pane show fade" id="tab-poli-3">
-                                    Rad
+                                    <div class="card">
+                                        <div class="card-header card-header-large bg-white">
+                                            <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Radiologi</h5>
+                                        </div>
+                                        <div class="card-body">
+
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

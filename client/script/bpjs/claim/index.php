@@ -120,7 +120,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<b>NIK: " + row.pasien.nik + "</b><br /><h5><span class=\"text-info number_style\" antrian=\"" + row.antrian + "\" id=\"rm_" + row.uid + "\">" + row.pasien.no_rm + "</span> - " + row.pasien.nama + "</h5><b><i class=\"fa fa-phone\"></i> " + row.pasien.no_telp + "</b>";
+                        return "<b>NIK: " + row.pasien.nik + "</b><br /><h5><span class=\"text-info number_style\" antrian=\"" + row.antrian + "\" id=\"rm_" + row.uid + "\">(" + row.pasien.no_rm + ")</span> - " + row.pasien.nama + "</h5><b><i class=\"fa fa-phone\"></i> " + row.pasien.no_telp + "</b>";
                     }
                 },
                 {
@@ -144,6 +144,9 @@
                             "<button id=\"sep_edit_" + row.sep_no + "\" uid=\"" + row.uid + "\" class=\"btn btn-info btn-sm btn-edit-sep\">" +
                                 "<i class=\"fa fa-edit\"></i> Edit" +
                             "</button>" +
+                            "<button id=\"sep_cetak_" + row.sep_no + "\" uid=\"" + row.uid + "\" class=\"btn btn-success btn-sm btn-cetak-sep\">" +
+                            "<i class=\"fa fa-print\"></i> Cetak" +
+                            "</button>" +
                             "<button id=\"sep_delete_" + row.sep_no + "\" uid=\"" + row.uid + "\" class=\"btn btn-danger btn-sm btn-delete-sep\">" +
                                 "<i class=\"fa fa-trash\"></i> Hapus" +
                             "</button>" +
@@ -155,6 +158,10 @@
 
         $("#range_sep").change(function() {
             SEPList.ajax.reload();
+        });
+
+        $("body").on("click", ".btn-cetak-sep", function() {
+            $("#modal-sep-cetak").modal("show");
         });
 
 
@@ -1238,6 +1245,125 @@
             <div class="modal-footer">
                 <button class="btn btn-success" id="btnProsesSEP">
                     <i class="fa fa-check"></i> Proses
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="modal-sep-cetak" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> <span>Surat Eligibilitas Peserta</span>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>No. SEP</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. SEP</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>No. Kartu</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Nama Peserta</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. Lahir</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>No. Telp</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Sub/Spesialis</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Faskes Penunjuk</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Diagnosa Awal</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Catatan</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-6">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>Peserta</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>COB</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Jenis Rawat</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Kelas Rawat</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Penjamin</td>
+                                <td class="wrap_content">:</td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-12">
+                        <small>
+                            <b>
+                                *Saya menyetujui BPJS Kesehatan menggunakan informasi medis pasien jika diperlukan<br />
+                                *SEP bukan sebagai bukti penjaminan peserta
+                            </b>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnProsesSEP">
+                    <i class="fa fa-print"></i> Cetak
                 </button>
 
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
