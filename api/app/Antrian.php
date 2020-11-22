@@ -758,12 +758,15 @@ class Antrian extends Utility
                         'AND',
                         'antrian_nomor.dokter' => '= ?',
                         'AND',
-                        'antrian_nomor.penjamin' => '= ?'
+                        'antrian_nomor.penjamin' => '= ?',
+                        'AND',
+                        'antrian_nomor.status' => '= ?'
                     ), array(
                             $allData['pasien'],
                             $allData['departemen'],
                             $allData['dokter'],
-                            $allData['penjamin']
+                            $allData['penjamin'],
+                            'N'
                         )
                     )
                     ->execute();

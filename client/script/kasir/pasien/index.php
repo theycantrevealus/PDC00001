@@ -176,8 +176,6 @@
 		});
 
 		$("#range_kwitansi").change(function() {
-			/*console.clear();
-			console.log(getDateRange());*/
 			tableKwitansi.ajax.reload();
 		});
 
@@ -212,15 +210,14 @@
                             response.response_package.response_data[InvKeyData].pasien !== undefined &&
                             response.response_package.response_data[InvKeyData].pasien !== null
                         ) {
-							if(!response.response_package.response_data[InvKeyData].lunas) {
-
+						    if(!response.response_package.response_data[InvKeyData].lunas) {
 							    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
                                     response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
                                 }
 								returnedData.push(response.response_package.response_data[InvKeyData]);
 							}
 						} else {
-							//
+						    //
 						}
 					}
 
@@ -314,8 +311,6 @@
 
 
 		$("#range_invoice").change(function() {
-			/*console.clear();
-			console.log(getDateRange());*/
 			tableAntrianBayar.ajax.reload();
 		});
 
@@ -394,7 +389,6 @@
                             };
 
 							for(var invKey in invoice_detail_item) {
-							    console.log(invoice_detail_item[invKey]);
 							    if(invoice_detail_item[invKey].item_type === "master_tindakan")
                                 {
                                     //Biaya Admnistrasi
@@ -786,7 +780,6 @@
 						},
 						success: function(response) {
 							console.clear();
-							console.log(response);
 							var resultCheck = 0;
 							
 							for(var returnKey in response.response_package) {
@@ -795,8 +788,6 @@
 
 							if(resultCheck == $(".returItem:checked").length) {
 								$("#form-payment-detail").modal("hide");
-							} else {
-								console.log("Gagal Retur");
 							}
 							$("#form-payment-detail").modal("hide");
 							tableKwitansi.ajax.reload();

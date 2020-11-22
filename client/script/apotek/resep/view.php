@@ -48,11 +48,11 @@
                             uid: racikan_detail[racikanKey].uid,
                             nama: racikan_detail[racikanKey].kode,
                             keterangan: racikan_detail[racikanKey].keterangan,
-                            "signaKonsumsi": racikan_detail[racikanKey].signa_qty,
-                            "signaTakar": racikan_detail[racikanKey].signa_pakai,
-                            "signaHari": racikan_detail[racikanKey].qty,
-                            "item":racikan_detail[racikanKey].item,
-                            "aturan_pakai": racikan_detail[racikanKey].aturan_pakai
+                            signaKonsumsi: racikan_detail[racikanKey].signa_qty,
+                            signaTakar: racikan_detail[racikanKey].signa_pakai,
+                            signaHari: racikan_detail[racikanKey].qty,
+                            item:racikan_detail[racikanKey].item,
+                            aturan_pakai: racikan_detail[racikanKey].aturan_pakai
                         });
                         var itemKomposisi = racikan_detail[racikanKey].item;
                         for(var komposisiKey in itemKomposisi) {
@@ -66,7 +66,7 @@
 
                             itemKomposisi[komposisiKey].satuan = "<b>" + itemKomposisi[komposisiKey].takar_bulat + "</b><sub nilaiExact=\"" + itemKomposisi[komposisiKey].ratio + "\">" + itemKomposisi[komposisiKey].takar_decimal + "</sub>";
 
-                            autoKomposisi((parseInt(racikanKey) + 1), itemKomposisi[komposisiKey]);
+                            autoKomposisi((parseInt(racikanKey) + 1), itemKomposisi[komposisiKey], racikan_detail[racikanKey].qty);
                         }
                     }
 
@@ -441,158 +441,168 @@
                 type:"GET",
                 success:function(response) {
                     batchData = response.response_package.response_data;
+                    if(batchData !== null) {
+                        if(rowTarget !== "") {
 
-                    if(rowTarget !== "") {
-
-                        var selectedBatchList = [];
-                        var uniqueBatch = [];
-                        var harga_tertinggi = 0;
-                        var total_kebutuhan = 0;
-                        var kebutuhan = 0;
+                            var selectedBatchList = [];
+                            var uniqueBatch = [];
+                            var harga_tertinggi = 0;
+                            var total_kebutuhan = 0;
+                            var kebutuhan = 0;
 
 
 
-                        if(type === "resep") {
+                            if(type === "resep") {
 
-                            total_kebutuhan = $("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue");
-                            kebutuhan = $("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue");
+                                total_kebutuhan = $("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue");
+                                kebutuhan = $("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue");
 
-                            for(bKey in batchData)
-                            {
-                                if(batchData[bKey].harga > harga_tertinggi)
+                                for(bKey in batchData)
                                 {
-                                    harga_tertinggi = batchData[bKey].harga;
-                                }
-
-                                if(kebutuhan > 0)
-                                {
-
-                                    if(kebutuhan > batchData[bKey].stok_terkini)
+                                    if(batchData[bKey].harga > harga_tertinggi)
                                     {
-                                        batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
-                                    } else {
-                                        batchData[bKey].used = parseFloat(kebutuhan);
-                                    }
-                                    kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
-                                    if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
-                                        selectedBatchList.push(batchData[bKey]);
-                                        uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                        harga_tertinggi = batchData[bKey].harga;
                                     }
 
-                                }
-                            }
-
-
-
-                            if(selectedBatchList.length > 0) {
-                                var profitList = selectedBatchList[0].profit
-                                for(var profKey in profitList) {
-                                    if (profitList[profKey].penjamin === currentMetaData.penjamin.uid) {
-                                        selectedProfitType = profitList[profKey].profit_type;
-                                        selectedProfitValue = parseFloat(profitList[profKey].profit);
-                                    }
-                                }
-
-                                var finalTotal = 0;
-                                var rawTotal = harga_tertinggi;
-
-                                if(selectedProfitType === "N") {
-                                    finalTotal = rawTotal;
-                                } else if(selectedProfitType === "P") {
-                                    finalTotal = rawTotal + (selectedProfitValue / 100 * rawTotal);
-                                } else {
-                                    finalTotal = rawTotal + selectedProfitValue;
-                                }
-
-                                $("#batch_obat_" + rowTarget + " li").remove();
-                                for(var batchSelKey in selectedBatchList) {
-                                    $("#batch_obat_" + rowTarget).append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ") - " + selectedBatchList[batchSelKey].gudang.nama + "</li>");
-                                }
-
-                                $("#batch_obat_" + rowTarget).attr("harga", finalTotal);
-
-                                //Calculate harga
-                                $("#harga_obat_" + rowTarget).html(number_format(finalTotal * total_kebutuhan, 2, ".", ","));
-                            }
-                        } else {
-
-                            //racikan_jumlah_1
-                            var groupExplitor = rowTarget.split("_");
-                            groupExplitor = groupExplitor[0];
-                            total_kebutuhan = $("#racikan_jumlah_" + groupExplitor).inputmask("unmaskedvalue");
-                            kebutuhan = $("#racikan_jumlah_" + groupExplitor).inputmask("unmaskedvalue");
-
-                            for(bKey in batchData)
-                            {
-                                if(batchData[bKey].harga > harga_tertinggi)
-                                {
-                                    harga_tertinggi = batchData[bKey].harga;
-                                }
-
-                                if(kebutuhan > 0)
-                                {
-
-                                    if(kebutuhan > batchData[bKey].stok_terkini)
+                                    if(kebutuhan > 0)
                                     {
-                                        batchData[bKey].used = batchData[bKey].stok_terkini;
+
+                                        if(kebutuhan > batchData[bKey].stok_terkini)
+                                        {
+                                            batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
+                                        } else {
+                                            batchData[bKey].used = parseFloat(kebutuhan);
+                                        }
+                                        kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
+                                        if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
+                                            selectedBatchList.push(batchData[bKey]);
+                                            uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                        }
+
+                                    }
+                                }
+
+
+
+                                if(selectedBatchList.length > 0) {
+                                    var profitList = selectedBatchList[0].profit
+                                    for(var profKey in profitList) {
+                                        if (profitList[profKey].penjamin === currentMetaData.penjamin.uid) {
+                                            selectedProfitType = profitList[profKey].profit_type;
+                                            selectedProfitValue = parseFloat(profitList[profKey].profit);
+                                        }
+                                    }
+
+                                    var finalTotal = 0;
+                                    var rawTotal = harga_tertinggi;
+
+                                    if(selectedProfitType === "N") {
+                                        finalTotal = rawTotal;
+                                    } else if(selectedProfitType === "P") {
+                                        finalTotal = rawTotal + (selectedProfitValue / 100 * rawTotal);
                                     } else {
-                                        batchData[bKey].used = kebutuhan;
+                                        finalTotal = rawTotal + selectedProfitValue;
                                     }
-                                    kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
 
-                                    if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
-                                        selectedBatchList.push(batchData[bKey]);
-                                        uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                    $("#batch_obat_" + rowTarget + " li").remove();
+                                    for(var batchSelKey in selectedBatchList) {
+                                        $("#batch_obat_" + rowTarget).append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ") - " + selectedBatchList[batchSelKey].gudang.nama + "</li>");
                                     }
+
+                                    $("#batch_obat_" + rowTarget).attr("harga", finalTotal);
+
+                                    //Calculate harga
+                                    $("#harga_obat_" + rowTarget).html(number_format(finalTotal * total_kebutuhan, 2, ".", ","));
                                 }
-                            }
+                            } else {
 
-                            //Profit Manager
-                            var selectedProfitType = "N";
-                            var selectedProfitValue = 0;
+                                //racikan_jumlah_1
+                                var groupExplitor = rowTarget.split("_");
 
-                            if(selectedBatchList.length > 0) {
-                                var profitList = selectedBatchList[0].profit
-                                for(var profKey in profitList) {
-                                    if (profitList[profKey].penjamin === currentMetaData.penjamin.uid) {
-                                        selectedProfitType = profitList[profKey].profit_type;
-                                        selectedProfitValue = parseFloat(profitList[profKey].profit);
-                                    }
-                                }
+                                total_kebutuhan = $("#jlh_komposisi_" + groupExplitor[0] + "_" + groupExplitor[1]).inputmask("unmaskedvalue");
+                                kebutuhan = total_kebutuhan;
 
-                                var finalTotal = 0;
-                                var rawTotal = harga_tertinggi;
-
-                                if(selectedProfitType === "N") {
-                                    finalTotal = rawTotal;
-                                } else if(selectedProfitType === "P") {
-                                    finalTotal = rawTotal + (selectedProfitValue / 100 * rawTotal);
-                                } else {
-                                    finalTotal = rawTotal + selectedProfitValue;
+                                if(kebutuhan <= 0) {
+                                    $("#jlh_komposisi_" + groupExplitor[0] + "_" + groupExplitor[1]).css({
+                                        "background": "red"
+                                    });
                                 }
 
 
-                                //Racikan session
-                                $("#obat_komposisi_batch_" + rowTarget).attr({
-                                    "harga": finalTotal
-                                });
+                                for(bKey in batchData)
+                                {
+                                    if(batchData[bKey].harga > harga_tertinggi)
+                                    {
+                                        harga_tertinggi = batchData[bKey].harga;
+                                    }
 
-                                $("#obat_komposisi_batch_" + rowTarget + " li").remove();
-                                for(var batchSelKey in selectedBatchList) {
-                                    $("#obat_komposisi_batch_" + rowTarget).append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ") - " + selectedBatchList[batchSelKey].gudang.nama + "</li>");
+                                    if(kebutuhan > 0)
+                                    {
+                                        if(kebutuhan > batchData[bKey].stok_terkini)
+                                        {
+                                            batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
+                                        } else {
+                                            batchData[bKey].used = parseFloat(kebutuhan);
+                                        }
+                                        kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
+                                        if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
+                                            selectedBatchList.push(batchData[bKey]);
+                                            uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                        }
+
+                                    }
                                 }
 
-                                var totalKalkulasi = 0;
-                                //Kalkulasi total harga komposisi
-                                $("#komposisi_" + groupExplitor + " tbody tr").each(function() {
-                                    var attrHarga = $(this).find("td:eq(1) ol").attr("harga");
-                                    if (typeof attrHarga !== typeof undefined && attrHarga !== false) {
-                                        totalKalkulasi += parseFloat($(this).find("td:eq(1) ol").attr("harga")) * total_kebutuhan;
+
+                                //Profit Manager
+                                var selectedProfitType = "N";
+                                var selectedProfitValue = 0;
+
+
+
+                                if(selectedBatchList.length > 0) {
+                                    var profitList = selectedBatchList[0].profit
+                                    for(var profKey in profitList) {
+                                        if (profitList[profKey].penjamin === currentMetaData.penjamin.uid) {
+                                            selectedProfitType = profitList[profKey].profit_type;
+                                            selectedProfitValue = parseFloat(profitList[profKey].profit);
+                                        }
                                     }
-                                });
+
+                                    var finalTotal = 0;
+                                    var rawTotal = parseFloat(harga_tertinggi);
+
+                                    if(selectedProfitType === "N") {
+                                        finalTotal = rawTotal;
+                                    } else if(selectedProfitType === "P") {
+                                        finalTotal = rawTotal + (selectedProfitValue / 100 * rawTotal);
+                                    } else {
+                                        finalTotal = rawTotal + selectedProfitValue;
+                                    }
 
 
-                                $("#racikan_harga_" + groupExplitor).html(number_format(totalKalkulasi, 2, ".", ","));
+                                    //Racikan session
+                                    $("#obat_komposisi_batch_" + rowTarget).attr({
+                                        "harga": finalTotal
+                                    });
+
+                                    $("#obat_komposisi_batch_" + rowTarget + " li").remove();
+                                    for(var batchSelKey in selectedBatchList) {
+                                        $("#obat_komposisi_batch_" + rowTarget).append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ") - " + selectedBatchList[batchSelKey].gudang.nama + "</li>");
+                                    }
+
+                                    var totalKalkulasi = 0;
+                                    //Kalkulasi total harga komposisi
+                                    $("#komposisi_" + groupExplitor[0] + " tbody tr").each(function() {
+                                        var attrHarga = $(this).find("td:eq(1) ol").attr("harga");
+                                        if (typeof attrHarga !== typeof undefined && attrHarga !== false) {
+                                            totalKalkulasi += parseFloat($(this).find("td:eq(1) ol").attr("harga")) * parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                                        }
+                                    });
+
+
+                                    $("#racikan_harga_" + groupExplitor[0]).html(number_format(totalKalkulasi, 2, ".", ","));
+                                }
                             }
                         }
                     }
@@ -611,13 +621,13 @@
             refreshBatch($("#resep_obat_" + id).val(), id);
         });
 
-        $("body").on("keyup", ".racikan_signa_jlh", function () {
+        /*$("body").on("keyup", ".racikan_signa_jlh", function () {
             var groupRacikan = $(this).attr("id").split("_");
             groupRacikan = groupRacikan[groupRacikan.length - 1];
             $("#komposisi_" + groupRacikan + " tbody tr").each(function(e) {
                 refreshBatch($(this).find("td:eq(1) h6").attr("uid-obat"), groupRacikan + "_" + (e + 1), "racikan");
             });
-        });
+        });*/
 
 
 
@@ -661,7 +671,7 @@
 
             var newRacikanNama = document.createElement("INPUT");
             $(newRacikanCellNama).append(newRacikanNama);
-            $(newRacikanNama).addClass("form-control").css({
+            $(newRacikanNama).addClass("form-control racikan_nama").css({
                 "margin-bottom": "20px"
             }).attr({
                 "placeholder": "Nama Racikan"
@@ -679,8 +689,8 @@
                 "<tr>" +
                 "<th class=\"wrap_content\">No</th>" +
                 "<th>Obat</th>" +
-                /*"<th class=\"wrap_content\">@</th>" +*/
-                /*"<th>Takaran</th>" +*/
+                /*"<th class=\"\">@</th>" +*/
+                "<th class=\"wrap_content\">Jlh Terpakai</th>" +
                 "<th>Kekuatan</th>" +
                 "<th class=\"wrap_content\">Aksi</th>" +
                 "<tr>" +
@@ -783,7 +793,7 @@
 
                 $(this).find("td:eq(0)").html(id);
 
-                $(this).find("td:eq(1) input").attr({
+                $(this).find("td:eq(1) input.racikan_nama").attr({
                     "id": "racikan_nama_" + id
                 });
 
@@ -799,11 +809,11 @@
                     "id": "tambah_komposisi_" + id
                 });
 
-                $(this).find("td:eq(2) input").attr({
+                $(this).find("td:eq(2) input.racikan_signa_a").attr({
                     "id": "racikan_signaA_" + id
                 });
 
-                $(this).find("td:eq(4) input").attr({
+                $(this).find("td:eq(4) input.racikan_signa_b").attr({
                     "id": "racikan_signaB_" + id
                 });
 
@@ -822,14 +832,14 @@
         }
 
 
-        function autoKomposisi(id, setter = {}) {
+        function autoKomposisi(id, setter = {}, global_qty = 0) {
             if(setter.obat != undefined || $("#komposisi_" + id + " tbody tr").length == 0 || $("#komposisi_" + id + " tbody tr:last-child td:eq(1)").html() != "") {
                 var newKomposisiRow = document.createElement("TR");
                 $(newKomposisiRow).addClass("komposisi-row");
 
                 var newKomposisiCellID = document.createElement("TD");
                 var newKomposisiCellObat = document.createElement("TD");
-                //\var newKomposisiCellJumlah = document.createElement("TD");
+                var newKomposisiCellJumlah = document.createElement("TD");
                 var newKomposisiCellSatuan = document.createElement("TD");
                 var newKomposisiCellAksi = document.createElement("TD");
 
@@ -846,9 +856,23 @@
                 $(newKomposisiCellAksi).find("div").append(newKomposisiEdit);
                 $(newKomposisiCellAksi).find("div").append(newKomposisiDelete);
 
+                var newJumlahObatRacikanPerItem = document.createElement("INPUT");
+                $(newJumlahObatRacikanPerItem).addClass("form-control jlh_obat_racikan").attr({
+                    "placeholder": "0"
+                }).val(global_qty).inputmask({
+                    alias: 'decimal',
+                    rightAlign: true,
+                    placeholder: "0.00",
+                    prefix: "",
+                    autoGroup: false,
+                    digitsOptional: true
+                });
+
+                $(newKomposisiCellJumlah).append(newJumlahObatRacikanPerItem);
+
                 $(newKomposisiRow).append(newKomposisiCellID);
                 $(newKomposisiRow).append(newKomposisiCellObat);
-                //$(newKomposisiRow).append(newKomposisiCellJumlah);
+                $(newKomposisiRow).append(newKomposisiCellJumlah);
                 $(newKomposisiRow).append(newKomposisiCellSatuan);
                 $(newKomposisiRow).append(newKomposisiCellAksi);
 
@@ -946,21 +970,23 @@
                     "id": "obat_komposisi_batch_" + id + "_" + cid
                 });
 
-                refreshBatch($(this).find("td:eq(1) h6").attr("uid-obat"), id + "_" + cid, "racikan");
-
-                /*$(this).find("td:eq(2)").attr({
+                $(this).find("td:eq(2) input").attr({
                     "id": "jlh_komposisi_" + id + "_" + cid
-                });*/
-                $(this).find("td:eq(2)").attr({
+                });
+
+                $(this).find("td:eq(3)").attr({
                     "id": "takar_komposisi_" + id + "_" + cid
                 });
-                $(this).find("td:eq(3) button:eq(0)").attr({
+
+                $(this).find("td:eq(4) button:eq(0)").attr({
                     "id": "button_edit_komposisi_" + id + "_" + cid
                 });
 
-                $(this).find("td:eq(3) button:eq(1)").attr({
+                $(this).find("td:eq(4) button:eq(1)").attr({
                     "id": "button_delete_komposisi_" + id + "_" + cid
                 });
+
+                refreshBatch($(this).find("td:eq(1) h6").attr("uid-obat"), id + "_" + cid, "racikan");
             });
         }
 
@@ -1122,6 +1148,7 @@
 
             $("#single_komposisi_" + thisID).remove();
             rebaseKomposisi(Pid);
+            refreshBatch($("#obat_komposisi_" + Pid + "_" + thisID + " h6").attr("uid-obat"), Pid + "_" + thisID, "racikan");
             return false;
         });
 
@@ -1159,11 +1186,26 @@
             checkGenerateRacikan(id);
         });
 
-        $("body").on("keyup", ".racikan_signa_jlh", function() {
+        $("body").on("keyup", ".jlh_obat_racikan", function() {
+            var id = $(this).attr("id").split("_");
+            group = id[id.length - 2];
+            id = id[id.length - 1];
+
+            if($(this).inputmask("unmaskedvalue") < 1) {
+                $(this).val(1);
+            }
+
+            refreshBatch($("#obat_komposisi_" + group + "_" + id + " h6").attr("uid-obat"), group + "_" + id, "racikan");
+
+            checkGenerateRacikan(group);
+        });
+
+        /*$("body").on("keyup", ".racikan_signa_jlh", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
             checkGenerateRacikan(id);
-        });
+        });*/
+
         //===========================================================================
         $("body").on("keyup", ".resep_konsumsi", function() {
             var id = $(this).attr("id").split("_");
@@ -1313,7 +1355,8 @@
 
                                 komposisi.push({
                                     "obat": $(this).find("td:eq(1) h6").attr("uid-obat"),
-                                    "kekuatan": $(this).find("td:eq(2)").html(),
+                                    "jumlah": $(this).find("td:eq(2) input").inputmask("unmaskedvalue"),
+                                    "kekuatan": $(this).find("td:eq(3)").html(),
                                     "harga": parseFloat(hargaPerObatRacikan)
                                 });
                             });
@@ -1331,19 +1374,6 @@
                             });
                         }
                     });
-
-                    /*console.clear();
-                    console.log({
-                        request: "verifikasi_resep_2",
-                            uid: __PAGES__[3],
-                            kunjungan: currentMetaData.kunjungan,
-                            antrian:currentMetaData.uid,
-                            pasien:currentMetaData.pasien.uid,
-                            penjamin: currentMetaData.penjamin.uid,
-                            resep: resepItem,
-                            racikan: racikanItem
-                    });*/
-
 
                     if(allowSave) {
                         $.ajax({

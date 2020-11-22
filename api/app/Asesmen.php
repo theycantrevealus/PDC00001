@@ -1672,44 +1672,47 @@ class Asesmen extends Utility {
             array_splice($parameter['tindakan'], array_search($value['tindakan'], $requested), 1);
         }
 
-        if ($parameter['charge_invoice'] === 'Y') {
-            foreach ($parameter['tindakan'] as $key => $value) {
-                $HargaTindakan = self::$query->select('master_tindakan_kelas_harga', array(
-                    'id',
-                    'tindakan',
-                    'kelas',
-                    'penjamin',
-                    'harga'
-                ))
-                    ->where(array(
-                        'master_tindakan_kelas_harga.penjamin' => '= ?',
-                        'AND',
-                        'master_tindakan_kelas_harga.kelas' => '= ?',
-                        'AND',
-                        'master_tindakan_kelas_harga.tindakan' => '= ?',
-                        'AND',
-                        'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
-                    ), array(
-                        $parameter['penjamin'],
-                        __UID_KELAS_GENERAL_RJ__,    //Fix 1 harga kelas GENERAL
-                        $value['item']
-                    ))
-                    ->execute();
-                $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
-                $new_asesmen_tindakan = self::$query->insert('asesmen_tindakan', array(
-                    'kunjungan' => $value['kunjungan'],
-                    'antrian' => $value['antrian'],
-                    'asesmen' => $MasterAsesmen,
-                    'tindakan' => $value['item'],
-                    'penjamin' => $parameter['penjamin'],
-                    'kelas' => __UID_KELAS_GENERAL_RJ__,
-                    'harga' => $HargaFinal,
-                    'created_at' => parent::format_date(),
-                    'updated_at' => parent::format_date()
-                ))
-                    ->execute();
 
-                if ($new_asesmen_tindakan['response_result'] > 0) {
+
+
+        foreach ($parameter['tindakan'] as $key => $value) {
+            $HargaTindakan = self::$query->select('master_tindakan_kelas_harga', array(
+                'id',
+                'tindakan',
+                'kelas',
+                'penjamin',
+                'harga'
+            ))
+                ->where(array(
+                    'master_tindakan_kelas_harga.penjamin' => '= ?',
+                    'AND',
+                    'master_tindakan_kelas_harga.kelas' => '= ?',
+                    'AND',
+                    'master_tindakan_kelas_harga.tindakan' => '= ?',
+                    'AND',
+                    'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['penjamin'],
+                    __UID_KELAS_GENERAL_RJ__,    //Fix 1 harga kelas GENERAL
+                    $value['item']
+                ))
+                ->execute();
+            $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
+            $new_asesmen_tindakan = self::$query->insert('asesmen_tindakan', array(
+                'kunjungan' => $value['kunjungan'],
+                'antrian' => $value['antrian'],
+                'asesmen' => $MasterAsesmen,
+                'tindakan' => $value['item'],
+                'penjamin' => $parameter['penjamin'],
+                'kelas' => __UID_KELAS_GENERAL_RJ__,
+                'harga' => $HargaFinal,
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+
+            if ($new_asesmen_tindakan['response_result'] > 0) {
+                if ($parameter['charge_invoice'] === 'Y') {
                     $InvoiceDetail = $Invoice::append_invoice(array(
                         'invoice' => $TargetInvoice,
                         'item' => $value['item'],
@@ -1727,9 +1730,10 @@ class Asesmen extends Utility {
 
                     array_push($returnResponse, $InvoiceDetail);
                 }
-                array_push($returnResponse, $new_asesmen_tindakan);
             }
+            array_push($returnResponse, $new_asesmen_tindakan);
         }
+
 
 		$AsesmenInfo = self::$query->select('asesmen', array(
             'kunjungan',
@@ -1748,7 +1752,7 @@ class Asesmen extends Utility {
 		//Status Antrian
 
 
-        if($parameter['charge_invoice'] === 'Y') {
+        if($parameter['charge_invoice'] === 'Y')  {
             $antrian_status = self::$query->update('antrian_nomor', array(
                 'status' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P'
             ))

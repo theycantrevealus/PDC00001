@@ -1,4 +1,5 @@
 <p class="text-dark-gray d-flex align-items-center mt-3">
+    Tanggal Asesmen :
 	<i class="material-icons icon-muted mr-2">event</i>
 	<strong><?php echo date('d F Y', strtotime($_POST['setter']['created_at'])); ?></strong>
 </p>
@@ -63,7 +64,7 @@
         <div class="card">
             <div class="card-header card-header-large bg-white">
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-12">
                         <div class="segmen_keluhan_utama">
                             <div class="d-flex align-items-center">
                                 <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Pemeriksaan Fisik</strong></a>
