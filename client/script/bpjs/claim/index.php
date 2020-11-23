@@ -556,7 +556,6 @@
 
             if(selectedSEP !== "" && selectedSEP !== null) {
                 $("#modal-sep-edit").modal("show");
-
                 var RM = $("#rm_" + uid).html();
 
                 $("#txt_bpjs_rm").val(RM);
@@ -572,137 +571,147 @@
                         var data = response.response_package.response_data[0];
                         selectedSEPAntriamMeta = data;
 
-                        var diagnosa_kerja = data.diagnosa_kerja;
-                        var diagnosa_banding = data.diagnosa_banding;
-                        var icd10_kerja = data.icd10_kerja;
-                        var icd10_banding = data.icd10_banding;
+                        if(data.pasien_detail === undefined) {
+                            Swal.fire(
+                                "BPJS",
+                                "Data SEP tidak terdeteksi",
+                                "warning"
+                            ).then((result) => {
+                                $("#modal-sep-edit").modal("hide");
+                            });
+                        } else {
+                            var diagnosa_kerja = data.diagnosa_kerja;
+                            var diagnosa_banding = data.diagnosa_banding;
+                            var icd10_kerja = data.icd10_kerja;
+                            var icd10_banding = data.icd10_banding;
 
-                        $("#txt_bpjs_internal_dk").html(diagnosa_kerja);
-                        $("#txt_bpjs_internal_db").html(diagnosa_banding);
-                        $("#txt_bpjs_nama").val(data.pasien_detail.nama);
-                        $("#txt_bpjs_nik").val(data.pasien_detail.nik);
-                        $("#txt_bpjs_telepon").val(data.pasien_detail.no_telp);
+                            $("#txt_bpjs_internal_dk").html(diagnosa_kerja);
+                            $("#txt_bpjs_internal_db").html(diagnosa_banding);
+                            $("#txt_bpjs_nama").val(data.pasien_detail.nama);
+                            $("#txt_bpjs_nik").val(data.pasien_detail.nik);
+                            $("#txt_bpjs_telepon").val(data.pasien_detail.no_telp);
 
-                        for(var pKey in data.pasien_detail.history_penjamin) {
-                            if(data.pasien_detail.history_penjamin[pKey].penjamin === __UIDPENJAMINBPJS__)
-                            {
-                                var metaDataBPJS = JSON.parse(data.pasien_detail.history_penjamin[pKey].rest_meta);
-                                selectedSEPNoKartu = metaDataBPJS.response.peserta.noKartu;
-                                $("#txt_bpjs_nomor").val(metaDataBPJS.response.peserta.noKartu);
+                            for(var pKey in data.pasien_detail.history_penjamin) {
+                                if(data.pasien_detail.history_penjamin[pKey].penjamin === __UIDPENJAMINBPJS__)
+                                {
+                                    var metaDataBPJS = JSON.parse(data.pasien_detail.history_penjamin[pKey].rest_meta);
+                                    selectedSEPNoKartu = metaDataBPJS.response.peserta.noKartu;
+                                    $("#txt_bpjs_nomor").val(metaDataBPJS.response.peserta.noKartu);
+                                }
                             }
-                        }
 
-                        $.ajax({
-                            async: false,
-                            url:__HOSTAPI__ + "/BPJS/get_rujukan_list/" + $("#txt_bpjs_nomor").val(),
-                            type: "GET",
-                            beforeSend: function(request) {
-                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                            },
-                            success: function(response) {
-                                $("#txt_bpjs_nomor_rujukan " + " option").remove();
-                                $("#txt_bpjs_nomor_rujukan").select2("destroy");
-                                $("#txt_bpjs_nomor_rujukan").select2(/*{disabled:"readonly"}*/);
-                                $("#txt_bpjs_nomor_rujukan").select2("val", "");
-                                if(response.response_package.content.response !== null) {
-                                    $("#panel-rujukan").show();
-                                    var data = response.response_package.content.response.rujukan;
-                                    selectedListRujukan = data;
-
+                            $.ajax({
+                                async: false,
+                                url:__HOSTAPI__ + "/BPJS/get_rujukan_list/" + $("#txt_bpjs_nomor").val(),
+                                type: "GET",
+                                beforeSend: function(request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                success: function(response) {
+                                    $("#txt_bpjs_nomor_rujukan " + " option").remove();
+                                    $("#txt_bpjs_nomor_rujukan").select2("destroy");
+                                    $("#txt_bpjs_nomor_rujukan").select2(/*{disabled:"readonly"}*/);
+                                    $("#txt_bpjs_nomor_rujukan").select2("val", "");
+                                    if(response.response_package.content.response !== null) {
+                                        $("#panel-rujukan").show();
+                                        var data = response.response_package.content.response.rujukan;
+                                        selectedListRujukan = data;
 
 
-                                    if(data.length > 0) {
-                                        isRujukan = true;
-                                        for(var a = 0; a < data.length; a++) {
-                                            if(parseInt(data[a].pelayanan.kode) === 2) {
-                                                var selection = document.createElement("OPTION");
 
-                                                $(selection).attr("value", data[a].noKunjungan.toUpperCase()).html(data[a].noKunjungan.toUpperCase());
-                                                $("#txt_bpjs_nomor_rujukan").append(selection);
+                                        if(data.length > 0) {
+                                            isRujukan = true;
+                                            for(var a = 0; a < data.length; a++) {
+                                                if(parseInt(data[a].pelayanan.kode) === 2) {
+                                                    var selection = document.createElement("OPTION");
+
+                                                    $(selection).attr("value", data[a].noKunjungan.toUpperCase()).html(data[a].noKunjungan.toUpperCase());
+                                                    $("#txt_bpjs_nomor_rujukan").append(selection);
+                                                }
                                             }
-                                        }
 
-                                        $(".informasi_rujukan").show();
-                                        $("#btnProsesSEP").show();
-                                        loadInformasiRujukan(selectedListRujukan[0]);
-                                        loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+                                            $(".informasi_rujukan").show();
+                                            $("#btnProsesSEP").show();
+                                            loadInformasiRujukan(selectedListRujukan[0]);
+                                            loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+                                        } else {
+                                            isRujukan = false;
+                                            $(".informasi_rujukan").hide();
+                                            $("#btnProsesSEP").hide();
+                                        }
                                     } else {
-                                        isRujukan = false;
+                                        isRujukan = false
                                         $(".informasi_rujukan").hide();
+                                        $("#panel-rujukan").hide();
                                         $("#btnProsesSEP").hide();
                                     }
-                                } else {
-                                    isRujukan = false
-                                    $(".informasi_rujukan").hide();
-                                    $("#panel-rujukan").hide();
-                                    $("#btnProsesSEP").hide();
+                                    $("#rujukan_loading").hide();
+                                    $("#panel_rujukan_result").fadeIn();
+                                },
+                                error: function(response) {
+                                    console.log(response);
                                 }
-                                $("#rujukan_loading").hide();
-                                $("#panel_rujukan_result").fadeIn();
-                            },
-                            error: function(response) {
-                                console.log(response);
+                            });
+
+
+                            for(var dKey in icd10_kerja)
+                            {
+                                $("#txt_bpjs_internal_icdk").append("<li>" + icd10_kerja[dKey].nama + "</li>");
                             }
-                        });
 
-
-                        for(var dKey in icd10_kerja)
-                        {
-                            $("#txt_bpjs_internal_icdk").append("<li>" + icd10_kerja[dKey].nama + "</li>");
-                        }
-
-                        for(var dKey in icd10_banding)
-                        {
-                            $("#txt_bpjs_internal_icdb").append("<li>" + icd10_banding[dKey].nama + "</li>");
-                        }
+                            for(var dKey in icd10_banding)
+                            {
+                                $("#txt_bpjs_internal_icdb").append("<li>" + icd10_banding[dKey].nama + "</li>");
+                            }
 
 
 
-                        //Load SEP Detail
-                        $.ajax({
-                            async: false,
-                            url:__HOSTAPI__ + "/BPJS/get_sep_detail/" + uid,
-                            type: "GET",
-                            beforeSend: function(request) {
-                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                            },
-                            success: function(response){
-                                $("#txt_bpjs_poli_tujuan").append("<option value=\"" + response.response_package.response_data[0].poli_tujuan_detail.kode + "\">" + response.response_package.response_data[0].poli_tujuan_detail.nama + "</option>").val(response.response_package.response_data[0].poli_tujuan_detail.kode).trigger("change")/*.select2({
+                            //Load SEP Detail
+                            $.ajax({
+                                async: false,
+                                url:__HOSTAPI__ + "/BPJS/get_sep_detail/" + uid,
+                                type: "GET",
+                                beforeSend: function(request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                success: function(response){
+                                    $("#txt_bpjs_poli_tujuan").append("<option value=\"" + response.response_package.response_data[0].poli_tujuan_detail.kode + "\">" + response.response_package.response_data[0].poli_tujuan_detail.nama + "</option>").val(response.response_package.response_data[0].poli_tujuan_detail.kode).trigger("change")/*.select2({
                                     disabled:"readonly"
                                 })*/;
 
-                                $("input[name=\"txt_bpjs_poli_eksekutif\"][value=\"" + response.response_package.response_data[0].poli_eksekutif + "\"]").prop("checked", true);
-                                $("#txt_bpjs_catatan").val(response.response_package.response_data[0].catatan);
-                                $("#txt_bpjs_skdp").val(response.response_package.response_data[0].skdp);
-                                $("input[name=\"txt_bpjs_cob\"][value=\"" + response.response_package.response_data[0].pasien_cob + "\"]").prop("checked", true);
-                                $("input[name=\"txt_bpjs_katarak\"][value=\"" + response.response_package.response_data[0].pasien_katarak + "\"]").prop("checked", true);
-                                $("input[name=\"txt_bpjs_laka\"][value=\"" + response.response_package.response_data[0].laka_lantas + "\"]").prop("checked", true).trigger("change");
-                                var lakaPenjamin = response.response_package.response_data[0].laka_lantas_penjamin.split(",");
-                                for(var laka_pKey in lakaPenjamin) {
-                                    $("input[name=\"txt_bpjs_laka_penjamin\"][value=\"" + lakaPenjamin[laka_pKey] + "\"]").prop("checked", true);
+                                    $("input[name=\"txt_bpjs_poli_eksekutif\"][value=\"" + response.response_package.response_data[0].poli_eksekutif + "\"]").prop("checked", true);
+                                    $("#txt_bpjs_catatan").val(response.response_package.response_data[0].catatan);
+                                    $("#txt_bpjs_skdp").val(response.response_package.response_data[0].skdp);
+                                    $("input[name=\"txt_bpjs_cob\"][value=\"" + response.response_package.response_data[0].pasien_cob + "\"]").prop("checked", true);
+                                    $("input[name=\"txt_bpjs_katarak\"][value=\"" + response.response_package.response_data[0].pasien_katarak + "\"]").prop("checked", true);
+                                    $("input[name=\"txt_bpjs_laka\"][value=\"" + response.response_package.response_data[0].laka_lantas + "\"]").prop("checked", true).trigger("change");
+                                    var lakaPenjamin = response.response_package.response_data[0].laka_lantas_penjamin.split(",");
+                                    for(var laka_pKey in lakaPenjamin) {
+                                        $("input[name=\"txt_bpjs_laka_penjamin\"][value=\"" + lakaPenjamin[laka_pKey] + "\"]").prop("checked", true);
+                                    }
+
+                                    if(response.response_package.response_data[0].laka_lantas_tanggal !== null) {
+                                        var lakaTanggal = response.response_package.response_data[0].laka_lantas_tanggal, datePartsLaka = lakaTanggal.match(/(\d+)/g)
+                                        realDateLaka = new Date(datePartsLaka[0], datePartsLaka[1] - 1, datePartsLaka[2]);
+                                        $("#txt_bpjs_laka_tanggal").datepicker("setDate", realDateLaka);
+                                    }
+
+                                    $("#txt_bpjs_laka_keterangan").val(response.response_package.response_data[0].laka_lantas_keterangan);
+                                    $("input[name=\"txt_bpjs_laka_suplesi\"][value=\"" + response.response_package.response_data[0].laka_lantas_suplesi + "\"]").prop("checked", true).trigger("change");
+                                    $("#txt_bpjs_laka_suplesi_nomor").val(response.response_package.response_data[0].laka_lantas_suplesi_sep);
+
+                                    loadProvinsi("#txt_bpjs_laka_suplesi_provinsi", response.response_package.response_data[0].laka_lantas_provinsi);
+                                    loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val(), response.response_package.response_data[0].laka_lantas_kabupaten);
+                                    loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val(), response.response_package.response_data[0].laka_lantas_kecamatan);
+
+                                },
+                                error: function(response) {
+                                    console.log(response);
                                 }
+                            });
 
-                                if(response.response_package.response_data[0].laka_lantas_tanggal !== null) {
-                                    var lakaTanggal = response.response_package.response_data[0].laka_lantas_tanggal, datePartsLaka = lakaTanggal.match(/(\d+)/g)
-                                    realDateLaka = new Date(datePartsLaka[0], datePartsLaka[1] - 1, datePartsLaka[2]);
-                                    $("#txt_bpjs_laka_tanggal").datepicker("setDate", realDateLaka);
-                                }
-
-                                $("#txt_bpjs_laka_keterangan").val(response.response_package.response_data[0].laka_lantas_keterangan);
-                                $("input[name=\"txt_bpjs_laka_suplesi\"][value=\"" + response.response_package.response_data[0].laka_lantas_suplesi + "\"]").prop("checked", true).trigger("change");
-                                $("#txt_bpjs_laka_suplesi_nomor").val(response.response_package.response_data[0].laka_lantas_suplesi_sep);
-
-                                loadProvinsi("#txt_bpjs_laka_suplesi_provinsi", response.response_package.response_data[0].laka_lantas_provinsi);
-                                loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val(), response.response_package.response_data[0].laka_lantas_kabupaten);
-                                loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val(), response.response_package.response_data[0].laka_lantas_kecamatan);
-
-                            },
-                            error: function(response) {
-                                console.log(response);
-                            }
-                        });
-
-                        SEPButton.html("Daftar SEP").removeClass("btn-warning").addClass("btn-info");
+                            SEPButton.html("Daftar SEP").removeClass("btn-warning").addClass("btn-info");
+                        }
                     },
                     error: function(response) {
                         console.log(response);

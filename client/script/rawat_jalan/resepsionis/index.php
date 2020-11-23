@@ -109,7 +109,8 @@
 							    if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
                                     return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
                                 } else {
-							        return row["penjamin"];
+                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+							        //return row["penjamin"];
                                 }
 							}
 						} else {
@@ -188,6 +189,47 @@
         var isRujukan = false;
 
         $("body").on("click", ".daftar_sep", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Pasien/pasien-detail/" + id,
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function (response) {
+                    var data = response.response_package.response_data[0];
+                    var penjaminList = data.history_penjamin;
+                    var bpjsMeta;
+
+                    for(var penjaminKey in penjaminList) {
+                        if(penjaminList[penjaminKey].penjamin === __UIDPENJAMINBPJS__) {
+                            bpjsMeta = penjaminList[penjaminKey].rest_meta;
+                        }
+                    }
+
+                    if(bpjsMeta !== undefined) {
+                        $("#txt_bpjs_nama").val(data.nama);
+                        $("#txt_bpjs_nik").val(data.nik);
+                        $("#txt_bpjs_telepon").val(data.no_telp);
+
+                        for(var pKey in data.history_penjamin) {
+                            if(data.history_penjamin[pKey].penjamin === __UIDPENJAMINBPJS__)
+                            {
+                                var metaDataBPJS = JSON.parse(data.history_penjamin[pKey].rest_meta);
+                                selectedSEPNoKartu = metaDataBPJS.response.peserta.noKartu;
+                                $("#txt_bpjs_nomor").val(metaDataBPJS.response.peserta.noKartu);
+                                loadKelasRawat(metaDataBPJS.response.peserta.hakKelas.keterangan);
+                            }
+                        }
+                    }
+                },
+                error: function(response) {
+                    //
+                }
+            });
 
             loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
             loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val());
@@ -401,20 +443,6 @@
 
                     $("#txt_bpjs_internal_dk").html(diagnosa_kerja);
                     $("#txt_bpjs_internal_db").html(diagnosa_banding);
-                    $("#txt_bpjs_nama").val(data.pasien_detail.nama);
-                    $("#txt_bpjs_nik").val(data.pasien_detail.nik);
-                    $("#txt_bpjs_telepon").val(data.pasien_detail.no_telp);
-
-                    for(var pKey in data.pasien_detail.history_penjamin) {
-                        if(data.pasien_detail.history_penjamin[pKey].penjamin === __UIDPENJAMINBPJS__)
-                        {
-                            var metaDataBPJS = JSON.parse(data.pasien_detail.history_penjamin[pKey].rest_meta);
-                            selectedSEPNoKartu = metaDataBPJS.response.peserta.noKartu;
-                            $("#txt_bpjs_nomor").val(metaDataBPJS.response.peserta.noKartu);
-                            loadKelasRawat(metaDataBPJS.response.peserta.hakKelas.keterangan);
-                        }
-                    }
-
 
 
                     $.ajax({

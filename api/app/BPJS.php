@@ -156,6 +156,9 @@ class BPJS extends Utility {
                 case 'get_sep_detail':
                     return self::get_sep_detail($parameter[2]);
                     break;
+                case 'info_bpjs':
+                    return self::info_bpjs($parameter[2]);
+                    break;
 				default:
 					return 'Unknown request';
 			}
@@ -192,6 +195,12 @@ class BPJS extends Utility {
 			return 'Error => ' . $e;
 		}
 	}
+
+    public function info_bpjs($parameter) {
+	    $Pasien = new Pasien(self::$pdo);
+	    $data = $Pasien->get_pasien_detail('pasien', $parameter);
+	    return $data;
+    }
 
     private function get_poli_detail($parameter) {
         $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/poli/' . $parameter);

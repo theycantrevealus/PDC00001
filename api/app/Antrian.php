@@ -627,8 +627,12 @@ class Antrian extends Utility
 
                         if ($antrianKunjungan['response_result'] > 0) {
                             unset($parameter['dataObj']['currentPasien']);
-                            $antrian['response_notif'] = 'P';
+                            unset($parameter['dataObj']['valid_start']);
+                            unset($parameter['dataObj']['valid_end']);
+                            unset($parameter['dataObj']['penjaminMeta']);
+
                             $antrian = self::tambah_antrian('antrian', $parameter, $uid);
+                            $antrian['response_notif'] = 'P';
                             return $antrian;
                         } else {
                             $antrianKunjungan['response_notif'] = 'P';
