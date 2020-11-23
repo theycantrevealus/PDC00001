@@ -1352,15 +1352,20 @@
                 var jlh_hari = $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue");
                 var signa_konsumsi = $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue");
                 var signa_hari = $("#resep_signa_takar_" + id).inputmask("unmaskedvalue");
-
+                var aturanPakai = $("#resep_aturan_pakai_" + id).val();
                 if(
                     parseFloat(jlh_hari) > 0 &&
                     parseFloat(signa_konsumsi) > 0 &&
                     parseFloat(signa_hari) > 0 &&
                     obat != null &&
-                    $("#resep_row_" + id).hasClass("last-resep")
+                    $("#resep_row_" + id).hasClass("last-resep") &&
+                    parseInt(aturanPakai) > 0
                 ) {
                     autoResep();
+                } else {
+                    if(aturanPakai === "none") {
+                        notify_manual("info", "<i class=\"fa fa-info-circle\"></i> Aturan pakai harus diisi", 1000, "aturan_pakai_" + id, "#resep_aturan_pakai_" + id);
+                    }
                 }
             }
         }
@@ -1462,7 +1467,7 @@
             var dataAturanPakai = autoAturanPakai();
 
             $(newCellResepObat).find("div.aturan-pakai-container").append(newAturanPakai);
-            $(newAturanPakai).addClass("form-control aturan-pakai");
+            $(newAturanPakai).addClass("form-control aturan-pakai-resep");
             $(newAturanPakai).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
             for(var aturanPakaiKey in dataAturanPakai) {
                 $(newAturanPakai).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
@@ -1563,6 +1568,8 @@
                     "satuan-caption": data["satuan-caption"],
                     "satuan-terkecil": data["satuan-terkecil"]
                 });
+
+                checkGenerateResep(data["id"]);
 
                 //============KATEGORI OBAT
 
@@ -1715,6 +1722,10 @@
                     "id": "resep_obat_" + id
                 });
 
+                $(this).find("td:eq(1) select:eq(1)").attr({
+                    "id": "resep_aturan_pakai_" + id
+                });
+
                 //load_product_resep($(this).find("td:eq(1) select.resep-obat"), "");
                 if($(this).find("td:eq(1) select.resep-obat").val() != "none") {
                     /*var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
@@ -1744,18 +1755,36 @@
                 autoRacikan();
             } else {
                 var obat = $("#racikan_nama_" + id).val();
+                var komposisi = $("#komposisi_" + id + " tbody tr").length;
                 var jlh_obat = $("#racikan_jumlah_" + id).inputmask("unmaskedvalue");
                 var signa_konsumsi = $("#racikan_signaA_" + id).inputmask("unmaskedvalue");
                 var signa_hari = $("#racikan_signaB_" + id).inputmask("unmaskedvalue");
+                var aturanPakai = $("#aturan_pakai_racikan_" + id).val();
 
                 if(
                     parseFloat(jlh_obat) > 0 &&
                     parseFloat(signa_konsumsi) > 0 &&
                     parseFloat(signa_hari) > 0 &&
-                    obat != null &&
-                    $("#row_racikan_" + id).hasClass("last-racikan")
+                    $("#row_racikan_" + id).hasClass("last-racikan") &&
+                    aturanPakai !== "none" &&
+                    komposisi > 0
                 ) {
+                    if(obat === "") {
+                        $("#racikan_nama_" + id).val("Racikan " + id);
+                    }
                     autoRacikan();
+                } else {
+                    if(aturanPakai === "none") {
+                        notify_manual("info", "<i class=\"fa fa-info-circle\"></i> Aturan pakai harus diisi", 1000, "aturan_pakai_racikan_" + id, "#aturan_pakai_racikan_" + id);
+                    }
+
+                    if(komposisi === 0) {
+                        notify_manual("info", "<i class=\"fa fa-info-circle\"></i> Komposisi racikan belum diisi", 1000, "komposisi_" + id, "#komposisi_" + id);
+                    }
+
+                    if(signa_hari === 0 || signa_konsumsi === 0) {
+                        notify_manual("info", "<i class=\"fa fa-info-circle\"></i> Signa belum diisi", 1000, "racikan_signaA_" + id, "#racikan_signaA_" + id, "top");
+                    }
                 }
             }
         }
@@ -1823,7 +1852,7 @@
 
             var dataAturanPakai = autoAturanPakai();
 
-            $(newAturanPakaiRacikan).addClass("form-control aturan-pakai");
+            $(newAturanPakaiRacikan).addClass("form-control aturan-pakai-racikan");
             var newKeteranganRacikan = document.createElement("TEXTAREA");
             $(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<span>Keterangan</span>").append(newKeteranganRacikan);
             $(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
@@ -1913,6 +1942,7 @@
                 $(this).find("td:eq(1) input").attr({
                     "id": "racikan_nama_" + id
                 });
+
                 if($(this).find("td:eq(1) input") == "") {
                     $(this).find("td:eq(1) input").val("RACIKAN " + id);
                 }
@@ -1923,6 +1953,10 @@
 
                 $(this).find("td:eq(1) button.tambahKomposisi").attr({
                     "id": "tambah_komposisi_" + id
+                });
+
+                $(this).find("td:eq(1) select.aturan-pakai-racikan").attr({
+                    "id": "aturan_pakai_racikan_" + id
                 });
 
                 $(this).find("td:eq(2) input").attr({
@@ -2269,6 +2303,8 @@
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
 
+            checkGenerateResep(id);
+
             if($(this).val() != "none") {
                 var dataKategoriPerObat = autoKategoriObat(data['id']);
                 var kategoriObatDOM = "";
@@ -2297,6 +2333,23 @@
                 $("#resep_row_" + id).find("td:eq(1) div.kategori-obat-container").html("<span>Kategori Obat</span><br />");
             }
         });
+
+        $("body").on("change", ".aturan-pakai-resep", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            checkGenerateResep(id);
+        });
+
+
+        $("body").on("change", ".aturan-pakai-racikan", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            checkGenerateRacikan(id);
+        });
+
+
 
         $("body").on("click", ".resep_delete", function() {
             var id = $(this).attr("id").split("_");
@@ -2773,7 +2826,7 @@
             var resep = [];
             $("#table-resep tbody tr").each(function() {
                 var obat = $(this).find("td:eq(1) select.resep-obat").val();
-                var aturanPakai = $(this).find("td:eq(1) select.aturan-pakai").val();
+                var aturanPakai = $(this).find("td:eq(1) select.aturan-pakai-resep").val();
                 var keteranganPerObat = $(this).find("td:eq(1) textarea").val();
                 var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
                 var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");

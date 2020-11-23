@@ -131,7 +131,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return row.sep_no;
-                    }cd/va
+                    }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
