@@ -2,6 +2,8 @@
 	$(function(){
 		var currentPasien = localStorage.getItem("currentPasien");
 		var currentAntrianID = localStorage.getItem("currentAntrianID");
+		var curremtAntrianType = localStorage.getItem("currentAntrianType");
+
 		var penjaminMetaData;
 
 		/*alert(currentPasien);
@@ -11,8 +13,18 @@
 		var dataPasien = loadPasien(uid_pasien);
 
 		loadPenjamin();
-		loadPoli();
-		loadPrioritas();
+		if(curremtAntrianType !== "DEFAULT") {
+            loadPoli(curremtAntrianType);
+            loadDokter(curremtAntrianType);
+        } else {
+            loadPoli();
+        }
+
+        if(curremtAntrianType !== "DEFAULT") {
+            loadPrioritas(__PRIORITY_HIGH__);
+        } else {
+            loadPrioritas();
+        }
 
 		$("#departemen").on('change', function(){
 			var poli = $(this).val();
@@ -28,7 +40,6 @@
 				$('.inputan').each(function(){
 					var key = $(this).attr("id");
 					var value = $(this).val();
-
 					dataObj[key] = value;
 				});
 
@@ -92,7 +103,7 @@
                                 localStorage.getItem("currentPasien");
                                 localStorage.getItem("currentAntrianID");
 
-							    if(response.response_package.response_notif == 'K') {
+                                if(response.response_package.response_notif == 'K') {
 									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
                                     Swal.fire(
                                         'Berhasil ditambahkan!',
@@ -161,6 +172,7 @@
 					success: function(response){
                         localStorage.getItem("currentPasien");
                         localStorage.getItem("currentAntrianID");
+
 
                         if(response.response_package.response_notif == 'K') {
                             push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
@@ -342,7 +354,7 @@
         return dataPenjamin;
     }
 
-    function loadPoli(){
+    function loadPoli(targetted = ""){
     	var dataPoli = null;
 
         $.ajax({
@@ -360,9 +372,20 @@
 	                    var selection = document.createElement("OPTION");
 	                    if(MetaData[i].uid !== __POLI_INAP__) {
                             $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            if(targetted !== "") {
+                                if(MetaData[i].uid === targetted) {
+                                    $(selection).attr("selected", "selected");
+                                }
+                            }
                             $("#departemen").append(selection);
                         }
 	                }
+
+                    if(targetted !== "") {
+                        $("#departemen").attr("disabled", "disabled");
+                    } else {
+                        $("#departemen").removeAttr("disabled");
+                    }
                 }
             },
             error: function(response) {
@@ -373,7 +396,7 @@
         return dataPoli;
     }
 
-    function loadPrioritas(){
+    function loadPrioritas(targetted = 0){
     	var term = 11;
 
         $.ajax({
@@ -391,8 +414,19 @@
 	                    var selection = document.createElement("OPTION");
 
 	                    $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+	                    if(parseInt(targetted) > 0) {
+	                        if(parseInt(MetaData[i].id) === targetted) {
+                                $(selection).attr("selected", "selected");
+                            }
+                        }
 	                    $("#prioritas").append(selection);
 	                }
+
+                    if(parseInt(targetted) > 0) {
+                        $("#prioritas").attr("disabled", "disabled");
+                    } else {
+                        $("#prioritas").removeAttr("disabled");
+                    }
                 }
             },
             error: function(response) {

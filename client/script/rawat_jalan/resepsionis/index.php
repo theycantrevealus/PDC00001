@@ -2,6 +2,7 @@
 	$(function(){
 		var params;
 		var MODE = false;
+		var currentAntrianType = "DEFAULT";
         $(".sep").select2();
         $("#txt_bpjs_tanggal_rujukan").datepicker({
             dateFormat: "DD, dd MM yy",
@@ -60,7 +61,14 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+				    var data = response.response_package.response_data;
+				    var filtered = [];
+				    for(var key in data) {
+				        if(data[key].departemen !== "IGD") {
+				            filtered.push(data[key])
+                        }
+                    }
+					return filtered;
 				}
 			},
 			autoWidth: false,
@@ -134,6 +142,93 @@
 				}
 			]
 		});
+
+
+
+
+        var tableAntrianIGD= $("#table-antrian-IGD").DataTable({
+            "ajax":{
+                url: __HOSTAPI__ + "/Antrian/igd",
+                type: "GET",
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    return response.response_package.response_data;
+                }
+            },
+            autoWidth: false,
+            "bInfo" : false,
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["autonum"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["waktu_masuk"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"nama_" + row.uid_pasien + "\">" + row["pasien"] + "<span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
+                            if(parseInt(row['sep']) > 0) {
+                                return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row.sep + "</h6>";
+                            } else {
+                                if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
+                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                } else {
+                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                    //return row["penjamin"];
+                                }
+                            }
+                        } else {
+                            return row["penjamin"];
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["user_resepsionis"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-info btn-sm btn-pasien-pulang\">" +
+                            "<i class=\"fa fa-check\"></i> Pulangkan Pasien" +
+                            "</button>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+        $("#btnTambahIGD").click(function() {
+            //$("#modal-tambah-igd").modal("show");
+            currentAntrianType = __POLI_IGD__;
+            $("#modal-cari").modal("show");
+        });
 
 		$("body").on("click", ".btn-pasien-pulang", function() {
 		    var id = $(this).attr("id").split("_");
@@ -725,6 +820,7 @@
 			if(currentAntrian == undefined || currentAntrian == null) {
 				alert("Tidak ada antrian");
 			} else {
+                currentAntrianType = "DEFAULT";
 				$("#btnTambahPasien").fadeOut("false");
 				$("#txt_cari").val("");
 				$("#table-list-pencarian tbody").html("<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>");
@@ -735,7 +831,9 @@
 		$("body").on("click", ".btnDaftarPasien", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
+
 			localStorage.setItem("currentPasien", uid);
+            localStorage.setItem("currentAntrianType", currentAntrianType);
 			localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
 			location.href = __HOSTNAME__ + "/rawat_jalan/resepsionis/tambah/" + uid;
 		});
@@ -1613,6 +1711,105 @@
             <div class="modal-footer">
                 <button class="btn btn-success" id="btnProsesSEP">
                     <i class="fa fa-check"></i> Proses
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="modal-tambah-igd" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    Tambah Pasien IGD
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card card-form">
+                    <div class="row no-gutters">
+                        <div class="col-lg-4 card-body">
+                            <p><strong class="headings-color">Informasi Pasien</strong></p>
+                            <p class="text-muted">Mohon pastikan informasi pasien cocok</p>
+                        </div>
+                        <div class="col-lg-8 card-form__body card-body">
+                            <div class="form-row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="">Nama Pasien</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="nama" disabled required>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="">Jenis Kelamin</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="nama_jenkel" disabled required>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="">Nomor Rekam Medis</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="no_rm" disabled required>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="">Tanggal Lahir</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="tanggal_lahir" disabled required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-form">
+                    <div class="row no-gutters">
+                        <div class="col-lg-4 card-body">
+                            <p><strong class="headings-color">Detail Kunjungan</strong></p>
+                            <p class="text-muted">Mohon masukkan data dengan benar<br>* Wajib diisi</p>
+                        </div>
+                        <div class="col-lg-8 card-form__body card-body">
+                            <div class="form-row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Pembayaran <span class="red">*</span></label>
+                                    <select id="penjamin" class="form-control select2 inputan" required>
+                                        <option value="" disabled selected>Pilih Jenis Pembayaran</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Prioritas <span class="red">*</span></label>
+                                    <select id="prioritas" class="form-control select2 inputan" required>
+                                        <option value="" disabled selected>Pilih Prioritas</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Dokter <span class="red">*</span></label>
+                                    <select id="dokter" class="form-control select2 inputan" required>
+                                        <option value="" disabled selected>Pilih Dokter</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Penanggung Jawab Pasien <span class="red">*</span></label>
+                                    <input type="" name="pj_pasien" id="pj_pasien" maxlength="100" class="form-control inputan" required value="">
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Informasi didapat dari <span class="red">*</span></label>
+                                    <input type="" name="info_didapat_dari" id="info_didapat_dari" maxlength="100" class="form-control inputan" required value="">
+                                </div>
+                                <div class="col-lg-8 card-form__body card-body">
+                                    <div class="form-row">
+                                        <button type="submit" class="btn btn-success" id="btnSubmit">Simpan Data</button>
+                                        &nbsp;
+                                        <a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/resepsionis" class="btn btn-danger">Batal</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnProsesSEP">
+                    <i class="fa fa-check"></i> Tambah
                 </button>
 
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>

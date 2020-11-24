@@ -923,7 +923,8 @@ class Invoice extends Utility
                 if ($allowAntrian == true) {
                     //Pembayaran Kartu Non Umum Segera masukkan pada antrian poliklinik
                     $KunjunganData = self::$query->select('antrian_nomor', array(
-                        'dokter'
+                        'dokter',
+                        'prioritas'
                     ))
                         ->where(array(
                             'antrian_nomor.pasien' => '= ?',
@@ -940,7 +941,7 @@ class Invoice extends Utility
                         'departemen' => $parameter['poli'],
                         'pasien' => $parameter['pasien'],
                         'penjamin' => $parameter['penjamin'],
-                        'prioritas' => 36,
+                        'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
                         'dokter' => $KunjunganData['response_data'][0]['dokter']
                     );
                     $AntrianProses = $Antrian::tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
