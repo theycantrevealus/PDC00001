@@ -33,6 +33,9 @@
     var __POLI_IGD__ = <?php echo json_encode(__POLI_IGD__); ?>;
     var __POLI_LAB__ = <?php echo json_encode(__POLI_LAB__); ?>;
 
+    var __PRIORITY_HIGH__ = <?php echo json_encode(__PRIORITY_HIGH__); ?>;
+    var __ANTRIAN_KHUSUS__ = <?php echo json_encode(__ANTRIAN_KHUSUS__); ?>;
+
 	var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
     var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!

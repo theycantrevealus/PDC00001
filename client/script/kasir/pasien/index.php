@@ -263,7 +263,8 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
+						//return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
+                        return row.antrian_kunjungan.pegawai.nama;
 					}
 				},
 				{

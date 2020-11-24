@@ -10,7 +10,9 @@
 			$("#current-poli").removeClass("handy");
 		}
 
-		$("#current-poli").prepend(poliList[0]['nama']);
+		var myPoli = [];
+
+
 
 		function load_poli_info() {
 			//
@@ -48,11 +50,20 @@
 				        if(data[key].uid_poli !== __POLI_INAP__) {
 				            parsedData.push(data[key]);
                         }
+                        myPoli.push(data[key].departemen);
                     }
+
+                    $("#current-poli").prepend(myPoli.join(", "));
 					$("#jlh-antrian").html(parsedData.length);
 					return parsedData;
 				}
 			},
+            "fnRowCallback": function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+
+			    if(parseInt(aData.prioritas) === __PRIORITY_HIGH__) {
+                    $("td", nRow).addClass("bg-danger-custom");
+                }
+            },
 			autoWidth: false,
 			"bInfo" : false,
 			aaSorting: [[0, "asc"]],

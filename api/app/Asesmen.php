@@ -43,7 +43,7 @@ class Asesmen extends Utility {
 					break;
 
 				case 'antrian-asesmen-medis':
-					return self::get_antrian_asesmen_medis();
+					return self::get_antrian_asesmen_medis($parameter);
 					break;
 
 				default:
@@ -2276,7 +2276,7 @@ class Asesmen extends Utility {
 		return $listPasien;
 	}
 
-	private function get_antrian_asesmen_medis(){
+	private function get_antrian_asesmen_medis($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 

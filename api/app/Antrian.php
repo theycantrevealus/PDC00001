@@ -90,6 +90,13 @@ class Antrian extends Utility
         return $worker;
     }
 
+    private function tambah_igd($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $worker = '';
+    }
+
     private function tambah_kunjungan($table, $parameter)
     {
         $Authorization = new Authorization();
@@ -161,6 +168,7 @@ class Antrian extends Utility
                 //$antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
                 $updateNomorAntrian = self::$query->update('antrian_nomor', array(
                     'status' => 'K',
+                    'prioritas' => $parameter['dataObj']['prioritas'],
                     'poli' => $parameter['dataObj']['departemen'],
                     'dokter' => $parameter['dataObj']['dokter'],
                 ))
@@ -276,6 +284,8 @@ class Antrian extends Utility
                 'updated_at' => parent::format_date()
             ))->execute();
 
+
+
             if ($kunjungan['response_result'] > 0) {
                 $log = parent::log(array(
                     'type' => 'activity',
@@ -298,6 +308,8 @@ class Antrian extends Utility
                     ), 'class' => __CLASS__));
 
 
+
+
                 $SInvoice = new Invoice(self::$pdo);
                 $HargaKartu = $SInvoice::get_harga_tindakan(array(
                     'poli' => $parameter['dataObj']['departemen'],
@@ -309,27 +321,51 @@ class Antrian extends Utility
                 //Update antrian kunjungan
                 if ($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__) { // Jika umum
                     if (count($HargaKartu['response_data']) > 0 && floatval($HargaKartu['response_data'][0]['harga']) > 0) {
-                        $antrianKunjungan = self::$query->update('antrian_nomor', array(
-                            'status' => 'K',
-                            'kunjungan' => $uid,
-                            'poli' => $parameter['dataObj']['departemen'],
-                            'pasien' => $parameter['dataObj']['currentPasien'],
-                            'penjamin' => $parameter['dataObj']['penjamin'],
-                            'dokter' => $parameter['dataObj']['dokter']
-                        ))
-                            ->where(array(
-                                'antrian_nomor.id' => '= ?',
-                                'AND',
-                                'antrian_nomor.status' => '= ?'
-                            ), array(
-                                $parameter['dataObj']['currentAntrianID'],
-                                'D'
-                            ))
-                            ->execute();
                         $Pasien = new Pasien(self::$pdo);
                         $PasienDetail = $Pasien::get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
-                        $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
-                        $antrianKunjungan['response_notif'] = 'K';
+
+                        if($parameter['dataObj']['departemen'] === __POLI_IGD__) {
+                            //KHUSUS AUTO ANTRIAN
+                            $antrianKunjungan = self::$query->insert('antrian_nomor', array(
+                                'nomor_urut' => 'IGD',
+                                'pegawai' => $UserData['data']->uid,
+                                'kunjungan' => $uid,
+                                'prioritas' => $parameter['dataObj']['prioritas'],
+                                'pasien' => $parameter['dataObj']['currentPasien'],
+                                'dokter' => $parameter['dataObj']['dokter'],
+                                'penjamin' => $parameter['dataObj']['penjamin'],
+                                'poli' => $parameter['dataObj']['departemen'],
+                                'status' => 'K',
+                                'created_at' => parent::format_date(),
+                                'jenis_antrian' => __ANTRIAN_KHUSUS__
+                            ))
+                                ->execute();
+                            $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
+                            $antrianKunjungan['response_notif'] = 'K';
+                        } else {
+                            $antrianKunjungan = self::$query->update('antrian_nomor', array(
+                                'status' => 'K',
+                                'kunjungan' => $uid,
+                                'prioritas' => $parameter['dataObj']['prioritas'],
+                                'poli' => $parameter['dataObj']['departemen'],
+                                'pasien' => $parameter['dataObj']['currentPasien'],
+                                'penjamin' => $parameter['dataObj']['penjamin'],
+                                'dokter' => $parameter['dataObj']['dokter']
+                            ))
+                                ->where(array(
+                                    'antrian_nomor.id' => '= ?',
+                                    'AND',
+                                    'antrian_nomor.status' => '= ?'
+                                ), array(
+                                    $parameter['dataObj']['currentAntrianID'],
+                                    'D'
+                                ))
+                                ->execute();
+                            $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
+                            $antrianKunjungan['response_notif'] = 'K';
+                        }
+
+
 
 
                         //Invoice Manager
@@ -607,6 +643,7 @@ class Antrian extends Utility
                         $antrianKunjungan = self::$query->update('antrian_nomor', array(
                             'status' => 'P',
                             'kunjungan' => $uid,
+                            'prioritas' => $parameter['dataObj']['prioritas'],
                             'poli' => $parameter['dataObj']['departemen'],
                             'pasien' => $parameter['dataObj']['currentPasien'],
                             'penjamin' => $parameter['dataObj']['penjamin'],
@@ -662,6 +699,7 @@ class Antrian extends Utility
                         $antrianKunjungan = self::$query->update('antrian_nomor', array(
                             'status' => 'K',
                             'kunjungan' => $uid,
+                            'prioritas' => $parameter['dataObj']['prioritas'],
                             'poli' => $parameter['dataObj']['departemen'],
                             'pasien' => $parameter['dataObj']['currentPasien'],
                             'penjamin' => $parameter['dataObj']['penjamin'],
@@ -862,7 +900,8 @@ class Antrian extends Utility
             'dokter as uid_dokter',
             'departemen as uid_poli',
             'penjamin as uid_penjamin',
-            'waktu_masuk'
+            'waktu_masuk',
+            'prioritas'
         ))
             ->join('pasien', array(
                 'nama as pasien',
@@ -903,6 +942,7 @@ class Antrian extends Utility
                 $parameter
             ))
             ->order(array(
+                'antrian.prioritas' => 'DESC',
                 'antrian.waktu_masuk' => 'DESC'
             ))
             ->execute();
@@ -981,6 +1021,10 @@ class Antrian extends Utility
                     return self::get_list_antrian('antrian');
                     break;
 
+                case 'igd':
+                    return self::get_list_antrian('antrian', __POLI_IGD__);
+                    break;
+
                 case 'antrian-detail':
                     return self::get_antrian_detail('antrian', $parameter[2]);
                     break;
@@ -1014,61 +1058,121 @@ class Antrian extends Utility
         }
     }
 
-    private function get_list_antrian($table)
+    private function get_list_antrian($table, $target = '')
     {
-        $data = self::$query
-            ->select($table,
-                array(
-                    'uid',
-                    'pasien as uid_pasien',
-                    'dokter as uid_dokter',
-                    'departemen as uid_poli',
-                    'penjamin as uid_penjamin',
-                    'waktu_masuk',
-                    'waktu_keluar'
+        if($target !== '') {
+            $data = self::$query
+                ->select($table,
+                    array(
+                        'uid',
+                        'pasien as uid_pasien',
+                        'dokter as uid_dokter',
+                        'departemen as uid_poli',
+                        'penjamin as uid_penjamin',
+                        'waktu_masuk',
+                        'waktu_keluar'
+                    )
                 )
-            )
-            ->join('pasien', array(
-                    'nama as pasien',
-                    'no_rm'
+                ->join('pasien', array(
+                        'nama as pasien',
+                        'no_rm'
+                    )
                 )
-            )
-            ->join('master_poli', array(
-                    'nama as departemen'
+                ->join('master_poli', array(
+                        'nama as departemen'
+                    )
                 )
-            )
-            ->join('pegawai', array(
-                    'nama as dokter'
+                ->join('pegawai', array(
+                        'nama as dokter'
+                    )
                 )
-            )
-            ->join('master_penjamin', array(
-                    'nama as penjamin'
+                ->join('master_penjamin', array(
+                        'nama as penjamin'
+                    )
                 )
-            )
-            ->join('kunjungan', array(
-                    'pegawai as uid_resepsionis'
+                ->join('kunjungan', array(
+                        'pegawai as uid_resepsionis'
+                    )
                 )
-            )
-            ->on(array(
-                    array('pasien.uid', '=', $table . '.pasien'),
-                    array('master_poli.uid', '=', $table . '.departemen'),
-                    array('pegawai.uid', '=', $table . '.dokter'),
-                    array('master_penjamin.uid', '=', $table . '.penjamin'),
-                    array('kunjungan.uid', '=', $table . '.kunjungan')
+                ->on(array(
+                        array('pasien.uid', '=', $table . '.pasien'),
+                        array('master_poli.uid', '=', $table . '.departemen'),
+                        array('pegawai.uid', '=', $table . '.dokter'),
+                        array('master_penjamin.uid', '=', $table . '.penjamin'),
+                        array('kunjungan.uid', '=', $table . '.kunjungan')
+                    )
                 )
-            )
-            ->where(array(
-                    $table . '.waktu_keluar' => 'IS NULL',
-                    'AND',
-                    $table . '.deleted_at' => 'IS NULL'
+                ->where(array(
+                        $table . '.departemen' => '= ?',
+                        'AND',
+                        $table . '.waktu_keluar' => 'IS NULL',
+                        'AND',
+                        $table . '.deleted_at' => 'IS NULL'
+                    ), array(
+                        $target
+                    )
                 )
-            )
-            ->order(
-                array(
-                    $table . '.waktu_masuk' => 'DESC'
+                ->order(
+                    array(
+                        $table . '.waktu_masuk' => 'DESC'
+                    )
                 )
-            )
-            ->execute();
+                ->execute();
+        } else {
+            $data = self::$query
+                ->select($table,
+                    array(
+                        'uid',
+                        'pasien as uid_pasien',
+                        'dokter as uid_dokter',
+                        'departemen as uid_poli',
+                        'penjamin as uid_penjamin',
+                        'waktu_masuk',
+                        'waktu_keluar'
+                    )
+                )
+                ->join('pasien', array(
+                        'nama as pasien',
+                        'no_rm'
+                    )
+                )
+                ->join('master_poli', array(
+                        'nama as departemen'
+                    )
+                )
+                ->join('pegawai', array(
+                        'nama as dokter'
+                    )
+                )
+                ->join('master_penjamin', array(
+                        'nama as penjamin'
+                    )
+                )
+                ->join('kunjungan', array(
+                        'pegawai as uid_resepsionis'
+                    )
+                )
+                ->on(array(
+                        array('pasien.uid', '=', $table . '.pasien'),
+                        array('master_poli.uid', '=', $table . '.departemen'),
+                        array('pegawai.uid', '=', $table . '.dokter'),
+                        array('master_penjamin.uid', '=', $table . '.penjamin'),
+                        array('kunjungan.uid', '=', $table . '.kunjungan')
+                    )
+                )
+                ->where(array(
+                        $table . '.waktu_keluar' => 'IS NULL',
+                        'AND',
+                        $table . '.deleted_at' => 'IS NULL'
+                    )
+                )
+                ->order(
+                    array(
+                        $table . '.waktu_masuk' => 'DESC'
+                    )
+                )
+                ->execute();
+        }
 
         $autonum = 1;
         foreach ($data['response_data'] as $key => $value) {
