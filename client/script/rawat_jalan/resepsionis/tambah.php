@@ -38,10 +38,44 @@
 
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 					if(dataObj.penjamin == __UIDPENJAMINBPJS__) {
-						$("#modal-sep").modal("show");
-						$("#btnProsesPasien").hide();
-                        $("#btnProsesSEP").hide();
-						$("#hasil_bpjs").hide();
+
+
+						//Get Nomor BPJS
+                        $.ajax({
+                            async: false,
+                            url: __HOSTAPI__ + "/BPJS/info_bpjs/" + __PAGES__[3],
+                            beforeSend: function (request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type: "GET",
+                            success: function (response) {
+                                $("#modal-sep").modal("show");
+                                $("#btnProsesPasien").hide();
+                                $("#btnProsesSEP").hide();
+                                $("#hasil_bpjs").hide();
+
+                                var data = response.response_package.response_data[0];
+                                var restMeta;
+                                var penjaminList = data.history_penjamin;
+                                for(var penjaminKey in penjaminList) {
+                                    if(penjaminList[penjaminKey].penjamin === __UIDPENJAMINBPJS__) {
+                                        restMeta = JSON.parse(penjaminList[penjaminKey].rest_meta);
+                                    }
+                                }
+
+                                if(restMeta !== undefined) {
+                                    $("#txt_no_bpjs").val(restMeta.response.peserta.noKartu);
+                                    penjaminMetaData = cekPasienBPJS(loadPasien(__PAGES__[3]), restMeta.response.peserta.noKartu);
+                                } else {
+                                    $("#txt_no_bpjs").focus();
+                                }
+                            },
+                            error: function (response) {
+                                //
+                            }
+                        });
+
+
 					} else {
 						$.ajax({
 							async: false,
@@ -113,7 +147,7 @@
                 dataObj.penjaminMeta = JSON.stringify(penjaminMetaData);
             }
 			if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
-				$.ajax({
+			    $.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Antrian",
 					data: {
@@ -125,18 +159,30 @@
 					},
 					type: "POST",
 					success: function(response){
-						//console.log(response)
-						if(response.response_package.response_notif == 'K') {
-							push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-						} else if(response.response_package.response_notif == 'P') {
-							push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-						} else {
-							console.log("command not found");
-						}
+                        localStorage.getItem("currentPasien");
+                        localStorage.getItem("currentAntrianID");
 
-						localStorage.getItem("currentPasien");
-						localStorage.getItem("currentAntrianID");
-						location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                        if(response.response_package.response_notif == 'K') {
+                            push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+                            Swal.fire(
+                                'Berhasil ditambahkan!',
+                                'Silahkan arahkan pasien ke kasir',
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                            });
+                        } else if(response.response_package.response_notif == 'P') {
+                            push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning");
+                            Swal.fire(
+                                'Berhasil ditambahkan!',
+                                'Silahkan arahkan pasien ke poli',
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                            });
+                        } else {
+                            console.log(response);
+                        }
 					},
 					error: function(response) {
 						console.log("Error : ");
@@ -156,74 +202,85 @@
 		$("#btnProsesPasien").hide();
 
 		$("#btnCariPasien").click(function() {
-			$("#hasil_bpjs").hide();
-			$("#btnProsesPasien").hide();
-			$.ajax({
-				async: false,
-				url: __HOSTAPI__ + "/BPJS",
-				data: {
-					request : "cek_peserta",
-					no_bpjs: $("#txt_no_bpjs").val()
-				},
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type: "POST",
-				success: function(response){
-				    var data = response.response_package.content;
-
-				    penjaminMetaData = data;
-				    console.log(penjaminMetaData);
-
-					if(data.metaData.code == 200) {
-
-						$("#hasil_bpjs").fadeIn();
-						var pasienData = data.response.peserta;
-						if(pasienData.statusPeserta.keterangan == "AKTIF") {
-							if(pasienData.nik != dataPasien.nik) { //Cek NIK
-								$("#status_bpjs").addClass("text-danger").removeClass("text-success");
-								$("#status_bpjs").html("NIK tidak sama");
-							} else {
-								$("#status_bpjs").addClass("text-success").removeClass("text-danger");
-								$("#btnProsesPasien").show();
-								$("#status_bpjs").html(pasienData.statusPeserta.keterangan);
-							}
-						} else {
-							$("#status_bpjs").addClass("text-danger").removeClass("text-success");
-						}
-						$("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
-						$("#nama_pasien").html(pasienData.nama);
-						$("#nik_pasien").html(pasienData.nik);
-						$("#nomor_peserta").html(pasienData.noKartu);
-						$("#tll_pasien").html(pasienData.tglLahir);
-						//$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
-						$("#faskes_pasien").html(pasienData.provUmum.nmProvider);
-						$("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
-						$("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
-						
-						$("#tanggal_kartu").html(pasienData.tglCetakKartu);
-
-						//TAT Tanggal Akhir Kartu
-						//TMT Tanggal Mulai Kartu
-
-
-                        $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
-                        $("#txt_bpjs_nik").val(pasienData.nik);
-                        $("#txt_bpjs_nama").val(pasienData.nama);
-                        $("#txt_bpjs_rm").val($("#no_rm").val());
-
-
-					} else if(data.metaData.code == 201) {
-						//Tidak tidak ditemukan
-					}
-				},
-				error: function(response) {
-					console.log("Error : ");
-					console.log(response);
-				}
-			});
+            penjaminMetaData = cekPasienBPJS(dataPasien, $("#txt_no_bpjs").val());
 		});
 	});
+
+	function cekPasienBPJS(dataPasien, target) {
+	    var penjaminMetaData;
+	    $("#hasil_bpjs").hide();
+        $("#btnProsesPasien").hide();
+        $.ajax({
+            async: false,
+            url: __HOSTAPI__ + "/BPJS",
+            data: {
+                request : "cek_peserta",
+                no_bpjs: target
+            },
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type: "POST",
+            success: function(response){
+                var data = response.response_package.content;
+
+                penjaminMetaData = data;
+
+                if(parseInt(data.metaData.code) === 200) {
+
+                    $("#hasil_bpjs").fadeIn();
+                    var pasienData = data.response.peserta;
+                    if(pasienData.statusPeserta.keterangan === "AKTIF") {
+                        if(pasienData.nik != dataPasien.nik) { //Cek NIK
+                            $("#status_bpjs").addClass("text-danger").removeClass("text-success").html("NIK tidak sama");
+                        } else {
+                            $("#status_bpjs").addClass("text-success").removeClass("text-danger").html(pasienData.statusPeserta.keterangan);
+                            $("#btnProsesPasien").show();
+                        }
+                    } else {
+                        $("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
+                    }
+
+                    $("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
+                    $("#nama_pasien").html(pasienData.nama);
+                    $("#nik_pasien").html(pasienData.nik);
+                    $("#nomor_peserta").html(pasienData.noKartu);
+                    $("#tll_pasien").html(pasienData.tglLahir);
+                    //$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
+                    $("#faskes_pasien").html(pasienData.provUmum.nmProvider);
+                    $("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
+                    $("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
+
+                    $("#tanggal_kartu").html(pasienData.tglCetakKartu);
+
+                    //TAT Tanggal Akhir Kartu
+                    //TMT Tanggal Mulai Kartu
+
+
+                    $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
+                    $("#txt_bpjs_nik").val(pasienData.nik);
+                    $("#txt_bpjs_nama").val(pasienData.nama);
+                    $("#txt_bpjs_rm").val($("#no_rm").val());
+
+
+                } else {
+                    Swal.fire(
+                        'BPJS',
+                        data.metaData.message,
+                        'warning'
+                    ).then((result) => {
+                        $("#txt_no_bpjs").focus();
+                    });
+                }
+            },
+            error: function(response) {
+                console.log("Error : ");
+                console.log(response);
+            }
+        });
+
+        return penjaminMetaData;
+    }
 
 	function loadPasien(uid){
 
@@ -431,6 +488,12 @@
 									<i class="fa fa-search"></i>
 								</button>
 							</div>
+                            <div class="col-lg-12">
+                                <br />
+                                <b class="text-warning">
+                                    <i class="fa fa-info-circle"></i> Pastikan nomor sesuai dengan kartu BPJS. Jika tidak sesuai maka kemungkinan pasien yang dipilih salah. Input ulang nomor pada kartu untuk mengecek calon pasien.
+                                </b>
+                            </div>
 						</div>
 					</div>
 				</div>

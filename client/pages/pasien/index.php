@@ -49,7 +49,7 @@
                             <div class="row card-group-row">
                                 <div class="col-lg-12 col-md-12 card-group-row__col">
                                     <div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-                                        <table class="table table-bordered" id="table-pasien">
+                                        <table class="table table-bordered table-striped" id="table-pasien">
                                             <thead class="thead-dark">
                                                 <tr>
                                                     <th style="width: 20px;">No</th>

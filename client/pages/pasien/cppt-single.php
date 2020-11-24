@@ -1,7 +1,6 @@
 <p class="text-dark-gray d-flex align-items-center mt-3">
-    Tanggal Asesmen :
-	<i class="material-icons icon-muted mr-2">event</i>
-	<strong><?php echo date('d F Y', strtotime($_POST['setter']['created_at'])); ?></strong>
+    <i class="material-icons icon-muted mr-2">event</i>
+    <strong><?php echo date('d F Y', strtotime($_POST['setter']['created_at'])); ?></strong>
 </p>
 
 
@@ -9,28 +8,28 @@
 
 
 <div class="row projects-item mb-1">
-	<div class="col-1">
-		<br />
-		<div class="text-dark-gray">Subjective</div>
-	</div>
-	<div class="col-11">
-		<div class="card">
-			<div class="card-header card-header-large bg-white">
-				<div class="row">
-					<div class="col-6">
-						<div class="segmen_keluhan_utama">
-							<div class="d-flex align-items-center">
-								<a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Keluhan Utama</strong></a>
-							</div>
+    <div class="col-1">
+        <br />
+        <div class="text-dark-gray">Subjective</div>
+    </div>
+    <div class="col-11">
+        <div class="card">
+            <div class="card-header card-header-large bg-white">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="segmen_keluhan_utama">
+                            <div class="d-flex align-items-center">
+                                <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Keluhan Utama</strong></a>
+                            </div>
                             <div class="card-body">
                                 <p class="txt_keluhan_utama">
                                     <?php
-                                        echo $_POST['setter']['asesmen_detail']['keluhan_utama'];
+                                    echo $_POST['setter']['asesmen_detail']['keluhan_utama'];
                                     ?>
                                 </p>
                             </div>
-						</div>
-					</div>
+                        </div>
+                    </div>
                     <div class="col-6">
                         <div class="segmen_keluhan_tambahan">
                             <div class="d-flex align-items-center">
@@ -45,10 +44,10 @@
                             </div>
                         </div>
                     </div>
-				</div>
-			</div>
-		</div>
-	</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -64,7 +63,7 @@
         <div class="card">
             <div class="card-header card-header-large bg-white">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-6">
                         <div class="segmen_keluhan_utama">
                             <div class="d-flex align-items-center">
                                 <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Pemeriksaan Fisik</strong></a>
@@ -173,61 +172,61 @@
 
 
 <div class="row projects-item mb-1">
-	<div class="col-1">
-		<br />
-		<div class="text-dark-gray">Resep & Racikan</div>
-	</div>
-	<div class="col-11">
-		<div class="card">
-			<div class="card-header card-header-large bg-white">
-				<div class="row">
-					<div class="col-12">
-						<div class="segmen_resep">
-							<div class="d-flex align-items-center">
-								<a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Resep</strong></a>
-							</div>
-						</div>
+    <div class="col-1">
+        <br />
+        <div class="text-dark-gray">Resep & Racikan</div>
+    </div>
+    <div class="col-11">
+        <div class="card">
+            <div class="card-header card-header-large bg-white">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="segmen_resep">
+                            <div class="d-flex align-items-center">
+                                <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Resep</strong></a>
+                            </div>
+                        </div>
                         <div class="card-body">
                             <table class="table table-bordered">
                                 <thead class="thead-dark">
-                                    <tr>
-                                        <th class="wrap_content">No</th>
-                                        <th>Obat</th>
-                                        <th>Signa</th>
-                                        <th>Jlh</th>
-                                    </tr>
+                                <tr>
+                                    <th class="wrap_content">No</th>
+                                    <th>Obat</th>
+                                    <th>Signa</th>
+                                    <th>Jlh</th>
+                                </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
                         </div>
-					</div>
-				</div>
-			</div>
-			<div class="card-header card-header-large bg-white">
-				<div class="row">
-					<div class="col-12">
-						<div class="segmen_racikan">
-							<div class="d-flex align-items-center">
-								<a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Racikan</strong></a>
-							</div>
-						</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-header card-header-large bg-white">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="segmen_racikan">
+                            <div class="d-flex align-items-center">
+                                <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Racikan</strong></a>
+                            </div>
+                        </div>
                         <div class="card-body">
                             <table class="table table-bordered">
                                 <thead class="thead-dark">
-                                    <tr>
-                                        <th class="wrap_content">No</th>
-                                        <th>Racikan</th>
-                                        <th>Komposisi</th>
-                                        <th>Signa</th>
-                                        <th>Jlh</th>
-                                    </tr>
+                                <tr>
+                                    <th class="wrap_content">No</th>
+                                    <th>Racikan</th>
+                                    <th>Komposisi</th>
+                                    <th>Signa</th>
+                                    <th>Jlh</th>
+                                </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
                         </div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

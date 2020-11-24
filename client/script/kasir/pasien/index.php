@@ -30,6 +30,7 @@
 			bPaginate: true,
 			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
 			serverMethod: "POST",
+            "order": [[ 1, "desc" ]],
 			"ajax":{
 				url: __HOSTAPI__ + "/Invoice",
 				type: "POST",
@@ -37,12 +38,13 @@
 					d.request = "kwitansi_data";
 					d.from = getDateRange("#range_kwitansi")[0];
 					d.to = getDateRange("#range_kwitansi")[1];
+					d.column_set = ['created_at', 'nomor_kwitansi', 'created_at', 'metode_bayar', 'pegawai', 'terbayar'];
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					var dataSet = response.response_package.response_data;
+				    var dataSet = response.response_package.response_data;
 					var dataResponse = [];
 					if(dataSet == undefined) {
 						dataSet = [];
@@ -158,7 +160,7 @@
 							for(var historyKey in historyDetail) {
 								$("#invoice_detail_history tbody").append(
 									"<tr>" +
-										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
+										"<td>" + ((historyDetail[historyKey].status == "P") ? ((historyDetail[historyKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
 										"<td>" + historyDetail[historyKey].item.toUpperCase() + "</td>" +
 										"<td>" + historyDetail[historyKey].qty + "</td>" +
@@ -174,8 +176,6 @@
 		});
 
 		$("#range_kwitansi").change(function() {
-			/*console.clear();
-			console.log(getDateRange());*/
 			tableKwitansi.ajax.reload();
 		});
 
@@ -210,15 +210,14 @@
                             response.response_package.response_data[InvKeyData].pasien !== undefined &&
                             response.response_package.response_data[InvKeyData].pasien !== null
                         ) {
-							if(!response.response_package.response_data[InvKeyData].lunas) {
-
+						    if(!response.response_package.response_data[InvKeyData].lunas) {
 							    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
                                     response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
                                 }
 								returnedData.push(response.response_package.response_data[InvKeyData]);
 							}
 						} else {
-							//
+						    //
 						}
 					}
 
@@ -312,8 +311,6 @@
 
 
 		$("#range_invoice").change(function() {
-			/*console.clear();
-			console.log(getDateRange());*/
 			tableAntrianBayar.ajax.reload();
 		});
 
@@ -392,7 +389,6 @@
                             };
 
 							for(var invKey in invoice_detail_item) {
-							    console.log(invoice_detail_item[invKey]);
 							    if(invoice_detail_item[invKey].item_type === "master_tindakan")
                                 {
                                     //Biaya Admnistrasi
@@ -783,8 +779,7 @@
 							payment:selectedUIDKwitansi
 						},
 						success: function(response) {
-							console.log(selectedUID);
-							console.log(response);
+							console.clear();
 							var resultCheck = 0;
 							
 							for(var returnKey in response.response_package) {
@@ -793,8 +788,6 @@
 
 							if(resultCheck == $(".returItem:checked").length) {
 								$("#form-payment-detail").modal("hide");
-							} else {
-								console.log("Gagal Retur");
 							}
 							$("#form-payment-detail").modal("hide");
 							tableKwitansi.ajax.reload();

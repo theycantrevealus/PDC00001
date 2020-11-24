@@ -1,3 +1,5 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.js"></script>
+<link href="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.css" type="text/css" rel="stylesheet" />
 <script type="text/javascript">
 	
 	$(function(){
@@ -309,6 +311,7 @@
 
 	                $.each(dataPasien, function(key, item){
 	                    if(key === "no_rm") {
+	                        item = item.replace(/-/g, "");
 	                        $(".Card-number li#last-li").html(item.substr(0, 2));
                             $(".Card-number li:eq(1)").html(item.substr(2, 2));
                             $(".Card-number li#first-li").html(item.substr(4, 2));
@@ -374,6 +377,57 @@
 		
 		return dataPasien;
 	}
+
+    $("#cppt_pagination").pagination({
+        dataSource: __HOSTAPI__ + "/CPPT/semua/all/" + __PAGES__[2],
+        locator: 'response_package.response_data',
+        totalNumberLocator: function(response) {
+            console.log(response);
+            return response.response_package.response_total;
+        },
+        pageSize: 1,
+        ajax: {
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                $("#cppt_loader").html("Memuat data CPPT...");
+            }
+        },
+        callback: function(data, pagination) {
+            var dataHtml = "<ul style=\"list-style-type: none;\">";
+
+            $.each(data, function (index, item) {
+                if(item.uid !== __PAGES__[3]) {
+                    dataHtml += "<li>" + load_cppt(item) + "</li>";
+                }
+            });
+
+            dataHtml += "</ul>";
+
+            $("#cppt_loader").html(dataHtml);
+        }
+    });
+
+    function load_cppt(data) {
+        var returnHTML = "";
+        $.ajax({
+            url: __HOSTNAME__ + "/pages/rawat_jalan/dokter/cppt-single.php",
+            async:false,
+            data:{
+                setter:data
+            },
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type:"POST",
+            success:function(response_html) {
+                returnHTML = response_html;
+            },
+            error: function(response_html) {
+                console.log(response_html);
+            }
+        });
+        return returnHTML;
+    }
 
 	function loadWilayah(selector, parent, id, name){
 		

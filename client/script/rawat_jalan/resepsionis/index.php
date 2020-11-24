@@ -109,7 +109,8 @@
 							    if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
                                     return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
                                 } else {
-							        return row["penjamin"];
+                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+							        //return row["penjamin"];
                                 }
 							}
 						} else {
@@ -179,73 +180,124 @@
         });
 
 
-        loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
-        loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val());
-        loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val());
-        loadSpesialistik("#txt_bpjs_dpjp_spesialistik");
+        
 
+        var selectedSEPAntrian = "";
+        var selectedSEPAntriamMeta;
+        var selectedSEPNoKartu = "";
 
-        $("#txt_bpjs_laka_suplesi_provinsi").select2({
-            dropdownParent: $("#group_provinsi")
-        });
+        var isRujukan = false;
 
-        $("#txt_bpjs_dpjp_spesialistik").select2({
-            dropdownParent: $("#group_spesialistik")
-        });
+        $("body").on("click", ".daftar_sep", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
 
-        $("#txt_bpjs_laka_suplesi_kabupaten").select2({
-            dropdownParent: $("#group_kabupaten")
-        });
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Pasien/pasien-detail/" + id,
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function (response) {
+                    var data = response.response_package.response_data[0];
+                    var penjaminList = data.history_penjamin;
+                    var bpjsMeta;
 
-        $("#txt_bpjs_laka_suplesi_kecamatan").select2({
-            dropdownParent: $("#group_kecamatan")
-        });
+                    for(var penjaminKey in penjaminList) {
+                        if(penjaminList[penjaminKey].penjamin === __UIDPENJAMINBPJS__) {
+                            bpjsMeta = penjaminList[penjaminKey].rest_meta;
+                        }
+                    }
 
-        $("#txt_bpjs_nomor_rujukan").select2({
-            autoclose: true,
-            dropdownParent: $("#group_nomor_rujukan")
-        });
+                    if(bpjsMeta !== undefined) {
+                        $("#txt_bpjs_nama").val(data.nama);
+                        $("#txt_bpjs_nik").val(data.nik);
+                        $("#txt_bpjs_telepon").val(data.no_telp);
 
-        $("#txt_bpjs_dpjp").select2({
-            dropdownParent: $("#group_dpjp")
-        });
-
-        $("#txt_bpjs_kelas_rawat").select2({
-            dropdownParent: $("#group_kelas_rawat")
-        });
-
-        $("#txt_bpjs_asal_rujukan").select2({disabled:"readonly"});
-
-        $("#txt_bpjs_jenis_asal_rujukan").select2({disabled:"readonly"});
-
-
-
-
-
-        $("#txt_bpjs_jenis_asal_rujukan").change(function() {
-            loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
-        });
-
-        $("#txt_bpjs_dpjp_spesialistik").change(function() {
-            loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
-        });
-
-        $("#txt_bpjs_nomor_rujukan").change(function() {
-            loadInformasiRujukan(selectedListRujukan[$(this).find("option:selected").index()]);
-        });
-
-        /*$("#txt_bpjs_asal_rujukan").select2({
-            minimumInputLength: 2,
-            "language": {
-                "noResults": function(){
-                    return "Faskes tidak ditemukan";
+                        for(var pKey in data.history_penjamin) {
+                            if(data.history_penjamin[pKey].penjamin === __UIDPENJAMINBPJS__)
+                            {
+                                var metaDataBPJS = JSON.parse(data.history_penjamin[pKey].rest_meta);
+                                selectedSEPNoKartu = metaDataBPJS.response.peserta.noKartu;
+                                $("#txt_bpjs_nomor").val(metaDataBPJS.response.peserta.noKartu);
+                                loadKelasRawat(metaDataBPJS.response.peserta.hakKelas.keterangan);
+                            }
+                        }
+                    }
+                },
+                error: function(response) {
+                    //
                 }
-            },
-            dropdownParent: $("#modal-sep-new"),
-            ajax: {
-                dataType: "json",
-                headers:{
-                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+            });
+
+            loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
+            loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val());
+            loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val());
+            loadSpesialistik("#txt_bpjs_dpjp_spesialistik");
+
+
+            $("#txt_bpjs_laka_suplesi_provinsi").select2({
+                dropdownParent: $("#group_provinsi")
+            });
+
+            $("#txt_bpjs_dpjp_spesialistik").select2({
+                dropdownParent: $("#group_spesialistik")
+            });
+
+            $("#txt_bpjs_laka_suplesi_kabupaten").select2({
+                dropdownParent: $("#group_kabupaten")
+            });
+
+            $("#txt_bpjs_laka_suplesi_kecamatan").select2({
+                dropdownParent: $("#group_kecamatan")
+            });
+
+            $("#txt_bpjs_nomor_rujukan").select2({
+                autoclose: true,
+                dropdownParent: $("#group_nomor_rujukan")
+            });
+
+            $("#txt_bpjs_dpjp").select2({
+                dropdownParent: $("#group_dpjp")
+            });
+
+            $("#txt_bpjs_kelas_rawat").select2({
+                dropdownParent: $("#group_kelas_rawat")
+            });
+
+            $("#txt_bpjs_asal_rujukan").select2({disabled:"readonly"});
+
+            $("#txt_bpjs_jenis_asal_rujukan").select2({disabled:"readonly"});
+
+
+
+
+
+            $("#txt_bpjs_jenis_asal_rujukan").change(function() {
+                loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+            });
+
+            $("#txt_bpjs_dpjp_spesialistik").change(function() {
+                loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+            });
+
+            $("#txt_bpjs_nomor_rujukan").change(function() {
+                loadInformasiRujukan(selectedListRujukan[$(this).find("option:selected").index()]);
+            });
+
+            /*$("#txt_bpjs_asal_rujukan").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Faskes tidak ditemukan";
+                    }
+                },
+                dropdownParent: $("#modal-sep-new"),
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
                     "Content-Type" : "application/json",
                 },
                 url:__HOSTAPI__ + "/BPJS/get_faskes_select2/",
@@ -273,89 +325,86 @@
             //
         });*/
 
-        $("#txt_bpjs_diagnosa_awal").select2({
-            minimumInputLength: 2,
-            "language": {
-                "noResults": function(){
-                    return "Diagnosa tidak ditemukan";
-                }
-            },
-            dropdownParent: $("#group_diagnosa"),
-            ajax: {
-                dataType: "json",
-                headers:{
-                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                    "Content-Type" : "application/json",
+            $("#txt_bpjs_diagnosa_awal").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Diagnosa tidak ditemukan";
+                    }
                 },
-                url:__HOSTAPI__ + "/BPJS/get_diagnosa",
-                type: "GET",
-                data: function (term) {
-                    return {
-                        search:term.term
-                    };
-                },
-                cache: true,
-                processResults: function (response) {
-                    var data = response.response_package.content.response.diagnosa;
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.nama,
-                                id: item.kode
-                            }
-                        })
-                    };
+                dropdownParent: $("#group_diagnosa"),
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/BPJS/get_diagnosa",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.content.response.diagnosa;
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    }
                 }
-            }
-        }).addClass("form-control").on("select2:select", function(e) {
-            //
-        });
+            }).addClass("form-control").on("select2:select", function(e) {
+                //
+            });
 
-        $("#txt_bpjs_poli_tujuan").select2({
-            minimumInputLength: 2,
-            "language": {
-                "noResults": function(){
-                    return "Faskes tidak ditemukan";
-                }
-            },
-            dropdownParent: $("#group_poli"),
-            ajax: {
-                dataType: "json",
-                headers:{
-                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                    "Content-Type" : "application/json",
+            $("#txt_bpjs_poli_tujuan").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Faskes tidak ditemukan";
+                    }
                 },
-                url:__HOSTAPI__ + "/BPJS/get_poli",
-                type: "GET",
-                data: function (term) {
-                    return {
-                        search:term.term
-                    };
-                },
-                cache: true,
-                processResults: function (response) {
-                    var data = response.response_package.content.response.poli;
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.nama,
-                                id: item.kode
-                            }
-                        })
-                    };
+                dropdownParent: $("#group_poli"),
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/BPJS/get_poli",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.content.response.poli;
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    }
                 }
-            }
-        }).addClass("form-control").on("select2:select", function(e) {
-            //
-        });
-
-        var selectedSEPAntrian = "";
-        var selectedSEPAntriamMeta;
-        var selectedSEPNoKartu = "";
-
-        var isRujukan = false;
-
-        $("body").on("click", ".daftar_sep", function() {
+            }).addClass("form-control").on("select2:select", function(e) {
+                //
+            });
+            
+            
+            //======================================================================
+            
+            
             var SEPButton = $(this);
             SEPButton.html("Memuat SEP...").removeClass("btn-info").addClass("btn-warning");
 
@@ -394,20 +443,6 @@
 
                     $("#txt_bpjs_internal_dk").html(diagnosa_kerja);
                     $("#txt_bpjs_internal_db").html(diagnosa_banding);
-                    $("#txt_bpjs_nama").val(data.pasien_detail.nama);
-                    $("#txt_bpjs_nik").val(data.pasien_detail.nik);
-                    $("#txt_bpjs_telepon").val(data.pasien_detail.no_telp);
-
-                    for(var pKey in data.pasien_detail.history_penjamin) {
-                        if(data.pasien_detail.history_penjamin[pKey].penjamin === __UIDPENJAMINBPJS__)
-                        {
-                            var metaDataBPJS = JSON.parse(data.pasien_detail.history_penjamin[pKey].rest_meta);
-                            selectedSEPNoKartu = metaDataBPJS.response.peserta.noKartu;
-                            $("#txt_bpjs_nomor").val(metaDataBPJS.response.peserta.noKartu);
-                            loadKelasRawat(metaDataBPJS.response.peserta.hakKelas.keterangan);
-                        }
-                    }
-
 
 
                     $.ajax({

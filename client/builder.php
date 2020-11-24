@@ -329,6 +329,8 @@
             });
 		});
 
+
+
 		function refresh_notification() {
 			$.ajax({
 				async: false,
@@ -417,6 +419,68 @@
 			}
 			return false;
 		}
+
+        var floatContainer = document.createElement("DIV");
+        $(floatContainer).addClass("manual_container");
+        $("body").append(floatContainer);
+
+        function notify_manual(mode, title, time, identifier, setTo, pos = "left") {
+            var alertContainer = document.createElement("DIV");
+            var alertTitle = document.createElement("STRONG");
+            var alertDismiss = document.createElement("BUTTON");
+            var alertCloseButton = document.createElement("SPAN");
+
+            $(alertContainer).addClass("alert alert-dismissible fade show alert-" + mode).attr({
+                "role": "alert",
+                "id": identifier
+            });
+
+            $(alertTitle).html(title);
+
+            $(alertDismiss).attr({
+                "type": "button",
+                "data-dismiss": "alert",
+                "aria-label": "Close"
+            }).addClass("close");
+
+            $(alertCloseButton).attr({
+                "aria-hidden": true
+            }).html("&times;");
+
+            $(alertContainer).append(alertTitle);
+            $(alertDismiss).append(alertCloseButton);
+            $(alertContainer).append(alertDismiss);
+
+            var parentPos = $(setTo).offset();
+            console.log(parentPos);
+            var topPos = parentPos.top;
+            var leftPos = parentPos.left;
+
+            var marginFrom = 30;
+
+            var floatContainer = document.createElement("DIV");
+            $(floatContainer).append(alertContainer);
+
+            $(floatContainer).addClass("manual_container");
+
+            $("body").append(floatContainer);
+
+            if(pos === "left") {
+                $(".manual_container").css({
+                    "top": topPos + "px",
+                    "left": (leftPos - $(floatContainer).width() - marginFrom) + "px"
+                });
+            } else if(pos === "bottom") {
+                $(".manual_container").css({
+                    "top": (topPos - $(floatContainer).width() - marginFrom) + "px",
+                    "left": leftPos + "px"
+                });
+            }
+
+            setTimeout(function() {
+                $(alertContainer).fadeOut();
+            }, time);
+        }
 
 		function notification (mode, title, time, identifier) {
 			var alertContainer = document.createElement("DIV");

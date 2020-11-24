@@ -156,6 +156,9 @@ class BPJS extends Utility {
                 case 'get_sep_detail':
                     return self::get_sep_detail($parameter[2]);
                     break;
+                case 'info_bpjs':
+                    return self::info_bpjs($parameter[2]);
+                    break;
 				default:
 					return 'Unknown request';
 			}
@@ -192,6 +195,12 @@ class BPJS extends Utility {
 			return 'Error => ' . $e;
 		}
 	}
+
+    public function info_bpjs($parameter) {
+	    $Pasien = new Pasien(self::$pdo);
+	    $data = $Pasien->get_pasien_detail('pasien', $parameter);
+	    return $data;
+    }
 
     private function get_poli_detail($parameter) {
         $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/poli/' . $parameter);
@@ -760,10 +769,9 @@ class BPJS extends Utility {
 
         $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/Peserta/nokartu/' . $no_bpjs . '/tglSEP/' . $tglSEP . '');
 
-		$content = json_decode($content, TRUE);
-		$content['response']['peserta']['tglLahir'] = date('d F Y', strtotime($content['response']['peserta']['tglLahir']));
-		$content['response']['peserta']['tglCetakKartu'] = date('d F Y', strtotime($content['response']['peserta']['tglCetakKartu']));
-
+		/*$content = json_decode($content, TRUE);*/
+		$content['content']['response']['peserta']['tglLahir'] = date('d F Y', strtotime($content['content']['response']['peserta']['tglLahir']));
+		$content['content']['response']['peserta']['tglCetakKartu'] = date('d F Y', strtotime($content['content']['response']['peserta']['tglCetakKartu']));
 		return $content;
 	}
 

@@ -26,10 +26,10 @@
 				<table class="table table-bordered" id="table-layanan-radiologi">
 					<thead class="thead-dark">
 						<tr>
-							<th style="width: 20px;">No</th>
-							<th>Nama</th>
+							<th class="wrap_content">No</th>
+							<th width="50%">Nama</th>
 							<th>Jenis</th>
-							<th>Aksi</th>
+							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>

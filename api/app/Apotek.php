@@ -1261,6 +1261,7 @@ class Apotek extends Utility
                 $racikanDetailChange = self::$query->insert('racikan_detail_change_log', array(
                     'racikan' => $value['racikan_uid'],
                     'obat' => $KValue['obat'],
+                    'jumlah' => $KValue['jumlah'],
                     'kekuatan' => $KValue['kekuatan'],
                     'created_at' => parent::format_date(),
                     'updated_at' => parent::format_date()
@@ -1271,7 +1272,8 @@ class Apotek extends Utility
                     'invoice' => $TargetInvoice,
                     'item' => $KValue['obat'],
                     'item_origin' => 'master_inv',
-                    'qty' => floatval($value['jumlah']),
+                    //'qty' => floatval($value['jumlah']),
+                    'qty' => floatval($KValue['jumlah']),
                     'harga' => floatval($KValue['harga']),
                     'status_bayar' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'N' : 'Y',
                     'subtotal' => floatval($KValue['harga']) * floatval($value['jumlah']),

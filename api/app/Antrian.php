@@ -50,6 +50,19 @@ class Antrian extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
+        //Keluar Antrian
+        $update_antrian = self::$query->update('antrian', array(
+            'waktu_keluar' => parent::format_date()
+        ))
+            ->where(array(
+                'antrian.uid' => '= ?',
+                'AND',
+                'antrian.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
         $antrian = self::$query->select('antrian', array(
             'kunjungan'
         ))
@@ -224,7 +237,7 @@ class Antrian extends Utility
 
                 unset($parameter['dataObj']['currentPasien']);
 
-                //Keluar dari poli
+                /*//Keluar dari poli
                 $keluar = self::$query->update('antrian', array(
                     'waktu_keluar' => parent::format_date()
                 ))
@@ -235,7 +248,7 @@ class Antrian extends Utility
                     ), array(
                         $parameter['dataObj']['antrian']
                     ))
-                    ->execute();
+                    ->execute();*/
 
                 $antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
                 $antrian['response_notif'] = 'P';
@@ -614,8 +627,12 @@ class Antrian extends Utility
 
                         if ($antrianKunjungan['response_result'] > 0) {
                             unset($parameter['dataObj']['currentPasien']);
-                            $antrian['response_notif'] = 'P';
+                            unset($parameter['dataObj']['valid_start']);
+                            unset($parameter['dataObj']['valid_end']);
+                            unset($parameter['dataObj']['penjaminMeta']);
+
                             $antrian = self::tambah_antrian('antrian', $parameter, $uid);
+                            $antrian['response_notif'] = 'P';
                             return $antrian;
                         } else {
                             $antrianKunjungan['response_notif'] = 'P';
@@ -745,12 +762,15 @@ class Antrian extends Utility
                         'AND',
                         'antrian_nomor.dokter' => '= ?',
                         'AND',
-                        'antrian_nomor.penjamin' => '= ?'
+                        'antrian_nomor.penjamin' => '= ?',
+                        'AND',
+                        'antrian_nomor.status' => '= ?'
                     ), array(
                             $allData['pasien'],
                             $allData['departemen'],
                             $allData['dokter'],
-                            $allData['penjamin']
+                            $allData['penjamin'],
+                            'N'
                         )
                     )
                     ->execute();
