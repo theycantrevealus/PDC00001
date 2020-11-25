@@ -78,6 +78,14 @@
 							<span class="nav-link__count">
 								02
 							</span>
+                                    Antrian Rawat Inap
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#tab-antrian-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" >
+							<span class="nav-link__count">
+								03
+							</span>
                                     Pasien IGD
                                 </a>
                             </li>
@@ -114,6 +122,37 @@
                             </div>
                         </div>
                         <div class="tab-pane show fade" id="tab-antrian-2">
+                            <div class="card">
+                                <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                    <h5 class="card-header__title flex m-0">IGD</h5>
+                                    <button class="btn btn-info" id="btnTambahRI">
+                                        <i class="fa fa-plus"></i> Tambah Pasien
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive border-bottom">
+                                        <table class="table table-bordered table-striped largeDataType" id="table-antrian-RI" style="font-size: 0.9rem;">
+                                            <thead class="thead-dark">
+                                            <tr>
+                                                <th class="wrap_content">No</th>
+                                                <th>Waktu Masuk</th>
+                                                <th class="wrap_content">No. RM</th>
+                                                <th>Pasien</th>
+                                                <th>Dokter</th>
+                                                <th>Penjamin</th>
+                                                <th>Oleh</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane show fade" id="tab-antrian-3">
                             <div class="card">
                                 <div class="card-header card-header-large bg-white d-flex align-items-center">
                                     <h5 class="card-header__title flex m-0">IGD</h5>

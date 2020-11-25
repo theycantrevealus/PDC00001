@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function(){
 		var params;
@@ -137,6 +138,9 @@
 									"<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-info btn-sm btn-pasien-pulang\">" +
 										"<i class=\"fa fa-check\"></i> Pulangkan Pasien" +
 									"</button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" jenis=\"gelang\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" jenis=\"label_obat\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" jenis=\"kartu\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
 								"</div>";
 					}
 				}
@@ -149,6 +153,85 @@
         var tableAntrianIGD= $("#table-antrian-IGD").DataTable({
             "ajax":{
                 url: __HOSTAPI__ + "/Antrian/igd",
+                type: "GET",
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    return response.response_package.response_data;
+                }
+            },
+            autoWidth: false,
+            "bInfo" : false,
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["autonum"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["waktu_masuk"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"nama_" + row.uid_pasien + "\">" + row["pasien"] + "<span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
+                            if(parseInt(row['sep']) > 0) {
+                                return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row.sep + "</h6>";
+                            } else {
+                                if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
+                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                } else {
+                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                    //return row["penjamin"];
+                                }
+                            }
+                        } else {
+                            return row["penjamin"];
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["user_resepsionis"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-info btn-sm btn-pasien-pulang\">" +
+                            "<i class=\"fa fa-check\"></i> Pulangkan Pasien" +
+                            "</button>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+
+        $("#table-antrian-RI").DataTable({
+            "ajax":{
+                url: __HOSTAPI__ + "/Antrian/rawat_inap",
                 type: "GET",
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -1252,18 +1335,79 @@
 		$("#btnNext").click(function() {
 			reloadPanggilan($("#txt_loket").val(), $("#txt_current_antrian").attr("current_queue"));
 		});
+
 		$("#btnPanggil").click(function() {
 			push_socket($("#txt_loket").val(), "anjungan_kunjungan_panggil", "display_machine", {
 				loket: $("#txt_loket").val(),
 				nomor: $("#txt_current_antrian").html()
 			}, "info");
 		});
+
+
+        $(".print_manager").click(function() {
+            var targetSurat = $(this).attr("jenis");
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+
+            //$("#target-judul-cetak").html("CETAK " + targetSurat.toUpperCase() + " PASIEN");
+
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/pasien_" + targetSurat + ".php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    pc_customer: __PC_CUSTOMER__,
+                    no_rm:$("#rm_pasien_" + uid).html(),
+                    pasien: "An. " + $("#nama_pasien_" + uid).html(),
+                    tanggal_lahir: $("#nama_pasien_" + uid).attr("ttl"),
+                    usia: $("#nama_pasien_" + uid).attr("usia") + " tahun",
+                    dokter: __MY_NAME__,
+                    waktu_masuk: "",
+                    alamat: "",
+                    tempat_lahir: ""
+                },
+                success: function (response) {
+                    //$("#dokumen-viewer").html(response);
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        pageTitle: "cetak",
+                        afterPrint: function() {
+                            //
+                        }
+                    });
+                }
+            });
+        });
 	});
 
 </script>
 
 <script src="<?= __HOSTNAME__ ?>/template/assets/vendor/toastr.min.js"></script>
 <script src="<?= __HOSTNAME__ ?>/template/assets/js/toastr.js"></script>
+
+<div id="modal-print" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    Print Option
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="modal-cari" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
 	<div class="modal-dialog modal-lg" role="document">

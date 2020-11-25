@@ -1027,6 +1027,10 @@ class Antrian extends Utility
                     return self::get_list_antrian('antrian', __POLI_IGD__);
                     break;
 
+                case 'rawat_inap':
+                    return self::get_list_antrian('antrian', __POLI_INAP__);
+                    break;
+
                 case 'antrian-detail':
                     return self::get_antrian_detail('antrian', $parameter[2]);
                     break;

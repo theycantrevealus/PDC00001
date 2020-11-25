@@ -319,7 +319,7 @@
 			function SocketCheck(__HOST__) {
 				var checkSocket = new WebSocket(__HOST__);
 				checkSocket.onopen = function() {
-					//location.reload();
+					location.reload();
 				}
 			}
 

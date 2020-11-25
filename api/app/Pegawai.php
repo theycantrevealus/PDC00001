@@ -2,6 +2,7 @@
 
 namespace PondokCoder;
 
+use PondokCoder\Authorization as Authorization;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Modul as Modul;
 use PondokCoder\Poli as Poli;
@@ -83,6 +84,12 @@ class Pegawai extends Utility {
 			case 'update_pegawai_access':
 				return self::update_pegawai_access($parameter);
 				break;
+            case 'proceed_import_pegawai':
+                return self::proceed_import_pegawai($parameter);
+                break;
+            case 'master_pegawai_import_fetch':
+                return self::master_pegawai_import_fetch($parameter);
+                break;
 			default:
 				return array();
 				break;
@@ -825,6 +832,125 @@ class Pegawai extends Utility {
 		
 		return $Dokter;
 	}
+
+    private function master_pegawai_import_fetch($parameter)
+    {
+        if (!empty($_FILES['csv_file']['name'])) {
+            $unique_name = array();
+
+            $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $column = fgetcsv($file_data); //array_head
+            $row_data = array();
+            while ($row = fgetcsv($file_data)) {
+                if (!in_array($row[0], $unique_name)) {
+                    array_push($unique_name, $row[0]);
+                    $column_builder = array();
+                    foreach ($column as $key => $value) {
+                        $column_builder[$value] = $row[$key];
+                    }
+                    array_push($row_data, $column_builder);
+                }
+            }
+
+            $build_col = array();
+            foreach ($column as $key => $value) {
+                array_push($build_col, array("data" => $value));
+            }
+
+            $output = array(
+                'column' => $column,
+                'row_data' => $row_data,
+                'column_builder' => $build_col
+            );
+            return $output;
+        }
+    }
+
+    private function proceed_import_pegawai($parameter)
+    {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $duplicate_row = array();
+        $termi_item = array();
+        $non_active = array();
+        $success_proceed = 0;
+        $proceed_data = array();
+
+        foreach ($parameter['data_import'] as $key => $value) {
+            $checkPegawai = self::$query->select('pegawai', array(
+                'uid',
+                'nama',
+                'email'
+            ))
+                ->where(array(
+                    'pegawai.email' => '= ?'
+                ), array(
+                    $value['email']
+                ))
+                ->execute();
+            if(count($checkPegawai['response_data']) > 0) {
+                //
+            } else {
+                //New Pegawai
+                if($value['nama'] != '' && $value['email'] != '') {
+
+                    //Jabatan
+                    $targetUIDJabatan = '';
+                    $checkJabatan = self::$query->select('pegawai_jabatan', array(
+                        'uid',
+                        'nama'
+                    ))
+                        ->where(array(
+                            'pegawai_jabatan.nama' => '= ?'
+                        ), array(
+                            $value['jabatan']
+                        ))
+                        ->execute();
+
+                    if(count($checkJabatan['response_data']) > 0) {
+                        $targetUIDJabatan = $checkJabatan['response_data'][0]['uid'];
+                    } else {
+                        $targetUIDJabatan = parent::gen_uuid();
+                        $new_jabatan = self::$query->insert('pegawai_jabatan', array(
+                            'uid' => $targetUIDJabatan,
+                            'nama' => $value['jabatan'],
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date()
+                        ))
+                            ->execute();
+                    }
+
+                    $new_pegawai = self::$query->insert('pegawai', array(
+                        'uid' => parent::gen_uuid(),
+                        'email' => $value['email'],
+                        'nama' => $value['nama'],
+                        'jabatan' => $targetUIDJabatan,
+                        'kontak' => $value['kontak'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+
+                    if($new_pegawai['response_result'] > 0) {
+                        $success_proceed += 1;
+                    }
+
+                    array_push($proceed_data, $new_pegawai);
+                }
+            }
+        }
+
+        return array(
+            'duplicate_row' => $duplicate_row,
+            'non_active' => $non_active,
+            'success_proceed' => $success_proceed,
+            'data' => $parameter['data_import'],
+            'proceed' => $proceed_data,
+            'termin_item' => $termi_item,
+            'meta_data' => $data_terminologi
+        );
+    }
 
     private function get_all_dokter_select2(){
         $Dokter = self::$query->select('pegawai', array(
