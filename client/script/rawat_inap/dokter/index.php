@@ -30,7 +30,7 @@
                         console.log(filteredData[0].pasien_detail);
 				        $("#target_pasien").html(filteredData[0].pasien);
 				        $("#rm_pasien").html(filteredData[0].no_rm);
-                        $("#nama_pasien").html((filteredData[0].pasien_detail.panggilan_name === null) ? filteredData[0].pasien_detail.nama : filteredData[0].pasien_detail.panggilan_name + " " +  filteredData[0].pasien_detail.nama);
+                        $("#nama_pasien").html((filteredData[0].pasien_detail.panggilan_name === null) ? filteredData[0].pasien_detail.nama : filteredData[0].pasien_detail.panggilan_name.nama + " " +  filteredData[0].pasien_detail.nama);
                         $("#jenkel_pasien").html(filteredData[0].pasien_detail.jenkel_detail.nama);
                         $("#tempat_lahir_pasien").html(filteredData[0].pasien_detail.tempat_lahir);
                         $("#alamat_pasien").html(filteredData[0].pasien_detail.alamat);
@@ -47,10 +47,10 @@
                             type:"GET",
                             success:function(response) {
                                 var pasienData = response.response_package.response_data;
-
+                                //console.log(pasienData[0].panggilan_name);
                                 $("#target_pasien").html(pasienData[0].nama);
                                 $("#rm_pasien").html(pasienData[0].no_rm);
-                                $("#nama_pasien").html((pasienData[0].panggilan_name === null) ? pasienData[0].nama : pasienData[0].panggilan_name + " " +  pasienData[0].nama);
+                                $("#nama_pasien").html((pasienData[0].panggilan_name === null) ? pasienData[0].nama : pasienData[0].panggilan_name.nama + " " +  pasienData[0].nama);
                                 $("#usia_pasien").html(pasienData[0].usia);
                                 $("#jenkel_pasien").html(pasienData[0].jenkel_detail.nama);
                                 $("#tanggal_lahir_pasien").html(pasienData[0].tanggal_lahir_parsed);

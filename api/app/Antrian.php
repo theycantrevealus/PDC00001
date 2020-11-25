@@ -324,6 +324,8 @@ class Antrian extends Utility
                         $Pasien = new Pasien(self::$pdo);
                         $PasienDetail = $Pasien::get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
 
+
+
                         if($parameter['dataObj']['departemen'] === __POLI_IGD__) {
                             //KHUSUS AUTO ANTRIAN
                             $antrianKunjungan = self::$query->insert('antrian_nomor', array(
@@ -1105,9 +1107,12 @@ class Antrian extends Utility
                 ->where(array(
                         $table . '.departemen' => '= ?',
                         'AND',
-                        $table . '.waktu_keluar' => 'IS NULL',
+                        /*$table . '.waktu_keluar' => 'IS NULL',
+                        'AND',*/
+
+                        $table . '.deleted_at' => 'IS NULL',
                         'AND',
-                        $table . '.deleted_at' => 'IS NULL'
+                        'kunjungan.waktu_keluar' => 'IS NULL'
                     ), array(
                         $target
                     )
@@ -1161,9 +1166,11 @@ class Antrian extends Utility
                     )
                 )
                 ->where(array(
-                        $table . '.waktu_keluar' => 'IS NULL',
+                        /*$table . '.waktu_keluar' => 'IS NULL',
+                        'AND',*/
+                        $table . '.deleted_at' => 'IS NULL',
                         'AND',
-                        $table . '.deleted_at' => 'IS NULL'
+                        'kunjungan.waktu_keluar' => 'IS NULL'
                     )
                 )
                 ->order(

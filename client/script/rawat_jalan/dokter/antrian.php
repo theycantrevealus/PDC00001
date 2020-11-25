@@ -3176,6 +3176,7 @@
 
 
         $("body").on("click", "#btnSelesai", function() {
+            simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan);
             Swal.fire({
                 title: 'Selesai isi asesmen rawat?',
                 text: 'Jika sudah selesai maka asesmen akan hilang dari antrian dan biaya tindakan serta obat akan langsung ditagihkan pada pasien.',
@@ -3185,7 +3186,7 @@
                 denyButtonText: `Belum`,
             }).then((result) => {
                 if (result.isConfirmed) {
-                    simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan);
+
                     const simpanDataProcess = new Promise(function(resolve, reject) {
                         resolve(simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan, "Y"));
                     }).then(function(result) {
@@ -4779,105 +4780,108 @@
         $(".inputan_inap").select2();
         $(".inputan_rujuk").select2();
 
-        if(dataOdontogram === undefined)
-        {
-            $(".ordo-top").each(function() {
-                var id = $(this).attr("id").split("_");
-                id = id[id.length - 1];
-                if(metaSelOrdo[id] === undefined)
-                {
-                    metaSelOrdo[id] = {
-                        "top" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "left" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "middle" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "right" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "bottom" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "mahkota": {
-                            "type": ""
-                        },
-                        "predefined": "",
-                        "sel_akar": false,
-                        "hilang": false,
-                        "sisa_akar": false,
-                        "fracture": false
-                    };
-                }
-            });
-        } else {
-            metaSelOrdo = JSON.parse(dataOdontogram);
-            // ParseView
 
-
-            for(var dbT in metaSelOrdo) {
-                //Render Result
-                $("#gigi_" + dbT + " .single_gigi_small .side_small").each(function() {
-                    var settedPiece = $(this).attr("class").split(" ");
-                    if(metaSelOrdo[dbT][settedPiece[0]].tambal !== "")
+        if(antrianData.poli_info.uid === __POLI_GIGI__) {
+            if(dataOdontogram === undefined)
+            {
+                $(".ordo-top").each(function() {
+                    var id = $(this).attr("id").split("_");
+                    id = id[id.length - 1];
+                    if(metaSelOrdo[id] === undefined)
                     {
-                        $(this).removeClass (function (index, className) {
-                            return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
-                        }).removeAttr("mode-class").removeAttr("mode-set");
-
-                        if($(this).hasClass(settedPiece[0])) {
-                            var getModeSet = metaSelOrdo[dbT][settedPiece[0]].tambal.split("_");
-
-                            $(this).addClass("modeset_" + getModeSet[getModeSet.length - 1]).attr({
-                                "mode-class": metaSelOrdo[dbT][settedPiece[0]].tambal,
-                                "mode-set": "modeset_" + getModeSet[getModeSet.length - 1]
-                            });
-                        }
-                    } else {
-                        $(this).removeClass (function (index, className) {
-                            return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
-                        }).removeAttr("mode-class").removeAttr("mode-set");
+                        metaSelOrdo[id] = {
+                            "top" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "left" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "middle" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "right" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "bottom" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "mahkota": {
+                                "type": ""
+                            },
+                            "predefined": "",
+                            "sel_akar": false,
+                            "hilang": false,
+                            "sisa_akar": false,
+                            "fracture": false
+                        };
                     }
                 });
+            } else {
+                metaSelOrdo = JSON.parse(dataOdontogram);
+                // ParseView
 
-                if(metaSelOrdo[dbT].hilang) {
-                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-times text-danger\"></i>");
-                } else if(metaSelOrdo[dbT].fracture) {
-                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-hashtag text-info\"></i>");
-                } else if(metaSelOrdo[dbT].sisa_akar) {
-                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"text-primary\">&radic;</i>");
-                } else {
-                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "", true);
-                }
 
-                if(metaSelOrdo[dbT].sel_akar) {
-                    $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
-                        "visibility": "visible"
+                for(var dbT in metaSelOrdo) {
+                    //Render Result
+                    $("#gigi_" + dbT + " .single_gigi_small .side_small").each(function() {
+                        var settedPiece = $(this).attr("class").split(" ");
+                        if(metaSelOrdo[dbT][settedPiece[0]].tambal !== "")
+                        {
+                            $(this).removeClass (function (index, className) {
+                                return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                            }).removeAttr("mode-class").removeAttr("mode-set");
+
+                            if($(this).hasClass(settedPiece[0])) {
+                                var getModeSet = metaSelOrdo[dbT][settedPiece[0]].tambal.split("_");
+
+                                $(this).addClass("modeset_" + getModeSet[getModeSet.length - 1]).attr({
+                                    "mode-class": metaSelOrdo[dbT][settedPiece[0]].tambal,
+                                    "mode-set": "modeset_" + getModeSet[getModeSet.length - 1]
+                                });
+                            }
+                        } else {
+                            $(this).removeClass (function (index, className) {
+                                return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                            }).removeAttr("mode-class").removeAttr("mode-set");
+                        }
                     });
-                } else {
-                    $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
-                        "visibility": "hidden"
-                    });
-                }
 
-                if(metaSelOrdo[dbT].mahkota.type === "mahkota_logam") {
-                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam"]);
-                } else if(metaSelOrdo[dbT].mahkota.type === "mahkota_nonlogam") {
-                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam"]);
-                } else {
-                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
-                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
-                }
+                    if(metaSelOrdo[dbT].hilang) {
+                        setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-times text-danger\"></i>");
+                    } else if(metaSelOrdo[dbT].fracture) {
+                        setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-hashtag text-info\"></i>");
+                    } else if(metaSelOrdo[dbT].sisa_akar) {
+                        setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"text-primary\">&radic;</i>");
+                    } else {
+                        setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "", true);
+                    }
 
-                $("#gigi_" + dbT + " .predefined_small").html(metaSelOrdo[dbT].predefined);
+                    if(metaSelOrdo[dbT].sel_akar) {
+                        $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
+                            "visibility": "visible"
+                        });
+                    } else {
+                        $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
+                            "visibility": "hidden"
+                        });
+                    }
+
+                    if(metaSelOrdo[dbT].mahkota.type === "mahkota_logam") {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam"]);
+                    } else if(metaSelOrdo[dbT].mahkota.type === "mahkota_nonlogam") {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam"]);
+                    } else {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
+                    }
+
+                    $("#gigi_" + dbT + " .predefined_small").html(metaSelOrdo[dbT].predefined);
+                }
             }
         }
 

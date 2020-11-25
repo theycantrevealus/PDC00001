@@ -1110,7 +1110,10 @@ class Asesmen extends Utility {
 		if($parameter['poli'] !== __POLI_INAP__) {
 		    //Pasien Keluar Poli
             if($parameter['charge_invoice'] === 'Y') {
+
+
                 //Pasien Keluar Poli
+
                 $keluar = self::$query->update('antrian', array(
                     'waktu_keluar' => parent::format_date()
                 ))

@@ -253,6 +253,7 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function(response){
+                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 tableAntrian.ajax.reload();
                             } else {

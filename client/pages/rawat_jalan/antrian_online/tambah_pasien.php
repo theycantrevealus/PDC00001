@@ -215,7 +215,7 @@
 						&nbsp;
 					<!-- </div>
 					<div class="col-12 col-md-4 mb-3"> -->
-						<a href="<?php echo __HOSTNAME__; ?>/pasien" class="btn btn-danger">Batal</a>
+						<a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/antrian_online" class="btn btn-danger">Batal</a>
 				   <!--  </div> -->
 				</div>
 			</div>

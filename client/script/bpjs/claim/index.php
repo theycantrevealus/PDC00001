@@ -559,7 +559,7 @@
                 var RM = $("#rm_" + uid).html();
 
                 $("#txt_bpjs_rm").val(RM);
-
+                alert(selectedSEPAntrian);
                 $.ajax({
                     async: false,
                     url:__HOSTAPI__ + "/Asesmen/antrian-detail/" + selectedSEPAntrian,

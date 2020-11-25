@@ -193,7 +193,9 @@
         function load_laboratorium(data) {
             var listPetugas = [];
             for(petugasKey in data.petugas) {
-                listPetugas.push(data.petugas[petugasKey].nama);
+                if(data.petugas[petugasKey] !== null) {
+                    listPetugas.push(data.petugas[petugasKey].nama);
+                }
             }
 
             data['petugas_parse'] = listPetugas.join(",");
