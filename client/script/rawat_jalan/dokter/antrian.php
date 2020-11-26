@@ -527,15 +527,17 @@
                             } );
 
                         if(antrianData.poli_info.uid === __POLI_MATA__) {
-                            var readMetaResepMata = JSON.parse(asesmen_detail.meta_resep);
-                            for(var mataKey in readMetaResepMata)
-                            {
-                                $("#" + mataKey).val(readMetaResepMata[mataKey]);
-                            }
+                            if(asesmen_detail.meta_resep !== undefined) {
+                                var readMetaResepMata = JSON.parse(asesmen_detail.meta_resep);
+                                for(var mataKey in readMetaResepMata)
+                                {
+                                    $("#" + mataKey).val(readMetaResepMata[mataKey]);
+                                }
 
-                            var tujuanMata = asesmen_detail.tujuan_resep.split(",");
-                            for(tujuanMataKey in tujuanMata) {
-                                $(".tujuan_resep[value=\"" + tujuanMata[tujuanMataKey] + "\"]").prop("checked", true);
+                                var tujuanMata = asesmen_detail.tujuan_resep.split(",");
+                                for(tujuanMataKey in tujuanMata) {
+                                    $(".tujuan_resep[value=\"" + tujuanMata[tujuanMataKey] + "\"]").prop("checked", true);
+                                }
                             }
                         }
 

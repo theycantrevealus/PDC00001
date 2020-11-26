@@ -86,7 +86,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["waktu_masuk"];
+                        return "<span id=\"waktu_masuk_" + row.uid + "\">" + row["waktu_masuk"] + "</span>";
 					}
 				},
 				{
@@ -106,7 +106,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.dokter;
+						return "<span id=\"dokter_" + row.uid + "\">" + row.dokter + "</span>";
 					}
 				},
 				{
@@ -135,12 +135,18 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-info btn-sm btn-pasien-pulang\">" +
-										"<i class=\"fa fa-check\"></i> Pulangkan Pasien" +
+									"<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
+										"<i class=\"fa fa-check\"></i>" +
 									"</button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" jenis=\"gelang\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" jenis=\"label_obat\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" jenis=\"kartu\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"gelang\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"kartu\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"lab\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"tracer\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"spbk\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"sosial\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"bayi\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"identitas\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+
 								"</div>";
 					}
 				}
@@ -254,7 +260,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["waktu_masuk"];
+                        return "<span id=\"waktu_masuk_" + row.uid + "\">" + row["waktu_masuk"] + "</span>";
                     }
                 },
                 {
@@ -1349,38 +1355,48 @@
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
 
-            //$("#target-judul-cetak").html("CETAK " + targetSurat.toUpperCase() + " PASIEN");
+            var pasien = $(this).attr("pasien");
 
+            //$("#target-judul-cetak").html("CETAK " + targetSurat.toUpperCase() + " PASIEN");
             $.ajax({
                 async: false,
-                url: __HOST__ + "miscellaneous/print_template/pasien_" + targetSurat + ".php",
+                url: __HOSTAPI__ + "/Pasien/pasien-detail/" + pasien,
+                type: "GET",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                type: "POST",
-                data: {
-                    pc_customer: __PC_CUSTOMER__,
-                    no_rm:$("#rm_pasien_" + uid).html(),
-                    pasien: "An. " + $("#nama_pasien_" + uid).html(),
-                    tanggal_lahir: $("#nama_pasien_" + uid).attr("ttl"),
-                    usia: $("#nama_pasien_" + uid).attr("usia") + " tahun",
-                    dokter: __MY_NAME__,
-                    waktu_masuk: "",
-                    alamat: "",
-                    tempat_lahir: ""
-                },
                 success: function (response) {
-                    //$("#dokumen-viewer").html(response);
-                    var containerItem = document.createElement("DIV");
-                    $(containerItem).html(response);
-                    $(containerItem).printThis({
-                        importCSS: true,
-                        base: false,
-                        pageTitle: "cetak",
-                        afterPrint: function() {
-                            //
+                    dataPasien = response.response_package.response_data[0];
+                    dataPasien.pc_customer = __PC_CUSTOMER__;
+                    dataPasien.pc_dokter = $("#dokter_" + uid).html();
+                    dataPasien.waktu_masuk = $("#waktu_masuk_" + uid).html();
+                    console.log(dataPasien);
+
+                    $.ajax({
+                        async: false,
+                        url: __HOST__ + "miscellaneous/print_template/pasien_" + targetSurat + ".php",
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "POST",
+                        data: dataPasien,
+                        success: function (response) {
+                            //$("#dokumen-viewer").html(response);
+                            var containerItem = document.createElement("DIV");
+                            $(containerItem).html(response);
+                            $(containerItem).printThis({
+                                importCSS: true,
+                                base: false,
+                                pageTitle: "cetak",
+                                afterPrint: function() {
+                                    //
+                                }
+                            });
                         }
                     });
+                },
+                error: function(response) {
+                    //
                 }
             });
         });

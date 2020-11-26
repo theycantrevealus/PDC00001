@@ -16,8 +16,8 @@
 				    for(var polKey in rawData) {
 				        if(
 				            rawData[polKey].uid !== __UIDFISIOTERAPI__ &&
-                            rawData[polKey].uid !== __POLI_INAP__ &&
-                            rawData[polKey].uid !== __POLI_IGD__ &&
+                            //rawData[polKey].uid !== __POLI_INAP__ &&
+                            //rawData[polKey].uid !== __POLI_IGD__ &&
                             rawData[polKey].uid !== __POLI_LAB__
                         ) {
 				            returnData.push(rawData[polKey]);
