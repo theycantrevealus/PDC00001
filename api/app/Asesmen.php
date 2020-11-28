@@ -34,6 +34,10 @@ class Asesmen extends Utility {
 					return self::get_asesmen_medis($parameter[2]);
 					break;
 
+                case 'antrian-detail-record':
+                    return self::get_asesmen_medis($parameter[2], true);
+                    break;
+
 				case 'asesmen-rawat-detail':
 					return self::get_asesmen_rawat($parameter[2]);
 					break;
@@ -318,7 +322,7 @@ class Asesmen extends Utility {
         return $data;
     }
 
-	public function get_asesmen_medis($parameter) { //uid antrian
+	public function get_asesmen_medis($parameter, $isCPPT = false) { //uid antrian
 		//prepare antrian
 		$antrian = self::$query->select('antrian', array(
 			'uid',
@@ -685,10 +689,11 @@ class Asesmen extends Utility {
 					$data['response_data'][0]['asesmen'],
 					$data['response_data'][0]['dokter'],
 					$data['response_data'][0]['pasien'],
-					'N'
+                    ($isCPPT) ? 'L' : 'N'
 				))
 				->execute();
 				$racikanData = array();
+				$racikanApotekData = array();
 				foreach ($resep['response_data'] as $key => $value) {
 					//GET Resep Detail
 					$resepDetail = self::$query->select('resep_detail', array(
@@ -741,6 +746,14 @@ class Asesmen extends Utility {
 					))
 					->execute();
 
+                    if($isCPPT) {
+                        /*$RacikanApotekItem = self::$query->select('racikan_change_log')
+                            ->where(array(
+                                'racikan_change_log.racikan'
+                            ), array())
+                            ->execute();*/
+                    }
+
 					foreach ($racikan['response_data'] as $RacikanKey => $RacikanValue) {
 						$RacikanDetailData = self::$query->select('racikan_detail', array(
 							'asesmen',
@@ -777,6 +790,21 @@ class Asesmen extends Utility {
 						array_push($racikanData, $RacikanValue);
 					}
 				}
+
+
+				if($isCPPT) {
+				    //List Resep dan Racikan oleh apotek
+                    $dataResepApotek = self::$query->select('resep_change_log', array())
+                        ->where(array(
+                            'resep_change_log.resep' => '= ?',
+                            'AND',
+                            'resep_change_log.deleted_at' => 'IS NULL'
+                        ), array(
+                            $resep[0]['uid']
+                        ))
+                        ->execute();
+                    $data['response_data'][0]['resep_apotek'] = $dataResepApotek['response_data'];
+                }
 
 				$data['response_data'][0]['racikan'] = $racikanData;
 				$data['response_data'][0]['resep'] = $resep['response_data'];

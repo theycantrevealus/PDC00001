@@ -47,7 +47,6 @@
                             type:"GET",
                             success:function(response) {
                                 var pasienData = response.response_package.response_data;
-                                //console.log(pasienData[0].panggilan_name);
                                 $("#target_pasien").html(pasienData[0].nama);
                                 $("#rm_pasien").html(pasienData[0].no_rm);
                                 $("#nama_pasien").html((pasienData[0].panggilan_name === null) ? pasienData[0].nama : pasienData[0].panggilan_name.nama + " " +  pasienData[0].nama);

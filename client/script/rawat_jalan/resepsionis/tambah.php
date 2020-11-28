@@ -22,6 +22,7 @@
 
         if(curremtAntrianType !== "DEFAULT") {
             loadPrioritas(__PRIORITY_HIGH__);
+            loadCaraDatang();
         } else {
             loadPrioritas();
         }
@@ -88,6 +89,9 @@
 
 
 					} else {
+
+					    console.log(dataObj);
+
 						$.ajax({
 							async: false,
 							url: __HOSTAPI__ + "/Antrian",
@@ -157,6 +161,7 @@
                 dataObj.valid_end = penjaminMetaData.response.peserta.tglTAT;
                 dataObj.penjaminMeta = JSON.stringify(penjaminMetaData);
             }
+			console.log(dataObj);
 			if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 			    $.ajax({
 					async: false,
@@ -357,6 +362,15 @@
     function loadPoli(targetted = ""){
     	var dataPoli = null;
 
+    	if(targetted === __POLI_IGD__) {
+    	    //Show Cara data dan keterangan cara datang
+            $(".poli_igd").show();
+            $(".poli_lain").hide();
+        } else {
+            $(".poli_igd").hide();
+            $(".poli_lain").show();
+        }
+
         $.ajax({
             async: false,
             url:__HOSTAPI__ + "/Poli/poli-available",
@@ -426,6 +440,45 @@
                         $("#prioritas").attr("disabled", "disabled");
                     } else {
                         $("#prioritas").removeAttr("disabled");
+                    }
+                }
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function loadCaraDatang(targetted = 0){
+        var term = 17;
+
+        $.ajax({
+            async: false,
+            url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + term,
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                var MetaData = response.response_package.response_data;
+
+                if (MetaData != ""){
+                    for(i = 0; i < MetaData.length; i++){
+                        var selection = document.createElement("OPTION");
+
+                        $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+                        if(parseInt(targetted) > 0) {
+                            if(parseInt(MetaData[i].id) === targetted) {
+                                $(selection).attr("selected", "selected");
+                            }
+                        }
+                        $("#cara_datang").append(selection);
+                    }
+
+                    if(parseInt(targetted) > 0) {
+                        $("#cara_datang").attr("disabled", "disabled");
+                    } else {
+                        $("#cara_datang").removeAttr("disabled");
                     }
                 }
             },

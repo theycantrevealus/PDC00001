@@ -32,5 +32,13 @@
         <div id="hasil_pemeriksaan" class="hasil_pemeriksaan">
 
         </div>
+        <div class="col-md-12 form-group">
+            <label>Kesan:</label>
+            <input type="text" name="kesan id="kesan" class="form-control informasi" />
+        </div>
+        <div class="col-md-12 form-group">
+            <label>Anjuran:</label>
+            <input type="text" name="anjuran id="anjuran" class="form-control informasi" />
+        </div>
 	</div>
 </div>

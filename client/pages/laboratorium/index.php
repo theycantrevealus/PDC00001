@@ -54,7 +54,15 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#tab-history" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                                    <a href="#tab-manajemen" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-2" >
+                                        <span class="nav-link__count">
+                                            <i class="fa fa-list"></i>
+                                        </span>
+                                        Manajemen Order
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#tab-history" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-3" >
                                         <span class="nav-link__count">
                                             <i class="fa fa-hourglass"></i>
                                         </span>
@@ -80,6 +88,19 @@
                                     <tbody>
 
                                     </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane show fade" id="tab-manajemen">
+                                <table class="table table-bordered table-striped largeDataType" id="service_labor">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Laboratorium</th>
+                                            <th>Pemeriksaan</th>
+                                            <th class="wrap_content">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
                                 </table>
                             </div>
                             <div class="tab-pane show fade" id="tab-history">

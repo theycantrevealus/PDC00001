@@ -28,7 +28,7 @@
             }
         </script>
     </head>
-    <body onload="myFunction()">
+    <body>
     <table style='width:100%;border-collapse:collapse; background:#fff; font-size:0.2rem; text-align: center;'>
         <tr>
             <td  rowspan="5" colspan="1"><img src="../images/logo.png" width="30px" height="30px" class="logo"></td>

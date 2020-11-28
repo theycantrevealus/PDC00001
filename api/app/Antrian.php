@@ -279,6 +279,8 @@ class Antrian extends Utility
                 'waktu_masuk' => parent::format_date(),
                 'pj_pasien' => $parameter['dataObj']['pj_pasien'],
                 'info_didapat_dari' => $parameter['dataObj']['info_didapat_dari'],
+                'cara_datang' => $parameter['dataObj']['cara_datang'],
+                'keterangan_cara_datang' => $parameter['dataObj']['keterangan_cara_datang'],
                 'pegawai' => $UserData['data']->uid,
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()

@@ -110,7 +110,7 @@
     <table>
         <tr>
             <td style="text-align:center; width:5%">
-                <img src="../images/logo.png" class="logo">
+                <img src="../client/template/assets/images/logo-icon.png" class="logo">
             </td>
             <td style="width:45%;">
                 <span class="title"><b>PEMERINTAH KABUPATEN BINTAN</b></span>
