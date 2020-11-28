@@ -1896,7 +1896,9 @@ class Laboratorium extends Utility {
 					'lab_order_detail.lab_order' => '= ?',
 					'AND',
 					'lab_order_detail.deleted_at' => 'IS NULL'
-				), array($parameter)
+				), array(
+				    $parameter
+                )
 			)
 			->execute();
 
@@ -3321,7 +3323,8 @@ class Laboratorium extends Utility {
                 'satuan',
                 'nilai_min',
                 'nilai_maks',
-                'keterangan'
+                'keterangan',
+                'status'
             ))
                 ->where(array(
                     'master_lab_nilai.deleted_at' => 'IS NULL',

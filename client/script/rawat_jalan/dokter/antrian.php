@@ -3802,6 +3802,7 @@
                                 "<td><button " + status_disabled + " class='btn btn-sm btn-danger btnHapusTindakanLab' data-uid='" + item.uid_tindakan + "' data-nama='" + item.tindakan + "'><i class='fa fa-trash'></i></button></td>" +
                                 "</tr>";
 
+
                             $("#table_tindakan_lab tbody").append(html);
 
                             tindakanTerpilih[item.uid_tindakan] = item.uid_penjamin;
@@ -3907,14 +3908,22 @@
                 for(var key in data.detail)
                 {
                     var LabSelectoriContainer = document.createElement("DIV");
-                    $(LabSelectoriContainer).addClass("col-md-4 d-flex align-items-center single_hover").html(
-                        "<div class=\"flex\">" +
-                        "<label for=\"lab_item_" + data.detail[key].id + "\" id=\"label_item_" + data.detail[key].id + "\">" + data.detail[key].keterangan + "</label>" +
-                        "<div class=\"custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right\">" +
-                        "<input type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
-                        "<label class=\"custom-control-label\" for=\"lab_item_" + data.detail[key].id + "\">Ya</label>" +
-                        "</div>" +
-                        "</div>");
+                    if(data.detail[key].status === 'A') {
+                        $(LabSelectoriContainer).addClass("col-md-4 d-flex align-items-center single_hover").html(
+                            "<div class=\"flex\">" +
+                            "<label for=\"lab_item_" + data.detail[key].id + "\" id=\"label_item_" + data.detail[key].id + "\">" + data.detail[key].keterangan + "</label>" +
+                            "<div class=\"custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right\">" +
+                            "<input type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
+                            "<label class=\"custom-control-label\" for=\"lab_item_" + data.detail[key].id + "\">Ya</label>" +
+                            "</div>" +
+                            "</div>");
+                    } else {
+                        $(LabSelectoriContainer).addClass("col-md-4 d-flex align-items-center single_hover").html(
+                            "<div class=\"flex\">" +
+                            "<label style=\"text-decoration: line-through\" for=\"lab_item_" + data.detail[key].id + "\" class=\"text-muted\" id=\"label_item_" + data.detail[key].id + "\">" + data.detail[key].keterangan + "</label>" +
+                            "</div>");
+                    }
+
                     $("#lab_nilai_order").append(LabSelectoriContainer);
 
                     listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
