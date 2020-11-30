@@ -5868,3 +5868,79 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="form-jadwal-operasi" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Pengajuan Jadwal Operasi</h5>
+            </div>
+            <div class="modal-body">
+                <div class="card card-form">
+                    <div class="row no-gutters">
+                        <div class="col-lg-12 card-body">
+                            <div class="form-row">
+                                <div class="col-12 col-md-6 form-group">
+                                    <label>Tanggal Operasi <span class="red">*</span></label>
+                                    <input type="date" id="operasi_tanggal" class="form-control" placeholder="Tentukan tanggal operasi" />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-6 form-group">
+                                    <div class="form-row">
+                                        <div class="col-12 col-md-6 form-group">
+                                            <label>Lama Operasi <span class="red">*</span></label>
+                                            <input type="number" id="operasi_durasi" class="form-control" placeholder="Est. Durasi Operasi (Jam)" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-12 form-group">
+                                    <label>Catatan <span class="red">*</span></label>
+                                    <textarea class="form-control" id="rujuk_catatan" style="min-height: 150px"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnProsesRujuk">
+                    <i class="fa fa-check"></i> Ajukan Rujukan
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+            </div>
+        </div>
+    </div>
+</div>
