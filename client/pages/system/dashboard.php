@@ -20,7 +20,7 @@
 
 	<div class="alert alert-soft-warning d-flex align-items-center card-margin" role="alert">
 		<i class="material-icons mr-3">error_outline</i>
-		<div class="text-body"><strong>Selamat Datang.</strong> SIMRS RSUD Bintan</div>
+		<div class="text-body"><strong>Selamat Datang.</strong> <?php echo __PC_CUSTOMER__; ?></div>
 	</div>
 
 	<!--div class="row card-group-row">
