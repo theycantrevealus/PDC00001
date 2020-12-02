@@ -104,10 +104,11 @@
 							},
 							type: "POST",
 							success: function(response){
+                                console.log(response);
                                 localStorage.getItem("currentPasien");
                                 localStorage.getItem("currentAntrianID");
 
-                                if(response.response_package.response_notif == 'K') {
+                                /*if(response.response_package.response_notif == 'K') {
 									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
                                     Swal.fire(
                                         'Berhasil ditambahkan!',
@@ -127,7 +128,7 @@
                                     });
 								} else {
 									console.log("command not found");
-								}
+								}*/
 
 							},
 							error: function(response) {
@@ -175,11 +176,12 @@
 					},
 					type: "POST",
 					success: function(response){
+                        console.log(response);
                         localStorage.getItem("currentPasien");
                         localStorage.getItem("currentAntrianID");
 
 
-                        if(response.response_package.response_notif == 'K') {
+                        /*if(response.response_package.response_notif == 'K') {
                             push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
                             Swal.fire(
                                 'Berhasil ditambahkan!',
@@ -199,7 +201,7 @@
                             });
                         } else {
                             console.log(response);
-                        }
+                        }*/
 					},
 					error: function(response) {
 						console.log("Error : ");
@@ -384,14 +386,19 @@
                 if (MetaData != ""){ 
                 	for(i = 0; i < MetaData.length; i++){
 	                    var selection = document.createElement("OPTION");
+                        $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
 	                    if(MetaData[i].uid !== __POLI_INAP__) {
-                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
                             if(targetted !== "") {
                                 if(MetaData[i].uid === targetted) {
                                     $(selection).attr("selected", "selected");
                                 }
+                                $("#departemen").append(selection);
+                            } else {
+                                if(MetaData[i].editable) {
+                                    $("#departemen").append(selection);
+                                }
                             }
-                            $("#departemen").append(selection);
+
                         }
 	                }
 

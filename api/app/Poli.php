@@ -180,16 +180,20 @@ class Poli extends Utility {
 					->select('master_poli', array(
 						'uid',
 						'nama',
+						'editable',
 						'created_at',
 						'updated_at'
 						)
 					)	
 					->where(array(
 							'master_poli.deleted_at' => 'IS NULL',
-							'AND',
-							'master_poli.editable' => '= TRUE'
+							/*'AND',
+							'master_poli.editable' => '= TRUE'*/
 						),array()
 					)
+            ->order(array(
+                'nama' => 'ASC'
+            ))
 					->execute();
 
 		$autonum = 1;

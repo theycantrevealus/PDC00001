@@ -489,8 +489,7 @@ class Pasien extends Utility
         }
     }
 
-    private function proceed_import_pasien($parameter)
-    {
+    private function proceed_import_pasien($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 

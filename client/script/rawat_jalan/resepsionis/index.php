@@ -235,7 +235,7 @@
         });
 
 
-        $("#table-antrian-RI").DataTable({
+        var tableAntrianRI = $("#table-antrian-RI").DataTable({
             "ajax":{
                 url: __HOSTAPI__ + "/Antrian/rawat_inap",
                 type: "GET",
@@ -345,6 +345,8 @@
                             console.log(response);
                             if(response.response_package.response_result > 0) {
                                 tableAntrian.ajax.reload();
+                                tableAntrianRI.ajax.reload();
+                                tableAntrianIGD.ajax.reload();
                             } else {
                                 Swal.fire(
                                     "Pulangkan pasien",

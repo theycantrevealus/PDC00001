@@ -204,7 +204,7 @@ class Invoice extends Utility
             );
 
             $paramValue = array(
-                $parameter['from'], $parameter['to']
+                date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day'))
             );
         }
 
@@ -936,15 +936,17 @@ class Invoice extends Utility
                         ))
                         ->execute();
 
-                    $Antrian = new Antrian(self::$pdo);
-                    $parameter['dataObj'] = array(
-                        'departemen' => $parameter['poli'],
-                        'pasien' => $parameter['pasien'],
-                        'penjamin' => $parameter['penjamin'],
-                        'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
-                        'dokter' => $KunjunganData['response_data'][0]['dokter']
-                    );
-                    $AntrianProses = $Antrian::tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                    if($parameter['poli'] !== __POLI_IGD__) {
+                        $Antrian = new Antrian(self::$pdo);
+                        $parameter['dataObj'] = array(
+                            'departemen' => $parameter['poli'],
+                            'pasien' => $parameter['pasien'],
+                            'penjamin' => $parameter['penjamin'],
+                            'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
+                            'dokter' => $KunjunganData['response_data'][0]['dokter']
+                        );
+                        $AntrianProses = $Antrian::tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                    }
                 }
             }
 

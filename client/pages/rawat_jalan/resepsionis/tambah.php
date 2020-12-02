@@ -84,14 +84,14 @@
                         <input type="" name="info_didapat_dari" id="info_didapat_dari" maxlength="100" class="form-control inputan" required value="">
                     </div>
 
-                    <div class="col-12 col-md-6 mb-3 panel_igd">
+                    <div class="col-12 col-md-6 mb-3 poli_igd">
                         <label>Cara Datang <span class="red">*</span></label>
                         <select id="cara_datang" class="form-control select2 inputan" required>
                             <option value="" disabled selected>Pilih Cara Datang</option>
                         </select>
                     </div>
 
-                    <div class="col-12 col-md-6 mb-3 panel_igd">
+                    <div class="col-12 col-md-6 mb-3 poli_igd">
                         <label>Keterangan</label>
                         <input type="" name="keterangan_cara_datang" id="keterangan_cara_datang" maxlength="100" class="form-control inputan" value="">
                     </div>

@@ -200,11 +200,379 @@ class Inventori extends Utility
             case 'get_stok_back_end':
                 return self::get_stok_back_end($parameter);
                 break;
+            case 'stok_import_fetch':
+                return self::stok_import_fetch($parameter);
+                break;
+            case 'proceed_import_stok':
+                return self::proceed_import_stok($parameter);
+                break;
+            case 'get_stok_log_backend':
+                return self::get_stok_log_backend($parameter);
+                break;
             default:
                 return $parameter;
                 break;
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    private function stok_import_fetch($parameter)
+    {
+        if (!empty($_FILES['csv_file']['name'])) {
+            $unique_name = array();
+
+            $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $column = fgetcsv($file_data); //array_head
+            $row_data = array();
+            while ($row = fgetcsv($file_data)) {
+                if (!in_array($row[0], $unique_name)) {
+                    array_push($unique_name, $row[0]);
+                    $column_builder = array();
+                    foreach ($column as $key => $value) {
+                        $column_builder[$value] = $row[$key];
+                    }
+                    array_push($row_data, $column_builder);
+                }
+            }
+
+            $build_col = array();
+            foreach ($column as $key => $value) {
+                array_push($build_col, array("data" => $value));
+            }
+
+            $output = array(
+                'column' => $column,
+                'row_data' => $row_data,
+                'column_builder' => $build_col
+            );
+            return $output;
+        }
+    }
+
+    private function proceed_import_stok($parameter)
+    {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $PO = parent::gen_uuid();
+
+        $duplicate_row = array();
+        $non_active = array();
+        $success_proceed = 0;
+        $proceed_data = array();
+        $all_data = array();
+
+        $total_all = 0;
+
+
+
+        foreach ($parameter['data_import'] as $key => $value) {
+
+            $targettedObat = '';
+            $targettedKategori = '';
+            $targettedSupplier = '';
+            $targettedSatuan = '';
+            $targettedBatch = '';
+
+
+            if($value['kategori'] != '') {
+                $checkKategori = self::$query->select('master_inv_kategori', array(
+                    'uid',
+                    'nama'
+                ))
+                    ->where(array(
+                        'master_inv_kategori.nama' => '= ?'
+                    ), array(
+                        $value['kategori']
+                    ))
+                    ->execute();
+                if(count($checkKategori['response_data']) > 0) {
+                    $targettedKategori = $checkKategori['response_data'][0]['uid'];
+                } else {
+                    $targettedKategori = parent::gen_uuid();
+                    $kategoriBaru = self::$query->insert('master_inv_kategori', array(
+                        'uid' => $targettedKategori,
+                        'nama' => $value['kategori'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+            }
+
+            if($value['supplier'] != '') {
+                $checkSupplier = self::$query->select('master_supplier', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'master_supplier.nama' => '= ?'
+                    ), array(
+                        $value['supplier']
+                    ))
+                    ->execute();
+                if(count($checkSupplier['response_data']) > 0) {
+                    $targettedSupplier = $checkSupplier['response_data'][0]['uid'];
+                } else {
+                    $targettedSupplier = parent::gen_uuid();
+                    $new_supplier = self::$query->insert('master_supplier', array(
+                        'uid' => $targettedSupplier,
+                        'nama' => $value['supplier'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+            }
+
+            if($value['satuan'] != '') {
+                //Satuan Obat
+                $checkSatuan = self::$query->select('master_inv_satuan', array(
+                    'uid',
+                    'nama'
+                ))
+                    ->where(array(
+                        'master_inv_satuan.nama' => '= ?'
+                    ), array(
+                        $value['satuan']
+                    ))
+                    ->execute();
+
+                if(count($checkSatuan['response_data']) > 0) {
+                    $targettedSatuan = $checkSatuan['response_data'][0]['uid'];
+                } else {
+                    $targettedSatuan = parent::gen_uuid();
+                    $new_satuan = self::$query->insert('master_inv_satuan', array(
+                        'uid' => $targettedSatuan,
+                        'nama' => $value['satuan'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+            }
+
+            if($value['nama'] != '') {
+                $checkObat = self::$query->select('master_inv', array(
+                    'uid',
+                    'nama'
+                ))
+                    ->where(array(
+                        'master_inv.nama' => '= ?'
+                    ), array(
+                        $value['nama']
+                    ))
+                    ->execute();
+                if(count($checkObat['response_data']) > 0) {
+                    $targettedObat = $checkObat['response_data'][0]['uid'];
+
+                    //Update Info Obat
+                    $updateObat = self::$query->update('master_inv', array(
+                        'kategori' => $targettedKategori,
+                        'satuan_terkecil' => $targettedSatuan,
+                        'keterangan' => $value['nama_rko'],
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->where(array(
+                            'master_inv.uid' => '= ?',
+                            'AND',
+                            'master_inv.deleted_at' => ' IS NULL'
+                        ), array(
+                            $targettedObat
+                        ))
+                        ->execute();
+                } else {
+                    //New Inventori
+                    if($value['nama'] != '') {
+                        $targettedObat = parent::gen_uuid();
+                        $new_obat = self::$query->insert('master_inv', array(
+                            'uid' => $targettedObat,
+                            'nama' => $value['nama'],
+                            'kategori' => $targettedKategori,
+                            'keterangan' => $value['nama_rko'],
+                            'satuan_terkecil' => $targettedSatuan,
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date()
+                        ))
+                            ->execute();
+
+                        if($new_obat['response_result'] > 0) {
+                            $success_proceed += 1;
+                        }
+
+                        array_push($proceed_data, $new_obat);
+                    }
+                }
+            }
+
+
+
+            if($targettedKategori === __UID_KATEGORI_OBAT) {
+                $checkItem = array();
+
+                if($value['generik'] === 'GENERIK') {
+                    array_push($checkItem, __UID_GENERIK__);
+                }
+
+                if($value['antibiotik'] === 'ANTIBIOTIK') {
+                    array_push($checkItem, __UID_ANTIBIOTIK__);
+                }
+
+                if($value['narkotika'] === 'NARKOTIKA') {
+                    array_push($checkItem, __UID_NARKOTIKA__);
+                }
+
+                if($value['psikotropika'] === 'PSIKOTROPIKA') {
+                    array_push($checkItem, __UID_PSIKOTROPIKA__);
+                }
+            }
+
+            if($value['batch'] != '') {
+                $checkBatch = self::$query->select('inventori_batch', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'inventori_batch.batch' => '= ?',
+                        'AND',
+                        'inventori_batch.barang' => '= ?',
+                        'AND',
+                        'inventori_batch.deleted_at' => 'IS NULL'
+                    ), array(
+                        $value['batch'],
+                        $targettedObat
+                    ))
+                    ->execute();
+
+                if(count($checkBatch['response_data']) > 0) {
+                    $targettedBatch = $checkBatch['response_data'][0]['uid'];
+                } else {
+                    if(parent::validateDate($value['kedaluarsa'])) {
+                        $targettedBatch = parent::gen_uuid();
+                        $newBatch = self::$query->insert('inventori_batch', array(
+                            'uid' => $targettedBatch,
+                            'barang' => $targettedObat,
+                            'batch' => $value['batch'],
+                            'expired_date' => date('Y-m-d', strtotime($value['kedaluarsa'])),
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date()
+                        ))
+                            ->execute();
+                    }
+                }
+            }
+
+
+
+            $total_all += floatval($value['harga']);
+
+            //PO Detail
+            $PODetail = self::$query->insert('inventori_po_detail', array(
+                'po' => $PO,
+                'barang' => $targettedObat,
+                'qty' => floatval($value['stok']),
+                'satuan' => $targettedSatuan,
+                'harga' => floatval($value['harga']),
+                'disc' => 0,
+                'disc_type' => 'N',
+                'subtotal' => (floatval($value['stok']) * floatval($value['harga'])),
+                'keterangan' => 'AUTO PO [STOK AWAL - ' . $UserData['data']->nama . ']',
+                'status' => 'L',
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+
+            //Import Stok Obat
+            $StokAwal = self::$query->insert('inventori_stok', array(
+                'barang' => $targettedObat,
+                'batch' => $targettedBatch,
+                'gudang' => $parameter['gudang'],
+                'stok_terkini' => floatval($value['stok'])
+            ))
+                ->execute();
+
+            if($StokAwal['response_result'] > 0) {
+                $StokLog = self::$query->insert('inventori_stok_log', array(
+                    'barang' => $targettedObat,
+                    'batch' => $targettedBatch,
+                    'gudang' => $parameter['gudang'],
+                    'masuk' => floatval($value['stok']),
+                    'keluar' => 0,
+                    'saldo' => floatval($value['stok']),
+                    'type' => __STATUS_STOK_AWAL__,
+                    'logged_at' => parent::format_date(),
+                    'jenis_transaksi' => 'inventori_batch',
+                    'uid_foreign' => $targettedBatch,
+                    'keterangan' => 'Stok Awal. Auto PO'
+                ))
+                    ->execute();
+            }
+
+            array_push($proceed_data, $StokAwal);
+        }
+
+
+        //Auto Purchase List
+
+        $Purchase = self::$query->insert('inventori_po', array(
+            'uid' => $PO,
+            'pegawai' => $UserData['data']->uid,
+            'total' => floatval($total_all),
+            'disc' => 0,
+            'disc_type' => 'N',
+            'total_after_disc' => $total_all,
+            'keterangan' => 'AUTO [TIDAK ADA SUPPLIER] - AUTO HARGA JUAL',
+            'status' => 'A',
+            'nomor_po' => 'STOK_AWAL',
+            'tanggal_po' => parent::format_date(),
+            'created_at' => parent::format_date(),
+            'updated_at' => parent::format_date()
+        ))
+            ->execute();
+
+        return array(
+            'duplicate_row' => $duplicate_row,
+            'non_active' => $non_active,
+            'success_proceed' => $success_proceed,
+            'data' => $all_data,
+            'po' => $Purchase,
+            'proceed' => $proceed_data
+        );
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //===========================================================================================KATEGORI
     private function tambah_kategori_obat($parameter)
@@ -3270,6 +3638,87 @@ class Inventori extends Utility
 
             $autonum++;
         }
+        return $data;
+    }
+
+    private function get_stok_log_backend($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'inventori_stok_log.type' => '= ?',
+                'AND',
+                'inventori_stok_log.gudang' => '= ?'
+            );
+
+            $paramValue = array(__STATUS_STOK_AWAL__, $parameter['gudang']);
+        } else {
+            $paramData = array(
+                'inventori_stok_log.type' => '= ?',
+                'AND',
+                'inventori_stok_log.gudang' => '= ?'
+            );
+
+            $paramValue = array(__STATUS_STOK_AWAL__, $parameter['gudang']);
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('inventori_stok_log', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'masuk',
+                'keluar',
+                'saldo'
+            ))
+                ->where(array(
+                    'inventori_stok_log.type' => '= ?'
+                ), array(
+                    __STATUS_STOK_AWAL__
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok_log', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'masuk',
+                'keluar',
+                'saldo'
+            ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['barang'] = self::get_item_detail($value['barang'])['response_data'][0];
+            $data['response_data'][$key]['batch'] = self::get_batch_detail($value['batch'])['response_data'][0];
+            $data['response_data'][$key]['batch']['expired_date'] = date('d F Y', strtotime($data['response_data'][$key]['batch']['expired_date']));
+
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('inventori_stok_log', array(
+            'id'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
         return $data;
     }
 
