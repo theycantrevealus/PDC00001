@@ -108,7 +108,7 @@
                                 localStorage.getItem("currentPasien");
                                 localStorage.getItem("currentAntrianID");
 
-                                /*if(response.response_package.response_notif == 'K') {
+                                if(response.response_package.response_notif == 'K') {
 									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
                                     Swal.fire(
                                         'Berhasil ditambahkan!',
@@ -128,7 +128,7 @@
                                     });
 								} else {
 									console.log("command not found");
-								}*/
+								}
 
 							},
 							error: function(response) {
