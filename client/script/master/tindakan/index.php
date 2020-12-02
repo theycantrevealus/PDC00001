@@ -180,7 +180,7 @@
                             console.log(response);
                             var html = "Imported : " + response.response_package.success_proceed + "<br />";
                             $("#csv_file_data").html(html);
-                            tableStokAwal.ajax.reload();
+                            tableTindakan.ajax.reload();
                             $("#review-import").modal("hide");
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
