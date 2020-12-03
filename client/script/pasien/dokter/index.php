@@ -170,7 +170,7 @@
                     $("#tanggal_periksa").html(data.tanggal_parsed);
 
                     //Parse Resep
-                    if(data.resep !== undefined) {
+                    if(data.resep[0] !== undefined) {
                         var resepData = data.resep[0].resep_detail;
                         $(".resepDokterCPPT tbody tr").remove();
                         for(var resepKey in resepData) {
@@ -236,7 +236,7 @@
                     //Parse Laboratorium
                     for(var labKey in selectedData.lab_order) {
                         var LabBuild = load_laboratorium(selectedData.lab_order[labKey]);
-                        $(".lab_loader").append(LabBuild);
+                        $(".lab_loader").html(LabBuild);
                     }
 
                     //Parse Radiologi

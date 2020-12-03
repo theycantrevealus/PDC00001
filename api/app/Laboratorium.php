@@ -183,16 +183,20 @@ class Laboratorium extends Utility {
             $paramData = array(
                 'master_lab.deleted_at' => 'IS NULL',
                 'AND',
+                'master_lab.status' => '= ?',
+                'AND',
                 '(master_lab.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
                 'master_lab.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
-            $paramValue = array();
+            $paramValue = array('P');
         } else {
             $paramData = array(
-                'master_lab.deleted_at' => 'IS NULL'
+                'master_lab.deleted_at' => 'IS NULL',
+                'AND',
+                'master_lab.status' => '= ?'
             );
-            $paramValue = array();
+            $paramValue = array('P');
         }
 
         if ($parameter['length'] < 0) {
@@ -3010,7 +3014,7 @@ class Laboratorium extends Utility {
 		$result = [];
 		$dataNilai = json_decode($parameter['data_nilai']);
 
-		if (isset($parameter['uid_order'])){
+		if (isset($parameter['uid_order'])) {
 
 		    foreach($dataNilai as $key_tindakan => $value_tindakan) {
                 foreach($value_tindakan as $key_nilai => $value_nilai){
@@ -3171,6 +3175,20 @@ class Laboratorium extends Utility {
                         ->execute();
                 }
             }
+
+		    //Update Kesan dan Anjurang
+            $selesai = self::$query->update('lab_order', array(
+                'kesan' => $parameter['kesan'],
+                'anjuran' => $parameter['anjuran']
+            ))
+                ->where(array(
+                    'lab_order.uid' => '= ?',
+                    'AND',
+                    'lab_order.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['uid_order']
+                ))
+                ->execute();
 		}
 
 		//create new 

@@ -188,6 +188,8 @@ class Asesmen extends Utility {
                 'dr_penanggung_jawab',
                 'no_order',
                 'status',
+                'kesan',
+                'anjuran',
                 'created_at'
             ))
                 ->where(array(

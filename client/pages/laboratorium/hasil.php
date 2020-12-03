@@ -34,11 +34,11 @@
         </div>
         <div class="col-md-12 form-group">
             <label>Kesan:</label>
-            <input type="text" name="kesan id="kesan" class="form-control informasi" />
+            <textarea style="min-height: 200px" type="text" name="kesan" id="kesan" class="form-control informasi"></textarea>
         </div>
         <div class="col-md-12 form-group">
             <label>Anjuran:</label>
-            <input type="text" name="anjuran id="anjuran" class="form-control informasi" />
+            <textarea style="min-height: 200px" type="text" name="anjuran" id="anjuran" class="form-control informasi"></textarea>
         </div>
 	</div>
 </div>
