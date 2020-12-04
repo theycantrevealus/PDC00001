@@ -239,7 +239,7 @@
 							var listParse = protocolLib[command](command, type, parameter, sender, receiver, time, audio, playlist);
 							playlist = listParse.playlist;
 						} else {
-							var listParse
+							var listParse;
 							if(playlist.length > 0) {
 								listParse = protocolLib[command](command, type, parameter, sender, receiver, time, audio, playlist, true);
 							} else {

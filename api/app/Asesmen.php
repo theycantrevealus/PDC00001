@@ -691,7 +691,7 @@ class Asesmen extends Utility {
 					$data['response_data'][0]['asesmen'],
 					$data['response_data'][0]['dokter'],
 					$data['response_data'][0]['pasien'],
-                    ($isCPPT) ? 'L' : 'N'
+                    ($isCPPT) ? 'L' : 'C'
 				))
 				->execute();
 				$racikanData = array();
@@ -1240,6 +1240,7 @@ class Asesmen extends Utility {
 
 			//Update resep master
 			$resepUpdate = self::$query->update('resep', array(
+                'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
 				'keterangan' => $parameter['keteranganResep'],
 				'keterangan_racikan' => $parameter['keteranganRacikan']
 			))
@@ -1522,6 +1523,7 @@ class Asesmen extends Utility {
 
 			//New Resep
 			$uid = parent::gen_uuid();
+
 			$newResep = self::$query->insert('resep',array(
 				'uid' => $uid,
 				'kunjungan' => $parameter['kunjungan'],
@@ -1532,7 +1534,7 @@ class Asesmen extends Utility {
 				'dokter' => $UserData['data']->uid,
 				'pasien' => $parameter['pasien'],
 				'total' => 0,
-				'status_resep' => 'N',
+				'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))
