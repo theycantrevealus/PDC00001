@@ -46,7 +46,15 @@
                         <div class="z-0">
                             <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
                                 <li class="nav-item">
-                                    <a href="#tab-laboratorium" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                                    <a href="#tab-verifikasi" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-4" >
+                                        <span class="nav-link__count">
+                                            <i class="fa fa-list"></i>
+                                        </span>
+                                        Verifikasi
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#tab-laboratorium" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
                                         <span class="nav-link__count">
                                             <i class="fa fa-check"></i>
                                         </span>
@@ -72,7 +80,7 @@
                             </ul>
                         </div>
                         <div class="card card-body tab-content">
-                            <div class="tab-pane show fade active" id="tab-laboratorium">
+                            <div class="tab-pane show fade" id="tab-laboratorium">
                                 <table class="table table-bordered table-striped" id="table-antrian-labor" style="font-size: 0.9rem;">
                                     <thead class="thead-dark">
                                     <tr>
@@ -106,6 +114,24 @@
                             <div class="tab-pane show fade" id="tab-history">
                                 <input id="range_history" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
                                 <table class="table table-bordered table-striped" id="table-history-labor" style="font-size: 0.9rem;">
+                                    <thead class="thead-dark">
+                                    <tr>
+                                        <th class="wrap_content">No</th>
+                                        <th>Waktu Order</th>
+                                        <th>No. RM</th>
+                                        <th>Pasien</th>
+                                        <th>Poliklinik</th>
+                                        <th>Dokter</th>
+                                        <th class="wrap_content">Aksi</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane show fade active" id="tab-verifikasi">
+                                <table class="table table-bordered table-striped" id="table-verifikasi-labor" style="font-size: 0.9rem;">
                                     <thead class="thead-dark">
                                     <tr>
                                         <th class="wrap_content">No</th>

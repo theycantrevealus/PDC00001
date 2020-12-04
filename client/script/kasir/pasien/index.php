@@ -439,7 +439,9 @@
                                 }
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
-									status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
+                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
+                                } else if(invoice_detail_item[invKey].status_bayar == 'V') {
+                                    status_bayar = "<span class=\"text-info\" style=\"white-space: pre\"><i class=\"fa fa-info-circle\"></i> Verifikasi</span>";
 								} else {
 									if(invoice_detail_item[invKey].item.allow_retur == true) {
 										if(invoice_detail_item[invKey].status_berobat == undefined) {

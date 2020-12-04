@@ -47,6 +47,15 @@ class Apotek extends Utility
                 case 'lunas':
                     return self::get_resep('L');
                     break;
+                case 'selesai':
+                    return self::get_resep('D');
+                    break;
+                case 'panggil':
+                    return self::get_resep('P');
+                    break;
+                case 'serah':
+                    return self::get_resep('S');
+                    break;
                 default:
                     return self::get_resep();
             }
@@ -75,8 +84,30 @@ class Apotek extends Utility
                     $parameter['status'] = 'L';
                     return self::get_resep_backend($parameter);
                     break;
+                case 'get_resep_selesai_backend':
+                    $parameter['status'] = 'D';
+                    $selesai = self::get_resep_backend($parameter);
+
+                    $parameter['status'] = 'P';
+                    $panggil = self::get_resep_backend($parameter);
+
+                    $parameter['status'] = 'S';
+                    $terima = self::get_resep_backend($parameter);
+
+                    $allData = array_merge(array_merge($terima['response_data'], $panggil['response_data']), $selesai['response_data']);
+                    $terima['response_data'] = $allData;
+
+                    return $terima;
+
+                    break;
                 case 'proses_resep':
                     return self::proses_resep($parameter);
+                    break;
+                case 'panggil_antrian_selesai':
+                    return self::panggil_antrian_selesai($parameter);
+                    break;
+                case 'serah_antrian_selesai':
+                    return self::serah_antrian_selesai($parameter);
                     break;
                 default:
                     return self::get_resep();
@@ -84,6 +115,44 @@ class Apotek extends Utility
         } catch (QueryException $e) {
             return 'Error => ' . $e;
         }
+    }
+
+    private function panggil_antrian_selesai($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $worker = self::$query->update('resep', array(
+            'status_resep' => 'P',
+            'waktu_panggil' => parent::format_date(),
+            'dipanggil_oleh' => $UserData['data']->uid
+        ))
+            ->where(array(
+                'resep.uid' => '= ?',
+                'AND',
+                'resep.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+        return $worker;
+    }
+
+    private function serah_antrian_selesai($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $worker = self::$query->update('resep', array(
+            'status_resep' => 'S',
+            'waktu_terima' => parent::format_date(),
+            'diserahkan_oleh' => $UserData['data']->uid
+        ))
+            ->where(array(
+                'resep.uid' => '= ?',
+                'AND',
+                'resep.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+        return $worker;
     }
 
     private function revisi_resep($parameter)
@@ -882,6 +951,7 @@ class Apotek extends Utility
                 'dokter',
                 'pasien',
                 'total',
+                'status_resep',
                 'created_at',
                 'updated_at'
             ))
@@ -896,6 +966,7 @@ class Apotek extends Utility
                 'dokter',
                 'pasien',
                 'total',
+                'status_resep',
                 'created_at',
                 'updated_at'
             ))
@@ -1050,6 +1121,7 @@ class Apotek extends Utility
             'asesmen',
             'dokter',
             'pasien',
+            'status_resep',
             'total',
             'created_at',
             'updated_at'

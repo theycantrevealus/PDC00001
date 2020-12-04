@@ -27,6 +27,10 @@ class Mitra extends Utility {
 				case 'detail':
 					return self::get_mitra_detail($parameter[2]);
 					break;
+                case 'mitra_item':
+                    return self::mitra_item($parameter);
+                    break;
+
 				default:
 					return self::get_mitra();
 			}
@@ -51,6 +55,25 @@ class Mitra extends Utility {
 			return 'Error => ' . $e;
 		}
 	}
+
+	private function mitra_item($parameter) {
+	    $data = self::$query->select('master_mitra', array(
+	        'uid',
+            'nama',
+            'jenis',
+            'kontak',
+            'alamat'
+        ))
+            ->where(array(
+                'master_mitra.jenis' => '= ?',
+                'AND',
+                'master_mitra.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter[2]
+            ))
+            ->execute();
+	    return $data;
+    }
 
 	public function __DELETE__($parameter = array()) {
 		return self::delete($parameter);

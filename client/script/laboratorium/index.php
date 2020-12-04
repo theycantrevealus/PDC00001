@@ -476,6 +476,226 @@
         });
 
 
+        $("body").on("click", ".btn-detail-verif", function() {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+
+            //Get Detail
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Laboratorium/get-laboratorium-order-pack/" + uid,
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "GET",
+                success: function (response) {
+                    $("#modal-detail-labor").modal("show");
+                    $(".lab_loader").html(load_laboratorium(response.response_package.response_data[0]));
+
+                    //$(".target_dpjp").select2();
+                    $("#penyedia_order_" + uid).select2();
+
+                    loadMitra("#penyedia_order_" + uid, "");
+
+
+                    $("#target_dpjp_lab_" + uid).select2({
+                        minimumInputLength: 1,
+                        "language": {
+                            "noResults": function(){
+                                return "Dokter tidak ditemukan";
+                            }
+                        },
+                        placeholder:"Cari Dokter",
+                        cache: true,
+                        selectOnClose: true,
+                        ajax: {
+                            dataType: "json",
+                            headers:{
+                                "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                                "Content-Type" : "application/json",
+                            },
+                            url:__HOSTAPI__ + "/Pegawai/get_all_dokter_select2",
+                            type: "GET",
+                            data: function (term) {
+                                return {
+                                    search:term.term
+                                };
+                            },
+                            processResults: function (response) {
+                                var data = response.response_package.response_data;
+                                return {
+                                    results: $.map(data, function (item) {
+                                        return {
+                                            text: item.nama_dokter,
+                                            id: item.uid
+                                        }
+                                    })
+                                };
+                            }
+                        }
+                    }).on("select2:select", function(e) {
+                        var data = e.params.data;
+
+                    });
+                },
+                error: function (response) {
+                    //
+                }
+            });
+
+
+            return false;
+        });
+
+        var tableVerifikasiLabor = $("#table-verifikasi-labor").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Laboratorium",
+                type: "POST",
+                data: function(d) {
+                    d.request = "get-antrian-backend";
+                    d.mode = "reqular";
+                    d.status = 'V';
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var returnedData = [];
+                    if(response == undefined || response.response_package == undefined) {
+                        returnedData = [];
+                    } else {
+                        returnedData = response.response_package.response_data;
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Nomor Order"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["autonum"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["waktu_order"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["no_rm"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["pasien"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["departemen"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["dokter"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail-verif\" data-toggle='tooltip' title='Detail'>" +
+                            "<i class=\"fa fa-search\"></i>" +
+                            "</a>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+        function loadMitra(target_ui, itemLab, selected = ""){
+            resetSelectBox(target_ui);
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Mitra/mitra_item/LAB/" + itemLab,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            $(target_ui).append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            })
+        }
+
+
+
+
+
+        function loadDokter(target_ui, poli, selected = ""){
+            resetSelectBox(target_ui, "Dokter");
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Poli/poli-set-dokter/" + poli,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].dokter).html(MetaData[i].nama);
+                            $(target_ui).append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            })
+        }
+
+        function resetSelectBox(selector, name){
+            $("#"+ selector +" option").remove();
+            var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
+            $("#" + selector).append(opti_null);
+        }
+
+
+
 
 
         //SOCKET
@@ -507,6 +727,18 @@
                 tableHistoryLabor.ajax.reload();
             }
         };
+
+        $("body").on("click", ".btn_verifikasi_item_lab", function () {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+
+            var pelaksana = $("#penyedia_order_" + uid).val();
+            var dpjp = $("#target_dpjp_lab_" + uid).val();
+
+
+            alert(uid);
+            return false;
+        });
 
 
 
@@ -831,5 +1063,68 @@
                 });
             });
         }
+
+        function load_laboratorium(data) {
+            var listPetugas = [];
+            for(petugasKey in data.petugas) {
+                if(data.petugas[petugasKey] !== null) {
+                    listPetugas.push(data.petugas[petugasKey].nama);
+                }
+            }
+
+            data['petugas_parse'] = listPetugas.join(",");
+
+            var returnHTML = "";
+            $.ajax({
+                url: __HOSTNAME__ + "/pages/laboratorium/lab-single-verif.php",
+                async:false,
+                data: data,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"POST",
+                success:function(response_html) {
+                    returnHTML = response_html;
+                },
+                error: function(response_html) {
+                    console.log(response_html);
+                }
+            });
+            return returnHTML;
+        }
 	});
 </script>
+
+
+
+
+
+
+
+
+
+<div id="modal-detail-labor" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Detail Permintaan Laboratorium</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-header card-header-large bg-white">
+                        <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Verifikasi Ketersediaan Laboratorium</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row lab_loader"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>

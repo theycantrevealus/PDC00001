@@ -80,6 +80,10 @@ class Laboratorium extends Utility {
 					return self::get_laboratorium_order_detail($parameter[2]);
 					break;
 
+                case 'get-laboratorium-order-pack':
+                    return self::get_lab_order_pack($parameter[2]);
+                    break;
+
 				default:
 					return self::get_lab();
 			}
@@ -153,6 +157,105 @@ class Laboratorium extends Utility {
 			return 'Error => ' . $e;
 		}
 	}
+
+
+	private function get_lab_order_pack($parameter) {
+        //Lab Order
+        $lab = self::$query->select('lab_order', array(
+            'uid',
+            'dr_penanggung_jawab',
+            'no_order',
+            'status',
+            'kesan',
+            'anjuran',
+            'created_at'
+        ))
+            ->where(array(
+                'lab_order.uid' => '= ?',
+                'AND',
+                'lab_order.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+
+
+
+        //Order Detail
+        foreach($lab['response_data'] as $LabKey => $LabValue) {
+            $Petugas = array();
+            $PetugasChecker = array();
+            $Pegawai = new Pegawai(self::$pdo);
+
+            $detailLaborOrder = self::$query->select('lab_order_detail', array(
+                'tindakan',
+                'keterangan'
+            ))
+                ->where(array(
+                    'lab_order_detail.lab_order' => '= ?',
+                    'AND',
+                    'lab_order_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $LabValue['uid']
+                ))
+                ->execute();
+
+            foreach ($detailLaborOrder['response_data'] as $LabDetailKey => $LabDetailValue) {
+                $LabTindakan = self::get_lab_detail($LabDetailValue['tindakan']);
+                $detailLaborOrder['response_data'][$LabDetailKey]['tindakan'] = $LabTindakan['response_data'][0];
+
+                $nilaiLaborOrder = self::$query->select('lab_order_nilai', array(
+                    'tindakan',
+                    'id_lab_nilai',
+                    'nilai',
+                    'petugas'
+                ))
+                    ->where(array(
+                        'lab_order_nilai.lab_order' => '= ?',
+                        'AND',
+                        'lab_order_nilai.deleted_at' => 'IS NULL'
+                    ), array(
+                        $LabValue['uid']
+                    ))
+                    ->execute();
+                foreach ($nilaiLaborOrder['response_data'] as $LabOrderDetailItemKey => $LabOrderDetailItemValue) {
+
+                    if(!in_array($LabOrderDetailItemValue['petugas'], $PetugasChecker)) {
+                        $PetugasDetail = $Pegawai->get_detail_pegawai($LabOrderDetailItemValue['petugas'])['response_data'][0];
+                        array_push($Petugas, $PetugasDetail);
+                        array_push($PetugasChecker, $LabOrderDetailItemValue['petugas']);
+                    }
+
+
+                    $LabItem = self::$query->select('master_lab_nilai', array(
+                        'satuan',
+                        'nilai_maks',
+                        'nilai_min',
+                        'keterangan'
+                    ))
+                        ->where(array(
+                            'master_lab_nilai.id' => '= ?',
+                            'AND',
+                            'master_lab_nilai.deleted_at' => 'IS NULL'
+                        ), array(
+                            $LabOrderDetailItemValue['id_lab_nilai']
+                        ))
+                        ->execute();
+
+                    $nilaiLaborOrder['response_data'][$LabOrderDetailItemKey]['lab_nilai'] = $LabItem['response_data'][0];
+                }
+
+                $detailLaborOrder['response_data'][$LabDetailKey]['hasil'] = $nilaiLaborOrder['response_data'];
+            }
+
+            $lab['response_data'][$LabKey]['detail'] = $detailLaborOrder['response_data'];
+            $lab['response_data'][$LabKey]['petugas'] = $Petugas;
+            $lab['response_data'][$LabKey]['parse_tanggal'] = date('d F Y', strtotime($LabValue['created_at']));
+            $lab['response_data'][$LabKey]['dr_penanggung_jawab'] = $Pegawai->get_detail_pegawai($LabValue['dr_penanggung_jawab'])['response_data'][0];
+        }
+
+        return $lab;
+    }
 
 	private function toogle_status_item_lab($parameter) {
         $Authorization = new Authorization();
@@ -415,7 +518,8 @@ class Laboratorium extends Utility {
                     'item_origin' => 'master_tindakan',
                     'qty' => 1,
                     'harga' => $HargaFinal,
-                    'status_bayar' => ($DValue['penjamin'] == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                    //'status_bayar' => ($DValue['penjamin'] == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                    'status_bayar' => ($DValue['penjamin'] == __UIDPENJAMINUMUM__) ? 'V' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
                     'subtotal' => $HargaFinal,
                     'discount' => 0,
                     'discount_type' => 'N',
@@ -2492,9 +2596,10 @@ class Laboratorium extends Utility {
 							'waktu_order'			=>	parent::format_date(),
 							'selesai'				=>	'false',
 							'dr_pengirim'			=>	$UserData['data']->uid,
-							'dr_penanggung_jawab'	=>	$parameter['dokterPJ'],
+							//'dr_penanggung_jawab'	=>	$parameter['dokterPJ'],
 							'no_order'				=>	'LO/' . date('Y/m') . '/' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT),
-							'status'				=>	'P',
+							//'status'				=>	'P', Revisi Verifikator
+                            'status'				=>	'V',
 							'pasien'				=>	$data_antrian['pasien'],
 							'kunjungan'				=>	$data_antrian['kunjungan'],
 							'created_at'			=>	parent::format_date(),
@@ -2633,7 +2738,8 @@ class Laboratorium extends Utility {
                                         'item_origin' => 'master_tindakan',
                                         'qty' => 1,
                                         'harga' => $HargaFinal,
-                                        'status_bayar' => ($valueTindakan['penjamin'] == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                                        //'status_bayar' => ($valueTindakan['penjamin'] == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                                        'status_bayar' => ($valueTindakan['penjamin'] == __UIDPENJAMINUMUM__) ? 'V' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
                                         'subtotal' => $HargaFinal,
                                         'discount' => 0,
                                         'discount_type' => 'N',
@@ -2727,7 +2833,8 @@ class Laboratorium extends Utility {
 					//update status order
 					$updateStatusOrder = self::$query
 						->update('lab_order', array(
-								'status'	=>	$status_lunas
+								//'status'	=>	$status_lunas
+                                'status'	=>	'V'
 							)
 						)
 						->where(
@@ -2744,7 +2851,8 @@ class Laboratorium extends Utility {
 
 					//update status antrian
                     $antrian_status = self::$query->update('antrian_nomor', array(
-                        'status' => ($data_antrian['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P'
+                        //'status' => ($data_antrian['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P'
+                        'status' => 'P'
                     ))
                         ->where(array(
                             'antrian_nomor.kunjungan' => '= ?',
