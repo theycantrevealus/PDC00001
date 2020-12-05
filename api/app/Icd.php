@@ -87,6 +87,14 @@ class Icd extends Utility
                 return self::get_icd_9_back_end_dt($parameter);
                 break;
 
+            case 'icd_import_fetch':
+                return self::icd_import_fetch($parameter);
+                break;
+
+            case 'proceed_import_icd':
+                return self::proceed_import_icd($parameter);
+                break;
+
             default:
                 # code...
                 break;
@@ -96,6 +104,89 @@ class Icd extends Utility
     public function __DELETE__($parameter = array())
     {
         return self::delete_icd($parameter);
+    }
+
+    private function icd_import_fetch($parameter) {
+        if (!empty($_FILES['csv_file']['name'])) {
+            $unique_name = array();
+
+            $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $column = fgetcsv($file_data); //array_head
+            $row_data = array();
+            while ($row = fgetcsv($file_data)) {
+                if (!in_array($row[0], $unique_name)) {
+                    array_push($unique_name, $row[0]);
+                    $column_builder = array();
+                    foreach ($column as $key => $value) {
+                        $column_builder[$value] = $row[$key];
+                    }
+                    array_push($row_data, $column_builder);
+                }
+            }
+
+            $build_col = array();
+            foreach ($column as $key => $value) {
+                array_push($build_col, array("data" => $value));
+            }
+
+            $output = array(
+                'column' => $column,
+                'row_data' => $row_data,
+                'column_builder' => $build_col
+            );
+            return $output;
+        }
+    }
+
+    private function proceed_import_icd($parameter) {
+        $duplicate_row = array();
+        $non_active = array();
+        $success_proceed = 0;
+        $proceed_data = array();
+
+        foreach ($parameter['data_import'] as $key => $value) {
+            //Check ICD
+
+            $check = self::$query->select($parameter['target'], array(
+                'id'
+            ))
+                ->where(array(
+                    $parameter['target'] . '.nama' => '= ?',
+                    'AND',
+                    $parameter['target'] . '.kode' => '= ?'
+                ), array(
+                    $value['ICD'],
+                    $value['kode']
+                ))
+                ->execute();
+            if(count($check['response_data']) > 0) {
+                $proceed_data = self::$query->update($parameter['target'], array(
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        $parameter['target'] . '.id' => '= ?'
+                    ), array(
+                        $check['response_data'][0]['id']
+                    ))
+                    ->execute();
+            } else {
+                $proceed_data = self::$query->insert($parameter['target'], array(
+                    'kode' => $value['kode'],
+                    'nama' => $value['ICD'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+        }
+
+        return array(
+            'duplicate_row' => $duplicate_row,
+            'non_active' => $non_active,
+            'success_proceed' => $success_proceed,
+            'data' => $parameter['data_import'],
+            'proceed' => $proceed_data
+        );
     }
 
 

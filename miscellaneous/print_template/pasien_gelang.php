@@ -32,7 +32,7 @@
         <table style='width:100%;border-collapse:collapse; background:#fff; font-size:0.7rem !important;'>
             <tr>
                 <td width="50%"><?php echo $_POST['no_rm'];?></td>
-                <td><?php echo $_POST['pasien'];?></td>
+                <td><?php echo $_POST['nama'];?></td>
             </tr>
             <tr>
                 <td><?php echo date('d F Y', strtotime($_POST['tanggal_lahir']));?></td>
@@ -40,7 +40,7 @@
             </tr>
             <tr>
                 <td><?php echo $_POST['dokter'];?></td>
-                <td>TGL : <?php echo date('d F Y', strtotime($_POST['waktu_masuk'])) ;?></td>
+                <td>TGL : <?php echo $_POST['waktu_masuk']; ?></td>
             </tr>
         </table>
     </body>

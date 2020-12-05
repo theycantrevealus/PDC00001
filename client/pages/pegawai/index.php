@@ -23,6 +23,11 @@
                     </div>
                     <div class="card-header">
                         <a href="<?php echo __HOSTNAME__; ?>/pegawai/tambah" class="btn btn-info ml-3 pull-right">Tambah Pengguna</a>
+                        <a style="width: 200px;">
+                            <button class="btn btn-info" id="btn-import">
+                                <i class="fa fa-download"></i> Import
+                            </button>
+                        </a>
                     </div>
                     <div class="card-body tab-content">
                         <div class="tab-pane active show fade" id="pegawai-modul">

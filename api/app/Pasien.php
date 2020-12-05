@@ -489,8 +489,7 @@ class Pasien extends Utility
         }
     }
 
-    private function proceed_import_pasien($parameter)
-    {
+    private function proceed_import_pasien($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -505,9 +504,9 @@ class Pasien extends Utility
                 'uid'
             ))
                 ->where(array(
-                    'master_inv.no_rm' => '= ?',
+                    'pasien.no_rm' => '= ?',
                     'AND',
-                    'master_inv.nik' => '= ?',
+                    'pasien.nik' => '= ?',
                 ), array(
                     $value['no_rm'],
                     $value['nik']

@@ -527,15 +527,17 @@
                             } );
 
                         if(antrianData.poli_info.uid === __POLI_MATA__) {
-                            var readMetaResepMata = JSON.parse(asesmen_detail.meta_resep);
-                            for(var mataKey in readMetaResepMata)
-                            {
-                                $("#" + mataKey).val(readMetaResepMata[mataKey]);
-                            }
+                            if(asesmen_detail.meta_resep !== undefined) {
+                                var readMetaResepMata = JSON.parse(asesmen_detail.meta_resep);
+                                for(var mataKey in readMetaResepMata)
+                                {
+                                    $("#" + mataKey).val(readMetaResepMata[mataKey]);
+                                }
 
-                            var tujuanMata = asesmen_detail.tujuan_resep.split(",");
-                            for(tujuanMataKey in tujuanMata) {
-                                $(".tujuan_resep[value=\"" + tujuanMata[tujuanMataKey] + "\"]").prop("checked", true);
+                                var tujuanMata = asesmen_detail.tujuan_resep.split(",");
+                                for(tujuanMataKey in tujuanMata) {
+                                    $(".tujuan_resep[value=\"" + tujuanMata[tujuanMataKey] + "\"]").prop("checked", true);
+                                }
                             }
                         }
 
@@ -1412,12 +1414,12 @@
         function checkPenjaminAvail(currentPenjamin, penjaminList, targetRow) {
             if(penjaminList.length > 0) {
                 if(penjaminList.indexOf(currentPenjamin) > 0) {
-                    $("#resep_obat_" + targetRow).parent().find("div.penjamin-container").html("<b class=\"badge badge-success obat-penjamin-notifier\"><i class=\"fa fa-check-circle\" style=\"margin-right: 5px;\"></i> Ditanggung Penjamin</b>");
+                    //$("#resep_obat_" + targetRow).parent().find("div.penjamin-container").html("<b class=\"badge badge-success obat-penjamin-notifier\"><i class=\"fa fa-check-circle\" style=\"margin-right: 5px;\"></i> Ditanggung Penjamin</b>");
                 } else {
-                    $("#resep_obat_" + targetRow).parent().find("div.penjamin-container").html("<b class=\"badge badge-danger obat-penjamin-notifier\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak Ditanggung Penjamin</b>");
+                    //$("#resep_obat_" + targetRow).parent().find("div.penjamin-container").html("<b class=\"badge badge-danger obat-penjamin-notifier\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak Ditanggung Penjamin</b>");
                 }
             } else {
-                $("#resep_obat_" + targetRow).parent().find("div.penjamin-container").html("<b class=\"badge badge-danger obat-penjamin-notifier\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak Ditanggung Penjamin</b>");
+                //$("#resep_obat_" + targetRow).parent().find("div.penjamin-container").html("<b class=\"badge badge-danger obat-penjamin-notifier\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak Ditanggung Penjamin</b>");
             }
         }
 
@@ -3176,6 +3178,7 @@
 
 
         $("body").on("click", "#btnSelesai", function() {
+            simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan);
             Swal.fire({
                 title: 'Selesai isi asesmen rawat?',
                 text: 'Jika sudah selesai maka asesmen akan hilang dari antrian dan biaya tindakan serta obat akan langsung ditagihkan pada pasien.',
@@ -3185,7 +3188,7 @@
                 denyButtonText: `Belum`,
             }).then((result) => {
                 if (result.isConfirmed) {
-                    simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan);
+
                     const simpanDataProcess = new Promise(function(resolve, reject) {
                         resolve(simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan, "Y"));
                     }).then(function(result) {
@@ -3799,6 +3802,7 @@
                                 "<td><button " + status_disabled + " class='btn btn-sm btn-danger btnHapusTindakanLab' data-uid='" + item.uid_tindakan + "' data-nama='" + item.tindakan + "'><i class='fa fa-trash'></i></button></td>" +
                                 "</tr>";
 
+
                             $("#table_tindakan_lab tbody").append(html);
 
                             tindakanTerpilih[item.uid_tindakan] = item.uid_penjamin;
@@ -3904,14 +3908,22 @@
                 for(var key in data.detail)
                 {
                     var LabSelectoriContainer = document.createElement("DIV");
-                    $(LabSelectoriContainer).addClass("col-md-4 d-flex align-items-center single_hover").html(
-                        "<div class=\"flex\">" +
-                        "<label for=\"lab_item_" + data.detail[key].id + "\" id=\"label_item_" + data.detail[key].id + "\">" + data.detail[key].keterangan + "</label>" +
-                        "<div class=\"custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right\">" +
-                        "<input type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
-                        "<label class=\"custom-control-label\" for=\"lab_item_" + data.detail[key].id + "\">Ya</label>" +
-                        "</div>" +
-                        "</div>");
+                    if(data.detail[key].status === 'A') {
+                        $(LabSelectoriContainer).addClass("col-md-4 d-flex align-items-center single_hover").html(
+                            "<div class=\"flex\">" +
+                            "<label for=\"lab_item_" + data.detail[key].id + "\" id=\"label_item_" + data.detail[key].id + "\">" + data.detail[key].keterangan + "</label>" +
+                            "<div class=\"custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right\">" +
+                            "<input type=\"checkbox\" value=\"" + data.detail[key].id + "\" name=\"detail_lab_item\" id=\"lab_item_" + data.detail[key].id + "\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
+                            "<label class=\"custom-control-label\" for=\"lab_item_" + data.detail[key].id + "\">Ya</label>" +
+                            "</div>" +
+                            "</div>");
+                    } else {
+                        $(LabSelectoriContainer).addClass("col-md-4 d-flex align-items-center single_hover").html(
+                            "<div class=\"flex\">" +
+                            "<label style=\"text-decoration: line-through\" for=\"lab_item_" + data.detail[key].id + "\" class=\"text-muted\" id=\"label_item_" + data.detail[key].id + "\">" + data.detail[key].keterangan + "</label>" +
+                            "</div>");
+                    }
+
                     $("#lab_nilai_order").append(LabSelectoriContainer);
 
                     listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
@@ -4053,7 +4065,7 @@
             LabMode = "new";
             uid_lab_order = "";
             $("#table_tindakan_lab tbody").html("");
-            $("#dr_penanggung_jawab_lab").val("").trigger('change');
+            //$("#dr_penanggung_jawab_lab").val("").trigger('change');
             $("#form-tambah-order-lab").modal("show");
 
             listTindakanLabTerpilih = {};
@@ -4081,7 +4093,7 @@
 
             listTindakanLabTerpilih = loadLabDetailOrder(uidLabOrder, status_disabled);
 
-            $("#dr_penanggung_jawab_lab").val(uidDokterPj).trigger('change');
+            //$("#dr_penanggung_jawab_lab").val(uidDokterPj).trigger('change');
             $("#form-tambah-order-lab").modal("show");
 
             //listTindakanLabTerpilih = loadLabOrder(uidLabOrder);
@@ -4258,7 +4270,7 @@
 
 
         $("#btnSubmitOrderLab").click(function() {
-            let dokterPJLabOrder = $("#dr_penanggung_jawab_lab").val();
+            /*let dokterPJLabOrder = $("#dr_penanggung_jawab_lab").val();
             if (
                 dokterPJLabOrder !== "" &&
                 dokterPJLabOrder !== undefined &&
@@ -4266,7 +4278,9 @@
                 Object.keys(listTindakanLabTerpilih).length > 0
             ){
                 orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, dokterPJLabOrder, uid_lab_order, dataTableLabOrder, __HOSTAPI__);
-            }
+            }*/
+
+            orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, "", uid_lab_order, dataTableLabOrder, __HOSTAPI__);
 
         });
 
@@ -4312,7 +4326,7 @@
             return dokterPJ;
         }
 
-        $("#dr_penanggung_jawab_lab").select2({
+        /*$("#dr_penanggung_jawab_lab").select2({
             minimumInputLength: 2,
             "language": {
                 "noResults": function(){
@@ -4348,7 +4362,7 @@
         }).addClass("form-control").on("select2:select", function(e) {
             var data = e.params.data;
 
-        });
+        });*/
 
         function setNomorUrut(table_name, no_urut_class){
             /*set dynamic serial number*/
@@ -4779,105 +4793,108 @@
         $(".inputan_inap").select2();
         $(".inputan_rujuk").select2();
 
-        if(dataOdontogram === undefined)
-        {
-            $(".ordo-top").each(function() {
-                var id = $(this).attr("id").split("_");
-                id = id[id.length - 1];
-                if(metaSelOrdo[id] === undefined)
-                {
-                    metaSelOrdo[id] = {
-                        "top" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "left" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "middle" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "right" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "bottom" : {
-                            "tambal": "",
-                            "caries": false
-                        },
-                        "mahkota": {
-                            "type": ""
-                        },
-                        "predefined": "",
-                        "sel_akar": false,
-                        "hilang": false,
-                        "sisa_akar": false,
-                        "fracture": false
-                    };
-                }
-            });
-        } else {
-            metaSelOrdo = JSON.parse(dataOdontogram);
-            // ParseView
 
-
-            for(var dbT in metaSelOrdo) {
-                //Render Result
-                $("#gigi_" + dbT + " .single_gigi_small .side_small").each(function() {
-                    var settedPiece = $(this).attr("class").split(" ");
-                    if(metaSelOrdo[dbT][settedPiece[0]].tambal !== "")
+        if(antrianData.poli_info.uid === __POLI_GIGI__) {
+            if(dataOdontogram === undefined)
+            {
+                $(".ordo-top").each(function() {
+                    var id = $(this).attr("id").split("_");
+                    id = id[id.length - 1];
+                    if(metaSelOrdo[id] === undefined)
                     {
-                        $(this).removeClass (function (index, className) {
-                            return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
-                        }).removeAttr("mode-class").removeAttr("mode-set");
-
-                        if($(this).hasClass(settedPiece[0])) {
-                            var getModeSet = metaSelOrdo[dbT][settedPiece[0]].tambal.split("_");
-
-                            $(this).addClass("modeset_" + getModeSet[getModeSet.length - 1]).attr({
-                                "mode-class": metaSelOrdo[dbT][settedPiece[0]].tambal,
-                                "mode-set": "modeset_" + getModeSet[getModeSet.length - 1]
-                            });
-                        }
-                    } else {
-                        $(this).removeClass (function (index, className) {
-                            return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
-                        }).removeAttr("mode-class").removeAttr("mode-set");
+                        metaSelOrdo[id] = {
+                            "top" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "left" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "middle" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "right" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "bottom" : {
+                                "tambal": "",
+                                "caries": false
+                            },
+                            "mahkota": {
+                                "type": ""
+                            },
+                            "predefined": "",
+                            "sel_akar": false,
+                            "hilang": false,
+                            "sisa_akar": false,
+                            "fracture": false
+                        };
                     }
                 });
+            } else {
+                metaSelOrdo = JSON.parse(dataOdontogram);
+                // ParseView
 
-                if(metaSelOrdo[dbT].hilang) {
-                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-times text-danger\"></i>");
-                } else if(metaSelOrdo[dbT].fracture) {
-                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-hashtag text-info\"></i>");
-                } else if(metaSelOrdo[dbT].sisa_akar) {
-                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"text-primary\">&radic;</i>");
-                } else {
-                    setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "", true);
-                }
 
-                if(metaSelOrdo[dbT].sel_akar) {
-                    $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
-                        "visibility": "visible"
+                for(var dbT in metaSelOrdo) {
+                    //Render Result
+                    $("#gigi_" + dbT + " .single_gigi_small .side_small").each(function() {
+                        var settedPiece = $(this).attr("class").split(" ");
+                        if(metaSelOrdo[dbT][settedPiece[0]].tambal !== "")
+                        {
+                            $(this).removeClass (function (index, className) {
+                                return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                            }).removeAttr("mode-class").removeAttr("mode-set");
+
+                            if($(this).hasClass(settedPiece[0])) {
+                                var getModeSet = metaSelOrdo[dbT][settedPiece[0]].tambal.split("_");
+
+                                $(this).addClass("modeset_" + getModeSet[getModeSet.length - 1]).attr({
+                                    "mode-class": metaSelOrdo[dbT][settedPiece[0]].tambal,
+                                    "mode-set": "modeset_" + getModeSet[getModeSet.length - 1]
+                                });
+                            }
+                        } else {
+                            $(this).removeClass (function (index, className) {
+                                return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
+                            }).removeAttr("mode-class").removeAttr("mode-set");
+                        }
                     });
-                } else {
-                    $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
-                        "visibility": "hidden"
-                    });
-                }
 
-                if(metaSelOrdo[dbT].mahkota.type === "mahkota_logam") {
-                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam"]);
-                } else if(metaSelOrdo[dbT].mahkota.type === "mahkota_nonlogam") {
-                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam"]);
-                } else {
-                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
-                    setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
-                }
+                    if(metaSelOrdo[dbT].hilang) {
+                        setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-times text-danger\"></i>");
+                    } else if(metaSelOrdo[dbT].fracture) {
+                        setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-hashtag text-info\"></i>");
+                    } else if(metaSelOrdo[dbT].sisa_akar) {
+                        setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"text-primary\">&radic;</i>");
+                    } else {
+                        setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "", true);
+                    }
 
-                $("#gigi_" + dbT + " .predefined_small").html(metaSelOrdo[dbT].predefined);
+                    if(metaSelOrdo[dbT].sel_akar) {
+                        $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
+                            "visibility": "visible"
+                        });
+                    } else {
+                        $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
+                            "visibility": "hidden"
+                        });
+                    }
+
+                    if(metaSelOrdo[dbT].mahkota.type === "mahkota_logam") {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam"]);
+                    } else if(metaSelOrdo[dbT].mahkota.type === "mahkota_nonlogam") {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam"]);
+                    } else {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
+                    }
+
+                    $("#gigi_" + dbT + " .predefined_small").html(metaSelOrdo[dbT].predefined);
+                }
             }
         }
 
@@ -5402,7 +5419,7 @@
 				<h5 class="modal-title" id="modal-large-title">Order Laboratorium</h5>
 			</div>
 			<div class="modal-body">
-				<div class="col-md-12 row form-group">
+				<!--div class="col-md-12 row form-group">
 					<div class="col-md-3">
 						<label for="dr_penanggung_jawab_lab">Dokter Penanggung Jawab</label>
 					</div>
@@ -5411,7 +5428,7 @@
 							
 						</select>	
 					</div>
-				</div>
+				</div-->
 				<div class="col-md-12 row form-group">
 					<div class="col-md-3">
 						<label for="tindakan_lab">Tindakan</label>
@@ -5848,6 +5865,82 @@
             </div>
             <div class="modal-footer">
                 <button type="button" id="btnUpdateOrdo" class="btn btn-success">Simpan</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="form-jadwal-operasi" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Pengajuan Jadwal Operasi</h5>
+            </div>
+            <div class="modal-body">
+                <div class="card card-form">
+                    <div class="row no-gutters">
+                        <div class="col-lg-12 card-body">
+                            <div class="form-row">
+                                <div class="col-12 col-md-6 form-group">
+                                    <label>Tanggal Operasi <span class="red">*</span></label>
+                                    <input type="date" id="operasi_tanggal" class="form-control" placeholder="Tentukan tanggal operasi" />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-6 form-group">
+                                    <div class="form-row">
+                                        <div class="col-12 col-md-6 form-group">
+                                            <label>Lama Operasi <span class="red">*</span></label>
+                                            <input type="number" id="operasi_durasi" class="form-control" placeholder="Est. Durasi Operasi (Jam)" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-12 form-group">
+                                    <label>Catatan <span class="red">*</span></label>
+                                    <textarea class="form-control" id="rujuk_catatan" style="min-height: 150px"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnProsesRujuk">
+                    <i class="fa fa-check"></i> Ajukan Rujukan
+                </button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
             </div>
         </div>

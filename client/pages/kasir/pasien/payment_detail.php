@@ -2,15 +2,17 @@
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<div class="col-lg-4">
-					<h5 class="card-header__title flex m-0" id="nama-pasien-faktur"></h5>
-				</div>
-				<div class="col-lg-4">
-					<h5 class="card-header__title flex m-0 text-right" id="pegawai-faktur"></h5>
-				</div>
-				<div class="col-lg-4">
-					<h5 class="card-header__title flex m-0 text-right" id="tanggal-faktur"></h5>
-				</div>
+                <div class="row info-kwitansi">
+                    <div class="col-4">
+                        <h5 class="card-header__title flex m-0" id="nama-pasien-faktur"></h5>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="card-header__title flex m-0 text-right" id="pegawai-faktur"></h5>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="card-header__title flex m-0 text-right" id="tanggal-faktur"></h5>
+                    </div>
+                </div>
 			</div>
 			<div class="card-header card-header-tabs-basic nav" role="tablist">
 				

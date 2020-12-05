@@ -51,6 +51,9 @@ class Inap extends Utility
             case 'tambah_asesmen':
                 return self::tambah_asesmen($parameter);
                 break;
+            case 'pulangkan_pasien':
+                return self::pulangkan_pasien($parameter);
+                break;
             default:
                 return self::get_all($parameter);
         }
@@ -58,6 +61,27 @@ class Inap extends Utility
 
     private function get_detail() {
         //
+    }
+
+    private function pulangkan_pasien($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $worker = self::$query->update('rawat_inap', array(
+            'waktu_keluar' => parent::format_date(),
+            'jenis_pulang' => $parameter['jenis'],
+            'alasan_pulang' => $parameter['keterangan']
+        ))
+            ->where(array(
+                'rawat_inap.pasien' => '= ?',
+                'AND',
+                'rawat_inap.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
+        return $worker;
     }
 
     private function get_all($parameter) {
@@ -68,7 +92,9 @@ class Inap extends Utility
             $paramData = array(
                 'rawat_inap.deleted_at' => 'IS NULL',
                 'AND',
-                'rawat_inap.dokter' => '= ?'
+                'rawat_inap.dokter' => '= ?',
+                'AND',
+                'rawat_inap.waktu_keluar' => 'IS NULL'
             );
 
             $paramValue = array($UserData['data']->uid);
@@ -76,7 +102,9 @@ class Inap extends Utility
             $paramData = array(
                 'rawat_inap.deleted_at' => 'IS NULL',
                 'AND',
-                'rawat_inap.dokter' => '= ?'
+                'rawat_inap.dokter' => '= ?',
+                'AND',
+                'rawat_inap.waktu_keluar' => 'IS NULL'
                 /*'AND',
                 'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''*/
             );
@@ -130,7 +158,7 @@ class Inap extends Utility
 
             //Pasien
             $Pasien = new Pasien(self::$pdo);
-            $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            $PasienDetail = $Pasien::get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienDetail['response_data'][0];
 
             //Dokter

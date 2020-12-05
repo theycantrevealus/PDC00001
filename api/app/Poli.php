@@ -180,16 +180,20 @@ class Poli extends Utility {
 					->select('master_poli', array(
 						'uid',
 						'nama',
+						'editable',
 						'created_at',
 						'updated_at'
 						)
 					)	
 					->where(array(
 							'master_poli.deleted_at' => 'IS NULL',
-							'AND',
-							'master_poli.editable' => '= TRUE'
+							/*'AND',
+							'master_poli.editable' => '= TRUE'*/
 						),array()
 					)
+            ->order(array(
+                'nama' => 'ASC'
+            ))
 					->execute();
 
 		$autonum = 1;
@@ -748,40 +752,29 @@ class Poli extends Utility {
 
 		if($parameter['length'] < 0) {
 			$data = self::$query->select('master_poli_tindakan', $columnTarget)
-			->join('master_tindakan', array(
-				'nama as nama_tindakan'
-			))
-			->on(array(
-				array(
-					'master_poli_tindakan.uid_tindakan' => 'master_tindakan.uid'
-				)
-			))
-			->where($paramData, $paramValue)
-			->order(array(
-				$columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
-			))
-			->execute();
+                ->order(array(
+                    $columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+                ))
+                ->where($paramData, $paramValue)
+			    ->execute();
 		} else {
-			$data = self::$query->select('master_poli_tindakan', $columnTarget)	
-			->join('master_tindakan', array(
-				'nama as nama_tindakan'
-			))
-			->on(array(
-				array('master_poli_tindakan.uid_tindakan', '=', 'master_tindakan.uid')
-			))
-			->where($paramData, $paramValue)
-			->order(array(
-				$columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
-			))
-			->offset(intval($parameter['start']))
-			->limit(intval($parameter['length']))
-			->execute();
+            $data = self::$query->select('master_poli_tindakan', $columnTarget)
+                ->where($paramData, $paramValue)
+                ->order(array(
+                    $columnTargetSetter[$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
 		}
 
 		$data['response_draw'] = $parameter['draw'];
 
 		$autonum = $parameter['start'] + 1;
+		$Tindakan = new Tindakan(self::$pdo);
 		foreach ($data['response_data'] as $key => $value) {
+		    $TindakanDetail = $Tindakan->get_tindakan_detail($value['uid_tindakan'])['response_data'][0];
+            $data['response_data'][$key]['nama_tindakan'] = $TindakanDetail['nama'];
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 		}

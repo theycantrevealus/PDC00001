@@ -104,6 +104,18 @@ class Tindakan extends Utility {
 				return self::tambah_master_tindakan($parameter);
 				break;
 
+            case 'get_tindakan_backend':
+                return self::get_tindakan_backend($parameter);
+                break;
+
+            case 'tindakan_import_fetch':
+                return self::tindakan_import_fetch($parameter);
+                break;
+
+            case 'proceed_import_tindakan':
+                return self::proceed_import_tindakan($parameter);
+                break;
+
 			default:
 				# code...
 				break;
@@ -113,6 +125,351 @@ class Tindakan extends Utility {
 	public function __DELETE__($parameter = array()){ 
 		return self::delete_tindakan($parameter);
 	}
+
+	private function tindakan_import_fetch($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (!empty($_FILES['csv_file']['name'])) {
+            $unique_name = array();
+
+            $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $column = fgetcsv($file_data); //array_head
+            $row_data = array();
+            while ($row = fgetcsv($file_data)) {
+                /*if (!in_array($row[0], $unique_name)) {
+                    array_push($unique_name, $row[0]);
+                    $column_builder = array();
+                    foreach ($column as $key => $value) {
+                        $column_builder[$value] = $row[$key];
+                    }
+                    array_push($row_data, $column_builder);
+                }*/
+
+                $column_builder = array();
+                foreach ($column as $key => $value) {
+                    $column_builder[$value] = $row[$key];
+                }
+                array_push($row_data, $column_builder);
+            }
+
+            $build_col = array();
+            foreach ($column as $key => $value) {
+                array_push($build_col, array("data" => $value));
+            }
+
+            $output = array(
+                'column' => $column,
+                'row_data' => $row_data,
+                'column_builder' => $build_col
+            );
+            return $output;
+        }
+    }
+
+
+    private function proceed_import_tindakan($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $duplicate_row = array();
+        $termi_item = array();
+        $non_active = array();
+        $success_proceed = 0;
+        $proceed_data = array();
+        $Penjamin = new Penjamin(self::$pdo);
+        foreach ($parameter['data_import'] as $key => $value) {
+            $targettedJenis = '';
+            $targettedTindakan = '';
+            $targettedPoli = '';
+
+
+            //Check Jenis
+            $checkJenis = self::$query->select('master_tindakan_jenis', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_tindakan_jenis.nama' => '= ?',
+                    'AND',
+                    'master_tindakan_jenis.deleted_at' => 'IS NULL',
+                ), array(
+                    ucwords(strtolower($value['jenis']))
+                ))
+                ->execute()
+            ;
+            if(count($checkJenis['response_data']) > 0) {
+                $targettedJenis = $checkJenis['response_data'][0]['uid'];
+            } else {
+                if($value['jenis'] != '') {
+                    $targettedJenis = parent::gen_uuid();
+                    $newJenis = self::$query->insert('master_tindakan_jenis', array(
+                        'uid' => $targettedJenis,
+                        'nama' => ucwords(strtolower($value['jenis'])),
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+            }
+
+
+            //Check Tindakan
+            $checkTindakan = self::$query->select('master_tindakan', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_tindakan.nama' => '= ?',
+                    'AND',
+                    'master_tindakan.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['tindakan']
+                ))
+                ->execute();
+            if(count($checkTindakan['response_data']) > 0) {
+                $targettedTindakan = $checkTindakan['response_data'][0]['uid'];
+            } else {
+                if($value['tindakan'] != '') {
+                    $targettedTindakan = parent::gen_uuid();
+                    $newTindakan = self::$query->insert('master_tindakan', array(
+                        'uid' => $targettedTindakan,
+                        'nama' => $value['tindakan'],
+                        'kelompok' => $value['kelompok'],
+                        'jenis' => $targettedJenis,
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+            }
+
+
+
+
+            //All Penjamin (1 Harga)
+            $DataPenjamin = $Penjamin->get_penjamin()['response_data'];
+
+            foreach ($DataPenjamin as $PKey => $PValue) {
+                //Harga
+                $targettedKelas = '';
+                if($value['kelompok'] === 'RJ') {
+                    $targettedKelas = __UID_KELAS_GENERAL_RJ__;
+                } else if($value['kelompok'] === 'RAD') {
+                    $targettedKelas = __UID_KELAS_GENERAL_RAD__;
+                } else if($value['kelompok'] === 'LAB') {
+                    $targettedKelas = __UID_KELAS_GENERAL_LAB__;
+                }
+
+                $checkHarga = self::$query->select('master_tindakan_kelas_harga', array(
+                    'id'
+                ))
+                    ->where(array(
+                        'master_tindakan_kelas_harga.tindakan' => '= ?',
+                        'AND',
+                        'master_tindakan_kelas_harga.kelas' => '= ?',
+                        'AND',
+                        'master_tindakan_kelas_harga.penjamin' => '= ?'
+                    ), array(
+                        $targettedTindakan,
+                        $targettedKelas,
+                        $PValue['uid']
+                    ))
+                    ->execute();
+                if(count($checkHarga['response_data']) > 0) {
+                    //Update Tarif
+                    $workerTarif = self::$query->update('master_tindakan_kelas_harga', array(
+                        'harga' => floatval($value['tarif']),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->where(array(
+                            'master_tindakan_kelas_harga.penjamin' => '= ?',
+                            'AND',
+                            'master_tindakan_kelas_harga.tindakan' => '= ?',
+                            'AND',
+                            'master_tindakan_kelas_harga.kelas' => '= ?'
+                        ), array(
+                            $PValue['uid'],
+                            $targettedTindakan,
+                            $targettedKelas
+                        ))
+                        ->execute();
+                } else {
+                    //New Tarif
+                    $workerTarif = self::$query->insert('master_tindakan_kelas_harga', array(
+                        'tindakan' => $targettedTindakan,
+                        'kelas' => $targettedKelas,
+                        'harga' => floatval($value['tarif']),
+                        'penjamin' => $PValue['uid'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+            }
+
+
+
+
+            //Check Poliklinik
+            //Kasus khusus
+            //Fisioterapi
+            $nama_poli = '';
+            if(
+                trim(strtoupper($value['poliklinik'])) === 'THT' ||
+                trim(strtoupper($value['poliklinik'])) === 'IGD'
+            ) {
+                if(trim(strtoupper($value['poliklinik'])) != 'THT') {
+                    $nama_poli = 'Poliklinik THT';
+                }
+
+                if(trim(strtoupper($value['poliklinik'])) != 'IGD') {
+                    $nama_poli = 'IGD';
+                }
+            } else {
+                $nama_poli = 'Poliklinik ' . ucwords(strtolower($value['poliklinik']));
+            }
+
+            if($nama_poli !== '') {
+                $checkPoli = self::$query->select('master_poli', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'master_poli.nama' => '= ?',
+                        'AND',
+                        'master_poli.editable' => '= ?',
+                        'AND',
+                        'master_poli.deleted_at' => 'IS NULL',
+                    ), array(
+                        $nama_poli,
+                        'TRUE'
+                    ))
+                    ->execute()
+                ;
+                if(count($checkPoli['response_data']) > 0) {
+                    $targettedPoli = $checkPoli['response_data'][0]['uid'];
+                } else {
+                    $targettedPoli = parent::gen_uuid();
+                    $newPoli = self::$query->insert('master_poli', array(
+                        'uid' => $targettedPoli,
+                        'nama' => $nama_poli,
+                        'editable' => 'TRUE',
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+
+
+                //Set setting tindakan per poli
+                //Check Switch Item
+                $checkPoliTindakan = self::$query->select('master_poli_tindakan', array(
+                    'id'
+                ))
+                    ->where(array(
+                        'master_poli_tindakan.uid_poli' => '= ?',
+                        'AND',
+                        'master_poli_tindakan.uid_tindakan' => '= ?'
+                    ), array(
+                        $targettedPoli,
+                        $targettedTindakan
+                    ))
+                    ->execute();
+                if(count($checkPoliTindakan['response_data']) > 0) {
+                    $workerSettingTindakan = self::$query->update('master_poli_tindakan', array(
+                        'deleted_at' => NULL
+                    ))
+                        ->where(array(
+                            'master_poli_tindakan.uid_poli' => '= ?',
+                            'AND',
+                            'master_poli_tindakan.uid_tindakan' => '= ?'
+                        ), array(
+                            $targettedPoli,
+                            $targettedTindakan
+                        ))
+                        ->execute();
+                } else {
+                    $workerSettingTindakan = self::$query->insert('master_poli_tindakan', array(
+                        'uid_poli' => $targettedPoli,
+                        'uid_tindakan' => $targettedTindakan,
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+            }
+        }
+
+        return array(
+            'duplicate_row' => $duplicate_row,
+            'non_active' => $non_active,
+            'success_proceed' => $success_proceed,
+            'data' => $parameter['data_import'],
+            'proceed' => $proceed_data
+        );
+    }
+
+	private function get_tindakan_backend($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'master_tindakan.deleted_at' => 'IS NULL',
+                'AND',
+                'master_tindakan.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'master_tindakan.deleted_at' => 'IS NULL',
+            );
+
+            $paramValue = array();
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('master_tindakan', array(
+                'uid',
+                'nama',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('master_tindakan', array(
+                'uid',
+                'nama',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('master_tindakan', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
 
 
 	/*============GET TINDAKAN============*/

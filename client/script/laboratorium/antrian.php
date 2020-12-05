@@ -74,6 +74,8 @@
 
             form_data.append("request", "update-hasil-lab");
             form_data.append("uid_order", uid_order);
+            form_data.append("kesan", $("#kesan").val());
+            form_data.append("anjuran", $("#anjuran").val());
             form_data.append('data_nilai', JSON.stringify(nilaiItemTindakan));
 
 

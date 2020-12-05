@@ -102,7 +102,6 @@ class Antrian extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-
         if(isset($parameter['dataObj']['konsul'])) { //Kunjungan karena konsul
 
 
@@ -279,6 +278,8 @@ class Antrian extends Utility
                 'waktu_masuk' => parent::format_date(),
                 'pj_pasien' => $parameter['dataObj']['pj_pasien'],
                 'info_didapat_dari' => $parameter['dataObj']['info_didapat_dari'],
+                'cara_datang' => intval($parameter['dataObj']['cara_datang']),
+                'keterangan_cara_datang' => $parameter['dataObj']['keterangan_cara_datang'],
                 'pegawai' => $UserData['data']->uid,
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
@@ -324,6 +325,8 @@ class Antrian extends Utility
                         $Pasien = new Pasien(self::$pdo);
                         $PasienDetail = $Pasien::get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
 
+
+
                         if($parameter['dataObj']['departemen'] === __POLI_IGD__) {
                             //KHUSUS AUTO ANTRIAN
                             $antrianKunjungan = self::$query->insert('antrian_nomor', array(
@@ -340,8 +343,17 @@ class Antrian extends Utility
                                 'jenis_antrian' => __ANTRIAN_KHUSUS__
                             ))
                                 ->execute();
+
                             $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
                             $antrianKunjungan['response_notif'] = 'K';
+
+                            //Auto Tambah ke Antrian Poli
+                            $parameter['dataObj']['currentAntrianID'] = 0;
+                            $currentPasien = $parameter['dataObj']['currentPasien'];
+                            unset($parameter['dataObj']['currentPasien']);
+                            $AntrianProses = self::tambah_antrian('antrian', $parameter, $uid);
+                            $antrianKunjungan['response_poli'] = $AntrianProses;
+                            $parameter['dataObj']['currentPasien'] = $currentPasien;
                         } else {
                             $antrianKunjungan = self::$query->update('antrian_nomor', array(
                                 'status' => 'K',
@@ -505,7 +517,7 @@ class Antrian extends Utility
                                 //
                             }
                         }
-
+                        $antrianKunjungan['response_harga'] = $HargaTindakan;
                         $antrianKunjungan['response_invoice'] = $Invoice;
 
                         return $antrianKunjungan;
@@ -1025,6 +1037,10 @@ class Antrian extends Utility
                     return self::get_list_antrian('antrian', __POLI_IGD__);
                     break;
 
+                case 'rawat_inap':
+                    return self::get_list_antrian('antrian', __POLI_INAP__);
+                    break;
+
                 case 'antrian-detail':
                     return self::get_antrian_detail('antrian', $parameter[2]);
                     break;
@@ -1105,9 +1121,12 @@ class Antrian extends Utility
                 ->where(array(
                         $table . '.departemen' => '= ?',
                         'AND',
-                        $table . '.waktu_keluar' => 'IS NULL',
+                        /*$table . '.waktu_keluar' => 'IS NULL',
+                        'AND',*/
+
+                        $table . '.deleted_at' => 'IS NULL',
                         'AND',
-                        $table . '.deleted_at' => 'IS NULL'
+                        'kunjungan.waktu_keluar' => 'IS NULL'
                     ), array(
                         $target
                     )
@@ -1161,9 +1180,11 @@ class Antrian extends Utility
                     )
                 )
                 ->where(array(
-                        $table . '.waktu_keluar' => 'IS NULL',
+                        /*$table . '.waktu_keluar' => 'IS NULL',
+                        'AND',*/
+                        $table . '.deleted_at' => 'IS NULL',
                         'AND',
-                        $table . '.deleted_at' => 'IS NULL'
+                        'kunjungan.waktu_keluar' => 'IS NULL'
                     )
                 )
                 ->order(

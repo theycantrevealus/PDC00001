@@ -139,7 +139,7 @@
             //Get Detail Asesmen
 
             $.ajax({
-                url:__HOSTAPI__ + "/Asesmen/antrian-detail/" + antrian,
+                url:__HOSTAPI__ + "/Asesmen/antrian-detail-record/" + antrian,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
@@ -169,11 +169,74 @@
                     $(".txt_planning").html(data.planning);
                     $("#tanggal_periksa").html(data.tanggal_parsed);
 
+                    //Parse Resep
+                    if(data.resep[0] !== undefined) {
+                        var resepData = data.resep[0].resep_detail;
+                        $(".resepDokterCPPT tbody tr").remove();
+                        for(var resepKey in resepData) {
+                            var newResepRow = document.createElement("TR");
+
+                            var resepID = document.createElement("TD");
+                            var resepObat = document.createElement("TD");
+                            var resepSigna = document.createElement("TD");
+                            var resepJlh = document.createElement("TD");
+
+                            $(resepID).html((parseInt(resepKey) + 1));
+                            $(resepObat).html(resepData[resepKey].obat_detail.nama);
+                            $(resepSigna).html(resepData[resepKey].signa_pakai + " &times; " + resepData[resepKey].signa_qty);
+                            $(resepJlh).html(resepData[resepKey].qty);
+
+                            $(newResepRow).append(resepID);
+                            $(newResepRow).append(resepObat);
+                            $(newResepRow).append(resepSigna);
+                            $(newResepRow).append(resepJlh);
+
+                            $(".resepDokterCPPT tbody").append(newResepRow);
+                        }
+
+                        var racikanData = data.racikan;
+                        $(".racikanDokterCPPT tbody tr").remove();
+                        for(var racikanKey in racikanData) {
+                            var itemRacikan = racikanData[racikanKey].item;
+
+                            console.log(racikanData[racikanKey]);
+
+                            var newRacikanRow = document.createElement("TR");
+
+                            var racikanID = document.createElement("TD");
+                            var racikanNama = document.createElement("TD");
+                            var racikanKomposisi = document.createElement("TD");
+                            var racikanSigna = document.createElement("TD");
+                            var racikanJlh = document.createElement("TD");
+
+                            $(racikanID).html((parseInt(racikanKey) + 1));
+                            $(racikanNama).html(racikanData[racikanKey].kode);
+
+                            var komposisi = "<ol type=\"1\">";
+                            for(var itemKey in itemRacikan) {
+                                komposisi += "<li>" + itemRacikan[itemKey].obat_detail.nama + " <b class=\"text-info\">" + itemRacikan[itemKey].kekuatan  + "</b></li>";
+                            }
+                            komposisi += "</ol>";
+                            $(racikanKomposisi).html(komposisi);
+                            $(racikanSigna).html(racikanData[racikanKey].signa_pakai + " &times; " + racikanData[racikanKey].signa_qty);
+                            $(racikanJlh).html(racikanData[racikanKey].qty);
+
+                            $(newRacikanRow).append(racikanID);
+                            $(newRacikanRow).append(racikanNama);
+                            $(newRacikanRow).append(racikanKomposisi);
+                            $(newRacikanRow).append(racikanSigna);
+                            $(newRacikanRow).append(racikanJlh);
+
+                            $(".racikanDokterCPPT tbody").append(newRacikanRow);
+
+                        }
+                    }
+
+
                     //Parse Laboratorium
                     for(var labKey in selectedData.lab_order) {
-                        console.log(selectedData.lab_order[labKey]);
                         var LabBuild = load_laboratorium(selectedData.lab_order[labKey]);
-                        $(".lab_loader").append(LabBuild);
+                        $(".lab_loader").html(LabBuild);
                     }
 
                     //Parse Radiologi
@@ -193,7 +256,9 @@
         function load_laboratorium(data) {
             var listPetugas = [];
             for(petugasKey in data.petugas) {
-                listPetugas.push(data.petugas[petugasKey].nama);
+                if(data.petugas[petugasKey] !== null) {
+                    listPetugas.push(data.petugas[petugasKey].nama);
+                }
             }
 
             data['petugas_parse'] = listPetugas.join(",");
@@ -406,21 +471,41 @@
                                                 <div class="card">
                                                     <div class="card-header card-header-large bg-white">
                                                         <div class="row">
-                                                            <div class="col-12">
+                                                            <div class="col-6">
                                                                 <div class="segmen_resep">
                                                                     <div class="d-flex align-items-center">
-                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Resep</strong></a>
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Resep Dokter</strong></a>
                                                                     </div>
                                                                 </div>
                                                                 <div class="card-body">
-                                                                    <table class="table table-bordered">
+                                                                    <table class="table table-bordered resepDokterCPPT largeDataType">
                                                                         <thead class="thead-dark">
-                                                                        <tr>
-                                                                            <th class="wrap_content">No</th>
-                                                                            <th>Obat</th>
-                                                                            <th>Signa</th>
-                                                                            <th>Jlh</th>
-                                                                        </tr>
+                                                                            <tr>
+                                                                                <th class="wrap_content">No</th>
+                                                                                <th>Obat</th>
+                                                                                <th>Signa</th>
+                                                                                <th>Jlh</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody></tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="segmen_resep">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Resep Apotek</strong></a>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <table class="table table-bordered resepApotekCPPT largeDataType">
+                                                                        <thead class="thead-dark">
+                                                                            <tr>
+                                                                                <th class="wrap_content">No</th>
+                                                                                <th>Obat</th>
+                                                                                <th>Signa</th>
+                                                                                <th>Jlh</th>
+                                                                            </tr>
                                                                         </thead>
                                                                         <tbody></tbody>
                                                                     </table>
@@ -430,14 +515,35 @@
                                                     </div>
                                                     <div class="card-header card-header-large bg-white">
                                                         <div class="row">
-                                                            <div class="col-12">
+                                                            <div class="col-6">
                                                                 <div class="segmen_racikan">
                                                                     <div class="d-flex align-items-center">
-                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Racikan</strong></a>
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Racikan Dokter</strong></a>
                                                                     </div>
                                                                 </div>
                                                                 <div class="card-body">
-                                                                    <table class="table table-bordered">
+                                                                    <table class="table table-bordered racikanDokterCPPT largeDataType">
+                                                                        <thead class="thead-dark">
+                                                                        <tr>
+                                                                            <th class="wrap_content">No</th>
+                                                                            <th>Racikan</th>
+                                                                            <th>Komposisi</th>
+                                                                            <th>Signa</th>
+                                                                            <th>Jlh</th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody></tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="segmen_racikan">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Racikan Apotek</strong></a>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <table class="table table-bordered racikanApotekCPPT largeDataType">
                                                                         <thead class="thead-dark">
                                                                         <tr>
                                                                             <th class="wrap_content">No</th>

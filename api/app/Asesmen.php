@@ -34,6 +34,10 @@ class Asesmen extends Utility {
 					return self::get_asesmen_medis($parameter[2]);
 					break;
 
+                case 'antrian-detail-record':
+                    return self::get_asesmen_medis($parameter[2], true);
+                    break;
+
 				case 'asesmen-rawat-detail':
 					return self::get_asesmen_rawat($parameter[2]);
 					break;
@@ -184,6 +188,8 @@ class Asesmen extends Utility {
                 'dr_penanggung_jawab',
                 'no_order',
                 'status',
+                'kesan',
+                'anjuran',
                 'created_at'
             ))
                 ->where(array(
@@ -318,7 +324,7 @@ class Asesmen extends Utility {
         return $data;
     }
 
-	public function get_asesmen_medis($parameter) { //uid antrian
+	public function get_asesmen_medis($parameter, $isCPPT = false) { //uid antrian
 		//prepare antrian
 		$antrian = self::$query->select('antrian', array(
 			'uid',
@@ -685,10 +691,11 @@ class Asesmen extends Utility {
 					$data['response_data'][0]['asesmen'],
 					$data['response_data'][0]['dokter'],
 					$data['response_data'][0]['pasien'],
-					'N'
+                    ($isCPPT) ? 'L' : 'C'
 				))
 				->execute();
 				$racikanData = array();
+				$racikanApotekData = array();
 				foreach ($resep['response_data'] as $key => $value) {
 					//GET Resep Detail
 					$resepDetail = self::$query->select('resep_detail', array(
@@ -741,6 +748,14 @@ class Asesmen extends Utility {
 					))
 					->execute();
 
+                    if($isCPPT) {
+                        /*$RacikanApotekItem = self::$query->select('racikan_change_log')
+                            ->where(array(
+                                'racikan_change_log.racikan'
+                            ), array())
+                            ->execute();*/
+                    }
+
 					foreach ($racikan['response_data'] as $RacikanKey => $RacikanValue) {
 						$RacikanDetailData = self::$query->select('racikan_detail', array(
 							'asesmen',
@@ -777,6 +792,21 @@ class Asesmen extends Utility {
 						array_push($racikanData, $RacikanValue);
 					}
 				}
+
+
+				if($isCPPT) {
+				    //List Resep dan Racikan oleh apotek
+                    $dataResepApotek = self::$query->select('resep_change_log', array())
+                        ->where(array(
+                            'resep_change_log.resep' => '= ?',
+                            'AND',
+                            'resep_change_log.deleted_at' => 'IS NULL'
+                        ), array(
+                            $resep[0]['uid']
+                        ))
+                        ->execute();
+                    $data['response_data'][0]['resep_apotek'] = $dataResepApotek['response_data'];
+                }
 
 				$data['response_data'][0]['racikan'] = $racikanData;
 				$data['response_data'][0]['resep'] = $resep['response_data'];
@@ -1110,7 +1140,10 @@ class Asesmen extends Utility {
 		if($parameter['poli'] !== __POLI_INAP__) {
 		    //Pasien Keluar Poli
             if($parameter['charge_invoice'] === 'Y') {
+
+
                 //Pasien Keluar Poli
+
                 $keluar = self::$query->update('antrian', array(
                     'waktu_keluar' => parent::format_date()
                 ))
@@ -1207,6 +1240,7 @@ class Asesmen extends Utility {
 
 			//Update resep master
 			$resepUpdate = self::$query->update('resep', array(
+                'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
 				'keterangan' => $parameter['keteranganResep'],
 				'keterangan_racikan' => $parameter['keteranganRacikan']
 			))
@@ -1489,6 +1523,7 @@ class Asesmen extends Utility {
 
 			//New Resep
 			$uid = parent::gen_uuid();
+
 			$newResep = self::$query->insert('resep',array(
 				'uid' => $uid,
 				'kunjungan' => $parameter['kunjungan'],
@@ -1499,7 +1534,7 @@ class Asesmen extends Utility {
 				'dokter' => $UserData['data']->uid,
 				'pasien' => $parameter['pasien'],
 				'total' => 0,
-				'status_resep' => 'N',
+				'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))

@@ -67,5 +67,17 @@
         <?php
             }
         ?>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    Kesan :<br />
+                    <p><?php echo (isset($_POST['kesan'])) ? $_POST['kesan'] : '-' ?></p>
+                </div>
+                <div class="col-md-12">
+                    Anjuran :<br />
+                    <p><?php echo (isset($_POST['anjuran'])) ? $_POST['anjuran'] : '-' ?></p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

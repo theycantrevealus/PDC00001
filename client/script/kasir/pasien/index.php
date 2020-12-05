@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function(){
 
@@ -115,6 +116,47 @@
 				}
 			]
 		});
+
+		$("#btnCetakFaktur").click(function() {
+		    var data = $("#payment-detail-loader").html();
+		    
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/kasir_faktur.php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    kwitansi_data: $("#payment-detail-loader").html(),
+                    pasien: $("#payment-detail-loader .info-kwitansi col-4:eq(1)").html(),
+                    pegawai: $("#payment-detail-loader .info-kwitansi col-4:eq(2)").html(),
+                    tgl_bayar: $("#payment-detail-loader .info-kwitansi col-4:eq(3)").html()
+                },
+                success: function (response) {
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        importStyle: true,
+                        header: null,
+                        footer: null,
+                        pageTitle: "Kwitansi",
+                        afterPrint: function() {
+                            $("#form-payment-detail").modal("hide");
+                        }
+                    });
+                },
+                error: function (response) {
+                    //
+                }
+            });
+		    return false;
+        });
 
 		$("body").on("click", ".btnDetailKwitansi", function() {
 			var uid = $(this).attr("id").split("_");
@@ -397,7 +439,9 @@
                                 }
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
-									status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
+                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
+                                } else if(invoice_detail_item[invKey].status_bayar == 'V') {
+                                    status_bayar = "<span class=\"text-info\" style=\"white-space: pre\"><i class=\"fa fa-info-circle\"></i> Verifikasi</span>";
 								} else {
 									if(invoice_detail_item[invKey].item.allow_retur == true) {
 										if(invoice_detail_item[invKey].status_berobat == undefined) {
@@ -860,7 +904,7 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Kembali</button>
 				<button type="button" class="btn btn-warning" id="btnProsesRetur"><i class="fa fa-database"></i> Proses Retur</button>
-				<button type="button" class="btn btn-success" id="btnBayar"><i class="fa fa-print"></i> Cetak Faktur</button>
+				<button type="button" class="btn btn-success" id="btnCetakFaktur"><i class="fa fa-print"></i> Cetak Faktur</button>
 			</div>
 		</div>
 	</div>
