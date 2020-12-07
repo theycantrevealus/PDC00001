@@ -2316,7 +2316,7 @@ class Asesmen extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
 		$antrianClass = new Antrian(self::$pdo);
-		$antrian = $antrianClass->get_antrian_by_dokter($UserData['data']->uid);
+		$antrian = $antrianClass->get_antrian_by_dokter($UserData['data']->uid, $parameter[2]);
 
 		$antrianPasien = [];
 

@@ -8,10 +8,10 @@
             lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
-                url: __HOSTAPI__ + "/Inap",
+                url: __HOSTAPI__ + "/IGD",
                 type: "POST",
                 data: function(d) {
-                    d.request = "get_rawat_inap";
+                    d.request = "get_igd";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -74,7 +74,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/rawat_inap/dokter/index/" + row.pasien.uid + "/" + row.kunjungan + "/" + row.penjamin.uid + "\" class=\"btn btn-sm btn-info\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/igd/dokter/index/" + row.pasien.uid + "/" + row.kunjungan + "/" + row.penjamin.uid + "\" class=\"btn btn-sm btn-info\">" +
                             "<i class=\"fa fa-sign-out-alt\"></i>" +
                             "</a>" +
                             "<button class=\"btn btn-sm btn-success btn-pulangkan-pasien\" id=\"pulangkan_" + row.pasien.uid + "\">" +

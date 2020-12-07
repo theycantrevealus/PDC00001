@@ -22,6 +22,7 @@
 
         if(curremtAntrianType !== "DEFAULT") {
             loadPrioritas(__PRIORITY_HIGH__);
+            loadBed(__KAMAR_IGD__);
             loadCaraDatang();
         } else {
             loadPrioritas();
@@ -143,6 +144,32 @@
 			}
 			return false;
 		});
+
+        function loadBed(ruangan){
+            $.ajax({
+                url:__HOSTAPI__ + "/Bed/bed-ruangan/" + ruangan,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    console.log(response);
+                    var MetaData = response.response_package.response_data;
+                    $("#ruangan option").remove();
+                    for(i = 0; i < MetaData.length; i++){
+                        if(MetaData[i].status == "R") {
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            $("#bangsal").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
 
 		$("#btnProsesPasien").click(function() {
 			var dataObj = {};

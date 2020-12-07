@@ -92,8 +92,15 @@
                     </div>
 
                     <div class="col-12 col-md-6 mb-3 poli_igd">
+                        <label>Bangsal <span class="red">*</span></label>
+                        <select id="bangsal" class="form-control select2 inputan" required>
+                            <option value="" disabled selected>Pilih Bangsal</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-12 mb-3 poli_igd">
                         <label>Keterangan</label>
-                        <input type="" name="keterangan_cara_datang" id="keterangan_cara_datang" maxlength="100" class="form-control inputan" value="">
+                        <textarea name="keterangan_cara_datang" id="keterangan_cara_datang" maxlength="100" class="form-control inputan" value="" style="min-height: 150px"></textarea>
                     </div>
 
                     <div class="col-lg-12 card-form__body card-body">

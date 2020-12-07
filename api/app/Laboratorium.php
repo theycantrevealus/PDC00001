@@ -152,11 +152,253 @@ class Laboratorium extends Utility {
                 case 'get-laboratorium-backend':
                     return self::get_laboratorium_backend($parameter);
                     break;
+
+                case 'laboratorium_import_fetch':
+                    return self::laboratorium_import_fetch($parameter);
+                    break;
+
+                case 'proceed_import_laboratorium':
+                    return self::proceed_import_laboratorium($parameter);
+                    break;
 			}	
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
 		}
 	}
+
+
+	private function laboratorium_import_fetch($parameter) {
+        if (!empty($_FILES['csv_file']['name'])) {
+            $unique_name = array();
+
+            $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $column = fgetcsv($file_data); //array_head
+            $row_data = array();
+            while ($row = fgetcsv($file_data)) {
+                if (!in_array($row[0], $unique_name)) {
+                    array_push($unique_name, $row[0]);
+                    $column_builder = array();
+                    foreach ($column as $key => $value) {
+                        $column_builder[$value] = $row[$key];
+                    }
+                    array_push($row_data, $column_builder);
+                }
+            }
+
+            $build_col = array();
+            foreach ($column as $key => $value) {
+                array_push($build_col, array("data" => $value));
+            }
+
+            $output = array(
+                'column' => $column,
+                'row_data' => $row_data,
+                'column_builder' => $build_col
+            );
+            return $output;
+        }
+    }
+
+    private function proceed_import_laboratorium($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $duplicate_row = array();
+        $non_active = array();
+        $success_proceed = 0;
+        $proceed_data = array();
+
+        foreach ($parameter['data_import'] as $key => $value) {
+            $targettedLab = '';
+            $targettedMitra = '';
+            $targettedTindakan = '';
+
+            //Check Laboratorium & Tindakan
+            $checkLab = self::$query->select('master_lab', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_lab.nama' => '= ?',
+                    'AND',
+                    'master_lab.kode' => '= ?'
+                ), array(
+                    $value['nama'],
+                    $value['kode']
+                ))
+                ->execute();
+            if(count($checkLab['response_data']) > 0) {
+                $targettedLab = $checkLab['response_data'][0]['uid'];
+                $proceed_lab = self::$query->update('master_lab', array(
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'master_lab.uid' => '= ?'
+                    ), array(
+                        $targettedLab
+                    ))
+                    ->execute();
+            } else {
+                $targettedLab = parent::gen_uuid();
+                $proceed_lab = self::$query->insert('master_lab', array(
+                    'uid' => $targettedLab,
+                    'kode' => $value['kode'],
+                    'nama' => $value['nama'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date(),
+                    'keterangan' => (isset($value['keterangan'])) ? $value['keterangan'] : ''
+                ))
+                    ->execute();
+            }
+
+            array_push($proceed_data, $proceed_lab);
+
+            //Check Mitra
+            $checkMitra = self::$query->select('master_mitra', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_mitra.nama' => '= ?'
+                ), array(
+                    $value['mitra']
+                ))
+                ->execute();
+            if(count($checkMitra['response_data']) > 0) {
+                $targettedMitra = $checkMitra['response_data'][0]['uid'];
+                $proceed_mitra = self::$query->update('master_mitra', array(
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'master_mitra.uid' => '= ?'
+                    ), array(
+                        $targettedMitra
+                    ))
+                    ->execute();
+            } else {
+                $targettedMitra = parent::gen_uuid();
+                $proceed_mitra = self::$query->insert('master_mitra', array(
+                    'uid' => $targettedMitra,
+                    'nama' => $value['mitra'],
+                    'jenis' => 'GEN',
+                    'kontak' => '',
+                    'alamat' => '',
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+            if($proceed_mitra['response_result'] > 0) { //Jika tindakan berhasil diproses
+                //Check Tindakan
+                $checkTindakan = self::$query->select('master_tindakan', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'master_tindakan.uid' => '= ?'
+                    ), array(
+                        $targettedLab
+                    ))
+                    ->execute();
+                if(count($checkTindakan['response_data']) > 0) {
+                    $proceed_tindakan = self::$query->update('master_tindakan', array(
+                        'deleted_at' => NULL
+                    ))
+                        ->where(array(
+                            'master_tindakan.uid' => '= ?'
+                        ), array(
+                            $targettedTindakan
+                        ))
+                        ->execute();
+                } else {
+                    $proceed_tindakan = self::$query->insert('master_tindakan', array(
+                        'uid' => $targettedLab,
+                        'nama' => $value['nama'],
+                        'kelompok' => 'LAB',
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+
+
+
+
+                //Loop Penjamin
+                $getPenjamin = self::$query->select('master_penjamin', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'master_penjamin.deleted_at' => 'IS NULL'
+                    ))
+                    ->execute();
+                foreach ($getPenjamin['response_data'] as $PKey => $PValue) { //Apply semua penjamin
+                    //Data Kelas Lab
+                    $kelasLab = self::$query->select('master_tindakan_kelas', array(
+                        'uid'
+                    ))
+                        ->where(array(
+                            'master_tindakan_kelas.jenis' => '= ?',
+                            'AND',
+                            'master_tindakan_kelas.deleted_at' => 'IS NULL'
+                        ), array(
+                            'LAB'
+                        ))
+                        ->execute();
+                    foreach ($kelasLab['response_data'] as $KKey => $KValue) { //Apply semua kelas Labor
+                        //Check kelas harga
+                        $checkTarif = self::$query->select('master_tindakan_kelas_harga', array(
+                            'id'
+                        ))
+                            ->where(array(
+                                'master_tindakan_kelas_harga.tindakan' => '',
+                                'AND',
+                                'master_tindakan_kelas_harga.kelas' => '= ?',
+                                'AND',
+                                'master_tindakan_kelas_harga.penjamin' => ' = ?',
+                                'AND',
+                                'master_tindakan_kelas_harga.mitra' => '= ?'
+                            ), array(
+                                $targettedLab,
+                                $KValue['uid'],
+                                $PValue['uid'],
+                                $targettedMitra
+                            ))
+                            ->execute();
+                        if(count($checkTarif['response_data']) > 0) {
+                            $proceed_tarif = self::$query->update('master_tindakan_kelas_harga', array(
+                                'harga' => floatval($value['harga']),
+                                'deleted_at' => NULL
+                            ))
+                                ->where(array(
+                                    'master_tindakan_kelas_harga.id' => '= ?'
+                                ), array(
+                                    $checkTarif[response_data][0]['id']
+                                ))
+                                ->execute();
+                        } else {
+                            $proceed_tarif = self::$query->insert('master_tindakan_kelas_harga', array(
+                                'tindakan' => $targettedLab,
+                                'kelas' => $KValue['uid'],
+                                'penjamin' => $PValue['uid'],
+                                'mitra' => $targettedMitra,
+                                'harga' => floatval($value['harga']),
+                                'created_at' => parent::format_date(),
+                                'updated_at' => parent::format_date()
+                            ))
+                                ->execute();
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'duplicate_row' => $duplicate_row,
+            'non_active' => $non_active,
+            'success_proceed' => $success_proceed,
+            'data' => $parameter['data_import'],
+            'proceed' => $proceed_data
+        );
+    }
 
 
 	private function get_lab_order_pack($parameter) {

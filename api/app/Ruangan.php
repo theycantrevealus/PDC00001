@@ -185,7 +185,7 @@ class Ruangan extends Utility {
 					->where(array(
 							$table . '.deleted_at' => 'IS NULL',
 							'AND',
-							$table . '.uid_lantai' => '= ?'
+							$table . '.lantai' => '= ?'
 						),
 						array($parameter)
 					)

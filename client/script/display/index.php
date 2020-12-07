@@ -215,6 +215,7 @@
 
 		var audio = new Audio(), i = 0;
 		audio.volume = 0.5;
+		audio.playbackRate = 0.1;
 		audio.loop = false;
 		var playlist = [];
 		var currentLength = 0;

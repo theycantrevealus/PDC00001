@@ -35,6 +35,15 @@
 								"</div>";
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.jabatan !== undefined && row.jabatan !== null) {
+                            return row.jabatan.nama;
+                        } else {
+                            return "-";
+                        }
+                    }
+                },
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
@@ -116,6 +125,12 @@
                     var table_view = document.createElement("TABLE");
                     $(table_view).append("<thead class=\"thead-dark\">" + thead + "</thead>");
                     $("#csv_file_data").append(table_view);
+
+                    for(var rKey in data.row_data) {
+                        var regexEmail = data.row_data[rKey].email.replace(new RegExp(/(\.)|( )/g), "_");
+                        data.row_data[rKey].email = regexEmail;
+                    }
+
                     $(table_view).addClass("table table-bordered table-striped table-responsive").DataTable({
                         data:data.row_data,
                         columns : data.column_builder
@@ -153,9 +168,11 @@
                         },
                         success:function(response)
                         {
+                            console.log(response);
                             var html = "Imported : " + response.response_package.success_proceed + "<br />";
                             $("#csv_file_data").html(html);
-                            tablePasien.ajax.reload();
+                            $("#form-import").modal("hide");
+                            tablePegawai.ajax.reload();
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
                         },

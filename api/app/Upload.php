@@ -31,7 +31,7 @@ class Upload extends Utility {
 
 		$data = $parameter['upload'];
 
-		$dataReturn['uploadResult'] = Utility::saveBase64ImagePng($data, '../images/igd/', $parameter['name']);
+		$dataReturn['uploadResult'] = Utility::saveBase64ImagePng($data, '../images/igd_old/', $parameter['name']);
 
 		return $dataReturn;
 	}

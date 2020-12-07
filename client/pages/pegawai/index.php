@@ -36,6 +36,7 @@
                                     <tr>
                                         <th class="wrap_content">No</th>
                                         <th><i class="fa fa-user-circle"></i> Pengguna</th>
+                                        <th>Jabatan</th>
                                         <th class="wrap_content">Aksi</th>
                                     </tr>
                                 </thead>
