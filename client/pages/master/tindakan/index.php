@@ -28,12 +28,12 @@
                 </div>
                 <div class="card-body tab-content">
                     <div class="tab-pane active show fade" id="resep-biasa">
-                        <table class="table table-bordered" id="table-tindakan">
+                        <table class="table table-bordered largeDataType" id="table-tindakan">
                             <thead class="thead-dark">
                                 <tr>
                                     <th class="wrap_content">No</th>
                                     <th>Nama Tindakan</th>
-                                    <th>Poli</th>
+                                    <th style="width: 20%">Poli</th>
                                     <th class="wrap_content">Aksi</th>
                                 </tr>
                             </thead>

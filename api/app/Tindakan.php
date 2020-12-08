@@ -5,6 +5,7 @@ namespace PondokCoder;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
+use PondokCoder\Poli as Poli;
 use PondokCoder\Authorization as Authorization;
 
 class Tindakan extends Utility {
@@ -346,9 +347,31 @@ class Tindakan extends Utility {
                 ;
                 if(count($checkPoli['response_data']) > 0) {
                     $targettedPoli = $checkPoli['response_data'][0]['uid'];
+                    if(strtoupper($value['jenis']) === 'KONSULTASI') {
+                        $proceed_poli = self::$query->update('master_poli', array(
+                            'tindakan_konsultasi' => $targettedTindakan,
+                            'deleted_at' => NULL
+                        ))
+                            ->where(array(
+                                'master_poli.uid' => '= ?'
+                            ), array(
+                                $targettedPoli
+                            ))
+                            ->execute();
+                    } else {
+                        $proceed_poli = self::$query->update('master_poli', array(
+                            'deleted_at' => NULL
+                        ))
+                            ->where(array(
+                                'master_poli.uid' => '= ?'
+                            ), array(
+                                $targettedPoli
+                            ))
+                            ->execute();
+                    }
                 } else {
                     $targettedPoli = parent::gen_uuid();
-                    $newPoli = self::$query->insert('master_poli', array(
+                    $proceed_poli = self::$query->insert('master_poli', array(
                         'uid' => $targettedPoli,
                         'nama' => $nama_poli,
                         'editable' => 'TRUE',
@@ -432,6 +455,7 @@ class Tindakan extends Utility {
             $data = self::$query->select('master_tindakan', array(
                 'uid',
                 'nama',
+                'kelompok',
                 'created_at',
                 'updated_at'
             ))
@@ -441,6 +465,7 @@ class Tindakan extends Utility {
             $data = self::$query->select('master_tindakan', array(
                 'uid',
                 'nama',
+                'kelompok',
                 'created_at',
                 'updated_at'
             ))
@@ -452,7 +477,35 @@ class Tindakan extends Utility {
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $Poli = new Poli(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
+            //get Poli
+            $poliList = array();
+            $tindakan_poli = self::$query->select('master_poli_tindakan', array(
+                'uid_poli'
+            ))
+                ->where(array(
+                    'master_poli_tindakan.uid_tindakan' => '= ?',
+                    'AND',
+                    'master_poli_tindakan.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($tindakan_poli['response_data'] as $PKey => $PValue) {
+                $PoliDetail = $Poli::get_poli_detail($PValue['uid_poli'])['response_data'][0];
+                array_push($poliList, $PoliDetail);
+            }
+
+            if($value['kelompok'] === 'LAB') {
+                $target_jenis = 'Laboratorium';
+            } else if($value['kelompok'] === 'RAD') {
+                $target_jenis = 'Radiologi';
+            } else {
+                $target_jenis = $poliList;
+            }
+
+            $data['response_data'][$key]['poli_list'] = $target_jenis;
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
         }

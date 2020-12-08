@@ -18,7 +18,7 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-
+                    console.log(response);
                     var returnData = [];
                     var returnedData = [];
                     if(response == undefined || response.response_package == undefined) {
@@ -47,7 +47,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+						return row.autonum;
 					}
 				},
 				{
@@ -55,6 +55,38 @@
 						return "<span id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        var poli_list = row.poli_list;
+                        var poli_parsed;
+                        if(Array.isArray(poli_list)) {
+                            if(poli_list.length === 1) {
+                                poli_parsed = "";
+                                if(poli_list.length > 0) {
+                                    for(var a in poli_list) {
+                                        if(poli_list[a] !== undefined && poli_list[a] !== null) {
+                                            poli_parsed += poli_list[a].nama;
+                                        }
+                                    }
+                                }
+                            } else {
+                                poli_parsed = "<ol style=\"1\">";
+                                if(poli_list.length > 0) {
+                                    for(var a in poli_list) {
+                                        if(poli_list[a] !== undefined && poli_list[a] !== null) {
+                                            poli_parsed += "<li>" + poli_list[a].nama + "</li>";
+                                        }
+                                    }
+                                }
+                                poli_parsed += "</ol>";
+                            }
+                        } else {
+                            poli_parsed = poli_list;
+                        }
+
+                        return poli_parsed;
+                    }
+                },
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
