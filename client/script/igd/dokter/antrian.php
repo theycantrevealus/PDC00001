@@ -1,11 +1,14 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/js/rSlider.min.js"></script>
 <link href="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.css" type="text/css" rel="stylesheet" />
+
 <script type="text/javascript">
     $(function() {
         //var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
         var poliListRaw = [];
         var poliListRawList = <?php echo json_encode($_SESSION['poli']['response_data']); ?>;
+
         var poliList = [];
         //var allICD10 = load_icd_10();
         var allICD10 = [];
@@ -54,17 +57,34 @@
             type:"GET",
             success:function(response) {
                 antrianData = response.response_package.response_data[0];
+                if(antrianData.dokter !== __ME__) {
+                    $("#btnSelesai").hide();
+                    $("#btnTambahTindakan").hide();
+                    $("#table-resep tbody tr td input, btn, select, textarea").attr("disabled", "disabled");
+                    $("#table-resep-racikan tr td input, btn, select, textarea").attr("disabled", "disabled");
+                    $("#btnTambahOrderLab").hide();
+                    $("#btnTambahTindakanRadiologi").hide();
+                }
+
+                console.log(antrianData);
 
                 prioritas_antrian = antrianData.prioritas;
                 kunjungan = antrianData.kunjungan_detail;
+
                 for(var poliSetKey in poliListRawList)
                 {
-                    if(poliListRawList[poliSetKey].poli.response_data[0].uid == antrianData.departemen)
-                    {
-                        poliListRaw.push(poliListRawList[poliSetKey].poli.response_data[0]);
+                    if(poliListRawList[poliSetKey].poli.response_data[0] !== undefined) {
+                        if(poliListRawList[poliSetKey].poli.response_data[0].uid == antrianData.departemen)
+                        {
+                            poliListRaw.push(poliListRawList[poliSetKey].poli.response_data[0]);
+                        }
+                    } else {
+                        console.log(poliListRawList[poliSetKey]);
                     }
                 }
+
                 poliList = poliListRaw;
+                console.log(poliList);
                 
                 if(antrianData.poli_info.uid === __POLI_GIGI__) {
                     $("#gigi_loader").show();
@@ -672,6 +692,59 @@
                 console.log(response);
             }
         });
+
+
+
+
+
+        var mySlider = new rSlider({
+            target: "#txt_nrs",
+            values: [0,1,2,3,4,5,6,7,8,9,10]
+        });
+
+        var rangeDefiner = [
+            {
+                text: "Tidak",
+                merge: 1
+            }, {
+                text: "Ringan",
+                merge: 2
+            }, {
+                text: "Sedang",
+                merge: 3
+            }, {
+                text: "Berat",
+                merge: 3
+            }, {
+                text: "Berat Sekali",
+                merge: 1
+            }
+        ];
+
+        for(var pain in rangeDefiner) {
+            var scaleStepper = document.createElement("DIV");
+            $(scaleStepper).css({
+                "width": (10 * rangeDefiner[pain].merge) + "%"
+            }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
+            $("#scale-loader-define").append(scaleStepper)
+        }
+
+        for(var a = 1; a <= 10; a++) {
+            var scaleStepper = document.createElement("DIV");
+            $(scaleStepper).css({
+                "width": "10%"
+            }).addClass("scale-stepper");
+            $("#scale-loader").append(scaleStepper)
+        }
+
+
+
+
+
+
+
+
+
 
 
         if(poliList.length > 1) {
@@ -3044,7 +3117,7 @@
 
                             if(response.response_package.response_result > 0) {
                                 notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-                                location.href = __HOSTNAME__ + "/rawat_inap/dokter/index/" + pasien_uid + "/" + __PAGES__[5] + "/" + pasien_penjamin_uid;
+                                location.href = __HOSTNAME__ + "/igd/dokter/index/" + pasien_uid + "/" + __PAGES__[5] + "/" + pasien_penjamin_uid;
                             } else {
                                 notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                             }
@@ -4228,23 +4301,23 @@
             loadPrioritas(prioritas_antrian);
         });
 
-        $("#inap_kamar").change(function() {
-            loadBangsal("inap", $("#inap_kamar").val());
+        $("#igd_kamar").change(function() {
+            loadBangsal("igd", $("#igd_kamar").val());
         });
 
         $("#btnInap").click(function() {
-            loadPenjamin("inap", pasien_penjamin_uid);
-            loadPoli("inap");
-            loadKamar("inap");
-            loadBangsal("inap", $("#inap_kamar").val());
-            loadDokter("inap", __POLI_INAP__);
-            $("#form-inap").modal("show");
+            loadPenjamin("igd", pasien_penjamin_uid);
+            loadPoli("igd");
+            loadKamar("igd");
+            loadBangsal("igd", $("#igd_kamar").val());
+            loadDokter("igd", __POLI_IGD__);
+            $("#form-igd").modal("show");
         });
 
 
         $("#btnProsesInap").click(function() {
             Swal.fire({
-                title: 'Daftar untuk rawat inap?',
+                title: 'Daftar untuk rawat igd?',
                 showDenyButton: true,
                 confirmButtonText: `Ya`,
                 denyButtonText: `Belum`,
@@ -4255,14 +4328,14 @@
                         url:__HOSTAPI__ + "/Inap",
                         type: "POST",
                         data: {
-                            request: "tambah_inap",
+                            request: "tambah_igd",
                             pasien: pasien_uid,
-                            waktu_masuk: $("#inap_tanggal_masuk").val(),
-                            kamar: $("#inap_kamar").val(),
-                            penjamin: $("#inap_penjamin").val(),
-                            bed: $("#inap_bed").val(),
-                            dokter: $("#inap_dokter").val(),
-                            keterangan: $("#inap_keterangan").val()
+                            waktu_masuk: $("#igd_tanggal_masuk").val(),
+                            kamar: $("#igd_kamar").val(),
+                            penjamin: $("#igd_penjamin").val(),
+                            bed: $("#igd_bed").val(),
+                            dokter: $("#igd_dokter").val(),
+                            keterangan: $("#igd_keterangan").val()
                         },
                         beforeSend: function(request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -4271,10 +4344,10 @@
                             if(response.response_package.response_result > 0) {
                                 Swal.fire(
                                     "Rawat Inap",
-                                    "Pasien berhasil didaftarkan untuk rawat inap",
+                                    "Pasien berhasil didaftarkan untuk rawat igd",
                                     "success"
                                 ).then((result) => {
-                                    $("#form-inap").modal("hide");
+                                    $("#form-igd").modal("hide");
                                 });
                             } else {
                                 console.log(response);
@@ -4602,7 +4675,7 @@
         }
 
         $(".inputan_konsul").select2();
-        $(".inputan_inap").select2();
+        $(".inputan_igd").select2();
         $(".inputan_rujuk").select2();
 
         if(dataOdontogram === undefined)
@@ -5412,48 +5485,48 @@
 
 
 
-<div id="form-inap" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+<div id="form-igd" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modal-large-title">Pindah Rawat Inap</h5>
             </div>
-            <div class="modal-body" id="inap-container">
+            <div class="modal-body" id="igd-container">
                 <div class="card card-form">
                     <div class="row no-gutters">
                         <div class="col-lg-12 card-body">
                             <div class="form-row">
                                 <div class="col-12 col-md-6 mb-3">
                                     <label>Pembayaran <span class="red">*</span></label>
-                                    <select id="inap_penjamin" class="form-control select2 inputan_inap" required disabled>
+                                    <select id="igd_penjamin" class="form-control select2 inputan_igd" required disabled>
                                         <option value="" disabled selected>Pilih Jenis Pembayaran</option>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 mb-3">
                                     <label>Dokter <span class="red">*</span></label>
-                                    <select id="inap_dokter" class="form-control select2 inputan_inap" required>
+                                    <select id="igd_dokter" class="form-control select2 inputan_igd" required>
                                         <option value="" disabled selected>Pilih Dokter</option>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 mb-3">
                                     <label>Kamar <span class="red">*</span></label>
-                                    <select id="inap_kamar" class="form-control select2 inputan_inap" required>
+                                    <select id="igd_kamar" class="form-control select2 inputan_igd" required>
                                         <option value="" disabled selected>Pilih Kamar</option>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 mb-3">
                                     <label>Bangsal <span class="red">*</span></label>
-                                    <select id="inap_bed" class="form-control select2 inputan_inap" required>
+                                    <select id="igd_bed" class="form-control select2 inputan_igd" required>
                                         <option value="" disabled selected>Pilih Bangsal</option>
                                     </select>
                                 </div>
-                                <div class="col-12 col-md-6 mb-3" id="group_inap_tanggal_masuk">
+                                <div class="col-12 col-md-6 mb-3" id="group_igd_tanggal_masuk">
                                     <label>Tanggal Masuk <span class="red">*</span></label>
-                                    <input type="date" id="inap_tanggal_masuk" class="form-control input-group" required />
+                                    <input type="date" id="igd_tanggal_masuk" class="form-control input-group" required />
                                 </div>
                                 <div class="col-12 col-md-6 mb-3">
                                     <label>Keterangan <span class="red">*</span></label>
-                                    <input type="text" id="inap_keterangan" class="form-control" placeholder="Keterangan" />
+                                    <input type="text" id="igd_keterangan" class="form-control" placeholder="Keterangan" />
                                 </div>
                             </div>
                         </div>

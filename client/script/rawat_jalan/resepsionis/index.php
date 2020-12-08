@@ -157,22 +157,44 @@
 
 
         var tableAntrianIGD= $("#table-antrian-IGD").DataTable({
-            "ajax":{
-                url: __HOSTAPI__ + "/Antrian/igd",
-                type: "GET",
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            ajax:{
+                url: __HOSTAPI__ + "/Antrian",
+                type: "POST",
+                data: function(d) {
+                    d.request = "igd";
+                },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    return response.response_package.response_data;
+                    var returnedData = [];
+                    if(response == undefined || response.response_package == undefined) {
+                        returnedData = [];
+                    } else {
+                        returnedData = response.response_package.response_data;
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return returnedData;
+                },
+                error: function(xhr, error, thrown) {
+                    console.log(xhr);
                 }
             },
             autoWidth: false,
-            "bInfo" : false,
-            aaSorting: [[0, "asc"]],
-            "columnDefs":[
-                {"targets":0, "className":"dt-body-left"}
-            ],
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Pasien"
+            },
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
@@ -191,7 +213,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"nama_" + row.uid_pasien + "\">" + row["pasien"] + "<span>";
+                        return "<span id=\"nama_" + row.uid_pasien + "\">" + row["nama_pasien"] + "<span>";
                     }
                 },
                 {
@@ -224,11 +246,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                        /*return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                             "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-info btn-sm btn-pasien-pulang\">" +
                             "<i class=\"fa fa-check\"></i> Pulangkan Pasien" +
                             "</button>" +
-                            "</div>";
+                            "</div>";*/
+                        return "";
                     }
                 }
             ]

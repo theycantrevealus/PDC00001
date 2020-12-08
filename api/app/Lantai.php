@@ -33,7 +33,7 @@ class Lantai extends Utility {
 					break;
 
 				default:
-					# code...
+                    return self::get_lantai();
 					break;
 			}
 		} catch (QueryException $e) {

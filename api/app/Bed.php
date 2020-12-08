@@ -153,6 +153,7 @@ class Bed extends Utility {
 						array(
 							'uid',
 							'nama',
+							'status',
 							'uid_lantai',
 							'uid_ruangan',
 							'created_at',
@@ -197,11 +198,11 @@ class Bed extends Utility {
 		} else {
 			$arr = ['','ruangan-detail', $parameter['ruangan']];
 
-			$ruangan = new Ruangan(self::$pdo);
+			/*$ruangan = new Ruangan(self::$pdo);
 			$get_ruangan = $ruangan::__GET__($arr);
 
-			$ruangan_res = $get_ruangan['response_data'][0];
-			$uid_lantai = $ruangan_res['uid_lantai'];
+			$ruangan_res = $get_ruangan['response_data'][0];*/
+			$uid_lantai = $parameter['lantai'];
 
 			$uid = parent::gen_uuid();
 			$bed = self::$query
@@ -246,7 +247,7 @@ class Bed extends Utility {
 		}
 	}
 
-	private function edit_bed($table, $parameter){
+	private function edit_bed($table, $parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -262,7 +263,7 @@ class Bed extends Utility {
 				->update($table, array(
 						'nama'=>$parameter['nama'],
 						'uid_ruangan'=>$parameter['ruangan'],
-						'uid_lantai'=>$uid_lantai,
+						'uid_lantai'=>$parameter['lantai'],
 						'updated_at'=>parent::format_date()
 					)
 				)

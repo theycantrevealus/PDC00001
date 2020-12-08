@@ -1,6 +1,8 @@
 <script type="text/javascript">
 	$(function(){
-		loadRuangan();
+        loadLantai();
+	    loadRuangan($("#lantai").val());
+
 
 		var MODE = "tambah", selectedUID;
 
@@ -101,9 +103,11 @@
 			MODE = "edit";
 			$("#txt_nama").val($("#nama_" + uid).html());
 
-			var ruangan = $("#ruangan_" + uid).data("uid");
-			$("#ruangan").val(ruangan);
-			$("#ruangan").trigger('change');
+			var lantai = $("#lantai_" + uid).data("uid");
+			$("#lantai").val(lantai).trigger('change');
+
+            var ruangan = $("#ruangan_" + uid).data("uid");
+            $("#ruangan").val(ruangan).trigger('change');
 
 			$("#form-tambah").modal("show");
 			return false;
@@ -111,8 +115,10 @@
 		
 		$("#tambah-bed").click(function() {
 			$("#txt_nama").val("");
-			$("#ruangan").val("");
-			$("#ruangan").trigger('change');
+			$("#ruangan").val("").trigger('change');
+
+            $("#lantai").val("").trigger('change');
+
 			$("#form-tambah").modal("show");
 			MODE = "tambah";
 		});
@@ -120,6 +126,7 @@
 		$("#btnSubmit").click(function() {
 			var nama = $("#txt_nama").val();
 			var ruangan = $("#ruangan").val();
+            var lantai = $("#lantai").val();
 
 			if(nama != "" && ruangan != "") {
 				var form_data = {};
@@ -127,6 +134,7 @@
 					form_data = {
 						"request": "tambah_bed",
 						"nama": nama,
+                        "lantai": lantai,
 						"ruangan": ruangan
 					};
 				} else {
@@ -134,6 +142,7 @@
 						"request": "edit_bed",
 						"uid": selectedUID,
 						"nama": nama,
+                        "lantai": lantai,
 						"ruangan": ruangan
 					};
 				}
@@ -161,22 +170,27 @@
 			}
 		});
 
-		$(".ruangan").select2({
+		$(".ruangan, .lantai").select2({
     		dropdownParent: $("#form-tambah")
 		});
 
 	});
 
-	function loadRuangan(){
+	$("body").on("change", "#lantai", function() {
+	    loadRuangan($(this).val());
+    });
+
+	function loadRuangan(lantai){
         $.ajax({
-            url:__HOSTAPI__ + "/Ruangan/ruangan",
+            url:__HOSTAPI__ + "/Ruangan/ruangan-lantai/" + lantai,
             type: "GET",
              beforeSend: function(request) {
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             success: function(response){
+                console.log(response);
                 var MetaData = response.response_package.response_data;
-
+                $("#ruangan option").remove();
                 for(i = 0; i < MetaData.length; i++){
                     var selection = document.createElement("OPTION");
 
@@ -189,6 +203,29 @@
             }
         });
 	}
+
+    function loadLantai(){
+        $.ajax({
+            url:__HOSTAPI__ + "/Lantai",
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                var MetaData = response.response_package.response_data;
+
+                for(i = 0; i < MetaData.length; i++){
+                    var selection = document.createElement("OPTION");
+
+                    $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                    $("#lantai").append(selection);
+                }
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+    }
 </script>
 
 <div id="form-tambah" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -202,7 +239,13 @@
 			</div>
 			<div class="modal-body">
 				<div class="modal-body">
-					<div class="form-group col-md-12">
+                    <div class="form-group col-md-12">
+                        <label for="ruangan">Lantai:</label>
+                        <select class="form-control lantai" id="lantai">
+                            <option value="" disabled selected>Pilih Lantai</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-12">
 						<label for="ruangan">Ruangan:</label>
 						<select class="form-control ruangan" id="ruangan">
 							<option value="" disabled selected>Pilih Ruangan</option>

@@ -35,7 +35,11 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["spesimen"].nama;
+					    if(row.spesimen !== undefined && row.spesimen !== null) {
+                            return row.spesimen.nama;
+                        } else {
+                            return "-";
+                        }
 					}
 				},
 				{

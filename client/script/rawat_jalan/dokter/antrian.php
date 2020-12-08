@@ -40,7 +40,7 @@
         var prioritas_antrian = 0;
         var tindakanMeta = [];
         var usedTindakan = [];
-        var pasien_penjamin, pasien_penjamin_uid;
+        //var pasien_penjamin, pasien_penjamin_uid;
         var pasien_uid, pasien_nama, pasien_kontak, pasien_alamat, pasien_usia, pasien_rm, pasien_jenkel, pasien_tanggal_lahir, pasien_penjamin, pasien_penjamin_uid, pasien_tempat_lahir;
         var UID = __PAGES__[3];
         var kunjungan = {};
@@ -57,13 +57,18 @@
 
                 prioritas_antrian = antrianData.prioritas;
                 kunjungan = antrianData.kunjungan_detail;
+
                 for(var poliSetKey in poliListRawList)
                 {
-                    if(poliListRawList[poliSetKey].poli.response_data[0].uid == antrianData.departemen)
-                    {
-                        poliListRaw.push(poliListRawList[poliSetKey].poli.response_data[0]);
+                    if(poliListRawList[poliSetKey].poli.response_data[0] !== undefined) {
+                        if(poliListRawList[poliSetKey].poli.response_data[0].uid == antrianData.departemen)
+                        {
+                            poliListRaw.push(poliListRawList[poliSetKey].poli.response_data[0]);
+                        }
                     }
                 }
+
+                console.log(poliListRaw);
                 poliList = poliListRaw;
                 
                 if(antrianData.poli_info.uid === __POLI_GIGI__) {

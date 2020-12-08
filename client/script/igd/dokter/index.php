@@ -4,7 +4,7 @@
 	    var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "";
 		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis",
+				url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis/igd",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -17,7 +17,7 @@
 				        if(
 				            data[a].uid_pasien === __PAGES__[3] &&
                             data[a].uid_kunjungan === __PAGES__[4] &&
-                            data[a].uid_poli === __POLI_INAP__
+                            data[a].uid_poli === __POLI_IGD__
                         ) {
 				            filteredData.push(data[a]);
                         }
@@ -27,7 +27,7 @@
 				        selectedKunjungan = filteredData[0].uid_kunjungan;
 				        selectedPenjamin = filteredData[0].uid_penjamin;
                         selected_waktu_masuk = filteredData[0].waktu_masuk;
-                        console.log(filteredData[0].pasien_detail);
+                        //console.log(filteredData[0].pasien_detail);
 				        $("#target_pasien").html(filteredData[0].pasien);
 				        $("#rm_pasien").html(filteredData[0].no_rm);
                         $("#nama_pasien").html((filteredData[0].pasien_detail.panggilan_name === null) ? filteredData[0].pasien_detail.nama : filteredData[0].pasien_detail.panggilan_name.nama + " " +  filteredData[0].pasien_detail.nama);
@@ -61,7 +61,7 @@
                             }
                         });
                     }
-
+				    console.log(filteredData);
 				    return filteredData;
 				}
 			},
@@ -74,18 +74,23 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+						return row.autonum;
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["waktu_masuk"];
+						return row.waktu_masuk;
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter;
+                    }
+                },
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									"<a href=\"" + __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + row.uid + "/" + row.uid_pasien + "/" + row.uid_kunjungan + "\" class=\"btn btn-success btn-sm\">" +
+									"<a href=\"" + __HOSTNAME__ + "/igd/dokter/antrian/" + row.uid + "/" + row.uid_pasien + "/" + row.uid_kunjungan + "\" class=\"btn btn-success btn-sm\">" +
 										"<i class=\"fa fa-eye\"></i>" +
 									"</a>" +
 								"</div>";
@@ -104,7 +109,7 @@
                 penjamin: __PAGES__[5],
                 kunjungan: __PAGES__[4],
                 pasien: __PAGES__[3],
-                poli: __POLI_INAP__
+                poli: __POLI_IGD__
             };
 
             $.ajax({
@@ -116,7 +121,7 @@
                 type:"POST",
                 data: formData,
                 success:function(response) {
-                    location.href = __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4];
+                    location.href = __HOSTNAME__ + "/igd/dokter/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4];
                 },
                 error: function(response) {
                     console.log(response);
@@ -154,7 +159,7 @@
                     $(containerItem).printThis({
                         importCSS: true,
                         base: false,
-                        pageTitle: "rawat_inap",
+                        pageTitle: "igd",
                         afterPrint: function() {
                             $("#cetak").modal("hide");
                             $("#dokumen-viewer").html("");
