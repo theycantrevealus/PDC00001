@@ -37,12 +37,28 @@
 							Asesmen Rawat
 						</a>
 					</li>
-					<li class="nav-item">
-						<a href="#tab-poli-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                    <li class="nav-item">
+                        <a href="#tab-poli-10" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-10" >
 							<span class="nav-link__count">
 								<i class="fa fa-briefcase-medical"></i>
 							</span>
-							Asesmen Medis
+                            Asesmen Medis 01
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#tab-poli-11" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-11" >
+							<span class="nav-link__count">
+								<i class="fa fa-briefcase-medical"></i>
+							</span>
+                            Asesmen Medis 02
+                        </a>
+                    </li>
+                    <li class="nav-item">
+						<a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+							<span class="nav-link__count">
+								<i class="fa fa-briefcase-medical"></i>
+							</span>
+							Asesmen Medis 03
 						</a>
 					</li>
                     <?php
@@ -114,7 +130,15 @@
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'perawat/form.php'; ?>
 				</div>
-				<div class="tab-pane show fade active" id="tab-poli-2">
+                <div class="tab-pane show fade active" id="tab-poli-10">
+                    <?php require 'info-pasien.php'; ?>
+                    <?php require 'triase-1.php'; ?>
+                </div>
+                <div class="tab-pane show fade" id="tab-poli-11">
+                    <?php require 'info-pasien.php'; ?>
+                    <?php require 'triase-2.php'; ?>
+                </div>
+				<div class="tab-pane show fade" id="tab-poli-2">
 					<?php require 'info-pasien.php'; ?>
                     <?php
                     if(in_array(__POLI_GIGI__, $PoliList)) {

@@ -222,7 +222,7 @@
 		});
 
 		
-		var tableAntrianBayar = $("#table-biaya-pasien").DataTable({
+		var tableAntrianBayar = $("#table-biaya-pasien-rj").DataTable({
 			processing: true,
 			serverSide: true,
 			sPaginationType: "full_numbers",
@@ -250,7 +250,9 @@
 						if(
 						    response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
                             response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== null
+                            response.response_package.response_data[InvKeyData].pasien !== null &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__
                         ) {
 						    if(!response.response_package.response_data[InvKeyData].lunas) {
 							    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
@@ -321,6 +323,242 @@
 				}
 			]
 		});
+
+
+
+
+
+
+
+
+
+        var tableAntrianBayar = $("#table-biaya-pasien-ri").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Invoice",
+                type: "POST",
+                data: function(d) {
+                    d.request = "biaya_pasien";
+                    d.from = getDateRange("#range_invoice")[0];
+                    d.to = getDateRange("#range_invoice")[1];
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    console.log(response);
+                    var returnedData = [];
+                    if(returnedData == undefined || returnedData.response_package == undefined) {
+                        returnedData = [];
+                    }
+                    for(var InvKeyData in response.response_package.response_data) {
+                        if(
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                            response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                            response.response_package.response_data[InvKeyData].pasien !== null &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_INAP__
+                        ) {
+                            if(!response.response_package.response_data[InvKeyData].lunas) {
+                                if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                    response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                }
+                                returnedData.push(response.response_package.response_data[InvKeyData]);
+                            }
+                        } else {
+                            //
+                        }
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Nomor Invoice"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(
+                            row.pasien.panggilan_name !== undefined &&
+                            row.pasien.panggilan_name !== null
+                        ) {
+                            return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+                        } else {
+                            return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.antrian_kunjungan.poli.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        //return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
+                        return row.antrian_kunjungan.pegawai.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span style=\"display: block\" class=\"text-right\">" + number_format(row.total_after_discount, 2, ".", ",") + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return 	"<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\"><i class=\"fa fa-eye\"></i></button>";
+                    }
+                }
+            ]
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        var tableAntrianBayar = $("#table-biaya-pasien-igd").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Invoice",
+                type: "POST",
+                data: function(d) {
+                    d.request = "biaya_pasien";
+                    d.from = getDateRange("#range_invoice")[0];
+                    d.to = getDateRange("#range_invoice")[1];
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    console.log(response);
+                    var returnedData = [];
+                    if(returnedData == undefined || returnedData.response_package == undefined) {
+                        returnedData = [];
+                    }
+
+                    for(var InvKeyData in response.response_package.response_data) {
+                        if(
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                            response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                            response.response_package.response_data[InvKeyData].pasien !== null &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__
+                        ) {
+                            if(!response.response_package.response_data[InvKeyData].lunas) {
+                                if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                    response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                }
+                                returnedData.push(response.response_package.response_data[InvKeyData]);
+                            }
+                        } else {
+                            //
+                        }
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Nomor Invoice"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(
+                            row.pasien.panggilan_name !== undefined &&
+                            row.pasien.panggilan_name !== null
+                        ) {
+                            return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+                        } else {
+                            return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.antrian_kunjungan.poli.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        //return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
+                        return row.antrian_kunjungan.pegawai.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span style=\"display: block\" class=\"text-right\">" + number_format(row.total_after_discount, 2, ".", ",") + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return 	"<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\"><i class=\"fa fa-eye\"></i></button>";
+                    }
+                }
+            ]
+        });
+
+
+
+
+
+
+
 
 
         Sync.onmessage = function(evt) {

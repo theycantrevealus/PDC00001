@@ -1,6 +1,8 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/js/rSlider.min.js"></script>
 <link href="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.css" type="text/css" rel="stylesheet" />
+
 <script type="text/javascript">
     $(function() {
         //var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
@@ -690,6 +692,59 @@
                 console.log(response);
             }
         });
+
+
+
+
+
+        var mySlider = new rSlider({
+            target: "#txt_nrs",
+            values: [0,1,2,3,4,5,6,7,8,9,10]
+        });
+
+        var rangeDefiner = [
+            {
+                text: "Tidak",
+                merge: 1
+            }, {
+                text: "Ringan",
+                merge: 2
+            }, {
+                text: "Sedang",
+                merge: 3
+            }, {
+                text: "Berat",
+                merge: 3
+            }, {
+                text: "Berat Sekali",
+                merge: 1
+            }
+        ];
+
+        for(var pain in rangeDefiner) {
+            var scaleStepper = document.createElement("DIV");
+            $(scaleStepper).css({
+                "width": (10 * rangeDefiner[pain].merge) + "%"
+            }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
+            $("#scale-loader-define").append(scaleStepper)
+        }
+
+        for(var a = 1; a <= 10; a++) {
+            var scaleStepper = document.createElement("DIV");
+            $(scaleStepper).css({
+                "width": "10%"
+            }).addClass("scale-stepper");
+            $("#scale-loader").append(scaleStepper)
+        }
+
+
+
+
+
+
+
+
+
 
 
         if(poliList.length > 1) {
