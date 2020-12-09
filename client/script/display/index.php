@@ -220,7 +220,7 @@
 		var playlist = [];
 		var currentLength = 0;
 
-		Sync.onmessage = function(evt) {
+		/*Sync.onmessage = function(evt) {
 			var signalData = JSON.parse(evt.data);
 			var command = signalData.protocols;
 			var type = signalData.type;
@@ -256,7 +256,7 @@
 					}
 				}
 			}
-		}
+		}*/
 
 		audio.addEventListener('ended', function () {
 			i++;
@@ -274,20 +274,39 @@
 		
 
 
-		var protocolLib = {
-			anjungan_kunjungan_baru: function(protocols, type, parameter, sender, receiver, time) {
-				//
+		protocolLib = {
+            anjungan_kunjungan_panggil_3: function(protocols, type, parameter, sender, receiver, time) {
+                if(!audio.paused && !audio.ended && 0 < audio.currentTime) {
+                    var listParse = protocolLib[command](command, type, parameter, sender, receiver, time, audio, playlist);
+                    playlist = listParse.playlist;
+                } else {
+                    var listParse;
+                    if(playlist.length > 0) {
+                        listParse = protocolLib[command](command, type, parameter, sender, receiver, time, audio, playlist, true);
+                    } else {
+                        listParse = protocolLib[command](command, type, parameter, sender, receiver, time, audio, playlist, false);
+                    }
+
+                    playlist = listParse.playlist;
+                    audio.src = playlist[0];
+                    audio.play();
+                }
 			},
 			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time, audio, playlist, isReset) {
-				var globalData = {};
+			    var globalData = {};
 				var tracks;
 				var current;
 				var commandParse = parameter;
 				var getUrutParse = commandParse.nomor.split("-");
 				var getHurufParse = getUrutParse[0];
 				var getNomorParse = getUrutParse[1];
+				var playlist = [];
+                var audio = new Audio(), i = 0;
+                audio.volume = 0.5;
+                audio.playbackRate = 0.1;
+                audio.loop = false;
 
-				
+
 
 				$("#current_antrian").html(commandParse.nomor);
 				$("#antrian_" + commandParse.loket).html(commandParse.nomor);
@@ -304,10 +323,10 @@
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
 					success: function(response){
-						
-						
 
-							
+
+
+
 
 						if(response.response_package != "") {
 							/*playlist = [
@@ -323,8 +342,8 @@
 								playlist.push(__HOST__ + 'audio/openning.mpeg');
 								playlist.push(__HOST__ + 'audio/antrian.mp3');
 							}
-							playlist.push(__HOST__ + 'audio/' + getHurufParse.toUpperCase() + '.mp3');	
-							
+							playlist.push(__HOST__ + 'audio/' + getHurufParse.toUpperCase() + '.mp3');
+
 							forRead = response.response_package.split(" ");
 							for(var z = 0; z < forRead.length; z++) {
 								playlist.push(__HOST__ + "audio/" + forRead[z] + ".MP3");
@@ -336,10 +355,10 @@
 							playlist.push(__HOST__ + 'audio/' + ($("#nama_antrian_" + commandParse.loket).html().replace("LOKET ", "").toLowerCase().trim()) + '.MP3');
 							playlist.push(__HOST__ + 'audio/closing.mpeg');
 						}
-							
+
 
 						/*var loketStatus = response.response_package;
-						
+
 						for(var a in loketStatus) {
 							for(var b in loketStatus[a]) {
 								if(globalData[a] != loketStatus[a][b] && loketStatus[a][b] > 0) {
@@ -366,10 +385,19 @@
 					}
 				});
 
-				return {
-					audio: audio,
-					playlist: playlist
-				};
+
+
+                var listParse = {
+                    audio: audio,
+                    playlist: playlist
+                };
+
+
+                playlist = listParse.playlist;
+                audio.src = playlist[0];
+                audio.play();
+
+				return listParse;
 			}
 		};
 

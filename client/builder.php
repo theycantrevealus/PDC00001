@@ -237,92 +237,6 @@
 				});
 			});
 
-			if ("WebSocket" in window) {
-				var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
-				
-				Sync = new WebSocket(serverTarget);
-				Sync.onopen = function() {
-					$(".global-sync-container").fadeOut();
-				}
-
-				Sync.onmessage = function(evt) {
-					var signalData = JSON.parse(evt.data);
-					var command = signalData.protocols;
-					var type = signalData.type;
-					var sender = signalData.sender;
-					var receiver = signalData.receiver;
-					var time = signalData.time;
-					var parameter = signalData.parameter;
-
-					if(command !== undefined && command !== null && command !== "") {
-						if(protocolLibGLOBAL[command] !== undefined) {
-							if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
-								protocolLibGLOBAL[command](command, type, parameter, sender, receiver, time);
-							}
-						}
-					}
-				}
-
-				var protocolLibGLOBAL = {
-					akses_update: function(protocols, type, parameter, sender, receiver, time) {
-						if(sender != receiver) {
-							$.ajax({
-								url:__HOSTAPI__ + "/Pegawai",
-								beforeSend: function(request) {
-									request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-								},
-								type:"POST",
-								data: {
-									"request": "refresh_pegawai_access",
-									"uid": __ME__
-								},
-								success:function(resp) {
-									notification ("info", "Hak modul Anda sudah diupdate. Refresh halaman untuk akses baru", 3000, "hasil_modul_update");
-								}
-							});
-						} else {
-							//
-						}
-					},
-                    refresh: function(protocols, type, parameter, sender, receiver, time) {
-					    location.reload();
-                    }
-				};
-
-				Sync.onclose = function() {
-					$(".global-sync-container").fadeIn();
-					var tryCount = 1;
-					setInterval(function() {
-						console.clear();
-						console.log("CPR..." + tryCount);
-						var checkSocket = SocketCheck(serverTarget);
-						tryCount++;
-					}, 1000);
-				}
-
-				Sync.onerror = function() {
-					$(".global-sync-container").fadeIn();
-					var tryCount = 1;
-					setInterval(function() {
-						console.clear();
-						console.log("CPR..." + tryCount);
-						var checkSocket = SocketCheck(serverTarget);
-						tryCount++;
-					}, 1000);
-				}
-
-				return Sync;
-			} else {
-				console.log("WebSocket Not Supported");
-			}
-
-			function SocketCheck(__HOST__) {
-				var checkSocket = new WebSocket(__HOST__);
-				checkSocket.onopen = function() {
-					location.reload();
-				}
-			}
-
 			$("body").on("click", "#refresh_protocol", function() {
 			    notification ("info", "Refresh page", 3000, "notif_update");
                 push_socket(__ME__, "refresh", "*", "Refresh page", "info");
@@ -378,17 +292,37 @@
 			});
 		}
 
-		function push_socket(sender, protocols, receiver, parameter, type) {
-			var msg = {
-				protocols: protocols,
-				sender: sender,
-				receiver: receiver,
-				parameter: parameter,
-				type: type
-			};
 
-			Sync.send(JSON.stringify(msg));
-		}
+
+        var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
+		var Sync;
+        var tm;
+        var protocolLib = {
+            akses_update: function(protocols, type, parameter, sender, receiver, time) {
+                if(sender != receiver) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Pegawai",
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        data: {
+                            "request": "refresh_pegawai_access",
+                            "uid": __ME__
+                        },
+                        success:function(resp) {
+                            notification ("info", "Hak modul Anda sudah diupdate. Refresh halaman untuk akses baru", 3000, "hasil_modul_update");
+                        }
+                    });
+                } else {
+                    //
+                }
+            },
+            refresh: function(protocols, type, parameter, sender, receiver, time) {
+                location.reload();
+            }
+        };
+
 	</script>
 	<?php
 		if(empty(__PAGES__[0])) {
@@ -412,6 +346,100 @@
 		}
 	?>
 	<script type="text/javascript">
+        function push_socket(sender, protocols, receiver, parameter, type) {
+
+            if(Sync.readyState === WebSocket.CLOSED) {
+                Sync = SocketCheck(serverTarget, protocolLib, tm);
+            }
+
+            var msg = {
+                protocols: protocols,
+                sender: sender,
+                receiver: receiver,
+                parameter: parameter,
+                type: type
+            };
+
+            Sync.send(JSON.stringify(msg));
+        }
+
+        $(function() {
+            if ("WebSocket" in window) {
+
+                //var Sync = new WebSocket(serverTarget);
+                console.log(protocolLib);
+                Sync = SocketCheck(serverTarget, protocolLib, tm);
+
+            } else {
+                console.log("WebSocket Not Supported");
+            }
+
+
+
+
+
+
+
+
+        });
+
+        function SocketCheck(serverTarget, protocolLib, tm) {
+
+            var Sync = new WebSocket(serverTarget);
+            Sync.onopen = function() {
+                clearInterval(tm);
+                console.clear();
+                console.log("connected");
+                $(".global-sync-container").fadeOut();
+            }
+
+            Sync.onmessage = function(evt) {
+                var signalData = JSON.parse(evt.data);
+                var command = signalData.protocols;
+                var type = signalData.type;
+                var sender = signalData.sender;
+                var receiver = signalData.receiver;
+                var time = signalData.time;
+                var parameter = signalData.parameter;
+
+                console.log(__ME__);
+
+                if(command !== undefined && command !== null && command !== "") {
+                    if(protocolLib[command] !== undefined) {
+                        if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
+                            protocolLib[command](command, type, parameter, sender, receiver, time);
+                        } else {
+                            protocolLib[command](command, type, parameter, sender, receiver, time);
+                        }
+                    }
+                }
+            }
+
+            Sync.onclose = function() {
+                $(".global-sync-container").fadeIn();
+                var tryCount = 1;
+                tm = setInterval(function() {
+                    console.clear();
+                    console.log("CPR..." + tryCount);
+                    Sync = SocketCheck(serverTarget, protocolLib, tm);
+                    tryCount++;
+                }, 3000);
+            }
+
+            Sync.onerror = function() {
+                /*$(".global-sync-container").fadeIn();
+                var tryCount = 1;
+                tm = setInterval(function() {
+                    console.clear();
+                    console.log("CPR..." + tryCount);
+                    Sync = SocketCheck(serverTarget, protocolLib);
+                    tryCount++;
+                }, 3000);*/
+            }
+
+            return Sync;
+        }
+
 		function inArray(needle, haystack) {
 			var length = haystack.length;
 			for(var i = 0; i < length; i++) {
