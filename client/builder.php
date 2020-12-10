@@ -388,7 +388,6 @@
             var Sync = new WebSocket(serverTarget);
             Sync.onopen = function() {
                 clearInterval(tm);
-                console.clear();
                 console.log("connected");
                 $(".global-sync-container").fadeOut();
             }
