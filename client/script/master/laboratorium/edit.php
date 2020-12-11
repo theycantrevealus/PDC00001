@@ -24,7 +24,9 @@
 				//Init Data
 				$("#txt_kode_laboratorium").val(labData.kode);
 				$("#txt_nama_laboratorium").val(labData.nama);
-				load_spesimen("#txt_spesimen_laboratorium", labData.spesimen.uid);
+				if(labData.spesimen !== undefined && labData.spesimen !== null) {
+                    load_spesimen("#txt_spesimen_laboratorium", labData.spesimen.uid);
+                }
 				$("#txt_spesimen_laboratorium").select2();
 				ClassicEditor
 					.create( document.querySelector( '#txt_keterangan' ), {

@@ -617,9 +617,12 @@ class Laboratorium extends Utility {
                 'uid'
             ))
                 ->where(array(
-                    'master_mitra.nama' => '= ?'
+                    'master_mitra.nama' => '= ?',
+                    'AND',
+                    'master_mitra.jenis' => '= ?'
                 ), array(
-                    $value['mitra']
+                    $value['mitra'],
+                    'LAB'
                 ))
                 ->execute();
             if(count($checkMitra['response_data']) > 0) {
@@ -638,7 +641,7 @@ class Laboratorium extends Utility {
                 $proceed_mitra = self::$query->insert('master_mitra', array(
                     'uid' => $targettedMitra,
                     'nama' => $value['mitra'],
-                    'jenis' => 'GEN',
+                    'jenis' => 'LAB',
                     'kontak' => '',
                     'alamat' => '',
                     'created_at' => parent::format_date(),
@@ -731,7 +734,7 @@ class Laboratorium extends Utility {
                                 ->where(array(
                                     'master_tindakan_kelas_harga.id' => '= ?'
                                 ), array(
-                                    $checkTarif[response_data][0]['id']
+                                    $checkTarif['response_data'][0]['id']
                                 ))
                                 ->execute();
                         } else {

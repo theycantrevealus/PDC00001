@@ -47,6 +47,9 @@ class Radiologi extends Utility
                 case 'antrian':
                     return self::get_antrian();
                     break;
+                case 'verifikasi':
+                    return self::get_antrian('V');
+                    break;
                 case 'get-order-detail':
                     return self::get_radiologi_order_detail($parameter[2]);
                     break;
@@ -72,6 +75,284 @@ class Radiologi extends Utility
         } catch (QueryException $e) {
             return 'Error => ' . $e;
         }
+    }
+
+    private function radiologi_import_fetch($parameter) {
+        if (!empty($_FILES['csv_file']['name'])) {
+
+            $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $column = fgetcsv($file_data); //array_head
+            $row_data = array();
+            while ($row = fgetcsv($file_data)) {
+                $column_builder = array();
+                foreach ($column as $key => $value) {
+                    $column_builder[$value] = $row[$key];
+                }
+                array_push($row_data, $column_builder);
+            }
+
+            $build_col = array();
+            foreach ($column as $key => $value) {
+                array_push($build_col, array("data" => $value));
+            }
+
+            $output = array(
+                'column' => $column,
+                'row_data' => $row_data,
+                'column_builder' => $build_col
+            );
+            return $output;
+        }
+    }
+
+    private function proceed_import_radiologi($parameter)
+    {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        $duplicate_row = array();
+        $non_active = array();
+        $success_proceed = 0;
+        $proceed_data = array();
+
+        //Reset Radiologi
+        $resetRadiologi = self::$query->update('master_radiologi_tindakan', array(
+            'deleted_at' => parent::format_date()
+        ))
+            ->execute();
+
+
+        foreach ($parameter['data_import'] as $key => $value) {
+            $targettedKategori = '';
+            $targettedMitra = '';
+            $targettedTindakan = '';
+            $targettedRadiologi = '';
+
+            //Check Kategori
+            $checkKategoriRad = self::$query->select('master_radiologi_jenis', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_lab_kategori.nama' => '= ?'
+                ), array(
+                    $value['kategori']
+                ))
+                ->execute();
+            if(count($checkKategoriRad['response_data']) > 0) {
+                $targettedKategori = $checkKategoriRad['response_data'][0]['uid'];
+                $proceed_kategori = self::$query->update('master_radiologi_jenis', array(
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'master_radiologi_jenis.uid' => '= ?'
+                    ), array(
+                        $targettedKategori
+                    ))
+                    ->execute();
+            } else {
+                $targettedKategori = parent::gen_uuid();
+                $proceed_kategori = self::$query->insert('master_radiologi_jenis', array(
+                    'uid' => $targettedKategori,
+                    'nama' => ($value['kategori'] != '') ? $value['kategori'] : 'UNSPECIFIED',
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+
+
+
+            //Check Mitra
+            $checkMitra = self::$query->select('master_mitra', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_mitra.nama' => '= ?'
+                ), array(
+                    $value['mitra']
+                ))
+                ->execute();
+            if(count($checkMitra['response_data']) > 0) {
+                $targettedMitra = $checkMitra['response_data'][0]['uid'];
+                $proceed_mitra = self::$query->update('master_mitra', array(
+                    'jenis' => 'RAD',
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'master_mitra.uid' => '= ?'
+                    ), array(
+                        $targettedMitra
+                    ))
+                    ->execute();
+            } else {
+                $targettedMitra = parent::gen_uuid();
+                $proceed_mitra = self::$query->insert('master_mitra', array(
+                    'uid' => $targettedMitra,
+                    'nama' => $value['mitra'],
+                    'jenis' => 'RAD',
+                    'kontak' => '',
+                    'alamat' => '',
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+
+
+            //Check Tindakan
+            $checkTindakan = self::$query->select('master_tindakan', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_tindakan.nama' => '= ?',
+                    'AND',
+                    'master_tindakan.kelompok' => '= ?'
+                ), array(
+                    $value['nama'],
+                    'RAD'
+                ))
+                ->execute();
+            if(count($checkTindakan['response_data']) > 0) {
+                $targettedTindakan = $checkTindakan['response_data'][0]['uid'];
+                $proceed_tindakan = self::$query->update('master_tindakan', array(
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'master_tindakan.uid' => '= ?'
+                    ), array(
+                        $targettedTindakan
+                    ))
+                    ->execute();
+            } else {
+                $targettedTindakan = parent::gen_uuid();
+                $proceed_tindakan = self::$query->insert('master_tindakan', array(
+                    'uid' => $targettedTindakan,
+                    'nama' => $value['nama'],
+                    'kelompok' => 'RAD',
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+            //Sync ke radiologi
+            $checkRadiologi = self::$query->select('master_radiologi_tindakan', array(
+                'id'
+            ))
+                ->where(array(
+                    'master_radiologi_tindakan.uid_tindakan' => '= ?'
+                ), array(
+                    $targettedTindakan
+                ))
+                ->execute();
+            if(count($checkRadiologi['response_data']) > 0) {
+                $targettedRadiologi = $checkRadiologi['response_data'][0]['id'];
+                $proceed_radiologi = self::$query->update('master_radiologi_tindakan', array(
+                    'jenis' => $targettedKategori,
+                    'updated_at' => parent::format_date()
+                ))
+                    ->where(array(
+                        'master_radiologi_tindakan.uid' => '= ?'
+                    ), array(
+                        $targettedRadiologi
+                    ))
+                    ->execute();
+            } else {
+
+                $proceed_radiologi = self::$query->insert('master_radiologi_tindakan', array(
+                    'jenis' => $targettedKategori,
+                    'uid_tindakan' => $targettedTindakan,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->returning('id')
+                    ->execute();
+                $targettedRadiologi = $proceed_radiologi['response_unique'];
+            }
+
+            //Manajer Tarif
+            //Loop Penjamin
+            $getPenjamin = self::$query->select('master_penjamin', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_penjamin.deleted_at' => 'IS NULL'
+                ))
+                ->execute();
+            foreach ($getPenjamin['response_data'] as $PKey => $PValue) { //Apply semua penjamin
+                //Data Kelas Lab
+                $kelasLab = self::$query->select('master_tindakan_kelas', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'master_tindakan_kelas.jenis' => '= ?',
+                        'AND',
+                        'master_tindakan_kelas.deleted_at' => 'IS NULL'
+                    ), array(
+                        'RAD'
+                    ))
+                    ->execute();
+                foreach ($kelasLab['response_data'] as $KKey => $KValue) {
+
+
+                    //Check kelas harga
+                    $checkTarif = self::$query->select('master_tindakan_kelas_harga', array(
+                        'id'
+                    ))
+                        ->where(array(
+                            'master_tindakan_kelas_harga.tindakan' => '',
+                            'AND',
+                            'master_tindakan_kelas_harga.kelas' => '= ?',
+                            'AND',
+                            'master_tindakan_kelas_harga.penjamin' => ' = ?',
+                            'AND',
+                            'master_tindakan_kelas_harga.mitra' => '= ?'
+                        ), array(
+                            $targettedTindakan,
+                            $KValue['uid'],
+                            $PValue['uid'],
+                            $targettedMitra
+                        ))
+                        ->execute();
+                    if(count($checkTarif['response_data']) > 0) {
+                        $proceed_tarif = self::$query->update('master_tindakan_kelas_harga', array(
+                            'harga' => floatval($value['harga']),
+                            'deleted_at' => NULL
+                        ))
+                            ->where(array(
+                                'master_tindakan_kelas_harga.id' => '= ?'
+                            ), array(
+                                $checkTarif['response_data'][0]['id']
+                            ))
+                            ->execute();
+                    } else {
+                        $proceed_tarif = self::$query->insert('master_tindakan_kelas_harga', array(
+                            'tindakan' => $targettedTindakan,
+                            'kelas' => $KValue['uid'],
+                            'penjamin' => $PValue['uid'],
+                            'mitra' => $targettedMitra,
+                            'harga' => floatval($value['harga']),
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date()
+                        ))
+                            ->execute();
+                    }
+
+
+
+                }
+            }
+        }
+
+        return array(
+            'duplicate_row' => $duplicate_row,
+            'non_active' => $non_active,
+            'success_proceed' => $success_proceed,
+            'data' => $parameter['data_import'],
+            'proceed' => $proceed_data
+        );
     }
 
     private function get_jenis_tindakan($table)
@@ -231,7 +512,7 @@ class Radiologi extends Utility
         return $data;
     }
 
-    private function get_antrian()
+    private function get_antrian($status = 'P')
     {
         $data = self::$query
             ->select('rad_order', array(
@@ -276,13 +557,12 @@ class Radiologi extends Utility
                 )
             )
             ->where(array(
-                    'rad_order.status'  => '= ?',
-                    'AND',
-                    'rad_order.deleted_at' => 'IS NULL'
-                ), array(
-                    'P'
-                )
-            )
+                'rad_order.status'  => '= ?',
+                'AND',
+                'rad_order.deleted_at' => 'IS NULL'
+            ), array(
+                $status
+            ))
             ->order(
                 array(
                     'rad_order.waktu_order' => 'DESC'
@@ -543,9 +823,166 @@ class Radiologi extends Utility
             case 'verifikasi_hasil':
                 return self::verifikasi_hasil($parameter);
                 break;
+            case 'radiologi_import_fetch':
+                return self::radiologi_import_fetch($parameter);
+                break;
+            case 'proceed_import_radiologi':
+                return self::proceed_import_radiologi($parameter);
+                break;
+            case 'verifikasi_item_rad':
+                return self::verifikasi_item_rad($parameter);
+                break;
             default:
                 # code...
                 break;
+        }
+    }
+
+    private function verifikasi_item_rad($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        foreach ($parameter['data_set'] as $key => $value) {
+
+
+
+
+
+
+
+
+            $worker = self::$query->update('rad_order_detail', array(
+                'mitra' => $value['mitra'],
+                'verifikator' => $UserData['data']->uid
+            ))
+                ->where(array(
+                    'rad_order_detail.radiologi_order' => '= ?',
+                    'AND',
+                    'rad_order_detail.deleted_at' => 'IS NULL',
+                    'AND',
+                    'rad_order_detail.tindakan' => '= ?'
+                ), array(
+                    $value['uid'],
+                    $value['tindakan']
+                ))
+                ->execute();
+
+
+
+
+
+            //Update antrian nomor dan charge invoice
+            $AsesmenInfo = self::$query->select('asesmen', array(
+                'poli',
+                'kunjungan',
+                'antrian',
+                'pasien',
+                'dokter'
+            ))
+                ->where(array(
+                    'asesmen.deleted_at' => 'IS NULL',
+                    'AND',
+                    'asesmen.uid' => '= ?'
+                ), array(
+                    $value['asesmen']
+                ))
+                ->execute();
+
+            $AntrianDetail = $AsesmenInfo['response_data'][0];
+
+
+            //Check Item Lab
+            $checkMaster = self::$query->select('rad_order_detail', array(
+                'id'
+            ))
+                ->where(array(
+                    'rad_order_detail.mitra' => 'IS NULL',
+                    'AND',
+                    'rad_order_detail.radiologi_order' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            if(count($checkMaster['response_data']) > 0) {
+                //
+            } else {
+
+                //Update master to P
+                $master_order = self::$query->update('rad_order', array(
+                    'status' => 'P',
+                    'updated_at' => parent::format_date()
+                ))
+                    ->where(array(
+                        'rad_order.uid' => '= ?',
+                        'AND',
+                        'rad_order.deleted_at' => 'IS NULL'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+
+
+
+                $antrian_nomor = self::$query->update('antrian_nomor', array(
+                    'status' => 'K'
+                ))
+                    ->where(array(
+                        'antrian_nomor.poli' => '= ?',
+                        'AND',
+                        'antrian_nomor.kunjungan' => '= ?',
+                        'AND',
+                        'antrian_nomor.dokter' => '= ?',
+                        'AND',
+                        'antrian_nomor.pasien' => '= ?'
+                    ), array(
+                        $AntrianDetail['poli'],
+                        $AntrianDetail['kunjungan'],
+                        $AntrianDetail['dokter'],
+                        $AntrianDetail['pasien']
+                    ))
+                    ->execute();
+
+
+            }
+
+            $invoice_master = self::$query->select('invoice', array(
+                'uid'
+            ))
+                ->where(array(
+                    'invoice.kunjungan' => '= ?',
+                    'AND',
+                    'invoice.pasien' => '= ?'
+                ), array(
+                    $AntrianDetail['kunjungan'],
+                    $AntrianDetail['pasien']
+                ))
+                ->execute();
+
+            $invoice_detail = self::$query->update('invoice_detail', array(
+                'status_bayar' => 'N',
+                'harga' => $value['harga'],
+                'subtotal' => $value['harga'],
+                'mitra' => $value['mitra']
+            ))
+                ->where(array(
+                    'invoice_detail.invoice' => '= ?',
+                    'AND',
+                    'invoice_detail.item' => '= ?',
+                    'AND',
+                    'invoice_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $invoice_master['response_data'][0]['uid'],
+                    $value['tindakan']
+                ))
+                ->execute();
+
+
+
+
+
+
+
+
         }
     }
 
@@ -688,13 +1125,13 @@ class Radiologi extends Utility
                     'item_origin' => 'master_tindakan',
                     'qty' => 1,
                     'harga' => $HargaFinal,
-                    'status_bayar' => ($DValue['penjamin'] == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                    'status_bayar' => ($DValue['penjamin'] == __UIDPENJAMINUMUM__) ? 'V' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
                     'subtotal' => $HargaFinal,
                     'discount' => 0,
                     'discount_type' => 'N',
                     'pasien' => $value['pasien'],
                     'penjamin' => $DValue['penjamin'],
-                    'keterangan' => 'Biaya Laboratorium'
+                    'keterangan' => 'Biaya Radiologi'
                 ));
 
                 array_push($charge_result, $InvoiceDetail);
@@ -1212,7 +1649,7 @@ class Radiologi extends Utility
                 if (count($parameter['listTindakan']) > 0) {
                     //Cek Penjamin dulu. Jika non umum langsung lunas. gitulah kira-kira
                     if ($data_antrian['penjamin'] == __UIDPENJAMINUMUM__) {
-                        $status_lunas = 'K';
+                        $status_lunas = 'V';
                     } else {
                         $status_lunas = 'P';
                     }
@@ -1374,7 +1811,7 @@ class Radiologi extends Utility
                                     'item_origin' => 'master_tindakan',
                                     'qty' => 1,
                                     'harga' => $HargaFinal,
-                                    'status_bayar' => ($valueTindakan == __UIDPENJAMINUMUM__) ? 'N' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                                    'status_bayar' => ($valueTindakan == __UIDPENJAMINUMUM__) ? 'V' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
                                     'subtotal' => $HargaFinal,
                                     'discount' => 0,
                                     'discount_type' => 'N',
@@ -1414,7 +1851,7 @@ class Radiologi extends Utility
 
                 //update status antrian
                 $antrian_status = self::$query->update('antrian_nomor', array(
-                    'status' => ($data_antrian['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P'
+                    'status' => ($data_antrian['penjamin'] === __UIDPENJAMINUMUM__) ? 'V' : 'P'
                 ))
                     ->where(array(
                         'antrian_nomor.kunjungan' => '= ?',

@@ -117,5 +117,323 @@
                 }
             });
         });
+
+
+
+
+
+
+        var tableVerifikasiRadiologi = $("#table-verifikasi-radiologi").DataTable({
+            "ajax":{
+                async: false,
+                url: __HOSTAPI__ + "/Radiologi/verifikasi",
+                type: "GET",
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    $("#jlh-antrian").html(response.response_package.response_result);
+                    return response.response_package.response_data;
+                }
+            },
+            autoWidth: false,
+            "bInfo" : false,
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["autonum"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["waktu_order"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["no_rm"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["pasien"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["departemen"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["dokter"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button asesmen=\"" + row.uid_asesmen + "\" id=\"rad_order_" + row.uid + "\" type='button' class=\"btn btn-info btn-sm btn-verifikasi-radiologi\" data-toggle='tooltip' title=\"Verifikasi Radiologi\"'>" +
+                            "<i class=\"fa fa-check\"></i>" +
+                            "</a>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+
+        $("body").on("click", ".btn-verifikasi-radiologi", function() {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+
+            var asesmen = $(this).attr("asesmen");
+
+            $.ajax({
+                url: __HOSTAPI__ + "/Radiologi/get-order-detail/" + uid,
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    $("#modal-verif-radio").modal("show");
+                    var data = response.response_package.response_data;
+                    $("#item-verif-radio tbody tr").remove();
+
+                    for(var key in data) {
+                        var autoRow = document.createElement("TR");
+
+                        var autoNum = document.createElement("TD");
+                        var autoItem = document.createElement("TD");
+                        var autoMitra = document.createElement("TD");
+                        var autoHarga = document.createElement("TD");
+
+                        $(autoNum).html((parseInt(key) + 1));
+                        $(autoItem).html(data[key].tindakan);
+                        $(autoMitra).html("<select asesmen=\"" + asesmen + "\" target=\"" + uid + "\" class=\"form-control mitra\" id=\"mitra_" + key + "_" + data[key].uid_tindakan + "\"></select>");
+                        $(autoHarga).attr({
+                            "id": "harga_" + uid + "_" + data[key].uid_tindakan
+                        });
+
+
+
+
+
+
+
+                        $(autoRow).append(autoNum);
+                        $(autoRow).append(autoItem);
+                        $(autoRow).append(autoMitra);
+                        $(autoRow).append(autoHarga);
+
+                        $("#item-verif-radio tbody").append(autoRow);
+                    }
+
+                    $(".mitra").each(function () {
+                        var id = $(this).attr("id");
+                        var tindakan = id.split("_");
+                        tindakan = tindakan[tindakan.length - 1];
+                        var asesmen = $(this).attr("asesmen");
+                        var target = $(this).attr("target");
+
+                        loadMitra(id, tindakan);
+
+                        $("#" + id).select2({
+                            dropdownParent: $("#modal-verif-radio")
+                        });
+
+                        loadHarga($("#" + id).val(), asesmen, tindakan, target);
+                    });
+                },
+                error:function(response) {
+                    //
+                }
+            });
+            return false;
+        });
+
+        $("#btn-verifikasi").click(function () {
+
+            Swal.fire({
+                title: "Verifikasi Radiologi",
+                text: "Apakah item pemeriksaan sudah benar dan sesuai dengan permintaan?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Tidak",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var forSave = [];
+                    $("#item-verif-radio tbody tr").each(function() {
+                        var id = $(this).find("td:eq(2) select").attr("id");
+                        var tindakan = id.split("_");
+                        tindakan = tindakan[tindakan.length - 1];
+                        var asesmen = $(this).find("td:eq(2) select").attr("asesmen");
+                        var target = $(this).find("td:eq(2) select").attr("target");
+                        var harga = $(this).find("td:eq(3)").attr("harga");
+                        var mitra = $(this).find("td:eq(2) select").val();
+
+
+                        forSave.push({
+                            request: "verifikasi_item_rad",
+                            uid: target,
+                            harga: parseFloat(harga),
+                            mitra: mitra,
+                            tindakan: tindakan,
+                            asesmen: asesmen
+                        });
+                    });
+
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Radiologi",
+                        type: "POST",
+                        data: {
+                            request: "verifikasi_item_rad",
+                            data_set: forSave
+                        },
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function (response) {
+                            $("#modal-verif-radio").modal("hide");
+                            tableVerifikasiRadiologi.ajax.reload();
+                        },
+                        error: function (response) {
+                            //
+                        }
+                    });
+                }
+            });
+
+        });
+
+        function loadHarga(mitra, asesmen, tindakan, target) {
+            $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                "harga": 0
+            });
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Mitra",
+                type: "POST",
+                data: {
+                    request: "check_target",
+                    mitra: mitra,
+                    asesmen: asesmen,
+                    tindakan: tindakan
+                },
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    if(response.response_package.response_data !== undefined && response.response_package.response_data[0] !== undefined) {
+                        var harga = response.response_package.response_data[0].harga;
+                        if(parseFloat(harga) > 0) {
+                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. " + number_format(harga, 2, ".", ",") + "</b>").attr({
+                                "harga": harga
+                            });
+                        } else {
+                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                                "harga": 0
+                            });
+                        }
+                    } else {
+                        $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                            "harga": 0
+                        });
+                    }
+                },
+                error: function(response) {
+                    $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                        "harga": 0
+                    });
+                }
+            });
+        }
+
+
+        $("body").on("change", ".mitra", function() {
+            var mitra = $(this).val();
+            var tindakan = $(this).attr("id").split("_");
+            tindakan = tindakan[tindakan.length - 1];
+            var asesmen = $(this).attr("asesmen");
+            var target = $(this).attr("target");
+            loadHarga(mitra, asesmen, tindakan, target);
+            return false;
+        });
+
+
+
+        function loadMitra(target_ui, itemLab, selected = ""){
+            resetSelectBox(target_ui);
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Mitra/mitra_item/RAD/" + itemLab,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+
+                    var MetaData = response.response_package.response_data;
+                    if (MetaData != "") {
+                        $("#" + target_ui + " option").remove();
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            $("#" + target_ui).append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            })
+        }
+
+        function resetSelectBox(selector, name) {
+            $("#"+ selector +" option").remove();
+            var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
+            $("#" + selector).append(opti_null);
+        }
 	});
 </script>
+
+
+<div id="modal-verif-radio" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Detail Permintaan Laboratorium</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-bordered largeDataType" id="item-verif-radio">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th class="wrap_content">No</th>
+                                    <th>Item Radiologi</th>
+                                    <th style="width: 20%">Mitra</th>
+                                    <th>Harga</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btn-verifikasi" class="btn btn-success">Verifikasi</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>

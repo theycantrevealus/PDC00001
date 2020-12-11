@@ -501,6 +501,7 @@
                         thisTindakan = thisTindakan[thisTindakan.length - 1];
 
                         loadMitra("penyedia_order_" + thisTindakan, "");
+
                         $(this).select2({
                             dropdownParent: $("#modal-detail-labor")
                         });
@@ -714,7 +715,7 @@
 
             $.ajax({
                 async: false,
-                url:__HOSTAPI__ + "/Mitra/mitra_item/GEN/" + itemLab,
+                url:__HOSTAPI__ + "/Mitra/mitra_item/LAB/" + itemLab,
                 type: "GET",
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
