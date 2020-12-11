@@ -384,7 +384,7 @@
         });
 
         function SocketCheck(serverTarget, protocolLib, tm) {
-
+            var audio;
             var Sync = new WebSocket(serverTarget);
             Sync.onopen = function() {
                 clearInterval(tm);
@@ -401,14 +401,24 @@
                 var time = signalData.time;
                 var parameter = signalData.parameter;
 
-                console.log(__ME__);
-
                 if(command !== undefined && command !== null && command !== "") {
                     if(protocolLib[command] !== undefined) {
-                        if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
-                            protocolLib[command](command, type, parameter, sender, receiver, time);
+                        if(command == "anjungan_kunjungan_panggil") {
+                            if(audio !== undefined && audio.audio !== undefined) {
+                                if(!audio.paused) {
+                                    audio.audio.pause();
+                                    audio.audio.currentTime = 0;
+                                } else {
+                                    alert();
+                                }
+                            }
+                            audio = protocolLib[command](command, type, parameter, sender, receiver, time);
                         } else {
-                            protocolLib[command](command, type, parameter, sender, receiver, time);
+                            if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
+                                protocolLib[command](command, type, parameter, sender, receiver, time);
+                            } else {
+                                protocolLib[command](command, type, parameter, sender, receiver, time);
+                            }
                         }
                     }
                 }

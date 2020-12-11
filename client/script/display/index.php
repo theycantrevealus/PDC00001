@@ -292,7 +292,7 @@
                     audio.play();
                 }
 			},
-			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time, audio, playlist, isReset) {
+			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time, isReset) {
 			    var globalData = {};
 				var tracks;
 				var current;
@@ -302,6 +302,7 @@
 				var getNomorParse = getUrutParse[1];
 				var playlist = [];
                 var audio = new Audio(), i = 0;
+                audio.currentTime = 0;
                 audio.volume = 0.5;
                 audio.playbackRate = 0.1;
                 audio.loop = false;
@@ -340,16 +341,16 @@
 								__HOST__ + 'audio/antrian.mp3'
 							];*/
 							if(isReset) {
-								playlist = [
-									__HOST__ + 'audio/openning.mpeg',
-									__HOST__ + 'audio/antrian.mp3'
-								];
+							    playlist = [];
+							    audio.pause();
+							    audio.currentTime = 0;
+                                playlist.push(__HOST__ + 'audio/openning.mpeg');
+                                playlist.push(__HOST__ + 'audio/antrian.mp3');
 							} else {
 								playlist.push(__HOST__ + 'audio/openning.mpeg');
 								playlist.push(__HOST__ + 'audio/antrian.mp3');
 							}
 							playlist.push(__HOST__ + 'audio/' + getHurufParse.toUpperCase() + '.mp3');
-
 							forRead = response.response_package.split(" ");
 							for(var z = 0; z < forRead.length; z++) {
 								playlist.push(__HOST__ + "audio/" + forRead[z] + ".MP3");
@@ -360,8 +361,7 @@
 							//playlist.push(__HOST__ + 'audio/' + ($("#nama_antrian_" + commandParse.loket).html().replace(" ", "").toLowerCase().trim()) + '.mp3');
 							playlist.push(__HOST__ + 'audio/' + ($("#nama_antrian_" + commandParse.loket).html().replace("LOKET ", "").toLowerCase().trim()) + '.MP3');
 							playlist.push(__HOST__ + 'audio/closing.mpeg');
-							console.log(playlist);
-                            playlist = listParse.playlist;
+							playlist = listParse.playlist;
                             audio.src = playlist[0];
                             audio.play();
 
@@ -373,7 +373,7 @@
                                     i = 0;
                                     console.log("Finished");
                                 } else {
-                                    console.log("Palying : " + playlist[i]);
+                                    console.log("Playing : " + playlist[i]);
                                     audio.src = playlist[i];
                                     audio.play();
                                 }
