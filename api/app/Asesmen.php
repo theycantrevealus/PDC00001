@@ -1350,9 +1350,12 @@ class Asesmen extends Utility {
 				'uid'
 			))
 			->where(array(
-				'racikan.asesmen' => '= ?'
+				'racikan.asesmen' => '= ?',
+                'AND',
+                'racikan.kode' => '= ?'
 			), array(
-				$MasterAsesmen
+				$MasterAsesmen,
+                $parameter['racikan'][$key]['nama']
 			))
 			->execute();
 

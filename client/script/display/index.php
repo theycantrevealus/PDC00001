@@ -310,6 +310,12 @@
 
 				$("#current_antrian").html(commandParse.nomor);
 				$("#antrian_" + commandParse.loket).html(commandParse.nomor);
+
+                var listParse = {
+                    audio: audio,
+                    playlist: playlist
+                };
+
 				$.ajax({
 					async: false,
 					url:__HOSTAPI__ + "/Anjungan",
@@ -354,7 +360,28 @@
 							//playlist.push(__HOST__ + 'audio/' + ($("#nama_antrian_" + commandParse.loket).html().replace(" ", "").toLowerCase().trim()) + '.mp3');
 							playlist.push(__HOST__ + 'audio/' + ($("#nama_antrian_" + commandParse.loket).html().replace("LOKET ", "").toLowerCase().trim()) + '.MP3');
 							playlist.push(__HOST__ + 'audio/closing.mpeg');
-						}
+							console.log(playlist);
+                            playlist = listParse.playlist;
+                            audio.src = playlist[0];
+                            audio.play();
+
+                            audio.addEventListener('ended', function () {
+                                i++;
+                                if(i == playlist.length) {
+                                    audio.pause();
+                                    audio.currentTime = 0;
+                                    i = 0;
+                                    console.log("Finished");
+                                } else {
+                                    console.log("Palying : " + playlist[i]);
+                                    audio.src = playlist[i];
+                                    audio.play();
+                                }
+                            });
+						} else {
+						    alert();
+                            console.log(playlist);
+                        }
 
 
 						/*var loketStatus = response.response_package;
@@ -387,15 +414,10 @@
 
 
 
-                var listParse = {
-                    audio: audio,
-                    playlist: playlist
-                };
 
 
-                playlist = listParse.playlist;
-                audio.src = playlist[0];
-                audio.play();
+
+
 
 				return listParse;
 			}

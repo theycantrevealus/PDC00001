@@ -388,6 +388,33 @@ class Apotek extends Utility
                     'L'
                 ))
                 ->execute();
+        } else {
+            //Update Resep
+            $updateResep = self::$query->update('resep', array(
+                'status_resep' => 'D'
+            ))
+                ->where(array(
+                    'resep.uid' => '= ?'
+                ), array(
+                    $parameter['resep']
+                ))
+                ->execute();
+
+            //Update Racikan
+            $updateRacikan = self::$query->update('racikan', array(
+                'status' => 'D'
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?',
+                    'AND',
+                    'racikan.status' => '= ?',
+                    'AND',
+                    'racikan.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['asesmen'],
+                    'L'
+                ))
+                ->execute();
         }
 
         return array(
@@ -406,6 +433,8 @@ class Apotek extends Utility
             'resep' => array(),
             'racikan' => array()
         );
+
+        $unique_racikan = array();
 
 
         //Resep Detail
@@ -541,9 +570,8 @@ class Apotek extends Utility
                 }
 
                 $RacikanValue['item'] = $RacikanDetailData['response_data'];
-
-                array_push($dataResponse['racikan'], $RacikanValue);
             }
+            array_push($dataResponse['racikan'], $RacikanValue);
         }
 
         return array($dataResponse);

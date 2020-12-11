@@ -3,14 +3,14 @@
         <div class="card-header card-header-large bg-white">
             <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> <span class="lab_nomor_order"><?php echo $_POST['no_order']; ?></span></h5>
         </div>
-        <div class="card-body">
+        <div class="card-body" id="labor_container_<?php echo  $_POST['uid']; ?>">
         <?php
             foreach($_POST['detail'] as $key => $value) {
                 if($value['mitra'] == '') {
                     ?>
-                <div class="card">
+                <div class="card group_<?php echo  $_POST['uid']; ?>" id="verifikasi_lab_container_<?php echo  $_POST['uid']; ?>_<?php echo  $value['tindakan']['uid']; ?>">
                     <div class="card-header card-header-large bg-white">
-                        <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> <span class="lab_nomor_order"><?php echo $value['tindakan']['kode']; ?> - <?php echo $value['tindakan']['nama']; ?></span></h5>
+                        <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> <span class="lab_nomor_order"><?php echo strtoupper($value['tindakan']['kode']); ?> - <?php echo $value['tindakan']['nama']; ?></span></h5>
                     </div>
                     <div class="card-body">
                         <table class="table form-mode">
@@ -40,6 +40,11 @@
                                     <b class="lab_petugas"><?php echo $_POST['petugas_parse']; ?>-</b>
                                 </td>
                             </tr>
+                            <tr>
+                                <td>Harga</td>
+                                <td>:</td>
+                                <td class="text-info" id="harga_<?php echo $_POST['uid']; ?>_<?php echo $value['tindakan']['uid']; ?>"></td>
+                            </tr>
                         </table>
                         <table class="table table-striped table-bordered">
                             <thead class="thead-dark">
@@ -66,15 +71,18 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
+                            <div class="col-md-12">
+                                <?php //echo json_encode($_POST); ?>
+                            </div>
                             <div class="col-md-5">
                                 Penyedia :<br />
-                                <select id="penyedia_order_<?php echo $value['tindakan']['uid']; ?>" class="form-control penyedia_order_lab"></select>
+                                <select asesmen="<?php echo $_POST['asesmen']; ?>" target="<?php echo $_POST['uid']; ?>" id="penyedia_order_<?php echo $value['tindakan']['uid']; ?>" class="form-control penyedia_order_lab"></select>
                             </div>
                             <div class="col-md-4 text-info" style="padding-top: 20px;">
                                 <i class="fa fa-info-circle"></i> Pelaksana pemeriksaan laboratorium
                             </div>
                             <div class="col-md-3">
-                                <button class="btn btn-success btn_verifikasi_item_lab" id="verifikasi_lab_<?php echo $value['tindakan']['uid']; ?>" target="<?php echo $_POST['uid']; ?>" tindakan="<?php echo $value['tindakan']['uid']; ?>">
+                                <button asesmen="<?php echo $_POST['asesmen']; ?>" class="btn btn-success btn_verifikasi_item_lab" id="verifikasi_lab_<?php echo $value['tindakan']['uid']; ?>" target="<?php echo $_POST['uid']; ?>" tindakan="<?php echo $value['tindakan']['uid']; ?>">
                                     <i class="fa fa-check"></i> Verifikasi
                                 </button>
                             </div>

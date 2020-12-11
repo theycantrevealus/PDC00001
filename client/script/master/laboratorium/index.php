@@ -96,7 +96,7 @@
             event.preventDefault();
             $("#csv_file_data").html("<h6 class=\"text-center\">Load Data...</h6>");
             var formData = new FormData(this);
-            formData.append("request", "laboratorium_import_fetch");
+            formData.append("request", "laboratorium_import_fetch_nilai");
             $.ajax({
                 url: __HOSTAPI__ + "/Laboratorium",
                 beforeSend: function(request) {

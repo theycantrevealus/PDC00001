@@ -1,6 +1,6 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
-	$(function(){
+	$(function() {
 
 	    var tableServiceLabor = $("#service_labor").DataTable({
             processing: true,
@@ -493,10 +493,7 @@
                     $("#modal-detail-labor").modal("show");
                     targettedLabItem = response.response_package.response_data[0];
 
-                    console.log(targettedLabItem);
-
                     $(".lab_loader").html(load_laboratorium(targettedLabItem));
-
                     //$(".target_dpjp").select2();
 
                     $(".penyedia_order_lab").each(function() {
@@ -504,7 +501,17 @@
                         thisTindakan = thisTindakan[thisTindakan.length - 1];
 
                         loadMitra("penyedia_order_" + thisTindakan, "");
-                        $(this).select2();
+                        $(this).select2({
+                            dropdownParent: $("#modal-detail-labor")
+                        });
+
+
+                        var tindakanAttr = $("#penyedia_order_" + thisTindakan).attr("id");
+                        tindakanAttr = tindakanAttr[tindakanAttr.length - 1];
+
+                        var asesmenAttr = $("#penyedia_order_" + thisTindakan).attr("asesmen");
+
+                        loadHarga($("#penyedia_order_" + thisTindakan).val(), asesmenAttr, thisTindakan, uid);
 
 
                         $("#target_dpjp_lab_" + uid + "_" + thisTindakan).select2({
@@ -516,6 +523,7 @@
                             },
                             placeholder:"Cari Dokter",
                             cache: true,
+                            dropdownParent: $("#modal-detail-labor"),
                             selectOnClose: true,
                             ajax: {
                                 dataType: "json",
@@ -647,6 +655,60 @@
             ]
         });
 
+
+        $("body").on("change", ".penyedia_order_lab", function() {
+            var mitra = $(this).val();
+            var tindakan = $(this).attr("id").split("_");
+            tindakan = tindakan[tindakan.length - 1];
+            var asesmen = $(this).attr("asesmen");
+            var target = $(this).attr("target");
+            loadHarga(mitra, asesmen, tindakan, target);
+            return false;
+        });
+
+        function loadHarga(mitra, asesmen, tindakan, target) {
+            $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                "harga": 0
+            });
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Mitra",
+                type: "POST",
+                data: {
+                    request: "check_target",
+                    mitra: mitra,
+                    asesmen: asesmen,
+                    tindakan: tindakan
+                },
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    if(response.response_package.response_data !== undefined && response.response_package.response_data[0] !== undefined) {
+                        var harga = response.response_package.response_data[0].harga;
+                        if(parseFloat(harga) > 0) {
+                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. " + number_format(harga, 2, ".", ",") + "</b>").attr({
+                                "harga": harga
+                            });
+                        } else {
+                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                                "harga": 0
+                            });
+                        }
+                    } else {
+                        $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                            "harga": 0
+                        });
+                    }
+                },
+                error: function(response) {
+                    $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                        "harga": 0
+                    });
+                }
+            });
+        }
+
         function loadMitra(target_ui, itemLab, selected = ""){
             resetSelectBox(target_ui);
 
@@ -708,7 +770,7 @@
             })
         }
 
-        function resetSelectBox(selector, name){
+        function resetSelectBox(selector, name) {
             $("#"+ selector +" option").remove();
             var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
             $("#" + selector).append(opti_null);
@@ -749,18 +811,20 @@
         };
 
         $("body").on("click", ".btn_verifikasi_item_lab", function () {
-            var uid = $(this).attr("id").split("_");
-            uid = uid[uid.length - 1];
+            var uid = $(this).attr("target");
 
             //$("#verifikasi_lab_container_" + uid).fadeOut();
 
             var tindakan = $(this).attr("tindakan");
             var pelaksana = $("#penyedia_order_" + tindakan).val();
-            var dpjp = $("#target_dpjp_lab_" + tindakan).val();
+            var dpjp = $("#target_dpjp_lab_" + uid + "_" + tindakan).val();
+            var asesmen = $(this).attr("asesmen");
+            var harga = $("#harga_" + uid + "_" + tindakan).attr("harga");
 
             if(
                 dpjp !== "" &&
                 dpjp !== null &&
+                dpjp !== undefined &&
                 pelaksana !== ""
             ) {
                 Swal.fire({
@@ -768,7 +832,7 @@
                     text: "Apakah item pemeriksaan sudah benar dan sesuai dengan permintaan?",
                     showDenyButton: true,
                     confirmButtonText: "Ya",
-                    denyButtonText: "Tidak. Batalkan Order",
+                    denyButtonText: "Tidak",
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -779,16 +843,23 @@
                                 request: "verifikasi_item_lab",
                                 uid: uid,
                                 dpjp: dpjp,
+                                harga: harga,
                                 mitra: pelaksana,
-                                tindakan: tindakan
+                                tindakan: tindakan,
+                                asesmen: asesmen
                             },
                             beforeSend: function(request) {
                                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                             },
                             success: function(response){
 
-
-                                $("#verifikasi_lab_container_" + uid).fadeOut();
+                                $("#verifikasi_lab_container_" + uid + "_" + tindakan).fadeOut(function() {
+                                    $("#verifikasi_lab_container_" + uid + "_" + tindakan).remove();
+                                    if($(".group_" + uid).length === 0) {
+                                        $("#modal-detail-labor").modal("hide");
+                                        tableVerifikasiLabor.ajax.reload();
+                                    }
+                                });
 
                             },
                             error: function(response) {
