@@ -903,6 +903,9 @@ class Pegawai extends Utility {
             //Jabatan
             $targetUIDJabatan = '';
 
+            $targetUIDGudang = '';
+            $targetUIDUnit = '';
+
             $checkJabatan = self::$query->select('pegawai_jabatan', array(
                 'uid',
                 'nama'
@@ -917,16 +920,79 @@ class Pegawai extends Utility {
             if(count($checkJabatan['response_data']) > 0) {
                 $targetUIDJabatan = $checkJabatan['response_data'][0]['uid'];
             } else {
-                if($value['jabatan'] !== '') {
-                    $targetUIDJabatan = parent::gen_uuid();
-                    $new_jabatan = self::$query->insert('pegawai_jabatan', array(
-                        'uid' => $targetUIDJabatan,
-                        'nama' => $value['jabatan'],
-                        'created_at' => parent::format_date(),
-                        'updated_at' => parent::format_date()
+                $targetUIDJabatan = parent::gen_uuid();
+                $new_jabatan = self::$query->insert('pegawai_jabatan', array(
+                    'uid' => $targetUIDJabatan,
+                    'nama' => $value['jabatan'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+            $checkGudang = self::$query->select('master_inv_gudang', array(
+                'uid',
+                'nama'
+            ))
+                ->where(array(
+                    'master_inv_gudang.nama' => '= ?'
+                ), array(
+                    $value['unit']
+                ))
+                ->execute();
+
+            if(count($checkGudang['response_data']) > 0) {
+                $targetUIDGudang = $checkGudang['response_data'][0]['uid'];
+            } else {
+                $targetUIDGudang = parent::gen_uuid();
+                $new_gudang = self::$query->insert('master_inv_gudang', array(
+                    'uid' => $targetUIDGudang,
+                    'nama' => $value['unit'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+
+            //Generate Unit Baru
+            $checkUnit = self::$query->select('master_unit', array(
+                'uid',
+                'nama'
+            ))
+                ->where(array(
+                    'master_unit.nama' => '= ?',
+                    'AND',
+                    'master_unit.kode' => '= ?'
+                ), array(
+                    $value['unit'],
+                    $value['kode_unit']
+                ))
+                ->execute();
+
+            if(count($checkUnit['response_data']) > 0) {
+                $targetUIDUnit = $checkUnit['response_data'][0]['uid'];
+                $new_unit = self::$query->update('master_unit', array(
+                    'gudang' => $targetUIDGudang,
+                    'updated_at' => parent::format_date()
+                ))
+                    ->where(array(
+                        'master_unit.uid' => '= ?'
+                    ), array(
+                        $targetUIDUnit
                     ))
-                        ->execute();
-                }
+                    ->execute();
+            } else {
+                $targetUIDUnit = parent::gen_uuid();
+                $new_unit = self::$query->insert('master_unit', array(
+                    'uid' => $targetUIDJabatan,
+                    'nama' => $value['unit'],
+                    'kode' => $value['kode_unit'],
+                    'gudang' => $targetUIDGudang,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
             }
 
             $checkPegawai = self::$query->select('pegawai', array(
@@ -948,6 +1014,7 @@ class Pegawai extends Utility {
                     //Update the employee data
                     $targettedPegawai = $checkPegawai['response_data'][0]['uid'];
                     $proceed_pegawai = self::$query->update('pegawai', array(
+                        'unit' => $targetUIDUnit,
                         'jabatan' => $targetUIDJabatan,
                         'deleted_at' => NULL
                     ))
@@ -966,6 +1033,7 @@ class Pegawai extends Utility {
                         'nama' => $value['nama'],
                         'password' => '$2y$10$xdwAR9rpYmSfzKOYyfJkcuOUkmxqI.tb03kdJpE41HbpiHndwEHDS',
                         'jabatan' => $targetUIDJabatan,
+                        'unit' => $targetUIDUnit,
                         'kontak' => $value['kontak'],
                         'created_at' => parent::format_date(),
                         'updated_at' => parent::format_date()
@@ -1322,6 +1390,11 @@ class Pegawai extends Utility {
                         }
                     }
                 }
+
+
+
+
+
 
 
 
