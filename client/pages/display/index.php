@@ -54,7 +54,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-12">
+						<!--div class="col-md-12">
 							<div class="card">
 								<div class="card-header card-header-large bg-white d-flex align-items-center">
 									<h5 class="card-header__title flex m-0">Kunjungan Per Unit</h5>
@@ -76,7 +76,7 @@
 									</div>
 								</div>
 							</div>
-						</div>
+						</div-->
 					</div>
 					<!-- <div class="col-md-12">
 						<div id="carousel-slider" class="carousel slide" data-ride="carousel">

@@ -14,7 +14,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <div class="input-group input-group-merge">
-                                        <input type="text" class="form-control form-control-prepended" required="" />
+                                        <input type="text" class="form-control form-control-prepended" id="igd_gcs_e" />
                                         <div class="input-group-prepend">
                                             <div class="input-group-text">
                                                 E
@@ -26,7 +26,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <div class="input-group input-group-merge">
-                                        <input type="text" class="form-control form-control-prepended" required="" />
+                                        <input type="text" class="form-control form-control-prepended" id="igd_gcs_v" />
                                         <div class="input-group-prepend">
                                             <div class="input-group-text">
                                                 V
@@ -38,7 +38,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <div class="input-group input-group-merge">
-                                        <input type="text" class="form-control form-control-prepended" required="" />
+                                        <input type="text" class="form-control form-control-prepended" id="igd_gcs_m" />
                                         <div class="input-group-prepend">
                                             <div class="input-group-text">
                                                 M
@@ -50,7 +50,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <div class="input-group input-group-merge">
-                                        <input type="text" class="form-control form-control-prepended" required="" />
+                                        <input type="text" class="form-control form-control-prepended" id="igd_gcs_tot" />
                                         <div class="input-group-prepend">
                                             <div class="input-group-text">
                                                 Total
@@ -64,7 +64,7 @@
                             <div class="col-md-6">
                                 Tekanan Darah:
                                 <div class="input-group input-group-merge">
-                                    <input type="text" class="form-control form-control-appended" required="">
+                                    <input type="text" class="form-control form-control-appended" id="igd_tekanan_darah">
                                     <div class="input-group-append">
                                         <div class="input-group-text">
                                             mmHg
@@ -75,7 +75,7 @@
                             <div class="col-md-6">
                                 Nadi:
                                 <div class="input-group input-group-merge">
-                                    <input type="text" class="form-control form-control-appended" required="">
+                                    <input type="text" class="form-control form-control-appended" id="igd_nadi">
                                     <div class="input-group-append">
                                         <div class="input-group-text">
                                             X/i
@@ -90,15 +90,15 @@
                                 <div class="form-group">
                                     <label for="txt_pupil">Pupil:</label>
                                     <br />
-                                    <input type="radio" name="txt_pupil" /> Isokor
+                                    <input type="radio" name="igd_pupil" value="isokor" /> Isokor
                                     <br />
-                                    <input type="radio" name="txt_pupil" /> Anisokor
+                                    <input type="radio" name="igd_pupil" value="anisokor" /> Anisokor
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="txt_no_ktp">Refleks Cahaya:</label>
-                                    <input class="form-control" id="txt_refleks_cahaya" required />
+                                    <input class="form-control" id="igd_refleks_cahaya" />
                                 </div>
                             </div>
                         </div>
@@ -107,7 +107,7 @@
                             <div class="col-md-6">
                                 RR:
                                 <div class="input-group input-group-merge">
-                                    <input type="text" class="form-control form-control-appended" required="">
+                                    <input type="text" class="form-control form-control-appended" id="igd_rr">
                                     <div class="input-group-append">
                                         <div class="input-group-text">
                                             X/m
@@ -118,7 +118,7 @@
                             <div class="col-md-6">
                                 Suhu:
                                 <div class="input-group input-group-merge">
-                                    <input type="text" class="form-control form-control-appended" required="">
+                                    <input type="text" class="form-control form-control-appended" id="igd_suhu">
                                     <div class="input-group-append">
                                         <div class="input-group-text">
                                             <sup>o</sup>C
@@ -137,12 +137,15 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <div class="form-group">
-                                    <input type="radio" name="txt_info_anamnesa" /> Ya
-                                    <br />
-                                    <input type="radio" name="txt_info_anamnesa" /> Tidak
-                                    <input type="text" class="form-control uppercase" id="txt_pengantar" placeholder="Sebutkan" required>
+                                    <input type="radio" name="igd_status_alergi" value="y" /> Ya
+                                    <input type="text" class="form-control uppercase" id="igd_status_alergi_text" placeholder="Sebutkan" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="radio" name="igd_status_alergi" value="n" /> Tidak
                                 </div>
                             </div>
                         </div>
@@ -156,15 +159,15 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <input type="radio" name="txt_info_anamnesa" /> Tidak Terganggu
+                                    <input type="radio" name="igd_gangguan_perilaku" value="tidak_terganggu" /> Tidak Terganggu
                                     <br />
-                                    <input type="radio" name="txt_info_anamnesa" /> Terganggu
+                                    <input type="radio" name="igd_gangguan_perilaku" value="terganggu" /> Terganggu
                                     <ul class="selection-list">
                                         <li>
-                                            <input type="radio" name="txt_info_anamnesa" /> Tidak Membahayakan
+                                            <input type="radio" name="igd_gangguan_terganggu" value="terganggu_tidak_bahaya" /> Tidak Membahayakan
                                         </li>
                                         <li>
-                                            <input type="radio" name="txt_info_anamnesa" /> Membahayakan Diri Sendiri / Orang Lain
+                                            <input type="radio" name="igd_gangguan_terganggu" value="terganggu_bahaya" /> Membahayakan Diri Sendiri / Orang Lain
                                         </li>
                                     </ul>
                                 </div>
@@ -179,17 +182,17 @@
                         <b>Skala Nyeri</b>
                     </div>
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row" style="margin-bottom: 20px;">
                             <div class="col-md-3">
                                 Nyeri
                             </div>
                             <div class="col-md-9">
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Ya
+                                        <input type="radio" name="igd_skala_nyeri" value="y" /> Ya
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Tidak
+                                        <input type="radio" name="igd_skala_nyeri" value="n" /> Tidak
                                     </div>
                                 </div>
                             </div>
@@ -199,7 +202,7 @@
                                 Lokasi
                             </div>
                             <div class="col-md-9">
-                                <input type="text" class="form-control" name="" placeholder="Lokasi Nyeri" />
+                                <input type="text" class="form-control" id="igd_lokasi" placeholder="Lokasi Nyeri" />
                             </div>
                         </div>
                         <br />
@@ -210,13 +213,13 @@
                             <div class="col-md-9">
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Sering
+                                        <input type="radio" name="igd_frekuensi" value="sering" /> Sering
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Kadang
+                                        <input type="radio" name="igd_frekuensi" value="kadang" /> Kadang
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Jarang
+                                        <input type="radio" name="igd_frekuensi" value="jarang" /> Jarang
                                     </div>
                                 </div>
                             </div>
@@ -229,28 +232,28 @@
                             <div class="col-md-9">
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Terbakar
+                                        <input type="radio" name="igd_karakter_nyeri" value="terbakar" /> Terbakar
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Tertindih
+                                        <input type="radio" name="igd_karakter_nyeri" value="tertindih" /> Tertindih
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Menyebar
+                                        <input type="radio" name="igd_karakter_nyeri" value="menyebar" /> Menyebar
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Tajam
+                                        <input type="radio" name="igd_karakter_nyeri" value="tajam" /> Tajam
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Tumpul
+                                        <input type="radio" name="igd_karakter_nyeri" value="tumpul" /> Tumpul
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Berdenyut
+                                        <input type="radio" name="igd_karakter_nyeri" value="berdenyut" /> Berdenyut
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="radio" name="txt_info_anamnesa" /> Lainnya
-                                        <input type="text" class="form-control" name="" />
+                                        <input type="radio" name="igd_karakter_nyeri" value="lainnya" /> Lainnya
+                                        <input type="text" class="form-control" id="igd_karakter_nyeri_text" disabled />
                                     </div>
                                 </div>
                             </div>
@@ -266,7 +269,7 @@
                                 <b>Total Skor</b>
                             </div>
                             <div class="col-md-9">
-                                <input type="text" class="form-control" name="" />
+                                <input type="text" class="form-control" id="igd_skor_nyeri" />
                             </div>
                         </div>
                         <br />
@@ -277,16 +280,16 @@
                             <div class="col-md-9">
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Ringan
+                                        <input type="radio" name="igd_tipe_nyeri" value="ringan" /> Ringan
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Sedang
+                                        <input type="radio" name="igd_tipe_nyeri" value="sedang" /> Sedang
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Berat
+                                        <input type="radio" name="igd_tipe_nyeri" value="berat" /> Berat
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="radio" name="txt_info_anamnesa" /> Berat Sekali
+                                        <input type="radio" name="igd_tipe_nyeri" value="berat_sekali" /> Berat Sekali
                                     </div>
                                 </div>
                             </div>
@@ -318,104 +321,104 @@
                                         <td class="ats-item" style="background: #ffb3b3;">
                                             <ul class="selection-list table-child">
                                                 <li>
-                                                    <input type="checkbox" /> Henti Jantung
+                                                    <input type="checkbox" name="ats_check" value="1_1" /> Henti Jantung
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" /> Henti Nafas
+                                                    <input type="checkbox" name="ats_check" value="1_2" /> Henti Nafas
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" /> Sumbatan Jalan Nafas
+                                                    <input type="checkbox" name="ats_check" value="1_3" /> Sumbatan Jalan Nafas
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" /> Respirasi < 10 x/menit
+                                                    <input type="checkbox" name="ats_check" value="1_4" /> Respirasi < 10 x/menit
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" /> Gangguan Pernafasan Ekstrim
+                                                    <input type="checkbox" name="ats_check" value="1_5" /> Gangguan Pernafasan Ekstrim
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" /> Tekanan darah < 80(dewasa) shok berat pada anak/bayi
+                                                    <input type="checkbox" name="ats_check" value="1_6" /> Tekanan darah < 80(dewasa) shok berat pada anak/bayi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" /> GCS < 9
+                                                    <input type="checkbox" name="ats_check" value="1_7" /> GCS < 9
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" /> Kejang berkepanjangan(lebih dari 10 menit/tidak berhenti)
+                                                    <input type="checkbox" name="ats_check" value="1_8" /> Kejang berkepanjangan(lebih dari 10 menit/tidak berhenti)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" /> Henti Jantung
+                                                    <input type="checkbox" name="ats_check" value="1_9" /> Henti Jantung
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" /> Henti Jantung
+                                                    <input type="checkbox" name="ats_check" value="1_10" /> Henti Jantung
                                                 </li>
                                             </ul>
                                         </td>
                                         <td class="ats-item" style="background: #ffb3b3;">
                                             <ul class="selection-list table-child">
                                                 <li>
-                                                    <input type="checkbox" name=""> Distres pernafasan/sesak nafas berat RR >= 35 x/menit
+                                                    <input type="checkbox" name="ats_check" value="2_1"> Distres pernafasan/sesak nafas berat RR >= 35 x/menit
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Kurangnya perfusi
+                                                    <input type="checkbox" name="ats_check" value="2_2"> Kurangnya perfusi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> HR < 50 atau > 150(dewasa)
+                                                    <input type="checkbox" name="ats_check" value="2_3"> HR < 50 atau > 150(dewasa)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Hipotensi ringan systole < 90mmHg
+                                                    <input type="checkbox" name="ats_check" value="2_4"> Hipotensi ringan systole < 90mmHg
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Kehilangan darah parah
+                                                    <input type="checkbox" name="ats_check" value="2_5"> Kehilangan darah parah
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Nyeri dada karena jantung
+                                                    <input type="checkbox" name="ats_check" value="2_6"> Nyeri dada karena jantung
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Nyeri parah oleh sebab apapun
+                                                    <input type="checkbox" name="ats_check" value="2_7"> Nyeri parah oleh sebab apapun
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Mengantuk, penurunan respon oleh sebab apapun(GCS < 13)
+                                                    <input type="checkbox" name="ats_check" value="2_8"> Mengantuk, penurunan respon oleh sebab apapun(GCS < 13)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> BSL < 3mmol (GDS < 50 mg/dl)
+                                                    <input type="checkbox" name="ats_check" value="2_9"> BSL < 3mmol (GDS < 50 mg/dl)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Hemiparse acut / dysphasia
+                                                    <input type="checkbox" name="ats_check" value="2_10"> Hemiparse acut / dysphasia
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Demam dengan tanga-tanda kelesuan
+                                                    <input type="checkbox" name="ats_check" value="2_11"> Demam dengan tanga-tanda kelesuan
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Percikan asam / basa pada mata
+                                                    <input type="checkbox" name="ats_check" value="2_12"> Percikan asam / basa pada mata
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Multi trauma yang membutuhkan respon tim terorganisir
+                                                    <input type="checkbox" name="ats_check" value="2_12"> Multi trauma yang membutuhkan respon tim terorganisir
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Patah tulang besar, amputasi
+                                                    <input type="checkbox" name="ats_check" value="2_13"> Patah tulang besar, amputasi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Riwayat resiko tinggi
+                                                    <input type="checkbox" name="ats_check" value="2_14"> Riwayat resiko tinggi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Keracunan sedatif atau tertelan racun
+                                                    <input type="checkbox" name="ats_check" value="2_15"> Keracunan sedatif atau tertelan racun
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Nyeri berat kehamilan ektopik (KET)
+                                                    <input type="checkbox" name="ats_check" value="2_16"> Nyeri berat kehamilan ektopik (KET)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Perilaku Psikiatri
+                                                    Perilaku Psikiatri
                                                     <ul class="selection-list table-child">
                                                         <li>
-                                                            <input type="checkbox" name="">Kekesarasan/agresif
+                                                            <input type="checkbox" name="ats_check" value="2_17">Kekesarasan/agresif
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Ancaman langsung terhadap diri sendiri dan orang lain
+                                                            <input type="checkbox"  name="ats_check" value="2_18">Ancaman langsung terhadap diri sendiri dan orang lain
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Memerlukan restrain
+                                                            <input type="checkbox" name="ats_check" value="2_19">Memerlukan restrain
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Agitasi berat
+                                                            <input type="checkbox" name="ats_check" value="2_20">Agitasi berat
                                                         </li>
                                                     </ul>
                                                 </li>
@@ -424,79 +427,79 @@
                                         <td class="ats-item" style="background: #ffe6b3;">
                                             <ul class="selection-list table-child">
                                                 <li>
-                                                    <input type="checkbox" name=""> Hipertensi berat(systole >= 180mmHg atau diastole >= 110mmHg)
+                                                    <input type="checkbox" name="ats_check" value="3_1"> Hipertensi berat(systole >= 180mmHg atau diastole >= 110mmHg)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Kehilangan darah cukup parah sebab apapun
+                                                    <input type="checkbox" name="ats_check" value="3_2"> Kehilangan darah cukup parah sebab apapun
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Sesak nafas sedang RR >= 26x/mnt
+                                                    <input type="checkbox" name="ats_check" value="3_3"> Sesak nafas sedang RR >= 26x/mnt
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> SPO 90-95%
+                                                    <input type="checkbox" name="ats_check" value="3_4"> SPO 90-95%
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> BSL > 16mmol/GDS > 228mg/dl
+                                                    <input type="checkbox" name="ats_check" value="3_5"> BSL > 16mmol/GDS > 228mg/dl
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Kejang (saat ini kejang) < 10 menit
+                                                    <input type="checkbox" name="ats_check" value="3_6"> Kejang (saat ini kejang) < 10 menit
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Muntah terus menerus
+                                                    <input type="checkbox" name="ats_check" value="3_7"> Muntah terus menerus
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Dehidrasi
+                                                    <input type="checkbox" name="ats_check" value="3_8"> Dehidrasi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Cedera kepala dengan penurunan kesadaran
+                                                    <input type="checkbox" name="ats_check" value="3_9"> Cedera kepala dengan penurunan kesadaran
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Reaksi alergi
+                                                    <input type="checkbox" name="ats_check" value="3_10"> Reaksi alergi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Nyeri berat
+                                                    <input type="checkbox" name="ats_check" value="3_11"> Nyeri berat
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Nyeri non jantung
+                                                    <input type="checkbox" name="ats_check" value="3_12"> Nyeri non jantung
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Pasien usia > 65 tahun
+                                                    <input type="checkbox" name="ats_check" value="3_13"> Pasien usia > 65 tahun
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Cedera sedang pada ekstremitas, deformitas, lecet dan hancur
+                                                    <input type="checkbox" name="ats_check" value="3_14"> Cedera sedang pada ekstremitas, deformitas, lecet dan hancur
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Cedera dengan mati rasa dan pulsasi menurun
+                                                    <input type="checkbox" name="ats_check" value="3_15"> Cedera dengan mati rasa dan pulsasi menurun
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Neonatus stabil
+                                                    <input type="checkbox" name="ats_check" value="3_16"> Neonatus stabil
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Anak dalam resiko
+                                                    <input type="checkbox" name="ats_check" value="3_17"> Anak dalam resiko
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Perilaku Psikiatri
+                                                    Perilaku Psikiatri
                                                     <ul class="selection-list table-child">
                                                         <li>
-                                                            <input type="checkbox" name="">Sangat tertekan, resiko menyakiti diri
+                                                            <input type="checkbox" name="ats_check" value="3_18">Sangat tertekan, resiko menyakiti diri
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Acut psikotik, atau gangguan pola pikir
+                                                            <input type="checkbox" name="ats_check" value="3_19">Acut psikotik, atau gangguan pola pikir
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Kritis situsional, sengaja menyakiti diri
+                                                            <input type="checkbox" name="ats_check" value="3_20">Kritis situsional, sengaja menyakiti diri
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Gelisah, menarik diri
+                                                            <input type="checkbox" name="ats_check" value="3_21">Gelisah, menarik diri
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Berpotensi agresif
+                                                            <input type="checkbox" name="ats_check" value="3_22">Berpotensi agresif
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Luka robek memerlukan jahitan
+                                                            <input type="checkbox" name="ats_check" value="3_23">Luka robek memerlukan jahitan
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Lecet parah
+                                                            <input type="checkbox" name="ats_check" value="3_24">Lecet parah
                                                         </li>
                                                     </ul>
                                                 </li>
@@ -505,46 +508,46 @@
                                         <td class="ats-item" style="background: #ffe6b3;">
                                             <ul class="selection-list table-child">
                                                 <li>
-                                                    <input type="checkbox" name=""> Pendarahan ringan
+                                                    <input type="checkbox" name="ats_check" value="4_1"> Pendarahan ringan
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Hipertensi sedang (systole >= 160 mmHg atau diastole >= 100mmHg)
+                                                    <input type="checkbox" name="ats_check" value="4_2"> Hipertensi sedang (systole >= 160 mmHg atau diastole >= 100mmHg)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Cedera dada tanpa nyeri tulang rusuk, atau kesulitan bernafas
+                                                    <input type="checkbox" name="ats_check" value="4_3"> Cedera dada tanpa nyeri tulang rusuk, atau kesulitan bernafas
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Aspirasi benda asing tanpa gangguan pernafasan
+                                                    <input type="checkbox" name="ats_check" value="4_4"> Aspirasi benda asing tanpa gangguan pernafasan
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Kesulitan menelan, tidak ada gangguan pernafasan.
+                                                    <input type="checkbox" name="ats_check" value="4_5"> Kesulitan menelan, tidak ada gangguan pernafasan.
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Cedera kepala ringan, tidak ada kehilangan kesadaran
+                                                    <input type="checkbox" name="ats_check" value="4_6"> Cedera kepala ringan, tidak ada kehilangan kesadaran
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Muntah atau diare tanpa dehidrasi
+                                                    <input type="checkbox" name="ats_check" value="4_7"> Muntah atau diare tanpa dehidrasi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Nyeri sedang
+                                                    <input type="checkbox" name="ats_check" value="4_8"> Nyeri sedang
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Radang mata atau benda asing, penglihatan normal
+                                                    <input type="checkbox" name="ats_check" value="4_9"> Radang mata atau benda asing, penglihatan normal
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Terkilir pergelangan kaki/tangan, kemungkinan fraktur, vital sign normal, nyeri sedikit/sedang
+                                                    <input type="checkbox" name="ats_check" value="4_10"> Terkilir pergelangan kaki/tangan, kemungkinan fraktur, vital sign normal, nyeri sedikit/sedang
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Sakit perut non spesifik
+                                                    <input type="checkbox" name="ats_check" value="4_19"> Sakit perut non spesifik
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Bengkak dan panas pada sendi
+                                                    <input type="checkbox" name="ats_check" value="4_20"> Bengkak dan panas pada sendi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Perilaki Psikiatri
+                                                    Perilaki Psikiatri
                                                     <ul class="selection-list table-child">
                                                         <li>
-                                                            <input type="checkbox" name="">Masalah kesehatan, mental semi mendesak, resiko melukai diri sendiri atau orang lain
+                                                            <input type="checkbox" name="ats_check" value="4_21">Masalah kesehatan, mental semi mendesak, resiko melukai diri sendiri atau orang lain
                                                         </li>
                                                     </ul>
                                                 </li>
@@ -553,31 +556,31 @@
                                         <td class="ats-item" style="background: #ccffb3;">
                                             <ul class="selection-list table-child">
                                                 <li>
-                                                    <input type="checkbox" name=""> Nyeri minimal tanpa resiko
+                                                    <input type="checkbox" name="ats_check" value="5_1"> Nyeri minimal tanpa resiko
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Hipertensi ringan (systole >= 150mmHg diatole >= 90mmHg)
+                                                    <input type="checkbox" name="ats_check" value="5_2"> Hipertensi ringan (systole >= 150mmHg diatole >= 90mmHg)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Luka ringan, lecet kecil, luka robek tidak memerlukan jahitan
+                                                    <input type="checkbox" name="ats_check" value="5_3"> Luka ringan, lecet kecil, luka robek tidak memerlukan jahitan
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Kontrol luka
+                                                    <input type="checkbox" name="ats_check" value="5_4"> Kontrol luka
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Imunisasi
+                                                    <input type="checkbox" name="ats_check" value="5_5"> Imunisasi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name=""> Perilaku Psikiatri
+                                                    Perilaku Psikiatri
                                                     <ul class="selection-list table-child">
                                                         <li>
-                                                            <input type="checkbox" name="">Pasien dengan gejala kronis. Krisis sosial secara klinis baik
+                                                            <input type="checkbox" name="ats_check" value="5_7">Pasien dengan gejala kronis. Krisis sosial secara klinis baik
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Tidak ada riwayat sebelumnya atau asimtomatik
+                                                            <input type="checkbox" name="ats_check" value="5_8">Tidak ada riwayat sebelumnya atau asimtomatik
                                                         </li>
                                                         <li>
-                                                            <input type="checkbox" name="">Gejala minor
+                                                            <input type="checkbox" name="ats_check" value="5_9">Gejala minor
                                                         </li>
                                                     </ul>
                                                 </li>
@@ -587,15 +590,15 @@
                                     <tr>
                                         <td class="lower-data">SKALA</td>
                                         <td class="ats-item" style="background: #ffb3b3;">
-                                            <input type="radio" value="skala_1" name="skala" /> SKALA 1</td>
+                                            <input type="radio" value="skala_1" name="igd_skala_selected" /> SKALA 1</td>
                                         <td class="ats-item" style="background: #ffb3b3;">
-                                            <input type="radio" value="skala_2" name="skala" /> SKALA 2</td>
+                                            <input type="radio" value="skala_2" name="igd_skala_selected" /> SKALA 2</td>
                                         <td class="ats-item" style="background: #ffe6b3;">
-                                            <input type="radio" value="skala_3" name="skala" /> SKALA 3</td>
+                                            <input type="radio" value="skala_3" name="igd_skala_selected" /> SKALA 3</td>
                                         <td class="ats-item" style="background: #ffe6b3;">
-                                            <input type="radio" value="skala_4" name="skala" /> SKALA 4</td>
+                                            <input type="radio" value="skala_4" name="igd_skala_selected" /> SKALA 4</td>
                                         <td class="ats-item" style="background: #ccffb3;">
-                                            <input type="radio" value="skala_5" name="skala" /> SKALA 5</td>
+                                            <input type="radio" value="skala_5" name="igd_skala_selected" /> SKALA 5</td>
                                     </tr>
                                     <tr>
                                         <td class="lower-data">SITUASI URGENSI</td>

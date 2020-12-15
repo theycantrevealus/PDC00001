@@ -440,6 +440,75 @@ class Asesmen extends Utility {
                         $antrian['response_data'][0]['dokter']
                     ))
                     ->execute();
+            } else if($antrian['response_data'][0]['departemen'] === __POLI_IGD__) {
+                $data = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'pasien',
+                    'dokter',
+                    'keluhan_utama',
+                    'keluhan_tambahan',
+                    'tekanan_darah',
+                    'nadi',
+                    'pernafasan',
+                    'berat_badan',
+                    'tinggi_badan',
+                    'lingkar_lengan_atas',
+                    'pemeriksaan_fisik',
+                    'diagnosa_kerja',
+                    'diagnosa_banding',
+                    'planning',
+                    'asesmen',
+                    'suhu',
+                    'icd10_kerja',
+                    'icd10_banding',
+
+                    'gcs_e',
+                    'gcs_v',
+                    'gcs_m',
+                    'gcs_tot',
+                    'status_alergi',
+                    'status_alergi_text',
+                    'refleks_cahaya',
+                    'pupil',
+                    'refleks_cahaya',
+                    'rr',
+                    'gangguan_perilaku',
+                    'gangguan_terganggu',
+                    'skala_nyeri',
+                    'lokasi',
+                    'frekuensi',
+                    'karakter_nyeri',
+                    'karakter_nyeri_text',
+                    'skor_nyeri',
+                    'tipe_nyeri',
+                    'ats_list',
+                    'ats_skala',
+                    'ekg',
+                    'saved_lokalis_item',
+                    'skala_rasa_sakit',
+
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where(array(
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.kunjungan' => '= ?',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.pasien' => '= ?',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.dokter' => '= ?'
+                    ), array(
+                        $antrian['response_data'][0]['kunjungan'],
+                        $antrian['response_data'][0]['uid'],
+                        $antrian['response_data'][0]['pasien'],
+                        $antrian['response_data'][0]['dokter']
+                    ))
+                    ->execute();
             } else if($antrian['response_data'][0]['departemen'] === __POLI_GIGI__) {
                 $data = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
                     'uid',
@@ -939,6 +1008,53 @@ class Asesmen extends Utility {
                         'hasil' => $parameter['hasil'],
                         'kesimpulan' => $parameter['kesimpulan'],
                         'rekomendasi' => $parameter['rekomendasi'],
+                        'updated_at' => parent::format_date()
+                    );
+                } else if($PoliDetail['uid'] === __POLI_IGD__) {
+                    $saveParam = array(
+                        'keluhan_utama' => $parameter['keluhan_utama'],
+                        'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                        'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                        'nadi' => floatval($parameter['nadi']),
+                        'suhu' => floatval($parameter['suhu']),
+                        'pernafasan' => floatval($parameter['pernafasan']),
+                        'berat_badan' => floatval($parameter['berat_badan']),
+                        'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                        'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                        'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                        //'icd10_kerja' => intval($parameter['icd10_kerja']),
+                        'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                        'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                        //'icd10_banding' => intval($parameter['icd10_banding']),
+                        'icd10_banding' => implode(',', $selectedICD10Banding),
+                        'diagnosa_banding' => $parameter['diagnosa_banding'],
+                        'planning' => $parameter['planning'],
+
+                        'gcs_e' => (!empty($parameter['gcs_e'])) ? $parameter['gcs_e'] : '',
+                        'gcs_v' => (!empty($parameter['gcs_v'])) ? $parameter['gcs_v'] : '',
+                        'gcs_m' => (!empty($parameter['gcs_m'])) ? $parameter['gcs_m'] : '',
+                        'gcs_tot' => (!empty($parameter['gcs_tot'])) ? $parameter['gcs_tot'] : '',
+                        'status_alergi' => (!empty($parameter['status_alergi'])) ? $parameter['status_alergi'] : '',
+                        'status_alergi_text' => (!empty($parameter['status_alergi_text'])) ? $parameter['status_alergi_text'] : '',
+                        'refleks_cahaya' => (!empty($parameter['refleks_cahaya'])) ? $parameter['refleks_cahaya'] : '',
+                        'pupil' => (!empty($parameter['pupil'])) ? $parameter['pupil'] : '',
+                        'refleks_cahaya' => (!empty($parameter['refleks_cahaya'])) ? $parameter['refleks_cahaya'] : '',
+                        'rr' => (!empty($parameter['rr'])) ? $parameter['rr'] : '',
+                        'gangguan_perilaku' => (!empty($parameter['gangguan_perilaku'])) ? $parameter['gangguan_perilaku'] : '',
+                        'gangguan_terganggu' => (!empty($parameter['gangguan_terganggu'])) ? $parameter['gangguan_terganggu'] : '',
+                        'skala_nyeri' => (!empty($parameter['skala_nyeri'])) ? $parameter['skala_nyeri'] : '',
+                        'lokasi' => (!empty($parameter['lokasi'])) ? $parameter['lokasi'] : '',
+                        'frekuensi' => (!empty($parameter['frekuensi'])) ? $parameter['frekuensi'] : '',
+                        'karakter_nyeri' => (!empty($parameter['karakter_nyeri'])) ? $parameter['karakter_nyeri'] : '',
+                        'karakter_nyeri_text' => (!empty($parameter['karakter_nyeri_text'])) ? $parameter['karakter_nyeri_text'] : '',
+                        'skor_nyeri' => (!empty($parameter['skor_nyeri'])) ? $parameter['skor_nyeri'] : '',
+                        'tipe_nyeri' => (!empty($parameter['tipe_nyeri'])) ? $parameter['tipe_nyeri'] : '',
+                        'ats_list' => (!empty($parameter['ats_list'])) ? json_encode($parameter['ats_list']) : '',
+                        'ats_skala' => (!empty($parameter['ats_skala'])) ? $parameter['ats_skala'] : '',
+                        'ekg' => (!empty($parameter['ekg'])) ? $parameter['ekg'] : '',
+                        'saved_lokalis_item' => (!empty($parameter['savedLokalisItem'])) ? json_encode($parameter['savedLokalisItem']) : '',
+                        'skala_rasa_sakit' => intval($parameter['skala_rasa_sakit']),
+
                         'updated_at' => parent::format_date()
                     );
                 } else if($PoliDetail['uid'] === __POLI_GIGI__) {
