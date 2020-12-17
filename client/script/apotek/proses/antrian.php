@@ -165,7 +165,7 @@
                         var newDetailCellQty = document.createElement("TD");
                         var newQty = document.createElement("INPUT");
                         var statusSedia = "";
-                        if(data.detail[a].qty < data.detail[a].sedia)
+                        if(data.detail[a].qty <= data.detail[a].sedia)
                         {
                             statusSedia = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + data.detail[a].sedia + "</b>";
                         } else {
@@ -286,12 +286,13 @@
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
                         var newRacikanObat = document.createElement("SELECT");
                         var statusSediaRacikan = "";
-                        if(data.racikan[b].qty < racikanDetail[racDetailKey].sedia)
+                        if(data.racikan[b].qty >= racikanDetail[racDetailKey].sedia)
                         {
                             statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + racikanDetail[racDetailKey].sedia + "</b>";
                         } else {
                             statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia" + racikanDetail[racDetailKey].sedia + "</b>";
                         }
+
                         $(newCellRacikanObat).append("<h5 class=\"text-info\">" + RacikanObatData.data[0].nama + " <b class=\"text-danger text-right\">[" + racikanDetail[racDetailKey].kekuatan + "]</b></h5>").append(statusSediaRacikan);
 
                         $(newRacikanObat).attr({
@@ -392,6 +393,15 @@
                                 ).then((result) => {
                                     location.href = __HOSTNAME__ + "/apotek/proses";
                                 });
+                            } else {
+                                Swal.fire(
+                                    "Proses Berhasil!",
+                                    "Resep berhasil diproses",
+                                    "success"
+                                ).then((result) => {
+                                    location.href = __HOSTNAME__ + "/apotek/proses";
+                                });209
+
                             }
                         },
                         error: function(response) {

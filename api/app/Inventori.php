@@ -490,33 +490,40 @@ class Inventori extends Utility
             ))
                 ->execute();
 
-            //Import Stok Obat
-            $StokAwal = self::$query->insert('inventori_stok', array(
-                'barang' => $targettedObat,
-                'batch' => $targettedBatch,
-                'gudang' => $parameter['gudang'],
-                'stok_terkini' => floatval($value['stok'])
-            ))
-                ->execute();
+            if(floatval($value['stok']) > 0 || $parameter['gudang'] === __GUDANG_UTAMA__) {
+                //Gudang utama perlu stok kosong
+                //Di apotek perlu stok yang ada saja
 
-            if($StokAwal['response_result'] > 0) {
-                $StokLog = self::$query->insert('inventori_stok_log', array(
+
+
+                //Import Stok Obat
+                $StokAwal = self::$query->insert('inventori_stok', array(
                     'barang' => $targettedObat,
                     'batch' => $targettedBatch,
                     'gudang' => $parameter['gudang'],
-                    'masuk' => floatval($value['stok']),
-                    'keluar' => 0,
-                    'saldo' => floatval($value['stok']),
-                    'type' => __STATUS_STOK_AWAL__,
-                    'logged_at' => parent::format_date(),
-                    'jenis_transaksi' => 'inventori_batch',
-                    'uid_foreign' => $targettedBatch,
-                    'keterangan' => 'Stok Awal. Auto PO'
+                    'stok_terkini' => floatval($value['stok'])
                 ))
                     ->execute();
-            }
 
-            array_push($proceed_data, $StokAwal);
+                if($StokAwal['response_result'] > 0) {
+                    $StokLog = self::$query->insert('inventori_stok_log', array(
+                        'barang' => $targettedObat,
+                        'batch' => $targettedBatch,
+                        'gudang' => $parameter['gudang'],
+                        'masuk' => floatval($value['stok']),
+                        'keluar' => 0,
+                        'saldo' => floatval($value['stok']),
+                        'type' => __STATUS_STOK_AWAL__,
+                        'logged_at' => parent::format_date(),
+                        'jenis_transaksi' => 'inventori_batch',
+                        'uid_foreign' => $targettedBatch,
+                        'keterangan' => 'Stok Awal. Auto PO'
+                    ))
+                        ->execute();
+                }
+
+                array_push($proceed_data, $StokAwal);
+            }
         }
 
 

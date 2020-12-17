@@ -1138,7 +1138,7 @@
 
 
 		//SOCKET
-		Sync.onmessage = function(evt) {
+		/*Sync.onmessage = function(evt) {
 			var signalData = JSON.parse(evt.data);
 			var command = signalData.protocols;
 			var type = signalData.type;
@@ -1150,9 +1150,9 @@
 			if(command !== undefined && command !== null && command !== "") {
 				protocolLib[command](command, type, parameter, sender, receiver, time);
 			}
-		}
+		}*/
 
-		var protocolLib = {
+        protocolLib = {
 			userlist: function(protocols, type, parameter, sender, receiver, time) {
 				//
 			},
@@ -1160,12 +1160,12 @@
 				//
 			},
 			anjungan_kunjungan_baru: function(protocols, type, parameter, sender, receiver, time) {
-				refresh_notification();
+			    refresh_notification();
 				reinitAntrianSync($("#txt_loket").val());
 			},
-			anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
-				//
-			}
+            /*anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
+                //
+            }*/
 		};
 
 		//INIT

@@ -23,7 +23,6 @@
         var dataFrenulum = "";
         var dataKebersihanMulut = "";
 
-
         //Filter Rawat Jalan
         for(var z in poliListRaw.tindakan) {
             if(poliListRaw.tindakan[z].kelas == __UID_KELAS_GENERAL_RJ__) {

@@ -3,6 +3,8 @@
 	$(function(){
 		var uid_order = __PAGES__[2];
 		var order_data;
+		var forSave = {};
+		var selectedState = '';
 		var editorKeteranganPeriksa, editorKesimpulanPeriksa;
 		var tindakanID;
 		var fileList = [];
@@ -15,32 +17,38 @@
 		loadPasien(uid_order);
 		loadLampiran(uid_order);
 
-		$("#list-tindakan-radiologi tbody").on("click",".linkTindakan", function(){
+		$("#list-tindakan-radiologi tbody tr td").on("click", ".linkTindakan", function(e) {
+
 			let id_tindakan = $(this).parent().parent().attr("id").split("_");
 			tindakanID = id_tindakan[id_tindakan.length - 1];
-			
-			
-			let nama =  $(this).closest('tr').find('td:eq(1)').text(); //$(this).html();
-			$(".title-pemeriksaan").html(nama);
 
-			$("#panel-hasil").fadeIn(function() {
-				order_data = loadRadiologiOrderItem(tindakanID);
-				if (order_data != ""){
-					if (order_data[0].keterangan != null){
-						editorKeteranganPeriksa.setData(order_data[0].keterangan);
-					} else {
-						editorKeteranganPeriksa.setData("");
-					}
+            if(forSave["tindakan_" + tindakanID] === undefined) {
+                forSave["tindakan_" + tindakanID] = {
+                    keterangan: "",
+                    kesimpulan: ""
+                };
+            }
 
-					if (order_data[0].keterangan != null){
-						editorKesimpulanPeriksa.setData(order_data[0].kesimpulan);
-					} else {
-						editorKesimpulanPeriksa.setData("");
-					}
-				}
-			});
+            if(selectedState != tindakanID) {
+                $("#panel-hasil").fadeIn(function() {
+                    editorKeteranganPeriksa.setData(forSave["tindakan_" + tindakanID].keterangan);
+                    editorKesimpulanPeriksa.setData(forSave["tindakan_" + tindakanID].kesimpulan);
+                });
+                selectedState = tindakanID;
+            }
+
+
+
+            let nama =  $(this).closest('tr').find('td:eq(1)').text(); //$(this).html();
+            $(".title-pemeriksaan").html(nama);
+
+            console.clear();
+            console.log(forSave);
+
 			return false;
 		});
+
+
 
 		ClassicEditor
 			.create( document.querySelector( ".txt_keterangan_pemeriksaan" ), {
@@ -64,11 +72,14 @@
 			} )
 			.then( editor => {
 				editorKesimpulanPeriksa = editor;
+
 				window.editor = editor;
 			} )
 			.catch( err => {
 				//console.error( err.stack );
 			} );
+
+
 		
 
 		$("#formHasilRadiologi").submit(function(){
@@ -92,9 +103,9 @@
 				form_data.append("kesimpulanPeriksa", kesimpulanPeriksa);
 				form_data.append("tindakanID", tindakanID);
 
-				$("#btnSimpan").attr({
+				/*$("#btnSimpan").attr({
 					"disabled": "disabled"
-				});
+				});*/
 
 				for(var i = 0; i < fileList.length; i++) {
 					form_data.append("fileList[]", fileList[i]);
@@ -109,7 +120,11 @@
 				   console.log(value); 
 				}*/
 
-				$.ajax({
+                for (var pair of form_data.entries()) {
+                    console.log(pair[0]+ ', ' + pair[1]);
+                }
+
+				/*$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Radiologi",
 					processData: false,
@@ -167,7 +182,7 @@
 						console.log("Error : ");
 						console.log(response);
 					}
-				});
+				});*/
 			//}
 			//}
 
