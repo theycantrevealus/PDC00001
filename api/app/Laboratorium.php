@@ -656,9 +656,12 @@ class Laboratorium extends Utility {
                     'uid'
                 ))
                     ->where(array(
-                        'master_tindakan.uid' => '= ?'
+                        'master_tindakan.uid' => '= ?',
+                        'AND',
+                        'master_tindakan.kelompok' => '= ?'
                     ), array(
-                        $targettedLab
+                        $targettedLab,
+                        'LAB'
                     ))
                     ->execute();
                 if(count($checkTindakan['response_data']) > 0) {
@@ -666,9 +669,12 @@ class Laboratorium extends Utility {
                         'deleted_at' => NULL
                     ))
                         ->where(array(
-                            'master_tindakan.uid' => '= ?'
+                            'master_tindakan.uid' => '= ?',
+                            'AND',
+                            'master_tindakan.kelompok' => '= ?'
                         ), array(
-                            $targettedTindakan
+                            $targettedLab,
+                            'LAB'
                         ))
                         ->execute();
                 } else {
