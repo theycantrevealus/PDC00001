@@ -248,7 +248,7 @@ class Tindakan extends Utility {
                 ->where(array(
                     'master_tindakan.nama' => '= ?'
                 ), array(
-                    $value['tindakan']
+                    trim($value['tindakan'])
                 ))
                 ->execute();
             if(count($checkTindakan['response_data']) > 0) {
@@ -268,7 +268,7 @@ class Tindakan extends Utility {
                     $targettedTindakan = parent::gen_uuid();
                     $proceed_tindakan = self::$query->insert('master_tindakan', array(
                         'uid' => $targettedTindakan,
-                        'nama' => $value['tindakan'],
+                        'nama' => trim($value['tindakan']),
                         'kelompok' => $value['kelompok'],
                         'jenis' => $targettedJenis,
                         'created_at' => parent::format_date(),
