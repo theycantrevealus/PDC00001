@@ -188,17 +188,36 @@
 							</div>
 						</div>
                         <div class="card-body">
-                            <table class="table table-bordered">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th class="wrap_content">No</th>
-                                        <th>Obat</th>
-                                        <th>Signa</th>
-                                        <th>Jlh</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="row">
+                                <div class="col-6">
+                                    <b>Resep Dokter</b>
+                                    <table class="table table-bordered largeDataType" id="resep_dokter">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Obat</th>
+                                            <th>Signa</th>
+                                            <th>Jlh</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div class="col-6">
+                                    <b>Resep Apotek</b>
+                                    <table class="table table-bordered largeDataType" id="resep_apotek">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Obat</th>
+                                            <th>Signa</th>
+                                            <th>Jlh</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
 					</div>
 				</div>
@@ -212,22 +231,73 @@
 							</div>
 						</div>
                         <div class="card-body">
-                            <table class="table table-bordered">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th class="wrap_content">No</th>
-                                        <th>Racikan</th>
-                                        <th>Komposisi</th>
-                                        <th>Signa</th>
-                                        <th>Jlh</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="row">
+                                <div class="col-6">
+                                    <b>Racikan Dokter</b>
+                                    <table class="table table-bordered largeDataType" id="racikan_dokter">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Racikan</th>
+                                            <th>Komposisi</th>
+                                            <th>Signa</th>
+                                            <th>Jlh</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div class="col-6">
+                                    <b>Racikan Apotek</b>
+                                    <table class="table table-bordered largeDataType" id="racikan_apotek">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Racikan</th>
+                                            <th>Komposisi</th>
+                                            <th>Signa</th>
+                                            <th>Jlh</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+</div>
+
+
+
+
+
+
+
+<div class="row projects-item mb-1">
+    <div class="col-1">
+        <br />
+        <div class="text-dark-gray">Tindakan Penunjang</div>
+    </div>
+    <div class="col-11">
+        <div class="card">
+            <div class="card-header card-header-large bg-white">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="segmen_tindakan_penunjang">
+                            <div class="d-flex align-items-center">
+                                <a href="#" class="text-body"><strong class="text-15pt mr-2"><i class="fa fa-hashtag"></i> Tindakan Penunjang</strong></a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -241,28 +241,32 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-				    console.log(response);
 					var returnedData = [];
 					if(returnedData == undefined || returnedData.response_package == undefined) {
 						returnedData = [];
 					}
 					for(var InvKeyData in response.response_package.response_data) {
-						if(
-						    response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== null &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__
+					    if(
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
                         ) {
-						    if(!response.response_package.response_data[InvKeyData].lunas) {
-							    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                    response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                            if(
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== null &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__
+                            ) {
+                                if(!response.response_package.response_data[InvKeyData].lunas) {
+                                    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                    }
+                                    returnedData.push(response.response_package.response_data[InvKeyData]);
                                 }
-								returnedData.push(response.response_package.response_data[InvKeyData]);
-							}
-						} else {
-						    //
-						}
+                            } else {
+                                //
+                            }
+                        }
 					}
 
 					response.draw = parseInt(response.response_package.response_draw);
@@ -351,26 +355,30 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var returnedData = [];
                     if(returnedData == undefined || returnedData.response_package == undefined) {
                         returnedData = [];
                     }
                     for(var InvKeyData in response.response_package.response_data) {
                         if(
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== null &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_INAP__
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
                         ) {
-                            if(!response.response_package.response_data[InvKeyData].lunas) {
-                                if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                    response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                            if (
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== null &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_INAP__
+                            ) {
+                                if (!response.response_package.response_data[InvKeyData].lunas) {
+                                    if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                    }
+                                    returnedData.push(response.response_package.response_data[InvKeyData]);
                                 }
-                                returnedData.push(response.response_package.response_data[InvKeyData]);
+                            } else {
+                                //
                             }
-                        } else {
-                            //
                         }
                     }
 
@@ -470,7 +478,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var returnedData = [];
                     if(returnedData == undefined || returnedData.response_package == undefined) {
                         returnedData = [];
@@ -478,19 +485,24 @@
 
                     for(var InvKeyData in response.response_package.response_data) {
                         if(
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== null &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
                         ) {
-                            if(!response.response_package.response_data[InvKeyData].lunas) {
-                                if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                    response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                            if (
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== null &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__
+                            ) {
+                                if (!response.response_package.response_data[InvKeyData].lunas) {
+                                    if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                    }
+                                    returnedData.push(response.response_package.response_data[InvKeyData]);
                                 }
-                                returnedData.push(response.response_package.response_data[InvKeyData]);
+                            } else {
+                                //
                             }
-                        } else {
-                            //
                         }
                     }
 
