@@ -502,6 +502,8 @@
 
                         loadMitra("penyedia_order_" + thisTindakan, "");
 
+
+
                         $(this).select2({
                             dropdownParent: $("#modal-detail-labor")
                         });
@@ -514,8 +516,7 @@
 
                         loadHarga($("#penyedia_order_" + thisTindakan).val(), asesmenAttr, thisTindakan, uid);
 
-
-                        $("#target_dpjp_lab_" + uid + "_" + thisTindakan).select2({
+                        $("#target_dpjp_lab_" + uid).select2({
                             minimumInputLength: 1,
                             "language": {
                                 "noResults": function(){
@@ -524,7 +525,7 @@
                             },
                             placeholder:"Cari Dokter",
                             cache: true,
-                            dropdownParent: $("#modal-detail-labor"),
+                            dropdownParent: $("#container_mitra_" + uid + "_" + thisTindakan),
                             selectOnClose: true,
                             ajax: {
                                 dataType: "json",
@@ -554,13 +555,11 @@
                         }).on("select2:select", function(e) {
                             var data = e.params.data;
 
+                        }).on('results:message', function(params){
+                            this.dropdown._resizeDropdown();
+                            this.dropdown._positionDropdown();
                         });
                     });
-
-
-
-
-
                 },
                 error: function (response) {
                     //
@@ -671,6 +670,7 @@
             $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
                 "harga": 0
             });
+
             $.ajax({
                 async: false,
                 url:__HOSTAPI__ + "/Mitra",
@@ -688,19 +688,26 @@
                     if(response.response_package.response_data !== undefined && response.response_package.response_data[0] !== undefined) {
                         var harga = response.response_package.response_data[0].harga;
                         if(parseFloat(harga) > 0) {
-                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. " + number_format(harga, 2, ".", ",") + "</b>").attr({
+                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. " + number_format(harga, 2, ".", ",") + " <span class=\"text-success\"><i class=\"fa fa-check-circle\"></i></span></b>").attr({
                                 "harga": harga
                             });
                         } else {
-                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b><br /><span class=\"text-warning\"><i class=\"fa fa-info-circle\"></i> Harga bernilai 0. Pastikan harga tindakan sudah benar</span>").attr({
                                 "harga": 0
                             });
                         }
                     } else {
-                        $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                        $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b><br /><span class=\"text-warning\"><i class=\"fa fa-info-circle\"></i> Harga bernilai 0. Pastikan harga tindakan sudah benar</span>").attr({
                             "harga": 0
                         });
                     }
+
+                    var totalBiaya = 0;
+                    $(".harga_iden").each(function () {
+                        totalBiaya += parseFloat($(this).attr("harga"));
+                    });
+
+                    $("#total_biaya").html("Rp." + number_format(totalBiaya,2, ".", ",")).attr("harga", totalBiaya);
                 },
                 error: function(response) {
                     $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
@@ -810,6 +817,72 @@
                 tableHistoryLabor.ajax.reload();
             }
         };
+
+        $("#btn_verif_all").click(function () {
+            Swal.fire({
+                title: "Verifikasi Laboratorium",
+                text: "Apakah item pemeriksaan sudah benar dan sesuai dengan permintaan?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Tidak",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(".order_item_lab").each(function() {
+                        var uid = $(this).attr("target");
+                        var tindakan = $(this).attr("tindakan");
+                        var pelaksana = $("#penyedia_order_" + tindakan).val();
+                        var dpjp = $("#target_dpjp_lab_" + uid).val();
+                        var asesmen = $(this).attr("asesmen");
+                        var harga = $("#harga_" + uid + "_" + tindakan).attr("harga");
+
+                        if(
+                            dpjp !== "" &&
+                            dpjp !== null &&
+                            dpjp !== undefined &&
+                            pelaksana !== ""
+                        ) {
+                            $.ajax({
+                                async: false,
+                                url:__HOSTAPI__ + "/Laboratorium",
+                                type: "POST",
+                                data: {
+                                    request: "verifikasi_item_lab",
+                                    uid: uid,
+                                    dpjp: dpjp,
+                                    harga: harga,
+                                    mitra: pelaksana,
+                                    tindakan: tindakan,
+                                    asesmen: asesmen
+                                },
+                                beforeSend: function(request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                success: function(response){
+
+                                    /*$("#verifikasi_lab_container_" + uid + "_" + tindakan).fadeOut(function() {
+                                        $("#verifikasi_lab_container_" + uid + "_" + tindakan).remove();
+                                        if($(".group_" + uid).length === 0) {
+                                            $("#modal-detail-labor").modal("hide");
+                                            tableVerifikasiLabor.ajax.reload();
+                                        }
+                                    });*/
+
+                                },
+                                error: function(response) {
+                                    console.log(response);
+                                }
+                            });
+                        }
+                    });
+
+                    $("#modal-detail-labor").modal("hide");
+                    tableVerifikasiLabor.ajax.reload();
+                }
+            });
+
+
+            return false;
+        });
 
         $("body").on("click", ".btn_verifikasi_item_lab", function () {
             var uid = $(this).attr("target");
@@ -1258,6 +1331,7 @@
                 <div class="row lab_loader"></div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btn_verif_all">Verifikasi</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
             </div>
         </div>
