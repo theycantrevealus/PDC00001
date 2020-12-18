@@ -14,7 +14,7 @@
 				<!-- Navbar Brand -->
 				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand" style="padding: 10px;">
 					<!--<img class="navbar-brand-icon" style="position: absolute; margin-top: 20px;" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-white.png" width="160" height="160" alt="SIMRS PETALA BUMI">-->
-                    <img class="navbar-brand-icon" style="position: absolute; margin-top: 20px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="160" alt="<?php echo __PC_CUSTOMER__; ?>">
+                    <img class="navbar-brand-icon" style="position: absolute; margin-top: 0px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="80" alt="<?php echo __PC_CUSTOMER__; ?>">
                     <!--h3 style="padding-left: 60px !important; color: #fff;"><?php echo __PC_CUSTOMER__; ?></h3-->
 				</a>
 				
