@@ -946,7 +946,8 @@ class Radiologi extends Utility
             }
 
             $invoice_master = self::$query->select('invoice', array(
-                'uid'
+                'uid',
+                'total_after_discount'
             ))
                 ->where(array(
                     'invoice.kunjungan' => '= ?',
@@ -957,6 +958,8 @@ class Radiologi extends Utility
                     $AntrianDetail['pasien']
                 ))
                 ->execute();
+
+            $totalInvoice = $invoice_master['response_data'][0]['total_after_discount'];
 
             $invoice_detail = self::$query->update('invoice_detail', array(
                 'status_bayar' => 'N',
@@ -973,6 +976,20 @@ class Radiologi extends Utility
                 ), array(
                     $invoice_master['response_data'][0]['uid'],
                     $value['tindakan']
+                ))
+                ->execute();
+
+            //Update Invoice Master
+            $InvoiceMasterUpdate = self::$query->update('invoice', array(
+                'total_pre_discount' => $totalInvoice + floatval($value['harga']),
+                'total_after_discount' => $totalInvoice + floatval($value['harga'])
+            ))
+                ->where(array(
+                    'invoice.uid' => '= ?',
+                    'AND',
+                    'invoice.deleted_at' => 'IS NULL'
+                ), array(
+                    $invoice_master['response_data'][0]['uid']
                 ))
                 ->execute();
 
