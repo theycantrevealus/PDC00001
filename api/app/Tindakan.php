@@ -179,6 +179,25 @@ class Tindakan extends Utility {
         $success_proceed = 0;
         $proceed_data = array();
         $Penjamin = new Penjamin(self::$pdo);
+
+        //Reset Tindakan
+        $reset_tindakan = self::$query->update('master_tindakan', array(
+            'deleted_at' => parent::format_date()
+        ))
+            ->execute();
+
+        //Reset Tindakan Poli
+        $reset_poli = self::$query->update('master_poli', array(
+            'deleted_at' => parent::format_date()
+        ))
+            ->execute();
+
+        //Reset Tindakan Poli
+        $reset_tindakan_poli = self::$query->update('master_tindakan_kelas_harga', array(
+            'deleted_at' => parent::format_date()
+        ))
+            ->execute();
+
         foreach ($parameter['data_import'] as $key => $value) {
             $targettedJenis = '';
             $targettedTindakan = '';
@@ -190,9 +209,7 @@ class Tindakan extends Utility {
                 'uid'
             ))
                 ->where(array(
-                    'master_tindakan_jenis.nama' => '= ?',
-                    'AND',
-                    'master_tindakan_jenis.deleted_at' => 'IS NULL',
+                    'master_tindakan_jenis.nama' => '= ?'
                 ), array(
                     ucwords(strtolower($value['jenis']))
                 ))
@@ -200,10 +217,20 @@ class Tindakan extends Utility {
             ;
             if(count($checkJenis['response_data']) > 0) {
                 $targettedJenis = $checkJenis['response_data'][0]['uid'];
+                $proceed_jenis = self::$query->update('master_tindakan_jenis', array(
+                    'updated_at' => parent::format_date(),
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'master_tindakan_jenis.uid' => '= ?'
+                    ), array(
+                        $targettedJenis
+                    ))
+                    ->execute();
             } else {
                 if($value['jenis'] != '') {
                     $targettedJenis = parent::gen_uuid();
-                    $newJenis = self::$query->insert('master_tindakan_jenis', array(
+                    $proceed_jenis = self::$query->insert('master_tindakan_jenis', array(
                         'uid' => $targettedJenis,
                         'nama' => ucwords(strtolower($value['jenis'])),
                         'created_at' => parent::format_date(),
@@ -219,21 +246,29 @@ class Tindakan extends Utility {
                 'uid'
             ))
                 ->where(array(
-                    'master_tindakan.nama' => '= ?',
-                    'AND',
-                    'master_tindakan.deleted_at' => 'IS NULL'
+                    'master_tindakan.nama' => '= ?'
                 ), array(
-                    $value['tindakan']
+                    trim($value['tindakan'])
                 ))
                 ->execute();
             if(count($checkTindakan['response_data']) > 0) {
                 $targettedTindakan = $checkTindakan['response_data'][0]['uid'];
+                $proceed_tindakan = self::$query->update('master_tindakan', array(
+                    'updated_at' => parent::format_date(),
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'master_tindakan.uid' => '= ?'
+                    ), array(
+                        $targettedTindakan
+                    ))
+                    ->execute();
             } else {
                 if($value['tindakan'] != '') {
                     $targettedTindakan = parent::gen_uuid();
-                    $newTindakan = self::$query->insert('master_tindakan', array(
+                    $proceed_tindakan = self::$query->insert('master_tindakan', array(
                         'uid' => $targettedTindakan,
-                        'nama' => $value['tindakan'],
+                        'nama' => trim($value['tindakan']),
                         'kelompok' => $value['kelompok'],
                         'jenis' => $targettedJenis,
                         'created_at' => parent::format_date(),
@@ -279,7 +314,8 @@ class Tindakan extends Utility {
                     //Update Tarif
                     $workerTarif = self::$query->update('master_tindakan_kelas_harga', array(
                         'harga' => floatval($value['tarif']),
-                        'updated_at' => parent::format_date()
+                        'updated_at' => parent::format_date(),
+                        'deleted_at' => NULL
                     ))
                         ->where(array(
                             'master_tindakan_kelas_harga.penjamin' => '= ?',
@@ -318,11 +354,11 @@ class Tindakan extends Utility {
                 trim(strtoupper($value['poliklinik'])) === 'THT' ||
                 trim(strtoupper($value['poliklinik'])) === 'IGD'
             ) {
-                if(trim(strtoupper($value['poliklinik'])) != 'THT') {
+                if(trim(strtoupper($value['poliklinik'])) === 'THT') {
                     $nama_poli = 'Poliklinik THT';
                 }
 
-                if(trim(strtoupper($value['poliklinik'])) != 'IGD') {
+                if(trim(strtoupper($value['poliklinik'])) === 'IGD') {
                     $nama_poli = 'IGD';
                 }
             } else {
@@ -336,9 +372,7 @@ class Tindakan extends Utility {
                     ->where(array(
                         'master_poli.nama' => '= ?',
                         'AND',
-                        'master_poli.editable' => '= ?',
-                        'AND',
-                        'master_poli.deleted_at' => 'IS NULL',
+                        'master_poli.editable' => '= ?'
                     ), array(
                         $nama_poli,
                         'TRUE'

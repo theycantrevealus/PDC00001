@@ -18,6 +18,10 @@
 		<h1 style="font-size: 40pt; font-family: Courier; margin: 0; padding: 0"><?php echo $_POST['antrian']; ?></h1>
 		<H6>TERIMA KASIH<br />ANDA TELAH MENUNGGU</H6>
 		<h6>Semoga Lekas Sembuh</h6>
+<<<<<<< HEAD
 		<h6><?php echo date('d F Y H:i:s'); ?></h6>
+=======
+		<h6><?php echo date('d F Y'); ?> - <?php echo date('H:i'); ?></h6>
+>>>>>>> 2adb58c5112fcd3b0bc2f542ed0b1d9c4a1b256c
 	</center>
 </div>

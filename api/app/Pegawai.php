@@ -880,6 +880,27 @@ class Pegawai extends Utility {
         $non_active = array();
         $success_proceed = 0;
         $proceed_data = array();
+        $worker_poli_dokter = array();
+
+        $resetPegawai = self::$query->update('pegawai', array(
+            'deleted_at' => parent::format_date()
+        ))
+            ->where(array(
+                'NOT pegawai.uid' => '= ?'
+            ))
+            ->execute();
+
+        $hardResetDokter = self::$query->hard_delete('master_poli_dokter')
+            ->execute();
+
+        $hardResetPerawat = self::$query->hard_delete('master_poli_perawat')
+            ->execute();
+
+        //Reset Master Unit
+        $resetUnit = self::$query->update('master_unit', array(
+            'deleted_at' => parent::format_date()
+        ))
+            ->execute();
 
         foreach ($parameter['data_import'] as $key => $value) {
             $targettedPoli = '';
@@ -887,6 +908,9 @@ class Pegawai extends Utility {
 
             //Jabatan
             $targetUIDJabatan = '';
+
+            $targetUIDGudang = '';
+            $targetUIDUnit = '';
 
             $checkJabatan = self::$query->select('pegawai_jabatan', array(
                 'uid',
@@ -902,16 +926,82 @@ class Pegawai extends Utility {
             if(count($checkJabatan['response_data']) > 0) {
                 $targetUIDJabatan = $checkJabatan['response_data'][0]['uid'];
             } else {
-                if($value['jabatan'] !== '') {
-                    $targetUIDJabatan = parent::gen_uuid();
-                    $new_jabatan = self::$query->insert('pegawai_jabatan', array(
-                        'uid' => $targetUIDJabatan,
-                        'nama' => $value['jabatan'],
-                        'created_at' => parent::format_date(),
-                        'updated_at' => parent::format_date()
+                $targetUIDJabatan = parent::gen_uuid();
+                $new_jabatan = self::$query->insert('pegawai_jabatan', array(
+                    'uid' => $targetUIDJabatan,
+                    'nama' => $value['jabatan'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+            $checkGudang = self::$query->select('master_inv_gudang', array(
+                'uid',
+                'nama'
+            ))
+                ->where(array(
+                    'master_inv_gudang.nama' => '= ?'
+                ), array(
+                    $value['unit']
+                ))
+                ->execute();
+
+            if(count($checkGudang['response_data']) > 0) {
+                $targetUIDGudang = $checkGudang['response_data'][0]['uid'];
+            } else {
+                $targetUIDGudang = parent::gen_uuid();
+                $new_gudang = self::$query->insert('master_inv_gudang', array(
+                    'uid' => $targetUIDGudang,
+                    'nama' => $value['unit'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+
+
+            //Generate Unit Baru
+            $checkUnit = self::$query->select('master_unit', array(
+                'uid',
+                'nama'
+            ))
+                ->where(array(
+                    'master_unit.nama' => '= ?',
+                    'AND',
+                    'master_unit.kode' => '= ?'
+                ), array(
+                    $value['unit'],
+                    strtoupper($value['kode_unit'])
+                ))
+                ->execute();
+
+            if(count($checkUnit['response_data']) > 0) {
+                $targetUIDUnit = $checkUnit['response_data'][0]['uid'];
+                $proceed_unit = self::$query->update('master_unit', array(
+                    'kode' => strtoupper($value['kode_unit']),
+                    'gudang' => $targetUIDGudang,
+                    'updated_at' => parent::format_date(),
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'master_unit.uid' => '= ?'
+                    ), array(
+                        $targetUIDUnit
                     ))
-                        ->execute();
-                }
+                    ->execute();
+            } else {
+                $targetUIDUnit = parent::gen_uuid();
+                $proceed_unit = self::$query->insert('master_unit', array(
+                    'uid' => $targetUIDJabatan,
+                    'nama' => $value['unit'],
+                    'kode' => $value['kode_unit'],
+                    'gudang' => $targetUIDGudang,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
             }
 
             $checkPegawai = self::$query->select('pegawai', array(
@@ -920,123 +1010,129 @@ class Pegawai extends Utility {
                 'email'
             ))
                 ->where(array(
-                    'pegawai.email' => '= ?'
+                    'pegawai.email' => '= ?',
+                    'AND',
+                    'pegawai.deleted_at' => 'IS NULL'
                 ), array(
                     $value['email']
                 ))
                 ->execute();
-            if(count($checkPegawai['response_data']) > 0) {
-                //Update the employee data
-                $employee_worker = self::$query->update('pegawai', array(
-                    'jabatan' => $targetUIDJabatan
-                ))
-                    ->where(array(
-                        'pegawai.uid' => '= ?'
-                    ), array(
-                        $checkPegawai['response_data'][0]['uid']
+
+            if($value['nama'] != '' && $value['email'] != '' && $targetUIDJabatan !== '') {
+                if (count($checkPegawai['response_data']) > 0) {
+                    //Update the employee data
+                    $targettedPegawai = $checkPegawai['response_data'][0]['uid'];
+                    $proceed_pegawai = self::$query->update('pegawai', array(
+                        'unit' => $targetUIDUnit,
+                        'jabatan' => $targetUIDJabatan,
+                        'deleted_at' => NULL
                     ))
-                    ->execute();
-            } else {
-                //New Pegawai
-                if($value['nama'] != '' && $value['email'] != '') {
-
-
-
-
-                    if($targetUIDJabatan !== '') {
-                        $checkPegawai = self::$query->select('pegawai', array(
-                            'uid'
+                        ->where(array(
+                            'pegawai.uid' => '= ?'
+                        ), array(
+                            $targettedPegawai
                         ))
-                            ->where(array(
-                                'pegawai.email' => '= ?'
-                            ), array(
-                                $value['email']
-                            ))
-                            ->execute();
-                        if(count($checkPegawai['response_data']) > 0) {
-                            $targettedPegawai = $checkPegawai['response_data'][0]['uid'];
-                            $proceed_pegawai = self::$query->update('pegawai', array(
-                                'deleted_at' => NULL
-                            ))
-                                ->where(array(
-                                    'pegawai.uid' => '= ?'
-                                ), array(
-                                    $checkPegawai['response_data'][0]['uid']
-                                ))
-                                ->execute();
-                        } else {
-                            $targettedPegawai = parent::gen_uuid();
-                            $proceed_pegawai = self::$query->insert('pegawai', array(
-                                'uid' => $targettedPegawai,
-                                'email' => $value['email'],
-                                'nama' => $value['nama'],
-                                'password' => '$2y$10$xdwAR9rpYmSfzKOYyfJkcuOUkmxqI.tb03kdJpE41HbpiHndwEHDS',
-                                'jabatan' => $targetUIDJabatan,
-                                'kontak' => $value['kontak'],
-                                'created_at' => parent::format_date(),
-                                'updated_at' => parent::format_date()
-                            ))
-                                ->execute();
-                        }
+                        ->execute();
+                } else {
+                    //New Pegawai
+                    $targettedPegawai = parent::gen_uuid();
+                    $proceed_pegawai = self::$query->insert('pegawai', array(
+                        'uid' => $targettedPegawai,
+                        'email' => $value['email'],
+                        'nama' => $value['nama'],
+                        'password' => '$2y$10$xdwAR9rpYmSfzKOYyfJkcuOUkmxqI.tb03kdJpE41HbpiHndwEHDS',
+                        'jabatan' => $targetUIDJabatan,
+                        'unit' => $targetUIDUnit,
+                        'kontak' => $value['kontak'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
 
-                        array_push($proceed_data, $proceed_pegawai);
+                if ($proceed_pegawai['response_result'] > 0) {
+                    $success_proceed += 1;
+                }
+
+                array_push($proceed_data, $proceed_pegawai);
 
 
+                if($targetUIDJabatan == __UIDDOKTER__) {
 
-                        if($targetUIDJabatan == __UIDDOKTER__) {
-
-                            $MultiPoli = explode(',', $value['unit']);
-                            foreach ($MultiPoli as $MKey => $MValue) {
-                                $nama_poli = '';
-                                if(
-                                    trim(strtoupper(trim($MValue))) === 'THT' ||
-                                    trim(strtoupper(trim($MValue))) === 'IGD'
-                                ) {
-                                    if(trim(strtoupper(trim($MValue))) != 'THT') {
-                                        $nama_poli = 'Poliklinik THT';
-                                    }
-
-                                    if(trim(strtoupper(trim($MValue))) != 'IGD') {
-                                        $nama_poli = 'IGD';
-                                    }
-                                } else {
-                                    $nama_poli = 'Poliklinik ' . ucwords(strtolower(trim($MValue)));
+                    if(strtoupper($value['poli_check']) === 1) {
+                        $MultiPoli = explode(',', $value['unit']);
+                        foreach ($MultiPoli as $MKey => $MValue) {
+                            $nama_poli = '';
+                            if(
+                                trim(strtoupper(trim($MValue))) === 'THT' ||
+                                trim(strtoupper(trim($MValue))) === 'IGD'
+                            ) {
+                                if(trim(strtoupper(trim($MValue))) === 'THT') {
+                                    $nama_poli = 'Poliklinik THT';
                                 }
 
-                                if($nama_poli !== '') {
+                                if(trim(strtoupper(trim($MValue))) === 'IGD') {
+                                    $nama_poli = 'IGD';
+                                }
+                            } else {
+                                $nama_poli = 'Poliklinik ' . ucwords(strtolower(trim($MValue)));
+                            }
 
-                                    //Check Poli
-                                    $checkPoli = self::$query->select('master_poli', array(
-                                        'uid'
+                            if($nama_poli !== '') {
+
+                                //Check Poli
+                                $checkPoli = self::$query->select('master_poli', array(
+                                    'uid'
+                                ))
+                                    ->where(array(
+                                        'master_poli.nama' => '= ?',
+                                        'AND',
+                                        'master_poli.editable' => '= ?'
+                                    ), array(
+                                        $nama_poli,
+                                        'TRUE'
+                                    ))
+                                    ->execute();
+
+                                if (count($checkPoli['response_data']) > 0) {
+                                    $targettedPoli = $checkPoli['response_data'][0]['uid'];
+                                    $proceed_poli = self::$query->update('master_poli', array(
+                                        'deleted_at' => NULL
                                     ))
                                         ->where(array(
-                                            'master_poli.nama' => '= ?',
-                                            'AND',
-                                            'master_poli.editable' => '= ?',
-                                            'AND',
-                                            'master_poli.deleted_at' => 'IS NULL',
+                                            'master_poli.uid' => '= ?'
                                         ), array(
-                                            $nama_poli,
-                                            'TRUE'
+                                            $targettedPoli
                                         ))
                                         ->execute();
+                                } else {
+                                    $targettedPoli = parent::gen_uuid();
+                                    $newPoli = self::$query->insert('master_poli', array(
+                                        'uid' => $targettedPoli,
+                                        'nama' => $nama_poli,
+                                        'editable' => 'TRUE',
+                                        'created_at' => parent::format_date(),
+                                        'updated_at' => parent::format_date()
+                                    ))
+                                        ->execute();
+                                }
 
-                                    if (count($checkPoli['response_data']) > 0) {
-                                        $targettedPoli = $checkPoli['response_data'][0]['uid'];
-                                    } else {
-                                        $targettedPoli = parent::gen_uuid();
-                                        $newPoli = self::$query->insert('master_poli', array(
-                                            'uid' => $targettedPoli,
-                                            'nama' => $nama_poli,
-                                            'editable' => 'TRUE',
-                                            'created_at' => parent::format_date(),
-                                            'updated_at' => parent::format_date()
-                                        ))
-                                            ->execute();
-                                    }
+                                //Set Dokter Poli
+                                $checkPoliDokter = self::$query->select('master_poli_dokter', array())
+                                    ->where(array(
+                                        'master_poli_dokter.poli' => '= ?',
+                                        'AND',
+                                        'master_poli_dokter.dokter' => '= ?'
+                                    ), array(
+                                        $targettedPoli,
+                                        $targettedPegawai
+                                    ))
+                                    ->execute();
 
-                                    //Set Dokter Poli
-                                    $checkPoliDokter = self::$query->select('master_poli_dokter', array())
+                                if(count($checkPoliDokter['response_data']) > 0) {
+                                    $workerDokterPoli = self::$query->update('master_poli_dokter', array(
+                                        'deleted_at' => NULL
+                                    ))
                                         ->where(array(
                                             'master_poli_dokter.poli' => '= ?',
                                             'AND',
@@ -1046,40 +1142,39 @@ class Pegawai extends Utility {
                                             $targettedPegawai
                                         ))
                                         ->execute();
-
-                                    if(count($checkPoliDokter['response_data']) > 0) {
-                                        $workerDokterPoli = self::$query->update('master_poli_dokter', array(
-                                            'deleted_at' => NULL
-                                        ))
-                                            ->where(array(
-                                                'master_poli_dokter.poli' => '= ?',
-                                                'AND',
-                                                'master_poli_dokter.dokter' => '= ?'
-                                            ), array(
-                                                $targettedPoli,
-                                                $targettedPegawai
-                                            ))
-                                            ->execute();
-                                    } else {
-                                        $workerDokterPoli = self::$query->insert('master_poli_dokter', array(
-                                            'poli' => $targettedPoli,
-                                            'dokter' => $targettedPegawai,
-                                            'created_at' => parent::format_date(),
-                                            'updated_at' => parent::format_date()
-                                        ))
-                                            ->execute();
-                                    }
+                                } else {
+                                    $workerDokterPoli = self::$query->insert('master_poli_dokter', array(
+                                        'poli' => $targettedPoli,
+                                        'dokter' => $targettedPegawai,
+                                        'created_at' => parent::format_date(),
+                                        'updated_at' => parent::format_date()
+                                    ))
+                                        ->execute();
                                 }
-
+                                array_push($worker_poli_dokter, $workerDokterPoli);
                             }
+                        }
 
-                            //Update Akses
-                            //36, 38, 102
-                            $akses_module = array(36, 38, 102);
-                            foreach($akses_module as $AKey => $AValue) {
-                                //Check Module
-                                $checkModule = self::$query->select('pegawai_module', array(
-                                    'id'
+                        //Update Akses
+                        //36, 38, 102
+                        $akses_module = array(36, 38, 102);
+                        foreach($akses_module as $AKey => $AValue) {
+                            //Check Module
+                            $checkModule = self::$query->select('pegawai_module', array(
+                                'id'
+                            ))
+                                ->where(array(
+                                    'pegawai_module.uid_pegawai' => '= ?',
+                                    'AND',
+                                    'pegawai_module.modul' => '= ?'
+                                ), array(
+                                    $targettedPegawai,
+                                    $AValue
+                                ))
+                                ->execute();
+                            if(count($checkModule['response_data']) > 0) {
+                                $proceed_module = self::$query->update('pegawai_module', array(
+                                    'deleted_at' => NULL
                                 ))
                                     ->where(array(
                                         'pegawai_module.uid_pegawai' => '= ?',
@@ -1090,85 +1185,88 @@ class Pegawai extends Utility {
                                         $AValue
                                     ))
                                     ->execute();
-                                if(count($checkModule['response_data']) > 0) {
-                                    $proceed_module = self::$query->update('pegawai_module', array(
-                                        'deleted_at' => NULL
-                                    ))
-                                        ->where(array(
-                                            'pegawai_module.uid_pegawai' => '= ?',
-                                            'AND',
-                                            'pegawai_module.modul' => '= ?'
-                                        ), array(
-                                            $targettedPegawai,
-                                            $AValue
-                                        ))
-                                        ->execute();
-                                } else {
-                                    $proceed_module = self::$query->insert('pegawai_module', array(
-                                        'uid_pegawai' => $targettedPegawai,
-                                        'modul' => $AValue,
-                                        'uid_admin' => $UserData['data']->uid,
-                                        'logged_at' => parent::format_date()
-                                    ))
-                                        ->execute();
+                            } else {
+                                $proceed_module = self::$query->insert('pegawai_module', array(
+                                    'uid_pegawai' => $targettedPegawai,
+                                    'modul' => $AValue,
+                                    'uid_admin' => $UserData['data']->uid,
+                                    'logged_at' => parent::format_date()
+                                ))
+                                    ->execute();
+                            }
+                        }
+                    }
+
+                } else if ($targetUIDJabatan === __UIDADMIN__) {
+                    //Administrator
+                    //
+                } else if ($targetUIDJabatan === __UIDPERAWAT__) {
+                    if(strtoupper($value['poli_check']) === 1) {
+                        $MultiPoli = explode(',', $value['unit']);
+                        foreach ($MultiPoli as $MKey => $MValue) {
+                            $nama_poli = '';
+                            if (
+                                trim(strtoupper(trim($MValue))) === 'THT' ||
+                                trim(strtoupper(trim($MValue))) === 'IGD'
+                            ) {
+                                if (trim(strtoupper(trim($MValue))) === 'THT') {
+                                    $nama_poli = 'Poliklinik THT';
                                 }
+
+                                if (trim(strtoupper(trim($MValue))) === 'IGD') {
+                                    $nama_poli = 'IGD';
+                                }
+                            } else {
+                                $nama_poli = 'Poliklinik ' . ucwords(strtolower(trim($MValue)));
                             }
 
-                        } else if ($targetUIDJabatan === __UIDADMIN__) {
-                            //Administrator
-                            //
-                        } else if ($targetUIDJabatan === __UIDPERAWAT__) {
-                            $MultiPoli = explode(',', $value['unit']);
-                            foreach ($MultiPoli as $MKey => $MValue) {
-                                $nama_poli = '';
-                                if (
-                                    trim(strtoupper(trim($MValue))) === 'THT' ||
-                                    trim(strtoupper(trim($MValue))) === 'IGD'
-                                ) {
-                                    if (trim(strtoupper(trim($MValue))) != 'THT') {
-                                        $nama_poli = 'Poliklinik THT';
-                                    }
+                            if ($nama_poli !== '') {
+                                //Check Poli
+                                $checkPoli = self::$query->select('master_poli', array(
+                                    'uid'
+                                ))
+                                    ->where(array(
+                                        'master_poli.nama' => '= ?',
+                                        'AND',
+                                        'master_poli.editable' => '= ?',
+                                        'AND',
+                                        'master_poli.deleted_at' => 'IS NULL',
+                                    ), array(
+                                        $nama_poli,
+                                        'TRUE'
+                                    ))
+                                    ->execute();
 
-                                    if (trim(strtoupper(trim($MValue))) != 'IGD') {
-                                        $nama_poli = 'IGD';
-                                    }
+                                if (count($checkPoli['response_data']) > 0) {
+                                    $targettedPoli = $checkPoli['response_data'][0]['uid'];
                                 } else {
-                                    $nama_poli = 'Poliklinik ' . ucwords(strtolower(trim($MValue)));
+                                    $targettedPoli = parent::gen_uuid();
+                                    $newPoli = self::$query->insert('master_poli', array(
+                                        'uid' => $targettedPoli,
+                                        'nama' => $nama_poli,
+                                        'editable' => 'TRUE',
+                                        'created_at' => parent::format_date(),
+                                        'updated_at' => parent::format_date()
+                                    ))
+                                        ->execute();
                                 }
 
-                                if ($nama_poli !== '') {
-                                    //Check Poli
-                                    $checkPoli = self::$query->select('master_poli', array(
-                                        'uid'
+                                //Set Perawat Poli
+                                $checkPoliDokter = self::$query->select('master_poli_perawat', array())
+                                    ->where(array(
+                                        'master_poli_perawat.poli' => '= ?',
+                                        'AND',
+                                        'master_poli_perawat.perawat' => '= ?'
+                                    ), array(
+                                        $targettedPoli,
+                                        $targettedPegawai
                                     ))
-                                        ->where(array(
-                                            'master_poli.nama' => '= ?',
-                                            'AND',
-                                            'master_poli.editable' => '= ?',
-                                            'AND',
-                                            'master_poli.deleted_at' => 'IS NULL',
-                                        ), array(
-                                            $nama_poli,
-                                            'TRUE'
-                                        ))
-                                        ->execute();
+                                    ->execute();
 
-                                    if (count($checkPoli['response_data']) > 0) {
-                                        $targettedPoli = $checkPoli['response_data'][0]['uid'];
-                                    } else {
-                                        $targettedPoli = parent::gen_uuid();
-                                        $newPoli = self::$query->insert('master_poli', array(
-                                            'uid' => $targettedPoli,
-                                            'nama' => $nama_poli,
-                                            'editable' => 'TRUE',
-                                            'created_at' => parent::format_date(),
-                                            'updated_at' => parent::format_date()
-                                        ))
-                                            ->execute();
-                                    }
-
-                                    //Set Perawat Poli
-                                    $checkPoliDokter = self::$query->select('master_poli_perawat', array())
+                                if(count($checkPoliDokter['response_data']) > 0) {
+                                    $workerPerawatPoli = self::$query->update('master_poli_perawat', array(
+                                        'deleted_at' => NULL
+                                    ))
                                         ->where(array(
                                             'master_poli_perawat.poli' => '= ?',
                                             'AND',
@@ -1178,159 +1276,159 @@ class Pegawai extends Utility {
                                             $targettedPegawai
                                         ))
                                         ->execute();
-
-                                    if(count($checkPoliDokter['response_data']) > 0) {
-                                        $workerDokterPoli = self::$query->update('master_poli_perawat', array(
-                                            'deleted_at' => NULL
-                                        ))
-                                            ->where(array(
-                                                'master_poli_perawat.poli' => '= ?',
-                                                'AND',
-                                                'master_poli_perawat.perawat' => '= ?'
-                                            ), array(
-                                                $targettedPoli,
-                                                $targettedPegawai
-                                            ))
-                                            ->execute();
-                                    } else {
-                                        $workerDokterPoli = self::$query->insert('master_poli_perawat', array(
-                                            'poli' => $targettedPoli,
-                                            'perawat' => $targettedPegawai,
-                                            'created_at' => parent::format_date(),
-                                            'updated_at' => parent::format_date()
-                                        ))
-                                            ->execute();
-                                    }
-                                }
-                            }
-
-                            //36, 54
-                            $akses_module = array(36, 54);
-                            foreach($akses_module as $AKey => $AValue) {
-                                //Check Module
-                                $checkModule = self::$query->select('pegawai_module', array(
-                                    'id'
-                                ))
-                                    ->where(array(
-                                        'pegawai_module.uid_pegawai' => '= ?',
-                                        'AND',
-                                        'pegawai_module.modul' => '= ?'
-                                    ), array(
-                                        $targettedPegawai,
-                                        $AValue
-                                    ))
-                                    ->execute();
-                                if(count($checkModule['response_data']) > 0) {
-                                    $proceed_module = self::$query->update('pegawai_module', array(
-                                        'deleted_at' => NULL
-                                    ))
-                                        ->where(array(
-                                            'pegawai_module.uid_pegawai' => '= ?',
-                                            'AND',
-                                            'pegawai_module.modul' => '= ?'
-                                        ), array(
-                                            $targettedPegawai,
-                                            $AValue
-                                        ))
-                                        ->execute();
                                 } else {
-                                    $proceed_module = self::$query->insert('pegawai_module', array(
-                                        'uid_pegawai' => $targettedPegawai,
-                                        'modul' => $AValue,
-                                        'uid_admin' => $UserData['data']->uid,
-                                        'logged_at' => parent::format_date()
+                                    $workerPerawatPoli = self::$query->insert('master_poli_perawat', array(
+                                        'poli' => $targettedPoli,
+                                        'perawat' => $targettedPegawai,
+                                        'created_at' => parent::format_date(),
+                                        'updated_at' => parent::format_date()
                                     ))
                                         ->execute();
                                 }
-                            }
-
-                        } else if ($targetUIDJabatan === __UIDPETUGASLAB__) {
-                            //81
-                            $akses_module = array(81);
-                            foreach($akses_module as $AKey => $AValue) {
-                                //Check Module
-                                $checkModule = self::$query->select('pegawai_module', array(
-                                    'id'
-                                ))
-                                    ->where(array(
-                                        'pegawai_module.uid_pegawai' => '= ?',
-                                        'AND',
-                                        'pegawai_module.modul' => '= ?'
-                                    ), array(
-                                        $targettedPegawai,
-                                        $AValue
-                                    ))
-                                    ->execute();
-                                if(count($checkModule['response_data']) > 0) {
-                                    $proceed_module = self::$query->update('pegawai_module', array(
-                                        'deleted_at' => NULL
-                                    ))
-                                        ->where(array(
-                                            'pegawai_module.uid_pegawai' => '= ?',
-                                            'AND',
-                                            'pegawai_module.modul' => '= ?'
-                                        ), array(
-                                            $targettedPegawai,
-                                            $AValue
-                                        ))
-                                        ->execute();
-                                } else {
-                                    $proceed_module = self::$query->insert('pegawai_module', array(
-                                        'uid_pegawai' => $targettedPegawai,
-                                        'modul' => $AValue,
-                                        'uid_admin' => $UserData['data']->uid,
-                                        'logged_at' => parent::format_date()
-                                    ))
-                                        ->execute();
-                                }
-                            }
-                        } else if ($targetUIDJabatan === __UIDPETUGASRAD__) {
-                            //69
-                            $akses_module = array(69);
-                            foreach($akses_module as $AKey => $AValue) {
-                                //Check Module
-                                $checkModule = self::$query->select('pegawai_module', array(
-                                    'id'
-                                ))
-                                    ->where(array(
-                                        'pegawai_module.uid_pegawai' => '= ?',
-                                        'AND',
-                                        'pegawai_module.modul' => '= ?'
-                                    ), array(
-                                        $targettedPegawai,
-                                        $AValue
-                                    ))
-                                    ->execute();
-                                if(count($checkModule['response_data']) > 0) {
-                                    $proceed_module = self::$query->update('pegawai_module', array(
-                                        'deleted_at' => NULL
-                                    ))
-                                        ->where(array(
-                                            'pegawai_module.uid_pegawai' => '= ?',
-                                            'AND',
-                                            'pegawai_module.modul' => '= ?'
-                                        ), array(
-                                            $targettedPegawai,
-                                            $AValue
-                                        ))
-                                        ->execute();
-                                } else {
-                                    $proceed_module = self::$query->insert('pegawai_module', array(
-                                        'uid_pegawai' => $targettedPegawai,
-                                        'modul' => $AValue,
-                                        'uid_admin' => $UserData['data']->uid,
-                                        'logged_at' => parent::format_date()
-                                    ))
-                                        ->execute();
-                                }
+                                array_push($worker_poli_perawat, $workerPerawatPoli);
                             }
                         }
 
-                        if($proceed_pegawai['response_result'] > 0) {
-                            $success_proceed += 1;
+                        //36, 54
+                        $akses_module = array(36, 54);
+                        foreach($akses_module as $AKey => $AValue) {
+                            //Check Module
+                            $checkModule = self::$query->select('pegawai_module', array(
+                                'id'
+                            ))
+                                ->where(array(
+                                    'pegawai_module.uid_pegawai' => '= ?',
+                                    'AND',
+                                    'pegawai_module.modul' => '= ?'
+                                ), array(
+                                    $targettedPegawai,
+                                    $AValue
+                                ))
+                                ->execute();
+                            if(count($checkModule['response_data']) > 0) {
+                                $proceed_module = self::$query->update('pegawai_module', array(
+                                    'deleted_at' => NULL
+                                ))
+                                    ->where(array(
+                                        'pegawai_module.uid_pegawai' => '= ?',
+                                        'AND',
+                                        'pegawai_module.modul' => '= ?'
+                                    ), array(
+                                        $targettedPegawai,
+                                        $AValue
+                                    ))
+                                    ->execute();
+                            } else {
+                                $proceed_module = self::$query->insert('pegawai_module', array(
+                                    'uid_pegawai' => $targettedPegawai,
+                                    'modul' => $AValue,
+                                    'uid_admin' => $UserData['data']->uid,
+                                    'logged_at' => parent::format_date()
+                                ))
+                                    ->execute();
+                            }
+                        }
+                    }
+                } else if ($targetUIDJabatan === __UIDPETUGASLAB__) {
+                    //81
+                    $akses_module = array(81);
+                    foreach($akses_module as $AKey => $AValue) {
+                        //Check Module
+                        $checkModule = self::$query->select('pegawai_module', array(
+                            'id'
+                        ))
+                            ->where(array(
+                                'pegawai_module.uid_pegawai' => '= ?',
+                                'AND',
+                                'pegawai_module.modul' => '= ?'
+                            ), array(
+                                $targettedPegawai,
+                                $AValue
+                            ))
+                            ->execute();
+                        if(count($checkModule['response_data']) > 0) {
+                            $proceed_module = self::$query->update('pegawai_module', array(
+                                'deleted_at' => NULL
+                            ))
+                                ->where(array(
+                                    'pegawai_module.uid_pegawai' => '= ?',
+                                    'AND',
+                                    'pegawai_module.modul' => '= ?'
+                                ), array(
+                                    $targettedPegawai,
+                                    $AValue
+                                ))
+                                ->execute();
+                        } else {
+                            $proceed_module = self::$query->insert('pegawai_module', array(
+                                'uid_pegawai' => $targettedPegawai,
+                                'modul' => $AValue,
+                                'uid_admin' => $UserData['data']->uid,
+                                'logged_at' => parent::format_date()
+                            ))
+                                ->execute();
+                        }
+                    }
+                } else if ($targetUIDJabatan === __UIDPETUGASRAD__) {
+                    //69
+                    $akses_module = array(69);
+                    foreach($akses_module as $AKey => $AValue) {
+                        //Check Module
+                        $checkModule = self::$query->select('pegawai_module', array(
+                            'id'
+                        ))
+                            ->where(array(
+                                'pegawai_module.uid_pegawai' => '= ?',
+                                'AND',
+                                'pegawai_module.modul' => '= ?'
+                            ), array(
+                                $targettedPegawai,
+                                $AValue
+                            ))
+                            ->execute();
+                        if(count($checkModule['response_data']) > 0) {
+                            $proceed_module = self::$query->update('pegawai_module', array(
+                                'deleted_at' => NULL
+                            ))
+                                ->where(array(
+                                    'pegawai_module.uid_pegawai' => '= ?',
+                                    'AND',
+                                    'pegawai_module.modul' => '= ?'
+                                ), array(
+                                    $targettedPegawai,
+                                    $AValue
+                                ))
+                                ->execute();
+                        } else {
+                            $proceed_module = self::$query->insert('pegawai_module', array(
+                                'uid_pegawai' => $targettedPegawai,
+                                'modul' => $AValue,
+                                'uid_admin' => $UserData['data']->uid,
+                                'logged_at' => parent::format_date()
+                            ))
+                                ->execute();
                         }
                     }
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             }
         }
 
@@ -1340,7 +1438,8 @@ class Pegawai extends Utility {
             'success_proceed' => $success_proceed,
             'data' => $parameter['data_import'],
             'proceed' => $proceed_data,
-            'termin_item' => $termi_item
+            'worker_dokter' => $worker_poli_dokter,
+            'worker_perawat' => $worker_poli_perawat
         );
     }
 

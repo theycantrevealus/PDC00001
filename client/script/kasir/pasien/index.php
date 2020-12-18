@@ -222,7 +222,7 @@
 		});
 
 		
-		var tableAntrianBayar = $("#table-biaya-pasien-rj").DataTable({
+		var tableAntrianBayarRJ = $("#table-biaya-pasien-rj").DataTable({
 			processing: true,
 			serverSide: true,
 			sPaginationType: "full_numbers",
@@ -241,28 +241,32 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-				    console.log(response);
 					var returnedData = [];
 					if(returnedData == undefined || returnedData.response_package == undefined) {
 						returnedData = [];
 					}
 					for(var InvKeyData in response.response_package.response_data) {
-						if(
-						    response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== null &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__
+					    if(
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
                         ) {
-						    if(!response.response_package.response_data[InvKeyData].lunas) {
-							    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                    response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                            if(
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== null &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__
+                            ) {
+                                if(!response.response_package.response_data[InvKeyData].lunas) {
+                                    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                    }
+                                    returnedData.push(response.response_package.response_data[InvKeyData]);
                                 }
-								returnedData.push(response.response_package.response_data[InvKeyData]);
-							}
-						} else {
-						    //
-						}
+                            } else {
+                                //
+                            }
+                        }
 					}
 
 					response.draw = parseInt(response.response_package.response_draw);
@@ -332,7 +336,7 @@
 
 
 
-        var tableAntrianBayar = $("#table-biaya-pasien-ri").DataTable({
+        var tableAntrianBayarRI = $("#table-biaya-pasien-ri").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
@@ -351,26 +355,30 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var returnedData = [];
                     if(returnedData == undefined || returnedData.response_package == undefined) {
                         returnedData = [];
                     }
                     for(var InvKeyData in response.response_package.response_data) {
                         if(
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== null &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_INAP__
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
                         ) {
-                            if(!response.response_package.response_data[InvKeyData].lunas) {
-                                if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                    response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                            if (
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== null &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_INAP__
+                            ) {
+                                if (!response.response_package.response_data[InvKeyData].lunas) {
+                                    if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                    }
+                                    returnedData.push(response.response_package.response_data[InvKeyData]);
                                 }
-                                returnedData.push(response.response_package.response_data[InvKeyData]);
+                            } else {
+                                //
                             }
-                        } else {
-                            //
                         }
                     }
 
@@ -451,7 +459,7 @@
 
 
 
-        var tableAntrianBayar = $("#table-biaya-pasien-igd").DataTable({
+        var tableAntrianBayarIGD = $("#table-biaya-pasien-igd").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
@@ -470,7 +478,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var returnedData = [];
                     if(returnedData == undefined || returnedData.response_package == undefined) {
                         returnedData = [];
@@ -478,19 +485,24 @@
 
                     for(var InvKeyData in response.response_package.response_data) {
                         if(
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                            response.response_package.response_data[InvKeyData].pasien !== null &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
                         ) {
-                            if(!response.response_package.response_data[InvKeyData].lunas) {
-                                if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                    response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                            if (
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== null &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__
+                            ) {
+                                if (!response.response_package.response_data[InvKeyData].lunas) {
+                                    if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                    }
+                                    returnedData.push(response.response_package.response_data[InvKeyData]);
                                 }
-                                returnedData.push(response.response_package.response_data[InvKeyData]);
+                            } else {
+                                //
                             }
-                        } else {
-                            //
                         }
                     }
 
@@ -561,7 +573,7 @@
 
 
 
-        Sync.onmessage = function(evt) {
+        /*Sync.onmessage = function(evt) {
             var signalData = JSON.parse(evt.data);
             var command = signalData.protocols;
             var type = signalData.type;
@@ -573,11 +585,11 @@
             if(command !== undefined && command !== null && command !== "") {
                 protocolLib[command](command, type, parameter, sender, receiver, time);
             }
-        }
+        }*/
 
 
 
-        var protocolLib = {
+        protocolLib = {
             userlist: function(protocols, type, parameter, sender, receiver, time) {
                 //
             },
@@ -586,13 +598,17 @@
             },
             kasir_daftar_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", "Transaksi baru", 3000, "notif_pasien_baru");
-                tableAntrianBayar.ajax.reload();
+                tableAntrianBayarRJ.ajax.reload();
+                tableAntrianBayarRI.ajax.reload();
+                tableAntrianBayarIGD.ajax.reload();
             }
         };
 
 
 		$("#range_invoice").change(function() {
-			tableAntrianBayar.ajax.reload();
+            tableAntrianBayarRJ.ajax.reload();
+            tableAntrianBayarRI.ajax.reload();
+            tableAntrianBayarIGD.ajax.reload();
 		});
 
 		
@@ -941,18 +957,24 @@
                                     response.response_package.response_message,
                                     "success"
                                 ).then((result) => {
+                                    tableAntrianBayarRJ.ajax.reload();
+                                    tableAntrianBayarRI.ajax.reload();
+                                    tableAntrianBayarIGD.ajax.reload();
+                                    tableKwitansi.ajax.reload();
+                                    $("#form-invoice").modal("hide");
+                                    $("#form-payment").modal("hide");
+
                                     var notifier_target = response.response_package.response_notifier;
                                     for(var notifKey in notifier_target)
                                     {
                                         push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info");
                                     }
-                                    tableAntrianBayar.ajax.reload();
-                                    tableKwitansi.ajax.reload();
-                                    $("#form-invoice").modal("hide");
-                                    $("#form-payment").modal("hide");
+
                                 });
                             } else {
-                                tableAntrianBayar.ajax.reload();
+                                tableAntrianBayarRJ.ajax.reload();
+                                tableAntrianBayarRI.ajax.reload();
+                                tableAntrianBayarIGD.ajax.reload();
                                 tableKwitansi.ajax.reload();
                                 $("#form-invoice").modal("hide");
                                 $("#form-payment").modal("hide");

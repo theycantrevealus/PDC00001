@@ -48,6 +48,9 @@ class Mitra extends Utility {
 				case 'edit_mitra':
 					return self::edit_mitra($parameter);
 					break;
+                case 'check_target':
+                    return self::check_target($parameter);
+                    break;
 				default:
 					return self::get_mitra();
 			}
@@ -55,6 +58,57 @@ class Mitra extends Utility {
 			return 'Error => ' . $e;
 		}
 	}
+
+	private function check_target($parameter) {
+	    $Asesmen = self::$query->select('asesmen', array(
+	        'kunjungan',
+            'pasien'
+        ))
+            ->where(array(
+                'asesmen.uid' => '= ?',
+                'AND',
+                'asesmen.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['asesmen']
+            ))
+            ->execute();
+	    if(count($Asesmen['response_data']) > 0) {
+            $Antrian = self::$query->select('antrian', array(
+                'penjamin'
+            ))
+                ->where(array(
+                    'antrian.kunjungan' => '= ?',
+                    'AND',
+                    'antrian.pasien' => '= ?'
+                ), array(
+                    $Asesmen['response_data'][0]['kunjungan'],
+                    $Asesmen['response_data'][0]['pasien']
+                ))
+                ->execute();
+            if(count($Antrian['response_data']) > 0) {
+                $data = self::$query->select('master_tindakan_kelas_harga', array(
+                    'harga'
+                ))
+                    ->where(array(
+                        'master_tindakan_kelas_harga.penjamin' => '= ?',
+                        'AND',
+                        'master_tindakan_kelas_harga.mitra' => '= ?',
+                        'AND',
+                        'master_tindakan_kelas_harga.tindakan' => '= ?'
+                    ), array(
+                        $Antrian['response_data'][0]['penjamin'],
+                        $parameter['mitra'],
+                        $parameter['tindakan']
+                    ))
+                    ->execute();
+                return $data;
+            } else {
+                return $Antrian;
+            }
+        } else {
+            return $Asesmen;
+        }
+    }
 
 	private function mitra_item($parameter) {
 	    $data = self::$query->select('master_mitra', array(

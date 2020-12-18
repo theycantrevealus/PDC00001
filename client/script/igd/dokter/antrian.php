@@ -5,6 +5,13 @@
 
 <script type="text/javascript">
     $(function() {
+
+        var savedPoint = {};
+        var currentCount = 1;
+        var canvas = $("#myCanvas");
+        var context = canvas.get(0).getContext('2d');
+
+
         //var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
         var poliListRaw = [];
         var poliListRawList = <?php echo json_encode($_SESSION['poli']['response_data']); ?>;
@@ -47,6 +54,47 @@
         var pasien_uid, pasien_nama, pasien_kontak, pasien_alamat, pasien_usia, pasien_rm, pasien_jenkel, pasien_tanggal_lahir, pasien_penjamin, pasien_penjamin_uid, pasien_tempat_lahir;
         var UID = __PAGES__[3];
         var kunjungan = {};
+
+        var mySlider = new rSlider({
+            target: "#txt_nrs",
+            values: [0,1,2,3,4,5,6,7,8,9,10]
+        });
+
+        var rangeDefiner = [
+            {
+                text: "Tidak",
+                merge: 1
+            }, {
+                text: "Ringan",
+                merge: 2
+            }, {
+                text: "Sedang",
+                merge: 3
+            }, {
+                text: "Berat",
+                merge: 3
+            }, {
+                text: "Berat Sekali",
+                merge: 1
+            }
+        ];
+
+        for(var pain in rangeDefiner) {
+            var scaleStepper = document.createElement("DIV");
+            $(scaleStepper).css({
+                "width": (10 * rangeDefiner[pain].merge) + "%"
+            }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
+            $("#scale-loader-define").append(scaleStepper)
+        }
+
+        for(var a = 1; a <= 10; a++) {
+            var scaleStepper = document.createElement("DIV");
+            $(scaleStepper).css({
+                "width": "10%"
+            }).addClass("scale-stepper");
+            $("#scale-loader").append(scaleStepper)
+        }
+
         $("#info-pasien-perawat").remove();
         $.ajax({
             url:__HOSTAPI__ + "/Antrian/antrian-detail/" + UID,
@@ -66,7 +114,6 @@
                     $("#btnTambahTindakanRadiologi").hide();
                 }
 
-                console.log(antrianData);
 
                 prioritas_antrian = antrianData.prioritas;
                 kunjungan = antrianData.kunjungan_detail;
@@ -84,8 +131,7 @@
                 }
 
                 poliList = poliListRaw;
-                console.log(poliList);
-                
+
                 if(antrianData.poli_info.uid === __POLI_GIGI__) {
                     $("#gigi_loader").show();
                 } else if(antrianData.poli_info.uid === __POLI_MATA__) {
@@ -682,6 +728,58 @@
                         } else {
                             $(".special-tab-fisioterapi").hide();
                         }
+
+
+                        if(antrianData.poli_info.uid === __POLI_IGD__) {
+
+                            $("#igd_gcs_e").val(asesmen_detail.gcs_e);
+                            $("#igd_gcs_v").val(asesmen_detail.gcs_v);
+                            $("#igd_gcs_m").val(asesmen_detail.gcs_m);
+                            $("#igd_gcs_tot").val(asesmen_detail.gcs_tot);
+
+                            $("#igd_pupil[value=\"" + asesmen_detail.pupil + "\"]").prop("checked", true);
+                            $("#igd_refleks_cahaya").val(asesmen_detail.refleks_cahaya);
+                            $("#igd_skor_nyeri").val(asesmen_detail.skor_nyeri);
+
+                            $("input[value=\"" + asesmen_detail.status_alergi + "\"]").prop("checked", true);
+                            $("input[value=\"" + asesmen_detail.gangguan_perilaku + "\"]").prop("checked", true);
+                            $("input[value=\"" + asesmen_detail.gangguan_terganggu + "\"]").prop("checked", true);
+                            $("input[value=\"" + asesmen_detail.skala_nyeri + "\"]").prop("checked", true);
+                            $("input[value=\"" + asesmen_detail.frekuensi + "\"]").prop("checked", true);
+                            $("input[value=\"" + asesmen_detail.karakter_nyeri + "\"]").prop("checked", true);
+                            $("input[value=\"" + asesmen_detail.tipe_nyeri + "\"]").prop("checked", true);
+                            $("input[value=\"" + asesmen_detail.ats_skala + "\"]").prop("checked", true);
+
+                            $("#igd_karakter_nyeri_text").val(asesmen_detail.karakter_nyeri_text);
+                            $("#igd_lokasi").val(asesmen_detail.lokasi);
+
+                            mySlider.setValues(asesmen_detail.skala_rasa_sakit);
+
+                            if(asesmen_detail.status_alergi == "y") {
+                                $("#igd_status_alergi_text").removeAttr("disabled").val(asesmen_detail.status_alergi_text);
+                            }
+
+                            if(asesmen_detail.karakter_nyeri == "lainnya") {
+                                $("#igd_karakter_nyeri_text").removeAttr("disabled").val(asesmen_detail.karakter_nyeri_text);
+                            }
+
+                            $("#igd_ekg").val(asesmen_detail.ekg);
+
+
+                            var ats_list = JSON.parse(asesmen_detail.ats_list);
+                            for(var atsKey in ats_list) {
+                                $("input[value=\"" + ats_list[atsKey] + "\"]").prop("checked", true);
+                            }
+
+                            var lokalis_parse = JSON.parse(asesmen_detail.saved_lokalis_item);
+                            for(var lokalisKeyParse in lokalis_parse) {
+                                currentCount++;
+                            }
+                            savedPoint = lokalis_parse;
+                            refreshLokalis(savedPoint, canvas, context);
+
+
+                        }
                     },
                     error: function(response) {
                         console.log(response);
@@ -693,49 +791,28 @@
             }
         });
 
-
-
-
-
-        var mySlider = new rSlider({
-            target: "#txt_nrs",
-            values: [0,1,2,3,4,5,6,7,8,9,10]
+        $("input[name=\"igd_karakter_nyeri\"]").change(function() {
+            if($(this).val() == "lainnya") {
+                $("#igd_karakter_nyeri_text").removeAttr("disabled");
+            } else {
+                $("#igd_karakter_nyeri_text").attr("disabled", "disabled").val("");
+            }
         });
 
-        var rangeDefiner = [
-            {
-                text: "Tidak",
-                merge: 1
-            }, {
-                text: "Ringan",
-                merge: 2
-            }, {
-                text: "Sedang",
-                merge: 3
-            }, {
-                text: "Berat",
-                merge: 3
-            }, {
-                text: "Berat Sekali",
-                merge: 1
+        $("input[name=\"igd_status_alergi\"]").change(function() {
+            if($(this).val() == "y") {
+                $("#igd_status_alergi_text").removeAttr("disabled");
+            } else {
+                $("#igd_status_alergi_text").attr("disabled", "disabled").val("");
             }
-        ];
+        });
 
-        for(var pain in rangeDefiner) {
-            var scaleStepper = document.createElement("DIV");
-            $(scaleStepper).css({
-                "width": (10 * rangeDefiner[pain].merge) + "%"
-            }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
-            $("#scale-loader-define").append(scaleStepper)
-        }
 
-        for(var a = 1; a <= 10; a++) {
-            var scaleStepper = document.createElement("DIV");
-            $(scaleStepper).css({
-                "width": "10%"
-            }).addClass("scale-stepper");
-            $("#scale-loader").append(scaleStepper)
-        }
+
+
+
+
+
 
 
 
@@ -2777,6 +2854,93 @@
                 var terapisRekomendasi = editorTerapisRekomendasi.getData();
             }
 
+
+            if(antrianData.poli_info.uid === __POLI_IGD__) {
+
+                var gcs_e = $("#igd_gcs_e").val();
+                var gcs_v = $("#igd_gcs_v").val();
+                var gcs_m = $("#igd_gcs_m").val();
+                var gcs_tot = $("#igd_gcs_tot").val();
+                var status_alergi = $("input[name=\"igd_status_alergi\"]:checked").val();
+                var status_alergi_text = $("#igd_status_alergi_text").val();
+                var refleks_cahaya = $("#igd_refleks_cahaya").val();
+                var pupil = $("input[name=\"igd_pupil\"]:checked").val();
+                var refleks_cahaya = $("#igd_refleks_cahaya").val();
+                var rr = $("#igd_rr").val();
+                var suhu = $("#igd_suhu").val();
+                var gangguan_perilaku = $("input[name=\"igd_gangguan_perilaku\"]:checked").val();
+                var gangguan_terganggu = $("input[name=\"igd_gangguan_terganggu\"]:checked").val();
+                var skala_nyeri = $("input[name=\"igd_skala_nyeri\"]:checked").val();
+                var lokasi = $("#igd_lokasi").val();
+                var frekuensi = $("input[name=\"igd_frekuensi\"]:checked").val();
+                var karakter_nyeri = $("input[name=\"igd_karakter_nyeri\"]:checked").val();
+                var karakter_nyeri_text = $("#igd_karakter_nyeri_text").val();
+                var skor_nyeri = $("#igd_skor_nyeri").val();
+                var tipe_nyeri = $("input[name=\"igd_tipe_nyeri\"]:checked").val();
+                var skala_rasa_sakit = mySlider.getValue();
+                
+                var ats_list = [];
+                $("input[name=\"ats_check\"]").each(function() {
+                    if($(this).is(":checked")) {
+                        if(ats_list.indexOf($(this).val()) < 0) {
+                            ats_list.push($(this).val());
+                        }
+                    } else {
+                        delete ats_list[ats_list.indexOf($(this).val())];
+                    }
+                });
+
+                var ats_skala = $("input[name=\"igd_skala_selected\"]:checked").val();
+                var ekg = $("#igd_ekg").val();
+                
+                var savedLokalisItem = {};
+
+                /*$("#lokalis_value tbody tr").each(function(e) {
+                    var lokalisKey = "page_" + (parseInt(e) + 1);
+                    var keterangan = $(this).find("td:eq(1) textarea").val();
+
+                    if(savedLokalisItem[lokalisKey] === undefined) {
+                        savedLokalisItem[lokalisKey] = {
+                            x: 0,
+                            y: 0,
+                            keterangan: "",
+                            message: ""
+                        };
+                    } else {
+                        savedLokalisItem[lokalisKey] = {
+                            x: savedPoint[lokalisKey].x,
+                            y: savedPoint[lokalisKey].y,
+                            keterangan: keterangan,
+                            message: savedPoint[lokalisKey].message
+                        };
+                    }
+
+                    console.log(lokalisKey);
+                    console.log(savedLokalisItem[lokalisKey]);
+
+                });*/
+                
+                //console.log(savedLokalisItem);
+
+                for(var lokalisKey in savedPoint) {
+                    if(savedLokalisItem[lokalisKey] === undefined) {
+                        savedLokalisItem[lokalisKey] = {
+                            x: 0,
+                            y: 0,
+                            message: "",
+                            keterangan: ""
+                        };
+                    }
+
+                    savedLokalisItem[lokalisKey] = {
+                        x: savedPoint[lokalisKey].x,
+                        y: savedPoint[lokalisKey].y,
+                        message: savedPoint[lokalisKey].message,
+                        keterangan: $("#keterangan_lokalis_" + lokalisKey).val()
+                    };
+                }
+            }
+
             /*var icd10Kerja = $("#txt_icd_10_kerja").val();
             var icd10Banding = $("#txt_icd_10_banding").val();*/
 
@@ -2998,9 +3162,9 @@
                     odontogram: JSON.stringify(metaSelOrdo)
                 };
             } else if(antrianData.poli_info.uid === __POLI_MATA__) {
-                var mataDataList =  {};
-                $(".mata_input").each(function() {
-                    if(mataDataList[$(this).attr("id")] === undefined) {
+                var mataDataList = {};
+                $(".mata_input").each(function () {
+                    if (mataDataList[$(this).attr("id")] === undefined) {
                         mataDataList[$(this).attr("id")] = 0
                     }
 
@@ -3008,8 +3172,8 @@
                 });
 
                 var tujuan_resep = [];
-                $(".tujuan_resep").each(function() {
-                    if($(this).is(":checked")) {
+                $(".tujuan_resep").each(function () {
+                    if ($(this).is(":checked")) {
                         tujuan_resep.push($(this).val())
                     }
                 });
@@ -3041,7 +3205,7 @@
                     diagnosa_banding: diagnosaBandingData,
                     planning: planningData,
 
-                    tindakan:tindakan,
+                    tindakan: tindakan,
                     resep: resep,
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
@@ -3050,6 +3214,76 @@
                     mata_data: JSON.stringify(mataDataList),
                     tujuan_resep: tujuan_resep.join(",")
                 };
+            } else if(antrianData.poli_info.uid === __POLI_IGD__) {
+
+
+                var formData = {
+                    request: "update_asesmen_medis",
+                    kunjungan: kunjungan,
+                    antrian: antrian,
+                    penjamin: penjamin,
+                    pasien: pasien,
+                    poli: poli,
+                    //==============================
+                    keluhan_utama: keluhanUtamaData,
+                    keluhan_tambahan: keluhanTambahanData,
+                    tekanan_darah: parseFloat(tekananDarah),
+                    nadi: parseFloat(nadi),
+                    suhu: parseFloat(suhu),
+                    pernafasan: parseFloat(pernafasan),
+                    berat_badan: parseFloat(beratBadan),
+                    tinggi_badan: parseFloat(tinggiBadan),
+                    lingkar_lengan_atas: parseFloat(lingkarLengan),
+                    icd9: selectedICD9,
+                    pemeriksaan_fisik: pemeriksaanFisikData,
+                    //icd10_kerja: parseInt(icd10Kerja),
+                    icd10_kerja: selectedICD10Kerja,
+                    diagnosa_kerja: diagnosaKerjaData,
+                    //icd10_banding: parseInt(icd10Banding),
+                    icd10_banding: selectedICD10Banding,
+                    diagnosa_banding: diagnosaBandingData,
+                    planning: planningData,
+                    /*anamnesa:terapisAnamnesa,
+                    tataLaksana: terapisTataLaksana,
+                    evaluasi: terapisEvaluasi,
+                    anjuranBulan: parseFloat(terapisAnjuranBulan),
+                    anjuranMinggu: parseFloat(terapisAnjuranMinggu),
+                    suspek: terapisSuspek,
+                    hasil:terapisHasil,
+                    kesimpulan:terapisKesimpulan,
+                    rekomendasi:terapisRekomendasi,*/
+                    //==============================
+                    tindakan:tindakan,
+                    resep: resep,
+                    keteranganResep: keteranganResep,
+                    keteranganRacikan: keteranganRacikan,
+                    racikan: racikan,
+
+                    gcs_e: gcs_e,
+                    gcs_v: gcs_v,
+                    gcs_m: gcs_m,
+                    gcs_tot: gcs_tot,
+                    status_alergi: status_alergi,
+                    status_alergi_text: status_alergi_text,
+                    refleks_cahaya: refleks_cahaya,
+                    pupil: pupil,
+                    rr: rr,
+                    gangguan_perilaku: gangguan_perilaku,
+                    gangguan_terganggu: gangguan_terganggu,
+                    skala_nyeri: skala_nyeri,
+                    lokasi: lokasi,
+                    frekuensi: frekuensi,
+                    karakter_nyeri: karakter_nyeri,
+                    karakter_nyeri_text: karakter_nyeri_text,
+                    skor_nyeri: skor_nyeri,
+                    tipe_nyeri: tipe_nyeri,
+                    ats_list: ats_list,
+                    ats_skala: ats_skala,
+                    ekg: ekg,
+                    savedLokalisItem: savedLokalisItem,
+                    skala_rasa_sakit: skala_rasa_sakit
+                };
+
             } else {
                 var formData = {
                     request: "update_asesmen_medis",
@@ -3102,6 +3336,7 @@
                 confirmButtonText: `Ya`,
                 denyButtonText: `Belum`,
             }).then((result) => {
+
                 if (result.isConfirmed) {
                     //Validation
                     $.ajax({
@@ -3113,11 +3348,12 @@
                         },
                         type: "POST",
                         success: function(response) {
-                            console.clear();
+
 
                             if(response.response_package.response_result > 0) {
                                 notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-                                location.href = __HOSTNAME__ + "/igd/dokter/index/" + pasien_uid + "/" + __PAGES__[5] + "/" + pasien_penjamin_uid;
+                                //location.href = __HOSTNAME__ + "/igd/dokter/index/" + pasien_uid + "/" + __PAGES__[5] + "/" + pasien_penjamin_uid;
+
                             } else {
                                 notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                             }
@@ -4135,7 +4371,7 @@
                 setNomorUrut('table_tindakan_lab', 'no_urut_lab');
             }
             else {
-                console.log(listTindakanLabTerpilih[uidTindakanLab]);
+                //
             }
         });
 
@@ -4403,7 +4639,7 @@
                                     $("#form-rujuk").modal("hide");
                                 });
                             } else {
-                                console.log(response);
+                                //
                             }
                         },
                         error: function(response) {
@@ -4554,8 +4790,6 @@
                 },
                 type: "POST",
                 success: function(response){
-                    console.clear();
-                    console.log(response);
                     if(response.response_package.response_notif == 'K') {
                         push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum konsul", "warning");
                         Swal.fire(
@@ -4656,7 +4890,6 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    console.log(response);
                     var MetaData = dataPoli = response.response_package.response_data;
 
                     if (MetaData !== undefined){
@@ -5227,7 +5460,132 @@
                 digitsOptional: true
             });
         }
+
+
+
+        function writeMessage(canvas, message, xloc, yloc, context) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.font = '18pt Calibri';
+            context.fillStyle = 'red';
+            context.fillText(message, xloc, yloc); // x,y are bottom left of text
+        }
+
+        function getMousePos(canvas, evt) {
+            var rect = $("#myCanvas").get(0).getBoundingClientRect(),
+                root = $("body");
+
+            // return relative mouse position
+            /*var mouseX = evt.clientX - rect.top - root.scrollTop();
+            var mouseY = evt.clientY - rect.left - root.scrollLeft();*/
+
+            var mouseX = evt.clientX - rect.left - 10;
+            var mouseY = evt.clientY - rect.top;
+            return {
+                x: mouseX,
+                y: mouseY
+            };
+        }
+
+        /*var canvas = document.getElementById('myCanvas');
+        var context = canvas.getContext('2d');*/
+
+
+        $("#myCanvas").click(function(evt) {
+            var c= 215;
+            var mousePos = getMousePos(canvas, evt);
+            var message = String.fromCharCode(c) + " " + currentCount;
+            
+
+
+            if(savedPoint["point_" + currentCount] === undefined) {
+                savedPoint["point_" + currentCount] = {
+                    message: message,
+                    keterangan: "",
+                    x: 0,
+                    y: 0
+                };
+            }
+
+            savedPoint["point_" + currentCount] = {
+                message: message,
+                keterangan: "",
+                x: mousePos.x,
+                y: mousePos.y
+            };
+
+
+            $("#lokalis_value tbody tr").each(function(e) {
+                var keterangan = $(this).find("td:eq(1) textarea").val();
+                savedPoint["point_" + (parseInt(e) + 1)].keterangan = keterangan;
+            });
+
+            refreshLokalis(savedPoint, canvas, context);
+            //writeMessage(canvas, message, mousePos.x -10, mousePos.y, context);
+            currentCount++;
+        });
+
+        function refreshLokalis(dataSet, canvas, context) {
+            var savedPoint = {};
+            
+            $("#lokalis_value tbody tr").remove();
+
+            var autoNum = 1;
+            context.clearRect(0, 0, canvas.width(), canvas.height());
+
+            for(var key in dataSet) {
+                var c= 215;
+                var message = String.fromCharCode(c) + " " + autoNum;
+
+                var newRow = document.createElement("TR");
+                $(newRow).attr({
+                    "id": "row-" + key
+                });
+                var newNum = document.createElement("TD");
+                $(newNum).html(autoNum);
+                var newRemark = document.createElement("TD");
+                var newAct = document.createElement("TD");
+
+                var remark = document.createElement("TEXTAREA");
+                var deleteBtn = document.createElement("BUTTON");
+
+                $(remark).addClass("form-control").attr({
+                    "placeholder": "Keterangan"
+                }).attr({
+                    "id": "keterangan_lokalis_" + key
+                }).val(dataSet[key].keterangan);
+
+                $(deleteBtn).addClass("btn btn-danger btnHapusLokalis").html("<i class=\"fa fa-times\"></i>").attr({
+                    id: "hapus-" + key
+                });
+
+                $(newRemark).append(remark);
+                $(newAct).append(deleteBtn);
+
+                $(newRow).append(newNum);
+                $(newRow).append(newRemark);
+                $(newRow).append(newAct);
+
+                $("#lokalis_value tbody").append(newRow);
+
+                writeMessage(canvas, message, dataSet[key].x, dataSet[key].y, context);
+
+                autoNum++;
+            }
+        }
+
+        $("body").on("click", ".btnHapusLokalis", function () {
+            var id = $(this).attr("id").split("-");
+            id = id[id.length - 1];
+
+            $("#row-" + id).remove();
+            delete savedPoint[id];
+            refreshLokalis(savedPoint, canvas, context);
+
+            return false;
+        });
     });
+
+    
 
 </script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>

@@ -14,24 +14,6 @@
 								<div class="card-form__body card-body-form-group flex">
 									<div class="row">
 										<div class="col-sm-auto">
-											<div class="form-group">
-												<label for="filter_name">Search</label>
-												<input id="filter_name" type="text" class="form-control" placeholder="Enter keyword">
-											</div>
-										</div>
-										<div class="col-sm-auto">
-											<div class="form-group">
-												<label for="filter_poli">Poliklinik</label><br>
-												<select id="filter_poli" class="form-control" style="width: 300px;"></select>
-											</div>
-										</div>
-										<div class="col-sm-auto">
-											<div class="form-group">
-												<label for="filter_dokter">Dokter</label><br>
-												<select id="filter_dokter" class="form-control" style="width: 350px;"></select>
-											</div>
-										</div>
-										<div class="col-sm-auto">
 											<div class="form-group" style="width: 200px;">
 												<label for="filter_date">Dari - Sampai</label>
 												<input id="filter_date" type="text" class="form-control" placeholder="Select date ..." value="13/03/2018 to 20/03/2018" data-toggle="flatpickr" data-flatpickr-mode="range" data-flatpickr-alt-format="d/m/Y" data-flatpickr-date-format="d/m/Y">

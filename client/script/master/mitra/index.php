@@ -11,14 +11,17 @@
 				},
 				dataSrc:function(response) {
 					var data = response.response_package.response_data;
+					var parsedData = [];
 					for(var key in data) {
-						if(dataLibrary[data[key].uid] == undefined) {
-							dataLibrary[data[key].uid] = data[key];
-						} else {
+						if(dataLibrary[data[key].uid] !== undefined) {
 							dataLibrary[data[key].uid] = data[key];
 						}
+
+						if(data[key].jenis != "GEN") {
+                            parsedData.push(data[key]);
+                        }
 					}
-					return response.response_package.response_data;
+					return parsedData;
 				}
 			},
 			autoWidth: false,

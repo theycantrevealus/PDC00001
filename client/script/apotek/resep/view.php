@@ -263,8 +263,6 @@
                 $(newObat).select2("data", {id: setter.obat, text: setter.obat_detail.nama});
                 $(newObat).trigger("change");
 
-
-
                 if($(newObat).val() != "none") {
                     var dataKategoriPerObat = autoKategoriObat(setter.obat);
                     var kategoriObatDOM = "";
@@ -588,7 +586,9 @@
 
                                     $("#obat_komposisi_batch_" + rowTarget + " li").remove();
                                     for(var batchSelKey in selectedBatchList) {
-                                        $("#obat_komposisi_batch_" + rowTarget).append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ") - " + selectedBatchList[batchSelKey].gudang.nama + "</li>");
+                                        if(selectedBatchList[batchSelKey].used > 0) {
+                                            $("#obat_komposisi_batch_" + rowTarget).append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ") - " + selectedBatchList[batchSelKey].gudang.nama + "</li>");
+                                        }
                                     }
 
                                     var totalKalkulasi = 0;
