@@ -184,6 +184,11 @@ class Tindakan extends Utility {
         $reset_tindakan = self::$query->update('master_tindakan', array(
             'deleted_at' => parent::format_date()
         ))
+            ->where(array(
+                'master_tindakan.kelompok' => '= ?'
+            ), array(
+                'RJ'
+            ))
             ->execute();
 
         //Reset Tindakan Poli
