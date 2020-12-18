@@ -740,6 +740,7 @@ class Tindakan extends Utility {
 				'tindakan',
 				'kelas',
 				'penjamin',
+				'mitra',
 				'harga',
 				'created_at',
 				'updated_at'

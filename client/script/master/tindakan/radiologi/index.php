@@ -32,6 +32,28 @@
 			return penjaminData;
 		}
 
+		function refresh_mitra(target, selected = "") {
+            var mitraData = [];
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Mitra/mitra_item/LAB",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    var data = response.response_package.response_data;
+                    mitraData = data;
+                    $(target).find("option").remove();
+                    for(var key in data) {
+                        $(target).append("<option " + ((data[key].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + data[key].uid + "\">" + data[key].nama + "</option>");
+                    }
+                    $(target).select2();
+                }
+            });
+            return mitraData;
+        }
+
 		function refresh_tindakan(target, selected = "", oldData = {}) {
 			var tindakanData = [];
 			$.ajax({
@@ -65,6 +87,7 @@
 
 		tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
 		penjaminBuilder = refresh_penjamin("#txt_penjamin", __UIDPENJAMINUMUM__);
+        mitraBuilder = refresh_mitra("#txt_mitra");
 
 		function refresh_kelas_data(tindakanKelas) {
 			var columnKelas = {};
@@ -85,7 +108,6 @@
 				},
 				type:"GET",
 				success:function(response) {
-
 					var data = response.response_package.response_data;
 					for(var key in data) {
 						if(columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] == undefined) {
@@ -120,6 +142,7 @@
 							//Parse data from vertical to horizontal
 							var data_harga = response.response_package;
 
+
 							for(var key = 0; key < data_harga.length; key++) {
 								if(data_harga[key].tindakan_detail != null) {
 									var kelasTarget = data_harga[key].tindakan;
@@ -147,6 +170,7 @@
 									autonum: autonum,
 									tindakan: "<label id=\"tindakan_" + DataPopulator[key].uid + "\">" + DataPopulator[key].nama + "</label>",
 									tindakan_uid : DataPopulator[key].uid,
+                                    mitra: DataPopulator[key].mitra,
 									action: "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-pencil-alt\"></i></button>"
 								};
 
@@ -392,7 +416,6 @@
 					},
 					type:"DELETE",
 					success:function(response) {
-						console.log(response);
 						tableTindakan.ajax.reload();
 					},
 					error: function(response) {
@@ -473,6 +496,10 @@
 			$("#form-tambah").modal("show");
 			MODE = "tambah";
 		});
+
+        $("#txt_mitra").change(function() {
+            //
+        });
 
 		$("#txt_tindakan").change(function() {
 			if(metaData[$("#txt_penjamin").val()] == undefined) {
@@ -626,7 +653,6 @@
 				},
 				type: "POST",
 				success: function(response){
-					console.log(response);
 					metaData = {};
 					dataBuilder = refresh_kelas_data(tindakanKelas);
 					tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
@@ -670,6 +696,10 @@
 						<label for="txt_nama">Penjamin :</label>
 						<select class="form-control" id="txt_penjamin"></select>
 					</div>
+                    <div class="form-group col-md-5">
+                        <label for="txt_nama">Mitra :</label>
+                        <select class="form-control" id="txt_mitra"></select>
+                    </div>
 				</div>
                 <div class="row">
                     <div class="form-group col-md-5">
