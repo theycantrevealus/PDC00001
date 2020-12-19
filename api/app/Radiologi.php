@@ -946,7 +946,8 @@ class Radiologi extends Utility
             }
 
             $invoice_master = self::$query->select('invoice', array(
-                'uid'
+                'uid',
+                'total_after_discount'
             ))
                 ->where(array(
                     'invoice.kunjungan' => '= ?',
@@ -957,6 +958,8 @@ class Radiologi extends Utility
                     $AntrianDetail['pasien']
                 ))
                 ->execute();
+
+            $totalInvoice = $invoice_master['response_data'][0]['total_after_discount'];
 
             $invoice_detail = self::$query->update('invoice_detail', array(
                 'status_bayar' => 'N',
@@ -973,6 +976,20 @@ class Radiologi extends Utility
                 ), array(
                     $invoice_master['response_data'][0]['uid'],
                     $value['tindakan']
+                ))
+                ->execute();
+
+            //Update Invoice Master
+            $InvoiceMasterUpdate = self::$query->update('invoice', array(
+                'total_pre_discount' => $totalInvoice + floatval($value['harga']),
+                'total_after_discount' => $totalInvoice + floatval($value['harga'])
+            ))
+                ->where(array(
+                    'invoice.uid' => '= ?',
+                    'AND',
+                    'invoice.deleted_at' => 'IS NULL'
+                ), array(
+                    $invoice_master['response_data'][0]['uid']
                 ))
                 ->execute();
 
@@ -1877,12 +1894,49 @@ class Radiologi extends Utility
     {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
-        $result = [];
+        $result = array(
+            'dir_msg' => '',
+            'order_detail' => array(),
+            'response_upload' => array(
+                'response_message' => '',
+                'response_result' => ''
+            ),
+            'response_delete_doc' => array(
+                'response_message' => '',
+                'response_result' => ''
+            )
+        );
 
         if (isset($parameter['tindakanID'])) {
-            $old = self::get_radiologi_order_detail_item($parameter['tindakanID']);
+            //$old = self::get_radiologi_order_detail_item($parameter['tindakanID']);
 
-            $updateData = self::$query
+            $detail_data = json_decode($parameter['detail'], true);
+            foreach ($detail_data as $key => $value) {
+
+                $tindakan_iden = explode('_', $key);
+                $updateData = self::$query
+                    ->update('rad_order_detail', array(
+                        'keterangan' => $value['keterangan'],
+                        'kesimpulan' => $value['kesimpulan'],
+                        'updated_at' => parent::format_date()
+                    ))
+                    ->where(array(
+                        'rad_order_detail.radiologi_order' => '= ?',
+                        'AND',
+                        'rad_order_detail.id' => '= ?',
+                        'AND',
+                        'rad_order_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['uid_radiologi_order'],
+                        $tindakan_iden[count($tindakan_iden) - 1]
+                    ))
+                    ->execute();
+                array_push($result['order_detail'], $updateData);
+            }
+
+            //$result['order_detail'] = json_decode($parameter['detail']);
+
+            /*$updateData = self::$query
                 ->update('rad_order_detail', array(
                         'keterangan' => $parameter['keteranganPeriksa'],
                         'kesimpulan' => $parameter['kesimpulanPeriksa'],
@@ -1927,7 +1981,7 @@ class Radiologi extends Utility
                     )
                 );
             }
-            $result['order_detail'] = $updateData;
+            $result['order_detail'] = $updateData;*/
         }
 
         //create new

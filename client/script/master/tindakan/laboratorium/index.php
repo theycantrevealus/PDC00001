@@ -7,6 +7,7 @@
 		var tindakanBuilder = [];
 		var dataBuilder;
 		var tableTindakan;
+		var selectedTindakan;
 
 		var metaData = {};
 
@@ -33,7 +34,7 @@
 		}
 
 		function refresh_tindakan(target, selected = "", oldData = {}) {
-			var tindakanData = [];
+		    var tindakanData = [];
 			$.ajax({
 				async: false,
 				url:__HOSTAPI__ + "/Tindakan/tindakan",
@@ -51,6 +52,7 @@
 							$(target).append("<option " + ((data[key].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + data[key].uid + "\">" + data[key].nama + "</option>");
 						}
 					}
+
 					$(target).select2();
 				}
 			});
@@ -67,6 +69,7 @@
 		penjaminBuilder = refresh_penjamin("#txt_penjamin", __UIDPENJAMINUMUM__);
 
 		function refresh_kelas_data(tindakanKelas) {
+			var columnKelas = {};
 			var columnKelas = {};
 			var dataBuilder;
 			var generateHeader = [{
@@ -311,6 +314,8 @@
 		$("body").on("click", ".btn-edit-tindakan", function() {
 			var uid = $(this).attr("tindakan");
 
+			selectedTindakan = uid;
+
 			tindakanBuilder = refresh_tindakan("#txt_tindakan", uid);
 			$("#txt_tindakan").attr("disabled", "disabled");
 			dataBuilder = refresh_kelas_data(tindakanKelas);
@@ -498,7 +503,7 @@
 			$("#filter-penjamin option[value=\"" + me.val() + "\"").prop("selected", true);
 			$("#filter-penjamin").val(me.val()).trigger("change");
 
-			tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
+			//tindakanBuilder = refresh_tindakan("#txt_tindakan", selectedTindakan, dataBuilder);
 
 			if(metaData[$("#txt_penjamin").val()] == undefined) {
 				metaData[$("#txt_penjamin").val()] = {};

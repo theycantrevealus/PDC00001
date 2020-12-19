@@ -216,7 +216,7 @@
                         $(autoMitra).html("<select asesmen=\"" + asesmen + "\" target=\"" + uid + "\" class=\"form-control mitra\" id=\"mitra_" + key + "_" + data[key].uid_tindakan + "\"></select>");
                         $(autoHarga).attr({
                             "id": "harga_" + uid + "_" + data[key].uid_tindakan
-                        });
+                        }).addClass("number_style");
 
 
 
@@ -231,6 +231,8 @@
 
                         $("#item-verif-radio tbody").append(autoRow);
                     }
+                    $("#item-verif-radio tfoot").remove();
+                    $("#item-verif-radio").append("<tfoot><tr><td colspan=\"3\" class=\"text-center\"><b>Total</b></td><td class=\"number_style number_style\"></td></tr></tfoot>");
 
                     $(".mitra").each(function () {
                         var id = $(this).attr("id");
@@ -311,7 +313,7 @@
         });
 
         function loadHarga(mitra, asesmen, tindakan, target) {
-            $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+            $("#harga_" + target + "_" + tindakan).html("<b>0.00</b>").attr({
                 "harga": 0
             });
             $.ajax({
@@ -331,22 +333,28 @@
                     if(response.response_package.response_data !== undefined && response.response_package.response_data[0] !== undefined) {
                         var harga = response.response_package.response_data[0].harga;
                         if(parseFloat(harga) > 0) {
-                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. " + number_format(harga, 2, ".", ",") + "</b>").attr({
+                            $("#harga_" + target + "_" + tindakan).html("<b>" + number_format(harga, 2, ".", ",") + "</b>").attr({
                                 "harga": harga
                             });
                         } else {
-                            $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                            $("#harga_" + target + "_" + tindakan).html("<b>0.00</b><br /><span class=\"text-warning\"><i class=\"fa fa-info-circle\"></i> Harga bernilai 0. Pastikan harga tindakan sudah benar</span>").attr({
                                 "harga": 0
                             });
                         }
                     } else {
-                        $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                        $("#harga_" + target + "_" + tindakan).html("<b>0.00</b><br /><span class=\"text-warning\"><i class=\"fa fa-info-circle\"></i> Harga bernilai 0. Pastikan harga tindakan sudah benar</span>").attr({
                             "harga": 0
                         });
                     }
+
+                    var totalBiaya = 0;
+                    $("#item-verif-radio tbody tr").each(function() {
+                        totalBiaya += parseFloat($(this).find("td:eq(3)").attr("harga"));
+                    });
+                    $("#item-verif-radio tfoot tr td:eq(1)").html("<h4 class=\"text-danger\">" + number_format(totalBiaya, 2, ".", ",") + "</h4>");
                 },
                 error: function(response) {
-                    $("#harga_" + target + "_" + tindakan).html("<b>Rp. 0.00</b>").attr({
+                    $("#harga_" + target + "_" + tindakan).html("<b>0.00</b><br /><span class=\"text-warning\"><i class=\"fa fa-info-circle\"></i> Harga bernilai 0. Pastikan harga tindakan sudah benar</span>").attr({
                         "harga": 0
                     });
                 }
@@ -416,13 +424,13 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-12">
-                        <table class="table table-bordered largeDataType" id="item-verif-radio">
+                        <table class="table table-bordered largeDataType table-striped" id="item-verif-radio">
                             <thead class="thead-dark">
                                 <tr>
                                     <th class="wrap_content">No</th>
                                     <th>Item Radiologi</th>
                                     <th style="width: 20%">Mitra</th>
-                                    <th>Harga</th>
+                                    <th style="width: 50%">Harga</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>

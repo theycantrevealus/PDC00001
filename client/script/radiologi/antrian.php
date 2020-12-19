@@ -9,7 +9,7 @@
 		var tindakanID;
 		var fileList = [];
 		var deletedDocList = [];	//for save all file uploaded
-		var file;		//for upload file
+		var file;//for upload file
 
 		$("#panel-hasil").hide();
 
@@ -21,6 +21,7 @@
 
 			let id_tindakan = $(this).parent().parent().attr("id").split("_");
 			tindakanID = id_tindakan[id_tindakan.length - 1];
+
 
             if(forSave["tindakan_" + tindakanID] === undefined) {
                 forSave["tindakan_" + tindakanID] = {
@@ -42,8 +43,6 @@
             let nama =  $(this).closest('tr').find('td:eq(1)').text(); //$(this).html();
             $(".title-pemeriksaan").html(nama);
 
-            console.clear();
-            console.log(forSave);
 
 			return false;
 		});
@@ -55,14 +54,18 @@
 				//plugins : [ Autosave ],
 				extraPlugins: [ MyCustomUploadAdapterPlugin ],
 				placeholder: "Keterangan Pemeriksaan..."
-			} )
+			})
 			.then( editor => {
 				editorKeteranganPeriksa = editor;
 				window.editor = editor;
-			} )
+
+                editor.editing.view.document.on( 'keydown', ( evt, data ) => {
+                    forSave["tindakan_" + selectedState].keterangan = editorKeteranganPeriksa.getData();
+                });
+			})
 			.catch( err => {
 				//console.error( err.stack );
-			} );
+			});
 
 
 		ClassicEditor
@@ -72,8 +75,11 @@
 			} )
 			.then( editor => {
 				editorKesimpulanPeriksa = editor;
-
 				window.editor = editor;
+
+                editor.editing.view.document.on( 'keydown', ( evt, data ) => {
+                    forSave["tindakan_" + selectedState].kesimpulan = editorKesimpulanPeriksa.getData();
+                });
 			} )
 			.catch( err => {
 				//console.error( err.stack );
@@ -101,6 +107,7 @@
 
 				form_data.append("keteranganPeriksa", keteranganPeriksa);
 				form_data.append("kesimpulanPeriksa", kesimpulanPeriksa);
+                form_data.append("detail", JSON.stringify(forSave));
 				form_data.append("tindakanID", tindakanID);
 
 				/*$("#btnSimpan").attr({
@@ -121,10 +128,10 @@
 				}*/
 
                 for (var pair of form_data.entries()) {
-                    console.log(pair[0]+ ', ' + pair[1]);
+                    //console.log(pair[0]+ ', ' + pair[1]);
                 }
 
-				/*$.ajax({
+				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Radiologi",
 					processData: false,
@@ -139,12 +146,12 @@
 						let response_upload = 0;
 						let response_delete_doc = 0;
 
-						if (
+						/*if (
 							response.response_package.order_detail !== undefined && 
 							response.response_package.order_detail !== ""
 						) {
 							order_detail = response.response_package.order_detail.response_result;
-						}
+						}*/
 
 						if (
 							response.response_package.response_upload !== undefined && 
@@ -168,13 +175,25 @@
 							}
 						}
 
-						if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){
+						var detailRes = response.response_package.order_detail;
+						for(var resKey in detailRes) {
+                            order_detail += detailRes[resKey].response_result;
+                        }
+
+						if(order_detail > 0) {
+                            notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
+                            location.href = __HOSTNAME__ + "/radiologi";
+                        }
+
+
+						/*if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){
 							notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
 							location.href = __HOSTNAME__ + "/radiologi";
 						} else {
+						    console.log(response);
 							$("#btnSimpan").removeAttr("disabled");
 							notification ("warning", "Tidak Ada Data yang Disimpan", 3000, "hasil_tambah_dev");
-						}
+						}*/
 					},
 					error: function(response) {
 						notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");
@@ -182,7 +201,7 @@
 						console.log("Error : ");
 						console.log(response);
 					}
-				});*/
+				});
 			//}
 			//}
 
@@ -284,7 +303,6 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
-					console.log(response);
 					MetaData = response.response_package.response_data;
 
 					if (MetaData != "") {
@@ -356,7 +374,6 @@
 				success: function(response){
 					if (response.response_package != undefined){
 						dataItem = response.response_package.response_data;
-						console.log(dataItem);
 					}
 				},
 				error: function(response) {
