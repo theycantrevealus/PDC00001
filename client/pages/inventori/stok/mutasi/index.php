@@ -27,18 +27,17 @@
 								<i class="fa fa-cubes"></i>
 								<!-- <b class="inv-tab-status text-success" id="status-informasi"><i class="fa fa-check-circle"></i></b> -->
 							</span>
-							Proses Mutasi Stok
+							Mutasi Stok
 						</a>
 					</li>
-					<li class="nav-item">
+					<!--li class="nav-item">
 						<a href="#tab-history" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-list"></i>
-								<!-- <b class="inv-tab-status text-success" id="status-satuan"><i class="fa fa-check-circle"></i></b> -->
 							</span>
 							Riwayat Mutasi Stok
 						</a>
-					</li>
+					</li-->
 				</ul>
 				<div class="card card-body tab-content">
 					<div class="tab-pane active show fade" id="tab-informasi">
@@ -65,8 +64,7 @@
 									<th>Dari</th>
 									<th>Ke</th>
 									<th>Diproses Oleh</th>
-									<th>Status</th>
-									<th>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody></tbody>
