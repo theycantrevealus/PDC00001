@@ -97,6 +97,9 @@ class Inventori extends Utility
                 case 'get_item_select2':
                     return self::get_item_select2($parameter);
                     break;
+                case 'get_mutasi_item':
+                    return self::get_mutasi_item($parameter);
+                    break;
                 default:
                     return self::get_item_select2($parameter);
             }
@@ -5165,6 +5168,39 @@ class Inventori extends Utility
     }
 
 
+    private function get_mutasi_item($parameter) {
+        $data = self::$query->select('inventori_mutasi_detail', array(
+            'item',
+            'batch',
+            'qty',
+            'keterangan',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'inventori_mutasi_detail.mutasi' => '= ?',
+                'AND',
+                'inventori_mutasi_detail.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter[2]
+            ))
+            ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            //Item Detail
+            $Item = self::get_item_detail($value['item']);
+            $data['response_data'][$key]['item'] = $Item['response_data'][0];
+
+            //Batch Detail
+            $Batch = self::get_batch_detail($value['batch']);
+            $data['response_data'][$key]['batch'] = $Batch['response_data'][0];
+
+
+        }
+
+        return $data;
+    }
+
+
     private function get_mutasi_request($parameter)
     {
         $Authorization = new Authorization();
@@ -5238,16 +5274,24 @@ class Inventori extends Utility
         $autonum = intval($parameter['start']) + 1;
         foreach ($data['response_data'] as $key => $value) {
 
-
-
-
             //Filter Unit yang sama
             if($value['unit'] == $UserData['data']->unit) {
                 $data['response_data'][$key]['autonum'] = $autonum;
 
+                $data['response_data'][$key]['tanggal'] = date('d F Y', strtotime($value['tanggal']));
 
+                //Gudang
+                $dari = self::get_gudang_detail($value['dari']);
+                $data['response_data'][$key]['dari'] = $dari['response_data'][0];
 
-                array_push($allData, $value);
+                $ke = self::get_gudang_detail($value['ke']);
+                $data['response_data'][$key]['ke'] = $ke['response_data'][0];
+
+                //Pegawai
+                $pegawai = new Pegawai(self::$pdo);
+                $data['response_data'][$key]['pegawai'] = $pegawai->get_detail($value['pegawai'])['response_data'][0];
+
+                array_push($allData, $data['response_data'][$key]);
                 $autonum++;
             }
 

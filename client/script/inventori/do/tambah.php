@@ -1,7 +1,8 @@
 <script type="text/javascript">
 	$(function(){
 		var poData = po_selection();
-		var itemDataList = loadItem();
+		var itemDataList = [];
+
 		var selectedItem = [];
 		var allowAdd = false;
 		$("#po").attr("disabled", "disabled");
@@ -99,7 +100,7 @@
 			if(!allowAdd) {
 				$(newItemSeletor).attr("disabled", "disabled");	
 			} else {
-                $(newItemSeletor).attr("disabled", "disabled");
+                //$(newItemSeletor).attr("disabled", "disabled");
             }
 			$(newItem).append(newItemSeletor);
 			$(newItemSeletor).select2().addClass("itemSelection form-control");
@@ -245,18 +246,41 @@
 		}
 
 		$("select").select2();
-		function checkAllowAdd(checkID) {
+		function checkAllowAdd(checkID, itemDataList) {
 			var allow = false;
+			/*console.clear();
+            console.log($("#item_" + checkID).val());
+            console.log($("#kode_batch_" + checkID).val());
+            console.log($("#qty_" + checkID).inputmask("unmaskedvalue"));
+            console.log($("#kadaluarsa_" + checkID).val());*/
+
 			if($("#row_" + checkID).hasClass("last-row")) {
-				if((selectedItem.length + 1) < itemDataList.length) {
-					if($("#item_" + checkID).val() != "none" && $("#kode_batch_" + checkID).val() != "" && $("#qty_" + checkID).inputmask("unmaskedvalue") > 0 && $("#kadaluarsa_" + checkID).val() != "") {
+
+			    /*if((selectedItem.length + 1) < itemDataList.length) {
+
+					if(
+					    $("#item_" + checkID).val() != "none" &&
+                        $("#kode_batch_" + checkID).val() != "" &&
+                        $("#qty_" + checkID).inputmask("unmaskedvalue") > 0 &&
+                        $("#kadaluarsa_" + checkID).val() != ""
+                    ) {
 						allow = true;
 					} else {
 						allow = false;
 					}
 				} else {
 					allow = false;
-				}
+				}*/
+                if(
+                    $("#item_" + checkID).val() != "none" &&
+                    $("#kode_batch_" + checkID).val() != "" &&
+                    $("#qty_" + checkID).inputmask("unmaskedvalue") > 0 &&
+                    $("#kadaluarsa_" + checkID).val() != ""
+                ) {
+                    allow = true;
+                } else {
+                    allow = false;
+                }
 			} else {
 				allow = false;
 			}
@@ -266,7 +290,7 @@
 		$("body").on("change", ".itemSelection", function(){
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
-			var checker = checkAllowAdd(id);
+			var checker = checkAllowAdd(id, itemDataList);
 			if(checker && allowAdd) {
 				$("#item_" + id).attr("disabled", "disabled");
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
@@ -280,7 +304,7 @@
 		$("body").on("keyup", ".kode_batch", function(){
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
-			var checker = checkAllowAdd(id);
+			var checker = checkAllowAdd(id, itemDataList);
 			if(checker && allowAdd) {
 				$("#item_" + id).attr("disabled", "disabled");
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
@@ -293,7 +317,7 @@
 		$("body").on("keyup", ".qty", function(){
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
-			var checker = checkAllowAdd(id);
+			var checker = checkAllowAdd(id, itemDataList);
 			if(checker && allowAdd) {
 				$("#item_" + id).attr("disabled", "disabled");
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
@@ -306,7 +330,7 @@
 		$("body").on("keyup", ".kadaluarsa", function(){
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
-			var checker = checkAllowAdd(id);
+			var checker = checkAllowAdd(id, itemDataList);
 			if(checker && allowAdd) {
 				$("#item_" + id).attr("disabled", "disabled");
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
@@ -319,7 +343,7 @@
 		$("body").on("change", ".kadaluarsa", function(){
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
-			var checker = checkAllowAdd(id);
+			var checker = checkAllowAdd(id, itemDataList);
 			if(checker && allowAdd) {
 				$("#item_" + id).attr("disabled", "disabled");
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
