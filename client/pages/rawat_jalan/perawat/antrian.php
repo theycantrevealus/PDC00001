@@ -1,3 +1,13 @@
+<?php
+/*$PoliList = array();
+foreach ($_SESSION['poli']['response_data'] as $key => $value)
+{
+    foreach ($value['poli']['response_data'] as $PoliKey => $PoliValue)
+    {
+        array_push($PoliList, $PoliValue['uid']);
+    }
+}*/
+?>
 <div class="container-fluid page__heading-container">
 	<div class="page__heading d-flex align-items-center">
 		<div class="flex">
@@ -21,21 +31,27 @@
 					<li class="nav-item">
 						<a href="#tab-assesment-awal-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
-								01
-								<b class="inv-tab-status text-success" id="status-1"><i class="fa fa-check-circle"></i></b>
+                                <i class="fa fa-address-book"></i>
 							</span>
-							Halaman 1
+							Asesmen Rawat Hal. 1
 						</a>
 					</li>
 					<li class="nav-item">
 						<a href="#tab-assesment-awal-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								02
-								<b class="inv-tab-status text-success" id="status-3"><i class="fa fa-check-circle"></i></b>
+								<i class="fa fa-address-book"></i>
 							</span>
-							Halaman 2
+                            Asesmen Rawat Hal. 2
 						</a>
 					</li>
+                    <li class="nav-item" id="fisioterapi_nav">
+                        <a href="#tab-assesment-terapis" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								<i class="fa fa-running"></i>
+							</span>
+                            Terapis
+                        </a>
+                    </li>
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
@@ -47,6 +63,10 @@
 					<?php require 'halaman2.php'; ?>
 					<?php //require 'action_panel.php'; ?>
 				</div>
+                <div class="tab-pane show fade " id="tab-assesment-terapis">
+                    <?php require 'fisioterapi.php'; ?>
+                    <?php //require 'action_panel.php'; ?>
+                </div>
 			</div>
 			<div class="card card-footer">
 				<div class="row">

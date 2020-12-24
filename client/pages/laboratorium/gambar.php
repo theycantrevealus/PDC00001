@@ -1,15 +1,17 @@
 <div class="row">
 	<div class="col-lg-12">
-		<h5 class="text-center">
-			<div class="custom-upload btn btn-success">
-				<input type="file" id="add_file" /><i class="fa fa-upload"></i> Upload
+        <div class="alert alert-warning">File yang diterima hanya format <b>pdf</b></div>
+        <h5 class="text-center" id="uploader-panel">
+
+            <div class="custom-upload btn btn-success">
+				<input type="file" accept="application/pdf" id="add_file" /><i class="fa fa-upload"></i> Upload
 			</div>
 
 		</h5>
 		<table class="table table-bordered largeDataType" id="labor-lampiran-table">
-			<thead>
+			<thead class="thead-dark">
 				<tr>
-					<th style="width: 20px;">No</th>
+					<th class="wrapContainers">No</th>
 					<th>Lampiran</th>
 					<th class="wrap_content">Aksi</th>
 				</tr>

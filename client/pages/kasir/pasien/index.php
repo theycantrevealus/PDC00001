@@ -40,37 +40,123 @@
 					</li>
 				</ul>
 			</div>
-			<?php
-				$day=new DateTime('last day of this month');
-			?>
 			<div class="card card-body tab-content">
 				<div class="tab-pane show fade active" id="tab-tagihan">
-					<div class="row">
-						<div class="col-lg">
-							<input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
-							<div class="row">
-								<div class="col-lg" style="margin-top: 25px">
-									<table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien" style="font-size: 0.9rem;">
-										<thead class="thead-dark">
-											<tr>
-												<th class="wrap_content">No</th>
-												<th class="wrap_content">No. Tagihan</th>
-												<th>Pasien</th>
-												<th>Poliklinik</th>
-												<th class="wrap_content">Staf Pendaftaran</th>
-												<th>Total Biaya</th>
-												<th>Aksi</th>
-											</tr>
-										</thead>
-										<tbody></tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
+                    <div class="row">
+                        <div class="col-lg">
+                            <div class="z-0">
+                                <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                                    <li class="nav-item">
+                                        <a href="#tab-rawat_jalan" class="active nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-tagihan" >
+                                            <span class="nav-link__count">
+                                                01
+                                            </span>
+                                            Rawat Jalan
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#tab-rawat_inap" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                                            <span class="nav-link__count">
+                                                02
+                                            </span>
+                                            Rawat Inap
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#tab-igd" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                                            <span class="nav-link__count">
+                                                03
+                                            </span>
+                                            IGD
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card card-body tab-content">
+                                <div class="tab-pane show fade active" id="tab-rawat_jalan">
+                                    <div class="row">
+                                        <div class="col-lg">
+                                            <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                            <div class="row">
+                                                <div class="col-lg" style="margin-top: 25px">
+                                                    <table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien-rj" style="font-size: 0.9rem;">
+                                                        <thead class="thead-dark">
+                                                        <tr>
+                                                            <th class="wrap_content">No</th>
+                                                            <th class="wrap_content">No. Tagihan</th>
+                                                            <th>Pasien</th>
+                                                            <th>Poliklinik</th>
+                                                            <th class="wrap_content">Staf Pendaftaran</th>
+                                                            <th>Total Biaya</th>
+                                                            <th class="wrap_content">Aksi</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane show fade" id="tab-rawat_inap">
+                                    <div class="row">
+                                        <div class="col-lg">
+                                            <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                            <div class="row">
+                                                <div class="col-lg" style="margin-top: 25px">
+                                                    <table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien-ri" style="font-size: 0.9rem;">
+                                                        <thead class="thead-dark">
+                                                        <tr>
+                                                            <th class="wrap_content">No</th>
+                                                            <th class="wrap_content">No. Tagihan</th>
+                                                            <th>Pasien</th>
+                                                            <th>Poliklinik</th>
+                                                            <th class="wrap_content">Staf Pendaftaran</th>
+                                                            <th>Total Biaya</th>
+                                                            <th class="wrap_content">Aksi</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane show fade" id="tab-igd">
+                                    <div class="row">
+                                        <div class="col-lg">
+                                            <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                            <div class="row">
+                                                <div class="col-lg" style="margin-top: 25px">
+                                                    <table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien-igd" style="font-size: 0.9rem;">
+                                                        <thead class="thead-dark">
+                                                        <tr>
+                                                            <th class="wrap_content">No</th>
+                                                            <th class="wrap_content">No. Tagihan</th>
+                                                            <th>Pasien</th>
+                                                            <th>Poliklinik</th>
+                                                            <th class="wrap_content">Staf Pendaftaran</th>
+                                                            <th>Total Biaya</th>
+                                                            <th class="wrap_content">Aksi</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 				</div>
+
+
+
 				<div class="tab-pane show fade" id="tab-kwitansi">
-					<div class="row">
+                    <div class="row">
 						<div class="col-lg">
 							<input id="range_kwitansi" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
 							<div class="row">

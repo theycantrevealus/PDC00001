@@ -29,9 +29,13 @@
 		$("#txt_diskon_all").inputmask({
 			alias: 'currency', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true
 		});
+
+
+
+
 		function load_supplier(target, selected = "") {
 			var kategoriData;
-			$.ajax({
+			/*$.ajax({
 				url:__HOSTAPI__ + "/Supplier",
 				async:false,
 				beforeSend: function(request) {
@@ -48,7 +52,45 @@
 				error: function(response) {
 					console.log(response);
 				}
-			});
+			});*/
+            $(target).select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Barang tidak ditemukan";
+                    }
+                },
+                placeholder:"Cari Pemasok",
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/Supplier/get_supplier_select2",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.response_data;
+                        console.log(data);
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.uid
+                                }
+                            })
+                        };
+                    }
+                }
+            }).addClass("form-control item-amprah").on("select2:select", function(e) {
+                var data = e.params.data;
+            });
 			return kategoriData;
 		}
 
@@ -101,7 +143,7 @@
 		function load_product(target, selectedData = "", appendData = true) {
 			var selected = [];
 			var productData;
-			$.ajax({
+			/*$.ajax({
 				url:__HOSTAPI__ + "/Inventori",
 				async:false,
 				beforeSend: function(request) {
@@ -129,12 +171,58 @@
 				error: function(response) {
 					console.log(response);
 				}
-			});
-			//return (productData.length == selected.length);
-			return {
+			});*/
+
+			$(target).select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Barang tidak ditemukan";
+                    }
+                },
+                placeholder:"Cari Barang",
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/Inventori/get_item_select2",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.response_data;
+                        console.log(data);
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.uid,
+                                    penjamin: item.penjamin
+                                }
+                            })
+                        };
+                    }
+                }
+            }).addClass("form-control item-amprah").on("select2:select", function(e) {
+                var data = e.params.data;
+                var penjaminListData = data.penjamin;
+                for(var penjaminKey in penjaminListData) {
+                    if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
+                        penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
+                    }
+                }
+            });
+
+			/*return {
 				allow: (productData.length == selected.length),
 				data: productData
-			};
+			};*/
 		}
 
 		function autoPODetail() {
@@ -151,9 +239,9 @@
 			var newCellSubtotal = document.createElement("TD");
 
 			var newItem = document.createElement("SELECT");
-			load_product(newItem);
 			$(newCellItem).append(newItem);
-			$(newItem).select2().addClass("form-control item");
+            $(newItem).addClass("form-control item");
+            load_product(newItem);
 
 			var keteranganItem = document.createElement("TEXTAREA");
 			$(newCellItem).append("<br /><br /><b>Keterangan Item</b>").append(keteranganItem);
@@ -274,7 +362,7 @@
 		autoPODetail();
 
 		load_supplier("#txt_supplier");
-		$("#txt_supplier").select2();
+		//$("#txt_supplier").select2();
 
 		function calculateRow(id) {
 			var qty = $("#qty_" + id).inputmask("unmaskedvalue");

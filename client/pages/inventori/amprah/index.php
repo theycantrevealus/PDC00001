@@ -1,14 +1,16 @@
+<?php
+	$day=new DateTime('last day of this month');
+?>
 <div class="container-fluid page__heading-container">
 	<div class="page__heading d-flex align-items-center">
 		<div class="flex">
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/inventori">Master Item</a></li>
-					<li class="breadcrumb-item active" aria-current="page" id="mode_item">Tambah</li>
+					<li class="breadcrumb-item active" aria-current="page" id="mode_item">Amprah</li>
 				</ol>
 			</nav>
-			<h4><span id="nama-departemen"></span>Tambah Inventori</h4>
+			<h4><span id="nama-departemen"></span>Amprah</h4>
 		</div>
 	</div>
 </div>
@@ -34,25 +36,32 @@
 								<i class="fa fa-list"></i>
 								<!-- <b class="inv-tab-status text-success" id="status-satuan"><i class="fa fa-check-circle"></i></b> -->
 							</span>
-							Riwayat Amprah
+							Riwayat Amprah Selesai
 						</a>
 					</li>
 				</ul>
 				<div class="card card-body tab-content">
 					<div class="tab-pane active show fade" id="tab-informasi">
 						<div class="row">
-							<div class="col-md-12">
+							<div class="col-md-2 text-right" style="padding: 10px">
+								Filter Tanggal:
+							</div>
+							<div class="col-md-6" style="border: solid 1px #ccc">
+								<input id="range_amprah" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+							</div>
+							<div class="col-md-4">
 								<a href="<?php echo __HOSTNAME__; ?>/inventori/amprah/tambah" class="btn btn-info pull-right">
 									<i class="fa fa-plus"></i> Amprah Baru
 								</a>
 							</div>
 						</div>
 						<hr />
-						<table class="table table-bordered">
+						<table class="table table-bordered" id="table-list-amprah">
 							<thead class="thead-dark">
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Tanggal</th>
+									<th>Kode Amprah</th>
 									<th>Diminta Oleh</th>
 									<th>Status</th>
 									<th>Aksi</th>

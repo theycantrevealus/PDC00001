@@ -2,7 +2,6 @@
 	
 	$(function(){
 		var status_antrian = '<?= $_GET['antrian']; ?>';
-		console.log(status_antrian);
 
 		var allData = {};
 		loadTermSelectBox('panggilan', 3);
@@ -61,23 +60,22 @@
 		});
 
 		$("#no_rm").on('keyup', function() {
-			let value = $(this).inputmask('unmaskedvalue');
-
-			if (value.length == 6){
-				if (cekNoRM(value) == false){
-					$("#no_rm").addClass("is-valid").removeClass("is-invalid");
-					$("#error-no-rm").html("");
-					$("#btnSubmit").removeAttr("disabled");
-				} else {
-					$("#no_rm").addClass("is-invalid");
-					$("#error-no-rm").html("No. RM tidak tersedia");
-					$("#btnSubmit").attr("disabled", true);
-				}
-			} else {
-				$("#no_rm").addClass("is-invalid");
-				$("#error-no-rm").html("No. RM harus 6 angka");
-				$("#btnSubmit").attr("disabled", true);
-			}
+            let value = $(this).val();
+            if ($(this).inputmask("unmaskedvalue").length == 6){
+                if (cekNoRM(value)){
+                    $("#no_rm").addClass("is-invalid");
+                    $("#error-no-rm").html("No. RM sudah terdaftar");
+                    $("#btnSubmit").attr("disabled", true);
+                } else {
+                    $("#no_rm").addClass("is-valid").removeClass("is-invalid");
+                    $("#error-no-rm").html("");
+                    $("#btnSubmit").removeAttr("disabled");
+                }
+            } else {
+                $("#no_rm").addClass("is-invalid");
+                $("#error-no-rm").html("No. RM harus 6 angka");
+                $("#btnSubmit").attr("disabled", true);
+            }
 		});
 
 		$("#form-add-pasien").submit(function() {
@@ -138,17 +136,19 @@
 					},
 					type: "POST",
 					success: function(response){
-						if (status_antrian == 'true'){ 		//redirect to tambah kunjungan
-							if (response.response_package.response_unique != ""){	//check returning uid
+						if (status_antrian === "true"){ 		//redirect to tambah kunjungan
+							if (
+							    response.response_package.response_unique !== "" &&
+                                response.response_package.response_unique !== undefined &&
+                                response.response_package.response_unique !== null
+                            ){	//check returning uid
 								//Set Current Pasien dan Antrian Data
 								localStorage.setItem("currentPasien", response.response_package.response_unique);
-
 								//Notif loket lain yang sedang aktif pemanggilan yang sama?? Back Log??
-								
 								location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + response.response_package.response_unique;
 							}
 						} else {
-							location.href = __HOSTNAME__ + '/pasien';
+							location.href = __HOSTNAME__ + "/pasien";
 						}
 					},
 					error: function(response) {
@@ -187,8 +187,8 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             success: function(response){
-            	if (response.response_package != ""){
-            		if (response.response_package.response_result > 0){
+            	if (response.response_package !== undefined){
+            		if (response.response_package.response_data.length > 0){
             			result = true;
             		}
             	}

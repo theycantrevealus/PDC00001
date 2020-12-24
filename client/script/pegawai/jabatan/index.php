@@ -51,7 +51,7 @@
 			var conf = confirm("Hapus jabatan item?");
 			if(conf) {
 				$.ajax({
-					url:__HOSTAPI__ + "/Inventori/master_inv_jabatan/" + uid,
+					url:__HOSTAPI__ + "/Inventori/pegawai_jabatan/" + uid,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},

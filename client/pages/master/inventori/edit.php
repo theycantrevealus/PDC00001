@@ -5,10 +5,10 @@
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/inventori">Master Item</a></li>
-					<li class="breadcrumb-item active" aria-current="page" id="mode_item">Tambah</li>
+					<li class="breadcrumb-item active" aria-current="page" id="mode_item">Edit</li>
 				</ol>
 			</nav>
-			<h4><span id="nama-departemen"></span>Tambah Inventori</h4>
+			<h4><span id="nama-departemen"></span>Edit Inventori</h4>
 		</div>
 	</div>
 </div>

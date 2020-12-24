@@ -36,7 +36,7 @@
 							Kategori
 						</a>
 					</li>
-					<li class="nav-item">
+					<!-- <li class="nav-item">
 						<a href="#tab-lab-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								03
@@ -44,7 +44,7 @@
 							</span>
 							Lokasi
 						</a>
-					</li>
+					</li> -->
 					<li class="nav-item">
 						<a href="#tab-lab-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
@@ -54,15 +54,6 @@
 							Nilai Laboratorium
 						</a>
 					</li>
-					<!-- <li class="nav-item">
-						<a href="#tab-lab-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								05
-								<b class="lab-tab-status text-success" id="status-5"><i class="fa fa-check-circle"></i></b>
-							</span>
-							Penjamin
-						</a>
-					</li> -->
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
@@ -74,10 +65,10 @@
 					<?php require 'kategori-item.php'; ?>
 					<?php require 'action-panel.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-lab-3">
+				<!-- <div class="tab-pane show fade" id="tab-lab-3">
 					<?php require 'lokasi-item.php'; ?>
 					<?php require 'action-panel.php'; ?>
-				</div>
+				</div> -->
 				<div class="tab-pane show fade" id="tab-lab-4">
 					<?php require 'nilai-item.php'; ?>
 					<?php require 'action-panel.php'; ?>

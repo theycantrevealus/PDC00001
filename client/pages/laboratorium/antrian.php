@@ -4,7 +4,7 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item">Laboratorium</li>
+                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/laboratorium">Laboratorium</a></li>
 					<li class="breadcrumb-item active" aria-current="page">Hasil Pemeriksaan Laboratorium</li>
 				</ol>
 			</nav>
@@ -21,7 +21,6 @@
 						<a href="#tab-laboratorium-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-laboratorium-1" >
 							<span class="nav-link__count">
 								01
-								<b class="inv-tab-status text-success" id="status-1"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Hasil Pemeriksaan
 						</a>
@@ -30,7 +29,6 @@
 						<a href="#tab-laboratorium-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								02
-								<b class="inv-tab-status text-success" id="status-3"><i class="fa fa-check-circle"></i></b>
 							</span>
 							Lampiran Pemeriksaan
 						</a>
@@ -45,16 +43,17 @@
 					<div class="tab-pane show fade " id="tab-laboratorium-2">
 						<?php require 'gambar.php'; ?>
 					</div>
-
-					<br />
 					<div class="row">
 						<div class="col-md-12">
-							<button type="submit" class="btn btn-success" id="btnSimpan">
-								<i class="fa fa-check-circle"></i> Simpan
+							<button type="submit" class="btn btn-info" id="btnSimpan">
+								<i class="fa fa-save"></i> Simpan
 							</button>
-							<a href="<?php echo __HOSTNAME__; ?>/laboratorium" class="btn btn-danger">
+                            <a href="<?php echo __HOSTNAME__; ?>/laboratorium" class="btn btn-danger">
 								<i class="fa fa-ban"></i> Kembali
 							</a>
+                            <button type="submit" class="btn btn-success pull-right" id="btnSelesai">
+                                <i class="fa fa-check-circle"></i> Selesai
+                            </button>
 						</div>
 					</div>
 				</div>

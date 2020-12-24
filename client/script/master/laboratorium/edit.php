@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
 	$(function() {
 
@@ -23,7 +24,9 @@
 				//Init Data
 				$("#txt_kode_laboratorium").val(labData.kode);
 				$("#txt_nama_laboratorium").val(labData.nama);
-				load_spesimen("#txt_spesimen_laboratorium", labData.spesimen.uid);
+				if(labData.spesimen !== undefined && labData.spesimen !== null) {
+                    load_spesimen("#txt_spesimen_laboratorium", labData.spesimen.uid);
+                }
 				$("#txt_spesimen_laboratorium").select2();
 				ClassicEditor
 					.create( document.querySelector( '#txt_keterangan' ), {
@@ -49,6 +52,7 @@
 					autoLokasi(selectedLokasi, labData.lokasi[lok].uid);
 					selectedLokasi.push(labData.lokasi[lok].uid);
 				}
+
 				autoLokasi(selectedLokasi);
 
 				for(var nil in labData.nilai) {
@@ -463,7 +467,7 @@
 		function autoNilai(setterNilai = {}) {
 			var min = ((setterNilai.min === undefined) ? 0 : setterNilai.min);
 			var max = ((setterNilai.max === undefined) ? 0 : setterNilai.max);
-			var satuan = ((setterNilai.satuan === undefined) ? "" : setterNilai.satuan);
+			var satuan = ((setterNilai.satuan === undefined) ? "-" : setterNilai.satuan);
 			var keterangan = ((setterNilai.keterangan === undefined) ? "" : setterNilai.keterangan);
 
 			var newRowNilai = document.createElement("TR");
@@ -581,9 +585,9 @@
 
 		function checkNilaiAllow(id) {
 			if(
-				parseFloat($("#nilai_min_lab_" + id).val()) > 0 &&
+				/*parseFloat($("#nilai_min_lab_" + id).val()) > 0 &&
 				parseFloat($("#nilai_max_lab_" + id).val()) > 0 &&
-				$("#nilai_satuan_lab_" + id).val() != "" &&
+				$("#nilai_satuan_lab_" + id).val() != "" &&*/
 				$("#nilai_keterangan_lab_" + id).val() != "" &&
 				$("#row_nilai_lab_" + id).hasClass("last-nilai")
 			) {
@@ -736,13 +740,13 @@
 				}
 			});
 
-			var lokasi = [];
+			/*var lokasi = [];
 			$("#lokasi-lab tbody tr").each(function() {
 				var lokasiData = $(this).find("td:eq(1) select").val();
 				if(lokasi.indexOf(lokasiData) < 0 && !$(this).hasClass("last-lokasi")) {
 					lokasi.push(lokasiData);
 				}
-			});
+			});*/
 
 			var nilai = [];
 			$("#nilai-lab tbody tr").each(function() {
@@ -785,7 +789,7 @@
 						spesimen: spesimen,
 						keterangan: keterangan,
 						kategori: kategori,
-						lokasi: lokasi,
+						//lokasi: lokasi,
 						nilai: nilai,
 						//penjamin: penjamin
 					},
@@ -794,8 +798,16 @@
 					},
 					type: "POST",
 					success: function(response){
-						console.log(response);
-						//location.href = __HOSTNAME__ + "/master/laboratorium";
+					    if(response.response_package[0].response_result > 0)
+                        {
+                            Swal.fire(
+                                'Laboratorium',
+                                'Data berhasil di update',
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + "/master/laboratorium";
+                            });
+                        }
 					},
 					error: function(response) {
 						console.log(response);

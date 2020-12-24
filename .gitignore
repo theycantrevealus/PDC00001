@@ -7,11 +7,14 @@ sync.php
 .htaccess
 composer.lock
 composer.json
-
-node_modules/*
-images/produk
-images/igd
-images/slideshow
+vendor
+node_modules/
+images/produk/
+images/pegawai/
+images/igd/
+images/slideshow/
+assets/
+.idea/
 audio/
 document/
 client/template/
@@ -21,7 +24,7 @@ api/sync.php
 api/constant.php
 api/app/Connection.php
 api/app/Utility.php
-api/vendor/
+api/vendor
 api/email_template/
 api/*.txt
 api/*.pem
@@ -39,3 +42,5 @@ config.php
 *.req
 *.crt
 *.sql
+*.png
+*.zip

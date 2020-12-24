@@ -82,17 +82,21 @@
 
 	</head>
 
-	<body class="layout-login">
+	<body class="layout-login" style="background-image: url(<?php echo __HOST__; ?>/client/template/assets/images/wallpaper.jpg); background-size: cover; background-position: center; background-attachment: fixed">
 		<div class="layout-login__overlay"></div>
-		<div class="layout-login__form bg-white" data-simplebar style="padding-top: 120px;">
+		<div class="layout-login__form" data-simplebar>
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
-				<a href="<?php echo __HOSTNAME__; ?>/template/index.html" class="navbar-brand" style="min-width: 0">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" width="280" height="280" alt="SIMRS RSUD Petala Bumi">
+				<a href="<?php echo __HOSTNAME__; ?>/" class="navbar-brand" style="min-width: 0">
+					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" width="180" height="180" alt="<?php echo __PC_CUSTOMER__; ?>">
+                    <!--<img class="navbar-brand-icon" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-black.png" width="180" height="180" alt="<?php echo __PC_CUSTOMER__; ?>">-->
 				</a>
 			</div>
-			<!-- <h4 class="m-0">RSUD Petala Bumi</h4>
-			<p class="mb-5 text-muted">SIMRS Integrated System</p> -->
-			<form>
+            <h4 class="m-0"><?php echo __PC_CUSTOMER__; ?></h4>
+			<p class="mb-5 text-muted">SIMRS Integrated System</p>
+
+
+
+            <form style="padding-top: 100px;">
 				<div class="form-group">
 					<label class="text-label" for="email_2">Email Address:</label>
 					<div class="input-group input-group-merge">
@@ -129,10 +133,41 @@
 				</div>
 			</form>
 			<div class="copyright-panel">
-				<small class="text-secondary">Powered By</small><br />
-				<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/pondokcoder1280.svg" width="120" />
+                <small class="text-secondary">Powered By</small><br />
+                <div class="row">
+                    <!--<div class="col-6">
+                        <img src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/icon.jpg" width="60" />
+                    </div>-->
+                    <div class="col-6" style="padding-top: 10px;">
+                        <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/pondokcoder1280.svg" width="120" />
+                    </div>
+                </div>
 			</div>
 		</div>
+        <style type="text/css">
+            form {
+                margin-top: -100px;
+            }
+            .layout-login__overlay {
+                background: rgba(250, 250, 250, .5) !important;
+            }
+            .layout-login__form {
+                position: relative;
+                box-shadow: 0 0 10px 10px rgba(0, 0, 0, .2);
+            }
+            .layout-login__form:after {
+                position: absolute !important;
+                top: 0; left: 0;
+                content: "";
+                width: 100%; height: 100%;
+                background: #fff !important;
+                z-index: -1;
+                opacity: .9;
+                background: #fff;
+                background-size: cover;
+                background-position: center;
+            }
+        </style>
 
 
 		<!-- jQuery -->
@@ -201,7 +236,6 @@
 				});
 			});
 		</script>
-
 
 	</body>
 

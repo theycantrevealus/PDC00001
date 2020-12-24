@@ -74,15 +74,36 @@
                             <option value="" disabled selected>Pilih Dokter</option>
                         </select>
                     </div>
-                    <div class="col-12 col-md-6 mb-3">
+
+                    <div class="col-12 col-md-6 mb-3 poli_lain">
                         <label>Penanggung Jawab Pasien <span class="red">*</span></label>
                         <input type="" name="pj_pasien" id="pj_pasien" maxlength="100" class="form-control inputan" required value="">
                     </div>
-                    <div class="col-12 col-md-6 mb-3">
+                    <div class="col-12 col-md-6 mb-3 poli_lain">
                         <label>Informasi didapat dari <span class="red">*</span></label>
                         <input type="" name="info_didapat_dari" id="info_didapat_dari" maxlength="100" class="form-control inputan" required value="">
                     </div>
-                     <div class="col-lg-8 card-form__body card-body">
+
+                    <div class="col-12 col-md-6 mb-3 poli_igd">
+                        <label>Cara Datang <span class="red">*</span></label>
+                        <select id="cara_datang" class="form-control select2 inputan" required>
+                            <option value="" disabled selected>Pilih Cara Datang</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-6 mb-3 poli_igd">
+                        <label>Bangsal <span class="red">*</span></label>
+                        <select id="bangsal" class="form-control select2 inputan" required>
+                            <option value="" disabled selected>Pilih Bangsal</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-12 mb-3 poli_igd">
+                        <label>Keterangan</label>
+                        <textarea name="keterangan_cara_datang" id="keterangan_cara_datang" maxlength="100" class="form-control inputan" value="" style="min-height: 150px"></textarea>
+                    </div>
+
+                    <div class="col-lg-12 card-form__body card-body">
                         <div class="form-row">
                             <button type="submit" class="btn btn-success" id="btnSubmit">Simpan Data</button>
                             &nbsp;

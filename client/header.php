@@ -12,12 +12,26 @@
 
 
 				<!-- Navbar Brand -->
-				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand" style="padding: 10px 20px;">
-					<img class="navbar-brand-icon" style="position: absolute; margin-top: 20px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="160" height="160" alt="SIMRS PETALA BUMI">
+				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand" style="padding: 10px;">
+					<!--<img class="navbar-brand-icon" style="position: absolute; margin-top: 20px;" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-white.png" width="160" height="160" alt="SIMRS PETALA BUMI">-->
+                    <img class="navbar-brand-icon" style="position: absolute; margin-top: 20px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="160" alt="<?php echo __PC_CUSTOMER__; ?>">
+                    <!--h3 style="padding-left: 60px !important; color: #fff;"><?php echo __PC_CUSTOMER__; ?></h3-->
 				</a>
 				
 				<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
-					<li class="nav-item dropdown">
+                    <?php
+                        if($_SESSION['jabatan']['response_data'][0]['uid'] == __UIDADMIN__)
+                        {
+                            ?>
+                            <li class="nav-item dropdown">
+                                <a href="#" id="refresh_protocol" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
+                                    <i class="material-icons nav-icon" id="counter-notif-identifier">refresh</i>
+                                </a>
+                            </li>
+                            <?php
+                        }
+                    ?>
+                    <li class="nav-item dropdown">
 						<a href="#notifications_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
 							<i class="material-icons nav-icon" id="counter-notif-identifier">notifications</i>
 						</a>
@@ -34,7 +48,7 @@
 					</li>
 					<li class="nav-item dropdown">
 						<a href="<?php echo __HOSTNAME__; ?>/template/#account_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
-							<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/avatar/demi.png" class="rounded-circle" width="32" alt="Frontted" />
+							<img src="<?php echo __HOST__; ?>images/pegawai/<?php echo $_SESSION['uid']; ?>.png?d=<?php echo date('H:i:s'); ?>" class="rounded-circle" width="32" alt="Frontted" />
 							<span class="ml-1 d-flex-inline">
 								<span class="text-light"><?php echo $_SESSION['nama']; ?></span>
 							</span>
@@ -46,7 +60,7 @@
 							</div>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item active" href="<?php echo __HOSTNAME__; ?>/template/index.html">Dashboard</a>
-							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/template/profile.html">My profile</a>
+							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/profile">My profile</a>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/template/edit-account.html">Edit account</a>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/logout">Logout</a>

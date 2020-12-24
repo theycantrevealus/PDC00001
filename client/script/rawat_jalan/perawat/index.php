@@ -84,6 +84,11 @@
 						return row["penjamin"];
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.prioritas.nama;
+                    }
+                },
 				/*{
 					"data" : null, render: function(data, type, row, meta) {
 						return row["user_resepsionis"];
@@ -105,6 +110,7 @@
 				if (data['status_assesmen'] === true){
 					$(row).css({"background-color":"#E0F5E5","color":"#000"});
 				}
+				$(".selector_dokter").select2();
 			}
 		});
 
@@ -142,6 +148,30 @@
 		    	});
 			}
 		});
+
+
+        Sync.onmessage = function(evt) {
+            var signalData = JSON.parse(evt.data);
+            var command = signalData.protocols;
+            var type = signalData.type;
+            var sender = signalData.sender;
+            var receiver = signalData.receiver;
+            var time = signalData.time;
+            var parameter = signalData.parameter;
+
+            if(command !== undefined && command !== null && command !== "") {
+                protocolLib[command](command, type, parameter, sender, receiver, time);
+            }
+        }
+
+
+
+        var protocolLib = {
+            antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
+                tableAntrianPerawat.ajax.reload();
+            }
+        };
 
 	});
 

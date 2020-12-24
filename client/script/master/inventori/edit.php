@@ -1,10 +1,24 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
 	$(function() {
+	    //load-kandungan-obat
 		var MODE = "edit";
 		var UID = __PAGES__[3];
 		var selectedDariSatuanList = [];
 		var invData;
-		let editorKeterangan;
+		var editorKeterangan;
+
+		/*ClassicEditor.create(document.querySelector("#txt_keterangan"), {
+            extraPlugins: [ MyCustomUploadAdapterPlugin ],
+            placeholder: "Keterangan Produk..."
+        }).then(editor => {
+            editorKeterangan = editor;
+            window.editor = editor;
+        })
+        .catch( err => {
+            //console.error( err.stack );
+        });*/
+
 		var imageResultPopulator = [];
 		var selectedKategoriObat = [];
 
@@ -16,17 +30,33 @@
 			},
 			type:"GET",
 			success:function(response) {
-				if(response.response_package.response_data !== undefined) {
+			    console.clear();
+			    console.log(response);
+			    if(response.response_package.response_data !== undefined) {
 					invData = response.response_package.response_data[0];
 				}
 
 				$("#txt_nama").val(invData.nama);
 				$(".label_nama").html(invData.nama.toUpperCase());
 
-				$("#txt_kode").val(invData.kode_barang);
-				$(".label_kode").html(invData.kode_barang.toUpperCase());
+				if(invData.kode_barang == undefined) {
+                    $("#txt_kode").val("-");
+                    $(".label_kode").html("-");
+                } else {
+                    $("#txt_kode").val(invData.kode_barang);
+                    $(".label_kode").html(invData.kode_barang.toUpperCase());
+                }
 
 				load_kategori("#txt_kategori", invData.kategori);
+				console.log(invData.kandungan);
+				for(var kk = 0; kk < invData.kandungan.length; kk++) {
+				    autoKandungan({
+                        kandungan: invData.kandungan[kk].kandungan,
+                        keterangan: invData.kandungan[kk].keterangan
+                    });
+                }
+				autoKandungan();
+
 				$(".label_kategori").html($("#txt_kategori").find("option:selected").text().toUpperCase());
 				load_manufacture("#txt_manufacture", invData.manufacture);
 				load_satuan("#txt_satuan_terkecil", invData.satuan_terkecil);
@@ -65,12 +95,9 @@
 					$(".load-kategori-obat-badge").append("<div style=\"margin:5px;\" class=\"badge badge-info\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + $("#label_kategori_obat_" + selectedKategoriObat[b]).html() + "</div>");
 				}
 
-				autoGudang(invData.lokasi);
+				autoGudang(invData.lokasi, invData.monitoring);
 
-				
-				
-
-				ClassicEditor.create(document.querySelector("#txt_keterangan"), {
+				/*ClassicEditor.create(document.querySelector("#txt_keterangan"), {
 					extraPlugins: [ MyCustomUploadAdapterPlugin ],
 					placeholder: "Keterangan Produk..."
 				}).then(editor => {
@@ -80,7 +107,19 @@
 				})
 				.catch( err => {
 					//console.error( err.stack );
-				});
+				});*/
+                ClassicEditor.create(document.querySelector("#txt_keterangan"), {
+                    extraPlugins: [ MyCustomUploadAdapterPlugin ],
+                    placeholder: "Keterangan Produk..."
+                }).then(editor => {
+                    editorKeterangan = editor;
+                    editorKeterangan.setData(invData.keterangan);
+                    window.editor = editor;
+                })
+                .catch( err => {
+                    //console.error( err.stack );
+                });
+
 			}
 		});
 
@@ -177,12 +216,12 @@
 				    reader.onload = () => resolve(reader.result);
 				    reader.onerror = error => reject(error);
 				});
-				var Axhr = this.xhr;
+
+		    	var Axhr = this.xhr;
 				
 				async function doSomething(fileTarget) {
 					fileTarget.then(function(result) {
 						var ImageName = result.name;
-
 						toBase64(result).then(function(renderRes) {
 							const data = new FormData();
 							data.append( 'upload', renderRes);
@@ -211,7 +250,7 @@
 		    editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
 		        var MyCust = new MyUploadAdapter( loader );
 		        var dataToPush = MyCust.imageList;
-		        hiJackImage(dataToPush);
+		        hiJackImage( dataToPush );
 		        return MyCust;
 		    };
 		}
@@ -249,7 +288,7 @@
 			});
 		}
 
-		$("#upload-image").change(function(){
+		$("#upload-image").change(function() {
 			readURL(this, basic);
 		});
 
@@ -260,7 +299,6 @@
 				var reader = new FileReader();
 
 				reader.onload = function (e) {
-					
 					cropper.croppie('bind', {
 						url: e.target.result
 					});
@@ -333,7 +371,7 @@
 					kategoriData = response.response_package.response_data;
 					$(target).find("option").remove();
 					for(var a = 0; a < kategoriData.length; a++) {
-						$(target).append("<option value=\"" + kategoriData[a].uid + "\">" + kategoriData[a].nama + "</option>");
+						$(target).append("<option " + ((kategoriData[a].uid == selected) ? "selected=\"selected\"" : "") +  " value=\"" + kategoriData[a].uid + "\">" + kategoriData[a].nama + "</option>");
 					}
 					$(".label_kategori").html($(target).find("option:selected").text().toUpperCase());
 				},
@@ -464,7 +502,7 @@
 		}
 
 		function autoHarga(setData = {}) {
-			var penjaminData;
+		    var penjaminData;
 			$("#table-penjamin tbody tr").remove();
 			$.ajax({
 				url:__HOSTAPI__ + "/Penjamin/penjamin",
@@ -517,7 +555,7 @@
 							autoGroup: false,
 							digitsOptional: true
 						}).val((setData[penjaminData[a].uid] == undefined) ? 0 : setData[penjaminData[a].uid].profit);
-
+						//console.log(setData[penjaminData[a].uid].profit);
 						$(newHargaRow).append(newCellPenjaminID);
 						$(newHargaRow).append(newCellPenjaminName);
 						$(newHargaRow).append(newCellPenjaminName);
@@ -535,8 +573,81 @@
 		}
 
 
+		function autoKandungan(setter = {
+		    kandungan: "",
+            keterangan: ""
+        }) {
+            $("#load-kandungan-obat tbody tr").removeClass("last_kandungan");
 
-		function autoGudang(lokasi) {
+            var newKandunganRow = document.createElement("TR");
+
+            var newKandunganID = document.createElement("TD");
+            var newKandunganName = document.createElement("TD");
+            var newKandunganKeterangan = document.createElement("TD");
+            var newKandunganAksi = document.createElement("TD");
+
+            $(newKandunganRow).append(newKandunganID);
+            $(newKandunganRow).append(newKandunganName);
+            var newKandunganNameInput = document.createElement("input");
+            $(newKandunganNameInput).addClass("form-control kandungan-check").attr("placeholder", "Kandungan Obat");
+            $(newKandunganName).append(newKandunganNameInput);
+            $(newKandunganNameInput).val(setter.kandungan);
+
+            $(newKandunganRow).append(newKandunganKeterangan);
+            var newKandunganKeteranganInput = document.createElement("input");
+            $(newKandunganKeteranganInput).addClass("form-control kandungan-check").attr("placeholder", "Keterangan");
+            $(newKandunganKeterangan).append(newKandunganKeteranganInput);
+            $(newKandunganKeteranganInput).val(setter.keterangan);
+
+            $(newKandunganRow).append(newKandunganAksi);
+            var newKandunganDelete = document.createElement("button");
+            $(newKandunganDelete).addClass("btn btn-sm btn-danger btn-delete-kandungan").html("<i class=\"fa fa-trash\"></i>");
+            $(newKandunganAksi).append(newKandunganDelete);
+
+
+            $(newKandunganRow).addClass("last_kandungan");
+
+            $("#load-kandungan-obat tbody").append(newKandunganRow);
+
+            rebaseKandungan();
+        }
+
+        $("body").on("keyup", ".kandungan-check", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            if(
+                $("#nama_kandungan_" + id).val() !== "" &&
+                $("#row_kandungan_" + id).hasClass("last_kandungan")
+            ) {
+                autoKandungan();
+            }
+        });
+
+		$("body").on("click", ".btn-delete-kandungan", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            if(!$("#row_kandungan_" + id).hasClass("last_kandungan")) {
+                $("#row_kandungan_" + id).remove();
+                rebaseKandungan();
+            }
+        });
+
+        function rebaseKandungan() {
+            $("#load-kandungan-obat tbody tr").each(function(e) {
+                var currentID = (e + 1);
+                $(this).attr("id", "row_kandungan_" + currentID);
+                $(this).find("td:eq(0)").html(currentID);
+                $(this).find("td:eq(1) input").attr("id", "nama_kandungan_" + currentID);
+                $(this).find("td:eq(2) input").attr("id", "keterangan_kandungan_" + currentID);
+                $(this).find("td:eq(3) button").attr("id", "delete_kandungan_" + currentID);
+            });
+        }
+
+
+
+		function autoGudang(lokasi, monitoring) {
 			var gudangData;
 			$("#table-lokasi-gudang tbody tr").remove();
 			$("#table-monitoring tbody tr").remove();
@@ -582,6 +693,7 @@
 						$(newMonitoringRow).attr({
 							"id": "monitoring_row_" + gudangData[a].uid
 						});
+
 						var newMonitoringCellGudangID = document.createElement("TD");
 						var newMonitoringCellGudangName = document.createElement("TD");
 						var newMonitoringCellGudangMinimum = document.createElement("TD");
@@ -590,6 +702,15 @@
 
 						$(newMonitoringCellGudangID).html((a + 1));
 						$(newMonitoringCellGudangName).html(gudangData[a].nama);
+
+						var nilaiMin = 0;
+                        var nilaiMax = 0;
+                        if(monitoring.length > 0) {
+                            if(gudangData[a].uid == monitoring[a].gudang) {
+                                nilaiMin = parseFloat(monitoring[a].min);
+                                nilaiMax = parseFloat(monitoring[a].max);
+                            }
+                        }
 						
 						var newMonitoringMinimum = document.createElement("INPUT");
 						$(newMonitoringCellGudangMinimum).append(newMonitoringMinimum);
@@ -600,7 +721,7 @@
 							prefix: "",
 							autoGroup: false,
 							digitsOptional: true
-						});
+						}).val(nilaiMin);
 
 						var newMonitoringMaximum = document.createElement("INPUT");
 						$(newMonitoringCellGudangMaximum).append(newMonitoringMaximum);
@@ -611,7 +732,7 @@
 							prefix: "",
 							autoGroup: false,
 							digitsOptional: true
-						});
+						}).val(nilaiMax);
 
 						$(newMonitoringCellGudangSatuan).html($("#txt_satuan_terkecil").find("option:selected").text());
 
@@ -736,7 +857,6 @@
 						type: 'canvas',
 						size: 'viewport'
 					}).then(function (image) {
-
 						var kategori = $("#txt_kategori").val();
 						var manufacture = $("#txt_manufacture").val();
 						var keterangan = editorKeterangan.getData();
@@ -804,9 +924,21 @@
 							}
 						});
 
+						var kandungan = [];
+						$("#load-kandungan-obat tbody tr").each(function() {
+						    if(
+						        !$(this).hasClass("last_kandungan") &&
+                                $(this).find("td:eq(1) input").val() !== ""
+                            ) {
+						        kandungan.push({
+                                    kandungan: $(this).find("td:eq(1) input").val(),
+                                    keterangan: $(this).find("td:eq(2) input").val()
+                                });
+                            }
+                        });
 
-
-
+                        console.log("Image Mode");
+                        console.log(monitoring);
 						$.ajax({
 							url:__HOSTAPI__ + "/Inventori",
 							async:false,
@@ -825,6 +957,7 @@
 								satuan_terkecil:satuan_terkecil,
 								listKategoriObat:listKategoriObat,
 								satuanKonversi:satuanKonversi,
+                                kandungan: kandungan,
 								penjaminList:penjaminList,
 								gudangMeta:gudangMeta,
 								monitoring:monitoring
@@ -858,7 +991,7 @@
 					
 					var satuanKonversi = [];
 					//Satuan
-					$("#table-konversi-satuan tbody tr").each(function(){
+					$("#table-konversi-satuan tbody tr").each(function() {
 						var dari = $(this).find("td:eq(1) select").val();
 						var ke = $(this).find("td:eq(2) select").val();
 						var rasio = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
@@ -873,7 +1006,7 @@
 
 					var penjaminList = [];
 					//Penjamin
-					$("#table-penjamin tbody tr").each(function(){
+					$("#table-penjamin tbody tr").each(function() {
 						var id = $(this).attr("id").split("_");
 						id = id[id.length - 1];
 						var marginType = $(this).find("td:eq(2) select").val();
@@ -901,7 +1034,7 @@
 
 					var monitoring = [];
 					//Monitoring
-					$("#table-monitoring tbody tr").each(function(){
+					$("#table-monitoring tbody tr").each(function() {
 						var id = $(this).attr("id").split("_");
 						id = id[id.length - 1];
 
@@ -917,6 +1050,20 @@
 						}
 					});
 
+                    var kandungan = [];
+                    $("#load-kandungan-obat tbody tr").each(function() {
+                        if(
+                            !$(this).hasClass("last_kandungan") &&
+                            $(this).find("td:eq(1) input").val() !== ""
+                        ) {
+                            kandungan.push({
+                                kandungan: $(this).find("td:eq(1) input").val(),
+                                keterangan: $(this).find("td:eq(2) input").val()
+                            });
+                        }
+                    });
+                    console.log("Non Image Mode");
+					console.log(monitoring);
 					$.ajax({
 						url:__HOSTAPI__ + "/Inventori",
 						async:false,
@@ -935,6 +1082,7 @@
 							satuan_terkecil:satuan_terkecil,
 							listKategoriObat:listKategoriObat,
 							satuanKonversi:satuanKonversi,
+                            kandungan: kandungan,
 							penjaminList:penjaminList,
 							gudangMeta:gudangMeta,
 							monitoring:monitoring

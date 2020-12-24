@@ -66,8 +66,6 @@
 		tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
 		penjaminBuilder = refresh_penjamin("#txt_penjamin", __UIDPENJAMINUMUM__);
 
-
-
 		function refresh_kelas_data(tindakanKelas) {
 			var columnKelas = {};
 			var dataBuilder;
@@ -114,6 +112,7 @@
 						},
 						type:"GET",
 						success:function(response) {
+
 							var DataPopulator = {};
 							var DataPopulatorParsed = [];
 
@@ -122,22 +121,22 @@
 							var data_harga = response.response_package;
 
 							for(var key = 0; key < data_harga.length; key++) {
-								var kelasTarget = data_harga[key].tindakan;
-								
-								if(DataPopulator[kelasTarget] === undefined) {
-									DataPopulator[kelasTarget] = {
-										uid: kelasTarget,
-										nama: data_harga[key].tindakan_detail.nama
-									};
+								if(data_harga[key].tindakan_detail != null) {
+									var kelasTarget = data_harga[key].tindakan;
+									if(DataPopulator[kelasTarget] === undefined) {
+										DataPopulator[kelasTarget] = {
+											uid: kelasTarget,
+											nama: data_harga[key].tindakan_detail.nama
+										};
 
-									if(DataPopulator[kelasTarget].kelas_harga == undefined) {
-										DataPopulator[kelasTarget].kelas_harga = columnKelas;
+										if(DataPopulator[kelasTarget].kelas_harga == undefined) {
+											DataPopulator[kelasTarget].kelas_harga = columnKelas;
+										}
 									}
-								}
-
-								var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
-								if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
-									DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+									var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
+									if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
+										DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+									}
 								}
 							}
 							
@@ -237,22 +236,24 @@
 									var data_harga = response.response_package;
 
 									for(var key = 0; key < data_harga.length; key++) {
-										var kelasTarget = data_harga[key].tindakan;
-										
-										if(DataPopulator[kelasTarget] === undefined) {
-											DataPopulator[kelasTarget] = {
-												uid: kelasTarget,
-												nama: data_harga[key].tindakan_detail.nama
-											};
+										if(data_harga[key].tindakan_detail != undefined) {
+											var kelasTarget = data_harga[key].tindakan;
+											
+											if(DataPopulator[kelasTarget] === undefined) {
+												DataPopulator[kelasTarget] = {
+													uid: kelasTarget,
+													nama: data_harga[key].tindakan_detail.nama
+												};
 
-											if(DataPopulator[kelasTarget].kelas_harga == undefined) {
-												DataPopulator[kelasTarget].kelas_harga = columnKelas;
+												if(DataPopulator[kelasTarget].kelas_harga == undefined) {
+													DataPopulator[kelasTarget].kelas_harga = columnKelas;
+												}
 											}
-										}
 
-										var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
-										if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
-											DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+											var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
+											if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
+												DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+											}
 										}
 									}
 									
@@ -263,7 +264,7 @@
 											autonum: autonum,
 											tindakan: "<label id=\"tindakan_" + DataPopulator[key].uid + "\">" + DataPopulator[key].nama + "</label>",
 											tindakan_uid : DataPopulator[key].uid,
-											action: "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-pencil-alt\"></i></button>"
+											action: "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-pencil-alt\"></i></button> <button class=\"btn btn-danger btn-sm btn-delete-tindakan-kelas\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-trash\"></i></button>"
 										};
 
 										for(var KelasKey in DataPopulator[key]) {
@@ -311,6 +312,7 @@
 			var uid = $(this).attr("tindakan");
 
 			tindakanBuilder = refresh_tindakan("#txt_tindakan", uid);
+			$("#txt_tindakan").attr("disabled", "disabled");
 			dataBuilder = refresh_kelas_data(tindakanKelas);
 			var tempDataBuilder = dataBuilder;
 
@@ -371,13 +373,34 @@
 					type:"DELETE",
 					success:function(response) {
 						tableTindakan.ajax.reload();
-						$(".separated_comma").digits();
 					},
 					error: function(response) {
 						console.log(response);
 					}
 				});
 			}
+		});
+
+		$("body").on("click", ".btn-delete-tindakan-kelas", function() {
+			var tindakan = $(this).attr("tindakan");
+			var conf = confirm("Hapus tindakan item?");
+			if(conf) {
+				$.ajax({
+					url:__HOSTAPI__ + "/Tindakan/master_tindakan_kelas_harga/" + tindakan + "/" + $("#filter-penjamin").val(),
+					beforeSend: function(request) {
+						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+					},
+					type:"DELETE",
+					success:function(response) {
+						console.log(response);
+						tableTindakan.ajax.reload();
+					},
+					error: function(response) {
+						console.log(response);
+					}
+				});
+			}
+			return false;
 		});
 
 		$("#filter-penjamin").change(function() {
@@ -413,6 +436,7 @@
 		
 		$("#tambah-tindakan").click(function() {
 			$("#txt_nama").val("");
+			$("#txt_tindakan").removeAttr("disabled");
 
 			//Prepare Kelas
 			$("#form-tambah table tbody").html("");
@@ -498,23 +522,52 @@
 			var me = $(this);
 			var kelas = me.attr("kelas");
 			var kelasIden = me.attr("identifier");
+            if($("#satu_harga").is(":checked")) {
+                $("#txt_penjamin option").each(function () {
+                    var penjaminType = $(this);
+                    if (metaData[penjaminType.attr("value")] == undefined) {
+                        metaData[penjaminType.attr("value")] = {};
+                    }
 
-			if(metaData[$("#txt_penjamin").val()] == undefined) {
-				metaData[$("#txt_penjamin").val()] = {};
-			}
+                    if(metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] == undefined) {
+                        metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] = {};
+                    }
+                });
+            } else {
+                if (metaData[$("#txt_penjamin").val()] == undefined) {
+                    metaData[$("#txt_penjamin").val()] = {};
+                }
 
-			if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
-				metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
-			}
+                if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
+                    metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
+                }
+            }
+
+
 
 			$("#form-tambah table tbody tr").each(function() {
 				var us = $(this);
-				if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
-					metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
-				}
+                if($("#satu_harga").is(":checked")) {
+                    $("#txt_penjamin option").each(function () {
+                        var penjaminType = $(this);
+                        if(metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+                            metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
+                        }
+                    });
+                } else {
+                    if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+                        metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
+                    }
+                }
 			});
-
-			metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+            if($("#satu_harga").is(":checked")) {
+                $("#txt_penjamin option").each(function () {
+                    var penjaminType = $(this);
+                    metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+                });
+            } else {
+                metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+            }
 		});
 
 		$("#btnSubmitMasterTindakan").click(function() {
@@ -554,13 +607,12 @@
 			var form_data = {};
 			if(MODE == "tambah") {
 				form_data = {
-					request: "tambah_tindakan_kelas_harga",
+					request: "update_tindakan_kelas_harga",
 					data: metaData
 				};
 			} else {
 				form_data = {
-					request: "edit_tindakan_kelas_harga",
-					uid: selectedUID,
+					request: "update_tindakan_kelas_harga",
 					data: metaData
 				};
 			}
@@ -574,6 +626,7 @@
 				},
 				type: "POST",
 				success: function(response){
+					console.log(response);
 					metaData = {};
 					dataBuilder = refresh_kelas_data(tindakanKelas);
 					tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
@@ -618,6 +671,15 @@
 						<select class="form-control" id="txt_penjamin"></select>
 					</div>
 				</div>
+                <div class="row">
+                    <div class="form-group col-md-5">
+                        <div class="custom-control custom-checkbox-toggle custom-control-inline mr-1">
+                            <input checked="" type="checkbox" id="satu_harga" class="custom-control-input">
+                            <label class="custom-control-label" for="satu_harga">Yes</label>
+                        </div>
+                        <label for="subscribe">Satu Harga</label>
+                    </div>
+                </div>
 				<div class="row">
 					<div class="form-group col-md-12" id="kelas_loader">
 						<table class="table largeDataType">

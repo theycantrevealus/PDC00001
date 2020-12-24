@@ -7,7 +7,7 @@
 ?>
 <?php require 'head.php'; ?>
 <body class="layout-default">
-	
+
 	<?php
 		if(__PAGES__[0] == 'anjungan') {
 			require 'pages/anjungan/index.php';
@@ -125,11 +125,11 @@
 				?>
 			</div>
 			<div class="content-shimmer">
-				<span>
-					<img width="80" height="80" src="<?php echo __HOSTNAME__; ?>/template/assets/images/preloader4.gif" />
+				<center>
+					<img width="240" height="220" src="<?php echo __HOSTNAME__; ?>/template/assets/images/preloader.gif" />
 					<br />
 					Loading...
-				</span>
+				</center>
 			</div>
 		</div>
 	</div>
@@ -145,36 +145,14 @@
 	}"></app-settings>
 	</div> -->
 	<?php require 'script.php'; ?>
-	<!-- <div class="bsod">
-		<div id="page">
-			<div id="container">
-				<h1>:(</h1>
-				<h2>Your PC ran into a problem and needs to restart. We're just collecting some error info, and then we'll restart for you.</h2>
-				<h2>
-					<span id="percentage">0</span>% complete
-				</h2>
-				<div id="details">
-					<div id="qr">
-						<div id="image">
-							<img src="http://xontab.com/experiments/Javascript/BSOD/qr.png" alt="QR Code" />
-						</div>
-					</div>
-					<div id="stopcode">
-						<h4>
-							MAMPOS!!!
-						</h4>
-						<h5>
-							If you call a support person, give them this info:<br/>Stop Code: 404 PAGE NOT FOUND
-						</h5>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div> -->
-
 	<script type="text/javascript">
-		var Sync;
 		$(function() {
+			$(".txt_tanggal").datepicker({
+				dateFormat: 'DD, dd MM yy',
+				autoclose: true
+			});
+			
+			moment.locale('id');
 			var parentList = [];
 
 			$(".sidebar-menu-item.active").each(function(){
@@ -259,89 +237,13 @@
 				});
 			});
 
-			if ("WebSocket" in window) {
-				var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
-				
-				Sync = new WebSocket(serverTarget);
-				Sync.onopen = function() {
-					$(".global-sync-container").fadeOut();
-				}
-
-				Sync.onmessage = function(evt) {
-					var signalData = JSON.parse(evt.data);
-					var command = signalData.protocols;
-					var type = signalData.type;
-					var sender = signalData.sender;
-					var receiver = signalData.receiver;
-					var time = signalData.time;
-					var parameter = signalData.parameter;
-
-					if(command !== undefined && command !== null && command !== "") {
-						if(protocolLibGLOBAL[command] !== undefined) {
-							if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
-								protocolLibGLOBAL[command](command, type, parameter, sender, receiver, time);
-							}
-						}
-					}
-				}
-
-				var protocolLibGLOBAL = {
-					akses_update: function(protocols, type, parameter, sender, receiver, time) {
-						if(sender != receiver) {
-							$.ajax({
-								url:__HOSTAPI__ + "/Pegawai",
-								beforeSend: function(request) {
-									request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-								},
-								type:"POST",
-								data: {
-									"request": "refresh_pegawai_access",
-									"uid": __ME__
-								},
-								success:function(resp) {
-									notification ("info", "Hak modul Anda sudah diupdate. Refresh halaman untuk akses baru", 3000, "hasil_modul_update");
-								}
-							});
-						} else {
-							//
-						}
-					}
-				};
-
-				Sync.onclose = function() {
-					$(".global-sync-container").fadeIn();
-					var tryCount = 1;
-					setInterval(function() {
-						console.clear();
-						console.log("CPR..." + tryCount);
-						var checkSocket = SocketCheck(serverTarget);
-						tryCount++;
-					}, 1000);
-				}
-
-				Sync.onerror = function() {
-					$(".global-sync-container").fadeIn();
-					var tryCount = 1;
-					setInterval(function() {
-						console.clear();
-						console.log("CPR..." + tryCount);
-						var checkSocket = SocketCheck(serverTarget);
-						tryCount++;
-					}, 1000);
-				}
-
-				return Sync;
-			} else {
-				console.log("WebSocket Not Supported");
-			}
-
-			function SocketCheck(__HOST__) {
-				var checkSocket = new WebSocket(__HOST__);
-				checkSocket.onopen = function() {
-					location.reload();
-				}
-			}
+			$("body").on("click", "#refresh_protocol", function() {
+			    notification ("info", "Refresh page", 3000, "notif_update");
+                push_socket(__ME__, "refresh", "*", "Refresh page", "info");
+            });
 		});
+
+
 
 		function refresh_notification() {
 			$.ajax({
@@ -390,17 +292,37 @@
 			});
 		}
 
-		function push_socket(sender, protocols, receiver, parameter, type) {
-			var msg = {
-				protocols: protocols,
-				sender: sender,
-				receiver: receiver,
-				parameter: parameter,
-				type: type
-			};
 
-			Sync.send(JSON.stringify(msg));
-		}
+
+        var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
+		var Sync;
+        var tm;
+        var protocolLib = {
+            akses_update: function(protocols, type, parameter, sender, receiver, time) {
+                if(sender != receiver) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Pegawai",
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        data: {
+                            "request": "refresh_pegawai_access",
+                            "uid": __ME__
+                        },
+                        success:function(resp) {
+                            notification ("info", "Hak modul Anda sudah diupdate. Refresh halaman untuk akses baru", 3000, "hasil_modul_update");
+                        }
+                    });
+                } else {
+                    //
+                }
+            },
+            refresh: function(protocols, type, parameter, sender, receiver, time) {
+                location.reload();
+            }
+        };
+
 	</script>
 	<?php
 		if(empty(__PAGES__[0])) {
@@ -424,6 +346,109 @@
 		}
 	?>
 	<script type="text/javascript">
+        function push_socket(sender, protocols, receiver, parameter, type) {
+
+            if(Sync.readyState === WebSocket.CLOSED) {
+                Sync = SocketCheck(serverTarget, protocolLib, tm);
+            }
+
+            var msg = {
+                protocols: protocols,
+                sender: sender,
+                receiver: receiver,
+                parameter: parameter,
+                type: type
+            };
+
+            Sync.send(JSON.stringify(msg));
+        }
+
+        $(function() {
+            if ("WebSocket" in window) {
+
+                //var Sync = new WebSocket(serverTarget);
+                console.log(protocolLib);
+                Sync = SocketCheck(serverTarget, protocolLib, tm);
+
+            } else {
+                console.log("WebSocket Not Supported");
+            }
+
+
+
+
+
+
+
+
+        });
+
+        function SocketCheck(serverTarget, protocolLib, tm) {
+            var audio;
+            var Sync = new WebSocket(serverTarget);
+            Sync.onopen = function() {
+                clearInterval(tm);
+                console.log("connected");
+                $(".global-sync-container").fadeOut();
+            }
+
+            Sync.onmessage = function(evt) {
+                var signalData = JSON.parse(evt.data);
+                var command = signalData.protocols;
+                var type = signalData.type;
+                var sender = signalData.sender;
+                var receiver = signalData.receiver;
+                var time = signalData.time;
+                var parameter = signalData.parameter;
+
+                if(command !== undefined && command !== null && command !== "") {
+                    if(protocolLib[command] !== undefined) {
+                        if(command == "anjungan_kunjungan_panggil") {
+                            if(audio !== undefined && audio.audio !== undefined) {
+                                if(!audio.paused) {
+                                    audio.audio.pause();
+                                    audio.audio.currentTime = 0;
+                                } else {
+                                    alert();
+                                }
+                            }
+                            audio = protocolLib[command](command, type, parameter, sender, receiver, time);
+                        } else {
+                            if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
+                                protocolLib[command](command, type, parameter, sender, receiver, time);
+                            } else {
+                                protocolLib[command](command, type, parameter, sender, receiver, time);
+                            }
+                        }
+                    }
+                }
+            }
+
+            Sync.onclose = function() {
+                $(".global-sync-container").fadeIn();
+                var tryCount = 1;
+                tm = setInterval(function() {
+                    console.clear();
+                    console.log("CPR..." + tryCount);
+                    Sync = SocketCheck(serverTarget, protocolLib, tm);
+                    tryCount++;
+                }, 3000);
+            }
+
+            Sync.onerror = function() {
+                /*$(".global-sync-container").fadeIn();
+                var tryCount = 1;
+                tm = setInterval(function() {
+                    console.clear();
+                    console.log("CPR..." + tryCount);
+                    Sync = SocketCheck(serverTarget, protocolLib);
+                    tryCount++;
+                }, 3000);*/
+            }
+
+            return Sync;
+        }
+
 		function inArray(needle, haystack) {
 			var length = haystack.length;
 			for(var i = 0; i < length; i++) {
@@ -431,6 +456,69 @@
 			}
 			return false;
 		}
+
+        var floatContainer = document.createElement("DIV");
+        $(floatContainer).addClass("manual_container");
+        $("body").append(floatContainer);
+
+        function notify_manual(mode, title, time, identifier, setTo, pos = "left") {
+            var alertContainer = document.createElement("DIV");
+            var alertTitle = document.createElement("STRONG");
+            var alertDismiss = document.createElement("BUTTON");
+            var alertCloseButton = document.createElement("SPAN");
+
+            $(alertContainer).addClass("alert alert-dismissible fade show alert-" + mode).attr({
+                "role": "alert",
+                "id": identifier
+            });
+
+            $(alertTitle).html(title);
+
+            $(alertDismiss).attr({
+                "type": "button",
+                "data-dismiss": "alert",
+                "aria-label": "Close"
+            }).addClass("close");
+
+            $(alertCloseButton).attr({
+                "aria-hidden": true
+            }).html("&times;");
+
+            $(alertContainer).append(alertTitle);
+            $(alertDismiss).append(alertCloseButton);
+            $(alertContainer).append(alertDismiss);
+
+            var parentPos = $(setTo).offset();
+            if(parentPos !== undefined) {
+                var topPos = parentPos.top;
+                var leftPos = parentPos.left;
+
+                var marginFrom = 30;
+
+                var floatContainer = document.createElement("DIV");
+                $(floatContainer).append(alertContainer);
+
+                $(floatContainer).addClass("manual_container");
+
+                $("body").append(floatContainer);
+
+                if(pos === "left") {
+                    $(".manual_container").css({
+                        "top": topPos + "px",
+                        "left": (leftPos - $(floatContainer).width() - marginFrom) + "px"
+                    });
+                } else if(pos === "bottom") {
+                    $(".manual_container").css({
+                        "top": (topPos - $(floatContainer).width() - marginFrom) + "px",
+                        "left": leftPos + "px"
+                    });
+                }
+
+                setTimeout(function() {
+                    $(alertContainer).fadeOut();
+                }, time);
+            }
+        }
 
 		function notification (mode, title, time, identifier) {
 			var alertContainer = document.createElement("DIV");
@@ -516,6 +604,16 @@
 			return dataFaskes;
 		}
 
+		function str_pad(str_length, target, objectPad = "0") {
+			target = "" + target;
+			var pad = "";
+			for(var a = 1; a <= str_length; a++) {
+				pad += objectPad;
+			}
+			var ans = pad.substring(0, pad.length - target.length) + target;
+			return ans;
+		}
+
 		$(function() {
 			var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
 			var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
@@ -578,19 +676,6 @@
 			monthName[9]="Oktober";
 			monthName[10]="November";
 			monthName[11]="Desember";
-
-			$(".txt_tanggal").datepicker({
-				dateFormat: 'DD, dd MM yy',
-				onSelect: function(date) {
-					var date = $(this).datepicker('getDate'),
-					day  = date.getDate(),
-					month = date.getMonth() + 1,
-					year =  date.getFullYear();
-
-					var dayOfWeek = weekday[date.getUTCDay()+1];
-					$(this).datepicker("setDate", dayOfWeek);
-		        }
-			});
 		});
 	</script>
 	<div class="notification-container"></div>
