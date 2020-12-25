@@ -7,7 +7,6 @@
                     <li class="breadcrumb-item active" aria-current="page">BPJS Claim</li>
                 </ol>
             </nav>
-            <h4 class="m-0">Resep</h4>
         </div>
     </div>
 </div>
@@ -16,66 +15,67 @@
 <div class="container-fluid page__container">
     <div class="row card-group-row">
         <div class="col-lg-12 col-md-12">
-            <div class="card-group">
-                <div class="card card-body">
-                    <div class="d-flex flex-row">
-                        <div class="col-md-2">
-                            <i class="material-icons icon-muted icon-30pt">insert_chart</i>
-                        </div>
-                        <div class="col-md-10">
-                            <b>Status Ketersediaan Obat</b>
-                            <br />
-                            <span>Apotek</span>
-                            <br />
-                            <span>
-								<b class="text-warning">10 item</b> (hampir habis) <br />
-								<b class="text-danger">2 item</b> (habis)
-							</span>
-                            <h6 class="text-right">
-                                <small><a href="<?php echo __HOSTNAME__; ?>"><i class="fa fa-cubes"></i> Amprah</a></small>
-                            </h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="card card-body">
-                    <div class="d-flex flex-row">
-                        <div class="col-md-12">
-                            <b>Kebutuhan Obat Terkini</b>
-                            <ol id="required_item_list">
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-                <div class="card card-body">
-                    <div class="d-flex flex-row">
-                        <div class="col-md-12">
-                            <b>Perubahan Resep</b>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">Tagihan BPJS</h5>
+                    <h5 class="card-header__title flex m-0">VClaim BPJS</h5>
                 </div>
                 <div class="card-header card-header-tabs-basic nav" role="tablist">
-                    <a href="#list-resep" class="active" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">Resep</a>
+                    <a href="#tracked" class="active" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">SEP Terdaftar</a>
+                    <a href="#untracked" data-toggle="tab" role="tab" aria-selected="false">SEP Lainnya</a>
                 </div>
                 <div class="card-body tab-content">
-                    <div class="tab-pane active show fade" id="list-resep">
-                        <table class="table table-bordered table-striped" id="table-resep" style="font-size: 0.9rem;">
-                            <thead class="thead-dark">
-                            <tr>
-                                <th class="wrap_content">No</th>
-                                <th>Poliklinik</th>
-                                <th>Pasien</th>
-                                <th>Dokter</th>
-                                <th>Penjamin</th>
-                                <th>Aksi</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                    <div class="tab-pane active show fade" id="tracked">
+                        <div class="card">
+                            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                <h5 class="card-header__title flex m-0">SEP</h5>
+                                <div class="col-md-6" style="border: solid 1px #ccc">
+                                    <input id="range_sep" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                </div>
+                            </div>
+                            <div class="card-body tab-content">
+                                <div class="tab-pane active show fade" id="list-resep">
+
+                                    <table class="table table-bordered table-striped largeDataType" id="table-sep">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th style="width: 25%;">Pasien</th>
+                                            <th style="width: 20%;">Perujuk</th>
+                                            <th>No. SEP</th>
+                                            <th class="wrap_content">Poli</th>
+                                            <th class="wrap_content">Aksi</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane show fade" id="untracked">
+                        <div class="card">
+                            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                <h5 class="card-header__title flex m-0">SEP Untracked</h5>
+                            </div>
+                            <div class="card-body tab-content">
+                                <div class="tab-pane active show fade" id="list-resep">
+
+                                    <table class="table table-bordered table-striped largeDataType" id="table-sep-untrack">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>No. RM</th>
+                                            <th>Pasien</th>
+                                            <th>No. SEP</th>
+                                            <th>Poli</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

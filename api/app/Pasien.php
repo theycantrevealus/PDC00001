@@ -189,10 +189,51 @@ class Pasien extends Utility
             $TerminologiInfo = $Terminologi::get_terminologi_items_detail('terminologi_item', $value['panggilan']);
             $data['response_data'][$key]['panggilan_name'] = $TerminologiInfo['response_data'][0];
 
+
+            //Jenkel
+            $JenkelInfo = $Terminologi::get_terminologi_items_detail('terminologi_item', $value['jenkel']);
+            $data['response_data'][$key]['jenkel_detail'] = $JenkelInfo['response_data'][0];
+
+            //Agama
+            $AgamaInfo = $Terminologi::get_terminologi_items_detail('terminologi_item', $value['agama']);
+            $data['response_data'][$key]['agama_detail'] = $AgamaInfo['response_data'][0];
+
+            $data['response_data'][$key]['tanggal_lahir_parsed'] = date('d F Y', strtotime($value['tanggal_lahir']));
+
             $data['response_data'][$key]['usia'] = date("Y") - date("Y", strtotime($value['tanggal_lahir']));
             $data['response_data'][$key]['periode'] = date('m/y', strtotime($value['created_at']));
-            $data['response_data'][$key]['autonum'] = $autonum;
 
+            //Penjamin Pasien
+            $Detail = self::$query->select('pasien_penjamin', array(
+                'penjamin',
+                'valid_awal',
+                'valid_akhir',
+                'rest_meta',
+                'terdaftar'
+            ))
+                ->where(array(
+                    'pasien_penjamin.pasien' => '= ?',
+                    'AND',
+                    'pasien_penjamin.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($Detail['response_data'] as $DKey => $DValue)
+            {
+                //Detail Penjamin
+                $Penjamin = new Penjamin(self::$pdo);
+                $PenjaminDetail = $Penjamin::get_penjamin_detail($DValue['penjamin']);
+                $Detail['response_data'][$DKey]['penjamin_detail'] = $PenjaminDetail['response_data'][0];
+
+                $Detail['response_data'][$DKey]['valid_awal'] = date('d F Y', strtotime($DValue['valid_awal']));
+                $Detail['response_data'][$DKey]['valid_akhir'] = date('d F Y', strtotime($DValue['valid_akhir']));
+                $Detail['response_data'][$DKey]['terdaftar'] = date('d F Y', strtotime($DValue['terdaftar']));
+            }
+            $data['response_data'][$key]['history_penjamin'] = $Detail['response_data'];
+
+
+            $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
         }
 
@@ -448,8 +489,7 @@ class Pasien extends Utility
         }
     }
 
-    private function proceed_import_pasien($parameter)
-    {
+    private function proceed_import_pasien($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -464,9 +504,9 @@ class Pasien extends Utility
                 'uid'
             ))
                 ->where(array(
-                    'master_inv.no_rm' => '= ?',
+                    'pasien.no_rm' => '= ?',
                     'AND',
-                    'master_inv.nik' => '= ?',
+                    'pasien.nik' => '= ?',
                 ), array(
                     $value['no_rm'],
                     $value['nik']
@@ -610,17 +650,17 @@ class Pasien extends Utility
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
-                'pasien.deleted_at' => 'IS NULL'
-            );
-
-            $paramValue = array();
-        } else {
-            $paramData = array(
                 'pasien.deleted_at' => 'IS NULL',
                 'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
                 'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'pasien.deleted_at' => 'IS NULL'
             );
 
             $paramValue = array();

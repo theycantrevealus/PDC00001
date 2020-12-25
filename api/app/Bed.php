@@ -37,7 +37,10 @@ class Bed extends Utility {
 				/*case 'ruangan-lantai':
 					return self::get_ruangan_lantai('master_unit_ruangan', $parameter[2]);
 					break;*/
-
+                
+                case 'bed-ruangan':
+                    return self::get_bed_ruangan('master_unit_bed', $parameter[2]);
+                    break;
 				default:
 					# code...
 					break;
@@ -114,7 +117,7 @@ class Bed extends Utility {
 		return $data;
 	}
 
-	private function get_bed_detail($table, $parameter){
+	public function get_bed_detail($table, $parameter){
 		$data = self::$query
 					->select($table, 
 						array(
@@ -150,7 +153,9 @@ class Bed extends Utility {
 						array(
 							'uid',
 							'nama',
+							'status',
 							'uid_lantai',
+							'uid_ruangan',
 							'created_at',
 							'updated_at'
 						)
@@ -158,7 +163,7 @@ class Bed extends Utility {
 					->where(array(
 							$table . '.deleted_at' => 'IS NULL',
 							'AND',
-							$table . '.uid_lantai' => '= ?'
+							$table . '.uid_ruangan' => '= ?'
 						),
 						array($parameter)
 					)
@@ -193,11 +198,11 @@ class Bed extends Utility {
 		} else {
 			$arr = ['','ruangan-detail', $parameter['ruangan']];
 
-			$ruangan = new Ruangan(self::$pdo);
+			/*$ruangan = new Ruangan(self::$pdo);
 			$get_ruangan = $ruangan::__GET__($arr);
 
-			$ruangan_res = $get_ruangan['response_data'][0];
-			$uid_lantai = $ruangan_res['uid_lantai'];
+			$ruangan_res = $get_ruangan['response_data'][0];*/
+			$uid_lantai = $parameter['lantai'];
 
 			$uid = parent::gen_uuid();
 			$bed = self::$query
@@ -242,24 +247,23 @@ class Bed extends Utility {
 		}
 	}
 
-	private function edit_bed($table, $parameter){
+	private function edit_bed($table, $parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
 		$old = self::get_bed_detail('master_unit_bed', $parameter['uid']);
 
-		$arr = ['','ruangan-detail', $parameter['ruangan']];
 		$ruangan = new Ruangan(self::$pdo);
-		$get_ruangan = $ruangan::__GET__($arr);
+		$get_ruangan = $ruangan::get_ruangan_detail('master_unit_ruangan', $parameter['ruangan']);
 
 		$ruangan_res = $get_ruangan['response_data'][0];
-		$uid_lantai = $ruangan_res['uid_lantai'];
+		$uid_lantai = $ruangan_res['lantai'];
 
 		$bed = self::$query
 				->update($table, array(
 						'nama'=>$parameter['nama'],
 						'uid_ruangan'=>$parameter['ruangan'],
-						'uid_lantai'=>$uid_lantai,
+						'uid_lantai'=>$parameter['lantai'],
 						'updated_at'=>parent::format_date()
 					)
 				)

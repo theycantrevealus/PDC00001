@@ -19,19 +19,31 @@
 				<p><strong class="headings-color">Informasi Gudang</strong></p>
 				<p style="font-size: 0.9rem;" class="text-muted"></p>
 			</div>
-			<div class="col-lg-8 card-form__body card-body">
+			<div class="col-lg-4 card-form__body card-body">
 				<div class="form-row">
-					<div class="col-12 col-md-6 mb-3">
+					<div class="col-12 col-md-12">
 						<label for="">Gudang</label>
 						<select class="form-control" id="txt_gudang"></select>
 					</div>
-					<div class="col-12 col-md-6 mb-3" style="padding-top: 22.5px;">
-						<button class="btn btn-info" id="tambahStokAwal">
-							<i class="fa fa-plus"></i> Tambah Stok Awal
-						</button>
+					<div class="col-12 col-md-12">
+                        <br />
+                        <button class="btn btn-info" id="tambahStokAwal">
+                            <i class="fa fa-plus"></i> Tambah Stok Awal
+                        </button>
 					</div>
 				</div>
 			</div>
+            <div class="col-lg-4 card-form__body card-body">
+                <div class="form-row">
+                    <div class="col-12 col-md-12">
+                        <label for="">Import Stock</label>
+                        <br />
+                        <button class="btn btn-info" id="importStokAwal">
+                            <i class="fa fa-plus"></i> Import Stok Awal
+                        </button>
+                    </div>
+                </div>
+            </div>
 		</div>
 	</div>
 	<div class="card card-form">

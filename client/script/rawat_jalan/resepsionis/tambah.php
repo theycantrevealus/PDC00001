@@ -2,6 +2,9 @@
 	$(function(){
 		var currentPasien = localStorage.getItem("currentPasien");
 		var currentAntrianID = localStorage.getItem("currentAntrianID");
+		var curremtAntrianType = localStorage.getItem("currentAntrianType");
+
+		var penjaminMetaData;
 
 		/*alert(currentPasien);
 		alert(currentAntrianID);*/
@@ -10,8 +13,20 @@
 		var dataPasien = loadPasien(uid_pasien);
 
 		loadPenjamin();
-		loadPoli();
-		loadPrioritas();
+		if(curremtAntrianType !== "DEFAULT") {
+            loadPoli(curremtAntrianType);
+            loadDokter(curremtAntrianType);
+        } else {
+            loadPoli();
+        }
+
+        if(curremtAntrianType !== "DEFAULT") {
+            loadPrioritas(__PRIORITY_HIGH__);
+            loadBed(__KAMAR_IGD__);
+            loadCaraDatang();
+        } else {
+            loadPrioritas();
+        }
 
 		$("#departemen").on('change', function(){
 			var poli = $(this).val();
@@ -27,7 +42,6 @@
 				$('.inputan').each(function(){
 					var key = $(this).attr("id");
 					var value = $(this).val();
-
 					dataObj[key] = value;
 				});
 
@@ -35,14 +49,50 @@
 				dataObj.currentPasien = currentPasien;
 				dataObj.currentAntrianID = currentAntrianID;
 
-				console.log(dataObj);
-
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 					if(dataObj.penjamin == __UIDPENJAMINBPJS__) {
-						$("#modal-sep").modal("show");
-						$("#btnProsesPasien").hide();
-						$("#hasil_bpjs").hide();
+
+
+						//Get Nomor BPJS
+                        $.ajax({
+                            async: false,
+                            url: __HOSTAPI__ + "/BPJS/info_bpjs/" + __PAGES__[3],
+                            beforeSend: function (request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type: "GET",
+                            success: function (response) {
+                                $("#modal-sep").modal("show");
+                                $("#btnProsesPasien").hide();
+                                $("#btnProsesSEP").hide();
+                                $("#hasil_bpjs").hide();
+
+                                var data = response.response_package.response_data[0];
+                                var restMeta;
+                                var penjaminList = data.history_penjamin;
+                                for(var penjaminKey in penjaminList) {
+                                    if(penjaminList[penjaminKey].penjamin === __UIDPENJAMINBPJS__) {
+                                        restMeta = JSON.parse(penjaminList[penjaminKey].rest_meta);
+                                    }
+                                }
+
+                                if(restMeta !== undefined) {
+                                    $("#txt_no_bpjs").val(restMeta.response.peserta.noKartu);
+                                    penjaminMetaData = cekPasienBPJS(loadPasien(__PAGES__[3]), restMeta.response.peserta.noKartu);
+                                } else {
+                                    $("#txt_no_bpjs").focus();
+                                }
+                            },
+                            error: function (response) {
+                                //
+                            }
+                        });
+
+
 					} else {
+
+					    console.log(dataObj);
+
 						$.ajax({
 							async: false,
 							url: __HOSTAPI__ + "/Antrian",
@@ -55,10 +105,11 @@
 							},
 							type: "POST",
 							success: function(response){
+                                console.log(response);
                                 localStorage.getItem("currentPasien");
                                 localStorage.getItem("currentAntrianID");
 
-							    if(response.response_package.response_notif == 'K') {
+                                if(response.response_package.response_notif == 'K') {
 									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
                                     Swal.fire(
                                         'Berhasil ditambahkan!',
@@ -94,6 +145,32 @@
 			return false;
 		});
 
+        function loadBed(ruangan){
+            $.ajax({
+                url:__HOSTAPI__ + "/Bed/bed-ruangan/" + ruangan,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    console.log(response);
+                    var MetaData = response.response_package.response_data;
+                    $("#ruangan option").remove();
+                    for(i = 0; i < MetaData.length; i++){
+                        if(MetaData[i].status == "R") {
+                            var selection = document.createElement("OPTION");
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            $("#bangsal").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
+
 		$("#btnProsesPasien").click(function() {
 			var dataObj = {};
 			$('.inputan').each(function(){
@@ -106,8 +183,15 @@
 			dataObj.pasien = uid_pasien;
 			dataObj.currentPasien = currentPasien;
 			dataObj.currentAntrianID = currentAntrianID;
+			if(dataObj.penjamin === __UIDPENJAMINBPJS__) {
+			    //Add SEP Info
+                dataObj.valid_start = penjaminMetaData.response.peserta.tglTMT;
+                dataObj.valid_end = penjaminMetaData.response.peserta.tglTAT;
+                dataObj.penjaminMeta = JSON.stringify(penjaminMetaData);
+            }
+			console.log(dataObj);
 			if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
-				$.ajax({
+			    $.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Antrian",
 					data: {
@@ -119,18 +203,32 @@
 					},
 					type: "POST",
 					success: function(response){
-						//console.log(response)
-						if(response.response_package.response_notif == 'K') {
-							push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-						} else if(response.response_package.response_notif == 'P') {
-							push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-						} else {
-							console.log("command not found");
-						}
+                        console.log(response);
+                        localStorage.getItem("currentPasien");
+                        localStorage.getItem("currentAntrianID");
 
-						localStorage.getItem("currentPasien");
-						localStorage.getItem("currentAntrianID");
-						location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+
+                        /*if(response.response_package.response_notif == 'K') {
+                            push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+                            Swal.fire(
+                                'Berhasil ditambahkan!',
+                                'Silahkan arahkan pasien ke kasir',
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                            });
+                        } else if(response.response_package.response_notif == 'P') {
+                            push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning");
+                            Swal.fire(
+                                'Berhasil ditambahkan!',
+                                'Silahkan arahkan pasien ke poli',
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                            });
+                        } else {
+                            console.log(response);
+                        }*/
 					},
 					error: function(response) {
 						console.log("Error : ");
@@ -142,67 +240,93 @@
 
 		$(".select2").select2({});
 
+
+
+
+
 		$("#hasil_bpjs").hide();
 		$("#btnProsesPasien").hide();
 
 		$("#btnCariPasien").click(function() {
-			$("#hasil_bpjs").hide();
-			$("#btnProsesPasien").hide();
-			$.ajax({
-				async: false,
-				url: __HOSTAPI__ + "/BPJS",
-				data: {
-					request : "cek_peserta",
-					no_bpjs: $("#txt_no_bpjs").val()
-				},
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type: "POST",
-				success: function(response){
-					var data = response.response_package;
-					if(data.metaData.code == 200) {
-
-						$("#hasil_bpjs").fadeIn();
-						var pasienData = data.response.peserta;
-						if(pasienData.statusPeserta.keterangan == "AKTIF") {
-							if(pasienData.nik != dataPasien.nik) { //Cek NIK
-								$("#status_bpjs").addClass("text-danger").removeClass("text-success");
-								$("#status_bpjs").html("NIK tidak sama");
-							} else {
-								$("#status_bpjs").addClass("text-success").removeClass("text-danger");
-								$("#btnProsesPasien").show();
-								$("#status_bpjs").html(pasienData.statusPeserta.keterangan);
-							}
-						} else {
-							$("#status_bpjs").addClass("text-danger").removeClass("text-success");
-						}
-						$("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
-						$("#nama_pasien").html(pasienData.nama);
-						$("#nik_pasien").html(pasienData.nik);
-						$("#nomor_peserta").html(pasienData.noKartu);
-						$("#tll_pasien").html(pasienData.tglLahir);
-						//$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
-						$("#faskes_pasien").html(pasienData.provUmum.nmProvider);
-						$("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
-						$("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
-						
-						$("#tanggal_kartu").html(pasienData.tglCetakKartu);
-
-						//TAT Tanggal Akhir Kartu
-						//TMT Tanggal Mulai Kartu
-
-					} else if(data.metaData.code == 201) {
-						//Tidak tidak ditemukan
-					}
-				},
-				error: function(response) {
-					console.log("Error : ");
-					console.log(response);
-				}
-			});
+            penjaminMetaData = cekPasienBPJS(dataPasien, $("#txt_no_bpjs").val());
 		});
 	});
+
+	function cekPasienBPJS(dataPasien, target) {
+	    var penjaminMetaData;
+	    $("#hasil_bpjs").hide();
+        $("#btnProsesPasien").hide();
+        $.ajax({
+            async: false,
+            url: __HOSTAPI__ + "/BPJS",
+            data: {
+                request : "cek_peserta",
+                no_bpjs: target
+            },
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type: "POST",
+            success: function(response){
+                var data = response.response_package.content;
+
+                penjaminMetaData = data;
+
+                if(parseInt(data.metaData.code) === 200) {
+
+                    $("#hasil_bpjs").fadeIn();
+                    var pasienData = data.response.peserta;
+                    if(pasienData.statusPeserta.keterangan === "AKTIF") {
+                        if(pasienData.nik != dataPasien.nik) { //Cek NIK
+                            $("#status_bpjs").addClass("text-danger").removeClass("text-success").html("NIK tidak sama");
+                        } else {
+                            $("#status_bpjs").addClass("text-success").removeClass("text-danger").html(pasienData.statusPeserta.keterangan);
+                            $("#btnProsesPasien").show();
+                        }
+                    } else {
+                        $("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
+                    }
+
+                    $("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
+                    $("#nama_pasien").html(pasienData.nama);
+                    $("#nik_pasien").html(pasienData.nik);
+                    $("#nomor_peserta").html(pasienData.noKartu);
+                    $("#tll_pasien").html(pasienData.tglLahir);
+                    //$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
+                    $("#faskes_pasien").html(pasienData.provUmum.nmProvider);
+                    $("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
+                    $("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
+
+                    $("#tanggal_kartu").html(pasienData.tglCetakKartu);
+
+                    //TAT Tanggal Akhir Kartu
+                    //TMT Tanggal Mulai Kartu
+
+
+                    $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
+                    $("#txt_bpjs_nik").val(pasienData.nik);
+                    $("#txt_bpjs_nama").val(pasienData.nama);
+                    $("#txt_bpjs_rm").val($("#no_rm").val());
+
+
+                } else {
+                    Swal.fire(
+                        'BPJS',
+                        data.metaData.message,
+                        'warning'
+                    ).then((result) => {
+                        $("#txt_no_bpjs").focus();
+                    });
+                }
+            },
+            error: function(response) {
+                console.log("Error : ");
+                console.log(response);
+            }
+        });
+
+        return penjaminMetaData;
+    }
 
 	function loadPasien(uid){
 
@@ -264,8 +388,17 @@
         return dataPenjamin;
     }
 
-    function loadPoli(){
+    function loadPoli(targetted = ""){
     	var dataPoli = null;
+
+    	if(targetted === __POLI_IGD__) {
+    	    //Show Cara data dan keterangan cara datang
+            $(".poli_igd").show();
+            $(".poli_lain").hide();
+        } else {
+            $(".poli_igd").hide();
+            $(".poli_lain").show();
+        }
 
         $.ajax({
             async: false,
@@ -280,10 +413,27 @@
                 if (MetaData != ""){ 
                 	for(i = 0; i < MetaData.length; i++){
 	                    var selection = document.createElement("OPTION");
+                        $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+	                    if(MetaData[i].uid !== __POLI_INAP__) {
+                            if(targetted !== "") {
+                                if(MetaData[i].uid === targetted) {
+                                    $(selection).attr("selected", "selected");
+                                }
+                                $("#departemen").append(selection);
+                            } else {
+                                if(MetaData[i].editable) {
+                                    $("#departemen").append(selection);
+                                }
+                            }
 
-	                    $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
-	                    $("#departemen").append(selection);
+                        }
 	                }
+
+                    if(targetted !== "") {
+                        $("#departemen").attr("disabled", "disabled");
+                    } else {
+                        $("#departemen").removeAttr("disabled");
+                    }
                 }
             },
             error: function(response) {
@@ -294,7 +444,7 @@
         return dataPoli;
     }
 
-    function loadPrioritas(){
+    function loadPrioritas(targetted = 0){
     	var term = 11;
 
         $.ajax({
@@ -312,8 +462,58 @@
 	                    var selection = document.createElement("OPTION");
 
 	                    $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+	                    if(parseInt(targetted) > 0) {
+	                        if(parseInt(MetaData[i].id) === targetted) {
+                                $(selection).attr("selected", "selected");
+                            }
+                        }
 	                    $("#prioritas").append(selection);
 	                }
+
+                    if(parseInt(targetted) > 0) {
+                        $("#prioritas").attr("disabled", "disabled");
+                    } else {
+                        $("#prioritas").removeAttr("disabled");
+                    }
+                }
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function loadCaraDatang(targetted = 0){
+        var term = 17;
+
+        $.ajax({
+            async: false,
+            url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + term,
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                var MetaData = response.response_package.response_data;
+
+                if (MetaData != ""){
+                    for(i = 0; i < MetaData.length; i++){
+                        var selection = document.createElement("OPTION");
+
+                        $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+                        if(parseInt(targetted) > 0) {
+                            if(parseInt(MetaData[i].id) === targetted) {
+                                $(selection).attr("selected", "selected");
+                            }
+                        }
+                        $("#cara_datang").append(selection);
+                    }
+
+                    if(parseInt(targetted) > 0) {
+                        $("#cara_datang").attr("disabled", "disabled");
+                    } else {
+                        $("#cara_datang").removeAttr("disabled");
+                    }
                 }
             },
             error: function(response) {
@@ -350,6 +550,33 @@
     	})
     }
 
+    function loadKelasRawat(){
+        $.ajax({
+            async: false,
+            url:__HOSTAPI__ + "/BPJS/get_kelas_rawat_select2",
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                var data = response.response_package.content.response.list;
+
+                $("#txt_bpjs_kelas_rawat option").remove();
+                for(var a = 0; a < data.length; a++) {
+                    var selection = document.createElement("OPTION");
+
+                    $(selection).attr("value", data[a].kode).html(data[a].nama);
+                    $("#txt_bpjs_kelas_rawat").append(selection);
+                }
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+    }
+
+
+
     function resetSelectBox(selector, name){
 		$("#"+ selector +" option").remove();
 		var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
@@ -382,6 +609,12 @@
 									<i class="fa fa-search"></i>
 								</button>
 							</div>
+                            <div class="col-lg-12">
+                                <br />
+                                <b class="text-warning">
+                                    <i class="fa fa-info-circle"></i> Pastikan nomor sesuai dengan kartu BPJS. Jika tidak sesuai maka kemungkinan pasien yang dipilih salah. Input ulang nomor pada kartu untuk mengecek calon pasien.
+                                </b>
+                            </div>
 						</div>
 					</div>
 				</div>
@@ -402,12 +635,138 @@
 				
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-success" id="btnProsesPasien">
-					<i class="fa fa-check"></i> Proses
-				</button>
+
+                <button class="btn btn-success" id="btnProsesPasien">
+                    <i class="fa fa-check"></i> Proses
+                </button>
 				
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 			</div>
 		</div> 
 	</div> 
+</div>
+
+
+
+<div id="modal-sep-new" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> Surat Eligibilitas Peserta
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12">
+                    <div class="form-row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                    <h5 class="card-header__title flex m-0 text-info"><i class="fa fa-hashtag"></i> Informasi Pasien</h5>
+                                </div>
+                                <div class="card-body row">
+                                    <div class="col-12 col-md-3 mb-3 form-group">
+                                        <label for="">No Kartu</label>
+                                        <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nomor" readonly>
+                                    </div>
+                                    <div class="col-12 col-md-3 mb-3 form-group">
+                                        <label for="">NIK Pasien</label>
+                                        <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nik" readonly>
+                                    </div>
+                                    <div class="col-12 col-md-6 mb-6 form-group">
+                                        <label for="">Nama Pasien</label>
+                                        <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nama" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                    <h5 class="card-header__title flex m-0 text-info"><i class="fa fa-hashtag"></i> Informasi Rujukan</h5>
+                                </div>
+                                <div class="card-body row">
+                                    <div class="col-12 col-md-6 mb-6">
+                                        <div class="col-12 col-md-8 mb-4 form-group">
+                                            <label for="">Nomor Medical Record (MR)</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rm" readonly>
+                                        </div>
+
+                                        <div class="col-12 col-md-7 form-group">
+                                            <label for="">Tanggal SEP</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tgl_sep" readonly value="<?php echo date('d F Y'); ?>">
+                                        </div>
+                                        <div class="col-12 col-md-9 form-group">
+                                            <label for="">Faskes</label>
+                                            <select class="form-control sep" id="txt_bpjs_faskes">
+                                                <option value="<?php echo __KODE_PPK__; ?>">RSUD KAB. BINTAN - KAB. BINTAN (KEPRI)</option>
+                                            </select>
+                                        </div>
+
+
+                                        <div class="col-12 col-md-8 form-group">
+                                            <label for="">Jenis Pelayanan</label>
+                                            <select class="form-control sep" id="txt_bpjs_jenis_layanan">
+                                                <option value="2">Rawat Jalan</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-9 mb-9 form-group">
+                                            <label for="">Kelas Rawat</label>
+                                            <select class="form-control sep" id="txt_bpjs_kelas_rawat"></select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6 mb-6">
+                                        <div class="col-12 col-md-4 mb-4 form-group">
+                                            <label for="">Jenis Asal Rujukan</label>
+                                            <select class="form-control uppercase sep" id="txt_bpjs_jenis_asal_rujukan">
+                                                <option value="1">Puskesmas</option>
+                                                <option value="2">Rumah Sakit</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-8 mb-4 form-group">
+                                            <label for="">Asal Rujukan</label>
+                                            <select class="form-control uppercase sep" id="txt_bpjs_asal_rujukan"></select>
+                                        </div>
+                                        <div class="col-12 col-md-5 mb-4 form-group">
+                                            <label for="">Tanggal Rujukan</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tanggal_rujukan">
+                                        </div>
+                                        <div class="col-12 col-md-6 mb-4 form-group">
+                                            <label for="">Nomor Rujukan</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_nomor_rujukan" />
+                                        </div>
+                                        <div class="col-12 col-md-12 form-group">
+                                            <label for="">Catatan</label>
+                                            <textarea class="form-control" id="txt_bpjs_catatan"></textarea>
+                                        </div>
+                                        <div class="col-12 col-md-12 form-group">
+                                            <label for="">Diagnosa Awal</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_diagnosa_awal" readonly>
+                                        </div>
+                                        <div class="col-12 col-md-8 mb-4 form-group">
+                                            <label for="">Poli Tujuan</label>
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_poli_tujuan" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnProsesPasien">
+                    <i class="fa fa-check"></i> Proses
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>

@@ -5,6 +5,9 @@
 ?>
 
 <script type="text/javascript">
+    var __PC_CUSTOMER__ = <?php echo json_encode(__PC_CUSTOMER__); ?>;
+    var __PC_CUSTOMER_ADDRESS__ = <?php echo json_encode(__PC_CUSTOMER_ADDRESS__); ?>;
+    var __PC_CUSTOMER_CONTACT__ = <?php echo json_encode(__PC_CUSTOMER_CONTACT__); ?>;
 	var __SYNC__ = <?php echo json_encode(__SYNC__); ?>;
 	var __SYNC_PORT__ = <?php echo json_encode(__SYNC_PORT__); ?>;
 	var __HOSTNAME__ = <?php echo json_encode(__HOSTNAME__); ?>;
@@ -26,6 +29,16 @@
     var __UIDADMIN__ = <?php echo json_encode(__UIDADMIN__); ?>;
     var __UIDFISIOTERAPI__ = <?php echo json_encode(__UIDFISIOTERAPI__); ?>;
     var __UIDPETUGASLAB__ = <?php echo json_encode(__UIDPETUGASLAB__); ?>;
+    var __POLI_GIGI__ = <?php echo json_encode(__POLI_GIGI__); ?>;
+    var __POLI_MATA__ = <?php echo json_encode(__POLI_MATA__); ?>;
+    var __POLI_INAP__ = <?php echo json_encode(__POLI_INAP__); ?>;
+    var __POLI_IGD__ = <?php echo json_encode(__POLI_IGD__); ?>;
+    var __POLI_LAB__ = <?php echo json_encode(__POLI_LAB__); ?>;
+
+    var __PRIORITY_HIGH__ = <?php echo json_encode(__PRIORITY_HIGH__); ?>;
+    var __ANTRIAN_KHUSUS__ = <?php echo json_encode(__ANTRIAN_KHUSUS__); ?>;
+
+    var __KAMAR_IGD__ = <?php echo json_encode(__KAMAR_IGD__); ?>;
 
 	var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
