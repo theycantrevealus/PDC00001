@@ -36,6 +36,35 @@
 			}
 		});
 
+		$("#btn_riwayat_hamil").click(function() {
+		    var tanggal_partus = "";
+		    var usia_kehamilan = "";
+		    var tempat_partus = "";
+		    var jenis_partus = "";
+		    var penolong = "";
+		    var nifas = "";
+		    var jenkel_anak = "";
+		    var bb_anak = "";
+		    var keadaan_sekarang = "";
+		    var keterangan = "";
+
+		    $("#riwayat_hamil tbody").append(
+		        "<tr>" +
+                    "<td></td>" +
+                    "<td>" + tanggal_partus + "</td>" +
+                    "<td>" + usia_kehamilan + "</td>" +
+                    "<td>" + tempat_partus + "</td>" +
+                    "<td>" + jenis_partus + "</td>" +
+                    "<td>" + penolong + "</td>" +
+                    "<td>" + nifas + "</td>" +
+                    "<td>" + jenkel_anak + "</td>" +
+                    "<td>" + bb_anak + "</td>" +
+                    "<td>" + keadaan_sekarang + "</td>" +
+                    "<td>" + keterangan + "</td>" +
+                "</tr>"
+            );
+        });
+
 		$("#btnSelesai").on('click', function(){
 			var btnSelesai = $(this);
 			btnSelesai.attr('disabled', 'disabled');
