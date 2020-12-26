@@ -4,6 +4,44 @@
 		var uid_antrian = __PAGES__[3];
 		var dataPasien = loadPasien(uid_antrian);
 
+		var riwayat_bidan = dataPasien.asesmen_bidan;
+
+		for(var bK in riwayat_bidan) {
+		    var tanggal_partus = riwayat_bidan[bK].tanggal_partus;
+		    var usia_kehamilan = riwayat_bidan[bK].usia_kehamilan;
+            var tempat_partus = riwayat_bidan[bK].tempat_partus;
+            var jenis_partus = riwayat_bidan[bK].jenis_partus;
+            var penolong = riwayat_bidan[bK].penolong;
+            var nifas = riwayat_bidan[bK].nifas;
+            var jenkel_anak = riwayat_bidan[bK].jenkel_anak;
+            var bb_anak = riwayat_bidan[bK].bb_anak;
+            var keadaan_sekarang = riwayat_bidan[bK].keadaan_sekarang;
+            var keterangan = riwayat_bidan[bK].keterangan;
+
+            const d = new Date(tanggal_partus);
+
+            $("#riwayat_hamil tbody").append(
+                "<tr>" +
+                "<td></td>" +
+                "<td tanggal=\"" + tanggal_partus + "\">" + d.getDate() + " " + monthNames[d.getMonth()] + " " + d.getFullYear() + "</td>" +
+                "<td>" + usia_kehamilan + "</td>" +
+                "<td>" + tempat_partus + "</td>" +
+                "<td>" + jenis_partus + "</td>" +
+                "<td>" + penolong + "</td>" +
+                "<td>" + nifas + "</td>" +
+                "<td>" + jenkel_anak + "</td>" +
+                "<td>" + bb_anak + "</td>" +
+                "<td>" + keadaan_sekarang + "</td>" +
+                "<td>" + keterangan + "</td>" +
+                "<td><button class=\"btn btn-sm btn-danger hapusPartus\"><i class=\"fa fa-ban\"></i></button></td>" +
+                "</tr>"
+            );
+        }
+
+		rebasePartus();
+
+
+
 		if(dataPasien.antrian.departemen !== __UIDFISIOTERAPI__) {
             $("#fisioterapi_nav").hide();
         }
@@ -35,6 +73,72 @@
 				$("#riwayat_obt_terlarang").attr("disabled", "disabled");
 			}
 		});
+
+		$("#btn_riwayat_hamil").click(function() {
+		    var tanggal_partus = $("#tgl_partus").val();
+		    var usia_kehamilan = $("#usia_hamil").val();
+		    var tempat_partus = $("#tempat_partus").val();
+		    var jenis_partus = $("#jenis_partus").val();
+		    var penolong = $("#penolong_partus").val();
+		    var nifas = $("#nifas").val();
+		    var jenkel_anak = $("#jenkel_anak").val();
+		    var bb_anak = $("#bb_anak").val();
+		    var keadaan_sekarang = $("#keadaan_anak").val();
+		    var keterangan = $("#keterangan_anak").val();
+
+
+		    if(
+		        tanggal_partus !== ""
+            ) {
+		        const d = new Date(tanggal_partus);
+
+                $("#riwayat_hamil tbody").append(
+                    "<tr>" +
+                    "<td></td>" +
+                    "<td tanggal=\"" + tanggal_partus + "\">" + d.getDate() + " " + monthNames[d.getMonth()] + " " + d.getFullYear() + "</td>" +
+                    "<td>" + usia_kehamilan + "</td>" +
+                    "<td>" + tempat_partus + "</td>" +
+                    "<td>" + jenis_partus + "</td>" +
+                    "<td>" + penolong + "</td>" +
+                    "<td>" + nifas + "</td>" +
+                    "<td>" + jenkel_anak + "</td>" +
+                    "<td>" + bb_anak + "</td>" +
+                    "<td>" + keadaan_sekarang + "</td>" +
+                    "<td>" + keterangan + "</td>" +
+                    "<td><button class=\"btn btn-sm btn-danger hapusPartus\"><i class=\"fa fa-ban\"></i></button></td>" +
+                    "</tr>"
+                );
+
+                $("#tgl_partus").val("");
+                $("#usia_hamil").val("");
+                $("#tempat_partus").val("");
+                $("#jenis_partus").val("");
+                $("#penolong_partus").val("");
+                $("#nifas").val("");
+                $("#jenkel_anak").val("");
+                $("#bb_anak").val("");
+                $("#keadaan_anak").val("");
+                $("#keterangan_anak").val("");
+
+                rebasePartus();
+            }
+        });
+
+		function rebasePartus() {
+		    $("#riwayat_hamil tbody tr").each(function(e) {
+		        var id = parseInt(e) + 1;
+		        $(this).attr("id", "partus_row_" + id);
+		        $(this).find("td:eq(0)").html(id);
+                $(this).find("td:eq(11) button").attr("id", "hapus_partus_" + id);
+            });
+        }
+
+        $("body").on("click", ".hapusPartus", function () {
+            var id = $(this).attr("id");
+            id = id[id.length - 1];
+            $("#partus_row_" + id).remove();
+            rebasePartus();
+        });
 
 		$("#btnSelesai").on('click', function(){
 			var btnSelesai = $(this);
@@ -68,6 +172,36 @@
 				}
 			});
 
+			var partusList = [];
+
+            $("#riwayat_hamil tbody tr").each(function(e) {
+                var tanggal_partus = $(this).find("td:eq(1)").attr("tanggal");
+                var usia_kehamilan = $(this).find("td:eq(2)").html();
+                var tempat_partus = $(this).find("td:eq(3)").html();
+                var jenis_partus = $(this).find("td:eq(4)").html();
+                var penolong = $(this).find("td:eq(5)").html();
+                var nifas = $(this).find("td:eq(6)").html();
+                var jenkel_anak = $(this).find("td:eq(7)").html();
+                var bb_anak = $(this).find("td:eq(8)").html();
+                var keadaan_sekarang = $(this).find("td:eq(9)").html();
+                var keterangan = $(this).find("td:eq(10)").html();
+
+                partusList.push({
+                    tanggal: tanggal_partus,
+                    usia: usia_kehamilan,
+                    tempat: tempat_partus,
+                    jenis: jenis_partus,
+                    penolong: penolong,
+                    nifas: nifas,
+                    jenkel_anak: jenkel_anak,
+                    bb_anak: bb_anak,
+                    keadaan_sekarang: keadaan_sekarang,
+                    keterangan: keterangan
+                });
+            });
+
+            allData["partus_list"] = partusList;
+
 			delete allData['riwayat_merokok_option'];
 			delete allData['riwayat_miras_option'];
 			delete allData['riwayat_obt_terlarang_option'];
@@ -86,6 +220,9 @@
 				},
 				type: "POST",
 				success: function(response){
+                    btnSelesai.removeAttr("disabled");
+				    /*console.clear();
+				    console.log(response.response_package);*/
 					location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
 				},
 				error: function(response) {
