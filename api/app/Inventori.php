@@ -97,6 +97,9 @@ class Inventori extends Utility
                 case 'get_item_select2':
                     return self::get_item_select2($parameter);
                     break;
+                case 'get_mutasi_item':
+                    return self::get_mutasi_item($parameter);
+                    break;
                 default:
                     return self::get_item_select2($parameter);
             }
@@ -3875,7 +3878,8 @@ class Inventori extends Utility
             );
 
             $paramValue = array(
-                $UserData['data']->gudang
+                //$UserData['data']->gudang
+                $parameter['gudang']
             );
         } else {
             $paramData = array(
@@ -3883,7 +3887,8 @@ class Inventori extends Utility
             );
 
             $paramValue = array(
-                $UserData['data']->gudang
+                $parameter['gudang']
+                //$UserData['data']->gudang
             );
         }
 
@@ -3916,7 +3921,8 @@ class Inventori extends Utility
             ))
                 ->join('master_inv', array(
                     'uid',
-                    'nama'
+                    'nama',
+                    'satuan_terkecil'
                 ))
                 ->on(array(
                     array('inventori_stok.barang', '=', 'master_inv.uid')
@@ -5162,9 +5168,150 @@ class Inventori extends Utility
     }
 
 
+    private function get_mutasi_item($parameter) {
+        $data = self::$query->select('inventori_mutasi_detail', array(
+            'item',
+            'batch',
+            'qty',
+            'keterangan',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'inventori_mutasi_detail.mutasi' => '= ?',
+                'AND',
+                'inventori_mutasi_detail.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter[2]
+            ))
+            ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            //Item Detail
+            $Item = self::get_item_detail($value['item']);
+            $data['response_data'][$key]['item'] = $Item['response_data'][0];
+
+            //Batch Detail
+            $Batch = self::get_batch_detail($value['batch']);
+            $data['response_data'][$key]['batch'] = $Batch['response_data'][0];
+
+
+        }
+
+        return $data;
+    }
+
+
     private function get_mutasi_request($parameter)
     {
-        //
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'inventori_mutasi.deleted_at' => 'IS NULL',
+                'AND',
+                'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'inventori_mutasi.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('inventori_mutasi', array(
+                'uid',
+                'kode',
+                'tanggal',
+                'dari',
+                'ke',
+                'pegawai',
+                'keterangan',
+                'created_at',
+                'updated_at'
+            ))
+                ->join('pegawai', array(
+                    'nama',
+                    'unit'
+                ))
+                ->on(array(
+                    array('inventori_mutasi.pegawai', '=', 'pegawai.uid')
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_mutasi', array(
+                'uid',
+                'kode',
+                'tanggal',
+                'dari',
+                'ke',
+                'pegawai',
+                'keterangan',
+                'created_at',
+                'updated_at'
+            ))
+                ->join('pegawai', array(
+                    'nama',
+                    'unit'
+                ))
+                ->on(array(
+                    array('inventori_mutasi.pegawai', '=', 'pegawai.uid')
+                ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $allData = array();
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+
+            //Filter Unit yang sama
+            if($value['unit'] == $UserData['data']->unit) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+
+                $data['response_data'][$key]['tanggal'] = date('d F Y', strtotime($value['tanggal']));
+
+                //Gudang
+                $dari = self::get_gudang_detail($value['dari']);
+                $data['response_data'][$key]['dari'] = $dari['response_data'][0];
+
+                $ke = self::get_gudang_detail($value['ke']);
+                $data['response_data'][$key]['ke'] = $ke['response_data'][0];
+
+                //Pegawai
+                $pegawai = new Pegawai(self::$pdo);
+                $data['response_data'][$key]['pegawai'] = $pegawai->get_detail($value['pegawai'])['response_data'][0];
+
+                array_push($allData, $data['response_data'][$key]);
+                $autonum++;
+            }
+
+
+        }
+
+        $data['response_data'] = $allData;
+
+        $itemTotal = self::$query->select('inventori_mutasi', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
     }
 
 //===========================================================================================DELETE
