@@ -1098,6 +1098,7 @@
                                     <th>Berat Badan</th>
                                     <th>Keadaan Sekarang</th>
                                     <th>Keterangan</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
