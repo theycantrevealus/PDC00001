@@ -1086,6 +1086,14 @@ class Asesmen extends Utility {
                         'frenulum' => $parameter['frenulum'],
                         'kebersihan_mulut' => $parameter['mulut_bersih'],
 
+                        //'keterangan_mulut' => $parameter['keterangan_mulut'],
+                        'keterangan_bibir' => $parameter['keterangan_bibir'],
+                        'keterangan_lidah' => $parameter['keterangan_lidah'],
+                        'keterangan_mukosa' => $parameter['keterangan_mukosa'],
+                        'keterangan_torus' => $parameter['keterangan_torus'],
+                        'keterangan_gingiva' => $parameter['keterangan_gingiva'],
+                        'keterangan_frenulum' => $parameter['keterangan_frenulum'],
+
                         'updated_at' => parent::format_date()
                     );
                 } else if($PoliDetail['uid'] === __POLI_MATA__) {
@@ -2042,9 +2050,55 @@ class Asesmen extends Utility {
                 'frenulum' => $parameter['frenulum'],
                 'kebersihan_mulut' => $parameter['mulut_bersih'],
 
+                'keterangan_bibir' => $parameter['keterangan_bibir'],
+                'keterangan_lidah' => $parameter['keterangan_lidah'],
+                'keterangan_mukosa' => $parameter['keterangan_mukosa'],
+                'keterangan_torus' => $parameter['keterangan_torus'],
+                'keterangan_gingiva' => $parameter['keterangan_gingiva'],
+                'keterangan_frenulum' => $parameter['keterangan_frenulum'],
+
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             );
+
+            /*$saveParam = array(
+                'keluhan_utama' => $parameter['keluhan_utama'],
+                'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                'nadi' => floatval($parameter['nadi']),
+                'suhu' => floatval($parameter['suhu']),
+                'pernafasan' => floatval($parameter['pernafasan']),
+                'berat_badan' => floatval($parameter['berat_badan']),
+                'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                'icd10_banding' => implode(',', $selectedICD10Banding),
+                'diagnosa_banding' => $parameter['diagnosa_banding'],
+                'planning' => $parameter['planning'],
+
+                'odontogram' => $parameter['odontogram'],
+                'muka_simetris' => $parameter['simetris'],
+                'tmj' => $parameter['sendi'],
+                'bibir' => $parameter['bibir'],
+                'lidah' => $parameter['lidah'],
+                'mukosa' => $parameter['mukosa'],
+                'torus' => $parameter['torus'],
+                'gingiva' => $parameter['gingiva'],
+                'frenulum' => $parameter['frenulum'],
+                'kebersihan_mulut' => $parameter['mulut_bersih'],
+
+                //'keterangan_mulut' => $parameter['keterangan_mulut'],
+                'keterangan_bibir' => $parameter['keterangan_bibir'],
+                'keterangan_lidah' => $parameter['keterangan_lidah'],
+                'keterangan_mukosa' => $parameter['keterangan_mukosa'],
+                'keterangan_torus' => $parameter['keterangan_torus'],
+                'keterangan_gingiva' => $parameter['keterangan_gingiva'],
+                'keterangan_frenulum' => $parameter['keterangan_frenulum'],
+
+                'updated_at' => parent::format_date()
+            );*/
         } else if($poli_uid === __POLI_MATA__) {
             $selectedICD10Kerja = array();
             $selectedICD10Banding = array();
