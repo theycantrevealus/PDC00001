@@ -85,6 +85,9 @@
                                                         </label>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_bibir" placeholder="Keterangan"></textarea>
+                                                </div>
                                             </div>
                                         </li>
                                         <li>
@@ -105,6 +108,9 @@
                                                             Ada Kelainan
                                                         </label>
                                                     </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_lidah" placeholder="Keterangan"></textarea>
                                                 </div>
                                             </div>
                                         </li>
@@ -127,6 +133,9 @@
                                                         </label>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_mukosa" placeholder="Keterangan"></textarea>
+                                                </div>
                                             </div>
                                         </li>
                                         <li>
@@ -147,6 +156,9 @@
                                                             Tidak Ada
                                                         </label>
                                                     </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_torus" placeholder="Keterangan"></textarea>
                                                 </div>
                                             </div>
                                         </li>
@@ -169,6 +181,9 @@
                                                         </label>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_gingiva" placeholder="Keterangan"></textarea>
+                                                </div>
                                             </div>
                                         </li>
                                         <li>
@@ -189,6 +204,9 @@
                                                             Ada Kelainan
                                                         </label>
                                                     </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_frenulum" placeholder="Keterangan"></textarea>
                                                 </div>
                                             </div>
                                         </li>

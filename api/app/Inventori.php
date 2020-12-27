@@ -4892,15 +4892,15 @@ class Inventori extends Utility
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
-                'master_inv.deleted_at' => 'IS NULL'
+                'master_inv.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
             );
 
             $paramValue = array();
         } else {
             $paramData = array(
-                'master_inv.deleted_at' => 'IS NULL',
-                'AND',
-                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+                'master_inv.deleted_at' => 'IS NULL'
             );
 
             $paramValue = array();
