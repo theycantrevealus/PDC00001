@@ -1086,6 +1086,14 @@ class Asesmen extends Utility {
                         'frenulum' => $parameter['frenulum'],
                         'kebersihan_mulut' => $parameter['mulut_bersih'],
 
+                        //'keterangan_mulut' => $parameter['keterangan_mulut'],
+                        'keterangan_bibir' => $parameter['keterangan_bibir'],
+                        'keterangan_lidah' => $parameter['keterangan_lidah'],
+                        'keterangan_mukosa' => $parameter['keterangan_mukosa'],
+                        'keterangan_torus' => $parameter['keterangan_torus'],
+                        'keterangan_gingiva' => $parameter['keterangan_gingiva'],
+                        'keterangan_frenulum' => $parameter['keterangan_frenulum'],
+
                         'updated_at' => parent::format_date()
                     );
                 } else if($PoliDetail['uid'] === __POLI_MATA__) {
@@ -2042,9 +2050,55 @@ class Asesmen extends Utility {
                 'frenulum' => $parameter['frenulum'],
                 'kebersihan_mulut' => $parameter['mulut_bersih'],
 
+                'keterangan_bibir' => $parameter['keterangan_bibir'],
+                'keterangan_lidah' => $parameter['keterangan_lidah'],
+                'keterangan_mukosa' => $parameter['keterangan_mukosa'],
+                'keterangan_torus' => $parameter['keterangan_torus'],
+                'keterangan_gingiva' => $parameter['keterangan_gingiva'],
+                'keterangan_frenulum' => $parameter['keterangan_frenulum'],
+
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             );
+
+            /*$saveParam = array(
+                'keluhan_utama' => $parameter['keluhan_utama'],
+                'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                'nadi' => floatval($parameter['nadi']),
+                'suhu' => floatval($parameter['suhu']),
+                'pernafasan' => floatval($parameter['pernafasan']),
+                'berat_badan' => floatval($parameter['berat_badan']),
+                'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                'icd10_banding' => implode(',', $selectedICD10Banding),
+                'diagnosa_banding' => $parameter['diagnosa_banding'],
+                'planning' => $parameter['planning'],
+
+                'odontogram' => $parameter['odontogram'],
+                'muka_simetris' => $parameter['simetris'],
+                'tmj' => $parameter['sendi'],
+                'bibir' => $parameter['bibir'],
+                'lidah' => $parameter['lidah'],
+                'mukosa' => $parameter['mukosa'],
+                'torus' => $parameter['torus'],
+                'gingiva' => $parameter['gingiva'],
+                'frenulum' => $parameter['frenulum'],
+                'kebersihan_mulut' => $parameter['mulut_bersih'],
+
+                //'keterangan_mulut' => $parameter['keterangan_mulut'],
+                'keterangan_bibir' => $parameter['keterangan_bibir'],
+                'keterangan_lidah' => $parameter['keterangan_lidah'],
+                'keterangan_mukosa' => $parameter['keterangan_mukosa'],
+                'keterangan_torus' => $parameter['keterangan_torus'],
+                'keterangan_gingiva' => $parameter['keterangan_gingiva'],
+                'keterangan_frenulum' => $parameter['keterangan_frenulum'],
+
+                'updated_at' => parent::format_date()
+            );*/
         } else if($poli_uid === __POLI_MATA__) {
             $selectedICD10Kerja = array();
             $selectedICD10Banding = array();
@@ -2186,6 +2240,28 @@ class Asesmen extends Utility {
 				)
 				->execute();
 			if ($data['response_result'] > 0){
+			    //Asesmen Kebidanan
+                $bidan = self::$query->select('asesmen_kebidanan', array(
+                    'tanggal_partus',
+                    'tempat_partus',
+                    'jenis_partus',
+                    'penolong',
+                    'nifas',
+                    'jenkel_anak',
+                    'keadaan_sekarang',
+                    'keterangan',
+                    'bb_anak',
+                    'usia_kehamilan'
+                ))
+                    ->where(array(
+                        'asesmen_kebidanan.asesmen' => '= ?',
+                        'AND',
+                        'asesmen_kebidanan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $data['response_data'][0]['asesmen']
+                    ))
+                    ->execute();
+                $antrian['asesmen_bidan'] = $bidan['response_data'];
 				$antrian['asesmen_rawat'] = $data['response_data'][0];
 			}
 		}
@@ -2364,6 +2440,74 @@ class Asesmen extends Utility {
 			}
 		}
 
+		$proceed_bidan_id = array();
+		$proceed_bidan_result = array();
+		//reset Partus
+        $resetPartus = self::$query->update('asesmen_kebidanan', array(
+            'deleted_at' => parent::format_date()
+        ))
+            ->where(array(
+                'asesmen_kebidanan.asesmen' => '= ?'
+            ), array(
+                $MasterUID
+            ))
+            ->execute();
+		foreach ($parameter['dataObj']['partus_list'] as $partKey => $partValue) {
+            //Asesmen Kebidanan
+            $checkBidan = self::$query->select('asesmen_kebidanan', array(
+                'id'
+            ))
+                ->where(array(
+                    'asesmen_kebidanan.asesmen' => '= ?'
+                ), array(
+                    $MasterUID
+                ))
+                ->execute();
+            if(count($checkBidan['response_data']) > 0 && !in_array($checkBidan['response_data'][0]['id'], $proceed_bidan_id)) {
+                $proceed_bidan = self::$query->update('asesmen_kebidanan', array(
+                    'tanggal_partus' => $partValue['tanggal'],
+                    'usia_kehamilan' => $partValue['usia'],
+                    'tempat_partus' => $partValue['tempat'],
+                    'jenis_partus' => $partValue['jenis'],
+                    'penolong' => $partValue['penolong'],
+                    'nifas' => $partValue['nifas'],
+                    'jenkel_anak' => $partValue['jenkel_anak'],
+                    'bb_anak' => $partValue['bb_anak'],
+                    'keadaan_sekarang' => $partValue['keadaan_sekarang'],
+                    'keterangan' => $partValue['keterangan'],
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'asesmen_kebidanan.id' => '= ?'
+                    ), array(
+                        $checkBidan['response_data'][0]['id']
+                    ))
+                    ->execute();
+                array_push($proceed_bidan_id, $checkBidan['response_data'][0]['id']);
+            } else {
+                $proceed_bidan = self::$query->insert('asesmen_kebidanan', array(
+                    'asesmen' => $MasterUID,
+                    'tanggal_partus' => $partValue['tanggal'],
+                    'usia_kehamilan' => $partValue['usia'],
+                    'tempat_partus' => $partValue['tempat'],
+                    'jenis_partus' => $partValue['jenis'],
+                    'penolong' => $partValue['penolong'],
+                    'nifas' => $partValue['nifas'],
+                    'jenkel_anak' => $partValue['jenkel_anak'],
+                    'bb_anak' => $partValue['bb_anak'],
+                    'keadaan_sekarang' => $partValue['keadaan_sekarang'],
+                    'keterangan' => $partValue['keterangan'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+            array_push($proceed_bidan_result, $proceed_bidan);
+        }
+
+
+        $returnResponse['bidan_partus'] = $proceed_bidan_result;
 		return $returnResponse;
 	}
 

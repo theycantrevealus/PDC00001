@@ -2976,6 +2976,13 @@
                 var frenulum = $("input[name=\"frenulum\"]:checked").val();
                 var mulut_bersih = $("input[name=\"mulut_bersih\"]:checked").val();
 
+                var keterangan_bibir = $("#keterangan_bibir").val();
+                var keterangan_lidah = $("#keterangan_lidah").val();
+                var keterangan_mukosa = $("#keterangan_mukosa").val();
+                var keterangan_torus = $("#keterangan_torus").val();
+                var keterangan_gingiva = $("#keterangan_gingiva").val();
+                var keterangan_frenulum = $("#keterangan_frenulum").val();
+
                 formData = {
                     request: "update_asesmen_medis",
                     kunjungan: kunjungan,
@@ -3026,6 +3033,13 @@
                     gingiva: gingiva,
                     frenulum: frenulum,
                     mulut_bersih: mulut_bersih,
+
+                    keterangan_bibir: keterangan_bibir,
+                    keterangan_lidah: keterangan_lidah,
+                    keterangan_mukosa: keterangan_mukosa,
+                    keterangan_torus: keterangan_torus,
+                    keterangan_gingiva: keterangan_gingiva,
+                    keterangan_frenulum: keterangan_frenulum,
 
                     odontogram: JSON.stringify(metaSelOrdo)
                 };
