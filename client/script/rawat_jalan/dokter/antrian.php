@@ -70,7 +70,7 @@
                 console.log(poliListRaw);
                 poliList = poliListRaw;
                 
-                if(antrianData.poli_info.uid === __POLI_GIGI__) {
+                if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
                     $("#gigi_loader").show();
                 } else if(antrianData.poli_info.uid === __POLI_MATA__) {
                     $("#mata_loader").show();
@@ -2965,7 +2965,7 @@
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan
                 };
-            } else if(antrianData.poli_info.uid === __POLI_GIGI__) {
+            } else if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
                 var simetris = $("input[name=\"simetris\"]:checked").val();
                 var sendi = $("input[name=\"sendi\"]:checked").val();
                 var bibir = $("input[name=\"bibir\"]:checked").val();
@@ -4797,8 +4797,9 @@
         $(".inputan_inap").select2();
         $(".inputan_rujuk").select2();
 
-
-        if(antrianData.poli_info.uid === __POLI_GIGI__) {
+//alert(__POLI_ORTODONTIE__);
+        if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
+//alert();
             if(dataOdontogram === undefined)
             {
                 $(".ordo-top").each(function() {
