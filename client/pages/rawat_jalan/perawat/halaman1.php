@@ -368,16 +368,35 @@
 							</select>
 	                    </div>
 	                </div>
-	                <div class="form-group col-lg-12">
-						<div class="col-12 col-md-12 mb-3">
-							<label for="">Riwayat Merokok: </label>
-							<br />
-							<input type="radio" name="riwayat_merokok_option" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
-							<input type="radio" name="riwayat_merokok_option" value="y" /> Ya
-							<br />
-							<input type="text" class="form-control inputan riwayat_merokok" disabled="disabled" id="riwayat_merokok" placeholder="Riwayat Merokok" />
-	                    </div>
-	                </div>
+                    <div class="col-12 col-md-12 mb-3">
+                        <ol type="1" class="form-list-item">
+                            <li>
+                                <h6>Riwayat Merokok: </h6>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="radio" name="riwayat_merokok_option" value="n" checked="checked" />
+                                            <label class="form-check-label">
+                                                Tidak
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="radio" name="riwayat_merokok_option" value="y" />
+                                            <label class="form-check-label">
+                                                Ya
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control inputan riwayat_merokok" disabled="disabled" id="riwayat_merokok" placeholder="Riwayat Merokok" />
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ol>
+                    </div>
 	                <div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Minuman Keras: </label>

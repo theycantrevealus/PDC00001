@@ -1364,13 +1364,13 @@
                     parseFloat(signa_konsumsi) > 0 &&
                     parseFloat(signa_hari) > 0 &&
                     obat != null &&
-                    $("#resep_row_" + id).hasClass("last-resep") &&
-                    parseInt(aturanPakai) > 0
+                    $("#resep_row_" + id).hasClass("last-resep")
+                    //&& parseInt(aturanPakai) > 0
                 ) {
                     autoResep();
                 } else {
                     if(aturanPakai === "none") {
-                        notify_manual("info", "<i class=\"fa fa-info-circle\"></i> Aturan pakai harus diisi", 1000, "aturan_pakai_" + id, "#resep_aturan_pakai_" + id);
+                        //notify_manual("info", "<i class=\"fa fa-info-circle\"></i> Aturan pakai harus diisi", 1000, "aturan_pakai_" + id, "#resep_aturan_pakai_" + id);
                     }
                 }
             }
@@ -1393,7 +1393,6 @@
                 }
             });
             return dataAturanPakai;
-
         }
 
         function autoKategoriObat(obat) {

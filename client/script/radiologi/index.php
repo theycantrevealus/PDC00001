@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function(){
 
@@ -57,9 +58,9 @@
 									"<a href=\"" + __HOSTNAME__ + "/radiologi/antrian/" + row.uid + "\" class=\"btn btn-warning btn-sm\">" +
 										"<i class=\"fa fa-sign-out-alt\"></i>" +
 									"</a>" +
-									"<a href=\"" + __HOSTNAME__ + "/radiologi/cetak/" + row.uid + "\" target='_blank' class=\"btn btn-primary btn-sm\">" +
+									"<button id=\"cetak_" + row.uid + "\" class=\"btn btn-primary btn-sm btnCetak\">" +
 										"<i class=\"fa fa-print\"></i>" +
-									"</a>" +
+									"</button>" +
 									"<button id=\"rad_order_" + row.uid + "\" type='button' class=\"btn btn-success btn-sm btn-selesai-radiologi\" data-toggle='tooltip' title='Tandai selesai'>" +
 										"<i class=\"fa fa-check\"></i>" +
 									"</a>" +
@@ -309,8 +310,129 @@
                     });
                 }
             });
-
         });
+
+        $("body").on("click", ".btnCetak", function() {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+
+            var radItem = loadRadOrderDetail(uid);
+            var radLampiran = loadRadOrderLampiran(uid);
+            var radPasien = loadRadOrderPasien(uid);
+
+
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/rad_hasil.php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    rad_pasien: radPasien,
+                    rad_item: radItem,
+                    rad_lampiran: radLampiran
+                },
+                success: function (response) {
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        pageTitle: "Laporan Radiologi " + radPasien.pasien.no_rm,
+                        afterPrint: function() {
+                            //
+                        }
+                    });
+                },
+                error: function (response) {
+                    //
+                }
+            });
+
+            return false;
+        });
+
+        function loadRadOrderDetail(uid){
+            var html;
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Radiologi/get-order-detail/" + uid,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    if (response.response_package.response_result > 0){
+                        console.clear();
+                        html = "<ol>";
+                        dataItem = response.response_package.response_data;
+                        $.each(dataItem, function(key, item){
+                            html += "<li style=\"border-bottom: dashed 1px #808080; padding: 10px 0;\">" +
+                                    "<div style=\"margin-left: 10px\">" +
+                                    "<h4>" + item.tindakan + "</h4>" +
+                                    "<b>Keterangan:</b><br />" + item.keterangan +
+                                    "<br />" +
+                                    "<b>Kesimpulan:</b><br />" + item.kesimpulan +
+                                    "</div>" +
+                                "</li>";
+                        });
+                        html += "</ol>";
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return html;
+        }
+
+        function loadRadOrderLampiran(uid) {
+            var MetaData;
+            var html = "";
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Radiologi/get-radiologi-lampiran/" + uid,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    MetaData = response.response_package.response_data;
+                    for(LampKey in MetaData) {
+                        html += "<div class=\"pagebreak\">" +
+                            "<embed type=\"application/pdf\" src=\"" + __HOST__ + "document/radiologi/" + MetaData[LampKey].radiologi_order + "/" + MetaData[LampKey].lampiran + "\" width=\"100%\" height=\"100%\" />" +
+                            "</div>";
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return html;
+        }
+
+        function loadRadOrderPasien(uid) {
+            var MetaData;
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Radiologi/get-data-pasien-antrian/" + uid,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    MetaData = response.response_package;
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return MetaData;
+        }
 
         function loadHarga(mitra, asesmen, tindakan, target) {
             $("#harga_" + target + "_" + tindakan).html("<b>0.00</b>").attr({
