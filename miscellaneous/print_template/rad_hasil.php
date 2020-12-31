@@ -6,7 +6,12 @@
                 size:A4;
                 padding:0.3cm;
             }
+
+            .pagebreak { page-break-before: always; }
         }
+
+        .pagebreak { page-break-before: always; }
+
         body{
             margin:auto 0px;
             color: #000;
@@ -119,19 +124,20 @@
             <td style="width:2%;"></td>
             <td style="border: 1px solid #000000; padding : 1% 1% 1% 2%">
                 <table class="head">
-                    <tr><td>No. RM</td><td>:</td><td><?php echo $_POST['lab_pasien']['pasien']['no_rm'];?></td></tr>
-                    <tr><td>Nama Pasien</td><td>:</td><td><?php echo $_POST['lab_pasien']['pasien']['panggilan'] . $_POST['lab_pasien']['pasien']['nama'];?></td></tr>
-                    <tr><td>Tanggal Lahir</td><td>:</td><td><?php echo $_POST['lab_pasien']['pasien']['tanggal_lahir'];?></td></tr>
+                    <tr><td>No. RM</td><td>:</td><td><?php echo $_POST['rad_pasien']['pasien']['no_rm'];?></td></tr>
+                    <tr><td>Nama Pasien</td><td>:</td><td><?php echo $_POST['rad_pasien']['pasien']['panggilan'] . $_POST['rad_pasien']['pasien']['nama'];?></td></tr>
+                    <tr><td>Tanggal Lahir</td><td>:</td><td><?php echo $_POST['rad_pasien']['pasien']['tanggal_lahir'];?></td></tr>
                 </table>
             </td>
         </tr>
     </table>
     ========================================================================================================
-    <center style="padding: 1% 0 1% 0; font-size: 1.5rem;"><b>HASIL LABORATORIUM</b></center>
+    <center style="padding: 1% 0 1% 0; font-size: 1.5rem;"><b>HASIL RADIOLOGI</b></center>
     --------------------------------------------------------------------------------------------------------
     <div class="middle" style="">
-        <?php print_r($_POST['lab_item']); ?>
+        <?php print_r($_POST['rad_item']); ?>
     </div>
 </div>
+    <?php echo $_POST['rad_lampiran']; ?>
 </body>
 </html>
