@@ -14,6 +14,14 @@
 		$("#panel-hasil").hide();
 
 		var dataLibrary = loadOrder(uid_order);
+
+		for(var datKey in dataLibrary) {
+		    forSave["tindakan_" + dataLibrary[datKey].id] = {
+		        keterangan: (dataLibrary[datKey].keterangan === null) ? "" : dataLibrary[datKey].keterangan,
+                kesimpulan: (dataLibrary[datKey].kesimpulan === null) ? "" : dataLibrary[datKey].kesimpulan
+            };
+        }
+
 		loadPasien(uid_order);
 		loadLampiran(uid_order);
 
