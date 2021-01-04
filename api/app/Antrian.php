@@ -388,6 +388,8 @@ class Antrian extends Utility
 
 
         } else { //Kunjungan Pertama
+
+
             $uid = parent::gen_uuid();
             //Tentukan tindakan untuk poli bersangkutan
             $PoliTindakan = new Poli(self::$pdo);
