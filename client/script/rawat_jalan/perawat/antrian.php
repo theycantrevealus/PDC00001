@@ -40,11 +40,22 @@
 
 		rebasePartus();
 
-
-
 		if(dataPasien.antrian.departemen !== __UIDFISIOTERAPI__) {
-            $("#fisioterapi_nav").hide();
+            $("#fisioterapi_nav").remove();
         }
+
+
+        if(dataPasien.antrian.departemen !== __POLI_IGD__) {
+            $(".tab-igd").remove();
+        } else {
+            //$(".tab-pane").removeClass("active");
+            $(".tab-igd:nth-child(1)").addClass("active");
+            $("#tab-assesment-awal-igd-1").addClass("active");
+            $(".tab-irm").remove();
+            $(".tab-biasa").remove();
+        }
+
+
 
 		$(".select2").select2({});
 

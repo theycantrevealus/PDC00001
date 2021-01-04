@@ -5,12 +5,12 @@ namespace PondokCoder;
 use PondokCoder\Invoice as Invoice;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
+use PondokCoder\Tindakan as Tindakan;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Antrian as Antrian;
 use PondokCoder\Pasien as Pasien;
-use PondokCoder\Tindakan as Tindakan;
 
 class Radiologi extends Utility
 {
@@ -778,7 +778,35 @@ class Radiologi extends Utility
 
     private function get_tindakan_for_dokter()
     {
-        $dataTindakan = self::get_tindakan();
+        $dataTindakan = self::$query
+            ->select('master_tindakan'
+                , array(
+                    'uid',
+                    'nama',
+                    'created_at',
+                    'updated_at'
+                )
+            )
+            ->where(array(
+                'master_tindakan.deleted_at' => 'IS NULL',
+                'AND',
+                'master_tindakan.kelompok' => '= ?',
+                'AND',
+                'master_tindakan.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\''
+            ), array(
+                'RAD'
+            ))
+            ->execute();
+
+        $tindakan = new Tindakan(self::$pdo);
+        foreach ($dataTindakan['response_data'] as $key => $value){
+
+            $harga = $tindakan::get_harga_tindakan($value['uid']);
+            $dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
+        }
+
+        return $dataTindakan;
+        /*$dataTindakan = self::get_tindakan();
 
         $tindakan = new Tindakan(self::$pdo);
         $autonum = 1;
@@ -793,7 +821,7 @@ class Radiologi extends Utility
             $dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
         }
 
-        return $dataTindakan;
+        return $dataTindakan;*/
     }
 
     public function __POST__($parameter = array())

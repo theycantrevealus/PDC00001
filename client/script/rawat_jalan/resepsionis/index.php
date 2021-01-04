@@ -447,6 +447,7 @@
             loadSpesialistik("#txt_bpjs_dpjp_spesialistik");
 
 
+
             $("#txt_bpjs_laka_suplesi_provinsi").select2({
                 dropdownParent: $("#group_provinsi")
             });
@@ -1075,6 +1076,8 @@
                         $(selection).attr("value", data[a].kode).html(data[a].nama);
                         $(target).append(selection);
                     }
+
+                    loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $(target).val());
                 },
                 error: function(response) {
                     console.log(response);
@@ -1094,6 +1097,7 @@
                     var data = response.response_package.content.response.list;
 
                     $(target + " option").remove();
+                    $(target).select2('data', null);
                     for(var a = 0; a < data.length; a++) {
                         var selection = document.createElement("OPTION");
 

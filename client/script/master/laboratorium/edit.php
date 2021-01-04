@@ -777,7 +777,7 @@
 				}
 			});*/
 
-			if(kode != "" && nama != "") {
+			if(nama != "") {
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Laboratorium",
@@ -798,7 +798,8 @@
 					},
 					type: "POST",
 					success: function(response){
-					    if(response.response_package[0].response_result > 0)
+                        console.log(response);
+					    if(response.response_package.response_result > 0)
                         {
                             Swal.fire(
                                 'Laboratorium',

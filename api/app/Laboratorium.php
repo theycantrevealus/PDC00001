@@ -1723,16 +1723,29 @@ class Laboratorium extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
-		$worker = self::$query->insert('master_lab', array(
-			'uid' => $uid,
-			'kode' => $parameter['kode'],
-			'nama' => $parameter['nama'],
-			'keterangan' => $parameter['keterangan'],
-			'spesimen' => $parameter['spesimen'],
-			'created_at' => parent::format_date(),
-			'updated_at' => parent::format_date()
-		))
-		->execute();
+        if(isset($parameter['spesimen']) && !empty($parameter['spesimen'])) {
+            $worker = self::$query->insert('master_lab', array(
+                'uid' => $uid,
+                'kode' => $parameter['kode'],
+                'nama' => $parameter['nama'],
+                'keterangan' => $parameter['keterangan'],
+                'spesimen' => $parameter['spesimen'],
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+        } else {
+            $worker = self::$query->insert('master_lab', array(
+                'uid' => $uid,
+                'kode' => $parameter['kode'],
+                'nama' => $parameter['nama'],
+                'keterangan' => $parameter['keterangan'],
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+        }
+
 
 		if($worker['response_result'] > 0) {
 			$log = parent::log(array(
@@ -1887,6 +1900,8 @@ class Laboratorium extends Utility {
 				}
 			}*/
 		}
+
+		return $worker;
 	}
 
 	private function edit_lab($parameter) {
@@ -1894,21 +1909,39 @@ class Laboratorium extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = $parameter['uid'];
 		$old_value = self::get_lab_detail($uid);
-		$worker = self::$query->update('master_lab', array(
-			'kode' => $parameter['kode'],
-			'nama' => $parameter['nama'],
-			'keterangan' => $parameter['keterangan'],
-			'spesimen' => $parameter['spesimen'],
-			'updated_at' => parent::format_date()
-		))
-		->where(array(
-			'master_lab.uid' => '= ?',
-			'AND',
-			'master_lab.deleted_at' => 'IS NULL'
-		), array(
-			$uid
-		))
-		->execute();
+		if(isset($parameter['spesimen']) && !empty($parameter['spesimen'])) {
+            $worker = self::$query->update('master_lab', array(
+                'kode' => $parameter['kode'],
+                'nama' => $parameter['nama'],
+                'keterangan' => $parameter['keterangan'],
+                'spesimen' => $parameter['spesimen'],
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'master_lab.uid' => '= ?',
+                    'AND',
+                    'master_lab.deleted_at' => 'IS NULL'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+        } else {
+            $worker = self::$query->update('master_lab', array(
+                'kode' => $parameter['kode'],
+                'nama' => $parameter['nama'],
+                'keterangan' => $parameter['keterangan'],
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'master_lab.uid' => '= ?',
+                    'AND',
+                    'master_lab.deleted_at' => 'IS NULL'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+        }
+
 
 		if($worker['response_result'] > 0) {
 			$log = parent::log(array(
@@ -2175,7 +2208,7 @@ class Laboratorium extends Utility {
 				}
 			}*/
 		}
-		return $queryList;
+		return $worker;
 	}
 
 
