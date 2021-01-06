@@ -1484,23 +1484,25 @@
 						</div>
 					</div>
 				</div>
-				<div class="form-group col-md-12" >
+				<div class="row" >
 					<!-- style="height: 100px; overflow: scroll;" -->
-					<table class="table table-bordered table-striped" id="table-list-pencarian">
-						<thead class="thead-dark">
-							<tr>
-								<th class="wrap_content">No</th>
-								<th>No. RM</th>
-								<th>Nama</th>
-								<th>NIK</th>
-								<th class="wrap_content">Jenis Kelamin</th>
-								<th class="wrap_content">Aksi</th>
-							</tr>
-						</thead>
-						<tbody>
-							
-						</tbody>
-					</table>
+                    <div class="col-md-12">
+                        <table class="table table-bordered table-striped largeDataType" id="table-list-pencarian">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>No. RM</th>
+                                <th>Nama</th>
+                                <th>NIK</th>
+                                <th class="wrap_content">Jenis Kelamin</th>
+                                <th class="wrap_content">Aksi</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
 				</div>
 				
 			</div>
