@@ -91,10 +91,16 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
+                    var forReturn = [];
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
                         dataSet = [];
+                    }
+
+                    for(var dKey in dataSet) {
+                        if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                            forReturn.push(dataSet[dKey]);
+                        }
                     }
 
                     response.draw = parseInt(response.response_package.response_draw);
@@ -151,6 +157,97 @@
                 }
             ]
         });
+
+
+
+
+
+        var tableResep2 = $("#table-resep-2").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: function(d){
+                    d.request = "get_resep_lunas_backend";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var forReturn = [];
+                    var dataSet = response.response_package.response_data;
+                    if(dataSet == undefined) {
+                        dataSet = [];
+                    }
+
+                    for(var dKey in dataSet) {
+                        if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                            forReturn.push(dataSet[dKey]);
+                        }
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return forReturn;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Kode Amprah"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.antrian.departemen.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(
+                            row.antrian.pasien_info.panggilan_name !== undefined &&
+                            row.antrian.pasien_info.panggilan_name !== null
+                        ) {
+                            return row.antrian.pasien_info.panggilan_name.nama + " " + row.antrian.pasien_info.nama;
+                        } else {
+                            return row.antrian.pasien_info.nama;
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.antrian.penjamin_data.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">Proses</a>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+
+
 
         var targettedData = {};
 
