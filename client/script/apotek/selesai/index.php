@@ -134,8 +134,10 @@
                     }
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
-                            forReturn.push(dataSet[dKey]);
+                        if(dataSet[dKey].departemen !== undefined) {
+                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                                forReturn.push(dataSet[dKey]);
+                            }
                         }
                     }
 
@@ -229,8 +231,10 @@
                     }
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
-                            forReturn.push(dataSet[dKey]);
+                        if(dataSet[dKey].departemen !== undefined) {
+                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                                forReturn.push(dataSet[dKey]);
+                            }
                         }
                     }
 

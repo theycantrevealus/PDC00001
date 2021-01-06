@@ -1346,7 +1346,9 @@ class Asesmen extends Utility {
 			'AND',
 			'resep.pasien' => '= ?',
 			'AND',
-			'resep.status_resep' => '= ?',
+			'(resep.status_resep' => '= ?',
+			'OR',
+            'resep.status_resep' => '= ?)',
 			'AND',
 			'resep.deleted_at' => 'IS NULL'
 		), array(
@@ -1355,7 +1357,8 @@ class Asesmen extends Utility {
 			$MasterAsesmen,
 			$UserData['data']->uid,
 			$parameter['pasien'],
-			'N'
+            'N',
+            'C'
 		))
 		->execute();
 		
@@ -1421,7 +1424,7 @@ class Asesmen extends Utility {
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
 						'qty' => $value['signaHari'],
-						'aturan_pakai' => $value['aturanPakai'],
+						'aturan_pakai' => intval($value['aturanPakai']),
 						'keterangan' => $value['keteranganPerObat'],
 						'updated_at'=> parent::format_date(),
 						'deleted_at' => NULL
@@ -1444,7 +1447,7 @@ class Asesmen extends Utility {
 						'signa_pakai' => $value['signaTakar'],
 						'qty' => $value['signaHari'],
 						'satuan' => $ObatInfo['satuan_terkecil'],
-						'aturan_pakai' => $value['aturanPakai'],
+						'aturan_pakai' => intval($value['aturanPakai']),
 						'keterangan' => $value['keteranganPerObat'],
 						'created_at' => parent::format_date(),
 						'updated_at'=> parent::format_date()
@@ -1677,7 +1680,7 @@ class Asesmen extends Utility {
 					$newResepDetail = self::$query->insert('resep_detail', array(
 						'resep' => $uid,
 						'obat' => $value['obat'],
-						'aturan_pakai' => $value['aturanPakai'],
+						'aturan_pakai' => intval($value['aturanPakai']),
 						'harga' => 0,
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
