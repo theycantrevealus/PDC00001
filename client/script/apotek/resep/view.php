@@ -775,7 +775,7 @@
             $(newRacikanRow).append(newRacikanCellSignaA);
             $(newRacikanRow).append(newRacikanCellSignaX);
             $(newRacikanRow).append(newRacikanCellSignaB);
-            $(newRacikanRow).append(newRacikan CellJlh);
+            $(newRacikanRow).append(newRacikanCellJlh);
             $(newRacikanRow).append(newRacikanCellHarga);
             $(newRacikanRow).append(newRacikanCellAksi);
 
