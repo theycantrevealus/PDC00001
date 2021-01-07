@@ -2939,7 +2939,7 @@
                 ) {
                     resep.push({
                         "obat": obat,
-                        "aturanPakai": aturanPakai,
+                        "aturanPakai": parseInt(aturanPakai),
                         "keteranganPerObat": keteranganPerObat,
                         "signaKonsumsi": signaKonsumsi,
                         "signaTakar": signaTakar,
@@ -2965,7 +2965,7 @@
                 };
 
                 dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input").val();
-                dataRacikan.aturanPakai = masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val();
+                dataRacikan.aturanPakai = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
                 dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
                 dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
                 dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));
@@ -3231,6 +3231,11 @@
                     racikan: racikan
                 };
             }
+
+
+
+            console.clear();
+            console.log(formData);
 
             $.ajax({
                 async: false,
