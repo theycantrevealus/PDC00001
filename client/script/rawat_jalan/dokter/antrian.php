@@ -2965,7 +2965,7 @@
                 };
 
                 dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input").val();
-                dataRacikan.aturanPakai = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
+                dataRacikan.aturanPakai = (masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val() === "none") ? 0 : parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
                 dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
                 dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
                 dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));
@@ -3234,7 +3234,7 @@
 
 
 
-            console.clear();
+            //console.clear();
             console.log(formData);
 
             $.ajax({
@@ -3247,6 +3247,7 @@
                 type: "POST",
                 success: function(response) {
                     savingResult = response;
+                    console.log(savingResult);
                 },
                 error: function(response) {
                     console.clear();

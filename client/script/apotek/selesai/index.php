@@ -134,9 +134,11 @@
                     }
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen !== undefined) {
-                            if(d    ataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                        if(dataSet[dKey].antrian.departemen !== undefined) {
+                            if(dataSet[dKey].antrian.departemen.uid != __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid != __POLI_INAP__) {
                                 forReturn.push(dataSet[dKey]);
+                            } else {
+                                console.log(dataSet[dKey].antrian.departemen.uid);
                             }
                         }
                     }
@@ -230,13 +232,17 @@
                         dataSet = [];
                     }
 
+
+
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen !== undefined) {
-                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                        if(dataSet[dKey].antrian.departemen !== undefined) {
+                            if(dataSet[dKey].antrian.departemen.uid == __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid == __POLI_INAP__) {
                                 forReturn.push(dataSet[dKey]);
                             }
                         }
                     }
+
+
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;

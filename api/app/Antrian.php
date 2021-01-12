@@ -498,8 +498,28 @@ class Antrian extends Utility
                             $parameter['dataObj']['currentAntrianID'] = 0;
                             $currentPasien = $parameter['dataObj']['currentPasien'];
                             unset($parameter['dataObj']['currentPasien']);
+                            unset($parameter['dataObj']['bangsal']);
                             $AntrianProses = self::tambah_antrian('antrian', $parameter, $uid);
                             $antrianKunjungan['response_poli'] = $AntrianProses;
+
+                            /*$no_antrian = self::ambilNomorAntrianPoli($parameter['dataObj']['departemen']);
+                            $antrian = self::$query
+                                ->insert('antrian', array(
+                                        'uid' => $uid,
+                                        'no_antrian' => $no_antrian,
+                                        'kunjungan' => $parameter['kunjungan'],
+                                        'prioritas' => 36,
+                                        'pasien' => $parameter['dataObj']['currentPasien'],
+                                        'departemen' => $parameter['dataObj']['departemen'],
+                                        'dokter' => $parameter['dataObj']['dokter'],
+                                        'penjamin' => $parameter['penjamin'],
+                                        'waktu_masuk' => parent::format_date(),
+                                        'created_at' => parent::format_date(),
+                                        'updated_at' => parent::format_date()
+                                    )
+                                )
+                                ->execute();*/
+
                             $parameter['dataObj']['currentPasien'] = $currentPasien;
                         } else {
                             $antrianKunjungan = self::$query->update('antrian_nomor', array(

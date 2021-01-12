@@ -165,11 +165,11 @@
                         var newDetailCellQty = document.createElement("TD");
                         var newQty = document.createElement("INPUT");
                         var statusSedia = "";
-                        if(data.detail[a].qty <= data.detail[a].sedia)
+                        if(parseFloat(data.detail[a].qty) <= parseFloat(data.detail[a].sedia))
                         {
                             statusSedia = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + data.detail[a].sedia + "</b>";
                         } else {
-                            statusSedia = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia" + data.detail[a].sedia + "</b>";
+                            statusSedia = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + data.detail[a].sedia + "</b>";
                         }
                         $(newDetailCellQty).addClass("text_center").append("<h5 class=\"text_center\">" + parseFloat(data.detail[a].qty) + "</h5>").append(statusSedia);
                         /*$(newQty).inputmask({
@@ -286,11 +286,11 @@
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
                         var newRacikanObat = document.createElement("SELECT");
                         var statusSediaRacikan = "";
-                        if(data.racikan[b].qty >= racikanDetail[racDetailKey].sedia)
+                        if(parseFloat(data.racikan[b].qty) <= parseFloat(racikanDetail[racDetailKey].sedia))
                         {
                             statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + racikanDetail[racDetailKey].sedia + "</b>";
                         } else {
-                            statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia" + racikanDetail[racDetailKey].sedia + "</b>";
+                            statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + racikanDetail[racDetailKey].sedia + "</b>";
                         }
 
                         $(newCellRacikanObat).append("<h5 class=\"text-info\">" + RacikanObatData.data[0].nama + " <b class=\"text-danger text-right\">[" + racikanDetail[racDetailKey].kekuatan + "]</b></h5>").append(statusSediaRacikan);
