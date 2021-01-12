@@ -121,6 +121,8 @@
                         require 'asesmen-gigi.php';
                     } else if(in_array(__POLI_MATA__, $PoliList)) {
                         require 'asesmen-mata.php';
+                    } else if(in_array(__POLI_ORTODONTIE__, $PoliList)) {
+                        require 'asesmen-gigi.php';
                     }
                     require 'asesmen-awal.php';
                     ?>
