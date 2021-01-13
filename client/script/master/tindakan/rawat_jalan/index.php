@@ -182,13 +182,17 @@
 			var columnKelas = {};
 			var tableTindakan;
 			var dataBuilder;
+
+
 			var generateHeader = [{
-				"title": "No",
-				"data": "autonum"
-			}, {
-				"title" : "Tindakan",
-				"data": "tindakan"
-			}];
+                "data" : null, render: function(data, type, row, meta) {
+                    return row.autonum;
+                }
+            }, {
+                "data" : null, render: function(data, type, row, meta) {
+                    return row.tindakan;
+                }
+            }];
 
 			$.ajax({
 				async: false,
@@ -199,86 +203,127 @@
 				type:"GET",
 				success:function(response) {
 					var data = response.response_package.response_data;
+					console.log(data);
 					for(var key in data) {
+
 						$("#table-tindakan thead tr").append("<th>" + data[key].nama + "</th>");
 						if(columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] == undefined) {
 							columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] = 0;
 						}
 						generateHeader.push({
-							"uid": data[key].uid,
-							"title" : data[key].nama,
-							"data": data[key].nama.replace(" ", "_").toLowerCase()
-						});
+                            "data" : null, render: function(data, type, row, meta) {
+                                return row.nama.replace(" ", "_").toLowerCase();
+                            }
+                        });
 					}
-					$("#table-tindakan thead tr").append("<th>Aksi</th>");
+					$("#table-tindakan thead tr").append("<th>Poli</th>").append("<th>Aksi</th>");
+
+
+                    generateHeader.push({
+                        "data" : null, render: function(data, type, row, meta) {
+                            return row.poli;
+                        }
+                    });
 
 					generateHeader.push({
-						"title" : "Aksi",
-						"data": "action"
-					});
+                        "data" : null, render: function(data, type, row, meta) {
+                            return "";
+                        }
+                    });
 
 
 					if(generateHeader.length == $("#table-tindakan thead th").length) {
 						tableTindakan = $("#table-tindakan").DataTable({
 							"ajax":{
 								async: false,
-								url: __HOSTAPI__ + "/Tindakan/get-harga-per-kelas/" + tindakanKelas + "/" + $("#filter-penjamin").val(),
-								type: "GET",
+								processing: true,
+                                serverSide: true,
+                                sPaginationType: "full_numbers",
+                                bPaginate: true,
+                                lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+                                serverMethod: "POST",
 								headers:{
 									Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 								},
-								dataSrc:function(response) {
-									var DataPopulator = {};
-									var DataPopulatorParsed = [];
+                                "ajax": {
+                                    url: __HOSTAPI__ + "/Tindakan",
+                                    type: "POST",
+                                    data: function (d) {
+                                        d.request = "get_harga_per_tindakan_backend";
+                                        d.penjamin = $("#filter-penjamin").val();
+                                        d.jenis = tindakanKelas;
+                                    },
+                                    headers: {
+                                        Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                                    },
+                                    dataSrc: function (response) {
+                                        var DataPopulator = {};
+                                        var DataPopulatorParsed = [];
 
 
-									//Parse data from vertical to horizontal
-									var data_harga = response.response_package;
+                                        //Parse data from vertical to horizontal
+                                        var data_harga = response.response_package;
 
-									for(var key = 0; key < data_harga.length; key++) {
-										if(data_harga[key].tindakan_detail != undefined) {
-											var kelasTarget = data_harga[key].tindakan;
-											
-											if(DataPopulator[kelasTarget] === undefined) {
-												DataPopulator[kelasTarget] = {
-													uid: kelasTarget,
-													nama: data_harga[key].tindakan_detail.nama
-												};
+                                        for (var key = 0; key < data_harga.length; key++) {
+                                            if (data_harga[key].tindakan_detail != undefined) {
+                                                var kelasTarget = data_harga[key].tindakan;
 
-												if(DataPopulator[kelasTarget].kelas_harga == undefined) {
-													DataPopulator[kelasTarget].kelas_harga = columnKelas;
-												}
-											}
+                                                if (DataPopulator[kelasTarget] === undefined) {
+                                                    DataPopulator[kelasTarget] = {
+                                                        uid: kelasTarget,
+                                                        nama: data_harga[key].tindakan_detail.nama
+                                                    };
 
-											var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
-											if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
-												DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
-											}
-										}
-									}
-									
-									//Convert to array data
-									var autonum = 1;
-									for(var key in DataPopulator) {
-										var parseKelas = {
-											autonum: autonum,
-											tindakan: "<label id=\"tindakan_" + DataPopulator[key].uid + "\">" + DataPopulator[key].nama + "</label>",
-											tindakan_uid : DataPopulator[key].uid,
-											action: "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-pencil-alt\"></i></button> <button class=\"btn btn-danger btn-sm btn-delete-tindakan-kelas\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-trash\"></i></button>"
-										};
+                                                    if (DataPopulator[kelasTarget].kelas_harga == undefined) {
+                                                        DataPopulator[kelasTarget].kelas_harga = columnKelas;
+                                                    }
+                                                }
 
-										for(var KelasKey in DataPopulator[key]) {
-											if(KelasKey in columnKelas) {
-												parseKelas[KelasKey] = "<h6 class=\"text-right\">" + number_format(DataPopulator[key][KelasKey], 2, ".", ",") + "</h6>";
-											}
-										}
+                                                var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
+                                                if (kelasKey in DataPopulator[kelasTarget].kelas_harga) {
+                                                    DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
+                                                }
 
-										DataPopulatorParsed.push(parseKelas);
-										autonum++;
-									}
-									dataBuilder = DataPopulator;
-									return DataPopulatorParsed;
-								}
+                                                DataPopulator[kelasTarget].poli = data_harga[key].poli;
+                                            }
+                                        }
+
+                                        //Convert to array data
+                                        var autonum = 1;
+                                        for (var key in DataPopulator) {
+
+                                            var poliParse = "<ol type=\"1\">";
+                                            var poliInfo = DataPopulator[key].poli;
+                                            for (var pInfoKey in poliInfo) {
+                                                if (poliInfo[pInfoKey].detail !== undefined && poliInfo[pInfoKey].detail !== null) {
+                                                    poliParse += "<li>" + poliInfo[pInfoKey].detail.nama + "</li>";
+                                                }
+                                            }
+
+                                            poliParse += "</ol>";
+
+                                            var parseKelas = {
+                                                autonum: autonum,
+                                                tindakan: "<label id=\"tindakan_" + DataPopulator[key].uid + "\">" + DataPopulator[key].nama + "</label>",
+                                                tindakan_uid: DataPopulator[key].uid,
+                                                poli: poliParse,
+                                                action: "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-pencil-alt\"></i></button> <button class=\"btn btn-danger btn-sm btn-delete-tindakan-kelas\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-trash\"></i></button>"
+                                            };
+
+                                            for (var KelasKey in DataPopulator[key]) {
+                                                if (KelasKey in columnKelas) {
+                                                    parseKelas[KelasKey] = "<h6 class=\"text-right\">" + number_format(DataPopulator[key][KelasKey], 2, ".", ",") + "</h6>";
+                                                }
+                                            }
+
+                                            DataPopulatorParsed.push(parseKelas);
+                                            autonum++;
+                                        }
+                                        dataBuilder = DataPopulator;
+                                        //console.log(DataPopulatorParsed);
+                                        return DataPopulatorParsed;
+                                    }
+                                }
 							},
 							fixedColumns:   {
 								leftColumns: 2
