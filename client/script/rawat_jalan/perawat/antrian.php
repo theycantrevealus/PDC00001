@@ -232,9 +232,13 @@
 				type: "POST",
 				success: function(response){
                     btnSelesai.removeAttr("disabled");
-				    /*console.clear();
-				    console.log(response.response_package);*/
-					location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+				    if(response.response_package.response_result > 0) {
+                        location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+                    } else {
+                        notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
+                        console.clear();
+                        console.log(response.response_package);
+                    }
 				},
 				error: function(response) {
 					btnSelesai.removeAttr("disabled");
