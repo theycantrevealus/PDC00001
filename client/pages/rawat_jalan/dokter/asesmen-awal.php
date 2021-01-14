@@ -91,7 +91,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 							<div class="form-group col-lg-6">
 								<label for="txt_tekanan_darah">Tekanan Darah</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_tanda_vital_td" class="form-control form-control-appended" placeholder="Tekanan Darah">
+									<input type="text" value="0" id="txt_tanda_vital_td" class="form-control form-control-appended" placeholder="Tekanan Darah" disabled />
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>mmHg</span>
@@ -102,7 +102,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 							<div class="form-group col-lg-6">
 								<label for="txt_nadi">Nadi</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_tanda_vital_n" class="form-control form-control-appended" placeholder="Nadi">
+									<input type="text" value="0" id="txt_tanda_vital_n" class="form-control form-control-appended" placeholder="Nadi" disabled />
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>x/menit</span>
@@ -115,7 +115,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 							<div class="form-group col-lg-6">
 								<label for="txt_suhu">Suhu</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_tanda_vital_s" class="form-control form-control-appended" placeholder="Suhu">
+									<input type="text" value="0" id="txt_tanda_vital_s" class="form-control form-control-appended" placeholder="Suhu" disabled />
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span><sup>o</sup>C</span>
@@ -126,7 +126,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 							<div class="form-group col-lg-6">
 								<label for="txt_pernafasan">Pernafasan</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_tanda_vital_rr" class="form-control form-control-appended" placeholder="Pernafasan">
+									<input type="text" value="0" id="txt_tanda_vital_rr" class="form-control form-control-appended" placeholder="Pernafasan" disabled />
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>x/menit</span>
@@ -139,7 +139,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 							<div class="form-group col-lg-6">
 								<label for="txt_berat_badan">Berat Badan</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_berat_badan" class="form-control form-control-appended" placeholder="Berat Badan">
+									<input type="text" value="0" id="txt_berat_badan" class="form-control form-control-appended" placeholder="Berat Badan" disabled />
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>kg</span>
@@ -150,7 +150,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 							<div class="form-group col-lg-6">
 								<label for="txt_tinggi_badan">Tinggi Badan</label>
 								<div class="input-group input-group-merge">
-									<input type="text" id="txt_tinggi_badan" class="form-control form-control-appended" placeholder="Tinggi Badan">
+									<input type="text" id="txt_tinggi_badan" class="form-control form-control-appended" placeholder="Tinggi Badan" disabled />
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>cm</span>
@@ -161,7 +161,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 							<div class="form-group col-lg-8">
 								<label for="txt_lingkar_lengan">Lingkar Lengan Atas</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_lingkar_lengan" class="form-control form-control-appended" placeholder="Lingkar Lengan Atas">
+									<input type="text" value="0" id="txt_lingkar_lengan" class="form-control form-control-appended" placeholder="Lingkar Lengan Atas" disabled />
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>cm</span>

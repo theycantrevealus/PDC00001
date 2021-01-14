@@ -394,8 +394,9 @@
                         <div class="card-header card-header-large bg-white">
                             <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Pengkajian Resiko Pasien Jatuh</h5>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body row">
                             <div class="col-md-6">
+                                <h5>Skala Jatuh Dewasa(MORSE)</h5>
                                 <table class="table table-bordered">
                                     <thead class="thead-dark">
                                         <tr>
@@ -406,7 +407,7 @@
                                     <tbody>
                                         <tr>
                                             <td>0 - 5</td>
-                                            <td>Resiko Rendah</td>
+                                            <td>Resiko Sedang</td>
                                         </tr>
                                         <tr>
                                             <td>6 - 13</td>
@@ -414,14 +415,48 @@
                                         </tr>
                                         <tr>
                                             <td>0 - 5</td>
-                                            <td>Resiko Rendah</td>
+                                            <td>Resiko Tinggi</td>
                                         </tr>
                                     </tbody>
                                 </table>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            Total Skor
+                                        </label>
+                                        <input class="form-control" type="text" name="simetris" value="" />
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="col-md-6">
-
+                                <h5>Skala Jatuh Anak(Humpty Dumpty)</h5>
+                                <table class="table table-bordered">
+                                    <thead class="thead-dark">
+                                    <tr>
+                                        <th>Skor</th>
+                                        <th>Tingkat Resiko</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>7 - 11</td>
+                                        <td>Resiko Rendah</td>
+                                    </tr>
+                                    <tr>
+                                        <td>>=12</td>
+                                        <td>Resiko Sedang</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            Total Skor
+                                        </label>
+                                        <input class="form-control" type="text" name="simetris" value="" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
