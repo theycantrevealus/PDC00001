@@ -2294,7 +2294,7 @@ class Asesmen extends Utility {
 		//Prepare Poli
 		$Poli = new Poli(self::$pdo);
 		$PoliDetail = $Poli::get_poli_detail($parameter['dataAntrian']['departemen'])['response_data'][0];
-
+        $DataPartus = $parameter['dataObj']['partus_list'];
 		//Check
 		$check = self::$query->select('asesmen', array(
 				'uid'
@@ -2337,7 +2337,7 @@ class Asesmen extends Utility {
 			if(count($poli_check['response_data']) > 0) {
 				//update asesmen rawat --> sudah oke
 				$parameter['dataObj']['updated_at'] = parent::format_date();
-
+                unset($parameter['dataObj']['partus_list']);
 				$rawat = self::$query
 					->update('asesmen_rawat_' . $PoliDetail['poli_asesmen'], $parameter['dataObj'])
 					->where(array(
@@ -2398,7 +2398,7 @@ class Asesmen extends Utility {
 				$parameter['dataObj']['pasien'] = $parameter['dataAntrian']['uid_pasien'];
 				$parameter['dataObj']['kunjungan'] = $parameter['dataAntrian']['kunjungan'];
 				$parameter['dataObj']['departemen'] = $parameter['dataAntrian']['departemen'];
-				
+
 				$rawat = self::new_asesmen_rawat($parameter['dataObj'], $MasterUID, $PoliDetail['poli_asesmen']);
 			}
 
@@ -2470,7 +2470,7 @@ class Asesmen extends Utility {
                 $MasterUID
             ))
             ->execute();
-		foreach ($parameter['dataObj']['partus_list'] as $partKey => $partValue) {
+		foreach ($DataPartus as $partKey => $partValue) {
             //Asesmen Kebidanan
             $checkBidan = self::$query->select('asesmen_kebidanan', array(
                 'id'
