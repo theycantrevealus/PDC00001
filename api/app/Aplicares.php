@@ -266,7 +266,7 @@ class Aplicares extends Utility {
 				array_push($crossCheckData, $value);
 			}
 		}
-		return $result;
+		return $crossCheckData;
 	}
 
 	private function tambah_ruangan($table, $parameter){

@@ -21,19 +21,23 @@
 					var autonum = 1;
 					var returnData = [];
 					for(var key in data) {
-						returnData.push({
-							"nama": data[key].nama,
-							"uid_ruangan": data[key].uid_ruangan,
-							"autonum": autonum,
-							"kode_ruangan": data[key].koderuang,
-							"kodekelas": data[key].kodekelas,
-							"kapasitas": data[key].kapasitas,
-							"tersedia": data[key].tersedia,
-							"tersediapria": data[key].tersediapria,
-							"tersediawanita": data[key].tersediawanita,
-							"tersediapriawanita": data[key].tersediapriawanita,
-						});
-						autonum++;
+					    if(data[key] !== null && data[key] !== undefined) {
+					        if(data[key].nama !== undefined) {
+                                returnData.push({
+                                    "nama": data[key].nama,
+                                    "uid_ruangan": data[key].uid_ruangan,
+                                    "autonum": autonum,
+                                    "kode_ruangan": data[key].koderuang,
+                                    "kodekelas": data[key].kodekelas,
+                                    "kapasitas": data[key].kapasitas,
+                                    "tersedia": data[key].tersedia,
+                                    "tersediapria": data[key].tersediapria,
+                                    "tersediawanita": data[key].tersediawanita,
+                                    "tersediapriawanita": data[key].tersediapriawanita,
+                                });
+                                autonum++;
+                            }
+                        }
 					}
 					return returnData;
 				}
@@ -335,7 +339,7 @@
 </script>
 
 <div id="form-tambah" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog modal-md bg-danger" role="document">
+	<div class="modal-dialog modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modal-large-title"><span id="title-form"></span> Ruangan</h5>
