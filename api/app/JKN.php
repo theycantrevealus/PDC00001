@@ -41,11 +41,18 @@ class JKN extends Utility
             isset($parameter['kodepoli']) &&
             isset($parameter['nomorreferensi']) &&
             isset($parameter['jenisreferensi']) &&
-            isset($parameter['nomorrequest']) &&
+            isset($parameter['jenisrequest']) &&
             isset($parameter['polieksekutif'])
         ) {
-            return array();
+            return self::get_antrian($parameter);
+        } else {
+            return $parameter;
         }
+    }
+
+    private function get_antrian($parameter) {
+
+        return array();
     }
 
     private function login($parameter) {
