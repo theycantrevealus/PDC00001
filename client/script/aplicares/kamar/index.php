@@ -24,16 +24,16 @@
 					    if(data[key] !== null && data[key] !== undefined) {
 					        if(data[key].nama !== undefined) {
                                 returnData.push({
-                                    "nama": data[key].nama,
-                                    "uid_ruangan": data[key].uid_ruangan,
+                                    "nama": String(data[key].nama),
+                                    "uid_ruangan": String(data[key].uid_ruangan),
                                     "autonum": autonum,
-                                    "kode_ruangan": data[key].koderuang,
-                                    "kodekelas": data[key].kodekelas,
-                                    "kapasitas": data[key].kapasitas,
-                                    "tersedia": data[key].tersedia,
-                                    "tersediapria": data[key].tersediapria,
-                                    "tersediawanita": data[key].tersediawanita,
-                                    "tersediapriawanita": data[key].tersediapriawanita,
+                                    "kode_ruangan": String(data[key].koderuang),
+                                    "kodekelas": String(data[key].kodekelas),
+                                    "kapasitas": String(data[key].kapasitas),
+                                    "tersedia": String(data[key].tersedia),
+                                    "tersediapria": String(data[key].tersediapria),
+                                    "tersediawanita": String(data[key].tersediawanita),
+                                    "tersediapriawanita": String(data[key].tersediapriawanita),
                                 });
                                 autonum++;
                             }

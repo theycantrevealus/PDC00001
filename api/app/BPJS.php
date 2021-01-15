@@ -775,8 +775,8 @@ class BPJS extends Utility {
 		return $content;
 	}
 
-    public function launchUrl($extended_url) {
-        $url = self::$base_url . $extended_url;
+    public function launchUrl($extended_url, $target_switch = 1) {
+        $url = (($target_switch === 1) ? self::$base_url : __BASE_LIVE_BPJS_APLICARES__) . $extended_url;
 
         date_default_timezone_set('UTC');
         $tStamp = strval(time()-strtotime('1970-01-01 00:00:00'));
