@@ -193,7 +193,7 @@ class Aplicares extends Utility {
 	private function get_ruangan_terdaftar_bpjs() {
 		$url = "/aplicaresws/rest/bed/read/" . self::$kodePPK . "/1/100";
         $BPJS = new BPJS(self::$pdo);
-		$result = $BPJS::launchUrl($url);
+		$result = $BPJS::launchUrl($url, 2);
 		$error_count = 1;
 		$error_message = array();
 

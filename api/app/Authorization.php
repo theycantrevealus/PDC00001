@@ -5,7 +5,7 @@ class Authorization {
 	public static $Bearer;
 	public function getAuthorizationHeader($parameter) {
 		$headers = null;
-		if (isset($parameter['Authorization'])) {
+		if (isset($parameter['Authorization']) || isset($parameter['x-token'])) {
 			$headers = trim($parameter["Authorization"]);
 		} else if (isset($parameter['HTTP_AUTHORIZATION'])) {
 			$headers = trim($parameter["HTTP_AUTHORIZATION"]);
@@ -22,13 +22,17 @@ class Authorization {
 	public function getBearerToken($parameter) {
 		$headers = self::getAuthorizationHeader($parameter);
 		$getBearer = explode("Bearer", $headers);
-		self::$Bearer = $getBearer[1];
+		self::$Bearer = (count($getBearer) > 1) ? $getBearer[1] : $getBearer[0];
 		if (!empty($headers)) {
-			if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
-				return $matches[1];
-			}
+		    if(count($getBearer) > 1) {
+                if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+                    return $matches[1];
+                }
+            } else {
+		        return $getBearer[0];
+            }
 		}
-		return (empty(self::$getBearer)) ? null : self::$getBearer;
+		return (empty($getBearer)) ? null : $getBearer;
 	}
 
 	public function readBearerToken() {
