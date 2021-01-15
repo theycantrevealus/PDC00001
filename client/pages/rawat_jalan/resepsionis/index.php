@@ -98,7 +98,7 @@
                                     <h5 class="card-header__title flex m-0">Antrian Poli</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="table-responsive border-bottom">
+                                    <div class="border-bottom">
                                         <table class="table table-bordered table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
                                             <thead class="thead-dark">
                                             <tr>

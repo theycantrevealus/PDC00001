@@ -65,7 +65,7 @@
     </head>
     <body>
     <div class="body">
-        <div class="left" style="margin-top:1.69cm !important;"><b><?php echo $_POST['pasien']; ?></b></div>
+        <div class="left" style="margin-top:1.69cm !important;"><b><?php echo $_POST['nama']; ?></b></div>
         <div class="left"><?php echo $_POST['alamat']; ?></div>
         <div class="left1">TTL</div><div class="left2">:</div><div class="left3"> <?php echo $_POST['tempat_lahir'] . ", " . $_POST['tanggal_lahir'];?></div>
         <div  class="clear"></div>
