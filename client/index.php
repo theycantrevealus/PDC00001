@@ -31,7 +31,9 @@
     var __UIDPETUGASLAB__ = <?php echo json_encode(__UIDPETUGASLAB__); ?>;
     var __POLI_GIGI__ = <?php echo json_encode(__POLI_GIGI__); ?>;
     var __POLI_MATA__ = <?php echo json_encode(__POLI_MATA__); ?>;
-    var __POLI_INAP__ = <?php echo json_encode(__POLI_INAP__); ?>;
+    var __POLI_ORTODONTIE__ = <?php echo json_encode(__POLI_ORTODONTIE__); ?>;
+    //alert(__POLI_ORTODONTIE__);
+	var __POLI_INAP__ = <?php echo json_encode(__POLI_INAP__); ?>;
     var __POLI_IGD__ = <?php echo json_encode(__POLI_IGD__); ?>;
     var __POLI_LAB__ = <?php echo json_encode(__POLI_LAB__); ?>;
     var __POLI_ORTODONTIE__ = <?php echo json_encode(__POLI_ORTODONTIE__); ?>;

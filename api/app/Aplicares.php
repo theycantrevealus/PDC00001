@@ -28,7 +28,7 @@ class Aplicares extends Utility {
 		self::$kodePPK = __KODE_PPK__;
 		self::$data_api = __DATA_API_LIVE__;
 		self::$secretKey_api = __SECRET_KEY_LIVE_BPJS__;
-		self::$base_url = __BASE_LIVE_BPJS__;
+		self::$base_url = __BASE_LIVE_BPJS_APLICARES__ . '/aplicaresws';
 	}
 
 	public function __GET__($parameter = array()) {
@@ -131,7 +131,7 @@ class Aplicares extends Utility {
 	private function get_kelas_kamar(){
 		$url = "/aplicaresws/rest/ref/kelas";
 		$BPJS = new BPJS(self::$pdo);
-		$result = $BPJS::launchUrl($url);
+		$result = $BPJS::launchUrl($url, 2);
 
 		return $result['content']['response']['list'];
 	}
@@ -193,7 +193,7 @@ class Aplicares extends Utility {
 	private function get_ruangan_terdaftar_bpjs() {
 		$url = "/aplicaresws/rest/bed/read/" . self::$kodePPK . "/1/100";
         $BPJS = new BPJS(self::$pdo);
-		$result = $BPJS::launchUrl($url);
+		$result = $BPJS::launchUrl($url, 2);
 		$error_count = 1;
 		$error_message = array();
 
@@ -266,7 +266,7 @@ class Aplicares extends Utility {
 				array_push($crossCheckData, $value);
 			}
 		}
-		return $result;
+		return $crossCheckData;
 	}
 
 	private function tambah_ruangan($table, $parameter){
@@ -415,8 +415,9 @@ class Aplicares extends Utility {
 		$rest = self::update_ruangan($forApi);
 
 		$result = array(
-			"local" => $ruangan,
-			"rest" => $rest
+			'local' => $ruangan,
+			'rest' => $rest,
+            'api' => $forApi
 		);
 
 		return $result;

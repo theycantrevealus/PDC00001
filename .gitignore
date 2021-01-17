@@ -9,6 +9,8 @@ composer.lock
 composer.json
 vendor
 node_modules/
+testSSP/
+images/
 images/produk/
 images/pegawai/
 images/igd/

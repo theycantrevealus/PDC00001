@@ -272,51 +272,53 @@
 
                 penjaminMetaData = data;
 
-                if(parseInt(data.metaData.code) === 200) {
+                if(data.metaData !== undefined) {
+                    if(parseInt(data.metaData.code) === 200) {
 
-                    $("#hasil_bpjs").fadeIn();
-                    var pasienData = data.response.peserta;
-                    if(pasienData.statusPeserta.keterangan === "AKTIF") {
-                        if(pasienData.nik != dataPasien.nik) { //Cek NIK
-                            $("#status_bpjs").addClass("text-danger").removeClass("text-success").html("NIK tidak sama");
+                        $("#hasil_bpjs").fadeIn();
+                        var pasienData = data.response.peserta;
+                        if(pasienData.statusPeserta.keterangan === "AKTIF") {
+                            if(pasienData.nik != dataPasien.nik) { //Cek NIK
+                                $("#status_bpjs").addClass("text-danger").removeClass("text-success").html("NIK tidak sama");
+                            } else {
+                                $("#status_bpjs").addClass("text-success").removeClass("text-danger").html(pasienData.statusPeserta.keterangan);
+                                $("#btnProsesPasien").show();
+                            }
                         } else {
-                            $("#status_bpjs").addClass("text-success").removeClass("text-danger").html(pasienData.statusPeserta.keterangan);
-                            $("#btnProsesPasien").show();
+                            $("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
                         }
+
+                        $("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
+                        $("#nama_pasien").html(pasienData.nama);
+                        $("#nik_pasien").html(pasienData.nik);
+                        $("#nomor_peserta").html(pasienData.noKartu);
+                        $("#tll_pasien").html(pasienData.tglLahir);
+                        //$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
+                        $("#faskes_pasien").html(pasienData.provUmum.nmProvider);
+                        $("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
+                        $("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
+
+                        $("#tanggal_kartu").html(pasienData.tglCetakKartu);
+
+                        //TAT Tanggal Akhir Kartu
+                        //TMT Tanggal Mulai Kartu
+
+
+                        $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
+                        $("#txt_bpjs_nik").val(pasienData.nik);
+                        $("#txt_bpjs_nama").val(pasienData.nama);
+                        $("#txt_bpjs_rm").val($("#no_rm").val());
+
+
                     } else {
-                        $("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
+                        Swal.fire(
+                            'BPJS',
+                            data.metaData.message,
+                            'warning'
+                        ).then((result) => {
+                            $("#txt_no_bpjs").focus();
+                        });
                     }
-
-                    $("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
-                    $("#nama_pasien").html(pasienData.nama);
-                    $("#nik_pasien").html(pasienData.nik);
-                    $("#nomor_peserta").html(pasienData.noKartu);
-                    $("#tll_pasien").html(pasienData.tglLahir);
-                    //$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
-                    $("#faskes_pasien").html(pasienData.provUmum.nmProvider);
-                    $("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
-                    $("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
-
-                    $("#tanggal_kartu").html(pasienData.tglCetakKartu);
-
-                    //TAT Tanggal Akhir Kartu
-                    //TMT Tanggal Mulai Kartu
-
-
-                    $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
-                    $("#txt_bpjs_nik").val(pasienData.nik);
-                    $("#txt_bpjs_nama").val(pasienData.nama);
-                    $("#txt_bpjs_rm").val($("#no_rm").val());
-
-
-                } else {
-                    Swal.fire(
-                        'BPJS',
-                        data.metaData.message,
-                        'warning'
-                    ).then((result) => {
-                        $("#txt_no_bpjs").focus();
-                    });
                 }
             },
             error: function(response) {
