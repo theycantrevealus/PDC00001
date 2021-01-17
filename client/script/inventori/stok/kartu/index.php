@@ -24,6 +24,8 @@
                     var returnedData = [];
                     var uniqueData = {};
 
+		console.log(response);
+
                     if(response == undefined || response.response_package == undefined) {
                         rawData = [];
                     } else {
@@ -94,7 +96,7 @@
                             "</div>" +
                             "<div class=\"col-md-10\">" +
                             "<b><i>" + ((row.kode_barang == undefined) ? "[KODE_BARANG]" : row.kode_barang.toUpperCase()) + "</i></b><br />" +
-                            "<h5>" + row.detail.nama.toUpperCase() + "</h5>" +
+                            "<h5>" + ((row.detail !== null) ? row.detail.nama.toUpperCase() : "") + "</h5>" +
                             kategoriObat +
                             "</div>" +
                             "</div>";

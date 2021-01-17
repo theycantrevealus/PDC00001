@@ -20,10 +20,10 @@
 			</div>
 		</div>
 	</div>
-	<div class="container-fluid" style="overflow: hidden; margin-top: -30px; height: 100%;">
+	<div class="container-fluid" style="overflow: hidden; margin: -30px 0; height: 100%;">
 		<div class="col-md-12" style="height: 100%; position: absolute; padding-bottom: 100px;">
 			<div class="row">
-				<div class="col-md-12 bg-white" style="height: 100%; position: absolute; padding-top: 20px; overflow-y: scroll;">
+				<div class="col-md-12" style="height: 100%; position: absolute; padding-top: 20px; overflow-y: scroll; left: 0; top: 0; margin-top: 20px;">
 					<div class="col-md-12">
 						<div class="card">
 							<div class="card-header card-header-large bg-white align-items-center" style="text-align: center;">
