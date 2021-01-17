@@ -582,7 +582,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-check">
-                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="1" id="riwayat_keluarga_sudah">
+                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="2" id="riwayat_keluarga_sudah">
                                         <label for="riwayat_keluarga_menikah">Menikah</label>
                                         <div class="form-group col-lg-12">
                                             <div class="input-group input-group-merge">
@@ -598,13 +598,13 @@
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-check">
-                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="1" id="riwayat_keluarga_bercerai">
+                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="3" id="riwayat_keluarga_bercerai">
                                         <label for="riwayat_keluarga_bercerai">Bercerai</label>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-check">
-                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="1" id="riwayat_keluarga_janda_duda">
+                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="4" id="riwayat_keluarga_janda_duda">
                                         <label for="riwayat_keluarga_janda_duda">Janda/Duda</label>
                                     </div>
                                 </div>
