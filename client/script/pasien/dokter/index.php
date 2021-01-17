@@ -239,7 +239,15 @@
                         $(".lab_loader").html(LabBuild);
                     }
 
+                    console.log(selectedData.rad_order);
+
                     //Parse Radiologi
+                    for(var radKey in selectedData.rad_order) {
+                        selectedData.rad_order[radKey]['__HOST__'] = __HOST__;
+                        var RadBuild = load_radiologi(selectedData.rad_order[radKey]);
+                        $(".rad_loader").html(RadBuild);
+                    }
+
 
                     $("#modal-detail-asesmen").modal("show");
                 },
@@ -252,6 +260,26 @@
         $("#range_pasien").change(function() {
             pasienTable.ajax.reload();
         });
+
+        function load_radiologi(data) {
+            var returnHTML = "";
+            $.ajax({
+                url: __HOSTNAME__ + "/pages/pasien/dokter/rad-single.php",
+                async:false,
+                data: data,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"POST",
+                success:function(response_html) {
+                    returnHTML = response_html;
+                },
+                error: function(response_html) {
+                    console.log(response_html);
+                }
+            });
+            return returnHTML;
+        }
 
         function load_laboratorium(data) {
             var listPetugas = [];
@@ -568,14 +596,7 @@
                                     <div class="row lab_loader"></div>
                                 </div>
                                 <div class="tab-pane show fade" id="tab-poli-3">
-                                    <div class="card">
-                                        <div class="card-header card-header-large bg-white">
-                                            <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Radiologi</h5>
-                                        </div>
-                                        <div class="card-body">
-
-                                        </div>
-                                    </div>
+                                    <div class="row rad_loader"></div>
                                 </div>
                             </div>
                         </div>
