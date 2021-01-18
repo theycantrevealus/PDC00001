@@ -805,7 +805,7 @@ class Tindakan extends Utility {
                     ->execute();
             }
 
-            $data['response_draw'] = $parameter['draw'];
+            $data['response_draw'] = intval($parameter['draw']);
             $autonum = intval($parameter['start']) + 1;
 
             if(count($data['response_data']) > 0) {
@@ -862,8 +862,10 @@ class Tindakan extends Utility {
         $data['recordsFiltered'] = $itemTotalAll;
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
+        $data['response_data'] = $returnData;
 
-        return $returnData;
+
+        return $data;
     }
 
 	private function get_harga_per_tindakan($parameter) {

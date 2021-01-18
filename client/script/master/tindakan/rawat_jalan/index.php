@@ -237,12 +237,8 @@
                         }
                     });
 
-                    console.log(generateHeader);
-
-
                     if(generateHeader.length == $("#table-tindakan thead th").length) {
                         tableTindakan = $("#table-tindakan").DataTable({
-                            processing: true,
                             serverSide: true,
                             sPaginationType: "full_numbers",
                             bPaginate: true,
@@ -263,14 +259,15 @@
                                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                                 },
                                 dataSrc: function (response) {
-
+                                    console.clear();
                                     console.log(response);
+
                                     var DataPopulator = {};
                                     var DataPopulatorParsed = [];
 
 
                                     //Parse data from vertical to horizontal
-                                    var data_harga = response.response_package;
+                                    var data_harga = response.response_package.response_data;
 
                                     for (var key = 0; key < data_harga.length; key++) {
                                         if (data_harga[key].tindakan_detail != undefined) {
@@ -328,7 +325,7 @@
                                         autonum++;
                                     }
                                     dataBuilder = DataPopulator;
-                                    console.log(DataPopulatorParsed);
+
                                     return DataPopulatorParsed;
                                 }
                             },
