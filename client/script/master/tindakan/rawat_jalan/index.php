@@ -7,6 +7,7 @@
         var tindakanBuilder = [];
         var dataBuilder;
         var tableTindakan;
+        var classNameBuilder;
 
         var metaData = {};
 
@@ -62,6 +63,7 @@
         columnBuilder = returnProceed.dataKelas;
         tableTindakan = returnProceed.table;
         dataBuilder = returnProceed.dataBuilder;
+        classNameBuilder = returnProceed.dataNamaKelas;
 
         tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
         penjaminBuilder = refresh_penjamin("#txt_penjamin", __UIDPENJAMINUMUM__);
@@ -182,7 +184,15 @@
             var columnKelas = {};
             var tableTindakan;
             var dataBuilder;
-
+            var generateHeaderName = [{
+                uid: "",
+                title: "No",
+                identifier: "auto_number"
+            }, {
+                uid: "",
+                title: "Tindakan",
+                identifier: "tindakan"
+            }];
 
             var generateHeader = [{
                 "data" : null, render: function(data, type, row, meta) {
@@ -203,16 +213,20 @@
                 type:"GET",
                 success:function(response) {
                     var data = response.response_package.response_data;
-                    console.log(data);
                     for(var key in data) {
 
                         if(data[key] !== undefined) {
                             var nama_target = data[key].nama.replace(" ", "_").toLowerCase();
-                            console.log(data[key]);
                             $("#table-tindakan thead tr").append("<th>" + data[key].nama + "</th>");
                             if(columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] == undefined) {
                                 columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] = 0;
                             }
+
+                            generateHeaderName.push({
+                                uid: data[key].uid,
+                                title: data[key].nama,
+                                identifier: nama_target
+                            });
 
                             generateHeader.push({
                                 "data" : null, render: function(data, type, row, meta) {
@@ -231,10 +245,22 @@
                         }
                     });
 
+                    generateHeaderName.push({
+                        uid: "",
+                        title: "Poli",
+                        identifier: "poli"
+                    });
+
                     generateHeader.push({
                         "data" : null, render: function(data, type, row, meta) {
                             return row.action;
                         }
+                    });
+
+                    generateHeaderName.push({
+                        uid: "",
+                        title: "Aksi",
+                        identifier: "action"
                     });
 
                     if(generateHeader.length == $("#table-tindakan thead th").length) {
@@ -248,6 +274,7 @@
                                 Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                             },
                             ajax: {
+                                async: false,
                                 url: __HOSTAPI__ + "/Tindakan",
                                 type: "POST",
                                 data: function (d) {
@@ -348,6 +375,7 @@
 
             return {
                 table: tableTindakan,
+                dataNamaKelas: generateHeaderName,
                 dataKelas: generateHeader,
                 dataBuilder: dataBuilder
             };
@@ -361,6 +389,8 @@
             $("#txt_tindakan").attr("disabled", "disabled");
             dataBuilder = refresh_kelas_data(tindakanKelas);
             var tempDataBuilder = dataBuilder;
+            //console.log(tempDataBuilder);
+            console.log(columnBuilder);
 
             /*$("#txt_tindakan option[value=\"" + uid + "\"").prop("selected", true);
             $("#txt_tindakan").val(uid).trigger("change");
@@ -368,23 +398,27 @@
 
             $("#form-tambah table tbody").html("");
 
+
             for(var i in columnBuilder) {
 
+                console.log(classNameBuilder[i]);
+
                 if(
-                    columnBuilder[i].data != "autonum" &&
-                    columnBuilder[i].data != "tindakan" &&
-                    columnBuilder[i].data != "action"
+                    classNameBuilder[i].identifier != "auto_number" &&
+                    classNameBuilder[i].identifier != "tindakan" &&
+                    classNameBuilder[i].identifier != "poli" &&
+                    classNameBuilder[i].identifier != "action"
                 ) {
                     var newRow = document.createElement("TR");
                     var newName = document.createElement("TD");
                     var newPrice = document.createElement("TD");
 
-                    $(newName).html(columnBuilder[i].title);
+                    $(newName).html(classNameBuilder[i].title);
 
                     var newInput = document.createElement("INPUT");
-                    $(newInput).addClass("form-control harga-tindakan").val(tempDataBuilder[$("#txt_tindakan").val()][columnBuilder[i].data.replace(" ", "_").toLowerCase()]).attr({
-                        "kelas": columnBuilder[i].uid,
-                        "identifier": columnBuilder[i].data.replace(" ", "_").toLowerCase()
+                    $(newInput).addClass("form-control harga-tindakan").val(tempDataBuilder[$("#txt_tindakan").val()][classNameBuilder[i].identifier.replace(" ", "_").toLowerCase()]).attr({
+                        "kelas": classNameBuilder[i].uid,
+                        "identifier": classNameBuilder[i].identifier.replace(" ", "_").toLowerCase()
                     }).inputmask({
                         alias: 'currency', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true
                     });
@@ -647,6 +681,8 @@
 
         $("#btnSubmit").click(function() {
             var penjaminList = tindakanBuilder;
+
+            console.log(metaData);
 
             var form_data = {};
             if(MODE == "tambah") {
