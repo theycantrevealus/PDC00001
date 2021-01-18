@@ -820,7 +820,7 @@ class Tindakan extends Utility {
                     $TKValue['kelas'] = $KelasDetail['response_data'][0];
 
                     //Poli
-                    /*$Poli = self::$query->select('master_poli_tindakan', array(
+                    $Poli = self::$query->select('master_poli_tindakan', array(
                         'uid_poli'
                     ))
                         ->where(array(
@@ -835,7 +835,7 @@ class Tindakan extends Utility {
                         $PoliParse = new Poli(self::$pdo);
                         $Poli['response_data'][$PKey]['detail'] = $PoliParse::get_poli_detail($PValue['uid_poli'])['response_data'][0];
                     }
-                    $TKValue['poli'] = $Poli['response_data'];*/
+                    $TKValue['poli'] = $Poli['response_data'];
 
 
                     $TKValue['harga'] = floatval($TKValue['harga']);
