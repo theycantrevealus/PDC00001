@@ -282,7 +282,8 @@ class Asesmen extends Utility {
                 'uid',
                 'petugas',
                 'no_order',
-                'selesai'
+                'selesai',
+                'created_at'
             ))
                 ->where(array(
                     'rad_order.asesmen' => '= ?',
@@ -292,6 +293,46 @@ class Asesmen extends Utility {
                     $value['uid']
                 ))
                 ->execute();
+
+
+            foreach($rad['response_data'] as $RadKey => $RadValue) {
+                $PetugasRad = new Pegawai(self::$pdo);
+                $rad['response_data'][$RadKey]['petugas'] = $PetugasRad->get_detail_pegawai($RadValue['petugas'])['response_data'][0];
+                $detailRadOrder = self::$query->select('rad_order_detail', array(
+                    'tindakan',
+                    'keterangan',
+                    'kesimpulan'
+                ))
+                    ->where(array(
+                        'rad_order_detail.radiologi_order' => '= ?',
+                        'AND',
+                        'rad_order_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $RadValue['uid']
+                    ))
+                    ->execute();
+                foreach ($detailRadOrder['response_data'] as $radItemKey => $radItemValue) {
+                    $Tindakan = new Tindakan(self::$pdo);
+                    $detailRadOrder['response_data'][$radItemKey]['tindakan'] = $Tindakan->get_tindakan_detail($radItemValue['tindakan'])['response_data'][0];
+                }
+                $rad['response_data'][$RadKey]['detail'] = $detailRadOrder['response_data'];
+
+                $rad['response_data'][$RadKey]['created_at'] = date('d F Y', strtotime($RadValue['created_at']));
+
+                $detailRadOrderDoc = self::$query->select('rad_order_document', array(
+                    'lampiran'
+                ))
+                    ->where(array(
+                        'rad_order_document.radiologi_order' => '= ?',
+                        'AND',
+                        'rad_order_document.deleted_at' => 'IS NULL'
+                    ), array(
+                        $RadValue['uid']
+                    ))
+                    ->execute();
+                $rad['response_data'][$RadKey]['document'] = $detailRadOrderDoc['response_data'];
+            }
+
             $data['response_data'][$key]['rad_order'] = $rad['response_data'];
 
 
