@@ -271,7 +271,7 @@
 
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = response.response_package.recordsTotal;
-					response.recordsFiltered = response.response_package.recordsFiltered;
+					response.recordsFiltered = returnedData.length;
 					
 					return returnedData;
 				}
