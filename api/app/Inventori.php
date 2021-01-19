@@ -1700,7 +1700,7 @@ class Inventori extends Utility
         return $data;
     }
 
-    private function get_batch_detail($parameter)
+    public function get_batch_detail($parameter)
     {
         $data = self::$query->select('inventori_batch', array(
             'uid',
@@ -3308,7 +3308,7 @@ class Inventori extends Utility
             ))
             ->execute();
         if (count($data['response_data']) > 0) {
-            $data['response_data'][0]['tanggal'] = date('d F Y', strtotime($data['response_data'][0]['tanggal']));
+            $data['response_data'][0]['tanggal'] = date('d F Y  [H:i]', strtotime($data['response_data'][0]['created_at']));
             $Pegawai = new Pegawai(self::$pdo);
             $data['response_data'][0]['pegawai_detail'] = $Pegawai::get_detail($data['response_data'][0]['pegawai'])['response_data'][0];
             $Unit = new Unit(self::$pdo);
@@ -3592,6 +3592,7 @@ class Inventori extends Utility
         $data = self::$query->select('inventori_amprah_proses', array(
             'uid',
             'kode',
+            'amprah',
             'pegawai',
             'tanggal'
         ))
@@ -3604,8 +3605,13 @@ class Inventori extends Utility
             ))
             ->execute();
 
+        $Inventori = new Inventori(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+
         foreach ($data['response_data'] as $key => $value) {
-            $Pegawai = new Pegawai(self::$pdo);
+            $amprah_detail = self::get_amprah_detail($value['amprah']);
+            $data['response_data'][$key]['amprah'] = $amprah_detail['response_data'][0];
+            $data['response_data'][$key]['tanggal'] = date('d F Y [H:i]', strtotime($value['created_at']));
             $PegawaiDetail = $Pegawai::get_detail($value['pegawai']);
             $data['response_data'][$key]['pegawai'] = $PegawaiDetail['response_data'][0];
             $detail_proses = self::$query->select('inventori_amprah_proses_detail', array(
@@ -3625,6 +3631,8 @@ class Inventori extends Utility
                 ->execute();
             $autonum = 1;
             foreach ($detail_proses['response_data'] as $DKey => $DValue) {
+                $detail_proses['response_data'][$DKey]['item'] = $Inventori->get_item_detail($DValue['item'])['response_data'][0];
+                $detail_proses['response_data'][$DKey]['batch'] = $Inventori->get_batch_detail($DValue['batch'])['response_data'][0];
                 $detail_proses['response_data'][$DKey]['autonum'] = $autonum;
                 $autonum++;
             }
@@ -5036,6 +5044,8 @@ class Inventori extends Utility
                 'gudang',
                 'stok_terkini'
             ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
                 ->where($paramData, $paramValue)
                 ->execute();
         }

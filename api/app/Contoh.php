@@ -2,6 +2,7 @@
 
 namespace PondokCoder;
 
+use PondokCoder\Authorization as Authorization;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
@@ -21,7 +22,10 @@ class Contoh extends Utility {
 	}
 
     public function __POST__($parameter = array()) {
-	    $worker = self::$query->select('master_poli', array(
+        $Authorization = new Authorization();
+        //return $Authorization->getSerialNumber($parameter);
+        return PHP_OS;
+	    /*$worker = self::$query->select('master_poli', array(
 	        'uid',
             'poli_asesmen'
         ))
@@ -206,14 +210,14 @@ class Contoh extends Utility {
         }
 
 
-        return $worker;
+        return $worker;*/
     }
 
 	public function __GET__($parameter = array()) {
 		try {
 
 			switch($parameter[1]) {
-				case 'select':
+                case 'select':
 					return
 
 						self::$query
