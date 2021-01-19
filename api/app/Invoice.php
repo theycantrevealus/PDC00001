@@ -362,7 +362,7 @@ class Invoice extends Utility
         return $data;
     }
 
-    private function get_payment($parameter)
+    public function get_payment($parameter)
     {
         $payment = self::$query->select('invoice_payment', array(
             'uid',

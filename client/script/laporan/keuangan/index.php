@@ -11,6 +11,36 @@
             }
         }
 
+        function refresh_penjamin(target, selected = "") {
+            var penjaminData = [];
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Penjamin/penjamin",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    var data = response.response_package.response_data;
+                    penjaminData = data;
+                    $(target).find("option").remove();
+                    for(var key in data) {
+                        $(target).append("<option " + ((data[key].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + data[key].uid + "\">" + data[key].nama + "</option>");
+                    }
+                }
+            });
+            return penjaminData;
+        }
+
+        refresh_penjamin("#txt_penjamin");
+
+        $("#txt_penjamin").select2().on("select2:select", function(e) {
+            var data = e.params.data;
+            var uid = data.id;
+
+            tableLaporan.ajax.reload();
+        });
+
         $("#range_laporan").change(function() {
             tableLaporan.ajax.reload();
         });
@@ -29,14 +59,17 @@
                 url: __HOSTAPI__ + "/Laporan",
                 type: "POST",
                 data: function(d) {
-                    d.request = "kunjungan_rawat_jalan";
+                    d.request = "keuangan";
                     d.from = getDateRange("#range_laporan")[0];
                     d.to = getDateRange("#range_laporan")[1];
+                    d.penjamin = $("#txt_penjamin").val()
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+
+                    console.log(response);
 
                     var returnedData = [];
                     var rawData = response.response_package.response_data;
@@ -65,12 +98,13 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_masuk;
+                        return row.nomor_invoice;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_keluar;
+                        var metode = (row.payment !== null) ? row.payment.metode_bayar : "-";
+                        return metode;
                     }
                 },
                 {
@@ -80,17 +114,25 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.alamat;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
                         return row.penjamin.nama;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.no_rm;
+                        return "<h6 class=\"number_style\">" + number_format(row.total_after_discount, 2, '.', ',') + "<h6>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        var terbayar = (row.payment !== null) ? row.payment.terbayar : 0;
+                        return "<h6 class=\"number_style\">" + number_format(terbayar, 2, '.', ',') + "<h6>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        var terbayar = (row.payment !== null) ? row.payment.terbayar : 0;
+                        var sisa_bayar = row.total_after_discount - terbayar;
+                        return "<h6 class=\"number_style\">" + number_format(sisa_bayar, 2, '.', ',') + "<h6>";
                     }
                 }
             ]
@@ -100,7 +142,7 @@
         $("#btnCetak").click(function () {
             $.ajax({
                 async: false,
-                url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_rawat_jalan.php",
+                url: __HOST__ + "miscellaneous/print_template/laporan_keuangan.php",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
@@ -111,7 +153,7 @@
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     __NAMA_SAYA__ : __MY_NAME__,
-                    __JUDUL__ : "Laporan Kunjungan Rawat Jalan",
+                    __JUDUL__ : "Invoice Listing",
                     __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
                     __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
                     data: totalData

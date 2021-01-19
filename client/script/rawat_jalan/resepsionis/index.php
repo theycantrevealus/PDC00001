@@ -1407,7 +1407,7 @@
 		});
 
 
-        $(".print_manager").click(function() {
+        $("body").on("click", ".print_manager", function() {
             var targetSurat = $(this).attr("jenis");
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];

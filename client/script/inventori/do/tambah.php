@@ -38,7 +38,9 @@
 					renderPO(poData, po_data.uid);
 					var itemData = po_data.item;
 					for(var itemDataKey in itemData) {
-						autoRow(selectedItem, itemData[itemDataKey].uid_barang);
+					    if(itemData[itemDataKey].qty > itemData[itemDataKey].sudah_sampai) {
+                            autoRow(selectedItem, itemData[itemDataKey].uid_barang, itemData[itemDataKey]);
+                        }
 					}
 				},
 				error: function(response) {
@@ -75,7 +77,7 @@
 			return poData;
 		}
 
-		function autoRow(selectedItemList = [], selectedItem = "") {
+		function autoRow(selectedItemList = [], selectedItem = "", data = {}) {
 			$("#table-item-do tbody tr").removeClass("last-row");
 			var newRow = document.createElement("TR");
 			$(newRow).addClass("last-row");
@@ -83,6 +85,7 @@
 			var newID = document.createElement("TD");
 			var newItem = document.createElement("TD");
 			var newKode = document.createElement("TD");
+			var newBelum = document.createElement("TD");
 			var newQty = document.createElement("TD");
 			var newSatuan = document.createElement("TD");
 			var newKeterangan = document.createElement("TD");
@@ -103,7 +106,9 @@
                 //$(newItemSeletor).attr("disabled", "disabled");
             }
 			$(newItem).append(newItemSeletor);
-			$(newItemSeletor).select2().addClass("itemSelection form-control");
+			$(newItemSeletor).select2().addClass("itemSelection form-control").attr({
+                "disabled": "disabled"
+            });
 
 
 			var newExpiredDate = document.createElement("INPUT");
@@ -117,13 +122,15 @@
 			$(newKode).append(newBatch);
 			$(newBatch).addClass("form-control kode_batch");
 
+			$(newBelum).html("<h6 class=\"number_style\">" + number_format((parseFloat(data.qty) - parseFloat(data.sudah_sampai)), 2, ".", ",") + "</h6>");
+
 			var newQtyInput = document.createElement("INPUT");
 			$(newQty).append(newQtyInput);
 			$(newQtyInput).addClass("form-control qty").inputmask({
 				alias: 'decimal', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true
 			});
 
-			$(newSatuan).html($(newItemSeletor).find("option:selected").attr("satuan"));
+			$(newSatuan).html(data.detail.satuan_caption.nama);
 
 			var newKeteranganInput = document.createElement("TEXTAREA");
 			$(newKeterangan).append(newKeteranganInput);
@@ -136,6 +143,7 @@
 			$(newRow).append(newID);
 			$(newRow).append(newItem);
 			$(newRow).append(newKode);
+            $(newRow).append(newBelum);
 			$(newRow).append(newQty);
 			$(newRow).append(newSatuan);
 			$(newRow).append(newKeterangan);
@@ -385,8 +393,8 @@
 					var item = $(this).find("td:eq(1) select").val();
 					var tanggal_exp = $(this).find("td:eq(1) input").val();
 					var batch = $(this).find("td:eq(2) input").val();
-					var qty = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
-					var keterangan = $(this).find("td:eq(5) textarea").val();
+					var qty = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
+					var keterangan = $(this).find("td:eq(6) textarea").val();
 					if(batch != "" && qty > 0 && tanggal_exp != "") {
 						itemDetailResult.push({
 							item: item,
