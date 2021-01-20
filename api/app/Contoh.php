@@ -24,8 +24,7 @@ class Contoh extends Utility {
     public function __POST__($parameter = array()) {
         $Authorization = new Authorization();
         //return $Authorization->getSerialNumber($parameter);
-        return PHP_OS;
-	    /*$worker = self::$query->select('master_poli', array(
+        $worker = self::$query->select('master_poli', array(
 	        'uid',
             'poli_asesmen'
         ))
@@ -33,10 +32,8 @@ class Contoh extends Utility {
                 'master_poli.deleted_at' => 'IS NULL'
             ))
             ->execute();
-
-
+        $conn = self::$pdo;
         foreach ($worker['response_data'] as $key => $value) {
-            $conn = self::$pdo;
             //$conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
             //$delete_table = $conn->prepare('DROP TABLE asesmen_rawat_' . $value['poli_asesmen']);
             //$delete_table->execute();
@@ -210,7 +207,7 @@ class Contoh extends Utility {
         }
 
 
-        return $worker;*/
+        return $worker;
     }
 
 	public function __GET__($parameter = array()) {
