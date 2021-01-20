@@ -5014,7 +5014,9 @@ class Inventori extends Utility
     {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
-                'inventori_stok.gudang' => '= ?'
+                'inventori_stok.gudang' => '= ?',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
             );
 
             $paramValue = array($parameter['gudang']);
@@ -5034,6 +5036,12 @@ class Inventori extends Utility
                 'gudang',
                 'stok_terkini'
             ))
+                ->join('master_inv', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('inventori_stok.barang', '=', 'master_inv.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -5044,6 +5052,12 @@ class Inventori extends Utility
                 'gudang',
                 'stok_terkini'
             ))
+                ->join('master_inv', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('inventori_stok.barang', '=', 'master_inv.uid')
+                ))
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))
                 ->where($paramData, $paramValue)

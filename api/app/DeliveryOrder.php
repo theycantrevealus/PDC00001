@@ -90,6 +90,9 @@ class DeliveryOrder extends Utility {
 					'deleted_at' => 'IS NULL'
 				),array()
 			)
+            ->order(array(
+                'created_at' => 'DESC'
+            ))
 			->execute();
 
 		$autonum = 1;
@@ -427,7 +430,7 @@ class DeliveryOrder extends Utility {
 					'barang' => $value['item'],
 					'batch' => $UIDBatch,
 					'kadaluarsa' => $value['tanggal_exp'],
-					'qty' => $value['qty'],
+					'qty' => floatval($value['qty']),
 					'po' => $parameter['po'],
 					'keterangan' => $value['keterangan'],
 					'created_at' => parent::format_date(),
