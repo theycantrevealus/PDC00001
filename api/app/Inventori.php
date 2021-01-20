@@ -3594,7 +3594,8 @@ class Inventori extends Utility
             'kode',
             'amprah',
             'pegawai',
-            'tanggal'
+            'tanggal',
+            'created_at'
         ))
             ->where(array(
                 'inventori_amprah_proses.deleted_at' => 'IS NULL',
