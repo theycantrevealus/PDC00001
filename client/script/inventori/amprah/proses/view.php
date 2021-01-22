@@ -151,14 +151,18 @@
 			}
 		});
 
-		$("body").on("keyup", ".batch_qty", function() {
-		    var totalAll = 0;
+		function TotalAllQty() {
+            var totalAll = 0;
             $("#table-batch tbody tr").each(function (e) {
                 var totalRow = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
                 totalAll += parseFloat(totalRow);
             });
 
             $("#total_dipenuhi").html(number_format(totalAll, 2, ".", ","));
+        }
+
+		$("body").on("keyup", ".batch_qty", function() {
+		    TotalAllQty();
         });
 
 		$("body").on("click", ".qty", function() {
@@ -226,12 +230,12 @@
 						$("#table-batch tbody").append(batchRow);
 					}
 				}
-
+                $("#table-batch tfoot").remove();
                 $("#table-batch").append("<tfoot><tr>" +
                     "<td colspan=\"3\" class=\"text-right\"><b>TOTAL</b></td>" +
                     "<td class=\"number_style\" id=\"total_dipenuhi\">0.00</td>" +
                     "</tr></tfoot>");
-				
+                TotalAllQty();
 				$("#form-batch-barang").modal("show");
 			}
 		});
