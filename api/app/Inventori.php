@@ -56,7 +56,7 @@ class Inventori extends Utility
                 case 'kartu_stok':
 
                     $ItemDetail = self::get_item_detail($parameter[2]);
-                    $ItemStokLog = self::get_item_stok_log($parameter[2], $parameter[3]);
+                    $ItemStokLog = self::get_item_stok_log($parameter[2], $parameter[3], $parameter[4], $parameter[5]);
                     $ItemDetail['response_data'][0]['log'] = $ItemStokLog['response_data'];
                     return $ItemDetail;
 
@@ -1744,27 +1744,59 @@ class Inventori extends Utility
      * @param uid $gudang Gudang
      * @return array Data is response_data
      */
-    public function  get_item_stok_log($parameter, $gudang) {
-        $data = self::$query->select('inventori_stok_log', array(
-            'id',
-            'masuk',
-            'keluar',
-            'saldo',
-            'type',
-            'logged_at',
-            'jenis_transaksi',
-            'uid_foreign',
-            'keterangan'
-        ))
-            ->where(array(
-                'inventori_stok_log.gudang' => '= ?',
-                'AND',
-                'inventori_stok_log.barang' => '= ?'
-            ), array(
-                $gudang,
-                $parameter
+    public function  get_item_stok_log($parameter, $gudang, $dari = "", $sampai = "") {
+        if($dari !== "" && $sampai !== "") {
+            $data = self::$query->select('inventori_stok_log', array(
+                'id',
+                'masuk',
+                'keluar',
+                'saldo',
+                'batch',
+                'type',
+                'logged_at',
+                'jenis_transaksi',
+                'uid_foreign',
+                'keterangan'
             ))
-            ->execute();
+                ->where(array(
+                    'inventori_stok_log.gudang' => '= ?',
+                    'AND',
+                    'inventori_stok_log.barang' => '= ?',
+                    'AND',
+                    'inventori_stok_log.logged_at' => 'BETWEEN ? AND ?'
+                ), array(
+                    $gudang,
+                    $parameter,
+                    date('Y-m-d', strtotime($dari)),
+                    date('Y-m-d', strtotime($sampai))
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok_log', array(
+                'id',
+                'masuk',
+                'keluar',
+                'saldo',
+                'batch',
+                'type',
+                'logged_at',
+                'jenis_transaksi',
+                'uid_foreign',
+                'keterangan'
+            ))
+                ->where(array(
+                    'inventori_stok_log.gudang' => '= ?',
+                    'AND',
+                    'inventori_stok_log.barang' => '= ?'
+                ), array(
+                    $gudang,
+                    $parameter
+                ))
+                ->execute();
+        }
+
+        $DO = new DeliveryOrder(self::$pdo);
+
         foreach ($data['response_data'] as $key => $value) {
             //Terminologi Item
             $Termi = self::$query->select('terminologi_item', array(
@@ -1780,6 +1812,8 @@ class Inventori extends Utility
                 ))
                 ->execute();
             $data['response_data'][$key]['type'] = $Termi['response_data'][0];
+
+            $data['response_data'][$key]['batch'] = self::get_batch_detail($value['batch'])['response_data'][0];
 
             $data['response_data'][$key]['logged_at'] = date('d M Y', strtotime($value['logged_at']));
 
@@ -1804,6 +1838,9 @@ class Inventori extends Utility
                     $PasienInfo = $Pasien::get_pasien_detail('pasien', $Resep['response_data'][0]['pasien']);
 
                     $data['response_data'][$key]['dokumen'] = 'Resep Asesmen ' . $PasienInfo['response_data'][0]['nama'];
+                } elseif ($value['jenis_transaksi'] === 'inventori_do') {
+                    $DODetail = $DO->get_do_info($value['uid_foreign'])['response_data'][0];
+                    $data['response_data'][$key]['dokumen'] = $DODetail['no_do'];
                 } else {
                     $data['response_data'][$key]['dokumen'] = '-';
                 }

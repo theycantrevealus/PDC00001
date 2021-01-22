@@ -145,7 +145,7 @@
 
 
 			if(isDone) {
-
+                $(newRow).addClass("finished");
                 $(newRow).append(newID);
                 $(newRow).append("<td>" + itemData[itemKey].nama.toUpperCase() + "</td>");
                 $(newRow).append("<td colspan=\"6\" class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Sudah Sampai</td>");
@@ -403,28 +403,23 @@
 			var itemDetailResult = [];
 			var allowSave = false;
 			$("#table-item-do tbody tr").each(function(e) {
-				/*if($(this).hasClass("last-row")) {
-
-				}*/
 
                 var item = $(this).find("td:eq(1) select").val();
                 var tanggal_exp = $(this).find("td:eq(1) input").val();
                 var batch = $(this).find("td:eq(2) input").val();
                 var qty = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
                 var keterangan = $(this).find("td:eq(6) textarea").val();
-                console.group();
-                console.log(qty);
-                console.log(batch);
-                console.log(tanggal_exp);
-                console.groupEnd();
-                if(batch != "" && qty > 0 && tanggal_exp != "") {
-                    itemDetailResult.push({
-                        item: item,
-                        batch: batch,
-                        tanggal_exp:tanggal_exp,
-                        qty: qty,
-                        keterangan: keterangan
-                    });
+
+                if((batch != "" && qty > 0 && tanggal_exp != "") || $(this).hasClass("finished")) {
+                    if(!$(this).hasClass("finished")) {
+                        itemDetailResult.push({
+                            item: item,
+                            batch: batch,
+                            tanggal_exp:tanggal_exp,
+                            qty: qty,
+                            keterangan: keterangan
+                        });
+                    }
                     allowSave = true;
                     $("#table-item-do tbody tr:eq(" + e + ") td").removeClass("bg-error");
                 } else {
