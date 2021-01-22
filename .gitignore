@@ -35,7 +35,6 @@ api/*.key
 api/*.req
 api/*.crt
 api/*.sql
-client/head.php
 *.txt
 *.pem
 *.pub
