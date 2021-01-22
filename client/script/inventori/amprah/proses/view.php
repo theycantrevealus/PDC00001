@@ -5,6 +5,77 @@
 		var pegawai_pengamprah = "";
 		var selectedItem = "";
 
+		//Load Stok dari unit pengamprah
+        var tableStokPengamprah = $("#table-monitor-batch").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[10, 15, -1], [10, 15, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Inventori",
+                type: "POST",
+                data: function(d){
+                    d.request = "get_stok_batch_unit";
+                    d.gudang = unit_pengamprah.gudang;
+                    d.barang = selectedItem;
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var returnedData = [];
+                    var dataSet = response.response_package.response_data;
+                    if(dataSet == undefined) {
+                        dataSet = [];
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    for(var a in dataSet) {
+                        if(parseFloat(dataSet[a].stok_terkini) > 0) {
+                            returnedData.push(dataSet[a]);
+                        }
+                    }
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Batch"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.batch;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.expired_date;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.stok_terkini;
+                    }
+                }
+            ]
+        });
+
+
+
+
 		$.ajax({
 			url:__HOSTAPI__ + "/Inventori/get_amprah_detail/" + __PAGES__[4],
 			async:false,
@@ -74,26 +145,25 @@
 				}
 
 				$("#verif_keterangan").html(data.keterangan);
-
-
-				console.log(metaData);
 			},
 			error: function(response) {
 				console.log(response);
 			}
 		});
 
-		$("body").on("focus", ".qty", function() {
-			var id = $(this).attr("id").split("_");
+		$("body").on("click", ".qty", function() {
+		    var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
 
 			selectedItem = id;
+
+			tableStokPengamprah.ajax.reload();
 
 			$("#keterangan_per_item").val($("#keterangan_amprah_" + selectedItem).text());
 
 			if(metaData[id] != undefined) {
 				$("#table-batch tbody tr").remove();
-				$("#table-monitor-batch tbody tr").remove();
+				//$("#table-monitor-batch tbody tr").remove();
 				$("#target_batch_amprah").html(metaData[id].nama);
 				$("#qty_batch_amprah").html($("#request_qty_" + id).html());
 				$("#unit_pengamprah").html(unit_pengamprah.nama);
@@ -196,7 +266,6 @@
 		});
 
 		$("#btnSubmitProsesAmprah").click(function() {
-			console.log(metaData)
 			var conf = confirm("Proses Amprah?");
 			if(conf) {
 				$("#btnSubmitProsesAmprah").attr({
@@ -220,8 +289,7 @@
 						if(response.response_package.response_result > 0) {
 							location.href = __HOSTNAME__ + "/inventori/amprah/proses";
 						} else {
-							console.log(response);
-							$("#btnSubmitProsesAmprah").removeAttr("disabled");	
+							$("#btnSubmitProsesAmprah").removeAttr("disabled");
 						}
 					},
 					error: function(response) {
@@ -276,7 +344,7 @@
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Batch</th>
-									<th>Tersedia</th>
+                                    <th>Tersedia</th>
 									<th>Jumlah</th>
 								</tr>
 							</thead>
@@ -290,6 +358,7 @@
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Batch</th>
+                                    <th>Expired</th>
 									<th>Tersedia</th>
 								</tr>
 							</thead>

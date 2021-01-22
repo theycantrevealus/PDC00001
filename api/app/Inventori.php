@@ -217,6 +217,10 @@ class Inventori extends Utility
                 return self::get_gudang_back_end();
                 break;
 
+            case 'get_stok_batch_unit':
+                return self::get_stok_batch_unit($parameter);
+                break;
+
             default:
                 return $parameter;
                 break;
@@ -3702,6 +3706,106 @@ class Inventori extends Utility
         return $data;
     }
 
+    private function get_stok_batch_unit($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'inventori_stok.barang' => '= ?',
+                'AND',
+                'inventori_stok.gudang' => '= ?',
+                'AND',
+                'inventori_batch.batch' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array($parameter['barang'], $parameter['gudang']);
+        } else {
+            $paramData = array(
+                'inventori_stok.barang' => '= ?',
+                'AND',
+                'inventori_stok.gudang' => '= ?'
+            );
+
+            $paramValue = array($parameter['barang'], $parameter['gudang']);
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('inventori_stok', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'stok_terkini'
+            ))
+                ->join('inventori_batch', array(
+                    'batch',
+                    'expired_date'
+                ))
+                ->on(array(
+                    array(
+                        'inventori_stok.batch', '=', 'inventori_batch.uid'
+                    )
+                ))
+                ->order(array(
+                    'inventori_batch.expired_date' => 'ASC'
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'stok_terkini'
+            ))
+                ->join('inventori_batch', array(
+                    'batch',
+                    'expired_date'
+                ))
+                ->on(array(
+                    array(
+                        'inventori_stok.batch', '=', 'inventori_batch.uid'
+                    )
+                ))
+                ->order(array(
+                    'inventori_batch.expired_date' => 'ASC'
+                ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['barang'] = self::get_item_detail($value['barang'])['response_data'][0];
+            $data['response_data'][$key]['expired_date'] = date('d F Y', strtotime($value['expired_date']));
+            //$data['response_data'][$key]['batch']['expired_date'] = date('d F Y', strtotime($data['response_data'][$key]['batch']['expired_date']));
+
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('inventori_stok', array(
+            'id'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+
+
+    }
+
     private function get_stok_log_backend($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
@@ -3735,11 +3839,6 @@ class Inventori extends Utility
                 'keluar',
                 'saldo'
             ))
-                ->where(array(
-                    'inventori_stok_log.type' => '= ?'
-                ), array(
-                    __STATUS_STOK_AWAL__
-                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
