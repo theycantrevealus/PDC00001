@@ -56,7 +56,7 @@ class Inventori extends Utility
                 case 'kartu_stok':
 
                     $ItemDetail = self::get_item_detail($parameter[2]);
-                    $ItemStokLog = self::get_item_stok_log($parameter[2], $parameter[3]);
+                    $ItemStokLog = self::get_item_stok_log($parameter[2], $parameter[3], $parameter[4], $parameter[5]);
                     $ItemDetail['response_data'][0]['log'] = $ItemStokLog['response_data'];
                     return $ItemDetail;
 
@@ -215,6 +215,10 @@ class Inventori extends Utility
 
             case 'get_gudang_back_end':
                 return self::get_gudang_back_end();
+                break;
+
+            case 'get_stok_batch_unit':
+                return self::get_stok_batch_unit($parameter);
                 break;
 
             default:
@@ -1700,7 +1704,7 @@ class Inventori extends Utility
         return $data;
     }
 
-    private function get_batch_detail($parameter)
+    public function get_batch_detail($parameter)
     {
         $data = self::$query->select('inventori_batch', array(
             'uid',
@@ -1744,27 +1748,59 @@ class Inventori extends Utility
      * @param uid $gudang Gudang
      * @return array Data is response_data
      */
-    public function  get_item_stok_log($parameter, $gudang) {
-        $data = self::$query->select('inventori_stok_log', array(
-            'id',
-            'masuk',
-            'keluar',
-            'saldo',
-            'type',
-            'logged_at',
-            'jenis_transaksi',
-            'uid_foreign',
-            'keterangan'
-        ))
-            ->where(array(
-                'inventori_stok_log.gudang' => '= ?',
-                'AND',
-                'inventori_stok_log.barang' => '= ?'
-            ), array(
-                $gudang,
-                $parameter
+    public function  get_item_stok_log($parameter, $gudang, $dari = "", $sampai = "") {
+        if($dari !== "" && $sampai !== "") {
+            $data = self::$query->select('inventori_stok_log', array(
+                'id',
+                'masuk',
+                'keluar',
+                'saldo',
+                'batch',
+                'type',
+                'logged_at',
+                'jenis_transaksi',
+                'uid_foreign',
+                'keterangan'
             ))
-            ->execute();
+                ->where(array(
+                    'inventori_stok_log.gudang' => '= ?',
+                    'AND',
+                    'inventori_stok_log.barang' => '= ?',
+                    'AND',
+                    'inventori_stok_log.logged_at' => 'BETWEEN ? AND ?'
+                ), array(
+                    $gudang,
+                    $parameter,
+                    date('Y-m-d', strtotime($dari)),
+                    date('Y-m-d', strtotime($sampai))
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok_log', array(
+                'id',
+                'masuk',
+                'keluar',
+                'saldo',
+                'batch',
+                'type',
+                'logged_at',
+                'jenis_transaksi',
+                'uid_foreign',
+                'keterangan'
+            ))
+                ->where(array(
+                    'inventori_stok_log.gudang' => '= ?',
+                    'AND',
+                    'inventori_stok_log.barang' => '= ?'
+                ), array(
+                    $gudang,
+                    $parameter
+                ))
+                ->execute();
+        }
+
+        $DO = new DeliveryOrder(self::$pdo);
+
         foreach ($data['response_data'] as $key => $value) {
             //Terminologi Item
             $Termi = self::$query->select('terminologi_item', array(
@@ -1780,6 +1816,8 @@ class Inventori extends Utility
                 ))
                 ->execute();
             $data['response_data'][$key]['type'] = $Termi['response_data'][0];
+
+            $data['response_data'][$key]['batch'] = self::get_batch_detail($value['batch'])['response_data'][0];
 
             $data['response_data'][$key]['logged_at'] = date('d M Y', strtotime($value['logged_at']));
 
@@ -1804,6 +1842,9 @@ class Inventori extends Utility
                     $PasienInfo = $Pasien::get_pasien_detail('pasien', $Resep['response_data'][0]['pasien']);
 
                     $data['response_data'][$key]['dokumen'] = 'Resep Asesmen ' . $PasienInfo['response_data'][0]['nama'];
+                } elseif ($value['jenis_transaksi'] === 'inventori_do') {
+                    $DODetail = $DO->get_do_info($value['uid_foreign'])['response_data'][0];
+                    $data['response_data'][$key]['dokumen'] = $DODetail['no_do'];
                 } else {
                     $data['response_data'][$key]['dokumen'] = '-';
                 }
@@ -3308,7 +3349,7 @@ class Inventori extends Utility
             ))
             ->execute();
         if (count($data['response_data']) > 0) {
-            $data['response_data'][0]['tanggal'] = date('d F Y', strtotime($data['response_data'][0]['tanggal']));
+            $data['response_data'][0]['tanggal'] = date('d F Y  [H:i]', strtotime($data['response_data'][0]['created_at']));
             $Pegawai = new Pegawai(self::$pdo);
             $data['response_data'][0]['pegawai_detail'] = $Pegawai::get_detail($data['response_data'][0]['pegawai'])['response_data'][0];
             $Unit = new Unit(self::$pdo);
@@ -3592,8 +3633,10 @@ class Inventori extends Utility
         $data = self::$query->select('inventori_amprah_proses', array(
             'uid',
             'kode',
+            'amprah',
             'pegawai',
-            'tanggal'
+            'tanggal',
+            'created_at'
         ))
             ->where(array(
                 'inventori_amprah_proses.deleted_at' => 'IS NULL',
@@ -3604,8 +3647,13 @@ class Inventori extends Utility
             ))
             ->execute();
 
+        $Inventori = new Inventori(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+
         foreach ($data['response_data'] as $key => $value) {
-            $Pegawai = new Pegawai(self::$pdo);
+            $amprah_detail = self::get_amprah_detail($value['amprah']);
+            $data['response_data'][$key]['amprah'] = $amprah_detail['response_data'][0];
+            $data['response_data'][$key]['tanggal'] = date('d F Y [H:i]', strtotime($value['created_at']));
             $PegawaiDetail = $Pegawai::get_detail($value['pegawai']);
             $data['response_data'][$key]['pegawai'] = $PegawaiDetail['response_data'][0];
             $detail_proses = self::$query->select('inventori_amprah_proses_detail', array(
@@ -3625,6 +3673,8 @@ class Inventori extends Utility
                 ->execute();
             $autonum = 1;
             foreach ($detail_proses['response_data'] as $DKey => $DValue) {
+                $detail_proses['response_data'][$DKey]['item'] = $Inventori->get_item_detail($DValue['item'])['response_data'][0];
+                $detail_proses['response_data'][$DKey]['batch'] = $Inventori->get_batch_detail($DValue['batch'])['response_data'][0];
                 $detail_proses['response_data'][$DKey]['autonum'] = $autonum;
                 $autonum++;
             }
@@ -3654,6 +3704,106 @@ class Inventori extends Utility
             $autonum++;
         }
         return $data;
+    }
+
+    private function get_stok_batch_unit($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'inventori_stok.barang' => '= ?',
+                'AND',
+                'inventori_stok.gudang' => '= ?',
+                'AND',
+                'inventori_batch.batch' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array($parameter['barang'], $parameter['gudang']);
+        } else {
+            $paramData = array(
+                'inventori_stok.barang' => '= ?',
+                'AND',
+                'inventori_stok.gudang' => '= ?'
+            );
+
+            $paramValue = array($parameter['barang'], $parameter['gudang']);
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('inventori_stok', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'stok_terkini'
+            ))
+                ->join('inventori_batch', array(
+                    'batch',
+                    'expired_date'
+                ))
+                ->on(array(
+                    array(
+                        'inventori_stok.batch', '=', 'inventori_batch.uid'
+                    )
+                ))
+                ->order(array(
+                    'inventori_batch.expired_date' => 'ASC'
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'stok_terkini'
+            ))
+                ->join('inventori_batch', array(
+                    'batch',
+                    'expired_date'
+                ))
+                ->on(array(
+                    array(
+                        'inventori_stok.batch', '=', 'inventori_batch.uid'
+                    )
+                ))
+                ->order(array(
+                    'inventori_batch.expired_date' => 'ASC'
+                ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['barang'] = self::get_item_detail($value['barang'])['response_data'][0];
+            $data['response_data'][$key]['expired_date'] = date('d F Y', strtotime($value['expired_date']));
+            //$data['response_data'][$key]['batch']['expired_date'] = date('d F Y', strtotime($data['response_data'][$key]['batch']['expired_date']));
+
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('inventori_stok', array(
+            'id'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+
+
     }
 
     private function get_stok_log_backend($parameter) {
@@ -3689,11 +3839,6 @@ class Inventori extends Utility
                 'keluar',
                 'saldo'
             ))
-                ->where(array(
-                    'inventori_stok_log.type' => '= ?'
-                ), array(
-                    __STATUS_STOK_AWAL__
-                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -5006,7 +5151,9 @@ class Inventori extends Utility
     {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
-                'inventori_stok.gudang' => '= ?'
+                'inventori_stok.gudang' => '= ?',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
             );
 
             $paramValue = array($parameter['gudang']);
@@ -5026,6 +5173,12 @@ class Inventori extends Utility
                 'gudang',
                 'stok_terkini'
             ))
+                ->join('master_inv', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('inventori_stok.barang', '=', 'master_inv.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -5036,6 +5189,14 @@ class Inventori extends Utility
                 'gudang',
                 'stok_terkini'
             ))
+                ->join('master_inv', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('inventori_stok.barang', '=', 'master_inv.uid')
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
                 ->where($paramData, $paramValue)
                 ->execute();
         }
