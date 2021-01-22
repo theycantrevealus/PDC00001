@@ -43,7 +43,7 @@ class Asesmen extends Utility {
 					break;
 
 				case 'antrian-asesmen-rawat':
-					return self::get_antrian_asesmen_rawat();
+					return self::get_antrian_asesmen_rawat($parameter);
 					break;
 
 				case 'antrian-asesmen-medis':
@@ -282,7 +282,8 @@ class Asesmen extends Utility {
                 'uid',
                 'petugas',
                 'no_order',
-                'selesai'
+                'selesai',
+                'created_at'
             ))
                 ->where(array(
                     'rad_order.asesmen' => '= ?',
@@ -292,6 +293,46 @@ class Asesmen extends Utility {
                     $value['uid']
                 ))
                 ->execute();
+
+
+            foreach($rad['response_data'] as $RadKey => $RadValue) {
+                $PetugasRad = new Pegawai(self::$pdo);
+                $rad['response_data'][$RadKey]['petugas'] = $PetugasRad->get_detail_pegawai($RadValue['petugas'])['response_data'][0];
+                $detailRadOrder = self::$query->select('rad_order_detail', array(
+                    'tindakan',
+                    'keterangan',
+                    'kesimpulan'
+                ))
+                    ->where(array(
+                        'rad_order_detail.radiologi_order' => '= ?',
+                        'AND',
+                        'rad_order_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $RadValue['uid']
+                    ))
+                    ->execute();
+                foreach ($detailRadOrder['response_data'] as $radItemKey => $radItemValue) {
+                    $Tindakan = new Tindakan(self::$pdo);
+                    $detailRadOrder['response_data'][$radItemKey]['tindakan'] = $Tindakan->get_tindakan_detail($radItemValue['tindakan'])['response_data'][0];
+                }
+                $rad['response_data'][$RadKey]['detail'] = $detailRadOrder['response_data'];
+
+                $rad['response_data'][$RadKey]['created_at'] = date('d F Y', strtotime($RadValue['created_at']));
+
+                $detailRadOrderDoc = self::$query->select('rad_order_document', array(
+                    'lampiran'
+                ))
+                    ->where(array(
+                        'rad_order_document.radiologi_order' => '= ?',
+                        'AND',
+                        'rad_order_document.deleted_at' => 'IS NULL'
+                    ), array(
+                        $RadValue['uid']
+                    ))
+                    ->execute();
+                $rad['response_data'][$RadKey]['document'] = $detailRadOrderDoc['response_data'];
+            }
+
             $data['response_data'][$key]['rad_order'] = $rad['response_data'];
 
 
@@ -1086,6 +1127,14 @@ class Asesmen extends Utility {
                         'frenulum' => $parameter['frenulum'],
                         'kebersihan_mulut' => $parameter['mulut_bersih'],
 
+                        //'keterangan_mulut' => $parameter['keterangan_mulut'],
+                        'keterangan_bibir' => $parameter['keterangan_bibir'],
+                        'keterangan_lidah' => $parameter['keterangan_lidah'],
+                        'keterangan_mukosa' => $parameter['keterangan_mukosa'],
+                        'keterangan_torus' => $parameter['keterangan_torus'],
+                        'keterangan_gingiva' => $parameter['keterangan_gingiva'],
+                        'keterangan_frenulum' => $parameter['keterangan_frenulum'],
+
                         'updated_at' => parent::format_date()
                     );
                 } else if($PoliDetail['uid'] === __POLI_MATA__) {
@@ -1338,7 +1387,9 @@ class Asesmen extends Utility {
 			'AND',
 			'resep.pasien' => '= ?',
 			'AND',
-			'resep.status_resep' => '= ?',
+			'(resep.status_resep' => '= ?',
+			'OR',
+            'resep.status_resep' => '= ?)',
 			'AND',
 			'resep.deleted_at' => 'IS NULL'
 		), array(
@@ -1347,7 +1398,8 @@ class Asesmen extends Utility {
 			$MasterAsesmen,
 			$UserData['data']->uid,
 			$parameter['pasien'],
-			'N'
+            'N',
+            'C'
 		))
 		->execute();
 		
@@ -1413,7 +1465,7 @@ class Asesmen extends Utility {
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
 						'qty' => $value['signaHari'],
-						'aturan_pakai' => $value['aturanPakai'],
+						'aturan_pakai' => intval($value['aturanPakai']),
 						'keterangan' => $value['keteranganPerObat'],
 						'updated_at'=> parent::format_date(),
 						'deleted_at' => NULL
@@ -1436,7 +1488,7 @@ class Asesmen extends Utility {
 						'signa_pakai' => $value['signaTakar'],
 						'qty' => $value['signaHari'],
 						'satuan' => $ObatInfo['satuan_terkecil'],
-						'aturan_pakai' => $value['aturanPakai'],
+						'aturan_pakai' => intval($value['aturanPakai']),
 						'keterangan' => $value['keteranganPerObat'],
 						'created_at' => parent::format_date(),
 						'updated_at'=> parent::format_date()
@@ -1466,12 +1518,12 @@ class Asesmen extends Utility {
 				'uid'
 			))
 			->where(array(
-				'racikan.asesmen' => '= ?',
-                'AND',
-                'racikan.kode' => '= ?'
+				'racikan.asesmen' => '= ?'
+                /*,'AND',
+                'racikan.kode' => '= ?'*/
 			), array(
-				$MasterAsesmen,
-                $parameter['racikan'][$key]['nama']
+				$MasterAsesmen
+                //,$parameter['racikan'][$key]['nama']
 			))
 			->execute();
 
@@ -1494,103 +1546,118 @@ class Asesmen extends Utility {
 				))
 				->execute();
 				if($racikanUpdate['response_result'] > 0) {
-					//Reset Racikan Detail
-					$resetRacikanDetail = self::$query->update('racikan_detail', array(
-						'deleted_at' => parent::format_date()
-					))
-					->where(array(
-						/*'racikan_detail.resep' => '= ?',
-						'AND',*/
-						'racikan_detail.racikan' => '= ?',
-						'AND',
-						'racikan_detail.asesmen' => '= ?'
-					), array(
-						//$uid,
-						$value['uid'],
-						$MasterAsesmen
-					))
-					->execute();
-
-					//Old Racikan Detail
-					$checkRacikanDetail = self::$query->select('racikan_detail', array(
-						'id',
-						'obat'
-					))
-					->where(array(
-						/*'racikan_detail.resep' => '= ?',
-						'AND',*/
-						'racikan_detail.racikan' => '= ?',
-						'AND',
-						'racikan_detail.asesmen' => '= ?'
-					), array(
-						//$uid,
-						$value['uid'],
-						$MasterAsesmen
-					))
-					->execute();
-
-					$oldRacikanDetail = array();
-					$usedRacikanDetail = array();
-					foreach ($checkRacikanDetail['response_data'] as $RDKey => $RDValue) {
-						if(!in_array($RDValue['obat'], $usedRacikanDetail)) {
-							array_push($usedRacikanDetail, $RDValue['obat']);
-							array_push($oldRacikanDetail, $RDValue);
-						}
-					}
-
-					foreach ($parameter['racikan'][$key]['item'] as $RDIKey => $RDIValue) {
-						if(in_array($RDIValue['obat'], $usedRacikanDetail)) {
-							$racikanDetailWorker = self::$query->update('racikan_detail', array(
-								'obat' => $RDIValue['obat'],
-								'ratio' => $RDIValue['takaran'],
-								'kekuatan' => $RDIValue['kekuatan'],
-								'penjamin' => $parameter['penjamin'],
-								'takar_bulat' => $RDIValue['takaranBulat'],
-								'takar_decimal' => $RDIValue['takaranDecimalText'],
-								'pembulatan' => ceil($RDIValue['takaran']),
-								'deleted_at' => NULL
-							))
-							->where(array(
-								/*'racikan_detail.resep' => '= ?',
-								'AND',*/
-								'racikan_detail.racikan' => '= ?',
-								'AND',
-								'racikan_detail.asesmen' => '= ?',
-								'AND',
-								'racikan_detail.obat' => '= ?'
-							), array(
-								//$uid,
-								$value['uid'],
-								$MasterAsesmen,
-								$RDIValue['obat']
-							))
-							->execute();
-						} else {
-							$racikanDetailWorker = self::$query->insert('racikan_detail', array(
-								'asesmen' => $MasterAsesmen,
-								//'resep' => $uid,
-								'obat' => $RDIValue['obat'],
-								'pembulatan' => ceil($RDIValue['takaran']),
-								'kekuatan' => $RDIValue['kekuatan'],
-								'takar_bulat' => $RDIValue['takaranBulat'],
-								'takar_decimal' => $RDIValue['takaranDecimalText'],
-								'harga' => 0,
-								'created_at' => parent::format_date(),
-								'updated_at' => parent::format_date(),
-								'racikan' => $value['uid'],
-								'ratio' => $RDIValue['takaran']
-							))
-							->execute();
-						}
-					}
-
-					array_push($racikanError, $racikanDetailWorker);
-
-					//Unset processed data from parameter
-					unset($parameter['racikan'][$key]);
-				} else {
 					//
+				} else {
+                    //array_push($racikanError, $racikanUpdate);
 				}
+
+
+
+                //Reset Racikan Detail
+                /*$resetRacikanDetail = self::$query->update('racikan_detail', array(
+                    'deleted_at' => parent::format_date()
+                ))
+                    ->where(array(
+                        'racikan_detail.racikan' => '= ?',
+                        'AND',
+                        'racikan_detail.asesmen' => '= ?'
+                    ), array(
+                        $value['uid'],
+                        $MasterAsesmen
+                    ))
+                    ->execute();*/
+
+                $resetRacikanDetail = self::$query->hard_delete('racikan_detail')
+                    ->where(array(
+                        /*'racikan_detail.resep' => '= ?',
+                        'AND',*/
+                        'racikan_detail.racikan' => '= ?',
+                        'AND',
+                        'racikan_detail.asesmen' => '= ?'
+                    ), array(
+                        //$uid,
+                        $value['uid'],
+                        $MasterAsesmen
+                    ))
+                    ->execute();
+
+                //Old Racikan Detail
+                $checkRacikanDetail = self::$query->select('racikan_detail', array(
+                    'id',
+                    'obat'
+                ))
+                    ->where(array(
+                        /*'racikan_detail.resep' => '= ?',
+                        'AND',*/
+                        'racikan_detail.racikan' => '= ?',
+                        'AND',
+                        'racikan_detail.asesmen' => '= ?'
+                    ), array(
+                        //$uid,
+                        $value['uid'],
+                        $MasterAsesmen
+                    ))
+                    ->execute();
+
+                $oldRacikanDetail = array();
+                $usedRacikanDetail = array();
+                foreach ($checkRacikanDetail['response_data'] as $RDKey => $RDValue) {
+                    if(!in_array($RDValue['obat'], $usedRacikanDetail)) {
+                        array_push($usedRacikanDetail, $RDValue['obat']);
+                        array_push($oldRacikanDetail, $RDValue);
+                    }
+                }
+
+                foreach ($parameter['racikan'][$key]['item'] as $RDIKey => $RDIValue) {
+                    if(in_array($RDIValue['obat'], $usedRacikanDetail)) {
+                        $racikanDetailWorker = self::$query->update('racikan_detail', array(
+                            'obat' => $RDIValue['obat'],
+                            'ratio' => floatval($RDIValue['takaran']),
+                            'kekuatan' => $RDIValue['kekuatan'],
+                            'penjamin' => $parameter['penjamin'],
+                            //'takar_bulat' => $RDIValue['takaranBulat'],
+                            //'takar_decimal' => $RDIValue['takaranDecimalText'],
+                            'pembulatan' => ceil($RDIValue['takaran']),
+                            'deleted_at' => NULL
+                        ))
+                            ->where(array(
+                                /*'racikan_detail.resep' => '= ?',
+                                'AND',*/
+                                'racikan_detail.racikan' => '= ?',
+                                'AND',
+                                'racikan_detail.asesmen' => '= ?',
+                                'AND',
+                                'racikan_detail.obat' => '= ?'
+                            ), array(
+                                //$uid,
+                                $value['uid'],
+                                $MasterAsesmen,
+                                $RDIValue['obat']
+                            ))
+                            ->execute();
+                    } else {
+                        $racikanDetailWorker = self::$query->insert('racikan_detail', array(
+                            'asesmen' => $MasterAsesmen,
+                            //'resep' => $uid,
+                            'obat' => $RDIValue['obat'],
+                            'pembulatan' => ceil($RDIValue['takaran']),
+                            'kekuatan' => $RDIValue['kekuatan'],
+                            //'takar_bulat' => $RDIValue['takaranBulat'],
+                            //'takar_decimal' => $RDIValue['takaranDecimalText'],
+                            'harga' => 0,
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date(),
+                            'racikan' => $value['uid'],
+                            'ratio' => floatval($RDIValue['takaran'])
+                        ))
+                            ->execute();
+                    }
+                }
+
+                //array_push($racikanError, $racikanDetailWorker);
+
+                //Unset processed data from parameter
+                unset($parameter['racikan'][$key]);
 			}
 
 			//UnProcessed Racikan
@@ -1619,11 +1686,11 @@ class Asesmen extends Utility {
 							'racikan' => $newRacikanUID,
 							//'resep' => $uid,
 							'obat' => $RDValue['obat'],
-							'ratio' => $RDValue['takaran'],
+							'ratio' => floatval($RDValue['takaran']),
 							'pembulatan' => ceil($RDValue['takaran']),
 							'kekuatan' => $RDValue['kekuatan'],
-							'takar_bulat' => $RDIValue['takaranBulat'],
-							'takar_decimal' => $RDIValue['takaranDecimalText'],
+							//'takar_bulat' => $RDIValue['takaranBulat'],
+							//'takar_decimal' => $RDIValue['takaranDecimalText'],
 							'harga' => 0,
 							'penjamin' => '',
 							'created_at' => parent::format_date(),
@@ -1636,9 +1703,9 @@ class Asesmen extends Utility {
 					array_push($racikanError, $newRacikan);
 				}
 			}
-			//return $racikanError;
+			return array('resep' => $resepProcess, 'racikan' => $racikanError);
 
-		} else {
+		} else { //Jika Resep baru
 
 			//New Resep
 			$uid = parent::gen_uuid();
@@ -1669,7 +1736,7 @@ class Asesmen extends Utility {
 					$newResepDetail = self::$query->insert('resep_detail', array(
 						'resep' => $uid,
 						'obat' => $value['obat'],
-						'aturan_pakai' => $value['aturanPakai'],
+						'aturan_pakai' => intval($value['aturanPakai']),
 						'harga' => 0,
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
@@ -1722,11 +1789,11 @@ class Asesmen extends Utility {
 								'asesmen' => $MasterAsesmen,
 								//'resep' => $uid_racikan,
 								'obat' => $RIValue['obat'],
-								'ratio' => $RIValue['takaran'],
-								'pembulatan' => ceil($RIValue['takaran']),
+								'ratio' => floatval($RIValue['takaran']),
+								'pembulatan' => ceil(floatval($RIValue['takaran'])),
 								'kekuatan' => $RIValue['kekuatan'],
-								'takar_bulat' => $RIValue['takaranBulat'],
-								'takar_decimal' => $RIValue['takaranDecimalText'],
+								//'takar_bulat' => $RIValue['takaranBulat'],
+								//'takar_decimal' => $RIValue['takaranDecimalText'],
 								'harga' => 0,
 								'racikan' => $uid_racikan,
 								'created_at' => parent::format_date(),
@@ -2042,9 +2109,55 @@ class Asesmen extends Utility {
                 'frenulum' => $parameter['frenulum'],
                 'kebersihan_mulut' => $parameter['mulut_bersih'],
 
+                'keterangan_bibir' => $parameter['keterangan_bibir'],
+                'keterangan_lidah' => $parameter['keterangan_lidah'],
+                'keterangan_mukosa' => $parameter['keterangan_mukosa'],
+                'keterangan_torus' => $parameter['keterangan_torus'],
+                'keterangan_gingiva' => $parameter['keterangan_gingiva'],
+                'keterangan_frenulum' => $parameter['keterangan_frenulum'],
+
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             );
+
+            /*$saveParam = array(
+                'keluhan_utama' => $parameter['keluhan_utama'],
+                'keluhan_tambahan' => $parameter['keluhan_tambahan'],
+                'tekanan_darah' => floatval($parameter['tekanan_darah']),
+                'nadi' => floatval($parameter['nadi']),
+                'suhu' => floatval($parameter['suhu']),
+                'pernafasan' => floatval($parameter['pernafasan']),
+                'berat_badan' => floatval($parameter['berat_badan']),
+                'tinggi_badan' => floatval($parameter['tinggi_badan']),
+                'lingkar_lengan_atas' => floatval($parameter['lingkar_lengan_atas']),
+                'pemeriksaan_fisik' => $parameter['pemeriksaan_fisik'],
+                'icd10_kerja' => implode(',', $selectedICD10Kerja),
+                'diagnosa_kerja' => $parameter['diagnosa_kerja'],
+                'icd10_banding' => implode(',', $selectedICD10Banding),
+                'diagnosa_banding' => $parameter['diagnosa_banding'],
+                'planning' => $parameter['planning'],
+
+                'odontogram' => $parameter['odontogram'],
+                'muka_simetris' => $parameter['simetris'],
+                'tmj' => $parameter['sendi'],
+                'bibir' => $parameter['bibir'],
+                'lidah' => $parameter['lidah'],
+                'mukosa' => $parameter['mukosa'],
+                'torus' => $parameter['torus'],
+                'gingiva' => $parameter['gingiva'],
+                'frenulum' => $parameter['frenulum'],
+                'kebersihan_mulut' => $parameter['mulut_bersih'],
+
+                //'keterangan_mulut' => $parameter['keterangan_mulut'],
+                'keterangan_bibir' => $parameter['keterangan_bibir'],
+                'keterangan_lidah' => $parameter['keterangan_lidah'],
+                'keterangan_mukosa' => $parameter['keterangan_mukosa'],
+                'keterangan_torus' => $parameter['keterangan_torus'],
+                'keterangan_gingiva' => $parameter['keterangan_gingiva'],
+                'keterangan_frenulum' => $parameter['keterangan_frenulum'],
+
+                'updated_at' => parent::format_date()
+            );*/
         } else if($poli_uid === __POLI_MATA__) {
             $selectedICD10Kerja = array();
             $selectedICD10Banding = array();
@@ -2186,6 +2299,28 @@ class Asesmen extends Utility {
 				)
 				->execute();
 			if ($data['response_result'] > 0){
+			    //Asesmen Kebidanan
+                $bidan = self::$query->select('asesmen_kebidanan', array(
+                    'tanggal_partus',
+                    'tempat_partus',
+                    'jenis_partus',
+                    'penolong',
+                    'nifas',
+                    'jenkel_anak',
+                    'keadaan_sekarang',
+                    'keterangan',
+                    'bb_anak',
+                    'usia_kehamilan'
+                ))
+                    ->where(array(
+                        'asesmen_kebidanan.asesmen' => '= ?',
+                        'AND',
+                        'asesmen_kebidanan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $data['response_data'][0]['asesmen']
+                    ))
+                    ->execute();
+                $antrian['asesmen_bidan'] = $bidan['response_data'];
 				$antrian['asesmen_rawat'] = $data['response_data'][0];
 			}
 		}
@@ -2200,7 +2335,7 @@ class Asesmen extends Utility {
 		//Prepare Poli
 		$Poli = new Poli(self::$pdo);
 		$PoliDetail = $Poli::get_poli_detail($parameter['dataAntrian']['departemen'])['response_data'][0];
-
+        $DataPartus = $parameter['dataObj']['partus_list'];
 		//Check
 		$check = self::$query->select('asesmen', array(
 				'uid'
@@ -2243,7 +2378,7 @@ class Asesmen extends Utility {
 			if(count($poli_check['response_data']) > 0) {
 				//update asesmen rawat --> sudah oke
 				$parameter['dataObj']['updated_at'] = parent::format_date();
-
+                unset($parameter['dataObj']['partus_list']);
 				$rawat = self::$query
 					->update('asesmen_rawat_' . $PoliDetail['poli_asesmen'], $parameter['dataObj'])
 					->where(array(
@@ -2304,7 +2439,8 @@ class Asesmen extends Utility {
 				$parameter['dataObj']['pasien'] = $parameter['dataAntrian']['uid_pasien'];
 				$parameter['dataObj']['kunjungan'] = $parameter['dataAntrian']['kunjungan'];
 				$parameter['dataObj']['departemen'] = $parameter['dataAntrian']['departemen'];
-				
+                unset($parameter['dataObj']['partus_list']);
+
 				$rawat = self::new_asesmen_rawat($parameter['dataObj'], $MasterUID, $PoliDetail['poli_asesmen']);
 			}
 
@@ -2364,10 +2500,78 @@ class Asesmen extends Utility {
 			}
 		}
 
+		$proceed_bidan_id = array();
+		$proceed_bidan_result = array();
+		//reset Partus
+        $resetPartus = self::$query->update('asesmen_kebidanan', array(
+            'deleted_at' => parent::format_date()
+        ))
+            ->where(array(
+                'asesmen_kebidanan.asesmen' => '= ?'
+            ), array(
+                $MasterUID
+            ))
+            ->execute();
+		foreach ($DataPartus as $partKey => $partValue) {
+            //Asesmen Kebidanan
+            $checkBidan = self::$query->select('asesmen_kebidanan', array(
+                'id'
+            ))
+                ->where(array(
+                    'asesmen_kebidanan.asesmen' => '= ?'
+                ), array(
+                    $MasterUID
+                ))
+                ->execute();
+            if(count($checkBidan['response_data']) > 0 && !in_array($checkBidan['response_data'][0]['id'], $proceed_bidan_id)) {
+                $proceed_bidan = self::$query->update('asesmen_kebidanan', array(
+                    'tanggal_partus' => $partValue['tanggal'],
+                    'usia_kehamilan' => $partValue['usia'],
+                    'tempat_partus' => $partValue['tempat'],
+                    'jenis_partus' => $partValue['jenis'],
+                    'penolong' => $partValue['penolong'],
+                    'nifas' => $partValue['nifas'],
+                    'jenkel_anak' => $partValue['jenkel_anak'],
+                    'bb_anak' => $partValue['bb_anak'],
+                    'keadaan_sekarang' => $partValue['keadaan_sekarang'],
+                    'keterangan' => $partValue['keterangan'],
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'asesmen_kebidanan.id' => '= ?'
+                    ), array(
+                        $checkBidan['response_data'][0]['id']
+                    ))
+                    ->execute();
+                array_push($proceed_bidan_id, $checkBidan['response_data'][0]['id']);
+            } else {
+                $proceed_bidan = self::$query->insert('asesmen_kebidanan', array(
+                    'asesmen' => $MasterUID,
+                    'tanggal_partus' => $partValue['tanggal'],
+                    'usia_kehamilan' => $partValue['usia'],
+                    'tempat_partus' => $partValue['tempat'],
+                    'jenis_partus' => $partValue['jenis'],
+                    'penolong' => $partValue['penolong'],
+                    'nifas' => $partValue['nifas'],
+                    'jenkel_anak' => $partValue['jenkel_anak'],
+                    'bb_anak' => $partValue['bb_anak'],
+                    'keadaan_sekarang' => $partValue['keadaan_sekarang'],
+                    'keterangan' => $partValue['keterangan'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+            array_push($proceed_bidan_result, $proceed_bidan);
+        }
+
+
+        $returnResponse['bidan_partus'] = $proceed_bidan_result;
 		return $returnResponse;
 	}
 
-	private function get_antrian_asesmen_rawat(){
+	private function get_antrian_asesmen_rawat($parameter){
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -2380,9 +2584,9 @@ class Asesmen extends Utility {
 				)
 			)
 			->where(array(
-					'perawat' => '= ?',
+					'master_poli_perawat.perawat' => '= ?',
 					'AND',
-					'deleted_at' => 'IS NULL'
+					'master_poli_perawat.deleted_at' => 'IS NULL'
 				), array(
 					$UserData['data']->uid
 				)

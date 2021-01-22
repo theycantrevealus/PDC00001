@@ -325,7 +325,7 @@
 
 
             var newDeleteResep = document.createElement("BUTTON");
-            $(newCellResepAksi).append(newDeleteResep);
+            //$(newCellResepAksi).append(newDeleteResep);
             $(newDeleteResep).addClass("btn btn-sm btn-danger resep_delete").html("<i class=\"fa fa-ban\"></i>");
 
             $(newCellHarga).addClass("number_style").html(harga_tertinggi);
@@ -767,7 +767,7 @@
             });
 
             var newRacikanDelete = document.createElement("BUTTON");
-            $(newRacikanCellAksi).append(newRacikanDelete);
+            //$(newRacikanCellAksi).append(newRacikanDelete);
             $(newRacikanDelete).addClass("btn btn-danger btn-sm btn-delete-racikan").html("<i class=\"fa fa-ban\"></i>");
 
             $(newRacikanRow).append(newRacikanCellID);

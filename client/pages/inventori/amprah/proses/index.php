@@ -50,9 +50,9 @@
 								<input id="range_amprah" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
 							</div>
 							<div class="col-md-4">
-								<a href="<?php echo __HOSTNAME__; ?>/inventori/amprah/tambah" class="btn btn-info pull-right">
+								<!--<a href="<?php /*echo __HOSTNAME__; */?>/inventori/amprah/tambah" class="btn btn-info pull-right">
 									<i class="fa fa-plus"></i> Amprah Baru
-								</a>
+								</a>-->
 							</div>
 						</div>
 						<hr />
@@ -79,9 +79,9 @@
 								<input id="range_amprah_selesai" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
 							</div>
 							<div class="col-md-4">
-								<a href="<?php echo __HOSTNAME__; ?>/inventori/amprah/tambah" class="btn btn-info pull-right">
+								<!--<a href="<?php /*echo __HOSTNAME__; */?>/inventori/amprah/tambah" class="btn btn-info pull-right">
 									<i class="fa fa-plus"></i> Amprah Baru
-								</a>
+								</a>-->
 							</div>
 						</div>
 						<hr />

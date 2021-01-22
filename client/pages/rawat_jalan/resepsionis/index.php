@@ -98,7 +98,7 @@
                                     <h5 class="card-header__title flex m-0">Antrian Poli</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="table-responsive border-bottom">
+                                    <div class="border-bottom">
                                         <table class="table table-bordered table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
                                             <thead class="thead-dark">
                                             <tr>
@@ -124,10 +124,10 @@
                         <div class="tab-pane show fade" id="tab-antrian-2">
                             <div class="card">
                                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                                    <h5 class="card-header__title flex m-0">IGD</h5>
-                                    <button class="btn btn-info" id="btnTambahRI">
+                                    <h5 class="card-header__title flex m-0">Rawat Inap</h5>
+                                    <!--button class="btn btn-info" id="btnTambahRI">
                                         <i class="fa fa-plus"></i> Tambah Pasien
-                                    </button>
+                                    </button-->
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive border-bottom">

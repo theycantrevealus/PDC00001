@@ -35,6 +35,10 @@ class DeliveryOrder extends Utility {
 					return self::load_po();
 					break;
 
+                case 'detail':
+                    return self::get_do_info($parameter[2]);
+                    break;
+
 				default:
 					return self::get_do();
 					break;
@@ -86,6 +90,9 @@ class DeliveryOrder extends Utility {
 					'deleted_at' => 'IS NULL'
 				),array()
 			)
+            ->order(array(
+                'created_at' => 'DESC'
+            ))
 			->execute();
 
 		$autonum = 1;
@@ -111,31 +118,80 @@ class DeliveryOrder extends Utility {
 		return $data;
 	}
 
+	public function get_do_info($parameter) {
+	    $data = self::$query->select('inventori_do', array(
+	        'uid',
+            'gudang',
+            'supplier',
+            'tgl_do',
+            'no_do',
+            'no_invoice',
+            'tgl_invoice',
+            'keterangan',
+            'status',
+            'pegawai',
+            'po'
+        ))
+            ->where(array(
+                'inventori_do.uid' => '= ?',
+                'AND',
+                'inventori_do.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+        $Supplier = new Supplier(self::$pdo);
+        $Gudang = new Inventori(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+        $PO = new PO(self::$pdo);
+	    foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['supplier'] =  $Supplier->get_detail($value['supplier']);
+            $data['response_data'][$key]['gudang'] =  $Gudang->get_gudang_detail($value['gudang'])['response_data'][0];
+            $data['response_data'][$key]['pegawai'] =  $Pegawai->get_detail_pegawai($value['pegawai'])['response_data'][0];
+            $data['response_data'][$key]['po'] =  $PO->get_po_detail($value['po'])['response_data'][0];
+            $data['response_data'][$key]['tgl_do'] = date('d F Y', strtotime($value['tgl_do']));
+            $data['response_data'][$key]['tgl_invoice'] = date('d F Y', strtotime($value['tgl_invoice']));
+            $data['response_data'][$key]['po'] =
+            $detail = self::get_do_detail($parameter);
+	        $data['response_data'][$key]['detail'] =  $detail['response_data'];
+        }
+
+	    return $data;
+    }
+
 	private function get_do_detail($parameter){
 		$data = self::$query
 			->select('inventori_do_detail', array(
 					'id',
-					'do',
+					'do_master',
 					'barang',
-					'kode_batch',
-					'kedaluarsa',
+					'batch',
+					'kadaluarsa',
 					'qty',
-					'satuan',
 					'keterangan',
 					'created_at',
 					'updated_at',
+                    'po'
 				)
 			)
 			->where(array(
 					'inventori_do_detail.deleted_at' => 'IS NULL',
 					'AND',
-					'inventori_do_detail.do' => '= ?'
+					'inventori_do_detail.do_master' => '= ?'
 				), array(
 					$parameter
 				)
 			)
 			->execute();
-
+		$autonum = 1;
+        $Inventori = new Inventori(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['batch'] = $Inventori->get_batch_detail($value['batch'])['response_data'][0];
+            $data['response_data'][$key]['barang'] = $Inventori->get_item_detail($value['barang'])['response_data'][0];
+            $data['response_data'][$key]['kadaluarsa'] = date('d F Y', strtotime($value['kadaluarsa']));
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
 		return $data;
 	}
 
@@ -187,7 +243,7 @@ class DeliveryOrder extends Utility {
 
 			//load po response_data
 			foreach ($dataPO['response_data'] as $dataKey => $value) {
-				$dataPO['response_data'][$key]['items'] = [];
+				$dataPO['response_data'][$dataKey]['items'] = [];
 
 				//get from inv_do where row has inv_po uid
 				$dataDO = self::get_do_where_po($value['uid']);
@@ -333,6 +389,7 @@ class DeliveryOrder extends Utility {
 		//Tambah DO Detail
 		if($do['response_result'] > 0) {
 			$itemReport = array();
+			$stok_change = array();
 			foreach ($parameter['item'] as $key => $value) {
 				//Cek Batch
 				$cek = self::$query->select('inventori_batch', array(
@@ -374,7 +431,7 @@ class DeliveryOrder extends Utility {
 					'barang' => $value['item'],
 					'batch' => $UIDBatch,
 					'kadaluarsa' => $value['tanggal_exp'],
-					'qty' => $value['qty'],
+					'qty' => floatval($value['qty']),
 					'po' => $parameter['po'],
 					'keterangan' => $value['keterangan'],
 					'created_at' => parent::format_date(),
@@ -406,7 +463,7 @@ class DeliveryOrder extends Utility {
 					if(count($cekStok['response_data']) > 0) {
 						//Add Stok
 						$stokWorker = self::$query->update('inventori_stok', array(
-							'stok_terkini' => $cekStok['response_data'][0]['stok_terkini'] + $value['qty']
+							'stok_terkini' => floatval($cekStok['response_data'][0]['stok_terkini']) + floatval($value['qty'])
 						))
 						->where(array(
 							'inventori_stok.barang' => '= ?',
@@ -432,6 +489,7 @@ class DeliveryOrder extends Utility {
 					}
 
 					if($stokWorker['response_result'] > 0) {
+					    array_push($stok_change, $stokWorker);
 						//Saldo Stok
 						$getSaldo = self::$query->select('inventori_stok', array(
 							'stok_terkini'
@@ -457,7 +515,10 @@ class DeliveryOrder extends Utility {
 							'masuk' => $value['qty'],
 							'keluar' => 0,
 							'saldo' => $getSaldo['response_data'][0]['stok_terkini'],
-							'type' => __STATUS_BARANG_MASUK__
+							'type' => __STATUS_BARANG_MASUK__,
+                            'jenis_transaksi' => 'inventori_do',
+                            'uid_foreign' => $uid,
+                            'keterangan' => 'Penerimaan barang dari pengantaran pesanan PO'
 						))
 						->execute();
 					}
@@ -465,6 +526,7 @@ class DeliveryOrder extends Utility {
 			}
 		}
 		$do['response_detail'] = $itemReport;
+		$do['response_stok'] = $stok_change;
 		return $do;
 	}
 

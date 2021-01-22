@@ -190,7 +190,13 @@ class Invoice extends Utility
                 'AND',
                 'invoice.created_at' => 'BETWEEN ? AND ?',
                 'AND',
-                'invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+                '(invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pegawai.nik' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pegawai.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
             $paramValue = array(
@@ -229,6 +235,7 @@ class Invoice extends Utility
                 ->on(array(
                     array('invoice.kunjungan', '=', 'antrian_nomor.kunjungan')
                 ))
+
                 ->execute();
         } else {
             $data = self::$query->select('invoice', array(
@@ -355,7 +362,7 @@ class Invoice extends Utility
         return $data;
     }
 
-    private function get_payment($parameter)
+    public function get_payment($parameter)
     {
         $payment = self::$query->select('invoice_payment', array(
             'uid',

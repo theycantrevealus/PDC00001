@@ -1,0 +1,175 @@
+<?php
+	error_reporting(0);
+	session_start();
+	//define('__SYNC__', '172.104.34.60');
+	//define('__SYNC__', '127.0.0.1');
+	//define('__SYNC__', '10.4.4.40');
+	//define('__SYNC__', '103.150.227.4');
+	define('__SYNC__', '192.168.99.240');
+	define('__SYNC_PORT__', '666');
+
+
+	/*define('__HOSTNAME__', 'http://192.168.43.108/simrs/client');
+	define('__HOSTAPI__', 'http://192.168.43.108/simrs/api');
+	define('__HOST__', 'http://192.168.43.108/simrs/');*/
+
+	define('__HOSTNAME__', 'http://' . $_SERVER['SERVER_ADDR'] . '/simrs_tes/client');
+	define('__HOSTAPI__', 'http://' . $_SERVER['SERVER_ADDR'] . '/simrs_tes/api');
+	define('__HOST__', 'http://' . $_SERVER['SERVER_ADDR'] . '/simrs_tes/');
+
+	define('__PC_CUSTOMER__', 'RSUD PETALA BUMI');
+	define('__PC_CUSTOMER_ADDRESS__', 'Jalan Dr. Soetomo No. 65, Sekip, LimaPuluh, Kota Pekanbaru, Riau 28155. Telp. (0761)23024');
+
+	/*define('__HOSTNAME__', 'http://192.168.100.137/simrs/client');
+	define('__HOSTAPI__', 'http://192.168.100.137/simrs/api');
+	define('__HOST__', 'http://192.168.100.137/simrs/');*/
+
+	/*define('__HOSTNAME__', 'http://localhost/simrs/client');
+	define('__HOSTAPI__', 'http://localhost/simrs/api');
+	define('__HOST__', 'http://localhost/simrs/');*/
+
+	/*define('__HOSTNAME__', 'http://192.168.100.44/simrs/client');
+	define('__HOSTAPI__', 'http://192.168.100.44/simrs/api');
+	define('__HOST__', 'http://192.168.100.44/simrs/');*/
+
+	define('__SYSTEM_DOMAIN__', 'petalabumi.com');
+	define('__APPS_NAME__', 'SIMS::Integrated v.2.0');
+	define('__APLICARES__', 'https://dvlp.bpjs-kesehatan.go.id:8888/aplicaresws');
+	define('__UIDRADIOLOGI__', '581f4c0a-2f0a-49df-9bea-9cd3d77d3673');
+	define('__UIDFISIOTERAPI__', '5787593b-f840-4622-84f0-ce6a29fa62b8');
+	define('__UIDKONSULDOKTER__','bc5f2cf4-8abd-461e-82a6-d542c634e206');
+	define('__UIDPENJAMINUMUM__','499ed11a-911d-4661-b3b2-783e17615eb7');
+	define('__UIDPENJAMINBPJS__','8509d734-22c3-421e-93c5-3de08fb0a506');
+
+
+	/*
+	 * master_poli*/
+	define('__UIDRADIOLOGI__', '581f4c0a-2f0a-49df-9bea-9cd3d77d3673');
+	define('__UIDFISIOTERAPI__', '5787593b-f840-4622-84f0-ce6a29fa62b8');
+
+
+	/*
+	 * master_penjamin*/
+	define('__UIDPENJAMINUMUM__','499ed11a-911d-4661-b3b2-783e17615eb7');
+	define('__UIDPENJAMINBPJS__','8509d734-22c3-421e-93c5-3de08fb0a506');
+
+
+	/*
+	 * pegawai_jabatan*/
+	define('__UIDADMIN__', 'b8c88459-f882-42f6-aba8-89e1cd65d948');
+	define('__UID_PENDAFTARAN__', 'f5bbcc8a-2ad0-4bfc-9c62-879925d6a7f2');
+	define('__UIDDOKTER__', 'c77f97be-f32f-4ca1-b571-3a0837dde7e8');
+	define('__UIDPERAWAT__', '583f2700-dd4b-4817-b50a-6c0d23e7c14c');
+	define('__UIDPETUGASLAB__', '8b1466d6-b923-4733-b214-584e2dfccbc1');
+	define('__UIDPETUGASRAD__', 'c52d24e0-2624-43a2-9353-f9791bac1365');
+	define('__UIDAPOTEKER__', 'f2b5adb1-a1eb-441c-8273-a246d7ced670');
+
+	/*
+	 * master_unit*/
+	define('__UNIT_GUDANG__', '9ab13031-3b00-4de7-88b1-17b69ea385ba');
+
+	/*
+	 * master_tindakan*/
+	define('__UID_KONSULTASI__', 'bc5f2cf4-8abd-461e-82a6-d542c634e206');
+	define('__UIDKONSULDOKTER__','11a95e98-9dfc-4e89-aae3-8f698aac7d9d');
+	define('__UIDKONSULDOKTER_GIGI__','4ba9ffe1-ea27-427c-9b4c-2e54bf7bb64e');
+	define('__UIDKONSULDOKTER_SPESIALIS__','7edd815b-755b-4b97-be40-7c289a8eedc7');
+
+	//define('__UID_KARTU__', 'c8dc085b-03e5-be82-6c1a-7ab76194d34f');
+	define('__UID_KARTU__', '5b61bedf-6dde-4a12-99b2-ffa908017ea2');
+
+		/*
+	 * master_inv_gudang*/
+	define('__GUDANG_UTAMA__', '5bda12c3-1589-40b6-97a5-2992a8a90677');
+	define('__GUDANG_APOTEK__', 'e7273646-1d2e-40e8-bcbc-028f6a8ce1e0');
+	define('__STATUS_BARANG_KELUAR__', 1658);
+
+
+	/*
+	 * master_tindakan_kelas*/
+	define('__UID_KELAS_GENERAL_RJ__', '64c374d4-3d35-432d-ad3d-e4b3e7ec448a');
+	define('__UID_KELAS_GENERAL_RAD__', '0b1f5a95-5285-4dd3-b9b7-37ecc65fd700');
+	define('__UID_KELAS_GENERAL_LAB__', 'a5771d26-72ed-4b76-a22f-817992f1 Yii::$app->mail->compose()
+                ->setFrom('aplikasiku@yii2.com')
+                ->setTo($model->email)
+                ->setSubject($model->subject)
+                ->setHtmlBody($model->body)
+                ->send(); Yii::$app->mail->compose()
+                ->setFrom('aplikasiku@yii2.com')
+                ->setTo($model->email)
+                ->setSubject($model->subject)
+                ->setHtmlBody($model->body)
+                ->send();f45c');
+
+
+	define('__KODE_PPK__', '0069R035');
+	define('__DATA_API_LIVE__', 32435);
+	define('__SECRET_KEY_LIVE_BPJS__', '2pAB5273E9');
+
+
+	//define('__BASE_LIVE_BPJS__', 'http://api.bpjs-kesehatan.go.id');
+	define('__BASE_LIVE_BPJS__', 'https://new-api.bpjs-kesehatan.go.id:8080');
+	define('__BASE_STAGING_BPJS__', 'https://dvlp.bpjs-kesehatan.go.id');
+
+		/*
+	 * master_poli*/
+	define('__POLI_MATA__', 'e7048b00-ec4e-479b-b64e-686ed834e0f5');
+	define('__POLI_GIGI__', '987bc502-9c1b-4947-bdba-b4bdce344228');
+	define('__POLI_INAP__', '1b5c452a-284e-4774-8490-5b5f4160ad10');
+	define('__POLI_INAP__', '008ab102-96ed-469d-ab7a-e0ecda1eeb2e');
+	define('__POLI_LAB__', 'cd9f8f30-4236-2d8b-46d6-b561f9b2c5a3');
+	define('__POLI_IGD__', '851d733c-3e50-46d0-ad90-d97828ea6204');
+
+	//Priority
+	define('__PRIORITY_HIGH__', 38);
+
+	//Jenis Antrian
+	define('__ANTRIAN_KHUSUS__', '6e71fddf-279c-486f-8958-edb81d532aef');
+
+
+	/*
+	 * terminologi_item*/
+	define('__STATUS_BARANG_MASUK__', 51);
+	define('__STATUS_STOK_AWAL__', 52);
+	define('__STATUS_MUTASI_STOK__', 53);
+	define('__STATUS_AMPRAH__', 54);
+	define('__STATUS_RETUR_AMPRAH__', 55);
+	define('__STATUS_RETUR_PEMASOK__', 56);
+	define('__STATUS_OPNAME__', 57);
+
+
+	/*
+	 * master_inv_obat_kategori*/
+	define('__UID_ANTIBIOTIK__', '5363e662-ea21-4e30-bd7f-d4f654c8f594');
+	define('__UID_FORNAS__', '5bd8f3a2-8372-e8d2-e8ea-aa7686b0c1ea');
+	define('__UID_NARKOTIKA__', 'd94359dd-c59a-1fb9-7267-348dc6de2921');
+	define('__UID_PSIKOTROPIKA__', '565e8bd8-a0a4-423d-96e5-5aa257c0d60b');
+	define('__UID_GENERIK__', '9506cc62-a327-4596-9c33-d8fc1204e515');
+
+	/*
+	 * master_inv_kategori*/
+	define('__UID_KATEGORI_OBAT', 'd021c875-1973-4352-a59a-f79f47568b8a');
+
+	/*
+	 * master_unit_ruangan*/
+	define('__KAMAR_IGD__', 'd0e8e876-a90e-4f0c-a5a5-8e9fdb298f8a');
+
+
+	/*
+	 * master_mitra*/
+	define('__MITRA_PTB__', '3d515c54-2433-3f2d-6865-9a1f150fe182');
+
+
+
+	/*self::$data_api = base64_decode("MTUxNzQ=");*/
+	//LIVE
+	//self::$data_api = 32435;
+	/*self::$secretKey_api = base64_decode("NWJDRjJCNEY4Mw==");*/
+	//LIVE//self::$secretKey_api = '2pAB5273E9';
+	//STAGING APPLICARES
+	//self::$secretKey_api = '5bCF2B4F8';
+	//
+	/*self::$base_url = "https://dvlp.bpjs-kesehatan.go.id:8888/aplicaresws";*/
+	//self::$base_url = "http://api.bpjs-kesehatan.go.id/aplicaresws";
+	//"https://dvlp.bpjs-kesehatan.go.id"
+?>

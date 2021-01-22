@@ -12,7 +12,9 @@
 		if(__PAGES__[0] == 'anjungan') {
 			require 'pages/anjungan/index.php';
 		} else if(__PAGES__[0] == 'display') {
-			require 'pages/display/index.php';
+            require 'pages/display/index.php';
+        } else if(__PAGES__[0] == 'display_jadwal_operasi') {
+			require 'pages/display_jadwal_operasi/index.php';
 		}
 	?>
 	<div class="mdk-header-layout js-mdk-header-layout">

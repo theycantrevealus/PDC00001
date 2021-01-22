@@ -107,10 +107,10 @@
     <table>
         <tr>
             <td style="text-align:center; width:5%">
-                <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-icon.png" class="logo">
+                <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-text-black.png" class="logo">
             </td>
             <td style="width:45%;">
-                <span class="title"><b>PEMERINTAH KABUPATEN BINTAN</b></span>
+                <span class="title"><b>PEMERINTAH PROVINSI RIAU</b></span>
                 <span class="title">DINAS KESEHATAN</span>
                 <span class="title"><?php echo $_POST['__PC_CUSTOMER__']; ?></span>
                 <span class="alamat"><?php echo $_POST['__PC_CUSTOMER_ADDRESS__']; ?></span>

@@ -2,11 +2,11 @@
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0"><!-- <i class="material-icons mr-3">info_outline</i> --> Informasi Pasien</h5>
+				<h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Informasi Pasien</h5>
 			</div>
 			<div class="card-body ">
 				<div class="col-md-12">
-					<table class="table">
+					<table class="table form-mode">
 						<tbody>
 							<tr>
 								<td>No. Rekam Medis</td>
@@ -34,8 +34,8 @@
 <div class="row">
 	<div class="col-lg">
 		<div class="card">
-			<div class="card-header d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Informasi Pendaftaran</h5>
+			<div class="card-header d-flex align-items-center bg-white">
+				<h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Informasi Pendaftaran</h5>
 			</div>
 			<div class="card-body ">
 				<div class="row">
@@ -77,11 +77,11 @@
 		</div>
 	</div>
 </div>
-<div class="row" style="margin-top: 20px;">
+<div class="row">
 	<div class="col-md-8">
 		<div class="card">
-			<div class="card-header d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Pengkajian Keperawatan</h5>
+			<div class="card-header d-flex align-items-center bg-white">
+				<h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Pengkajian Keperawatan</h5>
 			</div>
 			<div class="card-body">
 				<div class="row">
@@ -195,8 +195,8 @@
 	</div>
 	<div class="col-md-4">
 		<div class="card">
-			<div class="card-header d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Tanda-tanda Vital</h5>
+			<div class="card-header d-flex align-items-center bg-white">
+				<h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Tanda-tanda Vital</h5>
 			</div>
 			<div class="card-body">
 				<div class="row">
@@ -207,7 +207,7 @@
 								<input type="text" id="tanda_vital_td" name="tanda_vital_td" class="form-control form-control-appended inputan" placeholder="TD">
 								<div class="input-group-append">
 									<div class="input-group-text">
-										<span>mmHg</span>
+                                    <span>mmHg</span>
 									</div>
 								</div>
 							</div>
@@ -233,7 +233,7 @@
 								<input type="text" name="tanda_vital_s" id="tanda_vital_s" class="form-control form-control-appended inputan" placeholder="S">
 								<div class="input-group-append">
 									<div class="input-group-text">
-										<span>x/mnt</span>
+										<span>Celcius</span>
 									</div>
 								</div>
 							</div>
@@ -257,11 +257,11 @@
 		</div>
 	</div>
 </div>
-<div class="row" style="margin-top: 20px;">
+<div class="row">
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Riwayat Kesehatan</h5>
+				<h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Riwayat Kesehatan</h5>
 			</div>
 			<div class="card-body">
 				<div class="row">
@@ -368,16 +368,35 @@
 							</select>
 	                    </div>
 	                </div>
-	                <div class="form-group col-lg-12">
-						<div class="col-12 col-md-12 mb-3">
-							<label for="">Riwayat Merokok: </label>
-							<br />
-							<input type="radio" name="riwayat_merokok_option" value="n" checked="checked" /> Tidak &nbsp;&nbsp;
-							<input type="radio" name="riwayat_merokok_option" value="y" /> Ya
-							<br />
-							<input type="text" class="form-control inputan riwayat_merokok" disabled="disabled" id="riwayat_merokok" placeholder="Riwayat Merokok" />
-	                    </div>
-	                </div>
+                    <div class="col-12 col-md-12 mb-3">
+                        <ol type="1" class="form-list-item">
+                            <li>
+                                <h6>Riwayat Merokok: </h6>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="radio" name="riwayat_merokok_option" value="n" checked="checked" />
+                                            <label class="form-check-label">
+                                                Tidak
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="radio" name="riwayat_merokok_option" value="y" />
+                                            <label class="form-check-label">
+                                                Ya
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control inputan riwayat_merokok" disabled="disabled" id="riwayat_merokok" placeholder="Riwayat Merokok" />
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ol>
+                    </div>
 	                <div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Minuman Keras: </label>
@@ -470,11 +489,11 @@
 		</div>
 	</div>
 </div>
-<div class="row" style="margin-top: 20px;">
+<div class="row">
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Riwayat Keluarga</h5>
+				<h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Riwayat Keluarga</h5>
 			</div>
 			<div class="card-body">
 				<div class="row">
@@ -541,7 +560,82 @@
 </div>
 
 
-<div class="row wanita" style="margin-top: 20px;">
+
+
+<div class="row">
+    <div class="col-lg">
+        <div class="card">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Riwayat Pernikahan</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="form-group col-lg-12">
+                        <div class="col-12 col-md-12 mb-3">
+                            <label for="">Status Pernikahan: </label>
+                            <div class="row col-md-12" id="">
+                                <div class="col-md-2">
+                                    <div class="form-check">
+                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="1" id="riwayat_keluarga_belum">
+                                        <label for="riwayat_keluarga_belum">Belum Menikah</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="2" id="riwayat_keluarga_sudah">
+                                        <label for="riwayat_keluarga_menikah">Menikah</label>
+                                        <div class="form-group col-lg-12">
+                                            <div class="input-group input-group-merge">
+                                                <input type="text" id="kali_nikah" name="kali_nikah" class="form-control form-control-appended inputan">
+                                                <div class="input-group-append">
+                                                    <div class="input-group-text">
+                                                        <span>kali</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-check">
+                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="3" id="riwayat_keluarga_bercerai">
+                                        <label for="riwayat_keluarga_bercerai">Bercerai</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-check">
+                                        <input type="radio" class="form-check-input" name="status_pernikahan" value="4" id="riwayat_keluarga_janda_duda">
+                                        <label for="riwayat_keluarga_janda_duda">Janda/Duda</label>
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-12">
+                                    <label for="umur_nikah">Umur Waktu Pertama Menikah</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="text" id="umur_nikah" name="umur_nikah" class="form-control form-control-appended inputan">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">
+                                                <span>tahun</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-6">
+                        <div class="col-12 col-md-12 mb-3">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row wanita">
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
@@ -648,7 +742,7 @@
 	</div>
 </div>
 
-<div class="row" style="margin-top: 20px;">
+<div class="row">
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
@@ -667,13 +761,13 @@
 									</div>
 								</div>
 								<div class="col-md-3 row">
-									<div class="form-check col-md-1">
+									<div class="form-check">
 										<input type="radio" class="form-check-input" name="wanita_hamil" value="Ya" id="wanita_hamil_1">
 										<label class='form-check-label' for="wanita_hamil_1">Ya</label>
 									</div>
 								</div>
 								<div class="col-md-3 row">
-									<div class="form-check col-md-1">
+									<div class="form-check">
 										<input type="radio" class="form-check-input" name="wanita_hamil" value="Tidak Tahu" id="wanita_hamil_2">
 										<label class='form-check-label' for="wanita_hamil_2">Tidak Tahu</label>
 									</div>
@@ -910,7 +1004,7 @@
 </div>
  -->
 
-<div class="row" style="margin-top: 20px;">
+<div class="row">
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
@@ -948,7 +1042,7 @@
 </div>
 
 
-<div class="row wanita" style="margin-top: 20px;">
+<div class="row wanita">
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
@@ -1005,13 +1099,37 @@
 						<label>Keterangan: </label>
 						<input type="text" name="keterangan_anak" id="keterangan_anak" class="form-control inputan">
 					</div>
+                    <div class="col-md-12">
+                        <button class="btn btn-info" id="btn_riwayat_hamil">
+                            <i class="fa fa-plus"></i> Tambah Riwayat
+                        </button>
+                        <table class="table table-bordered" id="riwayat_hamil" style="margin-top: 10px;">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th class="wrap_content">No</th>
+                                    <th>Tgl Partus</th>
+                                    <th>Usia Kehamilan</th>
+                                    <th>Tempat Partus</th>
+                                    <th>Jenis Partus</th>
+                                    <th>Penolong</th>
+                                    <th>Nifas</th>
+                                    <th>J.Kelamin Anak</th>
+                                    <th>Berat Badan</th>
+                                    <th>Keadaan Sekarang</th>
+                                    <th>Keterangan</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
 
-<div class="row" style="margin-top: 20px;">
+<div class="row">
 	<div class="col-lg">
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">

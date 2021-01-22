@@ -24,6 +24,7 @@
                     var returnedData = [];
                     var uniqueData = {};
 
+
                     if(response == undefined || response.response_package == undefined) {
                         rawData = [];
                     } else {
@@ -42,8 +43,15 @@
                                 kategori_obat: rawData[dataKey].kategori_obat,
                                 kode_barang: rawData[dataKey].kode_barang
                             };
-                        } else {
-                            uniqueData[rawData[dataKey].barang].stok_terkini += parseFloat(rawData[dataKey].stok_terkini);
+                        }
+
+
+                        if(Array.isArray(rawData[dataKey].batch)) {
+                            var batchData = rawData[dataKey].batch;
+                            for(var bKey in batchData) {
+                                //uniqueData[rawData[dataKey].barang].stok_terkini += parseFloat(rawData[dataKey].stok_terkini);
+                                uniqueData[rawData[dataKey].barang].stok_terkini += parseFloat(batchData[bKey].stok_terkini);
+                            }
                         }
                     }
                     var autonum = 1;
@@ -94,7 +102,7 @@
                             "</div>" +
                             "<div class=\"col-md-10\">" +
                             "<b><i>" + ((row.kode_barang == undefined) ? "[KODE_BARANG]" : row.kode_barang.toUpperCase()) + "</i></b><br />" +
-                            "<h5>" + row.detail.nama.toUpperCase() + "</h5>" +
+                            "<h5>" + ((row.detail !== null) ? row.detail.nama.toUpperCase() : "") + "</h5>" +
                             kategoriObat +
                             "</div>" +
                             "</div>";

@@ -138,6 +138,21 @@
 									"<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
 										"<i class=\"fa fa-check\"></i>" +
 									"</button>" +
+                                    "<div class=\"btn-group\">" +
+                                        "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
+                                            "<i class=\"fa fa-print\"></i> Cetak" +
+                                        "</button>" +
+                                        "<div class=\"dropdown-menu\">" +
+                                            "<a id=\"cetak_kartu_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"kartu\" href=\"#\">Kartu Pasien</a>" +
+                                            "<a id=\"cetak_lab_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"lab\" href=\"#\">Label Laboratorium</a>" +
+                                            "<a id=\"cetak_tracer_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"tracer\" href=\"#\">Tracer</a>" +
+                                            "<a id=\"cetak_spbk_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"spbk\" href=\"#\">SPBK</a>" +
+                                            "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"sosial\" href=\"#\">Data Sosial Pasien</a>" +
+                                            "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"gelang\" href=\"#\">Gelang Pasien</a>" +
+                                            "<a id=\"cetak_bayi_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"bayi\" href=\"#\">Gelang Pasien Bayi</a>" +
+                                            "<a id=\"cetak_identitas_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"idenftitas\" href=\"#\">Identitas Pasien</a>" +
+                                        "</div>" +
+                                    "</div>" +
                                     /*"<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"gelang\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
                                     "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"kartu\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
                                     "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"lab\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
@@ -251,7 +266,20 @@
                             "<i class=\"fa fa-check\"></i> Pulangkan Pasien" +
                             "</button>" +
                             "</div>";*/
-                        return "";
+                        return "<div class=\"btn-group\">" +
+                                    "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
+                                    "<i class=\"fa fa-print\"></i> Cetak" +
+                                "</button>" +
+                                "<div class=\"dropdown-menu\">" +
+                                    "<a class=\"dropdown-item\" href=\"#\">Kartu Pasien</a>" +
+                                    "<a class=\"dropdown-item\" href=\"#\">Label Laboratorium</a>" +
+                                    "<a class=\"dropdown-item\" href=\"#\">Tracer</a>" +
+                                    "<a class=\"dropdown-item\" href=\"#\">SPBK</a>" +
+                                    "<a class=\"dropdown-item\" href=\"#\">Data Sosial Pasien</a>" +
+                                    "<a class=\"dropdown-item\" href=\"#\">Gelang Pasien</a>" +
+                                    "<a class=\"dropdown-item\" href=\"#\">Gelang Pasien Bayi</a>" +
+                                    "<a class=\"dropdown-item\" href=\"#\">Identitas Pasien</a>" +
+                                    "</div>";
                     }
                 }
             ]
@@ -445,6 +473,7 @@
             loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val());
             loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val());
             loadSpesialistik("#txt_bpjs_dpjp_spesialistik");
+
 
 
             $("#txt_bpjs_laka_suplesi_provinsi").select2({
@@ -1075,6 +1104,8 @@
                         $(selection).attr("value", data[a].kode).html(data[a].nama);
                         $(target).append(selection);
                     }
+
+                    loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $(target).val());
                 },
                 error: function(response) {
                     console.log(response);
@@ -1094,6 +1125,7 @@
                     var data = response.response_package.content.response.list;
 
                     $(target + " option").remove();
+                    $(target).select2('data', null);
                     for(var a = 0; a < data.length; a++) {
                         var selection = document.createElement("OPTION");
 
@@ -1375,7 +1407,7 @@
 		});
 
 
-        $(".print_manager").click(function() {
+        $("body").on("click", ".print_manager", function() {
             var targetSurat = $(this).attr("jenis");
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
@@ -1480,23 +1512,25 @@
 						</div>
 					</div>
 				</div>
-				<div class="form-group col-md-12" >
+				<div class="row" >
 					<!-- style="height: 100px; overflow: scroll;" -->
-					<table class="table table-bordered table-striped" id="table-list-pencarian">
-						<thead class="thead-dark">
-							<tr>
-								<th class="wrap_content">No</th>
-								<th>No. RM</th>
-								<th>Nama</th>
-								<th>NIK</th>
-								<th class="wrap_content">Jenis Kelamin</th>
-								<th class="wrap_content">Aksi</th>
-							</tr>
-						</thead>
-						<tbody>
-							
-						</tbody>
-					</table>
+                    <div class="col-md-12">
+                        <table class="table table-bordered table-striped largeDataType" id="table-list-pencarian">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>No. RM</th>
+                                <th>Nama</th>
+                                <th>NIK</th>
+                                <th class="wrap_content">Jenis Kelamin</th>
+                                <th class="wrap_content">Aksi</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
 				</div>
 				
 			</div>

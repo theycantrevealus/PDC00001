@@ -106,7 +106,7 @@
 			MODE = "edit";
 			$("#txt_nama").val($("#nama_" + uid).html());
 			$("#txt_kode").val($("#kode_" + uid).html());
-			generate_gudang("#txt_gudang", $("gudang_" + uid).attr("gudang"));
+			generate_gudang("#txt_gudang", $("#gudang_" + uid).attr("gudang"));
 			$("#form-tambah").modal("show");
 			$("#modal-large-title").html("Edit Unit");
 			return false;
