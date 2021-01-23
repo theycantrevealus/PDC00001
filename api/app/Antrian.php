@@ -210,13 +210,6 @@ class Antrian extends Utility
         return $worker;
     }
 
-    private function tambah_igd($parameter) {
-        $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
-
-        $worker = '';
-    }
-
     private function tambah_kunjungan($table, $parameter)
     {
         $Authorization = new Authorization();

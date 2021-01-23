@@ -29,15 +29,22 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.log(response);
+				    var returnedData = [];
 					var dataSet = response.response_package.response_data;
 					if(dataSet == undefined) {
 						dataSet = [];
 					}
 
+					for(var a in dataSet) {
+					    if(dataSet[a].unit === __UNIT__.uid) {
+					        returnedData.push(dataSet[a]);
+                        }
+                    }
+
 					response.draw = parseInt(response.response_package.response_draw);
-					response.recordsTotal = response.response_package.recordsTotal;
-					response.recordsFiltered = response.response_package.recordsFiltered;
+					//response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsTotal = returnedData.length;
+					response.recordsFiltered = returnedData.length;
 					return dataSet;
 				}
 			},
@@ -96,7 +103,7 @@
             "ajax":{
                 url: __HOSTAPI__ + "/Inventori",
                 type: "POST",
-                data: function(d){
+                data: function(d) {
                     d.request = "get_amprah_request_finish";
                     d.non_gudang = true;
                     d.from = getDateRange("#range_amprah_selesai")[0];

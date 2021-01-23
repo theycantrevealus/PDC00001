@@ -230,6 +230,7 @@
 						$("#table-batch tbody").append(batchRow);
 					}
 				}
+
                 $("#table-batch tfoot").remove();
                 $("#table-batch").append("<tfoot><tr>" +
                     "<td colspan=\"3\" class=\"text-right\"><b>TOTAL</b></td>" +
