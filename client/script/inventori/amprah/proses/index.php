@@ -279,12 +279,12 @@
                         <td class="wrap_content">:</td>
                         <td id="tanggal-amprah"></td>
 
-                        <td>Pengamprah</td>
+                        <td>Diproses Oleh</td>
                         <td class="wrap_content">:</td>
                         <td id="pengamprah"></td>
                     </tr>
                     <tr>
-                        <td>Diproses Oleh</td>
+                        <td>Pengamprah</td>
                         <td>:</td>
                         <td id="pelaksana"></td>
 

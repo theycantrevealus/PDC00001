@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function() {
 		$.ajax({
@@ -32,5 +33,44 @@
 				console.log(response);
 			}
 		});
+
+		$("#btnCetak").click(function () {
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/do_detail.php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    __HOSTNAME__: __HOSTNAME__,
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    __NAMA_SAYA__ : __MY_NAME__,
+                    __JUDUL__ : "Surat Bukti Amprah",
+                    data: $("#hasil-amprah").html()
+
+                },
+                success: function (response) {
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        importStyle: true,
+                        header: null,
+                        footer: null,
+                        pageTitle: $("#verif_kode").html().replaceAll("/","_"),
+                        afterPrint: function() {
+                            $("#form-payment-detail").modal("hide");
+                        }
+                    });
+                },
+                error: function (response) {
+                    //
+                }
+            });
+        });
 	});
 </script>

@@ -90,6 +90,9 @@ class DeliveryOrder extends Utility {
 					'deleted_at' => 'IS NULL'
 				),array()
 			)
+            ->order(array(
+                'created_at' => 'DESC'
+            ))
 			->execute();
 
 		$autonum = 1;
@@ -386,6 +389,7 @@ class DeliveryOrder extends Utility {
 		//Tambah DO Detail
 		if($do['response_result'] > 0) {
 			$itemReport = array();
+			$stok_change = array();
 			foreach ($parameter['item'] as $key => $value) {
 				//Cek Batch
 				$cek = self::$query->select('inventori_batch', array(
@@ -427,7 +431,7 @@ class DeliveryOrder extends Utility {
 					'barang' => $value['item'],
 					'batch' => $UIDBatch,
 					'kadaluarsa' => $value['tanggal_exp'],
-					'qty' => $value['qty'],
+					'qty' => floatval($value['qty']),
 					'po' => $parameter['po'],
 					'keterangan' => $value['keterangan'],
 					'created_at' => parent::format_date(),
@@ -459,7 +463,7 @@ class DeliveryOrder extends Utility {
 					if(count($cekStok['response_data']) > 0) {
 						//Add Stok
 						$stokWorker = self::$query->update('inventori_stok', array(
-							'stok_terkini' => $cekStok['response_data'][0]['stok_terkini'] + $value['qty']
+							'stok_terkini' => floatval($cekStok['response_data'][0]['stok_terkini']) + floatval($value['qty'])
 						))
 						->where(array(
 							'inventori_stok.barang' => '= ?',
@@ -485,6 +489,7 @@ class DeliveryOrder extends Utility {
 					}
 
 					if($stokWorker['response_result'] > 0) {
+					    array_push($stok_change, $stokWorker);
 						//Saldo Stok
 						$getSaldo = self::$query->select('inventori_stok', array(
 							'stok_terkini'
@@ -510,7 +515,10 @@ class DeliveryOrder extends Utility {
 							'masuk' => $value['qty'],
 							'keluar' => 0,
 							'saldo' => $getSaldo['response_data'][0]['stok_terkini'],
-							'type' => __STATUS_BARANG_MASUK__
+							'type' => __STATUS_BARANG_MASUK__,
+                            'jenis_transaksi' => 'inventori_do',
+                            'uid_foreign' => $uid,
+                            'keterangan' => 'Penerimaan barang dari pengantaran pesanan PO'
 						))
 						->execute();
 					}
@@ -518,6 +526,7 @@ class DeliveryOrder extends Utility {
 			}
 		}
 		$do['response_detail'] = $itemReport;
+		$do['response_stok'] = $stok_change;
 		return $do;
 	}
 

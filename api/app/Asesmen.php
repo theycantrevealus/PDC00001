@@ -2439,6 +2439,7 @@ class Asesmen extends Utility {
 				$parameter['dataObj']['pasien'] = $parameter['dataAntrian']['uid_pasien'];
 				$parameter['dataObj']['kunjungan'] = $parameter['dataAntrian']['kunjungan'];
 				$parameter['dataObj']['departemen'] = $parameter['dataAntrian']['departemen'];
+                unset($parameter['dataObj']['partus_list']);
 
 				$rawat = self::new_asesmen_rawat($parameter['dataObj'], $MasterUID, $PoliDetail['poli_asesmen']);
 			}

@@ -39,7 +39,9 @@
 					var itemData = po_data.item;
 					for(var itemDataKey in itemData) {
 					    if(itemData[itemDataKey].qty > itemData[itemDataKey].sudah_sampai) {
-                            autoRow(selectedItem, itemData[itemDataKey].uid_barang, itemData[itemDataKey]);
+                            autoRow(selectedItem, itemData[itemDataKey].uid_barang, itemData[itemDataKey], false);
+                        } else {
+                            autoRow(selectedItem, itemData[itemDataKey].uid_barang, itemData[itemDataKey], true);
                         }
 					}
 				},
@@ -77,7 +79,7 @@
 			return poData;
 		}
 
-		function autoRow(selectedItemList = [], selectedItem = "", data = {}) {
+		function autoRow(selectedItemList = [], selectedItem = "", data = {}, isDone = false) {
 			$("#table-item-do tbody tr").removeClass("last-row");
 			var newRow = document.createElement("TR");
 			$(newRow).addClass("last-row");
@@ -130,6 +132,7 @@
 				alias: 'decimal', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true
 			});
 
+			console.log(data.detail);
 			$(newSatuan).html(data.detail.satuan_caption.nama);
 
 			var newKeteranganInput = document.createElement("TEXTAREA");
@@ -140,14 +143,25 @@
 			$(newAksi).append(newDelete);
 			$(newDelete).addClass("btn btn-sm btn-danger deleteItem").html("<i class=\"fa fa-ban\"></i>");
 
-			$(newRow).append(newID);
-			$(newRow).append(newItem);
-			$(newRow).append(newKode);
-            $(newRow).append(newBelum);
-			$(newRow).append(newQty);
-			$(newRow).append(newSatuan);
-			$(newRow).append(newKeterangan);
-			$(newRow).append(newAksi);
+
+			if(isDone) {
+                $(newRow).addClass("finished");
+                $(newRow).append(newID);
+                $(newRow).append("<td>" + itemData[itemKey].nama.toUpperCase() + "</td>");
+                $(newRow).append("<td colspan=\"6\" class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Sudah Sampai</td>");
+            } else {
+                $(newRow).append(newID);
+                $(newRow).append(newItem);
+                $(newRow).append(newKode);
+                $(newRow).append(newBelum);
+                $(newRow).append(newQty);
+                $(newRow).append(newSatuan);
+                $(newRow).append(newKeterangan);
+                $(newRow).append(newAksi);
+            }
+
+
+
 			$("#table-item-do tbody").append(newRow);
 			rebaseTable();
 		}
@@ -166,16 +180,16 @@
 				$(this).find("td:eq(2) input").attr("id", "kode_batch_" + id);
 
 				//Qty
-				$(this).find("td:eq(3) input").attr("id", "qty_" + id);
+				$(this).find("td:eq(4) input").attr("id", "qty_" + id);
 
 				//Satuan
-				$(this).find("td:eq(4)").attr("id", "satuan_" + id);
+				$(this).find("td:eq(5)").attr("id", "satuan_" + id);
 
 				//Keterangan
-				$(this).find("td:eq(5) textarea").attr("id", "keterangan_" + id);
+				$(this).find("td:eq(6) textarea").attr("id", "keterangan_" + id);
 
 				//Delete
-				$(this).find("td:eq(6) button").attr("id", "delete_" + id);
+				$(this).find("td:eq(7) button").attr("id", "delete_" + id);
 			});
 		}
 
@@ -304,7 +318,7 @@
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
 					selectedItem.push($("#item_" + id).val());
 				}
-				autoRow(selectedItem);
+				//autoRow(selectedItem);
 			}
 			$("#satuan_" + id).html($(this).find("option:selected").attr("satuan"));
 		});
@@ -318,7 +332,7 @@
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
 					selectedItem.push($("#item_" + id).val());
 				}
-				autoRow(selectedItem);
+				//autoRow(selectedItem);
 			}
 		});
 
@@ -331,7 +345,7 @@
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
 					selectedItem.push($("#item_" + id).val());
 				}
-				autoRow(selectedItem);
+				//autoRow(selectedItem);
 			}
 		});
 
@@ -344,7 +358,7 @@
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
 					selectedItem.push($("#item_" + id).val());
 				}
-				autoRow(selectedItem);
+				//autoRow(selectedItem);
 			}
 		});
 
@@ -357,7 +371,7 @@
 				if(selectedItem.indexOf($("#item_" + id).val()) < 0) {
 					selectedItem.push($("#item_" + id).val());
 				}
-				autoRow(selectedItem);
+				//autoRow(selectedItem);
 			}
 		});
 
@@ -389,36 +403,38 @@
 			var itemDetailResult = [];
 			var allowSave = false;
 			$("#table-item-do tbody tr").each(function(e) {
-				if(!$(this).hasClass("last-row")) {
-					var item = $(this).find("td:eq(1) select").val();
-					var tanggal_exp = $(this).find("td:eq(1) input").val();
-					var batch = $(this).find("td:eq(2) input").val();
-					var qty = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
-					var keterangan = $(this).find("td:eq(6) textarea").val();
-					if(batch != "" && qty > 0 && tanggal_exp != "") {
-						itemDetailResult.push({
-							item: item,
-							batch: batch,
-							tanggal_exp:tanggal_exp,
-							qty: qty,
-							keterangan: keterangan
-						});
-						allowSave = true;
-						$("#table-item-do tbody tr:eq(" + e + ") td").removeClass("bg-error");
-					} else {
-						$("#table-item-do tbody tr:eq(" + e + ") td").addClass("bg-error");
-						if(batch == "") {
-							$(this).find("td:eq(2) input").focus();
-						} else if(qty <=0) {
-							$(this).find("td:eq(3) input").focus();
-						} else {
-							$(this).find("td:eq(1) input").focus();
-						}
-						
-						allowSave = false;
-						return false;
-					}
-				}
+
+                var item = $(this).find("td:eq(1) select").val();
+                var tanggal_exp = $(this).find("td:eq(1) input").val();
+                var batch = $(this).find("td:eq(2) input").val();
+                var qty = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
+                var keterangan = $(this).find("td:eq(6) textarea").val();
+
+                if((batch != "" && qty > 0 && tanggal_exp != "") || $(this).hasClass("finished")) {
+                    if(!$(this).hasClass("finished")) {
+                        itemDetailResult.push({
+                            item: item,
+                            batch: batch,
+                            tanggal_exp:tanggal_exp,
+                            qty: qty,
+                            keterangan: keterangan
+                        });
+                    }
+                    allowSave = true;
+                    $("#table-item-do tbody tr:eq(" + e + ") td").removeClass("bg-error");
+                } else {
+                    $("#table-item-do tbody tr:eq(" + e + ") td").addClass("bg-error");
+                    if(batch == "") {
+                        $(this).find("td:eq(2) input").focus();
+                    } else if(qty <=0) {
+                        $(this).find("td:eq(3) input").focus();
+                    } else {
+                        $(this).find("td:eq(1) input").focus();
+                    }
+
+                    allowSave = false;
+                    return false;
+                }
 			});
 
 			if(gudang != "none" && supplier != "none" && tgl_dokumen != "" && itemDetailResult.length > 0 && allowSave == true) {
@@ -433,6 +449,7 @@
 						gudang: gudang,
 						supplier: supplier,
 						nomor_do:nomor_do,
+                        keterangan: $("#keterangan").val(),
 						tgl_dokumen: tgl_dokumen,
 						no_invoice: no_invoice,
 						tgl_invoice: tgl_invoice,
