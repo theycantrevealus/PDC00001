@@ -84,6 +84,10 @@ class Laboratorium extends Utility {
                     return self::get_lab_order_pack($parameter[2]);
                     break;
 
+                case 'get_lab_nilai_detail':
+                    return self::get_lab_nilai_detail($parameter);
+                    break;
+
 				default:
 					return self::get_lab();
 			}
@@ -177,6 +181,23 @@ class Laboratorium extends Utility {
 			return 'Error => ' . $e;
 		}
 	}
+
+	private function get_lab_nilai_detail($parameter) {
+	    $data = self::$query->select('master_lab_nilai', array(
+	        'id',
+            'keterangan',
+            'nilai_min',
+            'nilai_maks',
+            'satuan'
+        ))
+            ->where(array(
+                'master_lab_nilai.id' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+	    return $data;
+    }
 
 	private function verifikasi_item_lab($parameter) {
         $Authorization = new Authorization();
@@ -307,6 +328,8 @@ class Laboratorium extends Utility {
                 $parameter['tindakan']
             ))
             ->execute();
+
+        return $worker;
     }
 
 
@@ -2413,7 +2436,7 @@ class Laboratorium extends Utility {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+        if (!isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             if($parameter['mode'] == 'history')
             {
                 $paramData = array(
@@ -2588,6 +2611,7 @@ class Laboratorium extends Utility {
         $autonum = intval($parameter['start']) + 1;
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+            //$data['response_data'][$key]['tgl_ambil_sample_parse'] = date('d F Y', strtotime($value['tgl_ambil_sample']));
             $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order'])) . ' - [' . date('H:i', strtotime($value['waktu_order'])) . ']';
 
             //Check Detail
@@ -2651,6 +2675,7 @@ class Laboratorium extends Utility {
 					'id',
 					'lab_order',
 					'request_item',
+					'tgl_ambil_sample',
 					'tindakan'
 				)
 			)
@@ -2668,6 +2693,8 @@ class Laboratorium extends Utility {
 			$data_lab = self::get_lab_detail_data_only($value['tindakan']);
 			$data['response_data'][$key]['kode'] = $data_lab['response_data'][0]['kode'];
 			$data['response_data'][$key]['nama'] = $data_lab['response_data'][0]['nama'];
+			$data['response_data'][$key]['tgl_ambil_sample_parse'] = date('d F Y', strtotime($value['tgl_ambil_sample']));
+            $data['response_data'][$key]['allow'] = ($value['tgl_ambil_sample'] <= date('Y-m-d')) ? true : false;
 			
 			$data['response_data'][$key]['nilai_item'] = [];
 			$data_nilai = self::get_laboratorium_order_nilai_item($value['tindakan'], $value['lab_order']);
@@ -3327,6 +3354,7 @@ class Laboratorium extends Utility {
 										'lab_order'		=>	$uidLabOrder,
 										'tindakan'		=>	$keyTindakan,
 										'request_item'  =>  implode(',',$orderItemID),
+										'tgl_ambil_sample' => $valueTindakan['tgl_sample'],
 										'penjamin'		=>	$valueTindakan['penjamin'],
 										'created_at'	=>	parent::format_date(),
 										'updated_at'	=>	parent::format_date()	
@@ -3624,7 +3652,7 @@ class Laboratorium extends Utility {
 						), array(
 							$uidLabOrder,
 							$keyTindakan,
-							$valueTindakan
+							$valueTindakan['penjamin']
 						)
 					)
 					->execute();
@@ -3646,7 +3674,7 @@ class Laboratorium extends Utility {
 							), array(
 								$uidLabOrder,
 								$keyTindakan,
-								$valueTindakan
+								$valueTindakan['penjamin']
 							)
 						)
 						->execute();
@@ -3677,7 +3705,8 @@ class Laboratorium extends Utility {
 							array(
 								'lab_order'		=>	$uidLabOrder,
 								'tindakan'		=>	$keyTindakan,
-								'penjamin'		=>	$valueTindakan,
+								'penjamin'		=>	$valueTindakan['penjamin'],
+                                'tgl_ambil_sample' => $valueTindakan['tgl_sample'],
 								'created_at'	=>	parent::format_date(),
 								'updated_at'	=>	parent::format_date()	
 							)
@@ -4316,6 +4345,8 @@ class Laboratorium extends Utility {
 			->select('lab_order_detail', array(
 					'id',
 					'lab_order as uid_lab_order',
+					'tgl_ambil_sample',
+					'request_item',
 					'tindakan as uid_tindakan',
 					'penjamin as uid_penjamin'
 				)
@@ -4334,6 +4365,17 @@ class Laboratorium extends Utility {
 
 			$penjamin = new Penjamin(self::$pdo);
 			$data['response_data'][$key]['penjamin'] = $penjamin->get_penjamin_detail($value['uid_penjamin'])['response_data'][0]['nama'];
+
+			$data['response_data'][$key]['tgl_ambil_sample'] = date('d F Y', strtotime($value['tgl_ambil_sample']));
+
+            $nilaiLab = array();
+            $dataSplitNilai = explode(',', $value['request_item']);
+            foreach ($dataSplitNilai as $dNLK => $dNLV) {
+                $data_nilai = self::get_lab_nilai_detail($dNLV);
+                array_push($nilaiLab, $data_nilai['response_data'][0]);
+            }
+
+            $data['response_data'][$key]['nilai_item'] = $nilaiLab;
 		}
 		
 		return $data;

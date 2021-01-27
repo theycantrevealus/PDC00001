@@ -1678,7 +1678,7 @@ class Inventori extends Utility
             $batch_info = self::get_batch_detail($value['batch'])['response_data'][0];
 
             if (
-                strtotime($batch_info['expired_date']) < date('Y-m-d') ||
+                $batch_info['expired_date'] < date('Y-m-d') ||
                 floatval($value['stok_terkini']) < 0
             ) { //Expired jangan dijual
                 unset($data['response_data'][$key]);

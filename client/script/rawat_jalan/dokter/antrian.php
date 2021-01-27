@@ -3962,7 +3962,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
 
-                        let button = "<div>";
+                        let button = "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">";
 
                         if (row['editable'] == 'true') {
                             button += "<button class='btn btn-warning btn-sm btnViewDetailOrder' data-uid='"
@@ -3998,14 +3998,22 @@
                 },
                 type:"GET",
                 success:function(response) {
+
                     if (response.response_package != null) {
                         dataDetail = response.response_package.response_data;
 
                         let no_urut = 1;
                         $.each(dataDetail, function(key, item){
+                            var dataNilai = item.nilai_item;
+                            var dataNilaiParse = "<ol type=\"1\">";
+                            for(var dNLK in dataNilai) {
+                                dataNilaiParse += "<li>" + dataNilai[dNLK].keterangan +"</li>";
+                            }
+                            dataNilaiParse += "</ol>";
                             let html = "<tr>" +
                                 "<td class='no_urut_lab'>" + no_urut + "</td>" +
-                                "<td>" + item.tindakan + "</td>" +
+                                "<td>" + item.tindakan + dataNilaiParse +"</td>" +
+                                "<td>" + item.tgl_ambil_sample + "</td>" +
                                 "<td>" + item.penjamin + "</td>" +
                                 "<td><button " + status_disabled + " class='btn btn-sm btn-danger btnHapusTindakanLab' data-uid='" + item.uid_tindakan + "' data-nama='" + item.tindakan + "'><i class='fa fa-trash'></i></button></td>" +
                                 "</tr>";
@@ -4109,6 +4117,7 @@
                 {
                     listTindakanLabTerpilih[$("#tindakan_lab").val()] = {
                         "penjamin":"",
+                        "tgl_sample": "",
                         "item":[]
                     };
                 }
@@ -4136,7 +4145,8 @@
 
                     listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
                         "id": data.detail[key].id,
-                        "nama": data.detail[key].keterangan
+                        "nama": data.detail[key].keterangan,
+                        "tgl_sampel":""
                     });
                 }
             });
@@ -4246,7 +4256,8 @@
             {
                 listTindakanLabTerpilih[$("#tindakan_lab").val()] = {
                     "penjamin":"",
-                    "item":[]
+                    "item":[],
+                    "tgl_sample": ""
                 };
             }
 
@@ -4270,6 +4281,8 @@
             $("#lab_nilai_order").html("");
             $("#btnTambahTindakanLab").removeAttr("disabled");
             $("#btnSubmitOrderLab").removeAttr("hidden");
+            $("#panelTambahLab").show();
+            $("#btnSubmitOrderLab").show();
             LabMode = "new";
             uid_lab_order = "";
             $("#table_tindakan_lab tbody").html("");
@@ -4295,6 +4308,9 @@
                 $("#btnTambahTindakanLab").prop('disabled', false);
                 $("#btnSubmitOrderLab").prop('hidden', false);
             }
+
+            $("#panelTambahLab").hide();
+            $("#btnSubmitOrderLab").hide();
 
             LabMode = "edit";
             uid_lab_order = uidLabOrder;
@@ -4404,6 +4420,7 @@
                 let html = "<tr>" +
                     "<td class=\"no_urut_lab\"></td>" +
                     "<td>" + dataTindakan[0].text + listItem + "</td>" +
+                    "<td><input id=\"tanggal_sample_" + uidTindakanLab + "\" class=\"form-control\" value=\"" + __CURRENT_DATE__ + "\" type=\"date\" data-uid=\""+ uidTindakanLab + "\" /></td>" +
                     "<td class=\"number_style\">" + hargaPenjamin + "</td>" +
                     "<td>" +
                     "<button class=\"btn btn-danger btn-sm btnHapusTindakanLab\" data-uid=\""+ uidTindakanLab + "\" data-nama=\"" + dataTindakan[0].text + "\"><i class=\"fa fa-trash\"></i></button>" +
@@ -4487,6 +4504,13 @@
             ){
                 orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, dokterPJLabOrder, uid_lab_order, dataTableLabOrder, __HOSTAPI__);
             }*/
+
+            //Set Tanggal
+            for(var lok in listTindakanLabTerpilih) {
+                listTindakanLabTerpilih[lok].tgl_sample = $("#tanggal_sample_" + lok).val()
+            }
+
+            //console.log(listTindakanLabTerpilih);
 
             orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, "", uid_lab_order, dataTableLabOrder, __HOSTAPI__);
 
@@ -5564,7 +5588,7 @@
 	<div class="modal-dialog modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="modal-large-title">Order Laboratorium</h5>
+				<h5 class="modal-titles" id="modal-large-title">Komposisi Racikan</h5>
 				<!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button> -->
@@ -5637,7 +5661,7 @@
 						</select>	
 					</div>
 				</div-->
-				<div class="col-md-12 row form-group">
+				<div class="col-md-12 row form-group" id="panelTambahLab">
 					<div class="col-md-3">
 						<label for="tindakan_lab">Tindakan</label>
 					</div>
@@ -5667,6 +5691,7 @@
 							<tr>
 								<th class="wrap_content">No</th>
 								<th>Tindakan Laboratorium</th>
+                                <th>Tgl Ambil Sampel</th>
                                 <th>Harga</th>
 								<th width='8%' class="wrap_content">Aksi</th>
 							</tr>
