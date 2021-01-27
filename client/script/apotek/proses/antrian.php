@@ -341,8 +341,20 @@
                             statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia <br />" + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         }
 
-                        if((parseFloat(data.racikan[b].qty) -parseFloat(jlh_sedia)) < 0) {
+                        if((parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia)) > 0) {
                             statusSediaRacikan += "<br /><b class=\"text-info\"><i class=\"fa fa-exclamation-circle\"> Stok : " + number_format(parseFloat(data.racikan[b].qty) -parseFloat(jlh_sedia), 2, ".", ",") + "</i></b>";
+                            $("#btnSelesai").attr({
+                                "disabled": "disabled"
+                            }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
+                        } else {
+                            var disabledStatus = $("#btnSelesai").attr('name');
+                            if (typeof attr !== typeof undefined && attr !== false) {
+                                $("#btnSelesai").attr({
+                                    "disabled": "disabled"
+                                }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
+                            } else {
+                                $("#btnSelesai").removeAttr("disabled").removeClass("btn-danger").addClass("btn-success").html("<i class=\"fa fa-check\"></i> Selesai");
+                            }
                         }
 
                         $(newCellRacikanObat).append("<h5 class=\"text-info\">" + RacikanObatData.data[0].nama + " <b class=\"text-danger text-right\">[" + racikanDetail[racDetailKey].kekuatan + "]</b></h5>").append(statusSediaRacikan);
