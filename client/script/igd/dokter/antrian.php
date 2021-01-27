@@ -4553,7 +4553,7 @@
 
         $("#btnProsesInap").click(function() {
             Swal.fire({
-                title: 'Daftar untuk rawat igd?',
+                title: 'Daftar untuk rawat inap?',
                 showDenyButton: true,
                 confirmButtonText: `Ya`,
                 denyButtonText: `Belum`,
@@ -4564,11 +4564,12 @@
                         url:__HOSTAPI__ + "/Inap",
                         type: "POST",
                         data: {
-                            request: "tambah_igd",
+                            request: "tambah_inap",
                             pasien: pasien_uid,
                             waktu_masuk: $("#igd_tanggal_masuk").val(),
                             kamar: $("#igd_kamar").val(),
                             penjamin: $("#igd_penjamin").val(),
+                            kunjungan: kunjungan.uid,
                             bed: $("#igd_bed").val(),
                             dokter: $("#igd_dokter").val(),
                             keterangan: $("#igd_keterangan").val()
@@ -4580,7 +4581,7 @@
                             if(response.response_package.response_result > 0) {
                                 Swal.fire(
                                     "Rawat Inap",
-                                    "Pasien berhasil didaftarkan untuk rawat igd",
+                                    "Pasien berhasil didaftarkan untuk rawat inap",
                                     "success"
                                 ).then((result) => {
                                     $("#form-igd").modal("hide");

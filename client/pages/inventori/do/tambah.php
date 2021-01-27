@@ -75,6 +75,7 @@
 											<th width="1%">No</th>
 											<th width="20%">Item</th>
 											<th width="10%">Kode Batch</th>
+                                            <th width="10%">Belum Sampai</th>
 											<th width="10%">Qty</th>
 											<th width="2%">Satuan</th>
 											<th width="12%">Keterangan</th>

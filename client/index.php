@@ -2,9 +2,12 @@
 	require '../config.php';
 	define('__PAGES__', explode('/', $_GET['pondokcoder_simrs']));
     $day=new DateTime('last day of this month');
+
+
 ?>
 
 <script type="text/javascript">
+    var __CURRENT_DATE__ = <?php echo json_encode(date('Y-m-d')); ?>;
     var __PC_CUSTOMER__ = <?php echo json_encode(__PC_CUSTOMER__); ?>;
     var __PC_CUSTOMER_ADDRESS__ = <?php echo json_encode(__PC_CUSTOMER_ADDRESS__); ?>;
     var __PC_CUSTOMER_CONTACT__ = <?php echo json_encode(__PC_CUSTOMER_CONTACT__); ?>;
@@ -70,7 +73,7 @@
 			$params['password']);
 		$pdo = new \PDO($conStr);
 		$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		require 'builder.php';
+        require 'builder.php';
 	} else {
 		require 'pages/system/login.php';	
 	}

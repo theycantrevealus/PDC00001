@@ -25,7 +25,6 @@
             padding: 1cm;
             color: #000;
             font-family: "Arial", sans-serif;
-            text-align:center;
         }
 
         .header{
@@ -133,6 +132,10 @@
             float: left;
         }
 
+        .number_style {
+            text-align: right !important;
+        }
+
         .col-4 {
             width: 33.33%;
         }
@@ -159,80 +162,11 @@
         <b>
             <br /><br />
             <span><?php echo $_POST['__JUDUL__']; ?></span>
-            <small><?php echo date('d F Y', strtotime($_POST['__PERIODE_AWAL__'])); ?> - <?php echo date('d F Y', strtotime($_POST['__PERIODE_AKHIR__'])); ?></small>
         </b>
     </center>
 </div>
 <div>
-    <table class="table border-bottom mb-5 data">
-        <thead class="thead-dark">
-        <tr>
-            <th>Tanggal Masuk</th>
-            <th>Tanggal Keluar</th>
-            <th>Nama Pasien</th>
-            <th>Alamat</th>
-            <th>Perusahaan Penjamin</th>
-            <th>Rekam Medis</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php
-
-        $dataBuild = array();
-        foreach ($_POST['data'] as $datKey => $datValue) {
-            if(!isset($dataBuild[$datValue['penjamin']['uid']])) {
-                $dataBuild[$datValue['penjamin']['uid']] = array(
-                        'nama' => $datValue['penjamin']['nama'],
-                    'data' => array()
-                );
-            }
-            array_push($dataBuild[$datValue['penjamin']['uid']]['data'], $datValue);
-        }
-
-        foreach ($dataBuild as $parseKey => $parseValue) {
-            foreach ($parseValue['data'] as $itemKey => $itemValue) {
-                ?>
-                <tr>
-                    <td><?php echo $itemValue['waktu_masuk']; ?></td>
-                    <td><?php echo $itemValue['waktu_keluar']; ?></td>
-                    <td><?php echo $itemValue['pasien']['panggilan_name'] . ' ' . $itemValue['pasien']['nama']; ?></td>
-                    <td><?php echo $itemValue['pasien']['alamat']; ?></td>
-                    <td><?php echo $itemValue['penjamin']['nama']; ?></td>
-                    <td><?php echo $itemValue['pasien']['no_rm']; ?></td>
-                </tr>
-                <?php
-            }
-            ?>
-            <tr>
-                <td colspan="2"></td>
-                <td style="border-top: solid 1px #000;">Jumlah Pasien : <?php echo count($parseValue['data']); ?></td>
-                <td colspan="3"></td>
-            </tr>
-        <?php
-        }
-        ?>
-        </tbody>
-    </table>
-    <table class="status">
-        <tr>
-            <td>Count of Queue Status</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Company Name</td>
-            <td>Total</td>
-        </tr>
-        <?php
-        foreach ($dataBuild as $parseKey => $parseValue) {
-            ?>
-            <tr>
-                <td><?php echo $parseValue['nama']; ?></td>
-                <td><?php echo count($parseValue['data']); ?></td>
-            </tr>
-        <?php
-        }
-        ?>
-    </table>
+    <?php echo $_POST['data']; ?>
 </div>
 </body>
 </html>
