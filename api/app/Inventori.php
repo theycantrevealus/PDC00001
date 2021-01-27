@@ -1677,7 +1677,10 @@ class Inventori extends Utility
         foreach ($data['response_data'] as $key => $value) {
             $batch_info = self::get_batch_detail($value['batch'])['response_data'][0];
 
-            if ($batch_info['expired_date'] < date('Y-m-d')) { //Expired jangan dijual
+            if (
+                strtotime($batch_info['expired_date']) < date('Y-m-d') ||
+                floatval($value['stok_terkini']) < 0
+            ) { //Expired jangan dijual
                 unset($data['response_data'][$key]);
             } else {
                 //$data['response_data'][$key]['item_detail'] = self::get_item_detail($value['barang'])['response_data'][0];

@@ -2,6 +2,8 @@
 	require '../config.php';
 	define('__PAGES__', explode('/', $_GET['pondokcoder_simrs']));
     $day=new DateTime('last day of this month');
+
+
 ?>
 
 <script type="text/javascript">
@@ -70,7 +72,7 @@
 			$params['password']);
 		$pdo = new \PDO($conStr);
 		$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		require 'builder.php';
+        require 'builder.php';
 	} else {
 		require 'pages/system/login.php';	
 	}
