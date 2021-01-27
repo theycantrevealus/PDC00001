@@ -3139,7 +3139,8 @@
                         mataDataList[$(this).attr("id")] = 0
                     }
 
-                    mataDataList[$(this).attr("id")] = $(this).inputmask("unmaskedvalue");
+                    //mataDataList[$(this).attr("id")] = $(this).inputmask("unmaskedvalue");
+                    mataDataList[$(this).attr("id")] = $(this).val();
                 });
 
                 var tujuan_resep = [];
@@ -5544,14 +5545,14 @@
                     "</div>");
             }
 
-            $(".mata_input").inputmask({
+            /*$(".mata_input").inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            });
+            });*/
         }
     });
 
