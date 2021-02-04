@@ -3,58 +3,77 @@
 	$(function(){
 		var uid_order = __PAGES__[2];
 		var order_data;
+		var forSave = {};
+		var selectedState = '';
 		var editorKeteranganPeriksa, editorKesimpulanPeriksa;
 		var tindakanID;
 		var fileList = [];
 		var deletedDocList = [];	//for save all file uploaded
-		var file;		//for upload file
+		var file;//for upload file
 
 		$("#panel-hasil").hide();
 
 		var dataLibrary = loadOrder(uid_order);
+
+		for(var datKey in dataLibrary) {
+		    forSave["tindakan_" + dataLibrary[datKey].id] = {
+		        keterangan: (dataLibrary[datKey].keterangan === null) ? "" : dataLibrary[datKey].keterangan,
+                kesimpulan: (dataLibrary[datKey].kesimpulan === null) ? "" : dataLibrary[datKey].kesimpulan
+            };
+        }
+
 		loadPasien(uid_order);
 		loadLampiran(uid_order);
 
-		$("#list-tindakan-radiologi tbody").on("click",".linkTindakan", function(){
+		$("#list-tindakan-radiologi tbody tr td").on("click", ".linkTindakan", function(e) {
+
 			let id_tindakan = $(this).parent().parent().attr("id").split("_");
 			tindakanID = id_tindakan[id_tindakan.length - 1];
-			
-			
-			let nama =  $(this).closest('tr').find('td:eq(1)').text(); //$(this).html();
-			$(".title-pemeriksaan").html(nama);
 
-			$("#panel-hasil").fadeIn(function() {
-				order_data = loadRadiologiOrderItem(tindakanID);
-				if (order_data != ""){
-					if (order_data[0].keterangan != null){
-						editorKeteranganPeriksa.setData(order_data[0].keterangan);
-					} else {
-						editorKeteranganPeriksa.setData("");
-					}
 
-					if (order_data[0].keterangan != null){
-						editorKesimpulanPeriksa.setData(order_data[0].kesimpulan);
-					} else {
-						editorKesimpulanPeriksa.setData("");
-					}
-				}
-			});
+            if(forSave["tindakan_" + tindakanID] === undefined) {
+                forSave["tindakan_" + tindakanID] = {
+                    keterangan: "",
+                    kesimpulan: ""
+                };
+            }
+
+            if(selectedState != tindakanID) {
+                $("#panel-hasil").fadeIn(function() {
+                    editorKeteranganPeriksa.setData(forSave["tindakan_" + tindakanID].keterangan);
+                    editorKesimpulanPeriksa.setData(forSave["tindakan_" + tindakanID].kesimpulan);
+                });
+                selectedState = tindakanID;
+            }
+
+
+
+            let nama =  $(this).closest('tr').find('td:eq(1)').text(); //$(this).html();
+            $(".title-pemeriksaan").html(nama);
+
+
 			return false;
 		});
+
+
 
 		ClassicEditor
 			.create( document.querySelector( ".txt_keterangan_pemeriksaan" ), {
 				//plugins : [ Autosave ],
 				extraPlugins: [ MyCustomUploadAdapterPlugin ],
 				placeholder: "Keterangan Pemeriksaan..."
-			} )
+			})
 			.then( editor => {
 				editorKeteranganPeriksa = editor;
 				window.editor = editor;
-			} )
+
+                editor.editing.view.document.on( 'keydown', ( evt, data ) => {
+                    forSave["tindakan_" + selectedState].keterangan = editorKeteranganPeriksa.getData();
+                });
+			})
 			.catch( err => {
 				//console.error( err.stack );
-			} );
+			});
 
 
 		ClassicEditor
@@ -65,10 +84,16 @@
 			.then( editor => {
 				editorKesimpulanPeriksa = editor;
 				window.editor = editor;
+
+                editor.editing.view.document.on( 'keydown', ( evt, data ) => {
+                    forSave["tindakan_" + selectedState].kesimpulan = editorKesimpulanPeriksa.getData();
+                });
 			} )
 			.catch( err => {
 				//console.error( err.stack );
 			} );
+
+
 		
 
 		$("#formHasilRadiologi").submit(function(){
@@ -90,11 +115,12 @@
 
 				form_data.append("keteranganPeriksa", keteranganPeriksa);
 				form_data.append("kesimpulanPeriksa", kesimpulanPeriksa);
+                form_data.append("detail", JSON.stringify(forSave));
 				form_data.append("tindakanID", tindakanID);
 
-				$("#btnSimpan").attr({
+				/*$("#btnSimpan").attr({
 					"disabled": "disabled"
-				});
+				});*/
 
 				for(var i = 0; i < fileList.length; i++) {
 					form_data.append("fileList[]", fileList[i]);
@@ -108,6 +134,10 @@
 				/*for (var value of form_data.values()) {
 				   console.log(value); 
 				}*/
+
+                for (var pair of form_data.entries()) {
+                    //console.log(pair[0]+ ', ' + pair[1]);
+                }
 
 				$.ajax({
 					async: false,
@@ -124,12 +154,12 @@
 						let response_upload = 0;
 						let response_delete_doc = 0;
 
-						if (
+						/*if (
 							response.response_package.order_detail !== undefined && 
 							response.response_package.order_detail !== ""
 						) {
 							order_detail = response.response_package.order_detail.response_result;
-						}
+						}*/
 
 						if (
 							response.response_package.response_upload !== undefined && 
@@ -153,13 +183,25 @@
 							}
 						}
 
-						if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){
+						var detailRes = response.response_package.order_detail;
+						for(var resKey in detailRes) {
+                            order_detail += detailRes[resKey].response_result;
+                        }
+
+						if(order_detail > 0) {
+                            notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
+                            location.href = __HOSTNAME__ + "/radiologi";
+                        }
+
+
+						/*if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){
 							notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
 							location.href = __HOSTNAME__ + "/radiologi";
 						} else {
+						    console.log(response);
 							$("#btnSimpan").removeAttr("disabled");
 							notification ("warning", "Tidak Ada Data yang Disimpan", 3000, "hasil_tambah_dev");
-						}
+						}*/
 					},
 					error: function(response) {
 						notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");
@@ -269,7 +311,6 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
-					console.log(response);
 					MetaData = response.response_package.response_data;
 
 					if (MetaData != "") {
@@ -341,7 +382,6 @@
 				success: function(response){
 					if (response.response_package != undefined){
 						dataItem = response.response_package.response_data;
-						console.log(dataItem);
 					}
 				},
 				error: function(response) {

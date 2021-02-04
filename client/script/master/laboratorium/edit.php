@@ -24,7 +24,9 @@
 				//Init Data
 				$("#txt_kode_laboratorium").val(labData.kode);
 				$("#txt_nama_laboratorium").val(labData.nama);
-				load_spesimen("#txt_spesimen_laboratorium", labData.spesimen.uid);
+				if(labData.spesimen !== undefined && labData.spesimen !== null) {
+                    load_spesimen("#txt_spesimen_laboratorium", labData.spesimen.uid);
+                }
 				$("#txt_spesimen_laboratorium").select2();
 				ClassicEditor
 					.create( document.querySelector( '#txt_keterangan' ), {
@@ -775,7 +777,7 @@
 				}
 			});*/
 
-			if(kode != "" && nama != "") {
+			if(nama != "") {
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Laboratorium",
@@ -796,7 +798,8 @@
 					},
 					type: "POST",
 					success: function(response){
-					    if(response.response_package[0].response_result > 0)
+                        console.log(response);
+					    if(response.response_package.response_result > 0)
                         {
                             Swal.fire(
                                 'Laboratorium',

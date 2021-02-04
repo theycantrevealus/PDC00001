@@ -39,6 +39,11 @@ class CPPT extends Utility {
 	}
 
 
+	public function get_cppt_single($parameter) {
+	    //
+    }
+
+
 	public function get_cppt($parameter) {
 
 		//Komposisi parameter
@@ -49,9 +54,11 @@ class CPPT extends Utility {
 		// Jika range tidak ada maka akan diambil min 3 data terakhir
 
 		//	List dari tabel antrian => karena jika sudah bayar maka masuk ke antrian (antrian poli)
-		$UIDPasien = $parameter[2];
+        $CurrentAntrian = ($parameter[2] === 'all') ? parent::gen_uuid() : $parameter[2];
+        $UIDPasien = $parameter[3];
 
-		if(isset($parameter[3]) && isset($parameter[4])) {//Filter Tanggal
+
+		if(isset($parameter[4]) && isset($parameter[5])) {//Filter Tanggal
 			$antrian = self::$query->select('antrian', array(
 				'uid',
 				'departemen',
@@ -62,17 +69,21 @@ class CPPT extends Utility {
 				'created_at',
 				'updated_at'
 			))
-			->where(array(
-				'antrian.pasien' => '= ?',
-				'AND',
-				'antrian.deleted_at' => 'IS NULL'
-			), array(
-				$UIDPasien
-			))
-			->order(array(
-				'created_at' => 'DESC'
-			))
-			->execute();
+                ->limit(intval($_GET['pageSize']))
+                ->offset(intval($_GET['pageNumber']) - 1)
+                ->where(array(
+                    'antrian.pasien' => '= ?',
+                    'AND',
+                    'antrian.deleted_at' => 'IS NULL',
+                    'AND',
+                    'NOT antrian.uid' => '= ?'
+                ), array(
+                    $UIDPasien, $CurrentAntrian
+                ))
+                ->order(array(
+                    'created_at' => 'DESC'
+                ))
+                ->execute();
 		} else { //Keseluruhan
 			$antrian = self::$query->select('antrian', array(
 				'uid',
@@ -84,18 +95,47 @@ class CPPT extends Utility {
 				'created_at',
 				'updated_at'
 			))
-			->where(array(
-				'antrian.pasien' => '= ?',
-				'AND',
-				'antrian.deleted_at' => 'IS NULL'
-			), array(
-				$UIDPasien
-			))
-			->order(array(
-				'created_at' => 'DESC'
-			))
-			->execute();
+                ->limit(intval($_GET['pageSize']))
+                ->offset(intval($_GET['pageNumber']) - 1)
+                ->where(array(
+                    'antrian.pasien' => '= ?',
+                    'AND',
+                    'antrian.deleted_at' => 'IS NULL',
+                    'AND',
+                    'NOT antrian.uid' => '= ?'
+                ), array(
+                    $UIDPasien, $CurrentAntrian
+                ))
+                ->order(array(
+                    'created_at' => 'DESC'
+                ))
+                ->execute();
 		}
+
+
+        $antrianTotal = self::$query->select('antrian', array(
+            'uid',
+            'departemen',
+            'kunjungan',
+            'pasien',
+            'dokter',
+            'penjamin',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'antrian.pasien' => '= ?',
+                'AND',
+                'antrian.deleted_at' => 'IS NULL',
+                'AND',
+                'NOT antrian.uid' => '= ?'
+            ), array(
+                $UIDPasien, $CurrentAntrian
+            ))
+            ->order(array(
+                'created_at' => 'DESC'
+            ))
+            ->execute();
 
 
 
@@ -113,20 +153,21 @@ class CPPT extends Utility {
 				'dokter',
 				'perawat'
 			))
-			->where(array(
-				'asesmen.pasien' => '= ?',
-				'AND',
-				'asesmen.antrian' => '= ?',
-				'AND',
-				'asesmen.poli' => '= ?',
-				'AND',
-				'asesmen.deleted_at' => 'IS NULL'
-			), array(
-				$UIDPasien,
-				$value['uid'],
-				$value['departemen']
-			))
-			->execute();
+
+                ->where(array(
+                    'asesmen.pasien' => '= ?',
+                    'AND',
+                    'asesmen.antrian' => '= ?',
+                    'AND',
+                    'asesmen.poli' => '= ?',
+                    'AND',
+                    'asesmen.deleted_at' => 'IS NULL'
+                ), array(
+                    $UIDPasien,
+                    $value['uid'],
+                    $value['departemen']
+                ))
+                ->execute();
 
 			//Informasi Poli
 			$Poli = new Poli(self::$pdo);
@@ -139,7 +180,9 @@ class CPPT extends Utility {
 				'keluhan_utama',
 				'keluhan_tambahan',
 				'diagnosa_kerja',
-				'diagnosa_banding'
+				'diagnosa_banding',
+                'planning',
+                'pemeriksaan_fisik'
 			))
 			->where(array(
 				'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.asesmen' => '= ?'
@@ -249,6 +292,7 @@ class CPPT extends Utility {
 			}
 
 			$antrian['response_data'][$key]['resep'] = $resep['response_data'];
+            //$antrian['response_data'][$key]['size'] = $_GET;
 
 
 
@@ -318,7 +362,7 @@ class CPPT extends Utility {
 				$racikan['response_data'][$RacikanKey]['racikan_detail'] = $RacikanDetail['response_data'];
 			}
 		}
-
+		$antrian['response_total'] = count($antrianTotal['response_data']);
 		return $antrian;
 	}
 }

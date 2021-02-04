@@ -86,10 +86,10 @@
                                                     <thead class="thead-dark">
                                                     <tr>
                                                         <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
-                                                        <th style="width: 15%;">Racikan</th>
+                                                        <th width="20%;">Racikan</th>
                                                         <th style="width: 15%;">Signa</th>
-                                                        <th style="width: 15%;">Jumlah</th>
-                                                        <th>Obat</th>
+                                                        <th class="wrap_content">Jumlah</th>
+                                                        <th width="30%;">Obat</th>
                                                         <th>Keterangan</th>
                                                     </tr>
                                                     </thead>

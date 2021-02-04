@@ -10,7 +10,7 @@
                 <a href="#info-dasar-3" data-toggle="tab" role="tab" aria-selected="false">Kandungan Obat</a>
 			</div>
 			<div class="card-body tab-content">
-				<div class="tab-pane active show fade" id="info-dasar-1">
+				<div class="tab-pane show fade active" id="info-dasar-1">
 					<div class="row">
 						<div class="col-md-4">
 							<div id="image-uploader"></div>
@@ -69,8 +69,9 @@
                         <thead class="thead-dark">
                             <tr>
                                 <th class="wrap_content">No</th>
-                                <th>Kandungan</th>
-                                <th class="wrap_content"></th>
+                                <th width="40%">Kandungan</th>
+                                <th>Keterangan</th>
+                                <th class="wrap_content">Aksi</th>
                             </tr>
                         </thead>
                         <tbody></tbody>

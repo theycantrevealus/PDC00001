@@ -32,5 +32,13 @@
         <div id="hasil_pemeriksaan" class="hasil_pemeriksaan">
 
         </div>
+        <div class="col-md-12 form-group">
+            <label>Kesan:</label>
+            <textarea style="min-height: 200px" type="text" name="kesan" id="kesan" class="form-control informasi"></textarea>
+        </div>
+        <div class="col-md-12 form-group">
+            <label>Anjuran:</label>
+            <textarea style="min-height: 200px" type="text" name="anjuran" id="anjuran" class="form-control informasi"></textarea>
+        </div>
 	</div>
 </div>

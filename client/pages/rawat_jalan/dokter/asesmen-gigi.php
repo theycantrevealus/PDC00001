@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" id="gigi_loader">
     <div class="col-lg">
         <div class="card">
             <div class="card-header card-header-large bg-white d-flex align-items-center">
@@ -71,7 +71,7 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="bibir" value="n" />
+                                                        <input class="form-check-input" type="radio" name="bibir" value="n" checked />
                                                         <label class="form-check-label">
                                                             Normal
                                                         </label>
@@ -79,11 +79,14 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="bibir" value="a" checked>
+                                                        <input class="form-check-input" type="radio" name="bibir" value="a" />
                                                         <label class="form-check-label">
                                                             Ada Kelainan
                                                         </label>
                                                     </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_bibir" placeholder="Keterangan"></textarea>
                                                 </div>
                                             </div>
                                         </li>
@@ -92,7 +95,7 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="lidah" value="n" />
+                                                        <input class="form-check-input" type="radio" name="lidah" value="n" checked />
                                                         <label class="form-check-label">
                                                             Normal
                                                         </label>
@@ -100,11 +103,14 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="lidah" value="a" checked>
+                                                        <input class="form-check-input" type="radio" name="lidah" value="a" />
                                                         <label class="form-check-label">
                                                             Ada Kelainan
                                                         </label>
                                                     </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_lidah" placeholder="Keterangan"></textarea>
                                                 </div>
                                             </div>
                                         </li>
@@ -113,7 +119,7 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="mukosa" value="n" />
+                                                        <input class="form-check-input" type="radio" name="mukosa" value="n" checked />
                                                         <label class="form-check-label">
                                                             Normal
                                                         </label>
@@ -121,11 +127,14 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="mukosa" value="a" checked>
+                                                        <input class="form-check-input" type="radio" name="mukosa" value="a" />
                                                         <label class="form-check-label">
                                                             Ada Kelainan
                                                         </label>
                                                     </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_mukosa" placeholder="Keterangan"></textarea>
                                                 </div>
                                             </div>
                                         </li>
@@ -148,6 +157,9 @@
                                                         </label>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_torus" placeholder="Keterangan"></textarea>
+                                                </div>
                                             </div>
                                         </li>
                                         <li>
@@ -169,6 +181,9 @@
                                                         </label>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_gingiva" placeholder="Keterangan"></textarea>
+                                                </div>
                                             </div>
                                         </li>
                                         <li>
@@ -189,6 +204,9 @@
                                                             Ada Kelainan
                                                         </label>
                                                     </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <textarea class="form-control" id="keterangan_frenulum" placeholder="Keterangan"></textarea>
                                                 </div>
                                             </div>
                                         </li>

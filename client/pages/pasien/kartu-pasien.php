@@ -1,15 +1,14 @@
 <div class="KartuPasien">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
     <div class="Wrap">
-        <div class="Base">
+        <div class="Base" style="position:relative;">
+            <img src="<?php echo __HOST__; ?>/client/template/assets/images/logo-text-white.png" width="70" style="position: absolute; top: 30px; z-index: 100; left: 40px" />
             <div class="Inner-wrap">
-
-
 
 
                 <!--       Logo SVG -->
 
-                <img src="<?php echo __HOST__; ?>/client/template/assets/images/logo-text-white.png" width="150" style="margin-top: -30px" />
+                <img src="<?php echo __HOST__; ?>/client/template/assets/images/logo-text-white.png" width="70" style="margin-top: 80px; visibility: hidden" />
 
 
                 <!-- Card Chip SVG -->

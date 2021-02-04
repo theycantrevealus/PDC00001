@@ -7,11 +7,13 @@
 						<table>
 							<tr>
 								<td>
-									<img style="position: absolute; width: 250px; height: 250px; top: -60px; left: 20px;" width="220" height="220" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" />			
+									<!--<img style="position: absolute; width: 250px; height: 250px; top: -60px; left: 20px;" width="220" height="220" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-white.png" />-->
+                                    <img style="position: absolute; width: 80px; height: 80px; top: 5px; left: 20px;" width="220" height="220" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" />
 								</td>
-								<td style="padding-left: 380px;">
-									<h3 style="color: #fff">RUMAH SAKIT UMUM PETALA BUMI</h3>
-									<i class="fa fa-map-marker" style="color: red;"></i> <span style="color: #fff">Jalan Dr. Soetomo No. 65, Sekip, LimaPuluh, Kota Pekanbaru, Riau 28155. Telp. (0761)23024</span>
+								<td style="padding-left: 120px;">
+									<h3 style="color: #fff"><?php echo __PC_CUSTOMER__; ?></h3>
+									<!--<i class="fa fa-map-marker" style="color: red;"></i> <span style="color: #fff">Jalan Dr. Soetomo No. 65, Sekip, LimaPuluh, Kota Pekanbaru, Riau 28155. Telp. (0761)23024</span>-->
+                                    <i class="fa fa-map-marker" style="color: red;"></i> <span style="color: #fff"><?php echo __PC_CUSTOMER_ADDRESS__; ?></span>
 								</td>
 							</tr>
 						</table>
@@ -52,7 +54,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-12">
+						<!--div class="col-md-12">
 							<div class="card">
 								<div class="card-header card-header-large bg-white d-flex align-items-center">
 									<h5 class="card-header__title flex m-0">Kunjungan Per Unit</h5>
@@ -74,7 +76,7 @@
 									</div>
 								</div>
 							</div>
-						</div>
+						</div-->
 					</div>
 					<!-- <div class="col-md-12">
 						<div id="carousel-slider" class="carousel slide" data-ride="carousel">

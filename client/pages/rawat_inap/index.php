@@ -19,33 +19,21 @@
 				<div class="card-header card-header-large bg-white d-flex align-items-center">
 					<h5 class="card-header__title flex m-0">Antrian Rawat Inap</h5>
 				</div>
-				<div class="card-body">
+                <div class="card-body">
 					<div class="table-responsive border-bottom">
 						<table class="table table-bordered table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
 							<thead class="thead-dark">
 								<tr>
-									<th width="2%">No</th>
+									<th class="wrap_content">No</th>
 									<th>Waktu Masuk</th>
-									<th>No. RM</th>
 									<th>Pasien</th>
-									<!-- <th>Departemen</th> -->
+                                    <th>Ruangan</th>
 									<th>Dokter</th>
 									<th>Penjamin</th>
-									<th>Oleh</th>
-									<th width='10%'>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr>
-									<td>1</td>
-									<td>25 July 2020 - [02:19]</td>
-									<td>121-545-441</td>
-									<td>MARCO DE GAMMA</td>
-									<td>dr. Yolazenia, M. Biomed, Sp.THT-KL</td>
-									<td>BPJS KESEHATAN</td>
-									<td>Admin Loket 1</td>
-									<td><a href='<?= __HOSTNAME__; ?>/rawat_inap/asesmen' class='btn btn-sm btn-warning'><i class='fa fa-address-card' data-toggle='tooltip' title='Asesmen Pasien'></i></a> <button type='button' class='btn btn-sm btn-success'><i class='fa fa-check' data-toggle='tooltip' title='Pulang'></i></button></td>
-								</tr>
 							</tbody>
 						</table>
 					</div>

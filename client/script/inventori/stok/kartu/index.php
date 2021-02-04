@@ -24,6 +24,7 @@
                     var returnedData = [];
                     var uniqueData = {};
 
+
                     if(response == undefined || response.response_package == undefined) {
                         rawData = [];
                     } else {
@@ -37,13 +38,24 @@
                             uniqueData[rawData[dataKey].barang] = {
                                 barang: rawData[dataKey].barang,
                                 stok_terkini: parseFloat(rawData[dataKey].stok_terkini),
+                                stok_batch: 0,
                                 detail : rawData[dataKey].detail,
                                 image: rawData[dataKey].image,
                                 kategori_obat: rawData[dataKey].kategori_obat,
                                 kode_barang: rawData[dataKey].kode_barang
                             };
-                        } else {
-                            uniqueData[rawData[dataKey].barang].stok_terkini += parseFloat(rawData[dataKey].stok_terkini);
+                        }
+
+
+                        if(Array.isArray(rawData[dataKey].batch)) {
+                            var batchData = rawData[dataKey].batch;
+                            console.log(batchData);
+                            for(var bKey in batchData) {
+                                //uniqueData[rawData[dataKey].barang].stok_terkini += parseFloat(rawData[dataKey].stok_terkini);
+                                if(batchData[bKey].gudang.uid === response.response_package.gudang_saya) {
+                                    uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
+                                }
+                            }
                         }
                     }
                     var autonum = 1;
@@ -56,7 +68,8 @@
                             stok_terkini: uniqueData[pKey].stok_terkini,
                             image: uniqueData[pKey].image,
                             kategori_obat: rawData[dataKey].kategori_obat,
-                            kode_barang: rawData[dataKey].kode_barang
+                            kode_barang: rawData[dataKey].kode_barang,
+                            stok_batch: uniqueData[pKey].stok_batch
                         });
                         autonum++;
                     }
@@ -94,7 +107,7 @@
                             "</div>" +
                             "<div class=\"col-md-10\">" +
                             "<b><i>" + ((row.kode_barang == undefined) ? "[KODE_BARANG]" : row.kode_barang.toUpperCase()) + "</i></b><br />" +
-                            "<h5>" + row.detail.nama.toUpperCase() + "</h5>" +
+                            "<h5>" + ((row.detail !== null) ? row.detail.nama.toUpperCase() : "") + "</h5>" +
                             kategoriObat +
                             "</div>" +
                             "</div>";
@@ -102,7 +115,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"number_style\">" + row.stok_terkini + "</h5>";
+                        return "<h5 class=\"number_style\">" + row.stok_batch + "</h5>";
                     }
                 },
                 {

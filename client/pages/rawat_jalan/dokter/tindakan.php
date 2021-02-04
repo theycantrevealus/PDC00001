@@ -21,7 +21,7 @@
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Tindakan</th>
-									<th>Penjamin</th>
+									<th>Harga</th>
 									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>

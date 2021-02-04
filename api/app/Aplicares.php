@@ -6,6 +6,7 @@ use PondokCoder\Query as Query;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
+use PondokCoder\BPJS as BPJS;
 use PondokCoder\Ruangan as Ruangan;
 
 class Aplicares extends Utility {
@@ -27,7 +28,7 @@ class Aplicares extends Utility {
 		self::$kodePPK = __KODE_PPK__;
 		self::$data_api = __DATA_API_LIVE__;
 		self::$secretKey_api = __SECRET_KEY_LIVE_BPJS__;
-		self::$base_url = __BASE_LIVE_BPJS__;
+		self::$base_url = __BASE_LIVE_BPJS_APLICARES__ . '/aplicaresws';
 	}
 
 	public function __GET__($parameter = array()) {
@@ -62,6 +63,7 @@ class Aplicares extends Utility {
 					break;
 				
 				default:
+                    return self::get_ruangan('master_unit_ruangan', $parameter[2]);
 					break;
 			}
 		} catch (QueryException $e) {
@@ -127,8 +129,9 @@ class Aplicares extends Utility {
 	}
 
 	private function get_kelas_kamar(){
-		$url = "/rest/ref/kelas";
-		$result = self::launchUrl($url);
+		$url = "/aplicaresws/rest/ref/kelas";
+		$BPJS = new BPJS(self::$pdo);
+		$result = $BPJS::launchUrl($url, 2);
 
 		return $result['content']['response']['list'];
 	}
@@ -188,8 +191,9 @@ class Aplicares extends Utility {
 	}
 
 	private function get_ruangan_terdaftar_bpjs() {
-		$url = "/rest/bed/read/" . self::$kodePPK . "/1/100";
-		$result = self::launchUrl($url);
+		$url = "/aplicaresws/rest/bed/read/" . self::$kodePPK . "/1/100";
+        $BPJS = new BPJS(self::$pdo);
+		$result = $BPJS::launchUrl($url, 2);
 		$error_count = 1;
 		$error_message = array();
 
@@ -411,8 +415,9 @@ class Aplicares extends Utility {
 		$rest = self::update_ruangan($forApi);
 
 		$result = array(
-			"local" => $ruangan,
-			"rest" => $rest
+			'local' => $ruangan,
+			'rest' => $rest,
+            'api' => $forApi
 		);
 
 		return $result;
@@ -486,7 +491,7 @@ class Aplicares extends Utility {
 		return $result;
 	}
 
-	private function launchUrl($extended_url){
+	/*public function launchUrl($extended_url){
 		$url = self::$base_url . $extended_url;
 
 		date_default_timezone_set('UTC');
@@ -504,7 +509,7 @@ class Aplicares extends Utility {
 		$ch = curl_init();
 
 		curl_setopt($ch, CURLOPT_URL, $url);
-		
+
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 3);
@@ -519,7 +524,7 @@ class Aplicares extends Utility {
 		$return_value = array("content"=>$result, "error"=>$err);
 
 		return $return_value;
-	}
+	}*/
 
 	private function get_header(){
 		// Computes the timestamp

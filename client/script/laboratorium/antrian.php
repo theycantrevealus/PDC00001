@@ -74,6 +74,8 @@
 
             form_data.append("request", "update-hasil-lab");
             form_data.append("uid_order", uid_order);
+            form_data.append("kesan", $("#kesan").val());
+            form_data.append("anjuran", $("#anjuran").val());
             form_data.append('data_nilai', JSON.stringify(nilaiItemTindakan));
 
 
@@ -281,9 +283,15 @@
                     if (response.response_package.response_result > 0){
                         dataItem = response.response_package.response_data;
                         $.each(dataItem, function(key, item){
+
                             html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
                                     "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
                                 "</div><div class=\"card-body\">" +
+                                "<div class=\"row\">" +
+                                "<div class=\"col-12\">" +
+                                "Tanggal Ambil Sample : <b class=\"" + ((!item.allow) ? "text-danger" : "text-success") + "\">" + ((!item.allow) ? "<i class=\"fa fa-ban\"></i>" : "<i class=\"fa fa-check\"></i>") + " " + item.tgl_ambil_sample_parse + "</b><hr />" +
+                                "</div>" +
+                                "<div class=\"col-12\">" +
                                 "<table class=\"table table-bordered table-striped largeDataType\">" +
                                 "<thead class=\"thead-dark\">" +
                                     "<tr>" +
@@ -326,7 +334,7 @@
                                         html += "<tr>" +
                                             "<td>"+ nomor +"</td>" +
                                             "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
-                                            "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                            "<td><input " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
                                             "<td>" + items.satuan + "</td>" +
                                             "<td>" + items.nilai_min + "</td>" +
                                             "<td>" + items.nilai_maks + "</td>" +
@@ -336,7 +344,7 @@
                                 });
                             }
 
-                            html += "</tbody></table></div></div>";
+                            html += "</tbody></table></div></div></div>";
                             $("#hasil_pemeriksaan").append(html);
                         });
                         

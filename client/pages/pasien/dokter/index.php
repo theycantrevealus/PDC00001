@@ -9,12 +9,6 @@
             </nav>
             <h4 class="m-0">Data Pasien</h4>
         </div>
-        <a href="<?php echo __HOSTNAME__; ?>/pasien/tambah" class="btn btn-info btn-sm ml-3">
-            <i class="fa fa-plus"></i> Tambah Pasien
-        </a>
-        <!-- <button class="btn btn-sm btn-info" id="tambah-pasien">
-            <i class="fa fa-plus"></i> Tambah
-        </button> -->
     </div>
 </div>
 
@@ -28,15 +22,15 @@
                             <h5 class="card-header__title flex m-0">Data Pasien</h5>
                         </div>
                         <div class="card-body tab-content">
+                            <input id="range_pasien" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
                             <table class="table table-bordered" id="table-pasien">
                                 <thead class="thead-dark">
                                 <tr>
-                                    <th style="width: 20px;">No</th>
-                                    <th>No RM</th>
-                                    <th>Nama Pasien</th>
-                                    <th>Tanggal Lahir</th>
-                                    <th>Jenis Kelamin</th>
-                                    <th>Kunjungan Terakhir</th>
+                                    <th class="wrap_content">No</th>
+                                    <th>Pasien</th>
+                                    <th>Poliklinik</th>
+                                    <th>Kunjungan</th>
+                                    <th>Tindakan Penunjang</th>
                                     <th>Aksi</th>
                                 </tr>
                                 </thead>

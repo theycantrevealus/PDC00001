@@ -23,15 +23,21 @@
                     </div>
                     <div class="card-header">
                         <a href="<?php echo __HOSTNAME__; ?>/pegawai/tambah" class="btn btn-info ml-3 pull-right">Tambah Pengguna</a>
+                        <a style="width: 200px;">
+                            <button class="btn btn-info" id="btn-import">
+                                <i class="fa fa-download"></i> Import
+                            </button>
+                        </a>
                     </div>
                     <div class="card-body tab-content">
                         <div class="tab-pane active show fade" id="pegawai-modul">
-                            <table class="table table-bordered" id="table-pegawai">
+                            <table class="table table-bordered table-striped" id="table-pegawai">
                                 <thead class="thead-dark">
                                     <tr>
-                                        <th style="width: 20px;">No</th>
+                                        <th class="wrap_content">No</th>
                                         <th><i class="fa fa-user-circle"></i> Pengguna</th>
-                                        <th>Aksi</th>
+                                        <th>Jabatan</th>
+                                        <th class="wrap_content">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
