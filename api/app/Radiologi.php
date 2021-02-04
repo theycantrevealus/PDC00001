@@ -1176,6 +1176,7 @@ class Radiologi extends Utility
                     'discount_type' => 'N',
                     'pasien' => $value['pasien'],
                     'penjamin' => $DValue['penjamin'],
+                    'billing_group' => 'radiologi',
                     'keterangan' => 'Biaya Radiologi'
                 ));
 
@@ -1862,6 +1863,7 @@ class Radiologi extends Utility
                                     'discount_type' => 'N',
                                     'pasien' => $data_antrian['pasien'],
                                     'penjamin' => $valueTindakan,
+                                    'billing_group' => 'radiologi',
                                     'keterangan' => 'Biaya Radiologi'
                                 ));
                             }

@@ -146,7 +146,7 @@ class PO extends Utility {
 		return $data;
 	}
 
-	public function get_po_item_price($parameter = array()){
+	public function get_po_item_price($parameter){
 		$data = self::$query
 			->select('inventori_po_detail', array(
 					'harga',
@@ -160,8 +160,8 @@ class PO extends Utility {
 					'AND',
 					'inventori_po_detail.barang' => '= ?'
 				), array(
-					$parameter[0],
-					$parameter[1]
+					$parameter['po'],
+					$parameter['barang']
 				)
 			)
 			->execute();

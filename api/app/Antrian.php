@@ -282,6 +282,7 @@ class Antrian extends Utility
                     'discount_type' => 'N',
                     'pasien' => $parameter['dataObj']['currentPasien'],
                     'penjamin' => $parameter['dataObj']['penjamin'],
+                    'billing_group' => 'tindakan',
                     'keterangan' => 'Biaya konsultasi'
                 ));
                 //$antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
@@ -359,6 +360,7 @@ class Antrian extends Utility
                     'discount_type' => 'N',
                     'pasien' => $parameter['dataObj']['currentPasien'],
                     'penjamin' => $parameter['dataObj']['penjamin'],
+                    'billing_group' => 'tindakan',
                     'keterangan' => 'Biaya konsultasi'
                 ));
 
@@ -584,6 +586,7 @@ class Antrian extends Utility
                                     'discount_type' => 'N',
                                     'pasien' => $parameter['dataObj']['currentPasien'],
                                     'penjamin' => $parameter['dataObj']['penjamin'],
+                                    'billing_group' => 'administrasi',
                                     'keterangan' => 'Biaya kartu pasien baru'
                                 ));
                             }
@@ -608,6 +611,7 @@ class Antrian extends Utility
                                 'discount_type' => 'N',
                                 'pasien' => $parameter['dataObj']['currentPasien'],
                                 'penjamin' => $parameter['dataObj']['penjamin'],
+                                'billing_group' => 'tindakan',
                                 'keterangan' => 'Biaya konsultasi'
                             ));
                         } else { //Belum ada invoice master umum
@@ -656,6 +660,7 @@ class Antrian extends Utility
                                         'discount_type' => 'N',
                                         'pasien' => $parameter['dataObj']['currentPasien'],
                                         'penjamin' => $parameter['dataObj']['penjamin'],
+                                        'billing_group' => 'administrasi',
                                         'keterangan' => 'Biaya kartu pasien baru'
                                     ));
                                 }
@@ -678,6 +683,7 @@ class Antrian extends Utility
                                     'discount_type' => 'N',
                                     'pasien' => $parameter['dataObj']['currentPasien'],
                                     'penjamin' => $parameter['dataObj']['penjamin'],
+                                    'billing_group' => 'tindakan',
                                     'keterangan' => 'Biaya konsultasi'
                                 ));
                             } else {
@@ -801,6 +807,7 @@ class Antrian extends Utility
                         'discount_type' => 'N',
                         'pasien' => $parameter['dataObj']['currentPasien'],
                         'penjamin' => $parameter['dataObj']['penjamin'],
+                        'billing_group' => 'tindakan',
                         'keterangan' => 'Biaya konsultasi'
                     ));
 
@@ -871,6 +878,7 @@ class Antrian extends Utility
                             'discount_type' => 'N',
                             'pasien' => $parameter['dataObj']['currentPasien'],
                             'penjamin' => $parameter['dataObj']['penjamin'],
+                            'billing_group' => 'administrasi',
                             'keterangan' => 'Biaya kartu pasien baru'
                         ));
 

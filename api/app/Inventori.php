@@ -276,6 +276,7 @@ class Inventori extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
         $PO = parent::gen_uuid();
+        $PODetailResult = array();
 
         $duplicate_row = array();
         $non_active = array();
@@ -471,6 +472,7 @@ class Inventori extends Utility
                         $newBatch = self::$query->insert('inventori_batch', array(
                             'uid' => $targettedBatch,
                             'barang' => $targettedObat,
+                            'po' => $PO,
                             'batch' => $value['batch'],
                             'expired_date' => date('Y-m-d', strtotime($value['kedaluarsa'])),
                             'created_at' => parent::format_date(),
@@ -496,11 +498,13 @@ class Inventori extends Utility
                 'disc_type' => 'N',
                 'subtotal' => (floatval($value['stok']) * floatval($value['harga'])),
                 'keterangan' => 'AUTO PO [STOK AWAL - ' . $UserData['data']->nama . ']',
-                'status' => 'L',
+                'status' => 'L'/*,
                 'created_at' => parent::format_date(),
-                'updated_at' => parent::format_date()
+                'updated_at' => parent::format_date()*/
             ))
                 ->execute();
+
+            array_push($PODetailResult, $PODetail);
 
             if(floatval($value['stok']) > 0 || $parameter['gudang'] === __GUDANG_UTAMA__) {
                 //Gudang utama perlu stok kosong
@@ -563,6 +567,7 @@ class Inventori extends Utility
             'success_proceed' => $success_proceed,
             'data' => $all_data,
             'po' => $Purchase,
+            'po_detail' => $PODetailResult,
             'proceed' => $proceed_data
         );
     }
@@ -1727,9 +1732,9 @@ class Inventori extends Utility
             //Get Harga dari PO
             if (isset($value['po'])) {
                 $PO = new PO(self::$pdo);
-                $Price = $PO::get_po_item_price(array(
-                    $value['po'],
-                    $value['barang']
+                $Price = $PO->get_po_item_price(array(
+                    'po' => $value['po'],
+                    'barang' => $value['barang']
                 ));
 
                 $data['response_data'][$key]['harga'] = floatval($Price['response_data'][0]['harga']);
@@ -3819,7 +3824,9 @@ class Inventori extends Utility
             $paramData = array(
                 'inventori_stok_log.type' => '= ?',
                 'AND',
-                'inventori_stok_log.gudang' => '= ?'
+                'inventori_stok_log.gudang' => '= ?',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
             );
 
             $paramValue = array(__STATUS_STOK_AWAL__, $parameter['gudang']);
@@ -3844,6 +3851,12 @@ class Inventori extends Utility
                 'keluar',
                 'saldo'
             ))
+                ->join('master_inv', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('inventori_stok_log.barang', '=' , 'master_inv.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -3856,6 +3869,12 @@ class Inventori extends Utility
                 'keluar',
                 'saldo'
             ))
+                ->join('master_inv', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('inventori_stok_log.barang', '=' , 'master_inv.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))

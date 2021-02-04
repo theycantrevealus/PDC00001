@@ -1166,6 +1166,7 @@ class Laboratorium extends Utility {
                     'discount_type' => 'N',
                     'pasien' => $value['pasien'],
                     'penjamin' => $DValue['penjamin'],
+                    'billing_group' => 'laboratorium',
                     'keterangan' => 'Biaya Laboratorium'
                 ));
 
@@ -3427,6 +3428,7 @@ class Laboratorium extends Utility {
                                         'discount_type' => 'N',
                                         'pasien' => $data_antrian['pasien'],
                                         'penjamin' => $valueTindakan['penjamin'],
+                                        'billing_group' => 'laboratorium',
                                         'keterangan' => 'Biaya Laboratorium'
                                     ));
                                 }

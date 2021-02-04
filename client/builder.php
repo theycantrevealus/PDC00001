@@ -245,6 +245,15 @@
             });
 		});
 
+        function getDateRange(target) {
+            var rangeItem = $(target).val().split(" to ");
+            if(rangeItem.length > 1) {
+                return rangeItem;
+            } else {
+                return [rangeItem, rangeItem];
+            }
+        }
+
 
 
 		function refresh_notification() {

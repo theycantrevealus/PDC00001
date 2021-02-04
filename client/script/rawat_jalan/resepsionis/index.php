@@ -430,6 +430,9 @@
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
 
+            var SEPButton = $(this);
+            SEPButton.html("Memuat SEP...").removeClass("btn-info").addClass("btn-warning");
+
             $.ajax({
                 async: false,
                 url: __HOSTAPI__ + "/Pasien/pasien-detail/" + id,
@@ -644,8 +647,7 @@
             //======================================================================
             
             
-            var SEPButton = $(this);
-            SEPButton.html("Memuat SEP...").removeClass("btn-info").addClass("btn-warning");
+
 
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
@@ -728,6 +730,12 @@
                                 $(".informasi_rujukan").hide();
                                 $("#panel-rujukan").hide();
                                 $("#btnProsesSEP").hide();
+                            }
+
+                            if(!isRujukan) {
+                                $("#btnProsesSEP").show();
+                                $(".informasi_rujukan").show();
+                                //$("#panel-rujukan").show();
                             }
                         },
                         error: function(response) {
@@ -812,9 +820,9 @@
                             kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
                             no_mr: $("#txt_bpjs_rm").val().replace(new RegExp(/-/g),""),
                             asal_rujukan: $("#txt_bpjs_jenis_asal_rujukan").val(),
-                            ppk_rujukan: $("#txt_bpjs_asal_rujukan").val(),
-                            tgl_rujukan: parse_tanggal_rujukan,
-                            no_rujukan: "",
+                            ppk_rujukan: /*$("#txt_bpjs_asal_rujukan").val()*/"00010001",
+                            tgl_rujukan: <?php echo json_encode(date('Y-m-d', strtotime("-1 days"))); ?>,
+                            no_rujukan: "1234567",
                             catatan: $("#txt_bpjs_catatan").val(),
                             diagnosa_awal: $("#txt_bpjs_diagnosa_awal").val(),
                             poli: $("#txt_bpjs_poli_tujuan").val(),
@@ -847,12 +855,15 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function(response){
+                            console.clear();
+                            console.log(response);
                             if(response.response_package.content.metaData.code === "201") {
                                 Swal.fire(
                                     "Gagal buat SEP",
                                     response.response_package.content.metaData.message,
                                     "warning"
                                 ).then((result) => {
+                                    //
                                 });
                             } else {
                                 Swal.fire(
@@ -995,13 +1006,27 @@
                     var data = response.response_package.content.response.list;
 
                     $("#txt_bpjs_kelas_rawat option").remove();
+                    var targetParse = ["0", "I", "II", "III"];
                     for(var a = 0; a < data.length; a++) {
                         var selection = document.createElement("OPTION");
 
                         $(selection).attr("value", data[a].kode).html(data[a].nama);
-                        if(data[a].nama.toUpperCase() === selected.toUpperCase()) {
-                            $(selection).attr("selected", "selected");
+
+                        var checkKelasNama = data[a].nama.toUpperCase().split("KELAS");
+                        var checkSelectedKelas = selected.toUpperCase().split("KELAS");
+                        if(checkKelasNama.length > 1) {
+                            if(data[a].nama.toUpperCase() === "KELAS " + targetParse.indexOf(checkSelectedKelas[1].trim())) {
+                                $(selection).attr("selected", "selected");
+                                //console.log(data[a].nama.toUpperCase() + " >>> " + "KELAS " + targetParse.indexOf(checkSelectedKelas[1].trim()));
+                            } else {
+                                //console.log(data[a].nama.toUpperCase() + " >>> " + selected.toUpperCase());
+                            }
+                        } else {
+                            if(data[a].nama.toUpperCase() === selected.toUpperCase()) {
+                                $(selection).attr("selected", "selected");
+                            }
                         }
+
                         $("#txt_bpjs_kelas_rawat").append(selection);
                     }
                 },

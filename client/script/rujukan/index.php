@@ -126,28 +126,15 @@
                 },
                 cache: true,
                 processResults: function (response) {
-                    var data = response.response_package.content;
-                    if(data.metaData.message === "Sukses") {
-                        return {
-                            results: $.map(data, function (item) {
-                                console.log(item);
-                                return {
-                                    text: item.noSep,
-                                    id: item.noSep
-                                }
-                            })
-                        };
-                    } else {
-                        console.clear();
-                        console.log(response);
-                        /*Swal.fire(
-                            "SEP tidak ditemukan",
-                            data.metaData.message,
-                            "warning"
-                        ).then((result) => {
-                            //
-                        });*/
-                    }
+                    var data = response.response_package;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.noSep,
+                                id: item.noSep
+                            }
+                        })
+                    };
                 }
             }
         }).addClass("form-control").on("select2:select", function(e) {

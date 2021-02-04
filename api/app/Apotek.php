@@ -1338,6 +1338,7 @@ class Apotek extends Utility
                 'discount_type' => 'N',
                 'pasien' => $parameter['pasien'],
                 'penjamin' => $parameter['penjamin'],
+                'billing_group' => 'obat',
                 'keterangan' => 'Biaya resep obat'
             ));
             array_push($invoice_detail, $AppendInvoice);

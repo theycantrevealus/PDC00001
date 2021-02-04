@@ -1707,103 +1707,106 @@ class Asesmen extends Utility {
 
 		} else { //Jika Resep baru
 
-			//New Resep
-			$uid = parent::gen_uuid();
 
-			$newResep = self::$query->insert('resep',array(
-				'uid' => $uid,
-				'kunjungan' => $parameter['kunjungan'],
-				'antrian' => $parameter['antrian'],
-				'keterangan' => $parameter['keteranganResep'],
-				'keterangan_racikan' => $parameter['keteranganRacikan'],
-				'asesmen' => $MasterAsesmen,
-				'dokter' => $UserData['data']->uid,
-				'pasien' => $parameter['pasien'],
-				'total' => 0,
-				'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
-				'created_at' => parent::format_date(),
-				'updated_at' => parent::format_date()
-			))
-			->execute();
+		    if(count($parameter['resep']) > 0 || count($parameter['racikan']) > 0) {
+                //New Resep
+                $uid = parent::gen_uuid();
 
-			if($newResep['response_result'] > 0) {
-				$resep_detail_error = array();
-				//SetDetail
-				foreach ($parameter['resep'] as $key => $value) {
-					$ObatDetail = new Inventori(self::$pdo);
-					$ObatInfo = $ObatDetail::get_item_detail($value['obat'])['response_data'][0];
+                $newResep = self::$query->insert('resep',array(
+                    'uid' => $uid,
+                    'kunjungan' => $parameter['kunjungan'],
+                    'antrian' => $parameter['antrian'],
+                    'keterangan' => $parameter['keteranganResep'],
+                    'keterangan_racikan' => $parameter['keteranganRacikan'],
+                    'asesmen' => $MasterAsesmen,
+                    'dokter' => $UserData['data']->uid,
+                    'pasien' => $parameter['pasien'],
+                    'total' => 0,
+                    'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
 
-					$newResepDetail = self::$query->insert('resep_detail', array(
-						'resep' => $uid,
-						'obat' => $value['obat'],
-						'aturan_pakai' => intval($value['aturanPakai']),
-						'harga' => 0,
-						'signa_qty' => $value['signaKonsumsi'],
-						'signa_pakai' => $value['signaTakar'],
-						'qty' => $value['signaHari'],
-						'satuan' => $ObatInfo['satuan_terkecil'],
-						'created_at' => parent::format_date(),
-						'updated_at' => parent::format_date(),
-						'keterangan' => $value['keteranganPerObat']
-					))
-					->execute();
-					array_push($resep_detail_error, $newResepDetail);
-				}
+                if($newResep['response_result'] > 0) {
+                    $resep_detail_error = array();
+                    //SetDetail
+                    foreach ($parameter['resep'] as $key => $value) {
+                        $ObatDetail = new Inventori(self::$pdo);
+                        $ObatInfo = $ObatDetail::get_item_detail($value['obat'])['response_data'][0];
 
-				foreach ($parameter['racikan'] as $key => $value) {
-					$uid_racikan = parent::gen_uuid();
-					$newRacikan = self::$query->insert('racikan', array(
-						'uid' => $uid_racikan,
-						'asesmen' => $MasterAsesmen,
-						//'resep' => $uid,
-						'kode' => $value['nama'],
-						'signa_qty' => $value['signaKonsumsi'],
-						'signa_pakai' => $value['signaTakar'],
-                        'keterangan' => $value['keterangan'],
-						'aturan_pakai' => intval($value['aturanPakai']),
-						'qty' => $value['signaHari'],
-						'total' => 0,
-						'created_at' => parent::format_date(),
-						'updated_at' => parent::format_date()
-					))
-					->execute();
+                        $newResepDetail = self::$query->insert('resep_detail', array(
+                            'resep' => $uid,
+                            'obat' => $value['obat'],
+                            'aturan_pakai' => intval($value['aturanPakai']),
+                            'harga' => 0,
+                            'signa_qty' => $value['signaKonsumsi'],
+                            'signa_pakai' => $value['signaTakar'],
+                            'qty' => $value['signaHari'],
+                            'satuan' => $ObatInfo['satuan_terkecil'],
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date(),
+                            'keterangan' => $value['keteranganPerObat']
+                        ))
+                            ->execute();
+                        array_push($resep_detail_error, $newResepDetail);
+                    }
 
-					if($newRacikan['response_result'] > 0) {
-						/*$newResepDetail = self::$pdo->insert('resep_detail', array(
-							'resep' => $uid,
-							'obat' => $uid_racikan,
-							'aturan_pakai' => $value['aturanPakai'],
-							'harga' => 0,
-							'signa_qty' => $value['signaKonsumsi'],
-							'signa_pakai' => $value['signaTakar'],
-							'qty' => $value['signaHari'],
-							'satuan' => '',
-							'created_at' => parent::format_date(),
-							'updated_at' => parent::format_date()
-						))
-						->execute();*/
+                    foreach ($parameter['racikan'] as $key => $value) {
+                        $uid_racikan = parent::gen_uuid();
+                        $newRacikan = self::$query->insert('racikan', array(
+                            'uid' => $uid_racikan,
+                            'asesmen' => $MasterAsesmen,
+                            //'resep' => $uid,
+                            'kode' => $value['nama'],
+                            'signa_qty' => $value['signaKonsumsi'],
+                            'signa_pakai' => $value['signaTakar'],
+                            'keterangan' => $value['keterangan'],
+                            'aturan_pakai' => intval($value['aturanPakai']),
+                            'qty' => $value['signaHari'],
+                            'total' => 0,
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date()
+                        ))
+                            ->execute();
 
-						//Set Racikan Detail
-						foreach ($value['item'] as $RIKey => $RIValue) {
-							$newRacikanDetail = self::$query->insert('racikan_detail', array(
-								'asesmen' => $MasterAsesmen,
-								//'resep' => $uid_racikan,
-								'obat' => $RIValue['obat'],
-								'ratio' => floatval($RIValue['takaran']),
-								'pembulatan' => ceil(floatval($RIValue['takaran'])),
-								'kekuatan' => $RIValue['kekuatan'],
-								//'takar_bulat' => $RIValue['takaranBulat'],
-								//'takar_decimal' => $RIValue['takaranDecimalText'],
-								'harga' => 0,
-								'racikan' => $uid_racikan,
-								'created_at' => parent::format_date(),
-								'updated_at' => parent::format_date()
-							))
-							->execute();
-						}
-					}
-				}
-			}
+                        if($newRacikan['response_result'] > 0) {
+                            /*$newResepDetail = self::$pdo->insert('resep_detail', array(
+                                'resep' => $uid,
+                                'obat' => $uid_racikan,
+                                'aturan_pakai' => $value['aturanPakai'],
+                                'harga' => 0,
+                                'signa_qty' => $value['signaKonsumsi'],
+                                'signa_pakai' => $value['signaTakar'],
+                                'qty' => $value['signaHari'],
+                                'satuan' => '',
+                                'created_at' => parent::format_date(),
+                                'updated_at' => parent::format_date()
+                            ))
+                            ->execute();*/
+
+                            //Set Racikan Detail
+                            foreach ($value['item'] as $RIKey => $RIValue) {
+                                $newRacikanDetail = self::$query->insert('racikan_detail', array(
+                                    'asesmen' => $MasterAsesmen,
+                                    //'resep' => $uid_racikan,
+                                    'obat' => $RIValue['obat'],
+                                    'ratio' => floatval($RIValue['takaran']),
+                                    'pembulatan' => ceil(floatval($RIValue['takaran'])),
+                                    'kekuatan' => $RIValue['kekuatan'],
+                                    //'takar_bulat' => $RIValue['takaranBulat'],
+                                    //'takar_decimal' => $RIValue['takaranDecimalText'],
+                                    'harga' => 0,
+                                    'racikan' => $uid_racikan,
+                                    'created_at' => parent::format_date(),
+                                    'updated_at' => parent::format_date()
+                                ))
+                                    ->execute();
+                            }
+                        }
+                    }
+                }
+            }
 			return $newResep;
 		}
 	}
@@ -1946,6 +1949,7 @@ class Asesmen extends Utility {
                         'discount_type' => 'N',
                         'pasien' => $parameter['pasien'],
                         'penjamin' => $parameter['penjamin'],
+                        'billing_group' => 'tindakan',
                         'keterangan' => 'Biaya Tindakan Perobatan'
                     ));
 
