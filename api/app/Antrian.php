@@ -365,6 +365,7 @@ class Antrian extends Utility
                 ));
 
                 unset($parameter['dataObj']['currentPasien']);
+                unset($parameter['dataObj']['bangsal']);
 
                 /*//Keluar dari poli
                 $keluar = self::$query->update('antrian', array(
@@ -853,7 +854,8 @@ class Antrian extends Utility
                             unset($parameter['dataObj']['valid_start']);
                             unset($parameter['dataObj']['valid_end']);
                             unset($parameter['dataObj']['penjaminMeta']);
-
+                            unset($parameter['dataObj']['currentPasien']);
+                            unset($parameter['dataObj']['bangsal']);
                             $antrian = self::tambah_antrian('antrian', $parameter, $uid);
                             $antrian['response_notif'] = 'P';
                             return $antrian;
@@ -950,6 +952,10 @@ class Antrian extends Utility
         foreach ($parameter['dataObj'] as $key => $value) {
             if($key !== 'konsul') {
                 $allData[$key] = $value;
+            }
+
+            if($key === 'cara_datang') {
+                $allData[$key] = intval($value);
             }
         }
 
