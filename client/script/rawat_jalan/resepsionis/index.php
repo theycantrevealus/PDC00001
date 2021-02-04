@@ -4,6 +4,7 @@
 		var params;
 		var MODE = false;
 		var currentAntrianType = "DEFAULT";
+		var currentAntrianUID = "";
         $(".sep").select2();
         $("#txt_bpjs_tanggal_rujukan").datepicker({
             dateFormat: "DD, dd MM yy",
@@ -112,14 +113,17 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 					    if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
-							if(parseInt(row['sep']) > 0) {
+							if(row['sep'] != "none") {
 								return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row.sep + "</h6>";
 							} else {
 							    if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
+                                    /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
+                                        "<button class=\"btn btn-warning btn-sm pull-right btn-ajukan-sep\"><i class=\"fa fa-exclamation-circle\"></i> Ajukan SEP</button>";*/
                                     return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
                                 } else {
+                                    /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
+                                        "<button class=\"btn btn-warning btn-sm pull-right btn-ajukan-sep\"><i class=\"fa fa-exclamation-circle\"></i> Ajukan SEP</button>";*/
                                     return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
-							        //return row["penjamin"];
                                 }
 							}
 						} else {
@@ -239,7 +243,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
-                            if(parseInt(row['sep']) > 0) {
+                            if(row['sep'] != "none") {
                                 return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row.sep + "</h6>";
                             } else {
                                 if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
@@ -332,7 +336,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
-                            if(parseInt(row['sep']) > 0) {
+                            if(row['sep'] != "none") {
                                 return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row.sep + "</h6>";
                             } else {
                                 if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
@@ -432,6 +436,9 @@
 
             var SEPButton = $(this);
             SEPButton.html("Memuat SEP...").removeClass("btn-info").addClass("btn-warning");
+
+            var antrian = $(this).attr("antrian");
+            currentAntrianUID = antrian;
 
             $.ajax({
                 async: false,
@@ -783,6 +790,7 @@
                     {
                         dataSetSEP = {
                             request: "sep_baru",
+                            antrian: currentAntrianUID,
                             no_kartu: $("#txt_bpjs_nomor").val(),
                             ppk_pelayanan: $("#txt_bpjs_faskes").val(),
                             kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
@@ -815,6 +823,7 @@
                     } else {
                         dataSetSEP = {
                             request: "sep_baru",
+                            antrian: currentAntrianUID,
                             no_kartu: $("#txt_bpjs_nomor").val(),
                             ppk_pelayanan: $("#txt_bpjs_faskes").val(),
                             kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
@@ -857,23 +866,27 @@
                         success: function(response){
                             console.clear();
                             console.log(response);
-                            if(response.response_package.content.metaData.code === "201") {
-                                Swal.fire(
-                                    "Gagal buat SEP",
-                                    response.response_package.content.metaData.message,
-                                    "warning"
-                                ).then((result) => {
-                                    //
-                                });
-                            } else {
+                            if(parseInt(response.response_package.bpjs.content.metaData.code) === 200) {
                                 Swal.fire(
                                     "Pembuatan SEP Berhasil!",
                                     "SEP telah dibuat",
                                     "success"
                                 ).then((result) => {
-                                    console.clear();
-                                    console.log(response);
+                                    tableAntrian.ajax.reload();
+                                    tableAntrianIGD.ajax.reload();
+                                    tableAntrianRI.ajax.reload();
                                     $("#modal-sep-new").modal("hide");
+                                });
+                            } else {
+                                Swal.fire(
+                                    "Gagal buat SEP",
+                                    response.response_package.bpjs.content.metaData.message,
+                                    "warning"
+                                ).then((result) => {
+                                    $("#modal-sep-new").modal("hide");
+                                    /*tableAntrian.ajax.reload();
+                                    tableAntrianIGD.ajax.reload();
+                                    tableAntrianRI.ajax.reload();*/
                                 });
                             }
                         },
@@ -1120,17 +1133,21 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    var data = response.response_package.content.response.list;
+                    if(response.response_package.content === null) {
+                        loadSpesialistik(target);
+                    } else {
+                        var data = response.response_package.content.response.list;
 
-                    $(target + " option").remove();
-                    for(var a = 0; a < data.length; a++) {
-                        var selection = document.createElement("OPTION");
+                        $(target + " option").remove();
+                        for(var a = 0; a < data.length; a++) {
+                            var selection = document.createElement("OPTION");
 
-                        $(selection).attr("value", data[a].kode).html(data[a].nama);
-                        $(target).append(selection);
+                            $(selection).attr("value", data[a].kode).html(data[a].nama);
+                            $(target).append(selection);
+                        }
+
+                        loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $(target).val());
                     }
-
-                    loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $(target).val());
                 },
                 error: function(response) {
                     console.log(response);
@@ -1147,15 +1164,20 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    var data = response.response_package.content.response.list;
+                    if(response.response_package.content === null) {
+                        loadDPJP(target, jenis, spesialistik);
+                    } else {
+                        var data = response.response_package.content.response.list;
 
-                    $(target + " option").remove();
-                    $(target).select2('data', null);
-                    for(var a = 0; a < data.length; a++) {
-                        var selection = document.createElement("OPTION");
+                        $(target + " option").remove();
+                        $(target).select2('data', null);
+                        for(var a = 0; a < data.length; a++) {
+                            var selection = document.createElement("OPTION");
 
-                        $(selection).attr("value", data[a].kode).html(data[a].kode + " - " + data[a].nama);
-                        $(target).append(selection);
+                            $(selection).attr("value", data[a].kode).html(data[a].kode + " - " + data[a].nama);
+                            $(target).append(selection);
+                        }
+
                     }
                 },
                 error: function(response) {

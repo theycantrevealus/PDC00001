@@ -27,8 +27,6 @@
                     d.pelayanan_jenis = $("#jenis_pelayanan").val();
                 },
                 dataSrc: function (response) {
-                    console.clear();
-                    console.log(response);
                     var data = response.response_package.response_data;
                     if (data === undefined) {
                         data = [];
@@ -62,10 +60,57 @@
                 },
                 {
                     "data": null, render: function (data, type, row, meta) {
-                        return "";
+                        return "<button class=\"btn btn-danger btnHapusSEP\" id=\"hapus_" + row.sep_no + "\"><i class=\"fa fa-ban\"></i></button>";
                     }
                 }
             ]
+        });
+
+        $("body").on("click", ".btnHapusSEP", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            Swal.fire({
+                title: "Hapus SEP?",
+                showDenyButton: true,
+                confirmButtonText: "Ya. Hapus",
+                denyButtonText: "Tidak",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/BPJS/SEP/" + id,
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "DELETE",
+                        success: function (response) {
+                            console.log(response);
+                            if(parseInt(response.response_package.bpjs.content.metaData.code) === 200) {
+                                Swal.fire(
+                                    'BPJS',
+                                    'SEP Berhasil dihapus',
+                                    'success'
+                                ).then((result) => {
+                                    SEPList.ajax.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'BPJS',
+                                    response.response_package.bpjs.content.metaData.message,
+                                    'error'
+                                ).then((result) => {
+                                    SEPList.ajax.reload();
+                                });
+                            }
+                        },
+                        error: function (response) {
+                            console.clear();
+                            console.log(response);
+                        }
+                    });
+                }
+            });
         });
     });
 </script>

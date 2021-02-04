@@ -68,50 +68,14 @@ class BPJS extends Utility {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
-	    $parameterBuilder = array('request' => array(
-	        't_sep' => array(
-	            'noSep' => $parameter[6],
-                'user' => $UserData['data']->nama
-            )
-        ));
-
-	    $deleteAct = self::deleteUrl('/' . __BPJS_SERVICE_NAME__ . '/SEP/Delete', $parameterBuilder);
-	    if(intval($deleteAct['metaData']['code']) === 200) {
-	        //Update SEP
-            $DeleteSEP = self::$query->delete('bpjs_sep')
-                ->where(array(
-                    'bpjs_sep.uid' => '= ?'
-                ), array(
-                    $parameter[7]
-                ))
-                ->execute();
-
-
-            $log = parent::log(array(
-                    'type'=>'activity',
-                    'column'=>array(
-                        'unique_target',
-                        'user_uid',
-                        'table_name',
-                        'action',
-                        'logged_at',
-                        'status',
-                        'login_id'
-                    ),
-                    'value'=>array(
-                        $parameter[7],
-                        $UserData['data']->uid,
-                        'bpjs_sep',
-                        'D',
-                        parent::format_date(),
-                        'N',
-                        $UserData['data']->log_id
-                    ),
-                    'class'=>__CLASS__
-                )
-            );
+        switch ($parameter[6]) {
+            case 'SEP':
+                return self::hapus_sep($parameter);
+                break;
+            default:
+                return $parameter;
+                break;
         }
-	    return $deleteAct;
     }
 
 	public function __GET__($parameter = array()) {
@@ -194,6 +158,9 @@ class BPJS extends Utility {
                 case 'get_history_sep_local':
                     return self::get_history_sep_local($parameter);
                     break;
+                case 'hapus_sep':
+                    return self::hapus_sep($parameter);
+                    break;
 				default:
 					return 'Unknown request';
 			}
@@ -272,6 +239,59 @@ class BPJS extends Utility {
     private function get_sep($parameter) {
         $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/SEP/' . $parameter['kartu']);
         return $content;
+    }
+
+    private function hapus_sep($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $parameterBuilder = array('request' => array(
+            't_sep' => array(
+                'noSep' => $parameter[7],
+                'user' => $UserData['data']->nama
+            )
+        ));
+
+        $deleteAct = self::deleteUrl('/' . __BPJS_SERVICE_NAME__ . '/SEP/Delete', $parameterBuilder);
+        if(intval($deleteAct['content']['metaData']['code']) === 200 || intval($deleteAct['content']['metaData']['code']) === 201) {
+            //Update SEP
+            $DeleteSEP = self::$query->delete('bpjs_sep')
+                ->where(array(
+                    'bpjs_sep.sep_no' => '= ?'
+                ), array(
+                    $parameter[7]
+                ))
+                ->execute();
+
+
+            $log = parent::log(array(
+                    'type'=>'activity',
+                    'column'=>array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value'=>array(
+                        $parameter[7],
+                        $UserData['data']->uid,
+                        'bpjs_sep',
+                        'D',
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class'=>__CLASS__
+                )
+            );
+        }
+
+        return array(
+            'bpjs' => $deleteAct,
+            'delete_act' => $DeleteSEP
+        );
     }
 
     private function get_local_sep($parameter) {
@@ -956,12 +976,16 @@ class BPJS extends Utility {
                 'sep_dinsos' => $proceed['content']['response']['sep']['informasi']['Dinsos'],
                 'sep_prolanis' => $proceed['content']['response']['sep']['informasi']['prolanisPRB'],
                 'sep_sktm' => $proceed['content']['response']['sep']['informasi']['noSKTM'],
+                'antrian' => $parameter['antrian'],
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             ))
                 ->execute();
         }
-        return $proceed;
+	    return array(
+	        'bpjs' => $proceed,
+            'log' => $sep_log
+        );
     }
 
     private function get_sep_log_untrack($parameter) {
