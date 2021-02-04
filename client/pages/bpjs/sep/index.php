@@ -28,8 +28,8 @@
                                     <div class="col-md-6">
                                         Jenis Pelayanan
                                         <select class="form-control" id="jenis_pelayanan">
-                                            <option value="1">Rawat Inap</option>
                                             <option value="2">Rawat Jalan</option>
+                                            <option value="1">Rawat Inap</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
@@ -43,11 +43,9 @@
                             <thead class="thead-dark">
                             <tr>
                                 <th class="wrap_content">No</th>
-                                <th class="wrap_content">SEP</th>
+                                <th style="width: 10%;">SEP</th>
                                 <th>Pasien</th>
-                                <th>Poli</th>
-                                <th>Dokter</th>
-                                <th>Aksi</th>
+                                <th class="wrap_content">Aksi</th>
                             </tr>
                             </thead>
                             <tbody></tbody>

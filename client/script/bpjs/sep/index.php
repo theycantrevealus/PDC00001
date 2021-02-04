@@ -52,22 +52,12 @@
                 },
                 {
                     "data": null, render: function (data, type, row, meta) {
-                        return "";
+                        return row.sep_no;
                     }
                 },
                 {
                     "data": null, render: function (data, type, row, meta) {
-                        return "";
-                    }
-                },
-                {
-                    "data": null, render: function (data, type, row, meta) {
-                        return "";
-                    }
-                },
-                {
-                    "data": null, render: function (data, type, row, meta) {
-                        return "";
+                        return "<b class=\"text-info\">" + row.pasien.no_rm + "</b><br />" + ((row.pasien.panggilan_name !== undefined) ? row.pasien.panggilan_name.nama : "") + " " + row.pasien.nama;
                     }
                 },
                 {
