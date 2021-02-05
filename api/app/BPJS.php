@@ -112,7 +112,7 @@ class BPJS extends Utility {
                     return self::get_dpjp($parameter);
                     break;
                 case 'get_faskes_select2':
-                    return self::get_faskes_select2();
+                    return self::get_faskes_select2($parameter);
                     break;
                 case 'get_rujukan_list':
                     return self::get_rujukan_list($parameter[2]);
@@ -125,6 +125,9 @@ class BPJS extends Utility {
                     break;
                 case 'info_bpjs':
                     return self::info_bpjs($parameter[2]);
+                    break;
+                case 'get_sep_list':
+                    return self::get_sep_list($parameter);
                     break;
 				default:
 					return 'Unknown request';
@@ -160,6 +163,9 @@ class BPJS extends Utility {
                     break;
                 case 'hapus_sep':
                     return self::hapus_sep($parameter);
+                    break;
+                case 'rujukan_baru':
+                    return self::rujukan_baru($parameter);
                     break;
 				default:
 					return 'Unknown request';
@@ -221,8 +227,8 @@ class BPJS extends Utility {
         return $content;
     }
 
-    private function get_faskes_select2() {
-        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/faskes/' . $_GET['search'] . '/' . $_GET['type']);
+    private function get_faskes_select2($parameter) {
+        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/faskes/' . $_GET['search'] . '/' . $parameter[2]);
         return $content;
     }
 
@@ -881,9 +887,59 @@ class BPJS extends Utility {
         return $proceed;
     }
 
+    private function rujukan_baru($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $parameterBuilder = array(
+            'request' => array(
+                't_rujukan' => array(
+                    'noSep' => $parameter['sep'],
+                    'tglRujukan' => date('Y-m-d'),
+                    'ppkDirujuk' => $parameter['tujuan'],
+                    'jnsPelayanan' => $parameter['jenis_pelayanan'],
+                    'catatan' => $parameter['catatan'],
+                    'diagRujukan' => $parameter['diagnosa'],
+                    'tipeRujukan' => $parameter['tipe'],
+                    'poliRujukan' => $parameter['poli'],
+                    'user' => $UserData['data']->nama
+                )
+            )
+        );
+        $proceed = self::postUrl('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/insert', $parameterBuilder);
+        $uid = parent::gen_uuid();
+        if(intval($proceed['content']['metaData']['code']) === 200) {
+            $uid = parent::gen_uuid();
+            $rujukan_log = self::$query->insert('bpjs_rujukan', array(
+                'uid' => $uid,
+                'request_rujukan' => $parameter['rujukan'],
+                'asal_rujukan_kode' => $proceed['content']['response']['rujukan']['AsalRujukan']['kode'],
+                'asal_rujukan_nama' => $proceed['content']['response']['rujukan']['AsalRujukan']['nama'],
+                'diagnosa_kode' => $proceed['content']['response']['rujukan']['diagnosa']['kode'],
+                'diagnosa_nama' => $proceed['content']['response']['rujukan']['diagnosa']['nama'],
+                'no_rujukan' => $proceed['content']['response']['rujukan']['noRujukan'],
+                'poli_tujuan_kode' => $proceed['content']['response']['poliTujuan']['kode'],
+                'poli_tujuan_nama' => $proceed['content']['response']['poliTujuan']['nama'],
+                'tgl_rujukan' => $proceed['content']['response']['tglRujukan'],
+                'tujuan_rujukan_kode' => $proceed['content']['response']['tujuanRujukan']['kode'],
+                'tujuan_rujukan_nama' => $proceed['content']['response']['tujuanRujukan']['nama'],
+                'catatan' => $parameter['catatan'],
+                'sep' => $parameter['sep_uid'],
+                'pegawai' => $UserData['data']->uid,
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+        }
+
+        return array(
+            'bpjs' => $proceed,
+            'log' => $rujukan_log
+        );
+    }
+
     private function sep_baru($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 	    //Build Parameter
         $parameterBuilder = array(
             'request' => array(
@@ -940,11 +996,12 @@ class BPJS extends Utility {
         );
 
 	    $proceed = self::postUrl('/' . __BPJS_SERVICE_NAME__ . '/SEP/1.1/insert', $parameterBuilder);
-
+        $uid = parent::gen_uuid();
 	    if(intval($proceed['content']['metaData']['code']) === 200) {
-	        $uid = parent::gen_uuid();
-	        $sep_log = self::$query->insert('bpjs_sep', array(
+
+            $sep_log = self::$query->insert('bpjs_sep', array(
                 'uid' => $uid,
+                'antrian' => $parameter['antrian'],
                 'pelayanan_jenis' => '2',
                 'kelas_rawat' => $parameter['kelas_rawat'],
                 'asal_rujukan_jenis' => $parameter['asal_rujukan'],
@@ -960,7 +1017,7 @@ class BPJS extends Utility {
                 'pasien_katarak' => $parameter['katarak'],
                 'laka_lantas' => $parameter['laka_lantas'],
                 'laka_lantas_penjamin' => $parameter['laka_lantas_penjamin'],
-                'laka_lantas_tanggal' => $parameter['laka_lantas_tanggal_kejadian'],
+                'laka_lantas_tanggal' => (isset($parameter['laka_lantas_tanggal_kejadian']) && !empty($parameter['laka_lantas_tanggal_kejadian'])) ? date('Y-m-d', strtotime($parameter['laka_lantas_tanggal_kejadian'])) : NULL,
                 'laka_lantas_keterangan' => $parameter['laka_lantas_keterangan'],
                 'laka_lantas_suplesi' => $parameter['laka_lantas_suplesi'],
                 'laka_lantas_suplesi_sep' => $parameter['laka_lantas_suplesi_nomor'],
@@ -976,7 +1033,6 @@ class BPJS extends Utility {
                 'sep_dinsos' => $proceed['content']['response']['sep']['informasi']['Dinsos'],
                 'sep_prolanis' => $proceed['content']['response']['sep']['informasi']['prolanisPRB'],
                 'sep_sktm' => $proceed['content']['response']['sep']['informasi']['noSKTM'],
-                'antrian' => $parameter['antrian'],
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             ))
@@ -1063,6 +1119,57 @@ class BPJS extends Utility {
             $data['response_data'][$key]['antrian_detail'] = $AntrianDetail['response_data'][0];
         }
 
+        return $data;
+    }
+
+    private function get_sep_list($parameter) {
+        $data = self::$query->select('bpjs_sep', array(
+            'uid',
+            'pelayanan_jenis',
+            'kelas_rawat',
+            'asal_rujukan_jenis',
+            'asal_rujukan_tanggal',
+            'asal_rujukan_nomor',
+            'asal_rujukan_ppk',
+            'asal_rujukan_nama',
+            'catatan',
+            'pasien',
+            'antrian',
+            'diagnosa_kode',
+            'diagnosa_nama',
+            'poli_tujuan',
+            'poli_eksekutif',
+            'pasien_cob',
+            'pasien_katarak',
+            'laka_lantas',
+            'laka_lantas_penjamin',
+            'laka_lantas_tanggal',
+            'laka_lantas_keterangan',
+            'laka_lantas_suplesi',
+            'laka_lantas_suplesi_sep',
+            'laka_lantas_provinsi',
+            'laka_lantas_kabupaten',
+            'laka_lantas_kecamatan',
+            'skdp_no_surat',
+            'skdp_dpjp',
+            'no_telp',
+            'pegawai',
+            'sep_no',
+            'sep_tanggal',
+            'sep_dinsos',
+            'sep_prolanis',
+            'sep_sktm',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'bpjs_sep.deleted_at' => 'IS NULL',
+                'AND',
+                'bpjs_sep.pasien' => '= ?'
+            ), array(
+                $parameter[2]
+            ))
+            ->execute();
         return $data;
     }
 

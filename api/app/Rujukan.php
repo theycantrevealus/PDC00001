@@ -52,10 +52,9 @@ class Rujukan extends Utility
         }
     }
 
-    private function get_all($parameter)
-    {
+    private function get_all($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(

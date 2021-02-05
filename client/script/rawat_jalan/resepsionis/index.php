@@ -112,9 +112,9 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-					    if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
+                        if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
 							if(row['sep'] != "none") {
-								return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row.sep + "</h6>";
+								return row["penjamin"] + " <h6 class=\"nomor_sep text-success\"><i class=\"fa fa-check\"></i> " + row.sep + "</h6>";
 							} else {
 							    if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
                                     /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
@@ -785,7 +785,7 @@
 
                     var tanggal_laka = new Date($("#txt_bpjs_laka_tanggal").datepicker("getDate"));
                     var parse_tanggal_laka =  tanggal_laka.getFullYear() + "-" + str_pad(2, tanggal_laka.getMonth()+1) + "-" + str_pad(2, tanggal_laka.getDate());
-
+                    alert(currentAntrianUID);
                     if(isRujukan)
                     {
                         dataSetSEP = {
@@ -801,6 +801,7 @@
                             no_rujukan: $("#txt_bpjs_nomor_rujukan").val(),
                             catatan: $("#txt_bpjs_catatan").val(),
                             diagnosa_awal: $("#txt_bpjs_diagnosa_awal").val(),
+                            diagnosa_kode: $("#txt_bpjs_diagnosa_awal option:selected").text(),
                             poli: $("#txt_bpjs_poli_tujuan").val(),
                             eksekutif: $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val(),
                             cob: $("input[type=\"radio\"][name=\"txt_bpjs_cob\"]:checked").val(),
@@ -834,6 +835,7 @@
                             no_rujukan: "1234567",
                             catatan: $("#txt_bpjs_catatan").val(),
                             diagnosa_awal: $("#txt_bpjs_diagnosa_awal").val(),
+                            diagnosa_kode: $("#txt_bpjs_diagnosa_awal option:selected").text(),
                             poli: $("#txt_bpjs_poli_tujuan").val(),
                             eksekutif: $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val(),
                             cob: $("input[type=\"radio\"][name=\"txt_bpjs_cob\"]:checked").val(),
@@ -1653,8 +1655,7 @@
                                         </div>
                                         <div class="col-12 col-md-9 form-group">
                                             <label for="">Faskes</label>
-                                            <select class="form-control sep" id="txt_bpjs_faskes">
-                                                <option value="<?php echo __KODE_PPK__; ?>">RSUD KAB. BINTAN - KAB. BINTAN (KEPRI)</option>
+                                            <select class="form-control sep" id="txt_bpjs_faskes" disabled>
                                                 <option value="<?php echo __KODE_PPK__; ?>">RSUD PETALA BUMI - KOTA PEKAN BARU</option>
                                             </select>
                                         </div>
