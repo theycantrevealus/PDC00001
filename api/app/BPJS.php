@@ -1354,13 +1354,15 @@ class BPJS extends Utility {
 
     public function launchUrl($extended_url, $target_switch = 1) {
         $url = (($target_switch === 1) ? self::$base_url : __BASE_LIVE_BPJS_APLICARES__) . $extended_url;
+        $data_api = (($target_switch === 1) ? self::$data_api : __DATA_API_LIVE_APLICARES__);
+        $secretKey_api = (($target_switch === 1) ? self::$secretKey_api : __SECRET_KEY_LIVE_APLICARES_BPJS__);
 
         date_default_timezone_set('UTC');
         $tStamp = strval(time()-strtotime('1970-01-01 00:00:00'));
-        $signature = hash_hmac('sha256', self::$data_api ."&". $tStamp , self::$secretKey_api, true);
+        $signature = hash_hmac('sha256', $data_api ."&". $tStamp , $secretKey_api, true);
         $encodedSignature = base64_encode($signature);
         $headers = array(
-            "X-cons-id: " . self::$data_api ." ",
+            "X-cons-id: " . $data_api ." ",
             "X-timestamp: " .$tStamp ." ",
             "X-signature: " .$encodedSignature,
             "Content-Type: application/json; charset=utf-8"

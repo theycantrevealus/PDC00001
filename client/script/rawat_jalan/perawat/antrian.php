@@ -234,13 +234,13 @@
 				success: function(response){
 					btnSelesai.removeAttr("disabled");
 				    if(response.response_package.response_result > 0) {
-                        location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+                        //
                     } else {
-                        notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
-                        console.clear();
-			console.log(JSON.stringify(response.response_package));
-                        console.log(response.response_package);
+                        //notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                     }
+                    console.clear();
+                    console.log(response.response_package);
+                    location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
 				},
 				error: function(response) {
 					btnSelesai.removeAttr("disabled");
@@ -485,7 +485,7 @@
         });
 	});
 
-	function loadTermSelectBox(selector, id_term){
+	function loadTermSelectBox(selector, id_term, selected = ""){
 		$.ajax({
             url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + id_term,
             type: "GET",
@@ -498,6 +498,9 @@
                 if (MetaData != ""){
                 	for(i = 0; i < MetaData.length; i++){
 	                    var selection = document.createElement("OPTION");
+	                    if(MetaData[i].id == selected) {
+                            $(selection).attr("selected", "selected");
+                        }
 
 	                    $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
 	                    $("#" + selector).append(selection);
@@ -574,6 +577,7 @@
 		                if (MetaData.antrian.penjamin != <?= json_encode(__UIDPENJAMINBPJS__) ?>) {
 		                	$(".rujukan-bpjs").attr("hidden", true);
 		                } else {
+		                    //
 		                }
 
 						if (MetaData.pasien.id_jenkel == 2){
@@ -587,10 +591,13 @@
 			                	$("#" + key).val(item);
 			                	checkedRadio(key, item);
 			                	checkedCheckbox(key, item);
+                                if(key == "riwayat_transfusi_golongan_darah") {
+                                    loadTermSelectBox("riwayat_transfusi_golongan_darah", 4, item);
+                                }
 			                });
 		                	
 		                	let program_kb = $("#program_kb").val();
-		                	if (program_kb == 0 || program_kb == ""){
+		                	if (program_kb == 0 || program_kb == "") {
 								disableElementSelectBox('jenis-kb', program_kb);	                		
 		                	}
 
@@ -654,7 +661,6 @@
 
 								$("#riwayat_obt_terlarang").removeAttr("disabled");
 							}
-
 		                }
 	            	}
 	            },
@@ -667,8 +673,9 @@
 		return MetaData;
 	}
 
-	function checkedRadio(name, value){
-		var $radios = $('input:radio[name='+ name +']');
+	function checkedRadio(name, value) {
+
+		var $radios = $('input:radio[name=' + name +']');
 
 		if ($radios != ""){
 			if($radios.is(':checked') === false) {

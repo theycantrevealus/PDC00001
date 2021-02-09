@@ -14,6 +14,7 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+				    console.log(response);
 					//return response.response_package.response_data;
 					var data = response.response_package;
 					var autonum = 1;
@@ -311,6 +312,7 @@
 				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 			},
 			success: function(response){
+			    //console.log(response);
 				var MetaData = response.response_package;
 
 				if (MetaData.length > 0){

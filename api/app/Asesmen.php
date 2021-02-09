@@ -2438,12 +2438,13 @@ class Asesmen extends Utility {
 				}
 			} else {
 				//new asesmen rawat --> sudah oke
-				$parameter['dataObj']['antrian'] = $parameter['dataAntrian']['uid'];
+                unset($parameter['dataObj']['partus_list']);
+                $parameter['dataObj']['antrian'] = $parameter['dataAntrian']['uid'];
 				$parameter['dataObj']['no_rm'] = $parameter['dataPasien']['no_rm'];
 				$parameter['dataObj']['pasien'] = $parameter['dataAntrian']['uid_pasien'];
 				$parameter['dataObj']['kunjungan'] = $parameter['dataAntrian']['kunjungan'];
 				$parameter['dataObj']['departemen'] = $parameter['dataAntrian']['departemen'];
-                unset($parameter['dataObj']['partus_list']);
+
 
 				$rawat = self::new_asesmen_rawat($parameter['dataObj'], $MasterUID, $PoliDetail['poli_asesmen']);
 			}

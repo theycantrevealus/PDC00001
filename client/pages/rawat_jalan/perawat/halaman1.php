@@ -363,7 +363,7 @@
 					<div class="form-group col-lg-12">
 						<div class="col-6">
 							<label for="">Riwayat Transfusi Darah: </label>
-							<select  class="form-control inputan select2" id="riwayat_transfusi_golongan_darah">
+							<select  class="form-control inputan select2" id="riwayat_transfusi_golongan_darah" name="riwayat_transfusi_golongan_darah">
 								<option value="">Pilih</option>
 							</select>
 	                    </div>
@@ -1207,7 +1207,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="form-group col-md-3" id="nyeri_lainnya_ket">
+					<div class="form-group col-md-3">
 						<label>Nyeri Lainnya: </label>
 						<input disabled type="text" name="nyeri_lainnya_ket" id="nyeri_lainnya_ket" class="form-control inputan nyeri_lainnya_ket" placeholder="-">
 					</div>
