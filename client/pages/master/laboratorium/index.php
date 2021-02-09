@@ -35,6 +35,7 @@
                                 <th class="wrap_content">Kode</th>
                                 <th>Nama</th>
                                 <th>Spesimen</th>
+                                <th>Mitra Penyedia</th>
                                 <th class="wrap_content">Aksi</th>
                             </tr>
                             </thead>

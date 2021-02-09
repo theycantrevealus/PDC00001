@@ -152,6 +152,8 @@ class Poli extends Utility {
 			'uid',
 			'nama',
 			'tindakan_konsultasi',
+			'kode_bpjs',
+            'nama_bpjs',
 			'created_at',
 			'updated_at'
 		))
@@ -211,6 +213,8 @@ class Poli extends Utility {
             'nama',
             'tindakan_konsultasi',
             'poli_asesmen',
+            'kode_bpjs',
+            'nama_bpjs',
             'created_at',
             'updated_at'
         ))
@@ -1574,6 +1578,8 @@ class Poli extends Utility {
 		$poli = self::$query->update('master_poli', array(
 			'nama' => $parameter['nama'],
 			'tindakan_konsultasi' => $parameter['tindakan_konsultasi'],
+			'kode_bpjs' => $parameter['integrasi_bpjs_poli_kode'],
+            'nama_bpjs' => $parameter['integrasi_bpjs_poli_nama'],
 			'updated_at' => parent::format_date()
 		))
 		->where(array(

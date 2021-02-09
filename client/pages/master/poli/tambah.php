@@ -66,6 +66,21 @@
 										</div>
 									</div>
 								</div>
+                                <div class="card">
+                                    <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                        <h5 class="card-header__title flex m-0">Integrasi BPJS</h5>
+                                    </div>
+                                    <div class="card-body tab-content">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="txt_bpjs_poli"><i class="fa fa-link"></i> Link Poliklinik:</label>
+                                                <div class="search-form">
+                                                    <select type="text" class="form-control" id="txt_bpjs_poli" placeholder="Target Poli"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 							</div>
 						</div>
                     </div>

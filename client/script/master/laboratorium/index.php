@@ -2,9 +2,18 @@
 	$(function(){
 		var MODE = "tambah", selectedUID;
 		var tableLab = $("#table-lab").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Laboratorium",
-				type: "GET",
+				type: "POST",
+                data: function(d) {
+                    d.request = "get_lab_backend";
+                },
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
@@ -17,6 +26,10 @@
 			"columnDefs":[
 				{"targets":0, "className":"dt-body-left"}
 			],
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Laboratorium"
+            },
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
@@ -33,7 +46,7 @@
 						return "<span id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
 					}
 				},
-				{
+                {
 					"data" : null, render: function(data, type, row, meta) {
 					    if(row.spesimen !== undefined && row.spesimen !== null) {
                             return row.spesimen.nama;
@@ -42,6 +55,17 @@
                         }
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        var mitraRaw = row.mitra_nama;
+                        var mitraParse = "<ol>";
+                        for(var mK in mitraRaw) {
+                            mitraParse += "<li>" + mitraRaw[mK] + "</li>";
+                        }
+                        mitraParse += "<ol>";
+                        return mitraParse;
+                    }
+                },
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +

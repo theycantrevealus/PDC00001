@@ -124,7 +124,9 @@ class Laboratorium extends Utility {
 				case 'edit_lab':
 					return self::edit_lab($parameter);
 					break;
-
+                case 'get_lab_backend':
+                    return self::get_lab_backend($parameter);
+                    break;
 				case 'new-order-lab':
 					return self::new_order_lab($parameter);
 					break;
@@ -1302,6 +1304,93 @@ class Laboratorium extends Utility {
 		return $data;
 	}
 
+	private function get_lab_backend($parameter) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'master_lab.deleted_at' => 'IS NULL',
+                'AND',
+                'master_lab.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'master_lab.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('master_lab', array(
+                'uid',
+                'kode',
+                'nama',
+                'spesimen',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('master_lab', array(
+                'uid',
+                'kode',
+                'nama',
+                'spesimen',
+                'created_at',
+                'updated_at'
+            ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        $mitra_list = new Mitra(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+
+            $mitra_data = $mitra_list->get_mitra_provider($value['uid']);
+            $mitra_data_parse = $mitra_data['response_data'];
+            $mitraInfo = array();
+            $mitra_unik = array();
+            $mitra_unik_nama = array();
+            foreach ($mitra_data_parse as $MKey => $MValue) {
+                $Mitra_detail = $mitra_list->get_mitra_detail($MValue['mitra']);
+                if($Mitra_detail['response_data'][0]['jenis'] === 'LAB') {
+                    $mitra_data_parse[$MKey]['mitra'] = $Mitra_detail['response_data'][0];
+                    array_push($mitraInfo, $MValue);
+
+                    if(!in_array($MValue['mitra'], $mitra_unik)) {
+                        array_push($mitra_unik, $MValue['mitra']);
+                        array_push($mitra_unik_nama, $Mitra_detail['response_data'][0]['nama']);
+                    }
+                }
+            }
+            $data['response_data'][$key]['mitra'] = $mitraInfo;
+            $data['response_data'][$key]['mitra_nama'] = $mitra_unik_nama;
+            $data['response_data'][$key]['spesimen'] = self::get_spesimen_detail($value['spesimen'])['response_data'][0];
+
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('master_lab', array(
+            'id'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
 	private function get_lab(){
 		$data = self::$query->select('master_lab', array(
 			'uid',
@@ -1316,8 +1405,19 @@ class Laboratorium extends Utility {
 		))
 		->execute();
 		$autonum = 1;
+        $mitra_list = new Mitra(self::$pdo);
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
+
+			$mitra_data = $mitra_list->get_mitra_provider($value['uid']);
+			$mitra_data_parse = $mitra_data['response_data'];
+			$mitraInfo = array();
+			foreach ($mitra_data_parse as $MKey => $MValue) {
+			    $Mitra_detail = $mitra_list->get_mitra_detail($MValue['mitra']);
+			    $mitra_data_parse[$MKey]['mitra'] = $Mitra_detail['response_data'][0];
+			    array_push($mitraInfo, $MValue);
+            }
+            $data['response_data'][$key]['mitra'] = $mitraInfo;
 			$data['response_data'][$key]['spesimen'] = self::get_spesimen_detail($value['spesimen'])['response_data'][0];
 			$autonum++;
 		}
