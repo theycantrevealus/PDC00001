@@ -26,10 +26,10 @@ class Aplicares extends Utility {
 		self::$pdo = $connection;
 		self::$query = new Query(self::$pdo);
 		self::$kodePPK = __KODE_PPK__;
-		/*self::$data_api = __DATA_API_LIVE_APLICARES__;
-		self::$secretKey_api = __SECRET_KEY_LIVE_APLICARES_BPJS__;*/
-        self::$data_api = __DATA_API_LIVE__;
-        self::$secretKey_api = __SECRET_KEY_LIVE_BPJS__;
+		self::$data_api = __DATA_API_LIVE_APLICARES__;
+		self::$secretKey_api = __SECRET_KEY_LIVE_APLICARES_BPJS__;
+        /*self::$data_api = __DATA_API_LIVE__;
+        self::$secretKey_api = __SECRET_KEY_LIVE_BPJS__;*/
 		self::$base_url = __BASE_LIVE_BPJS_APLICARES__ . '/aplicaresws';
 	}
 
@@ -534,6 +534,9 @@ class Aplicares extends Utility {
 		// Computes the timestamp
 		date_default_timezone_set('UTC');
 		$tStamp = strval(time()-strtotime('1970-01-01 00:00:00'));
+
+        //$data_api = (($target_switch === 1) ? self::$data_api : __DATA_API_LIVE_APLICARES__);
+        //$secretKey_api = (($target_switch === 1) ? self::$secretKey_api : __SECRET_KEY_LIVE_APLICARES_BPJS__);
 
 		// Computes the signature by hashing the salt with the secret key as the key
 		$signature = hash_hmac('sha256', self::$data_api ."&". $tStamp , self::$secretKey_api, true);
