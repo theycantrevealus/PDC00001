@@ -1439,6 +1439,7 @@ class Laboratorium extends Utility {
 			'uid',
 			'kode',
 			'nama',
+			'naratif',
 			'keterangan',
 			'spesimen',
 			'created_at',
@@ -1862,6 +1863,7 @@ class Laboratorium extends Utility {
                 'uid' => $uid,
                 'kode' => $parameter['kode'],
                 'nama' => $parameter['nama'],
+                'naratif' => $parameter['naratif'],
                 'keterangan' => $parameter['keterangan'],
                 'spesimen' => $parameter['spesimen'],
                 'created_at' => parent::format_date(),
@@ -1873,6 +1875,7 @@ class Laboratorium extends Utility {
                 'uid' => $uid,
                 'kode' => $parameter['kode'],
                 'nama' => $parameter['nama'],
+                'naratif' => $parameter['naratif'],
                 'keterangan' => $parameter['keterangan'],
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
@@ -2047,6 +2050,7 @@ class Laboratorium extends Utility {
             $worker = self::$query->update('master_lab', array(
                 'kode' => $parameter['kode'],
                 'nama' => $parameter['nama'],
+                'naratif' => $parameter['naratif'],
                 'keterangan' => $parameter['keterangan'],
                 'spesimen' => $parameter['spesimen'],
                 'updated_at' => parent::format_date()
@@ -2063,6 +2067,7 @@ class Laboratorium extends Utility {
             $worker = self::$query->update('master_lab', array(
                 'kode' => $parameter['kode'],
                 'nama' => $parameter['nama'],
+                'naratif' => $parameter['naratif'],
                 'keterangan' => $parameter['keterangan'],
                 'updated_at' => parent::format_date()
             ))

@@ -24,6 +24,11 @@
 				//Init Data
 				$("#txt_kode_laboratorium").val(labData.kode);
 				$("#txt_nama_laboratorium").val(labData.nama);
+				if(labData.naratif === 'Y') {
+				    $("#txt_hasil_naratif").prop("checked", true);
+                } else {
+                    $("#txt_hasil_naratif").prop("checked", false);
+                }
 				if(labData.spesimen !== undefined && labData.spesimen !== null) {
                     load_spesimen("#txt_spesimen_laboratorium", labData.spesimen.uid);
                 }
@@ -480,25 +485,25 @@
 
 			var newNilaiMin = document.createElement("INPUT");
 			$(newCellNilaiMin).append(newNilaiMin);
-			$(newNilaiMin).val(min).addClass("form-control nilai_min_selection").inputmask({
+			/*$(newNilaiMin).val(min).addClass("form-control nilai_min_selection").inputmask({
 				alias: 'decimal',
 				rightAlign: true,
 				placeholder: "0.00",
 				prefix: "",
 				autoGroup: false,
 				digitsOptional: true
-			});
+			});*/
 
 			var newNilaiMax = document.createElement("INPUT");
 			$(newCellNilaiMax).append(newNilaiMax);
-			$(newNilaiMax).val(max).addClass("form-control nilai_max_selection").inputmask({
+			/*$(newNilaiMax).val(max).addClass("form-control nilai_max_selection").inputmask({
 				alias: 'decimal',
 				rightAlign: true,
 				placeholder: "0.00",
 				prefix: "",
 				autoGroup: false,
 				digitsOptional: true
-			});
+			});*/
 			
 			var newNilaiSatuan = document.createElement("INPUT");
 			$(newCellNilaiSatuan).append(newNilaiSatuan);
@@ -521,6 +526,12 @@
 			$("#nilai-lab tbody").append(newRowNilai);
 			rebaseNilai();
 		}
+
+		$("#txt_hasil_naratif").change(function () {
+            $("#nilai-lab tbody tr").each(function () {
+                //$(this).find("td:eq(1) input").
+            });
+        });
 
 		function rebaseNilai(){
 			$("#nilai-lab tbody tr").each(function(e) {
@@ -730,6 +741,8 @@
 			var nama = $("#txt_nama_laboratorium").val();
 			var spesimen = $("#txt_spesimen_laboratorium").val();
 			var keterangan = editorKeterangan.getData();
+            var naratif = $("#txt_hasil_naratif").is(":checked");
+
 
 			//Halaman 2
 			var kategori = [];
@@ -777,6 +790,8 @@
 				}
 			});*/
 
+
+
 			if(nama != "") {
 				$.ajax({
 					async: false,
@@ -788,6 +803,7 @@
 						nama: nama,
 						spesimen: spesimen,
 						keterangan: keterangan,
+                        naratif: ((naratif) ? "Y" : "N"),
 						kategori: kategori,
 						//lokasi: lokasi,
 						nilai: nilai,

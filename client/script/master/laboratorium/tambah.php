@@ -463,7 +463,7 @@
 
 			var newNilaiMin = document.createElement("INPUT");
 			$(newCellNilaiMin).append(newNilaiMin);
-			$(newNilaiMin).addClass("form-control nilai_min_selection").inputmask({
+			/*$(newNilaiMin).addClass("form-control nilai_min_selection").inputmask({
 				alias: "decimal",
 				rightAlign: true,
 				placeholder: "0.00",
@@ -471,11 +471,11 @@
                 placeholder: "0",
 				autoGroup: false,
 				digitsOptional: true
-			});
+			});*/
 
 			var newNilaiMax = document.createElement("INPUT");
 			$(newCellNilaiMax).append(newNilaiMax);
-			$(newNilaiMax).addClass("form-control nilai_max_selection").inputmask({
+			/*$(newNilaiMax).addClass("form-control nilai_max_selection").inputmask({
 				alias: "decimal",
 				rightAlign: true,
 				placeholder: "0.00",
@@ -483,7 +483,7 @@
                 placeholder: "0",
 				autoGroup: false,
 				digitsOptional: true
-			});
+			});*/
 			
 			var newNilaiSatuan = document.createElement("INPUT");
 			$(newCellNilaiSatuan).append(newNilaiSatuan);
