@@ -57,12 +57,14 @@
 				},
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        var mitraRaw = row.mitra_nama;
-                        var mitraParse = "<ol>";
+                        var mitraRaw = row.mitra_all;
+                        var mitraSelected = row.mitra_nama;
+                        var mitraParse = "<div class=\"row\">";
+
                         for(var mK in mitraRaw) {
-                            mitraParse += "<li>" + mitraRaw[mK] + "</li>";
+                            mitraParse += "<div class=\"col-4\" style=\"" + ((mitraSelected.indexOf(mitraRaw[mK]) > -1) ? "opacity:1" : "opacity:.5;text-decoration:line-through") + "\">" + ((mitraSelected.indexOf(mitraRaw[mK]) > -1) ? "<i class=\"fa fa-check-circle text-success\"></i>" : "<i class=\"fa fa-times-circle text-danger\"></i>") + " <b class=\"" + ((mitraSelected.indexOf(mitraRaw[mK]) > -1) ? "text-success" : "text-danger") + "\">" + mitraRaw[mK] + "</b></div>";
                         }
-                        mitraParse += "<ol>";
+                        mitraParse += "</div>";
                         return mitraParse;
                     }
                 },

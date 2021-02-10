@@ -28,7 +28,7 @@
                 </div>
                 <div class="card-body tab-content">
                     <div class="tab-pane active show fade" id="list_master_lab">
-                        <table class="table table-bordered" id="table-lab">
+                        <table class="table table-bordered largeDataType" id="table-lab">
                             <thead class="thead-dark">
                             <tr>
                                 <th class="wrap_content">No</th>
