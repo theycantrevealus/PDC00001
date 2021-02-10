@@ -763,8 +763,10 @@
 
 			var nilai = [];
 			$("#nilai-lab tbody tr").each(function() {
-				var nilaiDataMin = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
-				var nilaiDataMax = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+                /*var nilaiDataMin = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
+                var nilaiDataMax = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");*/
+                var nilaiDataMin = $(this).find("td:eq(1) input").val();
+                var nilaiDataMax = $(this).find("td:eq(2) input").val();
 				var nilaiDataSatuan = $(this).find("td:eq(3) input").val();
 				var nilaiDataKeterangan = $(this).find("td:eq(4) input").val();
 
