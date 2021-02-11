@@ -251,7 +251,7 @@
                             console.clear();
                             console.log(response.response_package);
 
-                            location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+                            //location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
                         },
                         error: function(response) {
                             btnSelesai.removeAttr("disabled");
