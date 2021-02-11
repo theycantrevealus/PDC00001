@@ -2340,6 +2340,12 @@ class Asesmen extends Utility {
 		$Poli = new Poli(self::$pdo);
 		$PoliDetail = $Poli::get_poli_detail($parameter['dataAntrian']['departemen'])['response_data'][0];
         $DataPartus = $parameter['dataObj']['partus_list'];
+
+        foreach ($parameter['dataObj'] as $dataKey => $dataValue) {
+            if(!isset($dataKey) || $dataKey === 'undefined' || $dataKey == 'undefined') {
+                unset($parameter['dataObj'][$dataKey]);
+            }
+        }
 		//Check
 		$check = self::$query->select('asesmen', array(
 				'uid'
