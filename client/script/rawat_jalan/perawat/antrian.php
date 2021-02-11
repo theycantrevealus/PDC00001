@@ -172,7 +172,11 @@
                         if (value != "" && value != null){
                             $this = $(this);
                             var name = $(this).attr("id");
-                            allData[name] = value;
+                            if(name !== undefined) {
+                                allData[name] = value;
+                            } else {
+                                alert(name);
+                            }
                         }
                     });
 
