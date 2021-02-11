@@ -282,6 +282,7 @@ class Antrian extends Utility
                     'discount_type' => 'N',
                     'pasien' => $parameter['dataObj']['currentPasien'],
                     'penjamin' => $parameter['dataObj']['penjamin'],
+                    'billing_group' => 'tindakan',
                     'keterangan' => 'Biaya konsultasi'
                 ));
                 //$antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
@@ -359,10 +360,12 @@ class Antrian extends Utility
                     'discount_type' => 'N',
                     'pasien' => $parameter['dataObj']['currentPasien'],
                     'penjamin' => $parameter['dataObj']['penjamin'],
+                    'billing_group' => 'tindakan',
                     'keterangan' => 'Biaya konsultasi'
                 ));
 
                 unset($parameter['dataObj']['currentPasien']);
+                unset($parameter['dataObj']['bangsal']);
 
                 /*//Keluar dari poli
                 $keluar = self::$query->update('antrian', array(
@@ -584,6 +587,7 @@ class Antrian extends Utility
                                     'discount_type' => 'N',
                                     'pasien' => $parameter['dataObj']['currentPasien'],
                                     'penjamin' => $parameter['dataObj']['penjamin'],
+                                    'billing_group' => 'administrasi',
                                     'keterangan' => 'Biaya kartu pasien baru'
                                 ));
                             }
@@ -608,6 +612,7 @@ class Antrian extends Utility
                                 'discount_type' => 'N',
                                 'pasien' => $parameter['dataObj']['currentPasien'],
                                 'penjamin' => $parameter['dataObj']['penjamin'],
+                                'billing_group' => 'tindakan',
                                 'keterangan' => 'Biaya konsultasi'
                             ));
                         } else { //Belum ada invoice master umum
@@ -656,6 +661,7 @@ class Antrian extends Utility
                                         'discount_type' => 'N',
                                         'pasien' => $parameter['dataObj']['currentPasien'],
                                         'penjamin' => $parameter['dataObj']['penjamin'],
+                                        'billing_group' => 'administrasi',
                                         'keterangan' => 'Biaya kartu pasien baru'
                                     ));
                                 }
@@ -678,6 +684,7 @@ class Antrian extends Utility
                                     'discount_type' => 'N',
                                     'pasien' => $parameter['dataObj']['currentPasien'],
                                     'penjamin' => $parameter['dataObj']['penjamin'],
+                                    'billing_group' => 'tindakan',
                                     'keterangan' => 'Biaya konsultasi'
                                 ));
                             } else {
@@ -801,6 +808,7 @@ class Antrian extends Utility
                         'discount_type' => 'N',
                         'pasien' => $parameter['dataObj']['currentPasien'],
                         'penjamin' => $parameter['dataObj']['penjamin'],
+                        'billing_group' => 'tindakan',
                         'keterangan' => 'Biaya konsultasi'
                     ));
 
@@ -846,7 +854,8 @@ class Antrian extends Utility
                             unset($parameter['dataObj']['valid_start']);
                             unset($parameter['dataObj']['valid_end']);
                             unset($parameter['dataObj']['penjaminMeta']);
-
+                            unset($parameter['dataObj']['currentPasien']);
+                            unset($parameter['dataObj']['bangsal']);
                             $antrian = self::tambah_antrian('antrian', $parameter, $uid);
                             $antrian['response_notif'] = 'P';
                             return $antrian;
@@ -871,6 +880,7 @@ class Antrian extends Utility
                             'discount_type' => 'N',
                             'pasien' => $parameter['dataObj']['currentPasien'],
                             'penjamin' => $parameter['dataObj']['penjamin'],
+                            'billing_group' => 'administrasi',
                             'keterangan' => 'Biaya kartu pasien baru'
                         ));
 
@@ -942,6 +952,10 @@ class Antrian extends Utility
         foreach ($parameter['dataObj'] as $key => $value) {
             if($key !== 'konsul') {
                 $allData[$key] = $value;
+            }
+
+            if($key === 'cara_datang') {
+                $allData[$key] = intval($value);
             }
         }
 
@@ -1412,7 +1426,7 @@ class Antrian extends Utility
             //Cek Penjamin. Jika BPJS maka cek status SEP pada lokal
             if ($value['uid_penjamin'] == __UIDPENJAMINBPJS__) {
                 //Cek tabel SEP
-                $SEP = self::$query->select('penjamin_sep', array(
+                /*$SEP = self::$query->select('penjamin_sep', array(
                     'id',
                     'bpjs_no_sep'
                 ))
@@ -1431,6 +1445,24 @@ class Antrian extends Utility
                     $data['response_data'][$key]['sep'] = 0;
                 } else {
                     $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['bpjs_no_sep'];
+                }*/
+
+                $SEP = self::$query->select('bpjs_sep', array(
+                    'uid',
+                    'sep_no'
+                ))
+                    ->where(array(
+                        'bpjs_sep.antrian' => '= ?',
+                        'AND',
+                        'bpjs_sep.deleted_at' => 'IS NULL'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+                if (count($SEP['response_data']) > 0) {
+                    $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['sep_no'];
+                } else {
+                    $data['response_data'][$key]['sep'] = $SEP;
                 }
             }
 

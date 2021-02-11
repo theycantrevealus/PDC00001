@@ -685,6 +685,8 @@
                                 }
                             };
 
+							var item_grouper = {};
+							console.log(invoice_detail_item);
 							for(var invKey in invoice_detail_item) {
 							    if(invoice_detail_item[invKey].item_type === "master_tindakan")
                                 {
@@ -712,19 +714,71 @@
 										status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
 									}
 								}
-								$("#invoice_detail_item").append(
-									"<tr>" +
-										"<td>" + status_bayar + "</td>" +
-										"<td>" + invoice_detail_item[invKey].autonum + "</td>" +
-										"<td>" + invoice_detail_item[invKey].item.nama.toUpperCase() + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
-										"<td>" + invoice_detail_item[invKey].qty + "</td>" +
-										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].harga, 2, ".", ",") + "</td>" +
-										"<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",") + "</td>" +
-									"</tr>"
-								);
+
+								if(item_grouper[invoice_detail_item[invKey].billing_group] === undefined) {
+                                    item_grouper[invoice_detail_item[invKey].billing_group] = {
+                                        item: []
+                                    };
+                                }
+
+								item_grouper[invoice_detail_item[invKey].billing_group].item.push({
+                                    status_bayar: status_bayar,
+                                    autonum: invoice_detail_item[invKey].autonum,
+                                    nama: invoice_detail_item[invKey].item.nama.toUpperCase(),
+                                    qty: invoice_detail_item[invKey].qty,
+                                    penjamin: invoice_detail_item[invKey].penjamin.nama,
+                                    harga: number_format(invoice_detail_item[invKey].harga, 2, ".", ","),
+                                    total: number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",")
+                                });
 
 								itemMeta = invoice_detail_item;
 							}
+
+							for(itemKey in item_grouper) {
+							    var parseName = "";
+							    if(itemKey === "tindakan") {
+							        parseName = "Tindakan";
+                                } else if(itemKey === "obat"){
+							        parseName = "Obat / BHP";
+                                } else if(itemKey === "laboratorium"){
+                                    parseName = "Laboratorium";
+                                } else if(itemKey === "radiologi"){
+                                    parseName = "Radiologi";
+                                } else if(itemKey === "administrasi"){
+                                    parseName = "Administrasi";
+                                } else {
+							        parseName = "Unspecified";
+                                }
+
+                                $("#invoice_detail_item").append(
+                                    "<tr>" +
+                                    "<td colspan=\"6\" class=\"bg-info\"><h6 class=\"text-white\">" + parseName + "</h6></td>" +
+                                    "</tr>"
+                                );
+							    var detailData = item_grouper[itemKey].item;
+							    for(var itemDetailKey in detailData) {
+                                    $("#invoice_detail_item").append(
+                                        "<tr>" +
+                                        "<td>" + detailData[itemDetailKey].status_bayar + "</td>" +
+                                        "<td>" + detailData[itemDetailKey].autonum + "</td>" +
+                                        "<td>" + detailData[itemDetailKey].nama + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + detailData[itemDetailKey].penjamin + "</span></td>" +
+                                        "<td>" + detailData[itemDetailKey].qty + "</td>" +
+                                        "<td class=\"text-right\">" + detailData[itemDetailKey].harga + "</td>" +
+                                        "<td class=\"text-right\">" + detailData[itemDetailKey].total + "</td>" +
+                                        "</tr>"
+                                    );
+                                    /*$("#invoice_detail_item").append(
+                                    "<tr>" +
+                                    "<td>" + status_bayar + "</td>" +
+                                    "<td>" + invoice_detail_item[invKey].autonum + "</td>" +
+                                    "<td>" + invoice_detail_item[invKey].item.nama.toUpperCase() + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
+                                    "<td>" + invoice_detail_item[invKey].qty + "</td>" +
+                                    "<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].harga, 2, ".", ",") + "</td>" +
+                                    "<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",") + "</td>" +
+                                    "</tr>"
+                                );*/
+                                }
+                            }
 
 							var history_payment = invoice_detail.history;
 							for(var hisKey in history_payment) {

@@ -156,98 +156,115 @@
 			var btnSelesai = $(this);
 			btnSelesai.attr('disabled', 'disabled');
 
-			$(".inputan").each(function(){
-				var value = $(this).val();
+            Swal.fire({
+                title: "Simpan Asesmen Rawat?",
+                showDenyButton: true,
+                type: 'warning',
+                confirmButtonText: `Ya`,
+                confirmButtonColor: `#1297fb`,
+                denyButtonText: `Batal`,
+                denyButtonColor: `#ff2a2a`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(".inputan").each(function(){
+                        var value = $(this).val();
 
-				if (value != "" && value != null){
-					$this = $(this);
-					var name = $(this).attr("id");
-					allData[name] = value;
-				}
-			});
+                        if (value != "" && value != null){
+                            $this = $(this);
+                            var name = $(this).attr("id");
+                            allData[name] = value;
+                        }
+                    });
 
-			$("input[type=checkbox]:not(:checked)").each(function(){
-				var name = $(this).attr("id");
-				allData[name] = null;
-			});
+                    $("input[type=checkbox]:not(:checked)").each(function(){
+                        var name = $(this).attr("id");
+                        allData[name] = null;
+                    });
 
-			$("input[type=checkbox]:checked").each(function(){
-				var name = $(this).attr("id");
-				allData[name] = 1;
-			});
+                    $("input[type=checkbox]:checked").each(function(){
+                        var name = $(this).attr("id");
+                        allData[name] = 1;
+                    });
 
-			$("input[type=radio]:checked").each(function(){
-				var value = $(this).val();
-				if (value != ""){
-					var name = $(this).attr("name");
-					allData[name] = value;
-				}
-			});
+                    $("input[type=radio]:checked").each(function(){
+                        var value = $(this).val();
+                        if (value != ""){
+                            var name = $(this).attr("name");
+                            allData[name] = value;
+                        }
+                    });
 
-			var partusList = [];
+                    var partusList = [];
 
-            $("#riwayat_hamil tbody tr").each(function(e) {
-                var tanggal_partus = $(this).find("td:eq(1)").attr("tanggal");
-                var usia_kehamilan = $(this).find("td:eq(2)").html();
-                var tempat_partus = $(this).find("td:eq(3)").html();
-                var jenis_partus = $(this).find("td:eq(4)").html();
-                var penolong = $(this).find("td:eq(5)").html();
-                var nifas = $(this).find("td:eq(6)").html();
-                var jenkel_anak = $(this).find("td:eq(7)").html();
-                var bb_anak = $(this).find("td:eq(8)").html();
-                var keadaan_sekarang = $(this).find("td:eq(9)").html();
-                var keterangan = $(this).find("td:eq(10)").html();
+                    $("#riwayat_hamil tbody tr").each(function(e) {
+                        var tanggal_partus = $(this).find("td:eq(1)").attr("tanggal");
+                        var usia_kehamilan = $(this).find("td:eq(2)").html();
+                        var tempat_partus = $(this).find("td:eq(3)").html();
+                        var jenis_partus = $(this).find("td:eq(4)").html();
+                        var penolong = $(this).find("td:eq(5)").html();
+                        var nifas = $(this).find("td:eq(6)").html();
+                        var jenkel_anak = $(this).find("td:eq(7)").html();
+                        var bb_anak = $(this).find("td:eq(8)").html();
+                        var keadaan_sekarang = $(this).find("td:eq(9)").html();
+                        var keterangan = $(this).find("td:eq(10)").html();
 
-                partusList.push({
-                    tanggal: tanggal_partus,
-                    usia: usia_kehamilan,
-                    tempat: tempat_partus,
-                    jenis: jenis_partus,
-                    penolong: penolong,
-                    nifas: nifas,
-                    jenkel_anak: jenkel_anak,
-                    bb_anak: bb_anak,
-                    keadaan_sekarang: keadaan_sekarang,
-                    keterangan: keterangan
-                });
+                        partusList.push({
+                            tanggal: tanggal_partus,
+                            usia: usia_kehamilan,
+                            tempat: tempat_partus,
+                            jenis: jenis_partus,
+                            penolong: penolong,
+                            nifas: nifas,
+                            jenkel_anak: jenkel_anak,
+                            bb_anak: bb_anak,
+                            keadaan_sekarang: keadaan_sekarang,
+                            keterangan: keterangan
+                        });
+                    });
+
+                    allData["partus_list"] = partusList;
+
+                    delete allData['riwayat_merokok_option'];
+                    delete allData['riwayat_miras_option'];
+                    delete allData['riwayat_obt_terlarang_option'];
+
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Asesmen",
+                        data: {
+                            request : "update_asesmen_rawat",
+                            dataAntrian : dataPasien.antrian,
+                            dataPasien: dataPasien.pasien,
+                            dataObj : allData
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "POST",
+                        success: function(response){
+                            btnSelesai.removeAttr("disabled");
+                            if(response.response_package.response_result > 0) {
+                                //
+                            } else {
+                                //notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
+                            }
+                            console.clear();
+                            console.log(response.response_package);
+
+                            //location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+                        },
+                        error: function(response) {
+                            btnSelesai.removeAttr("disabled");
+                            console.log("Error : ");
+                            console.log(response);
+                        }
+                    });
+                } else {
+                    btnSelesai.removeAttr("disabled");
+                }
             });
 
-            allData["partus_list"] = partusList;
 
-			delete allData['riwayat_merokok_option'];
-			delete allData['riwayat_miras_option'];
-			delete allData['riwayat_obt_terlarang_option'];
-
-			$.ajax({
-				async: false,
-				url: __HOSTAPI__ + "/Asesmen",
-				data: {
-					request : "update_asesmen_rawat",
-					dataAntrian : dataPasien.antrian,
-					dataPasien: dataPasien.pasien,
-					dataObj : allData
-				},
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type: "POST",
-				success: function(response){
-					btnSelesai.removeAttr("disabled");
-				    if(response.response_package.response_result > 0) {
-                        location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
-                    } else {
-                        notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
-                        console.clear();
-			console.log(JSON.stringify(response.response_package));
-                        console.log(response.response_package);
-                    }
-				},
-				error: function(response) {
-					btnSelesai.removeAttr("disabled");
-					console.log("Error : ");
-					console.log(response);
-				}
-			});
 			// /console.log(dataPasien.antrian);
 		});
 
@@ -485,7 +502,7 @@
         });
 	});
 
-	function loadTermSelectBox(selector, id_term){
+	function loadTermSelectBox(selector, id_term, selected = ""){
 		$.ajax({
             url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + id_term,
             type: "GET",
@@ -498,6 +515,9 @@
                 if (MetaData != ""){
                 	for(i = 0; i < MetaData.length; i++){
 	                    var selection = document.createElement("OPTION");
+	                    if(MetaData[i].id == selected) {
+                            $(selection).attr("selected", "selected");
+                        }
 
 	                    $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
 	                    $("#" + selector).append(selection);
@@ -574,6 +594,7 @@
 		                if (MetaData.antrian.penjamin != <?= json_encode(__UIDPENJAMINBPJS__) ?>) {
 		                	$(".rujukan-bpjs").attr("hidden", true);
 		                } else {
+		                    //
 		                }
 
 						if (MetaData.pasien.id_jenkel == 2){
@@ -587,10 +608,13 @@
 			                	$("#" + key).val(item);
 			                	checkedRadio(key, item);
 			                	checkedCheckbox(key, item);
+                                if(key == "riwayat_transfusi_golongan_darah") {
+                                    loadTermSelectBox("riwayat_transfusi_golongan_darah", 4, item);
+                                }
 			                });
 		                	
 		                	let program_kb = $("#program_kb").val();
-		                	if (program_kb == 0 || program_kb == ""){
+		                	if (program_kb == 0 || program_kb == "") {
 								disableElementSelectBox('jenis-kb', program_kb);	                		
 		                	}
 
@@ -654,7 +678,6 @@
 
 								$("#riwayat_obt_terlarang").removeAttr("disabled");
 							}
-
 		                }
 	            	}
 	            },
@@ -667,8 +690,9 @@
 		return MetaData;
 	}
 
-	function checkedRadio(name, value){
-		var $radios = $('input:radio[name='+ name +']');
+	function checkedRadio(name, value) {
+
+		var $radios = $('input:radio[name=' + name +']');
 
 		if ($radios != ""){
 			if($radios.is(':checked') === false) {

@@ -30,6 +30,7 @@
                                 <th class="wrap_content">No</th>
                                 <th>Nama Poli</th>
                                 <th>Tindakan Konsultasi</th>
+                                <th>Kode BPJS</th>
                                 <th class="wrap_content">Aksi</th>
                             </tr>
                             </thead>

@@ -1334,6 +1334,7 @@ class Invoice extends Utility
                 'discount',
                 'discount_type',
                 'penjamin',
+                'billing_group',
                 'keterangan',
                 'created_at',
                 'updated_at'
@@ -1491,6 +1492,7 @@ class Invoice extends Utility
             'discount_type' => $parameter['discount_type'],
             'pasien' => $parameter['pasien'],
             'penjamin' => $parameter['penjamin'],
+            'billing_group' => $parameter['billing_group'],
             'keterangan' => $parameter['keterangan'],
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date()
