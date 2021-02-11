@@ -161,9 +161,9 @@
                 showDenyButton: true,
                 type: 'warning',
                 confirmButtonText: `Ya`,
-                confirmButtonColor: `#ff2a2a`,
+                confirmButtonColor: `#1297fb`,
                 denyButtonText: `Batal`,
-                denyButtonColor: `#1297fb`
+                denyButtonColor: `#ff2a2a`
             }).then((result) => {
                 if (result.isConfirmed) {
                     $(".inputan").each(function(){
