@@ -2728,12 +2728,19 @@ class Asesmen extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
 
+
 		$dataAsesmen['uid'] = $uid;
 		$dataAsesmen['asesmen'] = $uid_asesmen;
 		$dataAsesmen['perawat'] = $UserData['data']->uid;
 		$dataAsesmen['waktu_pengkajian'] = parent::format_date();
 		$dataAsesmen['created_at'] = parent::format_date();
 		$dataAsesmen['updated_at'] = parent::format_date();
+
+		foreach ($dataAsesmen as $dataKey => $dataValue) {
+		    if(strval($dataKey) === 'undefined') {
+		        unset($dataAsesmen[$dataKey]);
+            }
+        }
 
 		$rawat = self::$query
 			->insert('asesmen_rawat_' . $poli, $dataAsesmen)
