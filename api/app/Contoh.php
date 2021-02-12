@@ -42,6 +42,7 @@ class Contoh extends Utility {
             $new_table = $conn->prepare('
                 CREATE TABLE asesmen_rawat_' . $value['poli_asesmen'] . ' (
                     uid uuid NOT NULL,
+                    cara_masuk_lainnya character varying,
                     antrian uuid NOT NULL,
                     no_rm character varying(15) NOT NULL,
                     pasien uuid NOT NULL,

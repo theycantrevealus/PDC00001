@@ -172,10 +172,12 @@
                         if (value != "" && value != null){
                             $this = $(this);
                             var name = $(this).attr("id");
+
                             if(name !== undefined) {
+
                                 allData[name] = value;
                             } else {
-                                alert(name);
+                                //
                             }
                         }
                     });
@@ -592,7 +594,7 @@
 		                });
 
 		                $.each(MetaData.antrian, function(key, item){
-		                	$("#" + key).val(item);
+		                    $("#" + key).val(item);
 		                });
 
 		                if (MetaData.antrian.penjamin != <?= json_encode(__UIDPENJAMINBPJS__) ?>) {
@@ -608,8 +610,14 @@
 						}
 
 						if (MetaData.asesmen_rawat != ""){
-		                	$.each(MetaData.asesmen_rawat, function(key, item){
-			                	$("#" + key).val(item);
+                            let cara_masuk = $("input[name='cara_masuk']").val();
+		                	$.each(MetaData.asesmen_rawat, function(key, item) {
+                                $("#" + key).val(item);
+                                if(item !== null || item !== "" || item != "") {
+                                    $("#" + key).removeAttr("disabled").prop("disabled", false);
+                                } else {
+                                    disableLainnya('cara_masuk_lainnya', cara_masuk, "Lainnya");
+                                }
 			                	checkedRadio(key, item);
 			                	checkedCheckbox(key, item);
                                 if(key == "riwayat_transfusi_golongan_darah") {
@@ -622,8 +630,8 @@
 								disableElementSelectBox('jenis-kb', program_kb);	                		
 		                	}
 
-		                	let cara_masuk = $("input[name='cara_masuk']").val();
-		                	disableLainnya('cara_masuk_lainnya', cara_masuk, "Lainnya");
+
+		                	//disableLainnya('cara_masuk_lainnya', cara_masuk, "Lainnya");
 
 		                	let rujukan = $("input[name='rujukan']").val();
 		                	disableLainnya('ket_rujukan', rujukan, 1);
