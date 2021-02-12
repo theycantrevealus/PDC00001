@@ -172,7 +172,11 @@
                         if (value != "" && value != null){
                             $this = $(this);
                             var name = $(this).attr("id");
-                            allData[name] = value;
+                            if(name !== undefined) {
+                                allData[name] = value;
+                            } else {
+                                alert(name);
+                            }
                         }
                     });
 
@@ -251,7 +255,7 @@
                             console.clear();
                             console.log(response.response_package);
 
-                            //location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+                            location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
                         },
                         error: function(response) {
                             btnSelesai.removeAttr("disabled");

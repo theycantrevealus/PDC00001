@@ -2340,6 +2340,12 @@ class Asesmen extends Utility {
 		$Poli = new Poli(self::$pdo);
 		$PoliDetail = $Poli::get_poli_detail($parameter['dataAntrian']['departemen'])['response_data'][0];
         $DataPartus = $parameter['dataObj']['partus_list'];
+
+        foreach ($parameter['dataObj'] as $dataKey => $dataValue) {
+            if(!isset($dataKey) || $dataKey === 'undefined' || $dataKey == 'undefined') {
+                unset($parameter['dataObj'][$dataKey]);
+            }
+        }
 		//Check
 		$check = self::$query->select('asesmen', array(
 				'uid'
@@ -2722,12 +2728,26 @@ class Asesmen extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
 
+        $DataPartus = $dataAsesmen['partus_list'];
+
+
+
+
+		unset($dataAsesmen['partus_list']);
+
 		$dataAsesmen['uid'] = $uid;
 		$dataAsesmen['asesmen'] = $uid_asesmen;
 		$dataAsesmen['perawat'] = $UserData['data']->uid;
 		$dataAsesmen['waktu_pengkajian'] = parent::format_date();
+
 		$dataAsesmen['created_at'] = parent::format_date();
 		$dataAsesmen['updated_at'] = parent::format_date();
+
+		foreach ($dataAsesmen as $dataKey => $dataValue) {
+		    if(strval($dataKey) === 'undefined') {
+		        unset($dataAsesmen[$dataKey]);
+            }
+        }
 
 		$rawat = self::$query
 			->insert('asesmen_rawat_' . $poli, $dataAsesmen)
@@ -2763,6 +2783,63 @@ class Asesmen extends Utility {
 				->update('asesmen', array('status' => 'D'))
 				->where(array('asesmen.uid' => '= ?'), array($uid_asesmen))
 				->execute();
+
+
+
+
+            foreach ($DataPartus as $partKey => $partValue) {
+                //Asesmen Kebidanan
+                $checkBidan = self::$query->select('asesmen_kebidanan', array(
+                    'id'
+                ))
+                    ->where(array(
+                        'asesmen_kebidanan.asesmen' => '= ?'
+                    ), array(
+                        $uid_asesmen
+                    ))
+                    ->execute();
+                if(count($checkBidan['response_data']) > 0 && !in_array($checkBidan['response_data'][0]['id'], $proceed_bidan_id)) {
+                    $proceed_bidan = self::$query->update('asesmen_kebidanan', array(
+                        'tanggal_partus' => $partValue['tanggal'],
+                        'usia_kehamilan' => $partValue['usia'],
+                        'tempat_partus' => $partValue['tempat'],
+                        'jenis_partus' => $partValue['jenis'],
+                        'penolong' => $partValue['penolong'],
+                        'nifas' => $partValue['nifas'],
+                        'jenkel_anak' => $partValue['jenkel_anak'],
+                        'bb_anak' => $partValue['bb_anak'],
+                        'keadaan_sekarang' => $partValue['keadaan_sekarang'],
+                        'keterangan' => $partValue['keterangan'],
+                        'deleted_at' => NULL
+                    ))
+                        ->where(array(
+                            'asesmen_kebidanan.id' => '= ?'
+                        ), array(
+                            $checkBidan['response_data'][0]['id']
+                        ))
+                        ->execute();
+                    array_push($proceed_bidan_id, $checkBidan['response_data'][0]['id']);
+                } else {
+                    $proceed_bidan = self::$query->insert('asesmen_kebidanan', array(
+                        'asesmen' => $MasterUID,
+                        'tanggal_partus' => $partValue['tanggal'],
+                        'usia_kehamilan' => $partValue['usia'],
+                        'tempat_partus' => $partValue['tempat'],
+                        'jenis_partus' => $partValue['jenis'],
+                        'penolong' => $partValue['penolong'],
+                        'nifas' => $partValue['nifas'],
+                        'jenkel_anak' => $partValue['jenkel_anak'],
+                        'bb_anak' => $partValue['bb_anak'],
+                        'keadaan_sekarang' => $partValue['keadaan_sekarang'],
+                        'keterangan' => $partValue['keterangan'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
+
+                array_push($proceed_bidan_result, $proceed_bidan);
+            }
 		}
 
 		return $rawat;
