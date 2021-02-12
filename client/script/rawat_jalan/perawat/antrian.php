@@ -457,6 +457,10 @@
             ]
         });
 
+        $("#pj_pasien").prop("disabled", true).attr({
+            "disabled": "disabled"
+        });
+
         $("#btnSimpanTerapi").click(function() {
             Swal.fire({
                 title: 'Tambah terapi?',
@@ -610,6 +614,7 @@
 						}
 
 						if (MetaData.asesmen_rawat != ""){
+
                             let cara_masuk = $("input[name='cara_masuk']").val();
 		                	$.each(MetaData.asesmen_rawat, function(key, item) {
                                 $("#" + key).val(item);
