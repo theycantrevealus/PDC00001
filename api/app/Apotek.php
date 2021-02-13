@@ -1369,7 +1369,7 @@ class Apotek extends Utility
                 ))
                     ->execute();
 
-                $AppendInvoice = $Invoice::append_invoice(array(
+                $AppendInvoice = $Invoice->append_invoice(array(
                     'invoice' => $TargetInvoice,
                     'item' => $KValue['obat'],
                     'item_origin' => 'master_inv',
@@ -1381,6 +1381,7 @@ class Apotek extends Utility
                     'discount' => 0,
                     'discount_type' => 'N',
                     'pasien' => $parameter['pasien'],
+                    'billing_group' => 'obat',
                     'penjamin' => $parameter['penjamin'],
                     'keterangan' => 'Biaya racikan obat'
                 ));
@@ -1676,6 +1677,7 @@ class Apotek extends Utility
                 $invo_detail['harga'] = $value['harga_after_profit'];
                 $invo_detail['status_bayar'] = 'Y';
                 $invo_detail['subtotal'] = $value['harga_after_profit'] * $value['jumlah'];
+                $invo_detail['billing_group'] = 'obat';
                 $invo_detail['discount'] = 0;
                 $invo_detail['discount_type'] = 'N';
                 $invo_detail['keterangan'] = 'Biaya obat';
@@ -1809,6 +1811,7 @@ class Apotek extends Utility
             $parameter['harga'] = $value['harga'];
             $parameter['status_bayar'] = 'N';
             $parameter['subtotal'] = $value['harga'] * $value['jumlah'];
+            $parameter['billing_group'] = 'obat';
             $parameter['discount'] = 0;
             $parameter['discount_type'] = 'N';
             $parameter['keterangan'] = '';
