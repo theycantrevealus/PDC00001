@@ -1403,7 +1403,7 @@
                                             "success"
                                         ).then((result) => {
                                             push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya obat baru", "warning");
-                                            //location.href = __HOSTNAME__ + "/apotek/resep/";
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
                                         });
                                     } else {
                                         Swal.fire(
@@ -1411,7 +1411,7 @@
                                             "Silahkan minta pasien menunggu proses persiapan obat",
                                             "success"
                                         ).then((result) => {
-                                            //location.href = __HOSTNAME__ + "/apotek/resep/";
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
                                         });
                                     }
                                 }
@@ -1427,7 +1427,7 @@
                             "Pastikan semua obat memiliki stok tersedia",
                             "warning"
                         ).then((result) => {
-                            //location.href = __HOSTNAME__ + "/apotek/resep/";
+                            location.href = __HOSTNAME__ + "/apotek/resep/";
                         });
                     }
                 }
