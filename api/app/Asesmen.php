@@ -255,9 +255,9 @@ class Asesmen extends Utility {
                             'keterangan'
                         ))
                             ->where(array(
-                                'master_lab_nilai.id' => '= ?',
+                                'master_lab_nilai.id' => '= ?'/*,
                                 'AND',
-                                'master_lab_nilai.deleted_at' => 'IS NULL'
+                                'master_lab_nilai.deleted_at' => 'IS NULL'*/
                             ), array(
                                 $LabOrderDetailItemValue['id_lab_nilai']
                             ))

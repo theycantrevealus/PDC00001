@@ -12,7 +12,7 @@
                 </div>
 			</div>
 			<div class="card-body">
-				<table class="table table-bordered" id="nilai-lab">
+				<table class="table table-bordered largeDataType" id="nilai-lab">
 					<thead class="thead-dark">
 						<tr>
 							<th class="wrap_content">No</th>
