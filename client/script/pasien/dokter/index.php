@@ -30,6 +30,7 @@
                 },
                 dataSrc:function(response) {
                     var dataSet = response.response_package.response_data;
+                    //console.log(dataSet);
 
                     /*var dataResponse = [];
                     if(dataSet == undefined) {
@@ -234,12 +235,13 @@
 
 
                     //Parse Laboratorium
+                    console.log(selectedData.lab_order);
                     for(var labKey in selectedData.lab_order) {
                         var LabBuild = load_laboratorium(selectedData.lab_order[labKey]);
                         $(".lab_loader").html(LabBuild);
                     }
 
-                    console.log(selectedData.rad_order);
+                    //console.log(selectedData.rad_order);
 
                     //Parse Radiologi
                     for(var radKey in selectedData.rad_order) {

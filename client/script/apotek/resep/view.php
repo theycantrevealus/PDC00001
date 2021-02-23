@@ -1394,6 +1394,7 @@
                                 racikan: racikanItem
                             },
                             success:function(response) {
+                                console.log(response);
                                 if(response.response_package.antrian.response_result > 0) {
                                     if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
                                         Swal.fire(
@@ -1420,6 +1421,7 @@
                             }
                         });
                     } else {
+                        console.log("GAGAL");
                         Swal.fire(
                             "Verifikasi Gagal!",
                             "Pastikan semua obat memiliki stok tersedia",

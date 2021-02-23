@@ -1459,10 +1459,10 @@ class Antrian extends Utility
                         $value['uid']
                     ))
                     ->execute();
-                if (count($SEP['response_data']) == 0) {
-                    $data['response_data'][$key]['sep'] = 'none';
-                } else {
+                if (count($SEP['response_data']) > 0) {
                     $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['sep_no'];
+                } else {
+                    $data['response_data'][$key]['sep'] = $SEP;
                 }
             }
 

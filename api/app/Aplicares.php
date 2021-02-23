@@ -26,8 +26,10 @@ class Aplicares extends Utility {
 		self::$pdo = $connection;
 		self::$query = new Query(self::$pdo);
 		self::$kodePPK = __KODE_PPK__;
-		self::$data_api = __DATA_API_LIVE__;
-		self::$secretKey_api = __SECRET_KEY_LIVE_BPJS__;
+		self::$data_api = __DATA_API_LIVE_APLICARES__;
+		self::$secretKey_api = __SECRET_KEY_LIVE_APLICARES_BPJS__;
+        /*self::$data_api = __DATA_API_LIVE__;
+        self::$secretKey_api = __SECRET_KEY_LIVE_BPJS__;*/
 		self::$base_url = __BASE_LIVE_BPJS_APLICARES__ . '/aplicaresws';
 	}
 
@@ -63,7 +65,7 @@ class Aplicares extends Utility {
 					break;
 				
 				default:
-                    return self::get_ruangan('master_unit_ruangan', $parameter[2]);
+                    //return self::get_ruangan('master_unit_ruangan', $parameter[2]);
 					break;
 			}
 		} catch (QueryException $e) {
@@ -193,7 +195,8 @@ class Aplicares extends Utility {
 	private function get_ruangan_terdaftar_bpjs() {
 		$url = "/aplicaresws/rest/bed/read/" . self::$kodePPK . "/1/100";
         $BPJS = new BPJS(self::$pdo);
-		$result = $BPJS::launchUrl($url, 2);
+		$result = $BPJS->launchUrl($url, 2);
+
 		$error_count = 1;
 		$error_message = array();
 
@@ -201,7 +204,7 @@ class Aplicares extends Utility {
 
 		foreach ($result['content']['response']['list'] as $key => $value) {
 			$Ruangan = new Ruangan(self::$pdo);
-			$KodeRuangan = $Ruangan::get_ruangan_detail_by_code($value['koderuang']);
+			$KodeRuangan = $Ruangan->get_ruangan_detail_by_code($value['koderuang']);
 
 			if(isset($KodeRuangan['uid'])) {
 
@@ -267,6 +270,7 @@ class Aplicares extends Utility {
 			}
 		}
 		return $crossCheckData;
+        //return $result;
 	}
 
 	private function tambah_ruangan($table, $parameter){
@@ -530,6 +534,9 @@ class Aplicares extends Utility {
 		// Computes the timestamp
 		date_default_timezone_set('UTC');
 		$tStamp = strval(time()-strtotime('1970-01-01 00:00:00'));
+
+        //$data_api = (($target_switch === 1) ? self::$data_api : __DATA_API_LIVE_APLICARES__);
+        //$secretKey_api = (($target_switch === 1) ? self::$secretKey_api : __SECRET_KEY_LIVE_APLICARES_BPJS__);
 
 		// Computes the signature by hashing the salt with the secret key as the key
 		$signature = hash_hmac('sha256', self::$data_api ."&". $tStamp , self::$secretKey_api, true);

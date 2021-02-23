@@ -127,7 +127,7 @@
 											<div class="form-check">
 												<input type="radio" class="form-check-input" name="cara_masuk" value="Lainnya" id="cara_masuk_3">
 												<label class='form-check-label' for="cara_masuk_3">Lainnya:</label>
-												<input type="text" disabled="disabled" class="form-control cara_masuk_lainnya" id="cara_masuk_lainnya" name="cara_masuk_lainnya">
+												<input type="text" disabled="disabled" class="form-control cara_masuk_lainnya inputan" id="cara_masuk_lainnya" name="cara_masuk_lainnya">
 											</div>
 										</div>
 									</div>
@@ -284,7 +284,7 @@
 											<span>Kapan</span>
 										</span>
 									</div>
-									<input type="date" class="form-control inputan" id="riwayat_waktu_operasi">
+									<input type="date" class="form-control inputan form-control-special" id="riwayat_waktu_operasi">
 								</div>
 								<div class="col-md-5">
 									<!-- <div class="input-group">
@@ -303,12 +303,12 @@
 						 <div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Dirawat:</label>
 								<div class="input-group">
-									<div class="input-group-prepended">
+									<div class="input-group-prepend">
 										<span class="input-group-text">
 											<span>Kapan</span>
 										</span>
 									</div>
-									<input type="date" class="form-control inputan" id="riwayat_waktu_dirawat" name="riwayat_waktu_dirawat">
+									<input type="date" class="input-group-append form-control inputan form-control-special" id="riwayat_waktu_dirawat" name="riwayat_waktu_dirawat">
 								</div>
 								<br />
 								<span>Diagnosa:</span>
@@ -363,7 +363,7 @@
 					<div class="form-group col-lg-12">
 						<div class="col-6">
 							<label for="">Riwayat Transfusi Darah: </label>
-							<select  class="form-control inputan select2" id="riwayat_transfusi_golongan_darah">
+							<select  class="form-control inputan select2" id="riwayat_transfusi_golongan_darah" name="riwayat_transfusi_golongan_darah">
 								<option value="">Pilih</option>
 							</select>
 	                    </div>
@@ -371,7 +371,7 @@
                     <div class="col-12 col-md-12 mb-3">
                         <ol type="1" class="form-list-item">
                             <li>
-                                <h6>Riwayat Merokok: </h6>
+                                <label>Riwayat Merokok: </label>
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="form-check">
@@ -397,7 +397,65 @@
 
                         </ol>
                     </div>
-	                <div class="form-group col-lg-12">
+                    <div class="col-12 col-md-12 mb-3">
+                        <ol type="1" class="form-list-item">
+                            <li>
+                                <label for="">Riwayat Minuman Keras: </label>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="radio" name="riwayat_miras_option" value="n" checked="checked" />
+                                            <label class="form-check-label">
+                                                Tidak
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="radio" name="riwayat_miras_option" value="y" />
+                                            <label class="form-check-label">
+                                                Ya
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <input type="text" disabled="disabled" class="form-control inputan riwayat_miras" id="riwayat_miras" placeholder="Riwayat Minuman Keras" />
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ol>
+                    </div>
+                    <div class="col-12 col-md-12 mb-3">
+                        <ol type="1" class="form-list-item">
+                            <li>
+                                <label for="">Riwayat Obat Terlarang: </label>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="radio" name="riwayat_obt_terlarang_option" value="n" checked="checked" />
+                                            <label class="form-check-label">
+                                                Tidak
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input type="radio" name="riwayat_obt_terlarang_option" value="y" />
+                                            <label class="form-check-label">
+                                                Ya
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <input type="text" disabled="disabled" class="form-control inputan riwayat_obt_terlarang" id="riwayat_obt_terlarang" placeholder="Riwayat Obat Terlarang" />
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ol>
+                    </div>
+	                <!--<div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Minuman Keras: </label>
 							<br />
@@ -416,9 +474,142 @@
 							<br />
 							<input type="text" disabled="disabled" class="form-control inputan riwayat_obt_terlarang" id="riwayat_obt_terlarang" placeholder="Riwayat Obat Terlarang" />
 	                    </div>
-	                </div>
+	                </div>-->
+
+
 	                <div class="form-group col-lg-12">
-						<div class="col-12 col-md-12 mb-3">
+                        <div class="col-12 col-md-12 mb-3">
+                            <label for="">Riwayat Imunisasi: </label>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="riwayat_imunisasi_dpt_1" value="1" id="riwayat_imunisasi_dpt_1">
+                                                    <label class="form-check-label" for="riwayat_imunisasi_dpt_1">
+                                                        DPT 1
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="riwayat_imunisasi_polio_2" value="1" id="riwayat_imunisasi_polio_2">
+                                                    <label class="form-check-label" for="riwayat_imunisasi_polio_2">
+                                                        Polio II
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-2">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="riwayat_imunisasi_dpt_2" value="1" id="riwayat_imunisasi_dpt_2">
+                                                    <label class="form-check-label" for="riwayat_imunisasi_dpt_2">
+                                                        DPT II
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="riwayat_imunisasi_hepatitis" value="1" id="riwayat_imunisasi_hepatitis">
+                                                    <label class="form-check-label" for="riwayat_imunisasi_hepatitis">
+                                                        Hepatitis
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-2">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="riwayat_imunisasi_dpt_3" value="1" id="riwayat_imunisasi_dpt_3">
+                                                    <label class="form-check-label" for="riwayat_imunisasi_dpt_3">
+                                                        DPT III
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="riwayat_imunisasi_mmr" value="1" id="riwayat_imunisasi_mmr">
+                                                    <label class="form-check-label" for="riwayat_imunisasi_mmr">
+                                                        MMR
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-2">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="riwayat_imunisasi_campak" value="1" id="riwayat_imunisasi_campak">
+                                                    <label class="form-check-label" for="riwayat_imunisasi_campak">
+                                                        Campak
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-2">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="riwayat_imunisasi_bcg" value="1" id="riwayat_imunisasi_bcg">
+                                                    <label class="form-check-label" for="riwayat_imunisasi_bcg">
+                                                        BCG
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-2">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="riwayat_imunisasi_polio_1" value="1" id="riwayat_imunisasi_polio_1">
+                                                    <label class="form-check-label" for="riwayat_imunisasi_polio_1">
+                                                        Polio I
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+						<!--<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Imunisasi: </label>
 							<div class="row col-md-12" id="">
 								<div class="col-md-2">
@@ -463,12 +654,12 @@
 										<label for="riwayat_imunisasi_polio_2">Polio II</label>
 									</div>
 								</div>
-								<!-- <div class="col-md-2">
+								<div class="col-md-2">
 									<div class="form-check">
 										<input type="checkbox" class="form-check-input" name="riwayat_imunisasi_polio_3" value="1" id="riwayat_imunisasi_polio_3">
 										<label for="riwayat_imunisasi_polio_3">Polio III</label>
 									</div>
-								</div> -->
+								</div>
 								<div class="col-md-2">
 									<div class="form-check">
 										<input type="checkbox" class="form-check-input" name="riwayat_imunisasi_hepatitis" value="1" id="riwayat_imunisasi_hepatitis">
@@ -482,7 +673,7 @@
 									</div>
 								</div>
 							</div>
-	                    </div>
+	                    </div>-->
 	                </div>
 				</div>
 			</div>
@@ -496,8 +687,133 @@
 				<h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Riwayat Keluarga</h5>
 			</div>
 			<div class="card-body">
-				<div class="row">
-					<div class="form-group col-lg-12">
+                <div class="row">
+                    <div class="col-12">
+                        <label for="">Riwayat Penyakit dari Keluarga: </label>
+                    </div>
+                    <div class="col-md-2">
+                        <ol type="1" class="form-list-item" style="list-style-type: none">
+                            <li class="wrapped">
+                                <h6>&nbsp;</h6>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="riwayat_keluarga_asma" value="1" id="riwayat_keluarga_asma">
+                                            <label class="form-check-label" for="riwayat_keluarga_asma">
+                                                Asma
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="riwayat_keluarga_lainnya" value="1" id="riwayat_keluarga_lainnya" onclick='disableCheckboxChild(this, "riwayat_keluarga_lainnya_ket")'>
+                                            <label class="form-check-label" for="riwayat_keluarga_lainnya">
+                                                Lainnya
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <input type="text" name="riwayat_keluarga_lainnya_ket" id="riwayat_keluarga_lainnya_ket" class="form-control inputan riwayat_keluarga_lainnya_ket" disabled>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="col-md-2">
+                        <ol type="1" class="form-list-item" style="list-style-type: none">
+                            <li class="wrapped">
+                                <h6>&nbsp;</h6>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="riwayat_keluarga_diabetes" value="1" id="riwayat_keluarga_diabetes">
+                                            <label class="form-check-label" for="riwayat_keluarga_diabetes">
+                                                Diabetes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="col-md-2">
+                        <ol type="1" class="form-list-item" style="list-style-type: none">
+                            <li class="wrapped">
+                                <h6>&nbsp;</h6>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="riwayat_keluarga_hipertensi" value="1" id="riwayat_keluarga_hipertensi">
+                                            <label class="form-check-label" for="riwayat_keluarga_hipertensi">
+                                                Hipertensi
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="col-md-2">
+                        <ol type="1" class="form-list-item" style="list-style-type: none">
+                            <li class="wrapped">
+                                <h6>&nbsp;</h6>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="riwayat_keluarga_cancer" value="1" id="riwayat_keluarga_cancer">
+                                            <label class="form-check-label" for="riwayat_keluarga_cancer">
+                                                Cancer
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="col-md-2">
+                        <ol type="1" class="form-list-item" style="list-style-type: none">
+                            <li class="wrapped">
+                                <h6>&nbsp;</h6>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="riwayat_keluarga_anemia" value="1" id="riwayat_keluarga_anemia">
+                                            <label class="form-check-label" for="riwayat_keluarga_anemia">
+                                                Anemia
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="col-md-2">
+                        <ol type="1" class="form-list-item" style="list-style-type: none">
+                            <li class="wrapped">
+                                <h6>&nbsp;</h6>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="riwayat_keluarga_jantung" value="1" id="riwayat_keluarga_jantung">
+                                            <label class="form-check-label" for="riwayat_keluarga_jantung">
+                                                Jantung
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="col-12">
+                        <label for="hub_keluarga">Hubungan Keluarga</label>
+                        <input type="text" name="riwayat_hub_keluarga" id="riwayat_hub_keluarga" class="form-control inputan" placeholder="-">
+                    </div>
+
+
+
+
+
+					<!--<div class="form-group col-lg-12">
 						<div class="col-12 col-md-12 mb-3">
 							<label for="">Riwayat Penyakit dari Keluarga: </label>
 							<div class="row col-md-12" id="">
@@ -546,13 +862,7 @@
 								</div>
 							</div>
 	                    </div>
-	                </div>
-	                <div class="form-group col-lg-6">
-	                	<div class="col-12 col-md-12 mb-3">
-		                	<label for="hub_keluarga">Hubungan Keluarga</label>
-		                	<input type="text" name="riwayat_hub_keluarga" id="riwayat_hub_keluarga" class="form-control inputan" placeholder="-">
-	                	</div>
-	                </div>
+	                </div>-->
 				</div>
 			</div>
 		</div>
@@ -571,7 +881,104 @@
             <div class="card-body">
                 <div class="row">
                     <div class="form-group col-lg-12">
-                        <div class="col-12 col-md-12 mb-3">
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="">Status Pernikahan</label>
+                            </div>
+                            <div class="col-md-3">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="radio" class="form-check-input" name="status_pernikahan" value="1" id="riwayat_keluarga_belum">
+                                                    <label class="form-check-label" for="riwayat_keluarga_belum">
+                                                        Belum Menikah
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-3">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="radio" class="form-check-input" name="status_pernikahan" value="2" id="riwayat_keluarga_sudah">
+                                                    <label class="form-check-label" for="riwayat_keluarga_sudah">
+                                                        Menikah
+                                                    </label>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="input-group input-group-merge">
+                                                        <input type="text" id="kali_nikah" name="kali_nikah" class="form-control form-control-appended inputan">
+                                                        <div class="input-group-append">
+                                                            <div class="input-group-text">
+                                                                <span>kali</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-3">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="radio" class="form-check-input" name="status_pernikahan" value="3" id="riwayat_keluarga_bercerai">
+                                                    <label class="form-check-label" for="riwayat_keluarga_bercerai">
+                                                        Bercerai
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-3">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li class="wrapped">
+                                        <h6>&nbsp;</h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="radio" class="form-check-input" name="status_pernikahan" value="4" id="riwayat_keluarga_janda_duda">
+                                                    <label class="form-check-label" for="riwayat_keluarga_janda_duda">
+                                                        Janda/Duda
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="form-group col-lg-12">
+                                <label for="umur_nikah">Umur Waktu Pertama Menikah</label>
+                                <div class="input-group input-group-merge">
+                                    <input type="text" id="umur_nikah" name="umur_nikah" class="form-control form-control-appended inputan">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">
+                                            <span>tahun</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!--div class="col-12 col-md-12 mb-3">
                             <label for="">Status Pernikahan: </label>
                             <div class="row col-md-12" id="">
                                 <div class="col-md-2">
@@ -620,7 +1027,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>-->
                     </div>
                     <div class="form-group col-lg-6">
                         <div class="col-12 col-md-12 mb-3">
@@ -659,7 +1066,7 @@
 								</div>
 								<div class="col-md-4">
 									<div class="input-group input-group-merge">
-										<div class="input-group-prepended">
+										<div class="input-group-prepend">
 											<span class="input-group-text">
 												<span>Siklus</span>
 											</span>
@@ -717,7 +1124,7 @@
 								<div class="col-md-6">
 									<div class="form-check col-md-1">
 										<input type="radio" class="form-check-input" name="keluhan_haid" value="1" id="keluhan_haid_2">
-										<label class='cform-check-label' for="keluhan_haid_2">Ya</label>
+										<label class='form-check-label' for="keluhan_haid_2">Ya</label>
 									</div>
 								</div>
 							</div>
@@ -813,7 +1220,85 @@
 						</div>
 						<div class="col-6 col-md-6 mb-3">
 							<label for="k">Sebutkan:</label>
-							<div class="row col-md-12" id="">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <ol type="1" class="form-list-item" style="list-style-type: none">
+                                        <li>
+                                            <h6></h6>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input jenis-kb" name="program_kb_iud" value="1" id="program_kb_iud">
+                                                        <label class="form-check-label" for="program_kb_iud">
+                                                            IUD
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input jenis-kb" name="program_kb_pil" value="1" id="program_kb_pil">
+                                                        <label class="form-check-label" for="program_kb_pil">
+                                                            PIL
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ol>
+                                </div>
+                                <div class="col-md-4">
+                                    <ol type="1" class="form-list-item" style="list-style-type: none">
+                                        <li>
+                                            <h6></h6>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input jenis-kb" name="program_kb_susuk" value="1" id="program_kb_susuk">
+                                                        <label class="form-check-label" for="program_kb_susuk">
+                                                            Susuk
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input jenis-kb" name="program_kb_steril" value="1" id="program_kb_steril">
+                                                        <label class="form-check-label" for="program_kb_steril">
+                                                            Steril
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ol>
+                                </div>
+                                <div class="col-md-4">
+                                    <ol type="1" class="form-list-item" style="list-style-type: none">
+                                        <li>
+                                            <h6></h6>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input jenis-kb" name="program_kb_suntik" value="1" id="program_kb_suntik">
+                                                        <label class="form-check-label" for="program_kb_suntik">
+                                                            Suntik
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input jenis-kb" name="program_kb_vasectomi" value="1" id="program_kb_vasectomi">
+                                                        <label class="form-check-label" for="program_kb_vasectomi">
+                                                            Vasektomi
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+
+							<!--<div class="row col-md-12" id="">
 								<div class="col-md-2">
 									<div class="form-check">
 										<input type="checkbox" class="form-check-input jenis-kb" name="program_kb_iud" value="1" id="program_kb_iud">
@@ -852,7 +1337,7 @@
 										<label for="program_kb_vasectomi">Vasectomi</label>
 									</div>
 								</div>
-							</div>
+							</div>-->
 						</div>
 						<div class="col-6 col-md-6 mb-3">
 	                		<div class="form-group col-md-12">
@@ -1160,7 +1645,102 @@
 					</div>
 					<div class="col-6 col-md-6 mb-3">
 						<label for="k">Karakteristik Nyeri:</label>
-						<div class="row col-md-12" id="">
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li>
+                                        <h6></h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="nyeri_terbakar" value="1" id="nyeri_terbakar">
+                                                    <label class="form-check-label" for="nyeri_terbakar">
+                                                        Terbakar
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="nyeri_tumpul" value="1" id="nyeri_tumpul">
+                                                    <label class="form-check-label" for="nyeri_tumpul">
+                                                        Tumpul
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-3">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li>
+                                        <h6></h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="nyeri_tertindih" value="1" id="nyeri_tertindih">
+                                                    <label class="form-check-label" for="nyeri_tertindih">
+                                                        Tertindih
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="nyeri_denyut" value="1" id="nyeri_denyut">
+                                                    <label class="form-check-label" for="nyeri_denyut">
+                                                        Berdenyut
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-3">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li>
+                                        <h6></h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="nyeri_menyebar" value="1" id="nyeri_menyebar">
+                                                    <label class="form-check-label" for="nyeri_menyebar">
+                                                        Menyebar
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="nyeri_tajam" value="1" id="nyeri_tajam">
+                                                    <label class="form-check-label" for="nyeri_tajam">
+                                                        Tajam
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="col-md-3">
+                                <ol type="1" class="form-list-item" style="list-style-type: none">
+                                    <li>
+                                        <h6></h6>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="nyeri_lainnya" value="1" id="nyeri_lainnya" onclick='disableCheckboxChild(this, "nyeri_lainnya_ket")'>
+                                                    <label class="form-check-label" for="nyeri_lainnya">
+                                                        Lainnya
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+						<!--<div class="row col-md-12" id="">
 							<div class="col-md-3">
 								<div class="form-check">
 									<input type="checkbox" class="form-check-input" name="nyeri_terbakar" value="1" id="nyeri_terbakar">
@@ -1205,9 +1785,9 @@
 									<label for="nyeri_lainnya">Lainnya</label>
 								</div>
 							</div>
-						</div>
+						</div>-->
 					</div>
-					<div class="form-group col-md-3" id="nyeri_lainnya_ket">
+					<div class="form-group col-md-3">
 						<label>Nyeri Lainnya: </label>
 						<input disabled type="text" name="nyeri_lainnya_ket" id="nyeri_lainnya_ket" class="form-control inputan nyeri_lainnya_ket" placeholder="-">
 					</div>

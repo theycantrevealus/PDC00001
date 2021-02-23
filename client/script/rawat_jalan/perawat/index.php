@@ -99,7 +99,7 @@
 						var button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-info' data-toggle='tooltip' title='Isi Assesmen Pasien'><i class='fa fa-address-card'></i> Proses</a>";
 
 						if (row['status_asesmen'] === true){
-							button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-warning' data-toggle='tooltip' title='Edit Assesmen Pasien'><i class='fa fa-address-card'></i> Edit</a>";
+							button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-success' data-toggle='tooltip' title='Edit Assesmen Pasien'><i class='fa fa-check-circle'></i> Edit</a>";
 						}
 
 						return "<div class=\"btn-group \" role=\"group\" aria-label=\"Basic example\">" + button + "</div>";
@@ -107,10 +107,20 @@
 				}
 			],
 			rowCallback: function (row, data) {
-				if (data['status_assesmen'] === true){
-					$(row).css({"background-color":"#E0F5E5","color":"#000"});
-				}
-				$(".selector_dokter").select2();
+			    if (data['status_assesmen'] === true){
+					$(row).find("td").css({
+                        "background":"#fffcd0",
+                        "color":"#000"
+					});
+				} else {
+                    $(row).find("td").css({
+                        "background":"#E0F5E5",
+                        "color":"#000"
+                    });
+                }
+
+                $(row).find("select").select2();
+				//$(".selector_dokter").select2();
 			}
 		});
 

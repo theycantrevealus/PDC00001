@@ -481,6 +481,8 @@
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
 
+            var penjamin = $(this).attr("penjamin");
+
             //Get Detail
             $.ajax({
                 async: false,
@@ -500,12 +502,23 @@
                         var thisTindakan = $(this).attr("id").split("_");
                         thisTindakan = thisTindakan[thisTindakan.length - 1];
 
-                        loadMitra("penyedia_order_" + thisTindakan, "");
+
 
 
 
                         $(this).select2({
-                            dropdownParent: $("#modal-detail-labor")
+                            dropdownParent: $("#modal-detail-labor"),
+                            data: loadMitra("penyedia_order_" + thisTindakan, thisTindakan, penjamin),
+                            selectOnClose: true,
+                            escapeMarkup: function(markup) {
+                                return markup;
+                            },
+                            templateResult: function(data) {
+                                return data.html;
+                            },
+                            templateSelection: function(data) {
+                                return data.text;
+                            }
                         });
 
 
@@ -646,7 +659,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail-verif\" data-toggle='tooltip' title='Detail'>" +
+                            "<button penjamin=\"" + row.uid_penjamin + "\" type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail-verif\" data-toggle='tooltip' title='Detail'>" +
                             "<i class=\"fa fa-search\"></i>" +
                             "</a>" +
                             "</div>";
@@ -717,9 +730,10 @@
             });
         }
 
-        function loadMitra(target_ui, itemLab, selected = ""){
-            resetSelectBox(target_ui);
-
+        function loadMitra(target_ui, itemLab, penjamin){
+            var MetaData = [];
+            var returnedData = [];
+            resetSelectBox(target_ui, "Mitra");
             $.ajax({
                 async: false,
                 url:__HOSTAPI__ + "/Mitra/mitra_item/LAB/" + itemLab,
@@ -728,22 +742,39 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
+                    MetaData = response.response_package.response_data;
 
-                    var MetaData = response.response_package.response_data;
-                    if (MetaData != ""){
-                        $("#" + target_ui + " option").remove();
+                    if (MetaData != "" && MetaData !== undefined && MetaData !== null){
+                        //$("#" + target_ui + " option").remove();
                         for(i = 0; i < MetaData.length; i++){
-                            var selection = document.createElement("OPTION");
+                            var target_harga = 0;
+                            for(var ai in MetaData[i].harga) {
+                                if(MetaData[i].harga[ai].penjamin === penjamin) {
+                                    target_harga = MetaData[i].harga[ai].harga;
+                                }
+                            }
 
-                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
-                            $("#" + target_ui).append(selection);
+                            returnedData.push({
+                                id: MetaData[i].uid,
+                                text: "<div class=\"" + ((parseFloat(target_harga) > 0) ? "text-success" : "text-danger") + "\">" + MetaData[i].nama + "</div>",
+                                html: "<h6 class=\"" + ((parseFloat(target_harga) > 0) ? "text-success" : "text-danger") + "\">" + MetaData[i].nama + "<b style=\"position: absolute; right: 30px;\" class=\"pull-right\">" + number_format(target_harga, 2, ".", ",") + "</b></h6>",
+                                title: MetaData[i].nama
+                            });
+                            /*var selection = document.createElement("OPTION");
+
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama + " - <b>" + number_format(target_harga, 2, ".", ",") + "</b>");
+                            $("#" + target_ui).append(selection);*/
                         }
+                    } else {
+                        returnedData = [];
                     }
                 },
                 error: function(response) {
                     console.log(response);
                 }
-            })
+            });
+            return returnedData;
         }
 
 
