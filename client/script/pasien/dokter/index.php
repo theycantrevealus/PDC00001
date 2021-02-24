@@ -147,6 +147,7 @@
                 type:"GET",
                 success:function(response) {
                     var data = response.response_package.response_data[0];
+                    console.log(data);
 
                     var icd10Kerja = "<ol type=\"1\">";
                     var icd10Banding = "<ol type=\"1\">";
@@ -171,71 +172,109 @@
                     $("#tanggal_periksa").html(data.tanggal_parsed);
 
                     //Parse Resep
-                    if(data.resep[0] !== undefined) {
-                        var resepData = data.resep[0].resep_detail;
-                        $(".resepDokterCPPT tbody tr").remove();
-                        for(var resepKey in resepData) {
-                            var newResepRow = document.createElement("TR");
+                    if(data.resep !== null) {
+                        if(data.resep[0] !== undefined) {
+                            var resepData = data.resep[0].resep_detail;
+                            $(".resepDokterCPPT tbody tr").remove();
+                            for(var resepKey in resepData) {
+                                var newResepRow = document.createElement("TR");
 
-                            var resepID = document.createElement("TD");
-                            var resepObat = document.createElement("TD");
-                            var resepSigna = document.createElement("TD");
-                            var resepJlh = document.createElement("TD");
+                                var resepID = document.createElement("TD");
+                                var resepObat = document.createElement("TD");
+                                var resepSigna = document.createElement("TD");
+                                var resepJlh = document.createElement("TD");
 
-                            $(resepID).html((parseInt(resepKey) + 1));
-                            $(resepObat).html(resepData[resepKey].obat_detail.nama);
-                            $(resepSigna).html(resepData[resepKey].signa_pakai + " &times; " + resepData[resepKey].signa_qty);
-                            $(resepJlh).html(resepData[resepKey].qty);
+                                $(resepID).html((parseInt(resepKey) + 1));
+                                $(resepObat).html(resepData[resepKey].obat_detail.nama);
+                                $(resepSigna).html(resepData[resepKey].signa_pakai + " &times; " + resepData[resepKey].signa_qty);
+                                $(resepJlh).html(resepData[resepKey].qty);
 
-                            $(newResepRow).append(resepID);
-                            $(newResepRow).append(resepObat);
-                            $(newResepRow).append(resepSigna);
-                            $(newResepRow).append(resepJlh);
+                                $(newResepRow).append(resepID);
+                                $(newResepRow).append(resepObat);
+                                $(newResepRow).append(resepSigna);
+                                $(newResepRow).append(resepJlh);
 
-                            $(".resepDokterCPPT tbody").append(newResepRow);
-                        }
-
-                        var racikanData = data.racikan;
-                        $(".racikanDokterCPPT tbody tr").remove();
-                        for(var racikanKey in racikanData) {
-                            var itemRacikan = racikanData[racikanKey].item;
-
-                            console.log(racikanData[racikanKey]);
-
-                            var newRacikanRow = document.createElement("TR");
-
-                            var racikanID = document.createElement("TD");
-                            var racikanNama = document.createElement("TD");
-                            var racikanKomposisi = document.createElement("TD");
-                            var racikanSigna = document.createElement("TD");
-                            var racikanJlh = document.createElement("TD");
-
-                            $(racikanID).html((parseInt(racikanKey) + 1));
-                            $(racikanNama).html(racikanData[racikanKey].kode);
-
-                            var komposisi = "<ol type=\"1\">";
-                            for(var itemKey in itemRacikan) {
-                                komposisi += "<li>" + itemRacikan[itemKey].obat_detail.nama + " <b class=\"text-info\">" + itemRacikan[itemKey].kekuatan  + "</b></li>";
+                                $(".resepDokterCPPT tbody").append(newResepRow);
                             }
-                            komposisi += "</ol>";
-                            $(racikanKomposisi).html(komposisi);
-                            $(racikanSigna).html(racikanData[racikanKey].signa_pakai + " &times; " + racikanData[racikanKey].signa_qty);
-                            $(racikanJlh).html(racikanData[racikanKey].qty);
 
-                            $(newRacikanRow).append(racikanID);
-                            $(newRacikanRow).append(racikanNama);
-                            $(newRacikanRow).append(racikanKomposisi);
-                            $(newRacikanRow).append(racikanSigna);
-                            $(newRacikanRow).append(racikanJlh);
+                            var racikanData = data.racikan;
+                            $(".racikanDokterCPPT tbody tr").remove();
+                            for(var racikanKey in racikanData) {
+                                var itemRacikan = racikanData[racikanKey].item;
 
-                            $(".racikanDokterCPPT tbody").append(newRacikanRow);
+                                var newRacikanRow = document.createElement("TR");
 
+                                var racikanID = document.createElement("TD");
+                                var racikanNama = document.createElement("TD");
+                                var racikanKomposisi = document.createElement("TD");
+                                var racikanSigna = document.createElement("TD");
+                                var racikanJlh = document.createElement("TD");
+
+                                $(racikanID).html((parseInt(racikanKey) + 1));
+                                $(racikanNama).html(racikanData[racikanKey].kode);
+
+                                var komposisi = "<ol type=\"1\">";
+                                for(var itemKey in itemRacikan) {
+                                    komposisi += "<li>" + itemRacikan[itemKey].obat_detail.nama + " <b class=\"text-info\">" + itemRacikan[itemKey].kekuatan  + "</b></li>";
+                                }
+                                komposisi += "</ol>";
+                                $(racikanKomposisi).html(komposisi);
+                                $(racikanSigna).html(racikanData[racikanKey].signa_pakai + " &times; " + racikanData[racikanKey].signa_qty);
+                                $(racikanJlh).html(racikanData[racikanKey].qty);
+
+                                $(newRacikanRow).append(racikanID);
+                                $(newRacikanRow).append(racikanNama);
+                                $(newRacikanRow).append(racikanKomposisi);
+                                $(newRacikanRow).append(racikanSigna);
+                                $(newRacikanRow).append(racikanJlh);
+
+                                $(".racikanDokterCPPT tbody").append(newRacikanRow);
+                            }
+
+                            var resepApotekData = data.resep_apotek;
+                            $(".resepApotekCPPT tbody tr").remove();
+                            for(var resepApotekKey in resepApotekData) {
+                                //
+                            }
+
+                            var racikanApotekData = data.racikan_apotek;
+                            $(".racikanApotekCPPT tbody tr").remove();
+                            for(var racikanApotekKey in racikanApotekData) {
+                                var itemApotekRacikan = racikanApotekData[racikanApotekKey].item;
+
+                                var newRacikanApotekRow = document.createElement("TR");
+
+                                var racikanApotekID = document.createElement("TD");
+                                var racikanApotekNama = document.createElement("TD");
+                                var racikanApotekKomposisi = document.createElement("TD");
+                                var racikanApotekSigna = document.createElement("TD");
+                                var racikanApotekJlh = document.createElement("TD");
+
+                                $(racikanApotekID).html((parseInt(racikanApotekKey) + 1));
+                                $(racikanApotekNama).html(racikanApotekData[racikanApotekKey].kode);
+
+                                var komposisiApotek = "<ol type=\"1\">";
+                                for(var itemApotekKey in itemApotekRacikan) {
+                                    komposisi += "<li>" + itemRacikan[itemKey].obat_detail.nama + " <b class=\"text-info\">" + itemRacikan[itemKey].kekuatan  + "</b></li>";
+                                }
+                                komposisi += "</ol>";
+                                $(racikanKomposisi).html(komposisi);
+                                $(racikanSigna).html(racikanData[racikanKey].signa_pakai + " &times; " + racikanData[racikanKey].signa_qty);
+                                $(racikanJlh).html(racikanData[racikanKey].qty);
+
+                                $(newRacikanRow).append(racikanID);
+                                $(newRacikanRow).append(racikanNama);
+                                $(newRacikanRow).append(racikanKomposisi);
+                                $(newRacikanRow).append(racikanSigna);
+                                $(newRacikanRow).append(racikanJlh);
+
+                                $(".racikanDokterCPPT tbody").append(newRacikanRow);
+                            }
                         }
                     }
 
 
                     //Parse Laboratorium
-                    console.log(selectedData.lab_order);
                     for(var labKey in selectedData.lab_order) {
                         var LabBuild = load_laboratorium(selectedData.lab_order[labKey]);
                         $(".lab_loader").html(LabBuild);

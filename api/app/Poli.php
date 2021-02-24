@@ -61,6 +61,10 @@ class Poli extends Utility {
 					return self::get_set_perawat($parameter[2]);
 					break;
 
+                case 'get_poli_select2':
+                    return self::get_poli_select2($parameter);
+                    break;
+
 				default:
 					# code...
 					break;
@@ -147,6 +151,31 @@ class Poli extends Utility {
 	}
 
 	/*=============== GET POLI ================*/
+    private function get_poli_select2($parameter) {
+        $data = self::$query->select('master_poli', array(
+                'uid',
+                'nama',
+                'tindakan_konsultasi',
+                'kode_bpjs',
+                'nama_bpjs',
+                'created_at',
+                'updated_at'
+            ))
+            ->order(array(
+                'master_poli.created_at' => 'ASC'
+            ))
+            ->where(array(
+                'master_inv.deleted_at' => 'IS NULL',
+                'AND',
+                '(master_inv.kode_barang' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                'OR',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
+            ))
+            ->limit(10)
+            ->execute();
+        return $data['response_data'];
+    }
+
 	private function get_poli(){
 		$data = self::$query->select('master_poli', array(
 			'uid',

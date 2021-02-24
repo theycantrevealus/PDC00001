@@ -156,7 +156,8 @@
 
                 /*========================= CPPT ==========================*/
 
-                $("#cppt_pagination").pagination({
+
+                /*$("#cppt_pagination").pagination({
                     dataSource: __HOSTAPI__ + "/CPPT/semua/" + pasien_uid,
                     locator: 'response_package.response_data',
                     totalNumberLocator: function(response) {
@@ -180,7 +181,7 @@
 
                         $("#cppt_loader").html(dataHtml);
                     }
-                });
+                });*/
 
                 $("#target_pasien").html(pasien_nama);
                 $(".nama_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
@@ -766,12 +767,12 @@
                             $("#igd_ekg").val(asesmen_detail.ekg);
 
 
-                            var ats_list = JSON.parse(asesmen_detail.ats_list);
+                            var ats_list = (asesmen_detail.ats_list !== undefined) ? JSON.parse(asesmen_detail.ats_list) : [];
                             for(var atsKey in ats_list) {
                                 $("input[value=\"" + ats_list[atsKey] + "\"]").prop("checked", true);
                             }
 
-                            var lokalis_parse = JSON.parse(asesmen_detail.saved_lokalis_item);
+                            var lokalis_parse = (asesmen_detail.saved_lokalis_item !== undefined) ? JSON.parse(asesmen_detail.saved_lokalis_item) : [];
                             for(var lokalisKeyParse in lokalis_parse) {
                                 currentCount++;
                             }
@@ -4565,6 +4566,7 @@
                         type: "POST",
                         data: {
                             request: "tambah_inap",
+                            asal: 'igd',
                             pasien: pasien_uid,
                             waktu_masuk: $("#igd_tanggal_masuk").val(),
                             kamar: $("#igd_kamar").val(),
@@ -5444,8 +5446,7 @@
 
 
         if($("#mata-loader").length > 0) {
-            for(var mKey = 1; mKey <= 2; mKey++)
-            {
+            for(var mKey = 1; mKey <= 2; mKey++) {
                 $("#mata-loader").append("<div style=\"position: relative; min-height: 280px; " + ((mKey == 1) ? "border-right: solid 1px  #000" : "border-left: solid 1px  #000") + "\" class=\"col-md-6 eye-side-" + mKey + "\">" +
                     "<div style=\"" + ((mKey === 1) ? " right: 40px" : "left: 40px") + "; position: absolute; top: -40px; background: url('" + __HOST__ + "images/protractor.png') no-repeat; width: 400px; height: 400px; background-size: contain; background-position: center\"></div>" +
                     "<div style=\"" + ((mKey === 1) ? " right: 140px" : "left: 140px") + ";\" class=\"ocular-mata\"></div>" +

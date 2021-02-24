@@ -769,11 +769,25 @@ class Asesmen extends Utility {
 					$data['response_data'][0]['asesmen']
 				))
 				->execute();
+
 				foreach ($tindakan['response_data'] as $key => $value) {
 					$Tindakan = new Tindakan(self::$pdo);
 					$tindakan['response_data'][$key] = $Tindakan::get_tindakan_detail($value['tindakan'])['response_data'][0];
 				}
+
 				$data['response_data'][0]['tindakan'] = $tindakan['response_data'];
+
+
+
+
+
+
+
+
+
+
+
+
 
 				//Resep Detail
 				$resep = self::$query->select('resep', array(
@@ -794,14 +808,20 @@ class Asesmen extends Utility {
 					'AND',
 					'resep.pasien' => '= ?',
 					'AND',
-					'resep.status_resep' => '= ?'
+					'(resep.status_resep' => '= ?',
+                    'OR',
+                    'resep.status_resep' => '= ?',
+                    'OR',
+                    ' resep.status_resep' => '= ?)',
 				), array(
 					$antrian['response_data'][0]['kunjungan'],
 					$antrian['response_data'][0]['uid'],
 					$data['response_data'][0]['asesmen'],
 					$data['response_data'][0]['dokter'],
 					$data['response_data'][0]['pasien'],
-                    ($isCPPT) ? 'L' : 'C'
+                    ($isCPPT) ? 'L' : 'C',
+                    ($isCPPT) ? 'P' : 'C',
+                    ($isCPPT) ? 'S' : 'C'
 				))
 				->execute();
 				$racikanData = array();
@@ -904,6 +924,9 @@ class Asesmen extends Utility {
 				}
 
 
+
+
+
 				if($isCPPT) {
 				    //List Resep dan Racikan oleh apotek
                     $dataResepApotek = self::$query->select('resep_change_log', array())
@@ -918,8 +941,75 @@ class Asesmen extends Utility {
                     $data['response_data'][0]['resep_apotek'] = $dataResepApotek['response_data'];
                 }
 
-				$data['response_data'][0]['racikan'] = $racikanData;
-				$data['response_data'][0]['resep'] = $resep['response_data'];
+                if(count($resep['response_data']) > 0) {
+                    $resep_apotek = self::$query->select('resep_change_log', array(
+                        'id',
+                        'item',
+                        'qty',
+                        'signa_qty',
+                        'signa_pakai',
+                        'aturan_pakai',
+                        'verifikator',
+                        'keterangan'
+                    ))
+                        ->where(array(
+                            'resep_change_log.resep' => '= ?',
+                            'AND',
+                            'resep_change_log.deleted_at' => 'IS NULL'
+                        ), array(
+                            $resep['response_data'][0]['uid']
+                        ))
+                        ->execute();
+
+                    $data['response_data'][0]['resep'] = $resep['response_data'];
+                    $data['response_data'][0]['resep_apotek'] = $resep_apotek['response_data'];
+                } else {
+                    $data['response_data'][0]['resep'] = array();
+                    $data['response_data'][0]['resep_apotek'] = array();
+                }
+
+                if(count($racikan['response_data']) > 0) {
+                    $racikan_apotek = self::$query->select('racikan_change_log', array(
+                        'jumlah',
+                        'keterangan',
+                        'signa_qty',
+                        'signa_pakai',
+                        'aturan_pakai'
+                    ))
+                        ->where(array(
+                            'racikan_change_log.racikan' => '= ?',
+                            'AND',
+                            'racikan_change_log.deleted_at' => 'IS NULL'
+                        ), array(
+                            $racikan['response_data'][0]['uid']
+                        ))
+                        ->execute();
+
+                    $data['response_data'][0]['racikan'] = $racikanData;
+
+                    foreach ($racikan_apotek['response_data'] as $racikanApotekKey => $racikanApotekValue) {
+                        $racikan_apotek_detail = self::$query->select('racikan_detail_change_log', array(
+                            'obat',
+                            'kekuatan',
+                            'jumlah'
+                        ))
+                            ->where(array(
+                                'racikan_detail_change_log.racikan' => '= ?',
+                                'AND',
+                                'racikan_detail_change_log.deleted_at' => 'IS NULL'
+                            ), array(
+                                $racikan['response_data'][0]['uid']
+                            ))
+                            ->execute();
+                        $racikan_apotek['response_data'][$racikanApotekKey]['item'] = $racikan_apotek_detail['response_data'];
+                    }
+                    $data['response_data'][0]['racikan_apotek'] = $racikan_apotek['response_data'];
+                } else {
+                    $data['response_data'][0]['racikan'] = array();
+                    $data['response_data'][0]['racikan_apotek'] = array();
+                    $data['response_data'][0]['racikan_apotek_detail'] = array();
+                }
+
 				$data['response_data'][0]['asesmen_rawat'] = $Rawat['response_data'][0]['uid'];
                 $data['response_data'][0]['status_asesmen'] = $AsesmenMaster['response_data'][0];
                 $data['response_data'][0]['tanggal_parsed'] = date('d F Y', strtotime($AsesmenMaster['response_data'][0]['created_at']));
@@ -1079,7 +1169,7 @@ class Asesmen extends Utility {
                         'status_alergi_text' => (!empty($parameter['status_alergi_text'])) ? $parameter['status_alergi_text'] : '',
                         'refleks_cahaya' => (!empty($parameter['refleks_cahaya'])) ? $parameter['refleks_cahaya'] : '',
                         'pupil' => (!empty($parameter['pupil'])) ? $parameter['pupil'] : '',
-                        'refleks_cahaya' => (!empty($parameter['refleks_cahaya'])) ? $parameter['refleks_cahaya'] : '',
+                        //'refleks_cahaya' => (!empty($parameter['refleks_cahaya'])) ? $parameter['refleks_cahaya'] : '',
                         'rr' => (!empty($parameter['rr'])) ? $parameter['rr'] : '',
                         'gangguan_perilaku' => (!empty($parameter['gangguan_perilaku'])) ? $parameter['gangguan_perilaku'] : '',
                         'gangguan_terganggu' => (!empty($parameter['gangguan_terganggu'])) ? $parameter['gangguan_terganggu'] : '',
