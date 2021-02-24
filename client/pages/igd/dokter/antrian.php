@@ -19,7 +19,7 @@
 					<li class="breadcrumb-item active" aria-current="page">Pemeriksaan Medis</li>
 				</ol>
 			</nav>
-            <h4><span id="nama-departemen"></span> - Pemeriksaan <b class="text-info" id="heading_nama_poli">Rawat Inap</b></h4>
+            <h4><span id="nama-departemen"></span> - Pemeriksaan <b class="text-info" id="heading_nama_poli">IGD</b></h4>
 		</div>
 	</div>
 </div>

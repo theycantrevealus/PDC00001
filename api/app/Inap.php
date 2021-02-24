@@ -223,6 +223,22 @@ class Inap extends Utility
 
         if($worker['response_result'] > 0)
         {
+            //Check asal
+            if($parameter['asal'] === 'igd') {
+                $updateIGD = self::$query->update('igd', array(
+                    'jenis_pulang' => 'I',
+                    'alasan_pulang' => $parameter['keterangan'],
+                    'waktu_keluar' => parent::format_date()
+                ))
+                    ->where(array(
+                        'igd.kunjungan' => '= ?',
+                        'AND',
+                        'igd.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['kunjungan']
+                    ))
+                    ->execute();
+            }
             $log = parent::log(array(
                 'type'=>'activity',
                 'column'=>array(
