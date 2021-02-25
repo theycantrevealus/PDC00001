@@ -1502,9 +1502,11 @@ class Laboratorium extends Utility {
         }
 
         $itemTotal = self::$query->select('master_lab', array(
-            'id'
+            'uid'
         ))
-            ->where($paramData, $paramValue)
+            ->where(array(
+                'master_lab.deleted_at' => 'IS NULL'
+            ))
             ->execute();
 
         $data['recordsTotal'] = count($itemTotal['response_data']);
