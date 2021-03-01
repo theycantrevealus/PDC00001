@@ -47,7 +47,7 @@
 				    var data = response.response_package.response_data;
 				    var parsedData = [];
 				    for(var key in data) {
-				        if(data[key].uid_poli !== __POLI_INAP__) {
+				        if(data[key].uid_poli !== __POLI_INAP__ && data[key].uid_poli !== __POLI_IGD__) {
 				            parsedData.push(data[key]);
                         }
                         myPoli.push(data[key].departemen);

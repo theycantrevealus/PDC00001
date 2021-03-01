@@ -413,6 +413,7 @@
                 var parameter = signalData.parameter;
 
                 if(command !== undefined && command !== null && command !== "") {
+
                     if(protocolLib[command] !== undefined) {
                         if(command == "anjungan_kunjungan_panggil") {
                             if(audio !== undefined && audio.audio !== undefined) {

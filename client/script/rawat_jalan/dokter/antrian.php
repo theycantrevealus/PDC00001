@@ -3300,7 +3300,23 @@
             }).then(function(result) {
                 if(result.response_package.response_result > 0) {
                     notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-                    //push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                    /*if(result.response_package.resep_response !== undefined && result.response_package.resep_response !== null) {
+                        if(result.response_package.resep_response.resep.length > 0 || result.response_package.resep_response.racikan.length) {
+                            push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                        }
+                    }
+
+                    if(result.response_package.radiologi !== undefined && result.response_package.radiologi !== null) {
+                        if(result.response_package.radiologi.response_result > 0 && result.response_package.radiologi.response_data[0]['status'] === "V") {
+                            push_socket(__ME__, "permintaan_radio_baru", "*", "Permintaan radiologi dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                        }
+                    }
+
+                    if(result.response_package.laboratorium !== undefined && result.response_package.laboratorium !== null) {
+                        if(result.response_package.laboratorium.response_result > 0 && result.response_package.laboratorium.response_data[0]['status'] === "V") {
+                            push_socket(__ME__, "permintaan_laboratorium_baru", "*", "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                        }
+                    }*/
                     //location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                 } else {
                     notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
@@ -3326,7 +3342,23 @@
                     }).then(function(result) {
                         if(result.response_package.response_result > 0) {
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-                            push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                            if(result.response_package.resep_response !== undefined && result.response_package.resep_response !== null) {
+                                if(result.response_package.resep_response.resep.length > 0 || result.response_package.resep_response.racikan.length) {
+                                    push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                                }
+                            }
+
+                            if(result.response_package.radiologi !== undefined && result.response_package.radiologi !== null) {
+                                if(result.response_package.radiologi.response_result > 0 && result.response_package.radiologi.response_data[0]['status'] === "V") {
+                                    push_socket(__ME__, "permintaan_radio_baru", "*", "Permintaan radiologi dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                                }
+                            }
+
+                            if(result.response_package.laboratorium !== undefined && result.response_package.laboratorium !== null) {
+                                if(result.response_package.laboratorium.response_result > 0 && result.response_package.laboratorium.response_data[0]['status'] === "V") {
+                                    push_socket(__ME__, "permintaan_laboratorium_baru", "*", "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                                }
+                            }
                             location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                         } else {
                             notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");

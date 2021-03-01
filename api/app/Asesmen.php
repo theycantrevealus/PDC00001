@@ -1429,6 +1429,34 @@ class Asesmen extends Utility {
             }
         }
 
+        //Check Radiologi
+        $RadCheck = self::$query->select('rad_order', array(
+            'uid', 'status'
+        ))
+            ->where(array(
+                'rad_order.asesmen' => '= ?',
+                'AND',
+                'rad_order.deleted_at' => 'IS NULL'
+            ), array(
+                $MasterUID
+            ))
+            ->execute();
+        $returnResponse['radiologi'] = $RadCheck;
+
+        //Check Laboratorium
+        $LabCheck = self::$query->select('lab_order', array(
+            'uid', 'status'
+        ))
+            ->where(array(
+                'lab_order.asesmen' => '= ?',
+                'AND',
+                'lab_order.deleted_at' => 'IS NULL'
+            ), array(
+                $MasterUID
+            ))
+            ->execute();
+        $returnResponse['laboratorium'] = $LabCheck;
+
 		return $returnResponse;
 	}
 
