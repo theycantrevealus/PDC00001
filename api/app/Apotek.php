@@ -1004,6 +1004,9 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->order(array(
+                    'updated_at' => 'DESC'
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -1019,6 +1022,9 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->order(array(
+                    'updated_at' => 'DESC'
+                ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))
