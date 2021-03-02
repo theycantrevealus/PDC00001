@@ -94,8 +94,21 @@ class Apotek extends Utility
                     $parameter['status'] = 'S';
                     $terima = self::get_resep_backend($parameter);
 
+                    $recordsTotal = $selesai['recordsTotal'] + $panggil['recordsTotal'] + $terima['recordsTotal'];
+                    $recordsFiltered = $selesai['recordsFiltered'] + $panggil['recordsFiltered'] + $terima['recordsFiltered'];
+
                     $allData = array_merge(array_merge($terima['response_data'], $panggil['response_data']), $selesai['response_data']);
+                    $autonum = 1;
+                    foreach ($allData as $key => $value) {
+                        $allData[$key]['autonum'] = $autonum;
+                        $autonum++;
+                    }
+
                     $terima['response_data'] = $allData;
+                    $terima['recordsFiltered'] = $recordsFiltered;
+                    $terima['recordsTotal'] = $recordsTotal;
+
+
 
                     return $terima;
 
@@ -948,7 +961,7 @@ class Apotek extends Utility
     private function get_resep_backend($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -1013,16 +1026,16 @@ class Apotek extends Utility
         foreach ($data['response_data'] as $key => $value) {
             //Dokter Info
             $Pegawai = new Pegawai(self::$pdo);
-            $PegawaiInfo = $Pegawai::get_detail($value['dokter']);
+            $PegawaiInfo = $Pegawai->get_detail($value['dokter']);
             $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
 
             //Get Antrian Detail
             $Antrian = new Antrian(self::$pdo);
-            $AntrianInfo = $Antrian::get_antrian_detail('antrian', $value['antrian']);
+            $AntrianInfo = $Antrian->get_antrian_detail('antrian', $value['antrian']);
 
             //Departemen Info
             $Poli = new Poli(self::$pdo);
-            $PoliInfo = $Poli::get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
+            $PoliInfo = $Poli->get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
             $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
             $data['response_data'][$key]['antrian'] = $AntrianInfo['response_data'][0];
 

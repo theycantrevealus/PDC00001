@@ -92,6 +92,7 @@
                 },
                 dataSrc:function(response) {
                     var forReturn = [];
+                    console.log(response);
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
                         dataSet = [];
