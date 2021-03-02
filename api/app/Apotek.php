@@ -1129,6 +1129,7 @@ class Apotek extends Utility
         $itemTotal = self::$query->select('resep', array(
             'uid'
         ))
+            ->where($paramData, $paramValue)
             ->execute();
 
         $data['recordsTotal'] = count($itemTotal['response_data']);
