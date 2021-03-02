@@ -148,6 +148,7 @@
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
 
+
                     return forReturn;
                 }
             },
