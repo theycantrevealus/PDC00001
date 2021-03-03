@@ -1,5 +1,14 @@
 <script type="text/javascript">
+
 	$(function(){
+
+        protocolLib = {
+            antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
+                tableAntrianPerawat.ajax.reload();
+            }
+        };
+
 		var antrian_count = 0;
 		function loadDokter(poli, selected = ""){
 			var populateDokter = "";
@@ -37,7 +46,7 @@
 				},
 				dataSrc:function(response) {
 					antrian_count = response.response_package.length;
-					console.log(response);
+					//console.log(response);
 					return response.response_package;
 				}
 			},
@@ -160,7 +169,7 @@
 		});
 
 
-        Sync.onmessage = function(evt) {
+        /*Sync.onmessage = function(evt) {
             var signalData = JSON.parse(evt.data);
             var command = signalData.protocols;
             var type = signalData.type;
@@ -172,16 +181,11 @@
             if(command !== undefined && command !== null && command !== "") {
                 protocolLib[command](command, type, parameter, sender, receiver, time);
             }
-        }
+        }*/
 
 
 
-        var protocolLib = {
-            antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
-                notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
-                tableAntrianPerawat.ajax.reload();
-            }
-        };
+
 
 	});
 

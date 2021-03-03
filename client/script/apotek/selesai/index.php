@@ -1,5 +1,11 @@
 <script type="text/javascript">
     $(function() {
+        protocolLib = {
+            resep_selesai_proses: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "notif_pasien_baru");
+                tableResep.ajax.reload();
+            }
+        };
         var targettedUID;
         function load_resep() {
             var selected = [];
