@@ -868,8 +868,8 @@ class Radiologi extends Utility
 
     private function verifikasi_item_rad($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $processResult = array();
         foreach ($parameter['data_set'] as $key => $value) {
 
 
@@ -894,6 +894,8 @@ class Radiologi extends Utility
                     $value['tindakan']
                 ))
                 ->execute();
+
+            array_push($processResult, $worker);
 
 
 
@@ -937,7 +939,7 @@ class Radiologi extends Utility
 
                 //Update master to P
                 $master_order = self::$query->update('rad_order', array(
-                    'status' => 'P',
+                    'status' => 'K', //Ke kasir bayar
                     'updated_at' => parent::format_date()
                 ))
                     ->where(array(
@@ -1029,6 +1031,8 @@ class Radiologi extends Utility
 
 
         }
+
+        return $processResult;
     }
 
     private function verifikasi_hasil($parameter) {
