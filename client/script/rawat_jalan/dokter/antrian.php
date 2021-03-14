@@ -5057,6 +5057,14 @@
         $(".inputan_inap").select2();
         $(".inputan_rujuk").select2();
 
+        var parserSymbol = {
+            "modeset_emas": "gif",
+            "modeset_porselin": "poc",
+            "modeset_porselinmetal": "mpc",
+            "modeset_nonlogam": "fmc",
+            "modeset_sewarna": "cof"
+        };
+
 
         if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
             if(dataOdontogram === undefined)
@@ -5092,6 +5100,7 @@
                             },
                             "predefined": "",
                             "sel_akar": false,
+                            "nonvital": false,
                             "hilang": false,
                             "sisa_akar": false,
                             "fracture": false
@@ -5102,11 +5111,47 @@
                 metaSelOrdo = JSON.parse(dataOdontogram);
                 // ParseView
 
+                var tableGigiMetaData = {};
 
                 for(var dbT in metaSelOrdo) {
+                    var targetClassGroup = "";
+                    var partGroup = "";
+                    if(dbT >= 51 && dbT <= 55) {
+                        targetClassGroup = "1" + dbT[1];
+                        partGroup = "top";
+                    } else if(dbT >= 61 && dbT <= 65) {
+                        targetClassGroup = "2" + dbT[1];
+                        partGroup = "top";
+                    } else if(dbT >= 16 && dbT <= 18) {
+                        targetClassGroup = dbT;
+                        partGroup = "top";
+                    } else if(dbT >= 26 && dbT <= 28) {
+                        targetClassGroup = dbT;
+                        partGroup = "top";
+                    } else if(dbT >= 81 && dbT <= 85) {
+                        targetClassGroup = "4" + dbT[1];
+                        partGroup = "bottom";
+                    } else if(dbT >= 71 && dbT <= 75) {
+                        targetClassGroup = "3" + dbT[1];
+                        partGroup = "bottom";
+                    } else if(dbT >= 46 && dbT <= 48) {
+                        targetClassGroup = dbT;
+                        partGroup = "bottom";
+                    } else if(dbT >= 36 && dbT <= 38) {
+                        targetClassGroup = dbT;
+                        partGroup = "bottom";
+                    } else {
+                        targetClassGroup = dbT;
+                    }
+
+                    if(tableGigiMetaData["parse_" + targetClassGroup] === undefined) {
+                        tableGigiMetaData["parse_" + targetClassGroup] = [];
+                    }
+
                     //Render Result
                     $("#gigi_" + dbT + " .single_gigi_small .side_small").each(function() {
                         var settedPiece = $(this).attr("class").split(" ");
+
                         if(metaSelOrdo[dbT][settedPiece[0]].tambal !== "")
                         {
                             $(this).removeClass (function (index, className) {
@@ -5121,6 +5166,26 @@
                                     "mode-set": "modeset_" + getModeSet[getModeSet.length - 1]
                                 });
                             }
+
+                            if(settedPiece[0] === "top") {
+                                tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : " + ((partGroup === "top") ? "V" : "L") + " " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                            }
+
+                            if(settedPiece[0] === "left") {
+                                tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : " + ((partGroup === "top") ? "D" : "M") + " " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                            }
+
+                            if(settedPiece[0] === "right") {
+                                tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : " + ((partGroup === "top") ? "M" : "D") + " " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                            }
+
+                            if(settedPiece[0] === "bottom") {
+                                tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : " + ((partGroup === "top") ? "L" : "V") + " " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                            }
+
+                            if(settedPiece[0] === "middle") {
+                                tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : O " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                            }
                         } else {
                             $(this).removeClass (function (index, className) {
                                 return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
@@ -5130,10 +5195,14 @@
 
                     if(metaSelOrdo[dbT].hilang) {
                         setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-times text-danger\"></i>");
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " mis");
+                        console.log(dbT + " mis | " + targetClassGroup);
                     } else if(metaSelOrdo[dbT].fracture) {
                         setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-hashtag text-info\"></i>");
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " cfr");
                     } else if(metaSelOrdo[dbT].sisa_akar) {
                         setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"text-primary\">&radic;</i>");
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " rrx");
                     } else {
                         setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "", true);
                     }
@@ -5142,22 +5211,74 @@
                         $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
                             "visibility": "visible"
                         });
+                        $("#gigi_" + dbT + " .nonvital_sign_small").css({
+                            "visibility": "hidden"
+                        });
                     } else {
                         $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
                             "visibility": "hidden"
                         });
                     }
 
-                    if(metaSelOrdo[dbT].mahkota.type === "mahkota_logam") {
-                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam"]);
-                    } else if(metaSelOrdo[dbT].mahkota.type === "mahkota_nonlogam") {
-                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam"]);
+                    if(metaSelOrdo[dbT].nonvital) {
+                        $("#gigi_" + dbT + " .nonvital_sign_small").css({
+                            "visibility": "visible"
+                        });
+                        $("#gigi_" + dbT + " .perawatan_akar_sign_small").css({
+                            "visibility": "hidden"
+                        });
                     } else {
-                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
-                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
+                        $("#gigi_" + dbT + " .nonvital_sign_small").css({
+                            "visibility": "hidden"
+                        });
                     }
 
-                    $("#gigi_" + dbT + " .predefined_small").html(metaSelOrdo[dbT].predefined);
+                    if(metaSelOrdo[dbT].mahkota.type === "mahkota_logam") {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam", "mahkota_gold", "mahkota_porcelain"]);
+                    } else if(metaSelOrdo[dbT].mahkota.type === "mahkota_nonlogam") {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam", "mahkota_gold", "mahkota_porcelain"]);
+                    } else if(metaSelOrdo[dbT].mahkota.type === "mahkota_gold") {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_gold", ["mahkota_logam", "mahkota_nonlogam", "mahkota_porcelain"]);
+                    } else if(metaSelOrdo[dbT].mahkota.type === "mahkota_porcelain") {
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_gold", ["mahkota_logam", "mahkota_nonlogam", "mahkota_gold"]);
+                    } else {
+                        /*setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
+                        setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);*/
+                    }
+
+                    if(metaSelOrdo[dbT].predefined === "aw") {
+                        $("#gigi_" + dbT + " .predefined_small").html("<i class=\"fa fa-redo\" style=\"transform: rotateY(180deg)\"></i>");
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " aw");
+                    } else if(metaSelOrdo[dbT].predefined === "cw") {
+                        $("#gigi_" + dbT + " .predefined_small").html("<i class=\"fa fa-redo\"></i>");
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " cw");
+                    }
+                    else {
+                        $("#gigi_" + dbT + " .predefined_small").html(metaSelOrdo[dbT].predefined);
+                        if(metaSelOrdo[dbT].predefined !== "") {
+                            tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " " + metaSelOrdo[dbT].predefined);
+                        }
+                    }
+
+
+
+                    //Table Manager
+                    //$("#table_gigi_" + dbT + "").html(metaSelOrdo[dbT].predefined);
+                    /*if(settedPiece[0] === "top") {
+
+                        //$("#table_gigi_" + dbT).html("123");
+                    } else {
+                        //$("#table_gigi_" + dbT).html("123");
+                        $("#table_gigi_" + dbT + "").html(metaSelOrdo[dbT].predefined);
+                        //$("#table_gigi_" + dbT).html(settedPiece[0]);
+                    }*/
+
+                }
+
+                for(var tGigi in tableGigiMetaData) {
+                    targetIDTable = tGigi.split("_");
+
+                    $("#table_gigi_" + targetIDTable[1]).html(tableGigiMetaData[tGigi].join("; "));
                 }
             }
         }
@@ -5185,8 +5306,14 @@
                 "visibility": "hidden"
             });
 
-            setMahkota(".single_gigi", "mahkota_logam", ["mahkota_nonlogam", "mahkota_logam"], true);
-            setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_nonlogam", "mahkota_logam"], true);
+            $(".nonvital_sign").css({
+                "visibility": "hidden"
+            });
+
+            setMahkota(".single_gigi", "mahkota_logam", ["mahkota_nonlogam", "mahkota_logam", "mahkota_gold", "mahkota_porcelain"], true);
+            setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_nonlogam", "mahkota_logam", "mahkota_gold", "mahkota_porcelain"], true);
+            setMahkota(".single_gigi", "mahkota_gold", ["mahkota_nonlogam", "mahkota_logam", "mahkota_gold", "mahkota_porcelain"], true);
+            setMahkota(".single_gigi", "mahkota_porcelain", ["mahkota_nonlogam", "mahkota_logam", "mahkota_gold", "mahkota_porcelain"], true);
             setPredefined("#predefined", "", true);
 
             var id = $(this).attr("id").split("_");
@@ -5241,8 +5368,25 @@
                 $(".perawatan_akar_sign").css({
                     "visibility": "visible"
                 });
+                $(".nonvital_sign").css({
+                    "visibility": "hidden"
+                });
             } else {
                 $(".perawatan_akar_sign").css({
+                    "visibility": "hidden"
+                });
+            }
+
+            if(currentOrdonMeta.nonvital) {
+                $(".set_gigi tr#nonvital").addClass("selected_ordon");
+                $(".nonvital_sign").css({
+                    "visibility": "visible"
+                });
+                $(".perawatan_akar_sign").css({
+                    "visibility": "hidden"
+                });
+            } else {
+                $(".nonvital_sign").css({
                     "visibility": "hidden"
                 });
             }
@@ -5253,11 +5397,31 @@
             } else if(currentOrdonMeta.mahkota.type === "mahkota_nonlogam") {
                 $(".set_gigi tr#mahkota_nonlogam").addClass("selected_ordon");
                 setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_logam"]);
+            } else if(currentOrdonMeta.mahkota.type === "mahkota_gold") {
+                $(".set_gigi tr#mahkota_gold").addClass("selected_ordon");
+                setMahkota(".single_gigi", "mahkota_gold", ["mahkota_logam", "mahkota_nonlogam", "mahkota_porcelain"]);
+            } else if(currentOrdonMeta.mahkota.type === "mahkota_porcelain") {
+                $(".set_gigi tr#mahkota_porcelain").addClass("selected_ordon");
+                setMahkota(".single_gigi", "mahkota_porcelain", ["mahkota_logam", "mahkota_nonlogam", "mahkota_gold"]);
             } else {
-                setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
+                /*setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
+                setMahkota("#gigi_" + dbT + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);*/
+                setMahkota(".single_gigi", "mahkota_logam", ["mahkota_nonlogam", "mahkota_gold", "mahkota_porcelain"], true);
+                setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_logam", "mahkota_porcelain", "mahkota_gold"], true);
+                setMahkota(".single_gigi", "mahkota_gold", ["mahkota_logam", "mahkota_nonlogam", "mahkota_porcelain"], true);
+                setMahkota(".single_gigi", "mahkota_porcelain", ["mahkota_logam", "mahkota_nonlogam", "mahkota_gold"], true);
             }
 
-            setPredefined("#predefined", currentOrdonMeta.predefined.toUpperCase());
+            if(currentOrdonMeta.predefined.toUpperCase() === "AW") {
+                setPredefined("#predefined", "<i class=\"fa fa-redo\" style=\"transform: rotateY(180deg)\"></i>");
+            } else if(currentOrdonMeta.predefined.toUpperCase() === "CW") {
+                setPredefined("#predefined", "<i class=\"fa fa-redo\"></i>");
+            }
+            else {
+                setPredefined("#predefined", currentOrdonMeta.predefined.toUpperCase());
+            }
+
+
             if(currentOrdonMeta.predefined !== "") {
                 $(".set_gigi tr#" + currentOrdonMeta.predefined).addClass("selected_ordon");
             }
@@ -5343,6 +5507,21 @@
                 targetWarnaOrdo = "modeset_nonlogam";
             }
 
+            if(id === "tambal_porselin")
+            {
+                targetWarnaOrdo = "modeset_porselin";
+            }
+
+            if(id === "tambal_porselinmetal")
+            {
+                targetWarnaOrdo = "modeset_porselinmetal";
+            }
+
+            if(id === "tambal_nonvital")
+            {
+                targetWarnaOrdo = "modeset_nonvital";
+            }
+
             if(id === "car")
             {
                 targetWarnaOrdo = "modeset_caries";
@@ -5372,17 +5551,36 @@
 
         $(".set_gigi tr").click(function() {
             var id = $(this).attr("id");
-
             if($(this).hasClass("selected_ordon"))
             {
                 $(this).removeClass("selected_ordon");
                 if(
                     id === "une" ||
+                    id === "aw" ||
+                    id === "cw" ||
+                    id === "imv" ||
                     id === "pre" ||
-                    id === "ano"
+                    id === "ano" ||
+                    id === "diaso" ||
+                    id === "diasc" ||
+                    id === "attr" ||
+                    id === "abr" ||
+                    id === "pon"
                 )
                 {
-                    setPredefined("#predefined", id.toUpperCase(), true);
+                    if(id === "aw") {
+                        setPredefined("#predefined", "<i class=\"fa fa-redo\" style=\"transform: rotateY(180deg)\"></i>", true);
+                    } else if(id === "cw") {
+                        setPredefined("#predefined", "<i class=\"fa fa-redo\"></i>", true);
+                    } else if(id === "diaso") {
+                        setPredefined("#predefined", "diaSO", true);
+                    } else if(id === "diasc") {
+                        setPredefined("#predefined", "diaSC", true);
+                    }
+                    else {
+                        setPredefined("#predefined", id.toUpperCase(), true);
+                    }
+
                     currentOrdonMeta.predefined = "";
                 }
 
@@ -5390,19 +5588,38 @@
                     id === "mahkota_logam"
                 )
                 {
-                    setMahkota(".single_gigi", id, ["mahkota_nonlogam"], true);
+                    setMahkota(".single_gigi", id, ["mahkota_nonlogam", "mahkota_gold", "mahkota_porcelain"], true);
                     currentOrdonMeta.mahkota.type = "";
                 }
 
                 if(id === "mahkota_nonlogam")
                 {
-                    setMahkota(".single_gigi", id, ["mahkota_logam"], true);
+                    setMahkota(".single_gigi", id, ["mahkota_logam", "mahkota_gold", "mahkota_porcelain"], true);
                     currentOrdonMeta.mahkota.type = "";
                 }
 
-                if(id === "sel_akar"){
+                if(id === "mahkota_gold")
+                {
+                    setMahkota(".single_gigi", id, ["mahkota_logam", "mahkota_nonlogam", "mahkota_porcelain"], true);
+                    currentOrdonMeta.mahkota.type = "";
+                }
+
+                if(id === "mahkota_porcelain")
+                {
+                    setMahkota(".single_gigi", id, ["mahkota_logam", "mahkota_gold", "mahkota_nonlogam"], true);
+                    currentOrdonMeta.mahkota.type = "";
+                }
+
+                if(id === "sel_akar") {
                     currentOrdonMeta.sel_akar = false;
                     $(".perawatan_akar_sign").css({
+                        "visibility": "hidden"
+                    });
+                }
+
+                if(id === "nonvital") {
+                    currentOrdonMeta.nonvital = false;
+                    $(".nonvital_sign").css({
                         "visibility": "hidden"
                     });
                 }
@@ -5442,11 +5659,30 @@
 
                 if(
                     id === "une" ||
+                    id === "aw" ||
+                    id === "cw" ||
                     id === "pre" ||
-                    id === "ano"
+                    id === "imv" ||
+                    id === "ano"||
+                    id === "diaso" ||
+                    id === "diasc"||
+                    id === "attr" ||
+                    id === "abr" ||
+                    id === "pon"
                 )
                 {
-                    setPredefined("#predefined", id.toUpperCase());
+                    if(id === "aw") {
+                        setPredefined("#predefined", "<i class=\"fa fa-redo\" style=\"transform: rotateY(180deg)\"></i>");
+                    } else if(id === "cw") {
+                        setPredefined("#predefined", "<i class=\"fa fa-redo\"></i>");
+                    } else if(id === "diaso") {
+                        setPredefined("#predefined", "diaSO");
+                    } else if(id === "diasc") {
+                        setPredefined("#predefined", "diaSC");
+                    }
+                    else {
+                        setPredefined("#predefined", id.toUpperCase());
+                    }
                     currentOrdonMeta.predefined = id;
                 }
 
@@ -5454,13 +5690,25 @@
                     id === "mahkota_logam"
                 )
                 {
-                    setMahkota(".single_gigi", id, ["mahkota_nonlogam"]);
+                    setMahkota(".single_gigi", id, ["mahkota_nonlogam", "mahkota_gold", "mahkota_porcelain"]);
                     currentOrdonMeta.mahkota.type = id;
                 }
 
                 if(id === "mahkota_nonlogam")
                 {
-                    setMahkota(".single_gigi", id, ["mahkota_logam"]);
+                    setMahkota(".single_gigi", id, ["mahkota_logam", "mahkota_gold", "mahkota_porcelain"]);
+                    currentOrdonMeta.mahkota.type = id;
+                }
+
+                if(id === "mahkota_gold")
+                {
+                    setMahkota(".single_gigi", id, ["mahkota_logam", "mahkota_nonlogam", "mahkota_porcelain"]);
+                    currentOrdonMeta.mahkota.type = id;
+                }
+
+                if(id === "mahkota_porcelain")
+                {
+                    setMahkota(".single_gigi", id, ["mahkota_logam", "mahkota_gold", "mahkota_nonlogam"]);
                     currentOrdonMeta.mahkota.type = id;
                 }
 
@@ -5469,7 +5717,21 @@
                     $(".perawatan_akar_sign").css({
                         "visibility": "visible"
                     });
+                    $(".nonvital_sign").css({
+                        "visibility": "hidden"
+                    });
                     currentOrdonMeta.sel_akar = true;
+                }
+
+                if(id === "nonvital")
+                {
+                    $(".nonvital_sign").css({
+                        "visibility": "visible"
+                    });
+                    $(".perawatan_akar_sign").css({
+                        "visibility": "hidden"
+                    });
+                    currentOrdonMeta.nonvital = true;
                 }
 
                 if(id === "fracture"){
@@ -5508,7 +5770,45 @@
         });
 
         $("#btnUpdateOrdo").click(function() {
-            //Save MSODL
+            //Save MVODL
+
+            var tableGigiMetaData = {};
+            var dbT = selected_teeth;
+            var targetClassGroup = "";
+            var partGroup = "";
+            if(dbT >= 51 && dbT <= 55) {
+                targetClassGroup = "1" + dbT[1];
+                partGroup = "top";
+            } else if(dbT >= 61 && dbT <= 65) {
+                targetClassGroup = "2" + dbT[1];
+                partGroup = "top";
+            } else if(dbT >= 16 && dbT <= 18) {
+                targetClassGroup = dbT;
+                partGroup = "top";
+            } else if(dbT >= 26 && dbT <= 28) {
+                targetClassGroup = dbT;
+                partGroup = "top";
+            } else if(dbT >= 81 && dbT <= 85) {
+                targetClassGroup = "4" + dbT[1];
+                partGroup = "bottom";
+            } else if(dbT >= 71 && dbT <= 75) {
+                targetClassGroup = "3" + dbT[1];
+                partGroup = "bottom";
+            } else if(dbT >= 46 && dbT <= 48) {
+                targetClassGroup = dbT;
+                partGroup = "bottom";
+            } else if(dbT >= 36 && dbT <= 38) {
+                targetClassGroup = dbT;
+                partGroup = "bottom";
+            } else {
+                targetClassGroup = dbT;
+            }
+
+            if(tableGigiMetaData["parse_" + targetClassGroup] === undefined) {
+                tableGigiMetaData["parse_" + targetClassGroup] = [];
+            }
+
+
             $(".single_gigi .side").each(function() {
                 var tambal = $(this).attr("mode-class");
                 var settedPiece = $(this).attr("class").split(" ");
@@ -5533,6 +5833,26 @@
                             "mode-set": "modeset_" + getModeSet[getModeSet.length - 1]
                         });
                     }
+
+                    if(settedPiece[0] === "top") {
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : " + ((partGroup === "top") ? "L" : "V") + " " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                    }
+
+                    if(settedPiece[0] === "left") {
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : " + ((partGroup === "top") ? "D" : "M") + " " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                    }
+
+                    if(settedPiece[0] === "right") {
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : " + ((partGroup === "top") ? "M" : "D") + " " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                    }
+
+                    if(settedPiece[0] === "bottom") {
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : " + ((partGroup === "top") ? "V" : "L") + " " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                    }
+
+                    if(settedPiece[0] === "middle") {
+                        tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " : O " + parserSymbol[metaSelOrdo[dbT][settedPiece[0]].tambal]);
+                    }
                 } else {
                     $(this).removeClass (function (index, className) {
                         return (className.match (/(^|\s)modeset_\S+/g) || []).join(' ');
@@ -5554,22 +5874,51 @@
                 $("#gigi_" + selected_teeth + " .perawatan_akar_sign_small").css({
                     "visibility": "visible"
                 });
+                $("#gigi_" + selected_teeth + " .nonvital_sign_small").css({
+                    "visibility": "hidden"
+                });
             } else {
                 $("#gigi_" + selected_teeth + " .perawatan_akar_sign_small").css({
                     "visibility": "hidden"
                 });
             }
 
-            if(currentOrdonMeta.mahkota.type === "mahkota_logam") {
-                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam"]);
-            } else if(currentOrdonMeta.mahkota.type === "mahkota_nonlogam") {
-                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam"]);
+            if(currentOrdonMeta.nonvital) {
+                $("#gigi_" + selected_teeth + " .nonvital_sign_small").css({
+                    "visibility": "visible"
+                });
+                $("#gigi_" + selected_teeth + " .perawatan_akar_sign_small").css({
+                    "visibility": "hidden"
+                });
             } else {
-                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam"], true);
-                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam"], true);
+                $("#gigi_" + selected_teeth + " .nonvital_sign_small").css({
+                    "visibility": "hidden"
+                });
             }
 
-            $("#gigi_" + selected_teeth + " .predefined_small").html(currentOrdonMeta.predefined);
+            if(currentOrdonMeta.mahkota.type === "mahkota_logam") {
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_logam", ["mahkota_nonlogam", "mahkota_gold", "mahkota_porcelain"]);
+            } else if(currentOrdonMeta.mahkota.type === "mahkota_nonlogam") {
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam", "mahkota_gold", "mahkota_porcelain"]);
+            } else if(currentOrdonMeta.mahkota.type === "mahkota_gold") {
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_gold", ["mahkota_logam", "mahkota_nonlogam", "mahkota_porcelain"]);
+            } else if(currentOrdonMeta.mahkota.type === "mahkota_porcelain") {
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_porcelain", ["mahkota_logam", "mahkota_nonlogam", "mahkota_gold"]);
+            } else {
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_logam", ["mahkota_logam, mahkota_nonlogam", "mahkota_gold", "mahkota_porcelain"], true);
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_nonlogam", ["mahkota_logam, mahkota_nonlogam", "mahkota_gold", "mahkota_porcelain"], true);
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_gold", ["mahkota_logam, mahkota_nonlogam", "mahkota_gold", "mahkota_porcelain"], true);
+                setMahkota("#gigi_" + selected_teeth + " .single_gigi_small", "mahkota_porcelain", ["mahkota_logam, mahkota_nonlogam", "mahkota_gold", "mahkota_porcelain"], true);
+            }
+
+            if(currentOrdonMeta.predefined === "aw") {
+                $("#gigi_" + selected_teeth + " .predefined_small").html("<i class=\"fa fa-redo\" style=\"transform: rotateY(180deg)\"></i>");
+            } else if(currentOrdonMeta.predefined === "cw") {
+                $("#gigi_" + selected_teeth + " .predefined_small").html("<i class=\"fa fa-redo\"></i>");
+            } else {
+                $("#gigi_" + selected_teeth + " .predefined_small").html(currentOrdonMeta.predefined);
+            }
+
 
             metaSelOrdo[selected_teeth] = currentOrdonMeta;
 
@@ -5584,9 +5933,22 @@
             $(".perawatan_akar_sign").css({
                 "visibility": "hidden"
             });
-            setMahkota(".single_gigi", "mahkota_logam", ["mahkota_nonlogam", "mahkota_logam"], true);
-            setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_nonlogam", "mahkota_logam"], true);
+            $(".nonvital_sign").css({
+                "visibility": "hidden"
+            });
+            setMahkota(".single_gigi", "mahkota_logam", ["mahkota_nonlogam", "mahkota_logam", "mahkota_gold", "mahkota_porcelain"], true);
+            setMahkota(".single_gigi", "mahkota_nonlogam", ["mahkota_nonlogam", "mahkota_logam", "mahkota_gold", "mahkota_porcelain"], true);
+            setMahkota(".single_gigi", "mahkota_gold", ["mahkota_gold", "mahkota_logam", "mahkota_gold", "mahkota_porcelain"], true);
+            setMahkota(".single_gigi", "mahkota_porcelain", ["mahkota_porcelain", "mahkota_logam", "mahkota_gold", "mahkota_porcelain"], true);
             setPredefined("#predefined", "", true);
+
+            //Parse Table
+            for(var tGigi in tableGigiMetaData) {
+                targetIDTable = tGigi.split("_");
+
+                $("#table_gigi_" + targetIDTable[1]).html(tableGigiMetaData[tGigi].join("; "));
+            }
+
             $("#form-ordonto").modal("hide");
         });
 
@@ -6011,102 +6373,167 @@
                             <div class="global_assigner fa"></div>
                         </div>
                         <div class="perawatan_akar_sign"></div>
+                        <div class="nonvital_sign"></div>
                     </div>
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered set_gigi">
+                            <tr id="non" group-selection="mordor1">
+                                <td class="wrap_content">non</td>
+                                <td>Gigi tidak ada/tidak diketahui</td>
+                            </tr>
                             <tr id="une" group-selection="mordor1">
-                                <td class="wrap_content">UNE</td>
-                                <td>Belum Erupsi</td>
+                                <td>une</td>
+                                <td>Un-erupted</td>
                             </tr>
                             <tr id="pre" group-selection="mordor1">
-                                <td>PRE</td>
-                                <td>Erupsi Sebagian</td>
+                                <td>pre</td>
+                                <td>Partial Erupted</td>
+                            </tr>
+                            <tr id="imv" group-selection="mordor1">
+                                <td>imv</td>
+                                <td>Impacted visible</td>
                             </tr>
                             <tr id="ano" group-selection="mordor1">
-                                <td>ANO</td>
-                                <td>Anomali Bentuk</td>
+                                <td>ano</td>
+                                <td>Anomali</td>
                             </tr>
+                            <tr id="diaso" group-selection="mordor1">
+                                <td>diaSO</td>
+                                <td>Diastema Space Open</td>
+                            </tr>
+                            <tr id="diasc" group-selection="mordor1">
+                                <td>diaSC</td>
+                                <td>Diastema Space Close</td>
+                            </tr>
+                            <tr id="attr" group-selection="mordor1">
+                                <td>att</td>
+                                <td>Atrisi</td>
+                            </tr>
+                            <tr id="abr" group-selection="mordor1">
+                                <td>abr</td>
+                                <td>Abrasi</td>
+                            </tr>
+                            <tr id="pon" group-selection="mordor1">
+                                <td>pon</td>
+                                <td>Pontic</td>
+                            </tr>
+
+
+
+
+
+
                             <tr id="car" class="need_selection">
                                 <td class="wrap_content">
                                     <i class="fa fa-qrcode"></i>
                                 </td>
                                 <td>Caries</td>
                             </tr>
+
+
+
+
                             <tr id="mahkota_logam" group-selection="mordor2">
                                 <td>
                                     <i class="fa fa-vector-square mlogam"></i>
                                 </td>
-                                <td>Mahkota Logam</td>
+                                <td>Full Metal Crown</td>
+                            </tr>
+                            <tr id="mahkota_gold" group-selection="mordor2">
+                                <td>
+                                    <i style="color: gold" class="fa fa-vector-square mgold"></i>
+                                </td>
+                                <td>Gold Metal Crown</td>
+                            </tr>
+                            <tr id="mahkota_porcelain" group-selection="mordor2">
+                                <td>
+                                    <i style="color: #8700cf" class="fa fa-vector-square mporcelain"></i>
+                                </td>
+                                <td>Porcelain Crown</td>
                             </tr>
                             <tr id="mahkota_nonlogam" group-selection="mordor2">
                                 <td>
                                     <i class="fa fa-stop mnonlogam"></i>
                                 </td>
-                                <td>Mahkota Non Logam</td>
+                                <td>Non Metal Crown</td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <i class="fa fa-arrow-left">
-                                </td>
-                                <td>Migrasi Kiri</td>
+
+
+
+
+
+
+                            <tr id="cw" group-selection="mordor1">
+                                <td class="wrap_content"><i class="fa fa-redo"></i></td>
+                                <td>Rotate CW</td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <i class="fa fa-arrow-right">
-                                </td>
-                                <td>Migrasi Kanan</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <i class="fa fa-reply">
-                                </td>
-                                <td>Rotasi Kiri</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <i class="fa fa-reply flip">
-                                </td>
-                                <td>Rotasi Kanan</td>
+                            <tr id="aw" group-selection="mordor1">
+                                <td class="wrap_content"><i class="fa fa-redo" style="transform: rotateY(180deg)"></i></td>
+                                <td>Rotate AW</td>
                             </tr>
                         </table>
                     </div>
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered set_gigi">
+                            <!--tr id="tambal_nonvital" class="need_selection" group-selection="mordor4">
+                                <td class="wrap_content">
+                                    <i class="fa fa-stop nonvital"></i>
+                                </td>
+                                <td>Gigi Non Vital</td>
+                            </tr-->
                             <tr id="tambal_logam" class="need_selection" group-selection="mordor4">
                                 <td class="wrap_content">
                                     <i class="fa fa-stop logam"></i>
                                 </td>
-                                <td>Tambalan Logam</td>
+                                <td>Amalgam Filling</td>
                             </tr>
                             <tr id="tambal_emas" class="need_selection" group-selection="mordor4">
                                 <td class="wrap_content">
                                     <i class="fa fa-stop emas"></i>
                                 </td>
-                                <td>Tambalan Emas</td>
+                                <td>GIC/Silika</td>
                             </tr>
                             <tr id="tambal_sewarna" class="need_selection" group-selection="mordor4">
                                 <td class="wrap_content">
                                     <i class="fa fa-stop sewarna"></i>
                                 </td>
-                                <td>Tambalan Sewarna</td>
+                                <td>Composite Filling</td>
                             </tr>
                             <tr id="tambal_pencega" class="need_selection" group-selection="mordor4">
                                 <td class="wrap_content">
                                     <i class="fa fa-stop pencega"></i>
                                 </td>
-                                <td>Tambalan Pencega</td>
+                                <td>Fissure Sealant</td>
                             </tr>
-                            <tr id="tambal_nonlogam" class="need_selection" group-selection="mordor4">
+                            <!--tr id="tambal_nonlogam" class="need_selection" group-selection="mordor4">
                                 <td class="wrap_content">
                                     <i class="fa fa-stop nonlogam"></i>
                                 </td>
-                                <td>Tambalan Non Logam</td>
+                                <td>Full Metal Crown</td>
                             </tr>
-                            <tr id="sel_akar">
+                            <tr id="tambal_porselin" class="need_selection" group-selection="mordor4">
+                                <td class="wrap_content">
+                                    <i class="fa fa-stop porselin"></i>
+                                </td>
+                                <td>Porcelain Crown</td>
+                            </tr>
+                            <tr id="tambal_porselinmetal" class="need_selection" group-selection="mordor4">
+                                <td class="wrap_content">
+                                    <i class="fa fa-stop porselin_metal"></i>
+                                </td>
+                                <td>Metal Porcelain Crown</td-->
+                            </tr>
+                            <tr id="sel_akar" group-selection="mordor7">
                                 <td>
                                     <i class="fa fa-caret-down"></i>
                                 </td>
-                                <td>Perawatan Sal. Akar</td>
+                                <td>Perawatan Sel. Akar</td>
+                            </tr>
+                            <tr id="nonvital" group-selection="mordor7">
+                                <td>
+                                    <i style="color: #ccc" class="fa fa-caret-down"></i>
+                                </td>
+                                <td>Gigi Non Vital</td>
                             </tr>
                             <tr id="gigi_hilang" group-selection="mordor3">
                                 <td>

@@ -1412,7 +1412,7 @@ class Asesmen extends Utility {
                     ->execute();
 
                 $Laboratorium = new Laboratorium(self::$pdo);
-                $ChargeLab = $Laboratorium::charge_invoice_item(array(
+                $ChargeLab = $Laboratorium->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
                     'pasien' => $parameter['pasien']
@@ -1420,7 +1420,7 @@ class Asesmen extends Utility {
                 $returnResponse['lab_response'] = $ChargeLab;
 
                 $Radiologi = new Radiologi(self::$pdo);
-                $ChargeRad = $Radiologi::charge_invoice_item(array(
+                $ChargeRad = $Radiologi->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
                     'pasien' => $parameter['pasien']

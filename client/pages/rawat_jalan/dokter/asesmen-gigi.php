@@ -241,10 +241,48 @@
                                         </div>
                                     </div>
                                 </li>
-                                <li>
+                                <li style="padding-right: 10px;">
                                     <h6>Odontogram</h6>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <table class="table table-bordered">
+                                                <?php
+                                                for($tt = 1; $tt <= 8; $tt++) {
+                                                ?>
+                                                <tr>
+                                                    <?php
+                                                        if($tt <= 5) {
+                                                    ?>
+                                                    <td class="wrap_content text-center text-info">1<?php echo $tt; ?> [5<?php echo $tt; ?>]</td>
+                                                    <?php
+                                                        } else {
+                                                            ?>
+                                                            <td class="wrap_content text-center text-info">1<?php echo $tt; ?></td>
+                                                            <?php
+                                                        }
+                                                    ?>
+                                                    <td style="width: 40%" id="table_gigi_1<?php echo $tt; ?>"></td>
+                                                    <td style="width: 40%" id="table_gigi_2<?php echo $tt; ?>"></td>
+                                                    <?php
+                                                    if($tt <= 5) {
+                                                        ?>
+                                                        <td class="wrap_content text-center text-info">[6<?php echo $tt; ?>] 2<?php echo $tt; ?></td>
+                                                        <?php
+                                                    } else {
+                                                        ?>
+                                                        <td class="wrap_content text-center text-info">2<?php echo $tt; ?></td>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                </tr>
+                                                <?php
+                                                }
+                                                ?>
+                                            </table>
+                                        </div>
+                                    </div>
                                     <div class="ordogram">
-                                        <div class="row">
+                                        <div class="row" style="padding-top: 20px;">
                                             <div class="col-md-6">
                                                 <div class="row">
                                                     <div class="col-md-12 left-top">
@@ -540,6 +578,45 @@
                                         <div class="hang bottom-middle">02</div>
                                         <div class="hang left-middle">10<h3>R</h3>40</div>
                                         <div class="hang right-middle">20<h3>L</h3>30</div>
+                                    </div>
+
+                                    <div class="row" style="padding-top: 20px;">
+                                        <div class="col-12">
+                                            <table class="table table-bordered">
+                                                <?php
+                                                for($tb = 8; $tb >= 1; $tb--) {
+                                                    ?>
+                                                    <tr>
+                                                        <?php
+                                                        if($tb <= 5) {
+                                                            ?>
+                                                            <td class="wrap_content text-center text-info">4<?php echo $tb; ?> [8<?php echo $tb; ?>]</td>
+                                                            <?php
+                                                        } else {
+                                                            ?>
+                                                            <td class="wrap_content text-center text-info">4<?php echo $tb; ?></td>
+                                                            <?php
+                                                        }
+                                                        ?>
+                                                        <td style="width: 40%" id="table_gigi_4<?php echo $tb; ?>"></td>
+                                                        <td style="width: 40%" id="table_gigi_3<?php echo $tb; ?>"></td>
+                                                        <?php
+                                                        if($tb <= 5) {
+                                                            ?>
+                                                            <td class="wrap_content text-center text-info">[7<?php echo $tb; ?>] 3<?php echo $tb; ?></td>
+                                                            <?php
+                                                        } else {
+                                                            ?>
+                                                            <td class="wrap_content text-center text-info">3<?php echo $tb; ?></td>
+                                                            <?php
+                                                        }
+                                                        ?>
+                                                    </tr>
+                                                    <?php
+                                                }
+                                                ?>
+                                            </table>
+                                        </div>
                                     </div>
                                 </li>
                             </ol>

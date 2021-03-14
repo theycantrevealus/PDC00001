@@ -429,7 +429,7 @@ class BPJS extends Utility {
     private function get_history_sep_local($parameter) {
 
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 
         $begin = new DateTime($parameter['dari']);
@@ -1109,11 +1109,22 @@ class BPJS extends Utility {
             ))
             ->execute();
 
+        $Antrian = new Antrian(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
-            $Antrian = new Antrian(self::$pdo);
+
 
             $poli_detail = self::get_poli_detail($value['poli_tujuan']);
             $data['response_data'][$key]['poli_tujuan_detail'] = $poli_detail[0];
+
+            $pasien = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            foreach ($pasien['response_data'][0]['history_penjamin'] as $pKey => $pValue) {
+                if($pasien['response_data'][0]['history_penjamin'][$pKey]['penjamin'] === __UIDPENJAMINBPJS__) {
+                    $readData = preg_replace('/\\\\/', '', $pValue['penjamin_detail']['rest_meta']);
+                    $pasien['response_data'][0]['history_penjamin'][$pKey]['penjamin_detail']['rest_meta_parse'] = json_decode($readData, true);
+                }
+            }
+            $data['response_data'][$key]['pasien'] = $pasien['response_data'][0];
 
             $AntrianDetail = $Antrian->get_antrian_detail('antrian', $value['antrian']);
             $data['response_data'][$key]['antrian_detail'] = $AntrianDetail['response_data'][0];
