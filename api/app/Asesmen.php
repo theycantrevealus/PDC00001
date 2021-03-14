@@ -914,7 +914,7 @@ class Asesmen extends Utility {
 
 						foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
 							$InventoriObat = new Inventori(self::$pdo);
-							$RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat::get_item_detail($RVIValue['obat'])['response_data'][0];
+							$RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat->get_item_detail($RVIValue['obat'])['response_data'][0];
 						}
 
 						$RacikanValue['item'] = $RacikanDetailData['response_data'];
@@ -938,6 +938,9 @@ class Asesmen extends Utility {
                             $resep[0]['uid']
                         ))
                         ->execute();
+                    foreach ($dataResepApotek['response_data'] as $dRApotekKey => $dRApotekValue) {
+                        $dataResepApotek['response_data'][$dRApotekKey]['obat_detail'] = $Inventori->get_item_detail($dRApotekValue['item'])['response_data'][0];
+                    }
                     $data['response_data'][0]['resep_apotek'] = $dataResepApotek['response_data'];
                 }
 
@@ -961,6 +964,9 @@ class Asesmen extends Utility {
                         ))
                         ->execute();
 
+                    foreach ($resep_apotek['response_data'] as $dRApotekKey => $dRApotekValue) {
+                        $resep_apotek['response_data'][$dRApotekKey]['obat_detail'] = $Inventori->get_item_detail($dRApotekValue['item'])['response_data'][0];
+                    }
                     $data['response_data'][0]['resep'] = $resep['response_data'];
                     $data['response_data'][0]['resep_apotek'] = $resep_apotek['response_data'];
                 } else {
@@ -1001,6 +1007,9 @@ class Asesmen extends Utility {
                                 $racikan['response_data'][0]['uid']
                             ))
                             ->execute();
+                        foreach ($racikan_apotek_detail['response_data'] as $dRaApotekKey => $dRaApotekValue) {
+                            $racikan_apotek_detail['response_data'][$dRaApotekKey]['obat_detail'] = $Inventori->get_item_detail($dRaApotekValue['obat'])['response_data'][0];
+                        }
                         $racikan_apotek['response_data'][$racikanApotekKey]['item'] = $racikan_apotek_detail['response_data'];
                     }
                     $data['response_data'][0]['racikan_apotek'] = $racikan_apotek['response_data'];

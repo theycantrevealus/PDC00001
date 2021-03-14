@@ -147,7 +147,6 @@
                 type:"GET",
                 success:function(response) {
                     var data = response.response_package.response_data[0];
-                    console.log(data);
 
                     var icd10Kerja = "<ol type=\"1\">";
                     var icd10Banding = "<ol type=\"1\">";
@@ -198,6 +197,7 @@
                             }
 
                             var racikanData = data.racikan;
+
                             $(".racikanDokterCPPT tbody tr").remove();
                             for(var racikanKey in racikanData) {
                                 var itemRacikan = racikanData[racikanKey].item;
@@ -232,12 +232,31 @@
                             }
 
                             var resepApotekData = data.resep_apotek;
+
                             $(".resepApotekCPPT tbody tr").remove();
                             for(var resepApotekKey in resepApotekData) {
-                                //
+                                var newResepApotikRow = document.createElement("TR");
+
+                                var resepApotikID = document.createElement("TD");
+                                var resepApotikObat = document.createElement("TD");
+                                var resepApotikSigna = document.createElement("TD");
+                                var resepApotikJlh = document.createElement("TD");
+
+                                $(resepApotikID).html((parseInt(resepApotekKey) + 1));
+                                $(resepApotikObat).html(resepApotekData[resepApotekKey].obat_detail.nama);
+                                $(resepApotikSigna).html(resepApotekData[resepApotekKey].signa_pakai + " &times; " + resepApotekData[resepApotekKey].signa_qty);
+                                $(resepApotikJlh).html(resepApotekData[resepApotekKey].qty);
+
+                                $(newResepApotikRow).append(resepApotikID);
+                                $(newResepApotikRow).append(resepApotikObat);
+                                $(newResepApotikRow).append(resepApotikSigna);
+                                $(newResepApotikRow).append(resepApotikJlh);
+
+                                $(".resepApotekCPPT tbody").append(newResepApotikRow);
                             }
 
                             var racikanApotekData = data.racikan_apotek;
+                            console.log(racikanApotekData);
                             $(".racikanApotekCPPT tbody tr").remove();
                             for(var racikanApotekKey in racikanApotekData) {
                                 var itemApotekRacikan = racikanApotekData[racikanApotekKey].item;
@@ -255,20 +274,20 @@
 
                                 var komposisiApotek = "<ol type=\"1\">";
                                 for(var itemApotekKey in itemApotekRacikan) {
-                                    komposisi += "<li>" + itemRacikan[itemKey].obat_detail.nama + " <b class=\"text-info\">" + itemRacikan[itemKey].kekuatan  + "</b></li>";
+                                    komposisiApotek += "<li>" + itemApotekRacikan[itemApotekKey].obat_detail.nama + " <b class=\"text-info\">" + itemApotekRacikan[itemApotekKey].kekuatan  + "</b></li>";
                                 }
-                                komposisi += "</ol>";
-                                $(racikanKomposisi).html(komposisi);
-                                $(racikanSigna).html(racikanData[racikanKey].signa_pakai + " &times; " + racikanData[racikanKey].signa_qty);
-                                $(racikanJlh).html(racikanData[racikanKey].qty);
+                                komposisiApotek += "</ol>";
+                                $(racikanApotekKomposisi).html(komposisiApotek);
+                                $(racikanApotekSigna).html(racikanApotekData[racikanApotekKey].signa_pakai + " &times; " + racikanApotekData[racikanApotekKey].signa_qty);
+                                $(racikanApotekJlh).html(racikanApotekData[racikanApotekKey].jumlah);
 
-                                $(newRacikanRow).append(racikanID);
-                                $(newRacikanRow).append(racikanNama);
-                                $(newRacikanRow).append(racikanKomposisi);
-                                $(newRacikanRow).append(racikanSigna);
-                                $(newRacikanRow).append(racikanJlh);
+                                $(newRacikanApotekRow).append(racikanApotekID);
+                                $(newRacikanApotekRow).append(racikanApotekNama);
+                                $(newRacikanApotekRow).append(racikanApotekKomposisi);
+                                $(newRacikanApotekRow).append(racikanApotekSigna);
+                                $(newRacikanApotekRow).append(racikanApotekJlh);
 
-                                $(".racikanDokterCPPT tbody").append(newRacikanRow);
+                                $(".racikanApotekCPPT tbody").append(newRacikanApotekRow);
                             }
                         }
                     }
