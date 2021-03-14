@@ -244,7 +244,7 @@
                                 <li style="padding-right: 10px;">
                                     <h6>Odontogram</h6>
                                     <div class="row">
-                                        <div class="col-12">
+                                        <!--div class="col-12">
                                             <table class="table table-bordered">
                                                 <?php
                                                 for($tt = 1; $tt <= 8; $tt++) {
@@ -279,7 +279,7 @@
                                                 }
                                                 ?>
                                             </table>
-                                        </div>
+                                        </div-->
                                     </div>
                                     <div class="ordogram">
                                         <div class="row" style="padding-top: 20px;">
@@ -581,7 +581,7 @@
                                     </div>
 
                                     <div class="row" style="padding-top: 20px;">
-                                        <div class="col-12">
+                                        <!--div class="col-12">
                                             <table class="table table-bordered">
                                                 <?php
                                                 for($tb = 8; $tb >= 1; $tb--) {
@@ -616,7 +616,7 @@
                                                 }
                                                 ?>
                                             </table>
-                                        </div>
+                                        </div-->
                                     </div>
                                 </li>
                             </ol>
