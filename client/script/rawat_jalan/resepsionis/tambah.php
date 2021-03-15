@@ -142,7 +142,10 @@
 				} else {
 					alert("Data belum lengkap");
 				}
-			}
+			} else {
+			    console.log(currentAntrianID);
+                console.log(currentPasien);
+            }
 			return false;
 		});
 
