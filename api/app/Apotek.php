@@ -1501,7 +1501,7 @@ class Apotek extends Utility
 
     private function verifikasi_resep_2($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $resepChangedRecord = array();
         $racikanChangedRecord = array();
@@ -1528,7 +1528,7 @@ class Apotek extends Utility
             $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
         } else {
             $InvMasterParam['keterangan'] = '';
-            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $NewInvoice = $Invoice->create_invoice($InvMasterParam);
             $TargetInvoice = $NewInvoice['response_unique'];
         }
 
@@ -1548,7 +1548,7 @@ class Apotek extends Utility
                 ->execute();
             array_push($resepChangedRecord, $resepChange);
 
-            $AppendInvoice = $Invoice::append_invoice(array(
+            $AppendInvoice = $Invoice->append_invoice(array(
                 'invoice' => $TargetInvoice,
                 'item' => $value['obat'],
                 'item_origin' => 'master_inv',
@@ -1617,7 +1617,7 @@ class Apotek extends Utility
 
 
         $UpdateStatusResep = self::$query->update('resep', array(
-            'status_resep' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P'
+            'status_resep' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'L'
         ))
             ->where(array(
                 'resep.uid' => '= ?',
@@ -1630,7 +1630,7 @@ class Apotek extends Utility
 
         //Update Antrian
         $AntrianNomor = self::$query->update('antrian_nomor', array(
-            'status' => 'K'
+            'status' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'A'
         ))
             ->where(array(
                 'antrian_nomor.kunjungan' => '= ?',
@@ -1654,7 +1654,7 @@ class Apotek extends Utility
     private function verifikasi_resep($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $Invoice = new Invoice(self::$pdo);
 
         $checkerObatBiasa = array(); //Buat check uid obat lama
@@ -1905,7 +1905,7 @@ class Apotek extends Utility
                 $invo_detail['keterangan'] = 'Biaya obat';
             }
 
-            $AppendInvoice = $Invoice::append_invoice($invo_detail);
+            $AppendInvoice = $Invoice->append_invoice($invo_detail);
         } // End Loop Resep Biasa
 
 
@@ -2041,9 +2041,13 @@ class Apotek extends Utility
             $AppendInvoice = $Invoice::append_invoice($parameter);
         }
 
+
+
+        //TODO: Buka status tagihan untuk BPJS (apotek, lab, radio)
+
         //Update resep master menjadi kasir
         $Resep = self::$query->update('resep', array(
-            'status_resep' => 'K',
+            'status_resep' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'L',
             'verifikator' => $UserData['data']->uid
         ))
             ->where(array(
@@ -2055,7 +2059,7 @@ class Apotek extends Utility
             ))
             ->execute();
         $Racikan = self::$query->update('racikan', array(
-            'status' => 'K'
+            'status' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'L'
         ))
             ->where(array(
                 'racikan.asesmen' => '= ?'
@@ -2109,7 +2113,7 @@ class Apotek extends Utility
         //Update status pembayaran pasien
 
         $AntrianNomor = self::$query->update('antrian_nomor', array(
-            'status' => 'K'
+            'status' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'D'
         ))
             ->where(array(
                 'antrian_nomor.kunjungan' => '= ?',

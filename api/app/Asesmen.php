@@ -1049,11 +1049,11 @@ class Asesmen extends Utility {
 
 	private function update_asesmen_medis($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$MasterUID = '';
 		//Prepare Poli
 		$Poli = new Poli(self::$pdo);
-		$PoliDetail = $Poli::get_poli_detail($parameter['poli'])['response_data'][0];
+		$PoliDetail = $Poli->get_poli_detail($parameter['poli'])['response_data'][0];
 
 		//Check
 		$check = self::$query->select('asesmen', array(

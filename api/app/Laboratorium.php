@@ -317,7 +317,7 @@ class Laboratorium extends Utility {
 
 	private function verifikasi_item_lab($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $worker = self::$query->update('lab_order_detail', array(
             'mitra' => $parameter['mitra'],
@@ -358,6 +358,9 @@ class Laboratorium extends Utility {
             ->execute();
 
         $AntrianDetail = $AsesmenInfo['response_data'][0];
+        $Antrian = new Antrian(self::$pdo);
+        $AntrianData = $Antrian->get_antrian_detail('antrian', $AntrianDetail['antrian'])['response_data'][0];
+
 
 
         //Check Item Lab
@@ -378,7 +381,7 @@ class Laboratorium extends Utility {
 
             //Update master to P
             $master_order = self::$query->update('lab_order', array(
-                'status' => 'P',
+                'status' => ($AntrianData['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P',
                 'updated_at' => parent::format_date()
             ))
                 ->where(array(
@@ -393,7 +396,7 @@ class Laboratorium extends Utility {
 
 
             $antrian_nomor = self::$query->update('antrian_nomor', array(
-                'status' => 'K'
+                'status' => ($AntrianData['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'L'
             ))
                 ->where(array(
                     'antrian_nomor.poli' => '= ?',

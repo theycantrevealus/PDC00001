@@ -308,6 +308,7 @@
                                     "success"
                                 ).then((result) => {
                                     tableAntrianLabor.ajax.reload();
+                                    tableServiceLabor.ajax.reload();
                                 });
                             } else {
                                 Swal.fire(
@@ -1073,7 +1074,10 @@
                                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                                 },
                                 success: function(response){
-
+                                    tableVerifikasiLabor.ajax.reload();
+                                    tableServiceLabor.ajax.reload();
+                                    tableAntrianLabor.ajax.reload();
+                                    $("#modal-detail-labor").modal("hide");
                                     /*$("#verifikasi_lab_container_" + uid + "_" + tindakan).fadeOut(function() {
                                         $("#verifikasi_lab_container_" + uid + "_" + tindakan).remove();
                                         if($(".group_" + uid).length === 0) {
@@ -1090,8 +1094,10 @@
                         }
                     });
 
-                    $("#modal-detail-labor").modal("hide");
-                    tableVerifikasiLabor.ajax.reload();
+
+                    /*tableVerifikasiLabor.ajax.reload();
+                    tableServiceLabor.ajax.reload();
+                    tableAntrianLabor.ajax.reload();*/
                 }
             });
 
@@ -1147,6 +1153,7 @@
                                     if($(".group_" + uid).length === 0) {
                                         $("#modal-detail-labor").modal("hide");
                                         tableVerifikasiLabor.ajax.reload();
+                                        tableServiceLabor.ajax.reload();
                                     }
                                 });
 

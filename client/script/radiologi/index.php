@@ -314,6 +314,7 @@
                         success: function (response) {
                             $("#modal-verif-radio").modal("hide");
                             tableVerifikasiRadiologi.ajax.reload();
+                            tableAntrianRadiologi.ajax.reload();
                         },
                         error: function (response) {
                             //
