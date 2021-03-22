@@ -100,6 +100,9 @@
                             </div>
                         </div>
                         <div class="tab-pane show fade" id="tab-lab-2">
+                            <pre>
+                                <?php print_r($_POST); ?>
+                            </pre>
                         </div>
                     </div>
                 </div>

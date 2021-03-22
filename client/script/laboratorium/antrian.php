@@ -163,7 +163,7 @@
 			return false;
 		});
 
-		$('#form-upload-lampiran').on('shown.bs.modal', function () {
+		$("#form-upload-lampiran").on("shown.bs.modal", function () {
 			if (file.type == "application/pdf" && file != undefined) {
 				var fileReader = new FileReader();
 				fileReader.onload = function() {

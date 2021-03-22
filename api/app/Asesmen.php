@@ -719,7 +719,7 @@ class Asesmen extends Utility {
 					$ICD10BandingJoined = array();
 					foreach ($ICD10BandingRaw as $ICD10BRKey => $ICD10BRValue) {
 						$ICD10 = new Icd(self::$pdo);
-						$parseICD10 = $ICD10::get_icd_detail('master_icd_10', $ICD10BRValue);
+						$parseICD10 = $ICD10->get_icd_detail('master_icd_10', $ICD10BRValue);
 						if(count($parseICD10['response_data']) > 0) {
 							array_push($ICD10BandingJoined, array(
 								'id' => $ICD10BRValue,
@@ -735,7 +735,7 @@ class Asesmen extends Utility {
                         $ICD9Joined = array();
                         foreach ($ICD9Raw as $ICD9Key => $ICD9Value) {
                             $ICD9 = new Icd(self::$pdo);
-                            $parseICD9 = $ICD9::get_icd_detail('master_icd_9', $ICD9Value);
+                            $parseICD9 = $ICD9->get_icd_detail('master_icd_9', $ICD9Value);
                             if(count($parseICD9['response_data']) > 0) {
                                 array_push($ICD9Joined, array(
                                     'id' => $ICD9Value,
@@ -772,7 +772,7 @@ class Asesmen extends Utility {
 
 				foreach ($tindakan['response_data'] as $key => $value) {
 					$Tindakan = new Tindakan(self::$pdo);
-					$tindakan['response_data'][$key] = $Tindakan::get_tindakan_detail($value['tindakan'])['response_data'][0];
+					$tindakan['response_data'][$key] = $Tindakan->get_tindakan_detail($value['tindakan'])['response_data'][0];
 				}
 
 				$data['response_data'][0]['tindakan'] = $tindakan['response_data'];

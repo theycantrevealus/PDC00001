@@ -7,6 +7,19 @@
         $("#jenis_pelayanan").select2().on("select2:select", function(e) {
             SEPList.ajax.reload();
         });
+        var refreshData = 'N';
+        $("#btn_sync_bpjs").click(function() {
+            refreshData = 'Y';
+            SEPList.ajax.reload(function () {
+                refreshData = 'N';
+            });
+        });
+
+        function switchSEPParam(refreshData = false) {
+            return {
+
+            }
+        }
 
         var SEPList = $("#table-sep").DataTable({
             processing: true,
@@ -25,6 +38,7 @@
                     d.dari = getDateRange("#range_sep")[0];
                     d.sampai = getDateRange("#range_sep")[1];
                     d.pelayanan_jenis = $("#jenis_pelayanan").val();
+                    d.sync_bpjs = refreshData;
                 },
                 dataSrc: function (response) {
                     var data = response.response_package.response_data;
@@ -60,15 +74,105 @@
                 },
                 {
                     "data": null, render: function (data, type, row, meta) {
-                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-info btn-sm btn-edit-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_edit_" + row.uid + "\">" +
-                            "<i class=\"fa fa-pencil-alt\"></i> Edit" +
-                            "</button>" +
-                            "<button class=\"btn btn-danger btnHapusSEP\" id=\"hapus_" + row.sep_no + "\"><i class=\"fa fa-ban\"></i> Hapus</button>" +
-                            "</div>";
+                        if(row.claim !== undefined && row.claim !== null) {
+                            if(row.claim.length > 0) {
+                                return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                    "<button class=\"btn btn-info btn-sm btn-edit-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_edit_" + row.uid + "\">" +
+                                    "<i class=\"fa fa-pencil-alt\"></i> Edit" +
+                                    "</button>" +
+                                    "<button class=\"btn btn-success btn-sm btn-cetak-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_cetak_" + row.uid + "\">" +
+                                    "<i class=\"fa fa-print\"></i> Cetak" +
+                                    "</button>" +
+                                    "<button class=\"btn btn-purple btn-sm btn-detail-claim\" no_sep=\"" + row.sep_no + "\" id=\"sep_buat_claim_" + row.uid + "\">" +
+                                    "<i class=\"fa fa-search\"></i> Claim" +
+                                    "</button>" +
+                                    "<button disabled class=\"btn btn-danger btnHapusSEP\" id=\"hapus_" + row.sep_no + "\"><i class=\"fa fa-ban\"></i> Hapus</button>" +
+                                    "</div>";
+                            } else {
+                                return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                    "<button class=\"btn btn-info btn-sm btn-edit-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_edit_" + row.uid + "\">" +
+                                    "<i class=\"fa fa-pencil-alt\"></i> Edit" +
+                                    "</button>" +
+                                    "<button class=\"btn btn-success btn-sm btn-cetak-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_cetak_" + row.uid + "\">" +
+                                    "<i class=\"fa fa-print\"></i> Cetak" +
+                                    "</button>" +
+                                    "<button class=\"btn btn-purple btn-sm btn-buat-claim\" no_sep=\"" + row.sep_no + "\" id=\"sep_buat_claim_" + row.uid + "\">" +
+                                    "<i class=\"fa fa-plus-circle\"></i> Claim" +
+                                    "</button>" +
+                                    "<button class=\"btn btn-danger btnHapusSEP\" id=\"hapus_" + row.sep_no + "\"><i class=\"fa fa-ban\"></i> Hapus</button>" +
+                                    "</div>";
+                            }
+                        } else {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button class=\"btn btn-info btn-sm btn-edit-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_edit_" + row.uid + "\">" +
+                                "<i class=\"fa fa-pencil-alt\"></i> Edit" +
+                                "</button>" +
+                                "<button class=\"btn btn-success btn-sm btn-cetak-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_cetak_" + row.uid + "\">" +
+                                "<i class=\"fa fa-print\"></i> Cetak" +
+                                "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-buat-claim\" no_sep=\"" + row.sep_no + "\" id=\"sep_buat_claim_" + row.uid + "\">" +
+                                "<i class=\"fa fa-plus-circle\"></i> Claim" +
+                                "</button>" +
+                                "<button class=\"btn btn-danger btnHapusSEP\" id=\"hapus_" + row.sep_no + "\"><i class=\"fa fa-ban\"></i> Hapus</button>" +
+                                "</div>";
+                        }
+
+
                     }
                 }
             ]
+        });
+
+        $("body").on("click", ".btn-buat-claim", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+            $("#modal-sep-claim").modal("show");
+        });
+
+        $("body").on("click", ".btn-cetak-sep", function() {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/BPJS/get_sep_detail/" + id,
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "GET",
+                success: function (response) {
+                    var dataSEP = response.response_package.response_data[0];
+                    console.log(dataSEP);
+                    $("#sep_nomor").html(dataSEP.sep_no);
+                    $("#sep_tanggal").html(dataSEP.sep_tanggal);
+                    $("#sep_spesialis").html(dataSEP.poli_tujuan_detail.kode + " - " + dataSEP.poli_tujuan_detail.nama);
+                    $("#sep_faskes_asal").html(dataSEP.asal_rujukan_ppk + " - " + dataSEP.asal_rujukan_nama + "<b class=\"text-info\">[No : " + dataSEP.asal_rujukan_nomor + "]");
+                    $("#sep_diagnosa_awal").html(dataSEP.diagnosa_kode + " - " + dataSEP.diagnosa_nama);
+                    $("#sep_catatan").html(dataSEP.catatan);
+                    $("#sep_kelas_rawat").html(dataSEP.kelas_rawat);
+
+
+                    var penjaminList = dataSEP.pasien.history_penjamin;
+                    for(var pKey in penjaminList) {
+
+                        if(penjaminList[pKey].penjamin === __UIDPENJAMINBPJS__) {
+                            var metaData = JSON.parse(penjaminList[pKey].rest_meta);
+                            console.log(metaData);
+                            $("#sep_nomor_kartu").html(metaData.response.peserta.noKartu);
+                            $("#sep_nama_peserta").html(metaData.response.peserta.nama + "<b class=\"text-info\">[" + metaData.response.peserta.mr.noMR + "]</b>");
+                            $("#sep_tanggal_lahir").html(metaData.response.peserta.tglLahir);
+                            $("#sep_nomor_telepon").html(metaData.response.peserta.mr.noTelepon);
+                            $("#sep_peserta").html(metaData.response.peserta.jenisPeserta.keterangan);
+                            $("#sep_cob").html(metaData.response.peserta.cob.noAsuransi + " - " + metaData.response.peserta.cob.nmAsuransi);
+
+
+                        }
+                    }
+                    $("#modal-sep-cetak").modal("show");
+                },
+                error: function (response) {
+                    //
+                }
+            });
         });
 
         $("body").on("click", ".btn-edit-sep", function() {
@@ -178,6 +282,220 @@
                 }
             });
         });
+
+        $("#claim_tanggal_masuk").datepicker({
+            dateFormat: 'DD, dd MM yy',
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
+        $("#claim_tanggal_keluar").datepicker({
+            dateFormat: 'DD, dd MM yy',
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
+        $("#claim_jaminan").select2();
+
+        $("#claim_poli").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function() {
+                    return "Faskes tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-sep-claim"),
+            ajax: {
+                dataType: "json",
+                headers: {
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_poli",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.content.response.poli;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.nama,
+                                id: item.kode
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
+
+
+
+
+
+
+
+
+
+
+        $("#claim_ruang_rawat").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function() {
+                    return "Faskes tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-sep-claim"),
+            ajax: {
+                dataType: "json",
+                headers: {
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_ruang_rawat",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.content.response.list;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.nama,
+                                id: item.kode
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
+
+
+
+
+        $("#claim_spesialistik").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function() {
+                    return "Faskes tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-sep-claim"),
+            ajax: {
+                dataType: "json",
+                headers: {
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_spesialistik",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.content.response.list;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.nama,
+                                id: item.kode
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
+
+        $("#claim_cara_keluar").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function() {
+                    return "Cara keluar tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-sep-claim"),
+            ajax: {
+                dataType: "json",
+                headers: {
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_cara_keluar_select2",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.content.response.list;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.nama,
+                                id: item.kode
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
+
+
+        var dataKondisiPulang = load_bpjs("get_spesialistik");
+        console.log(dataKondisiPulang);
+
+
+        function load_bpjs(targetURL) {
+            var bpjsData;
+            $.ajax({
+                url:__HOSTAPI__ + "/BPJS/" + targetURL,
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    bpjsData = response.response_package;
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return bpjsData;
+        }
+
+        function autoICD(targetTable) {
+            var newRow = document.createElement("TR");
+            var newID = document.createElement("TD");
+            var newDiagnosa = document.createElement("TD");
+            var newAksi = document.createElement("TD");
+
+
+            $(newRow).append(newID);
+            $(newRow).append(newDiagnosa);
+            $(newRow).append(newAksi);
+
+            $(targetTable).append(newRow);
+        }
     });
 </script>
 
@@ -563,6 +881,245 @@
             <div class="modal-footer">
                 <button class="btn btn-success" id="btnProsesSEP">
                     <i class="fa fa-check"></i> Proses
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div id="modal-sep-claim" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> <span>Lembar Pengajuan Klaim</span>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6 col-md-6 form-group">
+                        <label for="">Tanggal Masuk</label>
+                        <input type="text" autocomplete="off" class="form-control uppercase" id="claim_tanggal_masuk" />
+                    </div>
+                    <div class="col-6 col-md-6 form-group">
+                        <label for="">Tanggal Keluar</label>
+                        <input type="text" autocomplete="off" class="form-control uppercase" id="claim_tanggal_keluar" />
+                    </div>
+                    <div class="col-4 col-md-6 form-group">
+                        <label for="">Jaminan</label>
+                        <select class="form-control" id="claim_jaminan">
+                            <option value="1">JKN</option>
+                        </select>
+                    </div>
+                    <div class="col-8 col-md-6 form-group">
+                        <label for="">Poli</label>
+                        <select class="form-control" id="claim_poli"></select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4 col-md-4 form-group">
+                        <label for="">Ruang Rawat</label>
+                        <select class="form-control" id="claim_ruang_rawat"></select>
+                    </div>
+                    <div class="col-4 col-md-4 form-group">
+                        <label for="">Kelas Rawat</label>
+                        <select class="form-control" id="claim_kelas_rawat"></select>
+                    </div>
+                    <div class="col-4 col-md-4 form-group">
+                        <label for="">Spesialistik</label>
+                        <select class="form-control" id="claim_spesialistik"></select>
+                    </div>
+                    <div class="col-6 col-md-4 form-group">
+                        <label for="">Cara Keluar</label>
+                        <select class="form-control" id="claim_cara_keluar"></select>
+                    </div>
+                    <div class="col-6 col-md-4 form-group">
+                        <label for="">Kondisi Pulang</label>
+                        <select class="form-control" id="claim_kondisi_pulang"></select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-md-6">
+                        <h5>Diagnosa</h5>
+                        <table class="table table-bordered largeDataType" id="claim_diagnosa">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th class="wrap_content">No</th>
+                                    <th>Diagnosa</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="col-6 col-md-6">
+                        <h5>Prosedur</h5>
+                        <table class="table table-bordered largeDataType" id="claim_procedure">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th class="wrap_content">No</th>
+                                    <th>Procedure</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4 col-md-4 form-group">
+                        <label for="">Rencana Tindak Lanjut</label>
+                        <select class="form-control" id="claim_rencana_tl">
+                            <option value="1">Diperbolehkan Pulang</option>
+                            <option value="2">Pemeriksaan Penunjang</option>
+                            <option value="3">Dirujuk Ke</option>
+                            <option value="4">Kontrol Kembali</option>
+                        </select>
+                    </div>
+                    <div class="col-4 col-md-4 form-group">
+                        <label for="">Dirujuk Ke</label>
+                        <select class="form-control" id="claim_dirujuk_ke"></select>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label for="">Kontrol Kembali</label>
+                            <input type="text" id="claim_tanggal_kontrol" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="">Kontrol Poli</label>
+                            <select class="form-control" id="claim_poli_kontrol"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5 form-group">
+                        <label for="">DPJP</label>
+                        <select class="form-control" id="claim_dpjp"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<div id="modal-sep-cetak" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> <span>Surat Eligibilitas Peserta</span>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>No. SEP</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nomor"></td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. SEP</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_tanggal"></td>
+                            </tr>
+                            <tr>
+                                <td>No. Kartu</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nomor_kartu"></td>
+                            </tr>
+                            <tr>
+                                <td>Nama Peserta</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nama_peserta"></td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. Lahir</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_tanggal_lahir"></td>
+                            </tr>
+                            <tr>
+                                <td>No. Telp</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nomor_telepon"></td>
+                            </tr>
+                            <tr>
+                                <td>Sub/Spesialis</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_spesialis"></td>
+                            </tr>
+                            <tr>
+                                <td>Faskes Penunjuk</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_faskes_asal"></td>
+                            </tr>
+                            <tr>
+                                <td>Diagnosa Awal</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_diagnosa_awal"></td>
+                            </tr>
+                            <tr>
+                                <td>Catatan</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_catatan"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-6">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>Peserta</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_peserta"></td>
+                            </tr>
+                            <tr>
+                                <td>COB</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_cob"></td>
+                            </tr>
+                            <tr>
+                                <td>Jenis Rawat</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_jenis_rawat"></td>
+                            </tr>
+                            <tr>
+                                <td>Kelas Rawat</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_kelas_rawat"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-12">
+                        <small>
+                            <b>
+                                *Saya menyetujui BPJS Kesehatan menggunakan informasi medis pasien jika diperlukan<br />
+                                *SEP bukan sebagai bukti penjaminan peserta
+                            </b>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnProsesSEP">
+                    <i class="fa fa-print"></i> Cetak
                 </button>
 
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>

@@ -317,6 +317,53 @@
             });
         });
 
+        $("body").on("click", ".lampiran_view_trigger", function() {
+            var target = $(this).attr("target");
+            $("#modal-lampiran-viewer").modal("show");
+            return false;
+        });
+
+        $("#modal-lampiran-viewer").on("shown.bs.modal", function () {
+            if (file.type == "application/pdf" && file != undefined) {
+                var fileReader = new FileReader();
+                fileReader.onload = function() {
+                    var pdfData = new Uint8Array(this.result);
+                    // Using DocumentInitParameters object to load binary data.
+                    var loadingTask = pdfjsLib.getDocument({
+                        data: pdfData
+                    });
+                    loadingTask.promise.then(function(pdf) {
+                        // Fetch the first page
+                        var pageNumber = 1;
+                        pdf.getPage(pageNumber).then(function(page) {
+                            var scale = 1.5;
+                            var viewport = page.getViewport({
+                                scale: scale
+                            });
+                            // Prepare canvas using PDF page dimensions
+                            var canvas = $("#pdfViewer")[0];
+                            var context = canvas.getContext('2d');
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+                            // Render PDF page into canvas context
+                            var renderContext = {
+                                canvasContext: context,
+                                viewport: viewport
+                            };
+                            var renderTask = page.render(renderContext);
+                            renderTask.promise.then(function() {
+                                //$("#btnSubmit").removeAttr("disabled").html("Terima SK").removeClass("btn-warning").addClass("btn-primary");
+                            });
+                        });
+                    }, function(reason) {
+                        // PDF loading error
+                        console.error(reason);
+                    });
+                };
+                fileReader.readAsArrayBuffer(file);
+            }
+        });
+
         $("#range_pasien").change(function() {
             pasienTable.ajax.reload();
         });
@@ -371,6 +418,27 @@
         }
     });
 </script>
+
+
+<div id="modal-lampiran-viewer" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Detail Pemeriksaan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <canvas style="width: 100%; border: solid 1px #ccc;" id="pdfViewer"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 

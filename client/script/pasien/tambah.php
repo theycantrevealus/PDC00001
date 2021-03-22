@@ -148,7 +148,11 @@
 								location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + response.response_package.response_unique;
 							}
 						} else {
-							location.href = __HOSTNAME__ + "/pasien";
+						    if(response.response_package.response_result > 0) {
+                                location.href = __HOSTNAME__ + "/pasien";
+                            } else {
+						        console.log(response);
+                            }
 						}
 					},
 					error: function(response) {

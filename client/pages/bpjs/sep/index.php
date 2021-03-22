@@ -25,7 +25,7 @@
                         <div class="card-group">
                             <div class="card card-body">
                                 <div class="d-flex flex-row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         Jenis Pelayanan
                                         <select class="form-control" id="jenis_pelayanan">
                                             <option value="2">Rawat Jalan</option>
@@ -35,6 +35,12 @@
                                     <div class="col-md-6">
                                         Periode
                                         <input id="range_sep" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <br />
+                                        <button class="btn btn-info" id="btn_sync_bpjs">
+                                            <i class="fa fa-sync"></i> Sync Data BPJS
+                                        </button>
                                     </div>
                                 </div>
                             </div>

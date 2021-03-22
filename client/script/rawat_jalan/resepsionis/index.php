@@ -780,7 +780,10 @@
                             $("#txt_bpjs_nomor_rujukan").select2("destroy");
                             $("#txt_bpjs_nomor_rujukan").select2();
                             $("#txt_bpjs_nomor_rujukan").select2("val", "");
-                            if(response.response_package.content.response !== null) {
+                            if(
+                                response.response_package.content !== undefined &&
+                                response.response_package.content.response !== null
+                        ) {
                                 $("#panel-rujukan").show();
                                 var data = response.response_package.content.response.rujukan;
                                 selectedListRujukan = data;
@@ -860,7 +863,6 @@
 
                     var tanggal_laka = new Date($("#txt_bpjs_laka_tanggal").datepicker("getDate"));
                     var parse_tanggal_laka =  tanggal_laka.getFullYear() + "-" + str_pad(2, tanggal_laka.getMonth()+1) + "-" + str_pad(2, tanggal_laka.getDate());
-                    alert(currentAntrianUID);
                     if(isRujukan)
                     {
                         dataSetSEP = {
