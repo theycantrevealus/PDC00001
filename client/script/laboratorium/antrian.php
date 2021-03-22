@@ -64,6 +64,7 @@
                 let uid_tindakan = get_id[get_id.length - 2];
                 let nilai = $(this).val();
 
+
                 if (uid_tindakan in nilaiItemTindakan){
                     nilaiItemTindakan[uid_tindakan][id_nilai] = nilai;
                 } else {
@@ -110,7 +111,6 @@
                 },
                 type: "POST",
                 success: function(response){
-                    console.log(response);
                     let order_detail = 0;
                     let response_upload = 0;
                     let response_delete_doc = 0;
@@ -163,7 +163,7 @@
 			return false;
 		});
 
-		$('#form-upload-lampiran').on('shown.bs.modal', function () {
+		$("#form-upload-lampiran").on("shown.bs.modal", function () {
 			if (file.type == "application/pdf" && file != undefined) {
 				var fileReader = new FileReader();
 				fileReader.onload = function() {
@@ -319,9 +319,14 @@
                                         nilai = "";
                                     }
 
-									// id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0)
-                                    {
+                                    var naratifMode =  "";
+                                    if(item.naratif === 'N' || item.naratif === undefined || item.naratif === null) {
+                                        naratifMode = "<input " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" />";
+                                    } else {
+                                        naratifMode = "<textarea " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" class=\"form-control inputItemTindakan\">" + nilai + "</textarea>";
+                                    }
+                                    // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
+                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0) {
                                         /*html += "<tr class=\"strikethrough\">" +
                                             "<td>"+ nomor +"</td>" +
                                             "<td>" + items.keterangan + "</td>" +
@@ -334,7 +339,7 @@
                                         html += "<tr>" +
                                             "<td>"+ nomor +"</td>" +
                                             "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
-                                            "<td><input " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                            "<td>" + naratifMode + "</td>" +
                                             "<td>" + items.satuan + "</td>" +
                                             "<td>" + items.nilai_min + "</td>" +
                                             "<td>" + items.nilai_maks + "</td>" +
@@ -359,7 +364,7 @@
 		//return dataItem;
 	}
 
-	function loadLampiran(uid_order){
+	function loadLampiran(uid_order) {
 		let dataItem;
 
 		if (uid_order != ""){

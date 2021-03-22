@@ -52,7 +52,6 @@
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 					if(dataObj.penjamin == __UIDPENJAMINBPJS__) {
 
-
 						//Get Nomor BPJS
                         $.ajax({
                             async: false,
@@ -84,7 +83,7 @@
                                 }
                             },
                             error: function (response) {
-                                //
+                                console.log(response);
                             }
                         });
 
@@ -142,7 +141,10 @@
 				} else {
 					alert("Data belum lengkap");
 				}
-			}
+			} else {
+			    console.log(currentAntrianID);
+                console.log(currentPasien);
+            }
 			return false;
 		});
 
@@ -271,6 +273,7 @@
             success: function(response){
                 var data = response.response_package.content;
 
+                console.log(data);
                 penjaminMetaData = data;
 
                 if(data.metaData !== undefined) {

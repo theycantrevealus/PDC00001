@@ -22,6 +22,63 @@
 		<i class="material-icons mr-3">error_outline</i>
 		<div class="text-body"><strong>Selamat Datang.</strong> <?php echo __PC_CUSTOMER__; ?></div>
 	</div>
+    <?php
+    if($_SESSION['jabatan']['response_data'][0]['nama'] === 'Administrator') {
+        ?>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="z-0">
+                <ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-dokter">
+                    <li class="nav-item">
+                        <a href="#master_labor" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+							<span class="nav-link__count">
+								<i class="fa fa-address-book"></i>
+							</span>
+                            Laboratorium
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#master_radio" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+							<span class="nav-link__count">
+								<i class="fa fa-address-book"></i>
+							</span>
+                            Radiologi
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card card-body tab-content">
+                <div class="tab-pane show fade active" id="master_labor">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header card-header-large bg-white">
+                                    <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Item Laboratorium tanpa nilai uji</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-bordered largeDataType" id="monitoring_master_labor">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Nama</th>
+                                            <th class="wrap_content">Aksi</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane show fade" id="master_radio">
+                </div>
+            </div>
+        </div>
+    </div>
+        <?php
+    }
+    ?>
 
 	<!--div class="row card-group-row">
 		<div class="col-lg-4 col-md-6 card-group-row__col">

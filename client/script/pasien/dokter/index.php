@@ -30,6 +30,7 @@
                 },
                 dataSrc:function(response) {
                     var dataSet = response.response_package.response_data;
+                    //console.log(dataSet);
 
                     /*var dataResponse = [];
                     if(dataSet == undefined) {
@@ -170,65 +171,124 @@
                     $("#tanggal_periksa").html(data.tanggal_parsed);
 
                     //Parse Resep
-                    if(data.resep[0] !== undefined) {
-                        var resepData = data.resep[0].resep_detail;
-                        $(".resepDokterCPPT tbody tr").remove();
-                        for(var resepKey in resepData) {
-                            var newResepRow = document.createElement("TR");
+                    if(data.resep !== null) {
+                        if(data.resep[0] !== undefined) {
+                            var resepData = data.resep[0].resep_detail;
+                            $(".resepDokterCPPT tbody tr").remove();
+                            for(var resepKey in resepData) {
+                                var newResepRow = document.createElement("TR");
 
-                            var resepID = document.createElement("TD");
-                            var resepObat = document.createElement("TD");
-                            var resepSigna = document.createElement("TD");
-                            var resepJlh = document.createElement("TD");
+                                var resepID = document.createElement("TD");
+                                var resepObat = document.createElement("TD");
+                                var resepSigna = document.createElement("TD");
+                                var resepJlh = document.createElement("TD");
 
-                            $(resepID).html((parseInt(resepKey) + 1));
-                            $(resepObat).html(resepData[resepKey].obat_detail.nama);
-                            $(resepSigna).html(resepData[resepKey].signa_pakai + " &times; " + resepData[resepKey].signa_qty);
-                            $(resepJlh).html(resepData[resepKey].qty);
+                                $(resepID).html((parseInt(resepKey) + 1));
+                                $(resepObat).html(resepData[resepKey].obat_detail.nama);
+                                $(resepSigna).html(resepData[resepKey].signa_pakai + " &times; " + resepData[resepKey].signa_qty);
+                                $(resepJlh).html(resepData[resepKey].qty);
 
-                            $(newResepRow).append(resepID);
-                            $(newResepRow).append(resepObat);
-                            $(newResepRow).append(resepSigna);
-                            $(newResepRow).append(resepJlh);
+                                $(newResepRow).append(resepID);
+                                $(newResepRow).append(resepObat);
+                                $(newResepRow).append(resepSigna);
+                                $(newResepRow).append(resepJlh);
 
-                            $(".resepDokterCPPT tbody").append(newResepRow);
-                        }
-
-                        var racikanData = data.racikan;
-                        $(".racikanDokterCPPT tbody tr").remove();
-                        for(var racikanKey in racikanData) {
-                            var itemRacikan = racikanData[racikanKey].item;
-
-                            console.log(racikanData[racikanKey]);
-
-                            var newRacikanRow = document.createElement("TR");
-
-                            var racikanID = document.createElement("TD");
-                            var racikanNama = document.createElement("TD");
-                            var racikanKomposisi = document.createElement("TD");
-                            var racikanSigna = document.createElement("TD");
-                            var racikanJlh = document.createElement("TD");
-
-                            $(racikanID).html((parseInt(racikanKey) + 1));
-                            $(racikanNama).html(racikanData[racikanKey].kode);
-
-                            var komposisi = "<ol type=\"1\">";
-                            for(var itemKey in itemRacikan) {
-                                komposisi += "<li>" + itemRacikan[itemKey].obat_detail.nama + " <b class=\"text-info\">" + itemRacikan[itemKey].kekuatan  + "</b></li>";
+                                $(".resepDokterCPPT tbody").append(newResepRow);
                             }
-                            komposisi += "</ol>";
-                            $(racikanKomposisi).html(komposisi);
-                            $(racikanSigna).html(racikanData[racikanKey].signa_pakai + " &times; " + racikanData[racikanKey].signa_qty);
-                            $(racikanJlh).html(racikanData[racikanKey].qty);
 
-                            $(newRacikanRow).append(racikanID);
-                            $(newRacikanRow).append(racikanNama);
-                            $(newRacikanRow).append(racikanKomposisi);
-                            $(newRacikanRow).append(racikanSigna);
-                            $(newRacikanRow).append(racikanJlh);
+                            var racikanData = data.racikan;
 
-                            $(".racikanDokterCPPT tbody").append(newRacikanRow);
+                            $(".racikanDokterCPPT tbody tr").remove();
+                            for(var racikanKey in racikanData) {
+                                var itemRacikan = racikanData[racikanKey].item;
 
+                                var newRacikanRow = document.createElement("TR");
+
+                                var racikanID = document.createElement("TD");
+                                var racikanNama = document.createElement("TD");
+                                var racikanKomposisi = document.createElement("TD");
+                                var racikanSigna = document.createElement("TD");
+                                var racikanJlh = document.createElement("TD");
+
+                                $(racikanID).html((parseInt(racikanKey) + 1));
+                                $(racikanNama).html(racikanData[racikanKey].kode);
+
+                                var komposisi = "<ol type=\"1\">";
+                                for(var itemKey in itemRacikan) {
+                                    komposisi += "<li>" + itemRacikan[itemKey].obat_detail.nama + " <b class=\"text-info\">" + itemRacikan[itemKey].kekuatan  + "</b></li>";
+                                }
+                                komposisi += "</ol>";
+                                $(racikanKomposisi).html(komposisi);
+                                $(racikanSigna).html(racikanData[racikanKey].signa_pakai + " &times; " + racikanData[racikanKey].signa_qty);
+                                $(racikanJlh).html(racikanData[racikanKey].qty);
+
+                                $(newRacikanRow).append(racikanID);
+                                $(newRacikanRow).append(racikanNama);
+                                $(newRacikanRow).append(racikanKomposisi);
+                                $(newRacikanRow).append(racikanSigna);
+                                $(newRacikanRow).append(racikanJlh);
+
+                                $(".racikanDokterCPPT tbody").append(newRacikanRow);
+                            }
+
+                            var resepApotekData = data.resep_apotek;
+
+                            $(".resepApotekCPPT tbody tr").remove();
+                            for(var resepApotekKey in resepApotekData) {
+                                var newResepApotikRow = document.createElement("TR");
+
+                                var resepApotikID = document.createElement("TD");
+                                var resepApotikObat = document.createElement("TD");
+                                var resepApotikSigna = document.createElement("TD");
+                                var resepApotikJlh = document.createElement("TD");
+
+                                $(resepApotikID).html((parseInt(resepApotekKey) + 1));
+                                $(resepApotikObat).html(resepApotekData[resepApotekKey].obat_detail.nama);
+                                $(resepApotikSigna).html(resepApotekData[resepApotekKey].signa_pakai + " &times; " + resepApotekData[resepApotekKey].signa_qty);
+                                $(resepApotikJlh).html(resepApotekData[resepApotekKey].qty);
+
+                                $(newResepApotikRow).append(resepApotikID);
+                                $(newResepApotikRow).append(resepApotikObat);
+                                $(newResepApotikRow).append(resepApotikSigna);
+                                $(newResepApotikRow).append(resepApotikJlh);
+
+                                $(".resepApotekCPPT tbody").append(newResepApotikRow);
+                            }
+
+                            var racikanApotekData = data.racikan_apotek;
+                            console.log(racikanApotekData);
+                            $(".racikanApotekCPPT tbody tr").remove();
+                            for(var racikanApotekKey in racikanApotekData) {
+                                var itemApotekRacikan = racikanApotekData[racikanApotekKey].item;
+
+                                var newRacikanApotekRow = document.createElement("TR");
+
+                                var racikanApotekID = document.createElement("TD");
+                                var racikanApotekNama = document.createElement("TD");
+                                var racikanApotekKomposisi = document.createElement("TD");
+                                var racikanApotekSigna = document.createElement("TD");
+                                var racikanApotekJlh = document.createElement("TD");
+
+                                $(racikanApotekID).html((parseInt(racikanApotekKey) + 1));
+                                $(racikanApotekNama).html(racikanApotekData[racikanApotekKey].kode);
+
+                                var komposisiApotek = "<ol type=\"1\">";
+                                for(var itemApotekKey in itemApotekRacikan) {
+                                    komposisiApotek += "<li>" + itemApotekRacikan[itemApotekKey].obat_detail.nama + " <b class=\"text-info\">" + itemApotekRacikan[itemApotekKey].kekuatan  + "</b></li>";
+                                }
+                                komposisiApotek += "</ol>";
+                                $(racikanApotekKomposisi).html(komposisiApotek);
+                                $(racikanApotekSigna).html(racikanApotekData[racikanApotekKey].signa_pakai + " &times; " + racikanApotekData[racikanApotekKey].signa_qty);
+                                $(racikanApotekJlh).html(racikanApotekData[racikanApotekKey].jumlah);
+
+                                $(newRacikanApotekRow).append(racikanApotekID);
+                                $(newRacikanApotekRow).append(racikanApotekNama);
+                                $(newRacikanApotekRow).append(racikanApotekKomposisi);
+                                $(newRacikanApotekRow).append(racikanApotekSigna);
+                                $(newRacikanApotekRow).append(racikanApotekJlh);
+
+                                $(".racikanApotekCPPT tbody").append(newRacikanApotekRow);
+                            }
                         }
                     }
 
@@ -239,7 +299,7 @@
                         $(".lab_loader").html(LabBuild);
                     }
 
-                    console.log(selectedData.rad_order);
+                    //console.log(selectedData.rad_order);
 
                     //Parse Radiologi
                     for(var radKey in selectedData.rad_order) {
@@ -255,6 +315,53 @@
                     console.log(response);
                 }
             });
+        });
+
+        $("body").on("click", ".lampiran_view_trigger", function() {
+            var target = $(this).attr("target");
+            $("#modal-lampiran-viewer").modal("show");
+            return false;
+        });
+
+        $("#modal-lampiran-viewer").on("shown.bs.modal", function () {
+            if (file.type == "application/pdf" && file != undefined) {
+                var fileReader = new FileReader();
+                fileReader.onload = function() {
+                    var pdfData = new Uint8Array(this.result);
+                    // Using DocumentInitParameters object to load binary data.
+                    var loadingTask = pdfjsLib.getDocument({
+                        data: pdfData
+                    });
+                    loadingTask.promise.then(function(pdf) {
+                        // Fetch the first page
+                        var pageNumber = 1;
+                        pdf.getPage(pageNumber).then(function(page) {
+                            var scale = 1.5;
+                            var viewport = page.getViewport({
+                                scale: scale
+                            });
+                            // Prepare canvas using PDF page dimensions
+                            var canvas = $("#pdfViewer")[0];
+                            var context = canvas.getContext('2d');
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+                            // Render PDF page into canvas context
+                            var renderContext = {
+                                canvasContext: context,
+                                viewport: viewport
+                            };
+                            var renderTask = page.render(renderContext);
+                            renderTask.promise.then(function() {
+                                //$("#btnSubmit").removeAttr("disabled").html("Terima SK").removeClass("btn-warning").addClass("btn-primary");
+                            });
+                        });
+                    }, function(reason) {
+                        // PDF loading error
+                        console.error(reason);
+                    });
+                };
+                fileReader.readAsArrayBuffer(file);
+            }
         });
 
         $("#range_pasien").change(function() {
@@ -311,6 +418,27 @@
         }
     });
 </script>
+
+
+<div id="modal-lampiran-viewer" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Detail Pemeriksaan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <canvas style="width: 100%; border: solid 1px #ccc;" id="pdfViewer"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 

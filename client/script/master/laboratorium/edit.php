@@ -26,9 +26,13 @@
 				$("#txt_nama_laboratorium").val(labData.nama);
 				if(labData.naratif === 'Y') {
 				    $("#txt_hasil_naratif").prop("checked", true);
+				    $("#nilai-lab tbody tr").each(function () {
+				        $(this).find("td:eq(4) input")
+                    });
                 } else {
                     $("#txt_hasil_naratif").prop("checked", false);
                 }
+
 				if(labData.spesimen !== undefined && labData.spesimen !== null) {
                     load_spesimen("#txt_spesimen_laboratorium", labData.spesimen.uid);
                 }
@@ -59,16 +63,19 @@
 				}
 
 				autoLokasi(selectedLokasi);
-
 				for(var nil in labData.nilai) {
 					autoNilai({
 						"satuan": labData.nilai[nil].satuan,
 						"keterangan": labData.nilai[nil].keterangan,
 						"min": labData.nilai[nil].nilai_min,
-						"max": labData.nilai[nil].nilai_maks
+						"max": labData.nilai[nil].nilai_maks,
+                        "naratif": labData.naratif
 					});
 				}
-				autoNilai();
+
+				autoNilai({
+                    "naratif": labData.naratif
+                });
 
 
 				for(var pen in labData.penjamin) {
@@ -474,6 +481,7 @@
 			var max = ((setterNilai.max === undefined) ? 0 : setterNilai.max);
 			var satuan = ((setterNilai.satuan === undefined) ? "-" : setterNilai.satuan);
 			var keterangan = ((setterNilai.keterangan === undefined) ? "" : setterNilai.keterangan);
+			var naratif = ((setterNilai.naratif === undefined) ? "N" : setterNilai.naratif);
 
 			var newRowNilai = document.createElement("TR");
 			var newCellNilaiID = document.createElement("TD");
@@ -506,10 +514,21 @@
 			});*/
 			
 			var newNilaiSatuan = document.createElement("INPUT");
+			$(newNilaiSatuan).addClass("form-control");
 			$(newCellNilaiSatuan).append(newNilaiSatuan);
 			$(newNilaiSatuan).val(satuan).addClass("form-control nilai_satuan_selection");
 
-			var newNilaiKeterangan = document.createElement("INPUT");
+            var newNilaiKeterangan = document.createElement("INPUT");
+            /*if(naratif === 'Y') {
+                newNilaiKeterangan = document.createElement("TEXTAREA");
+            } else {
+                newNilaiKeterangan = document.createElement("INPUT");
+            }*/
+
+            $(newNilaiKeterangan).addClass("form-control").attr({
+                "placeholder": "Nama nilai pengujian"
+            });
+
 			$(newCellNilaiKeterangan).append(newNilaiKeterangan);
 			$(newNilaiKeterangan).val(keterangan).addClass("form-control nilai_keterangan_selection");
 
@@ -528,8 +547,29 @@
 		}
 
 		$("#txt_hasil_naratif").change(function () {
-            $("#nilai-lab tbody tr").each(function () {
-                //$(this).find("td:eq(1) input").
+            /*$("#nilai-lab tbody tr").each(function () {
+
+            });*/
+
+            var thisValue = ($(this).is(":checked")) ? "Y" : "N";
+            $.ajax({
+                url:__HOSTAPI__ + "/Laboratorium",
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"POST",
+                data: {
+                    request: "update_naratif",
+                    uid: UID,
+                    target_value: thisValue
+                },
+                success:function(response) {
+                    //
+                },
+                error: function(response) {
+                    console.log(response);
+                }
             });
         });
 

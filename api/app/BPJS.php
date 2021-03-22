@@ -82,8 +82,12 @@ class BPJS extends Utility {
 		try {
 
 			switch($parameter[1]) {
+                case 'get_ruang_rawat':
+                    return self::get_ruang_rawat($parameter);
+                    break;
 				case 'get_faskes':
 					return self::get_faskes();
+					break;
                 case 'get_diagnosa':
                     return self::get_diagnosa();
 					break;
@@ -104,6 +108,12 @@ class BPJS extends Utility {
                     break;
                 case 'get_spesialistik':
                     return self::get_spesialistik();
+                    break;
+                case 'get_cara_keluar_select2':
+                    return self::get_cara_keluar_select2();
+                    break;
+                case 'get_kondisi_pulang_select2':
+                    return self::get_kondisi_pulang_select2();
                     break;
                 case 'get_sep_select2':
                     return self::get_sep_select2($parameter);
@@ -175,6 +185,19 @@ class BPJS extends Utility {
 		}
 	}
 
+	private function get_ruang_rawat($parameter) {
+        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/ruangrawat');
+        $data = array();
+        if(intval($content['content']['metaData']['code']) === 200) {
+            foreach($content['content']['response']['list'] as $key => $value) {
+                array_push($data, $value);
+            }
+            return $data;
+        } else {
+            return $content;
+        }
+    }
+
     public function info_bpjs($parameter) {
 	    $Pasien = new Pasien(self::$pdo);
 	    $data = $Pasien->get_pasien_detail('pasien', $parameter);
@@ -219,6 +242,16 @@ class BPJS extends Utility {
 
     private function get_spesialistik() {
         $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/spesialistik');
+        return $content;
+    }
+
+    private function get_cara_keluar_select2($parameter) {
+        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/carakeluar');
+        return $content;
+    }
+
+    private function get_kondisi_pulang_select2($parameter) {
+        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/pascapulang/');
         return $content;
     }
 
@@ -429,7 +462,7 @@ class BPJS extends Utility {
     private function get_history_sep_local($parameter) {
 
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 
         $begin = new DateTime($parameter['dari']);
@@ -438,72 +471,48 @@ class BPJS extends Utility {
         $interval = DateInterval::createFromDateString('1 day');
         $period = new DatePeriod($begin, $interval, $end);
         $data_sync_record = array();
-        foreach ($period as $dt) {
-            $sync_sep = self::get_history_sep(array(
-                'tanggal' => $dt->format("Y-m-d"),
-                'jenis' => $parameter['pelayanan_jenis']
-            ));
+        if(isset($parameter['sync_bpjs']) && $parameter['sync_bpjs'] === 'Y') {
+            foreach ($period as $dt) {
+                $sync_sep = self::get_history_sep(array(
+                    'tanggal' => $dt->format("Y-m-d"),
+                    'jenis' => $parameter['pelayanan_jenis']
+                ));
 
-            $sync_content = $sync_sep['content'];
+                $sync_content = $sync_sep['content'];
 
-            if(intval($sync_content['metaData']['code']) === 200 && trim($sync_content['metaData']['message']) === 'Sukses') {
-                $data_sync = $sync_content['response']['sep'];
-                foreach ($data_sync as $dKey => $dValue) {
-                    $SEPuid = parent::gen_uuid();
-                    //Save History
+                if(intval($sync_content['metaData']['code']) === 200 && trim($sync_content['metaData']['message']) === 'Sukses') {
+                    $data_sync = $sync_content['response']['sep'];
+                    foreach ($data_sync as $dKey => $dValue) {
+                        $SEPuid = parent::gen_uuid();
+                        //Save History
 
-                    //get pasien local info
-                    $penjamin_data = self::$query->select('pasien_penjamin', array(
-                        'pasien',
-                        'penjamin',
-                        'rest_meta'
-                    ))
-                        ->where(array(
-                            'pasien_penjamin.deleted_at' => 'IS NULL'
-                        ), array(
-                            //
-                        ))
-                        ->execute();
-                    $targetPasien = '';
-                    foreach ($penjamin_data['response_data'] as $PJKey => $PJValue) {
-                        $data_api_read = json_decode($PJValue['rest_meta'], true);
-
-                        if($PJValue['penjamin'] === __UIDPENJAMINBPJS__) {
-                            if($data_api_read['response']['peserta']['noKartu'] == $dValue['noKartu']) {
-                                $targetPasien = $PJValue['pasien'];
-                            }
-                        }
-                    }
-
-                    //Check duplicate
-                    $check = self::get_sep_detail_dup($dValue['noSep']);
-                    if(count($check['response_data']) > 0) {
-                        $sep_log = self::$query->update('bpjs_sep', array(
-                            'uid' => $SEPuid,
-                            'pasien' => $targetPasien,
-                            'pelayanan_jenis' => $dValue['jnsPelayanan'],
-                            'kelas_rawat' => $dValue['kelasRawat'],
-                            'asal_rujukan_nomor' => $dValue['noRujukan'],
-                            'diagnosa_kode' => $dValue['diagnosa'],
-                            'poli_tujuan' => $dValue['poli'],
-                            'pegawai' => $UserData['data']->uid,
-                            'sep_no' => $dValue['noSep'],
-                            'sep_tanggal' => $dValue['tglSep'],
-                            'sep_selesai' => $dValue['tglPlgSep'],
-                            'created_at' => parent::format_date(),
-                            'updated_at' => parent::format_date()
+                        //get pasien local info
+                        $penjamin_data = self::$query->select('pasien_penjamin', array(
+                            'pasien',
+                            'penjamin',
+                            'rest_meta'
                         ))
                             ->where(array(
-                                'bpjs_sep.deleted_at' => 'IS NULL',
-                                'AND',
-                                'bpjs_sep.uid' => '= ?'
+                                'pasien_penjamin.deleted_at' => 'IS NULL'
                             ), array(
-                                $check['response_data'][0]['uid']
+                                //
                             ))
                             ->execute();
-                    } else {
-                        if(isset($dValue['tglPlgSep'])) {
-                            $sep_log = self::$query->insert('bpjs_sep', array(
+                        $targetPasien = '';
+                        foreach ($penjamin_data['response_data'] as $PJKey => $PJValue) {
+                            $data_api_read = json_decode($PJValue['rest_meta'], true);
+
+                            if($PJValue['penjamin'] === __UIDPENJAMINBPJS__) {
+                                if($data_api_read['response']['peserta']['noKartu'] == $dValue['noKartu']) {
+                                    $targetPasien = $PJValue['pasien'];
+                                }
+                            }
+                        }
+
+                        //Check duplicate
+                        $check = self::get_sep_detail_dup($dValue['noSep']);
+                        if(count($check['response_data']) > 0) {
+                            $sep_log = self::$query->update('bpjs_sep', array(
                                 'uid' => $SEPuid,
                                 'pasien' => $targetPasien,
                                 'pelayanan_jenis' => $dValue['jnsPelayanan'],
@@ -518,30 +527,56 @@ class BPJS extends Utility {
                                 'created_at' => parent::format_date(),
                                 'updated_at' => parent::format_date()
                             ))
+                                ->where(array(
+                                    'bpjs_sep.deleted_at' => 'IS NULL',
+                                    'AND',
+                                    'bpjs_sep.uid' => '= ?'
+                                ), array(
+                                    $check['response_data'][0]['uid']
+                                ))
                                 ->execute();
                         } else {
-                            $sep_log = self::$query->insert('bpjs_sep', array(
-                                'uid' => $SEPuid,
-                                'pasien' => $targetPasien,
-                                'pelayanan_jenis' => $dValue['jnsPelayanan'],
-                                'kelas_rawat' => $dValue['kelasRawat'],
-                                'asal_rujukan_nomor' => $dValue['noRujukan'],
-                                'diagnosa_kode' => $dValue['diagnosa'],
-                                'poli_tujuan' => $dValue['poli'],
-                                'pegawai' => $UserData['data']->uid,
-                                'sep_no' => $dValue['noSep'],
-                                'sep_tanggal' => $dValue['tglSep'],
-                                'created_at' => parent::format_date(),
-                                'updated_at' => parent::format_date()
-                            ))
-                                ->execute();
+                            if(isset($dValue['tglPlgSep'])) {
+                                $sep_log = self::$query->insert('bpjs_sep', array(
+                                    'uid' => $SEPuid,
+                                    'pasien' => $targetPasien,
+                                    'pelayanan_jenis' => $dValue['jnsPelayanan'],
+                                    'kelas_rawat' => $dValue['kelasRawat'],
+                                    'asal_rujukan_nomor' => $dValue['noRujukan'],
+                                    'diagnosa_kode' => $dValue['diagnosa'],
+                                    'poli_tujuan' => $dValue['poli'],
+                                    'pegawai' => $UserData['data']->uid,
+                                    'sep_no' => $dValue['noSep'],
+                                    'sep_tanggal' => $dValue['tglSep'],
+                                    'sep_selesai' => $dValue['tglPlgSep'],
+                                    'created_at' => parent::format_date(),
+                                    'updated_at' => parent::format_date()
+                                ))
+                                    ->execute();
+                            } else {
+                                $sep_log = self::$query->insert('bpjs_sep', array(
+                                    'uid' => $SEPuid,
+                                    'pasien' => $targetPasien,
+                                    'pelayanan_jenis' => $dValue['jnsPelayanan'],
+                                    'kelas_rawat' => $dValue['kelasRawat'],
+                                    'asal_rujukan_nomor' => $dValue['noRujukan'],
+                                    'diagnosa_kode' => $dValue['diagnosa'],
+                                    'poli_tujuan' => $dValue['poli'],
+                                    'pegawai' => $UserData['data']->uid,
+                                    'sep_no' => $dValue['noSep'],
+                                    'sep_tanggal' => $dValue['tglSep'],
+                                    'created_at' => parent::format_date(),
+                                    'updated_at' => parent::format_date()
+                                ))
+                                    ->execute();
+                            }
                         }
+                        array_push($data_sync_record, $sep_log);
                     }
-                    array_push($data_sync_record, $sep_log);
-                }
-            } else {
-                if(isset($sync_content)) {
-                    array_push($data_sync_record, $sync_content);
+                } else {
+                    if(isset($sync_content)) {
+                        array_push($data_sync_record, $sync_content);
+                    }
                 }
             }
         }
@@ -659,12 +694,53 @@ class BPJS extends Utility {
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $Pasien = new Pasien(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
-            $Pasien = new Pasien(self::$pdo);
+
             $data['response_data'][$key]['pasien'] = $Pasien->get_pasien_detail('pasien', $value['pasien'])['response_data'][0];
+
+            //Check Claim Status
+            $claimData = self::$query->select('bpjs_claim', array(
+                'id',
+                'tglMasuk',
+                'tglKeluar',
+                'jaminan',
+                'poli',
+                'ruangRawat',
+                'kelasRawat',
+                'spesialistik',
+                'caraKeluar',
+                'kondisiPulang',
+                'diagnosa',
+                'procedure',
+                'tindakLanjut',
+                'dirujukKe_kodePPK',
+                'kontrolKembali_tanggal',
+                'kontrolKembali_poli',
+                'dpjp',
+                'user',
+                'pegawai',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'bpjs_claim.noSEP' => '= ?',
+                    'AND',
+                    'bpjs_claim.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['sep_no']
+                ))
+                ->execute();
+            foreach ($claimData['response_data'] as $CKey => $CValue) {
+                $claimData['response_data'][$CKey]['pegawai'] = $Pegawai->get_detail($CValue['pegawai'])['response_data'][0];
+            }
+
+            $data['response_data'][$key]['claim'] = $claimData['response_data'];
             $autonum++;
         }
+
 
         $data['sync_record'] = $data_sync_record;
 
@@ -1109,11 +1185,21 @@ class BPJS extends Utility {
             ))
             ->execute();
 
+        $Antrian = new Antrian(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
-            $Antrian = new Antrian(self::$pdo);
-
+            $data['response_data'][$key]['sep_tanggal'] = date('d F Y', strtotime($value['sep_tanggal']));
             $poli_detail = self::get_poli_detail($value['poli_tujuan']);
             $data['response_data'][$key]['poli_tujuan_detail'] = $poli_detail[0];
+
+            $pasien = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            foreach ($pasien['response_data'][0]['history_penjamin'] as $pKey => $pValue) {
+                if($pasien['response_data'][0]['history_penjamin'][$pKey]['penjamin'] === __UIDPENJAMINBPJS__) {
+                    /*$readData = preg_replace('/\\\\/', '', $pValue['penjamin_detail']['rest_meta']);
+                    $pasien['response_data'][0]['history_penjamin'][$pKey]['penjamin_detail']['rest_meta_parse'] = json_decode($readData, true);*/
+                }
+            }
+            $data['response_data'][$key]['pasien'] = $pasien['response_data'][0];
 
             $AntrianDetail = $Antrian->get_antrian_detail('antrian', $value['antrian']);
             $data['response_data'][$key]['antrian_detail'] = $AntrianDetail['response_data'][0];

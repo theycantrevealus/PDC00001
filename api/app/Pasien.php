@@ -223,7 +223,7 @@ class Pasien extends Utility
             {
                 //Detail Penjamin
                 $Penjamin = new Penjamin(self::$pdo);
-                $PenjaminDetail = $Penjamin::get_penjamin_detail($DValue['penjamin']);
+                $PenjaminDetail = $Penjamin->get_penjamin_detail($DValue['penjamin']);
                 $Detail['response_data'][$DKey]['penjamin_detail'] = $PenjaminDetail['response_data'][0];
 
                 $Detail['response_data'][$DKey]['valid_awal'] = date('d F Y', strtotime($DValue['valid_awal']));
@@ -245,14 +245,14 @@ class Pasien extends Utility
     private function tambah_pasien($table, $parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $dataObj = $parameter['dataObj'];
         $allData = [];
 
         $check = self::duplicate_check(array(
             'table' => $table,
-            'check' => $dataObj['nama']
+            'check' => $dataObj['no_rm']
         ));
 
         if (count($check['response_data']) > 0) {

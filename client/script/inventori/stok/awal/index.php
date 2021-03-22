@@ -144,7 +144,7 @@
             autoWidth: false,
             language: {
                 search: "",
-                searchPlaceholder: "Cari Pasien"
+                searchPlaceholder: "Cari Obat"
             },
 
 			aaSorting: [[0, "asc"]],

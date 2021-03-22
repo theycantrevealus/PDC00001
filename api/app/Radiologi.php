@@ -868,8 +868,8 @@ class Radiologi extends Utility
 
     private function verifikasi_item_rad($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $processResult = array();
         foreach ($parameter['data_set'] as $key => $value) {
 
 
@@ -889,15 +889,13 @@ class Radiologi extends Utility
                     'rad_order_detail.deleted_at' => 'IS NULL',
                     'AND',
                     'rad_order_detail.tindakan' => '= ?'
-                ), array(
+                ), array (
                     $value['uid'],
                     $value['tindakan']
                 ))
                 ->execute();
 
-
-
-
+            array_push($processResult, $worker);
 
             //Update antrian nomor dan charge invoice
             $AsesmenInfo = self::$query->select('asesmen', array(
@@ -917,6 +915,8 @@ class Radiologi extends Utility
                 ->execute();
 
             $AntrianDetail = $AsesmenInfo['response_data'][0];
+            $Antrian = new Antrian(self::$pdo);
+            $AntrianData = $Antrian->get_antrian_detail('antrian', $AntrianDetail['antrian'])['response_data'][0];
 
 
             //Check Item Lab
@@ -937,7 +937,7 @@ class Radiologi extends Utility
 
                 //Update master to P
                 $master_order = self::$query->update('rad_order', array(
-                    'status' => 'P',
+                    'status' => ($AntrianData['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P', //Ke kasir bayar
                     'updated_at' => parent::format_date()
                 ))
                     ->where(array(
@@ -952,7 +952,7 @@ class Radiologi extends Utility
 
 
                 $antrian_nomor = self::$query->update('antrian_nomor', array(
-                    'status' => 'K'
+                    'status' => ($AntrianData['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'R'
                 ))
                     ->where(array(
                         'antrian_nomor.poli' => '= ?',
@@ -1029,6 +1029,8 @@ class Radiologi extends Utility
 
 
         }
+
+        return $processResult;
     }
 
     private function verifikasi_hasil($parameter) {
@@ -1694,11 +1696,13 @@ class Radiologi extends Utility
 
                 if (count($parameter['listTindakan']) > 0) {
                     //Cek Penjamin dulu. Jika non umum langsung lunas. gitulah kira-kira
-                    if ($data_antrian['penjamin'] == __UIDPENJAMINUMUM__) {
+                    /*if ($data_antrian['penjamin'] == __UIDPENJAMINUMUM__) {
                         $status_lunas = 'V';
                     } else {
                         $status_lunas = 'P';
-                    }
+                    }*/
+
+                    $status_lunas = 'V';
 
                     $uidRadiologiOrder = parent::gen_uuid();
                     $radiologiOrder = self::$query

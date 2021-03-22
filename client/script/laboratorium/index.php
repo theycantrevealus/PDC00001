@@ -308,6 +308,7 @@
                                     "success"
                                 ).then((result) => {
                                     tableAntrianLabor.ajax.reload();
+                                    tableServiceLabor.ajax.reload();
                                 });
                             } else {
                                 Swal.fire(
@@ -668,6 +669,186 @@
             ]
         });
 
+        var targettedReagenLab;
+
+        var tableLab = $("#table-lab").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Laboratorium",
+                type: "POST",
+                data: function(d) {
+                    d.request = "get_lab_backend";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    return response.response_package.response_data;
+                }
+            },
+            autoWidth: false,
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Laboratorium"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["autonum"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"kode_" + row["uid"] + "\">" + row["kode"].toUpperCase() + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.spesimen !== undefined && row.spesimen !== null) {
+                            return row.spesimen.nama;
+                        } else {
+                            return "-";
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button id=\"lab_detail_" + row['uid'] + "\" class=\"btn btn-info btn-sm btn-detail-lab\">" +
+                            "<i class=\"fa fa-eye\"></i>" +
+                            "</button>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+
+        $("body").on("click", ".btn-detail-lab", function() {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+            targettedReagenLab = uid;
+
+
+            //Load Nilai
+            $.ajax({
+                url:__HOSTAPI__ + "/Laboratorium/lab_detail/" + uid,
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    labData = response.response_package.response_data[0];
+                    console.clear();
+                    console.log(response);
+                    for(var nil in labData.nilai) {
+                        autoNilai({
+                            "satuan": labData.nilai[nil].satuan,
+                            "keterangan": labData.nilai[nil].keterangan,
+                            "min": labData.nilai[nil].nilai_min,
+                            "max": labData.nilai[nil].nilai_maks,
+                            "naratif": labData.naratif
+                        });
+                    }
+                    $("#modal-detail-labor-reagen").modal("show");
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return false;
+        });
+
+
+        function autoNilai(setterNilai = {}) {
+            var min = ((setterNilai.min === undefined) ? 0 : setterNilai.min);
+            var max = ((setterNilai.max === undefined) ? 0 : setterNilai.max);
+            var satuan = ((setterNilai.satuan === undefined) ? "-" : setterNilai.satuan);
+            var keterangan = ((setterNilai.keterangan === undefined) ? "" : setterNilai.keterangan);
+            var naratif = ((setterNilai.naratif === undefined) ? "N" : setterNilai.naratif);
+
+            var newRowNilai = document.createElement("TR");
+            var newCellNilaiID = document.createElement("TD");
+            var newCellNilaiKeterangan = document.createElement("TD");
+            var newCellNilaiAksi = document.createElement("TD");
+
+            var newNilaiKeterangan = document.createElement("INPUT");
+
+            $(newNilaiKeterangan).addClass("form-control").attr({
+                "placeholder": "Nama nilai pengujian"
+            });
+
+            $(newCellNilaiKeterangan).html(keterangan);
+
+            var newNilaiCheck = document.createElement("INPUT");
+            $(newCellNilaiAksi).append("<ol type=\"1\" class=\"form-list-item\" style=\"list-style-type: none\">" +
+            "<li class=\"wrapped\"><div class=\"row\">" +
+                "<div class=\"col-md-12\">" +
+                "<div class=\"form-check\">" +
+                "<input type=\"checkbox\" name=\"riwayat_merokok_option\" value=\"A\" />" +
+                "<label class=\"form-check-label\">Ya </label>" +
+                "</div>" +
+                "</div>" +
+                "</div></li></ol>");
+
+            $(newRowNilai).append(newCellNilaiID);
+            $(newRowNilai).append(newCellNilaiKeterangan);
+            $(newRowNilai).append(newCellNilaiAksi);
+            $("#nilai-lab tbody").append(newRowNilai);
+            rebaseNilai();
+        }
+
+
+
+        function rebaseNilai(){
+            $("#nilai-lab tbody tr").each(function(e) {
+                var id = (e + 1);
+
+                $(this).attr({
+                    "id": "row_nilai_lab_" + id
+                }).removeClass("last-nilai");
+
+                $(this).find("td:eq(0)").html(id);
+                $(this).find("td:eq(1) input").attr({
+                    "id": "nilai_min_lab_" + id
+                });
+                $(this).find("td:eq(2) input").attr({
+                    "id": "nilai_max_lab_" + id
+                });
+                $(this).find("td:eq(3) input").attr({
+                    "id": "nilai_satuan_lab_" + id
+                });
+                $(this).find("td:eq(4) input").attr({
+                    "id": "nilai_keterangan_lab_" + id
+                });
+                $(this).find("td:eq(5) button").attr({
+                    "id": "delete_nilai_lab_" + id
+                });
+            });
+            $("#nilai-lab tbody tr:last-child").addClass("last-nilai");
+        }
+
+
+
 
         $("body").on("change", ".penyedia_order_lab", function() {
             var mitra = $(this).val();
@@ -846,6 +1027,10 @@
             antrian_laboratorium_selesai: function(protocols, type, parameter, sender, receiver, time) {
                 tableAntrianLabor.ajax.reload();
                 tableHistoryLabor.ajax.reload();
+            },
+            permintaan_laboratorium_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "hasil_order_labor");
+                tableVerifikasiLabor.ajax.reload();
             }
         };
 
@@ -889,7 +1074,10 @@
                                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                                 },
                                 success: function(response){
-
+                                    tableVerifikasiLabor.ajax.reload();
+                                    tableServiceLabor.ajax.reload();
+                                    tableAntrianLabor.ajax.reload();
+                                    $("#modal-detail-labor").modal("hide");
                                     /*$("#verifikasi_lab_container_" + uid + "_" + tindakan).fadeOut(function() {
                                         $("#verifikasi_lab_container_" + uid + "_" + tindakan).remove();
                                         if($(".group_" + uid).length === 0) {
@@ -906,8 +1094,10 @@
                         }
                     });
 
-                    $("#modal-detail-labor").modal("hide");
-                    tableVerifikasiLabor.ajax.reload();
+
+                    /*tableVerifikasiLabor.ajax.reload();
+                    tableServiceLabor.ajax.reload();
+                    tableAntrianLabor.ajax.reload();*/
                 }
             });
 
@@ -963,6 +1153,7 @@
                                     if($(".group_" + uid).length === 0) {
                                         $("#modal-detail-labor").modal("hide");
                                         tableVerifikasiLabor.ajax.reload();
+                                        tableServiceLabor.ajax.reload();
                                     }
                                 });
 
@@ -1364,6 +1555,37 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="btn_verif_all">Verifikasi</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="modal-detail-labor-reagen" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Ketersediaan BHP Terhadap Nilai Pengujian Laboratorium</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered largeDataType" id="nilai-lab">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th class="wrap_content">No</th>
+                        <th>Nilai Uji</th>
+                        <th style="width: 20%;">Tersedia</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info" id="btn_simpan_reagen"><i class="fa fa-save"></i> Simpan</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Tutup</button>
             </div>
         </div>
     </div>

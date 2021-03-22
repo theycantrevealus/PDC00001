@@ -54,17 +54,94 @@
             }
         });
 
+        function loadPoli(targetted = ""){
+            var dataPoli = null;
 
-		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
+            if(targetted === __POLI_IGD__) {
+                //Show Cara data dan keterangan cara datang
+                $(".poli_igd").show();
+                $(".poli_lain").hide();
+            } else {
+                $(".poli_igd").hide();
+                $(".poli_lain").show();
+            }
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Poli/poli-available",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            if(MetaData[i].uid !== __POLI_INAP__) {
+                                if(targetted !== "") {
+                                    if(MetaData[i].uid === targetted) {
+                                        $(selection).attr("selected", "selected");
+                                    }
+                                    $("#filter_poli").append(selection);
+                                } else {
+                                    if(MetaData[i].editable) {
+                                        $("#filter_poli").append(selection);
+                                    }
+                                }
+
+                            }
+                        }
+
+                        if(targetted !== "") {
+                            $("#filter_poli").attr("disabled", "disabled");
+                        } else {
+                            $("#filter_poli").removeAttr("disabled");
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataPoli;
+        }
+
+        loadPoli();
+
+        $("#filter_poli").select2().on('change', function(){
+            tableAntrian.ajax.reload();
+        });
+
+
+		var tableAntrian = $("#table-antrian-rawat-jalan").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Antrian/antrian",
-				type: "GET",
+				type: "POST",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
+                data: function(d) {
+                    d.request = "get_list_antrian_backend";
+                    d.poli = $("#filter_poli").val();
+                },
 				dataSrc:function(response) {
 				    var data = response.response_package.response_data;
 				    var filtered = [];
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
 				    for(var key in data) {
 				        if(data[key].departemen !== "IGD") {
 				            filtered.push(data[key])
@@ -114,7 +191,8 @@
 					"data" : null, render: function(data, type, row, meta) {
                         if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
 							if(row['sep'] != "none") {
-								return row["penjamin"] + " <h6 class=\"nomor_sep text-success\"><i class=\"fa fa-check\"></i> " + row.sep + "</h6>";
+								//return row["penjamin"] + " <h6 class=\"nomor_sep text-success\"><i class=\"fa fa-check\"></i> " + row.sep + "</h6>";
+                                return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
 							} else {
 							    if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
                                     /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
@@ -298,6 +376,8 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+                    console.clear();
+                    console.log(response);
                     return response.response_package.response_data;
                 }
             },
@@ -310,7 +390,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
+                        return row.autonum;
                     }
                 },
                 {
@@ -349,11 +429,6 @@
                         } else {
                             return row["penjamin"];
                         }
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row["user_resepsionis"];
                     }
                 },
                 {
@@ -705,7 +780,10 @@
                             $("#txt_bpjs_nomor_rujukan").select2("destroy");
                             $("#txt_bpjs_nomor_rujukan").select2();
                             $("#txt_bpjs_nomor_rujukan").select2("val", "");
-                            if(response.response_package.content.response !== null) {
+                            if(
+                                response.response_package.content !== undefined &&
+                                response.response_package.content.response !== null
+                        ) {
                                 $("#panel-rujukan").show();
                                 var data = response.response_package.content.response.rujukan;
                                 selectedListRujukan = data;
@@ -785,7 +863,6 @@
 
                     var tanggal_laka = new Date($("#txt_bpjs_laka_tanggal").datepicker("getDate"));
                     var parse_tanggal_laka =  tanggal_laka.getFullYear() + "-" + str_pad(2, tanggal_laka.getMonth()+1) + "-" + str_pad(2, tanggal_laka.getDate());
-                    alert(currentAntrianUID);
                     if(isRujukan)
                     {
                         dataSetSEP = {

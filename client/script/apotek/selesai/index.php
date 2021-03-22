@@ -1,5 +1,11 @@
 <script type="text/javascript">
     $(function() {
+        protocolLib = {
+            resep_selesai_proses: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "notif_pasien_baru");
+                tableResep.ajax.reload();
+            }
+        };
         var targettedUID;
         function load_resep() {
             var selected = [];
@@ -129,17 +135,16 @@
                 },
                 dataSrc:function(response) {
                     var forReturn = [];
+                    console.log(response);
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
                         dataSet = [];
                     }
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].antrian.departemen !== undefined) {
-                            if(dataSet[dKey].antrian.departemen.uid != __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid != __POLI_INAP__) {
+                        if(dataSet[dKey].departemen !== undefined) {
+                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
                                 forReturn.push(dataSet[dKey]);
-                            } else {
-                                console.log(dataSet[dKey].antrian.departemen.uid);
                             }
                         }
                     }
@@ -148,7 +153,7 @@
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
 
-                    return forReturn;
+                    return dataSet;
                 }
             },
             autoWidth: false,

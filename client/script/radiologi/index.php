@@ -2,6 +2,17 @@
 <script type="text/javascript">
 	$(function(){
 
+        protocolLib = {
+            permintaan_radio_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "hasil_order_radio");
+                tableVerifikasiRadiologi.ajax.reload();
+            },
+            antrian_radiologi_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "hasil_order_radio");
+                tableAntrianRadiologi.ajax.reload();
+            }
+        };
+
 		var tableAntrianRadiologi = $("#table-antrian-radiologi").DataTable({
 			"ajax":{
 				async: false,
@@ -303,6 +314,7 @@
                         success: function (response) {
                             $("#modal-verif-radio").modal("hide");
                             tableVerifikasiRadiologi.ajax.reload();
+                            tableAntrianRadiologi.ajax.reload();
                         },
                         error: function (response) {
                             //
@@ -530,6 +542,27 @@
             var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
             $("#" + selector).append(opti_null);
         }
+
+        /*Sync.onmessage = function(evt) {
+            var signalData = JSON.parse(evt.data);
+            var command = signalData.protocols;
+            var type = signalData.type;
+            var sender = signalData.sender;
+            var receiver = signalData.receiver;
+            var time = signalData.time;
+            var parameter = signalData.parameter;
+
+            console.log(signalData);
+            if(command !== undefined && command !== null && command !== "") {
+                protocolLib.command(command, type, parameter, sender, receiver, time);
+            } else {
+                console.log(command);
+            }
+        }*/
+
+
+
+
 	});
 </script>
 

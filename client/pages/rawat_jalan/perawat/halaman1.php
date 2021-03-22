@@ -127,7 +127,7 @@
 											<div class="form-check">
 												<input type="radio" class="form-check-input" name="cara_masuk" value="Lainnya" id="cara_masuk_3">
 												<label class='form-check-label' for="cara_masuk_3">Lainnya:</label>
-												<input type="text" disabled="disabled" class="form-control cara_masuk_lainnya" id="cara_masuk_lainnya" name="cara_masuk_lainnya">
+												<input type="text" disabled="disabled" class="form-control cara_masuk_lainnya inputan" id="cara_masuk_lainnya" name="cara_masuk_lainnya">
 											</div>
 										</div>
 									</div>

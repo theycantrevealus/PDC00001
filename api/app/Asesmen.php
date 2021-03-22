@@ -255,9 +255,9 @@ class Asesmen extends Utility {
                             'keterangan'
                         ))
                             ->where(array(
-                                'master_lab_nilai.id' => '= ?',
+                                'master_lab_nilai.id' => '= ?'/*,
                                 'AND',
-                                'master_lab_nilai.deleted_at' => 'IS NULL'
+                                'master_lab_nilai.deleted_at' => 'IS NULL'*/
                             ), array(
                                 $LabOrderDetailItemValue['id_lab_nilai']
                             ))
@@ -719,7 +719,7 @@ class Asesmen extends Utility {
 					$ICD10BandingJoined = array();
 					foreach ($ICD10BandingRaw as $ICD10BRKey => $ICD10BRValue) {
 						$ICD10 = new Icd(self::$pdo);
-						$parseICD10 = $ICD10::get_icd_detail('master_icd_10', $ICD10BRValue);
+						$parseICD10 = $ICD10->get_icd_detail('master_icd_10', $ICD10BRValue);
 						if(count($parseICD10['response_data']) > 0) {
 							array_push($ICD10BandingJoined, array(
 								'id' => $ICD10BRValue,
@@ -735,7 +735,7 @@ class Asesmen extends Utility {
                         $ICD9Joined = array();
                         foreach ($ICD9Raw as $ICD9Key => $ICD9Value) {
                             $ICD9 = new Icd(self::$pdo);
-                            $parseICD9 = $ICD9::get_icd_detail('master_icd_9', $ICD9Value);
+                            $parseICD9 = $ICD9->get_icd_detail('master_icd_9', $ICD9Value);
                             if(count($parseICD9['response_data']) > 0) {
                                 array_push($ICD9Joined, array(
                                     'id' => $ICD9Value,
@@ -769,11 +769,25 @@ class Asesmen extends Utility {
 					$data['response_data'][0]['asesmen']
 				))
 				->execute();
+
 				foreach ($tindakan['response_data'] as $key => $value) {
 					$Tindakan = new Tindakan(self::$pdo);
-					$tindakan['response_data'][$key] = $Tindakan::get_tindakan_detail($value['tindakan'])['response_data'][0];
+					$tindakan['response_data'][$key] = $Tindakan->get_tindakan_detail($value['tindakan'])['response_data'][0];
 				}
+
 				$data['response_data'][0]['tindakan'] = $tindakan['response_data'];
+
+
+
+
+
+
+
+
+
+
+
+
 
 				//Resep Detail
 				$resep = self::$query->select('resep', array(
@@ -794,14 +808,20 @@ class Asesmen extends Utility {
 					'AND',
 					'resep.pasien' => '= ?',
 					'AND',
-					'resep.status_resep' => '= ?'
+					'(resep.status_resep' => '= ?',
+                    'OR',
+                    'resep.status_resep' => '= ?',
+                    'OR',
+                    ' resep.status_resep' => '= ?)',
 				), array(
 					$antrian['response_data'][0]['kunjungan'],
 					$antrian['response_data'][0]['uid'],
 					$data['response_data'][0]['asesmen'],
 					$data['response_data'][0]['dokter'],
 					$data['response_data'][0]['pasien'],
-                    ($isCPPT) ? 'L' : 'C'
+                    ($isCPPT) ? 'L' : 'C',
+                    ($isCPPT) ? 'P' : 'C',
+                    ($isCPPT) ? 'S' : 'C'
 				))
 				->execute();
 				$racikanData = array();
@@ -894,7 +914,7 @@ class Asesmen extends Utility {
 
 						foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
 							$InventoriObat = new Inventori(self::$pdo);
-							$RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat::get_item_detail($RVIValue['obat'])['response_data'][0];
+							$RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat->get_item_detail($RVIValue['obat'])['response_data'][0];
 						}
 
 						$RacikanValue['item'] = $RacikanDetailData['response_data'];
@@ -902,6 +922,9 @@ class Asesmen extends Utility {
 						array_push($racikanData, $RacikanValue);
 					}
 				}
+
+
+
 
 
 				if($isCPPT) {
@@ -915,11 +938,87 @@ class Asesmen extends Utility {
                             $resep[0]['uid']
                         ))
                         ->execute();
+                    foreach ($dataResepApotek['response_data'] as $dRApotekKey => $dRApotekValue) {
+                        $dataResepApotek['response_data'][$dRApotekKey]['obat_detail'] = $Inventori->get_item_detail($dRApotekValue['item'])['response_data'][0];
+                    }
                     $data['response_data'][0]['resep_apotek'] = $dataResepApotek['response_data'];
                 }
 
-				$data['response_data'][0]['racikan'] = $racikanData;
-				$data['response_data'][0]['resep'] = $resep['response_data'];
+                if(count($resep['response_data']) > 0) {
+                    $resep_apotek = self::$query->select('resep_change_log', array(
+                        'id',
+                        'item',
+                        'qty',
+                        'signa_qty',
+                        'signa_pakai',
+                        'aturan_pakai',
+                        'verifikator',
+                        'keterangan'
+                    ))
+                        ->where(array(
+                            'resep_change_log.resep' => '= ?',
+                            'AND',
+                            'resep_change_log.deleted_at' => 'IS NULL'
+                        ), array(
+                            $resep['response_data'][0]['uid']
+                        ))
+                        ->execute();
+
+                    foreach ($resep_apotek['response_data'] as $dRApotekKey => $dRApotekValue) {
+                        $resep_apotek['response_data'][$dRApotekKey]['obat_detail'] = $Inventori->get_item_detail($dRApotekValue['item'])['response_data'][0];
+                    }
+                    $data['response_data'][0]['resep'] = $resep['response_data'];
+                    $data['response_data'][0]['resep_apotek'] = $resep_apotek['response_data'];
+                } else {
+                    $data['response_data'][0]['resep'] = array();
+                    $data['response_data'][0]['resep_apotek'] = array();
+                }
+
+                if(count($racikan['response_data']) > 0) {
+                    $racikan_apotek = self::$query->select('racikan_change_log', array(
+                        'jumlah',
+                        'keterangan',
+                        'signa_qty',
+                        'signa_pakai',
+                        'aturan_pakai'
+                    ))
+                        ->where(array(
+                            'racikan_change_log.racikan' => '= ?',
+                            'AND',
+                            'racikan_change_log.deleted_at' => 'IS NULL'
+                        ), array(
+                            $racikan['response_data'][0]['uid']
+                        ))
+                        ->execute();
+
+                    $data['response_data'][0]['racikan'] = $racikanData;
+
+                    foreach ($racikan_apotek['response_data'] as $racikanApotekKey => $racikanApotekValue) {
+                        $racikan_apotek_detail = self::$query->select('racikan_detail_change_log', array(
+                            'obat',
+                            'kekuatan',
+                            'jumlah'
+                        ))
+                            ->where(array(
+                                'racikan_detail_change_log.racikan' => '= ?',
+                                'AND',
+                                'racikan_detail_change_log.deleted_at' => 'IS NULL'
+                            ), array(
+                                $racikan['response_data'][0]['uid']
+                            ))
+                            ->execute();
+                        foreach ($racikan_apotek_detail['response_data'] as $dRaApotekKey => $dRaApotekValue) {
+                            $racikan_apotek_detail['response_data'][$dRaApotekKey]['obat_detail'] = $Inventori->get_item_detail($dRaApotekValue['obat'])['response_data'][0];
+                        }
+                        $racikan_apotek['response_data'][$racikanApotekKey]['item'] = $racikan_apotek_detail['response_data'];
+                    }
+                    $data['response_data'][0]['racikan_apotek'] = $racikan_apotek['response_data'];
+                } else {
+                    $data['response_data'][0]['racikan'] = array();
+                    $data['response_data'][0]['racikan_apotek'] = array();
+                    $data['response_data'][0]['racikan_apotek_detail'] = array();
+                }
+
 				$data['response_data'][0]['asesmen_rawat'] = $Rawat['response_data'][0]['uid'];
                 $data['response_data'][0]['status_asesmen'] = $AsesmenMaster['response_data'][0];
                 $data['response_data'][0]['tanggal_parsed'] = date('d F Y', strtotime($AsesmenMaster['response_data'][0]['created_at']));
@@ -950,11 +1049,11 @@ class Asesmen extends Utility {
 
 	private function update_asesmen_medis($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$MasterUID = '';
 		//Prepare Poli
 		$Poli = new Poli(self::$pdo);
-		$PoliDetail = $Poli::get_poli_detail($parameter['poli'])['response_data'][0];
+		$PoliDetail = $Poli->get_poli_detail($parameter['poli'])['response_data'][0];
 
 		//Check
 		$check = self::$query->select('asesmen', array(
@@ -1079,7 +1178,7 @@ class Asesmen extends Utility {
                         'status_alergi_text' => (!empty($parameter['status_alergi_text'])) ? $parameter['status_alergi_text'] : '',
                         'refleks_cahaya' => (!empty($parameter['refleks_cahaya'])) ? $parameter['refleks_cahaya'] : '',
                         'pupil' => (!empty($parameter['pupil'])) ? $parameter['pupil'] : '',
-                        'refleks_cahaya' => (!empty($parameter['refleks_cahaya'])) ? $parameter['refleks_cahaya'] : '',
+                        //'refleks_cahaya' => (!empty($parameter['refleks_cahaya'])) ? $parameter['refleks_cahaya'] : '',
                         'rr' => (!empty($parameter['rr'])) ? $parameter['rr'] : '',
                         'gangguan_perilaku' => (!empty($parameter['gangguan_perilaku'])) ? $parameter['gangguan_perilaku'] : '',
                         'gangguan_terganggu' => (!empty($parameter['gangguan_terganggu'])) ? $parameter['gangguan_terganggu'] : '',
@@ -1322,7 +1421,7 @@ class Asesmen extends Utility {
                     ->execute();
 
                 $Laboratorium = new Laboratorium(self::$pdo);
-                $ChargeLab = $Laboratorium::charge_invoice_item(array(
+                $ChargeLab = $Laboratorium->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
                     'pasien' => $parameter['pasien']
@@ -1330,7 +1429,7 @@ class Asesmen extends Utility {
                 $returnResponse['lab_response'] = $ChargeLab;
 
                 $Radiologi = new Radiologi(self::$pdo);
-                $ChargeRad = $Radiologi::charge_invoice_item(array(
+                $ChargeRad = $Radiologi->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
                     'pasien' => $parameter['pasien']
@@ -1338,6 +1437,34 @@ class Asesmen extends Utility {
                 $returnResponse['rad_response'] = $ChargeRad;
             }
         }
+
+        //Check Radiologi
+        $RadCheck = self::$query->select('rad_order', array(
+            'uid', 'status'
+        ))
+            ->where(array(
+                'rad_order.asesmen' => '= ?',
+                'AND',
+                'rad_order.deleted_at' => 'IS NULL'
+            ), array(
+                $MasterUID
+            ))
+            ->execute();
+        $returnResponse['radiologi'] = $RadCheck;
+
+        //Check Laboratorium
+        $LabCheck = self::$query->select('lab_order', array(
+            'uid', 'status'
+        ))
+            ->where(array(
+                'lab_order.asesmen' => '= ?',
+                'AND',
+                'lab_order.deleted_at' => 'IS NULL'
+            ), array(
+                $MasterUID
+            ))
+            ->execute();
+        $returnResponse['laboratorium'] = $LabCheck;
 
 		return $returnResponse;
 	}

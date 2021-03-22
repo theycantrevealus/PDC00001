@@ -1,5 +1,25 @@
 <script type="text/javascript">
     $(function() {
+        protocolLib = {
+            antrian_apotek_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", "<i class=\"fa fa-info\"></i> " + parameter, 3000, "request_resep");
+                tableResep.ajax.reload();
+            },
+            permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
+                console.clear();
+
+                listResep = load_resep();
+                requiredItem = populateObat(listResep);
+                for(var requiredItemKey in requiredItem) {
+                    $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase() + "</li>");
+                }
+
+                tableResep.clear();
+                tableResep.rows.add(load_resep());
+                tableResep.draw();
+                notification ("info", "<i class=\"fa fa-info\"></i> " + parameter, 3000, "request_resep");
+            }
+        };
         var selectedDokter = "";
         function load_resep() {
             var selected = [];
@@ -92,6 +112,7 @@
                 },
                 dataSrc:function(response) {
                     var forReturn = [];
+                    console.log(response);
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
                         dataSet = [];
@@ -931,7 +952,7 @@
 
 
         //SOCKET
-        Sync.onmessage = function(evt) {
+        /*Sync.onmessage = function(evt) {
             var signalData = JSON.parse(evt.data);
             var command = signalData.protocols;
             var type = signalData.type;
@@ -945,32 +966,8 @@
                     protocolLib[command](command, type, parameter, sender, receiver, time);
                 }
             }
-        }
+        }*/
 
-
-
-        var protocolLib = {
-            userlist: function(protocols, type, parameter, sender, receiver, time) {
-                //
-            },
-            userlogin: function(protocols, type, parameter, sender, receiver, time) {
-                //
-            },
-            permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
-                console.clear();
-
-                listResep = load_resep();
-                requiredItem = populateObat(listResep);
-                for(var requiredItemKey in requiredItem) {
-                    $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase() + "</li>");
-                }
-
-                tableResep.clear();
-                tableResep.rows.add(load_resep());
-                tableResep.draw();
-                notification ("info", "<i class=\"fa fa-info\"></i> " + parameter, 3000, "request_resep");
-            }
-        };
     });
 </script>
 

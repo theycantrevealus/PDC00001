@@ -413,6 +413,7 @@
                 var parameter = signalData.parameter;
 
                 if(command !== undefined && command !== null && command !== "") {
+
                     if(protocolLib[command] !== undefined) {
                         if(command == "anjungan_kunjungan_panggil") {
                             if(audio !== undefined && audio.audio !== undefined) {
@@ -425,10 +426,12 @@
                             }
                             audio = protocolLib[command](command, type, parameter, sender, receiver, time);
                         } else {
-                            if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
+                            if(receiver == __ME__ || sender == __ME__ || receiver == "*" || receiver == __MY_PRIVILEGES__.response_data[0]["uid"]) {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
+                                console.log(__MY_PRIVILEGES__);
                             } else {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
+                                alert("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
                             }
                         }
                     }

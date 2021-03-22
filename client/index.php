@@ -21,6 +21,7 @@
 	var __ME__ = <?php echo json_encode($_SESSION['uid']); ?>;
 	var __PROFILE_PIC__ = <?php echo json_encode($_SESSION['profile_pic']); ?>;
 	var __MY_NAME__ = <?php echo json_encode($_SESSION['nama']); ?>;
+	var __MY_PRIVILEGES__ = <?php echo json_encode($_SESSION['jabatan']); ?>;
 	var __UNIT__ = <?php echo json_encode($_SESSION['unit']); ?>;
 
 	var __UIDPENJAMINUMUM__ = <?php echo json_encode(__UIDPENJAMINUMUM__); ?>;

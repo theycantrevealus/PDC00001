@@ -84,7 +84,7 @@
                                         <tr>
                                             <td><?php echo $docAuto; ?></td>
                                             <td>
-                                                <a href="<?php echo $_POST['__HOST__'] . '/document/radiologi/' . $_POST['uid'] . '/' . $Docvalue['lampiran']; ?>">#Lampiran <?php echo $docAuto; ?> [<?php echo $Docvalue['lampiran']; ?>]</a>
+                                                <a class="lampiran_view_trigger" href="#" target="<?php echo $_POST['__HOST__'] . '/document/radiologi/' . $_POST['uid'] . '/' . $Docvalue['lampiran']; ?>">#Lampiran <?php echo $docAuto; ?> [<?php echo $Docvalue['lampiran']; ?>]</a>
                                             </td>
                                         </tr>
                                         <?php

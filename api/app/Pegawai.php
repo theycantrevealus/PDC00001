@@ -501,7 +501,7 @@ class Pegawai extends Utility {
 
 		//Load All Module
 		$Module = new Modul(self::$pdo);
-		$moduleData = $Module::get_all();
+		$moduleData = $Module->get_all();
 
 
 		//Module setter

@@ -44,3 +44,4 @@ api/*.sql
 *.sql
 *.png
 *.zip
+head.php
