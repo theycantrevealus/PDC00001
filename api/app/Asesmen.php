@@ -84,7 +84,7 @@ class Asesmen extends Utility {
 
 	private function pasien_saya($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $Laboratorium = new Laboratorium(self::$pdo);
         $Pegawai = new Pegawai(self::$pdo);
 
@@ -208,6 +208,19 @@ class Asesmen extends Utility {
                 $Petugas = array();
                 $PetugasChecker = array();
 
+                $detailLabOrderDoc = self::$query->select('lab_order_document', array(
+                    'lampiran'
+                ))
+                    ->where(array(
+                        'lab_order_document.lab_order' => '= ?',
+                        'AND',
+                        'lab_order_document.deleted_at' => 'IS NULL'
+                    ), array(
+                        $LabValue['uid']
+                    ))
+                    ->execute();
+                $lab['response_data'][$LabKey]['document'] = $detailLabOrderDoc['response_data'];
+
                 $detailLaborOrder = self::$query->select('lab_order_detail', array(
                     'tindakan',
                     'keterangan'
@@ -222,7 +235,7 @@ class Asesmen extends Utility {
                     ->execute();
 
                 foreach ($detailLaborOrder['response_data'] as $LabDetailKey => $LabDetailValue) {
-                    $LabTindakan = $Laboratorium::get_lab_detail($LabDetailValue['tindakan']);
+                    $LabTindakan = $Laboratorium->get_lab_detail($LabDetailValue['tindakan']);
                     $detailLaborOrder['response_data'][$LabDetailKey]['tindakan'] = $LabTindakan['response_data'][0];
 
                     $nilaiLaborOrder = self::$query->select('lab_order_nilai', array(

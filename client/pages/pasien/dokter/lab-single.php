@@ -100,9 +100,30 @@
                             </div>
                         </div>
                         <div class="tab-pane show fade" id="tab-lab-2">
-                            <pre>
-                                <?php print_r($_POST); ?>
-                            </pre>
+                            <table class="table table-bordered">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th class="wrap_content">No</th>
+                                    <th>Dokumen</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php
+                                $docAuto = 1;
+                                foreach($_POST['document'] as $Dockey => $Docvalue) {
+                                    ?>
+                                    <tr>
+                                        <td><?php echo $docAuto; ?></td>
+                                        <td>
+                                            <a class="lampiran_view_trigger" href="#" target="<?php echo $_POST['__HOST__'] . '/document/laboratorium/' . $_POST['uid'] . '/' . $Docvalue['lampiran']; ?>">#Lampiran <?php echo $docAuto; ?> [<?php echo $Docvalue['lampiran']; ?>]</a>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                    $docAuto++;
+                                }
+                                ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
