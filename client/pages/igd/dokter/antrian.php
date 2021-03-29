@@ -14,8 +14,8 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap">Rawat Inap</a></li>
-                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap/dokter/index/<?php echo __PAGES__[4]; ?>/<?php echo __PAGES__[5]; ?>"><b id="target_pasien"></b></a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/igd">IGD</a></li>
+                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/igd/dokter/index/<?php echo __PAGES__[4]; ?>/<?php echo __PAGES__[5]; ?>"><b id="target_pasien"></b></a></li>
 					<li class="breadcrumb-item active" aria-current="page">Pemeriksaan Medis</li>
 				</ol>
 			</nav>

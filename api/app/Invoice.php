@@ -444,11 +444,25 @@ class Invoice extends Utility
                 ) {
                     $allowReturn = false;
                 } else {
-                    if(
+                    $KonsulLib = array();
+                    //Get All Konsul Item Poli
+                    $PoliKonsul = self::$query->select('master_poli', array(
+                        'uid', 'tindakan_konsultasi'
+                    ))
+                        ->where(array(
+                            'master_poli.deleted_at' => 'IS NULL'
+                        ))
+                        ->execute();
+                    foreach ($PoliKonsul['response_data'] as $PolKey => $PolValue) {
+                        array_push($KonsulLib, $PolValue['tindakan_konsultasi']);
+                    }
+
+                    /*if(
                         $PDValue['item'] === __UIDKONSULDOKTER__ ||
                         $PDValue['item'] === __UIDKONSULDOKTER_GIGI__ ||
                         $PDValue['item'] === __UIDKONSULDOKTER_SPESIALIS__
-                    ) {
+                    ) {*/
+                    if(in_array($PDValue['item'], $KonsulLib)) {
                         $AsesmenCheck = self::$query->select('asesmen', array(
                             'uid'
                         ))
