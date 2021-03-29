@@ -6568,13 +6568,13 @@
                                 <td class="wrap_content">
                                     <i class="fa fa-stop emas"></i>
                                 </td>
-                                <td>GIC/Silika</td>
+                                <td>Silika/GIC</td>
                             </tr>
                             <tr id="tambal_sewarna" class="need_selection" group-selection="mordor4">
                                 <td class="wrap_content">
                                     <i class="fa fa-stop sewarna"></i>
                                 </td>
-                                <td>Composite Filling</td>
+                                <td>Composite Filling/GIC</td>
                             </tr>
                             <tr id="tambal_pencega" class="need_selection" group-selection="mordor4">
                                 <td class="wrap_content">
