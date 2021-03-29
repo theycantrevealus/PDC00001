@@ -76,6 +76,9 @@
             keterangan_racikan: ""
         };
 
+        var listTindakanLabTerpilih = {};
+        var listTindakanLabDihapus = [];
+
 
         //Filter Rawat Jalan
         for(var z in poliListRaw.tindakan) {
@@ -4069,7 +4072,8 @@
         }
 
         var selectedLabItemList = [];
-
+        $("#check_all_container").hide();
+        $("#check_all_lab").prop("checked", false);
         function setLabTindakan() {
             /*$("#tindakan_lab").empty();
             $("#tindakan_lab").append("<option disabled selected value=''>Pilih Tindakan Laboratorium</option>");
@@ -4087,8 +4091,7 @@
                 });
             }*/
 
-            var listTindakanLabTerpilih = {};
-            var listTindakanLabDihapus = [];
+
             var listPenjamin = loadDataPenjamin();
             var LabMode;
             var uid_lab_order;
@@ -4145,6 +4148,7 @@
                 }
                 $("#lab_nilai_order").html("");
 
+
                 if(listTindakanLabTerpilih[$("#tindakan_lab").val()] === undefined)
                 {
                     listTindakanLabTerpilih[$("#tindakan_lab").val()] = {
@@ -4154,6 +4158,16 @@
                     };
                 }
 
+                /*var checkAll = "<div class=\"row\"><div class=\"col-md-12\"><div class=\"flex\">" +
+                    "<label for=\"check_all_lab\">Pilih Semua</label>" +
+                    "<div class=\"custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right\">" +
+                    "<input type=\"checkbox\" name=\"detail_lab_item\" id=\"check_all_lab\" class=\"custom-control-input lab_order_item_detail pull-right\">" +
+                    "<label class=\"custom-control-label\" for=\"check_all_lab\">Ya</label>" +
+                    "</div>" +
+                    "</div></div></div><hr />";
+
+                $("#lab_nilai_order").append(checkAll);
+                $("#lab_nilai_order").append("<div class=\"row\"><div class=\"col-md-12\">");*/
                 for(var key in data.detail)
                 {
                     var LabSelectoriContainer = document.createElement("DIV");
@@ -4173,14 +4187,18 @@
                             "</div>");
                     }
 
+
+
                     $("#lab_nilai_order").append(LabSelectoriContainer);
 
-                    listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
+                    /*listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
                         "id": data.detail[key].id,
                         "nama": data.detail[key].keterangan,
                         "tgl_sampel":""
-                    });
+                    });*/
                 }
+                $("#check_all_container").show();
+                //$("#lab_nilai_order").append("</div></div>");
             });
         }
 
@@ -4282,6 +4300,37 @@
 
         setLabTindakan();
 
+        $("body").on("change", "#check_all_lab", function() {
+            if(listTindakanLabTerpilih[$("#tindakan_lab").val()] === undefined)
+            {
+                listTindakanLabTerpilih[$("#tindakan_lab").val()] = {
+                    "penjamin":"",
+                    "item":[],
+                    "tgl_sample": ""
+                };
+            }
+
+            if($(this).is(":checked")) {
+                $(".lab_order_item_detail").each(function() {
+                    $(this).prop("checked", true);
+
+
+                    listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
+                        "id": $(this).val(),
+                        "nama": $("#label_item_" + $(this).val()).text(),
+                        "tgl_sampel":""
+
+                    });
+                });
+            } else {
+                $(".lab_order_item_detail").each(function() {
+                    $(this).prop("checked", false);
+                });
+
+                listTindakanLabTerpilih[$("#tindakan_lab").val()].item = [];
+            }
+        });
+
 
         $("body").on("change", ".lab_order_item_detail", function() {
             if(listTindakanLabTerpilih[$("#tindakan_lab").val()] === undefined)
@@ -4296,7 +4345,8 @@
             if($(this).is(":checked")) {
                 listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
                     "id": $(this).val(),
-                    "nama": $("#label_item_" + $(this).val()).text()
+                    "nama": $("#label_item_" + $(this).val()).text(),
+                    "tgl_sampel":""
                 });
             } else {
                 for(var key in listTindakanLabTerpilih[$("#tindakan_lab").val()].item)
@@ -4323,6 +4373,10 @@
 
             listTindakanLabTerpilih = {};
             selectedLabItemList = [];
+        });
+
+        $("#form-tambah-order-lab").on("shown.bs.modal", function(){
+            $("#check_all_container").hide();
         });
 
         $("#table_order_lab tbody").on('click', '.btnViewDetailOrder', function(){
@@ -4426,6 +4480,9 @@
                 listTindakanLabTerpilih[uidTindakanLab].item.length > 0 &&
                 uidTindakanLab != null
             ) {
+                console.clear();
+                console.log(uidTindakanLab);
+                console.log(listTindakanLabTerpilih);
                 $("#lab_nilai_order").html("");
                 let dataTindakan = $("#tindakan_lab").select2('data');
                 let namaPenjamin;
@@ -4466,8 +4523,12 @@
                 $("#tindakan_lab option[value='"+ uidTindakanLab +"']").remove();
                 $("#lab_tindakan_notifier").html("");
                 setNomorUrut('table_tindakan_lab', 'no_urut_lab');
+                $("#check_all_container").hide();
+                $("#check_all_lab").prop("checked", false);
+                //listTindakanLabTerpilih = {};
             }
             else {
+                alert("Pilih nilai lab yang ingin diuji");
                 console.log(listTindakanLabTerpilih[uidTindakanLab]);
             }
         });
@@ -4481,7 +4542,7 @@
             $(this).parent().parent().remove();
 
             //set back to list
-            $("#tindakan_lab").append("<option value='"+ uid_tindakan +"'>"+ nama_tindakan +"</option>");
+            //$("#tindakan_lab").append("<option value='"+ uid_tindakan +"'>"+ nama_tindakan +"</option>");
             $("#lab_tindakan_notifier").html("");
 
             setNomorUrut('table_tindakan_lab', 'no_urut_lab');
@@ -4542,7 +4603,7 @@
                 listTindakanLabTerpilih[lok].tgl_sample = $("#tanggal_sample_" + lok).val()
             }
 
-            //console.log(listTindakanLabTerpilih);
+            console.log(listTindakanLabTerpilih);
 
             orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, "", uid_lab_order, dataTableLabOrder, __HOSTAPI__);
 
@@ -6075,8 +6136,24 @@
 					<div class="offset-md-3 col-md-2" style="padding-top: 8px;" id="lab_tindakan_notifier"></div>
 				</div>
                 <div class="col-md-12">
-                    <div id="lab_nilai_order" class="row">
+                    <div class="row" id="check_all_container">
+                        <div class="col-md-2">
+                            <div class="flex">
+                                <label for="check_all_lab">Pilih Semua</label>
+                                <div class="custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right">
+                                <input type="checkbox" id="check_all_lab" class="custom-control-input pull-right" />
+                                <label class="custom-control-label" for="check_all_lab">Ya</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12"><hr /></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="lab_nilai_order" class="row">
 
+                            </div>
+                        </div>
                     </div>
                 </div>
 				<div class="col-md-12 form-group" style="margin-top: 10px;">
