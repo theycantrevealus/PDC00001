@@ -3591,7 +3591,7 @@ class Laboratorium extends Utility {
 										'lab_order'		=>	$uidLabOrder,
 										'tindakan'		=>	$keyTindakan,
 										'request_item'  =>  implode(',',$orderItemID),
-										'tgl_ambil_sample' => $valueTindakan['tgl_sample'],
+										'tgl_ambil_sample' => (($valueTindakan['tgl_sample'] === '') ? parent::format_date() : $valueTindakan['tgl_sample']),
 										'penjamin'		=>	$valueTindakan['penjamin'],
 										'created_at'	=>	parent::format_date(),
 										'updated_at'	=>	parent::format_date()	
@@ -3944,7 +3944,7 @@ class Laboratorium extends Utility {
 								'lab_order'		=>	$uidLabOrder,
 								'tindakan'		=>	$keyTindakan,
 								'penjamin'		=>	$valueTindakan['penjamin'],
-                                'tgl_ambil_sample' => $valueTindakan['tgl_sample'],
+                                'tgl_ambil_sample' => (($valueTindakan['tgl_sample'] === '') ? parent::format_date() : $valueTindakan['tgl_sample']),
 								'created_at'	=>	parent::format_date(),
 								'updated_at'	=>	parent::format_date()	
 							)
