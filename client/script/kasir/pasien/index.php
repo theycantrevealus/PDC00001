@@ -1139,6 +1139,7 @@
 						},
 						success: function(response) {
 							console.clear();
+							console.log(response);
 							var resultCheck = 0;
 							
 							for(var returnKey in response.response_package) {

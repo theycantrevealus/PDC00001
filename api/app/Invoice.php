@@ -1072,11 +1072,26 @@ class Invoice extends Utility
                             ))
                             ->execute();
 
-                        if(
+                        $KonsulLib = array();
+                        //Get All Konsul Item Poli
+                        $PoliKonsul = self::$query->select('master_poli', array(
+                            'uid', 'tindakan_konsultasi'
+                        ))
+                            ->where(array(
+                                'master_poli.deleted_at' => 'IS NULL'
+                            ))
+                            ->execute();
+                        foreach ($PoliKonsul['response_data'] as $PolKey => $PolValue) {
+                            array_push($KonsulLib, $PolValue['tindakan_konsultasi']);
+                        }
+
+                        /*if(
                             $value === __UIDKONSULDOKTER__ ||
                             $value === __UIDKONSULDOKTER_GIGI__ ||
                             $value === __UIDKONSULDOKTER_SPESIALIS__
-                        ) {
+                        ) {*/
+
+                        if(in_array($value, $KonsulLib)) {
                             //Check status asesmen. jika sudah asesmen tidak bisa return lagi
                             $AsesmenCheck = self::$query->select('asesmen', array(
                                 'uid'
@@ -1132,7 +1147,7 @@ class Invoice extends Utility
                                 $worker['message'] = $updateAntrian;
                             }
                         } else {
-                            $worker['message'] = '';
+                            $worker['message'] = 'Ada Kesalahan';
                         }
                         array_push($detailUpdate, $worker);
                     }
