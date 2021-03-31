@@ -6572,7 +6572,7 @@
                                 <td class="wrap_content">
                                     <i class="fa fa-stop emas"></i>
                                 </td>
-                                <td>Silika/GIC</td>
+                                <td>Tambalan Sewarna Emas</td>
                             </tr>
                             <tr id="tambal_sewarna" class="need_selection" group-selection="mordor4">
                                 <td class="wrap_content">
