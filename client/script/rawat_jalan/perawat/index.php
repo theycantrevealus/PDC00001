@@ -6,6 +6,9 @@
             antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
                 tableAntrianPerawat.ajax.reload();
+            },
+            retur_barhasil: function(protocols, type, parameter, sender, receiver, time) {
+                tableAntrianPerawat.ajax.reload();
             }
         };
 

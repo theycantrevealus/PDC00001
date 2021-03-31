@@ -371,14 +371,17 @@
                 type: type
             };
 
-            Sync.send(JSON.stringify(msg));
+            return new Promise((resolve, reject) => {
+                Sync.send(JSON.stringify(msg));
+                resolve(msg);
+            });
         }
 
         $(function() {
             if ("WebSocket" in window) {
 
                 //var Sync = new WebSocket(serverTarget);
-                console.log(protocolLib);
+                //console.log(protocolLib);
                 Sync = SocketCheck(serverTarget, protocolLib, tm);
 
             } else {
@@ -399,7 +402,7 @@
             var Sync = new WebSocket(serverTarget);
             Sync.onopen = function() {
                 clearInterval(tm);
-                console.log("connected");
+                //console.log("connected");
                 $(".global-sync-container").fadeOut();
             }
 
@@ -428,10 +431,10 @@
                         } else {
                             if(receiver == __ME__ || sender == __ME__ || receiver == "*" || receiver == __MY_PRIVILEGES__.response_data[0]["uid"]) {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
-                                console.log(__MY_PRIVILEGES__);
+                                //console.log(__MY_PRIVILEGES__);
                             } else {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
-                                alert("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
+                                //alert("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
                             }
                         }
                     }

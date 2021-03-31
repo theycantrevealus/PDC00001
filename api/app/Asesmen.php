@@ -62,6 +62,10 @@ class Asesmen extends Utility {
 	public function __POST__($parameter = array()) {
 		try {
 			switch($parameter['request']) {
+                case 'asesmen_progressing':
+                    return self::order_asesmen($parameter);
+                    break;
+
 				case 'update_asesmen_medis':
 					return self::update_asesmen_medis($parameter);
 					break;
@@ -81,6 +85,27 @@ class Asesmen extends Utility {
 			return 'Error => ' . $e;
 		}
 	}
+
+	private function order_asesmen($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $proceed = self::$query->insert('asesmen', array(
+            'uid' => parent::gen_uuid(),
+            'poli' => $parameter['poli'],
+            'kunjungan' => $parameter['kunjungan'],
+            'antrian' => $parameter['antrian'],
+            'pasien' => $parameter['pasien'],
+            'dokter' => $UserData['data']->uid,
+            'perawat' => $parameter['perawat'],
+            'created_at' => parent::format_date(),
+            'updated_at' => parent::format_date(),
+            'status' => 'N'
+        ))
+            ->execute();
+
+	    return $proceed;
+    }
 
 	private function pasien_saya($parameter) {
         $Authorization = new Authorization();
@@ -2146,7 +2171,7 @@ class Asesmen extends Utility {
 
 	private function new_asesmen($parameter, $parent, $poli, $poli_uid) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$NewAsesmenPoli = parent::gen_uuid();
 
         if($poli_uid === __UIDFISIOTERAPI__)
@@ -2804,6 +2829,7 @@ class Asesmen extends Utility {
 		foreach ($antrian['response_data'] as $key => $value) {
 			$Poli = new Poli(self::$pdo);
 			$PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
+            $antrian['response_data'][$key]['poli_detail'] = $PoliDetail;
 
 			$cek_asesment = self::cek_asesmen_medis_detail($PoliDetail['poli_asesmen'], $value['uid']);
 			$antrian['response_data'][$key]['status_asesmen'] = false;

@@ -1321,6 +1321,11 @@
 			    refresh_notification();
 				reinitAntrianSync($("#txt_loket").val());
 			},
+            retur_barhasil: function(protocols, type, parameter, sender, receiver, time) {
+                tableAntrian.ajax.reload();
+                tableAntrianIGD.ajax.reload();
+                tableAntrianRI.ajax.reload();
+            }
             /*anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
                 //
             }*/
