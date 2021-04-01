@@ -2826,27 +2826,55 @@ class Asesmen extends Utility {
 		$antrianPasien = [];
 
 		$autonum = 1;
+		$returnData = array();
 		foreach ($antrian['response_data'] as $key => $value) {
-			$Poli = new Poli(self::$pdo);
-			$PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
+            $Poli = new Poli(self::$pdo);
+            $PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
             $antrian['response_data'][$key]['poli_detail'] = $PoliDetail;
 
-			$cek_asesment = self::cek_asesmen_medis_detail($PoliDetail['poli_asesmen'], $value['uid']);
-			$antrian['response_data'][$key]['status_asesmen'] = false;
+            $cek_asesment = self::cek_asesmen_medis_detail($PoliDetail['poli_asesmen'], $value['uid']);
+            $antrian['response_data'][$key]['status_asesmen'] = false;
 
-			if ($cek_asesment['response_result'] > 0){
-				$antrian['response_data'][$key]['uid_asesmen_medis'] = $cek_asesment['response_data'][0]['uid'];
-				$antrian['response_data'][$key]['status_asesmen'] = true; 
-			}
-			//Pasien Detail
+            if ($cek_asesment['response_result'] > 0){
+                $antrian['response_data'][$key]['uid_asesmen_medis'] = $cek_asesment['response_data'][0]['uid'];
+                $antrian['response_data'][$key]['status_asesmen'] = true;
+            }
+            //Pasien Detail
             $Pasien = new Pasien(self::$pdo);
-			$PasienDetail = $Pasien->get_pasien_detail('pasien', $value['uid_pasien']);
+            $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['uid_pasien']);
             $antrian['response_data'][$key]['pasien_detail'] = $PasienDetail['response_data'][0];
 
-			$antrian['response_data'][$key]['autonum'] = $autonum;
-			$autonum++;
-		}
+            $antrian['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
 
+		    if($value['uid_penjamin'] !== __UIDPENJAMINUMUM__) {
+                if($value['uid_penjamin'] === __UIDPENJAMINBPJS__) {
+                    //Harus ada SEP
+                    $checkSEP = self::$query->select('bpjs_sep', array(
+                        'uid'
+                    ))
+                        ->where(array(
+                            'bpjs_sep.antrian' => '= ?',
+                            'AND',
+                            'bpjs_sep.deleted_at' => 'IS NULL'
+                        ), array(
+                            $value['uid']
+                        ))
+                        ->execute();
+                    if(count($checkSEP['response_data']) > 0) {
+                        array_push($returnData, $antrian['response_data'][$key]);
+                    }
+                } else {
+                    array_push($returnData, $antrian['response_data'][$key]);
+                }
+            } else {
+                array_push($returnData, $antrian['response_data'][$key]);
+            }
+
+
+
+		}
+		$antrian['response_data'] = $returnData;
 		return $antrian;
 	}
 
