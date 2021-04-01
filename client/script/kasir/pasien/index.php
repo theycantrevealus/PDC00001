@@ -1031,7 +1031,9 @@
                                     var notifier_target = response.response_package.response_notifier;
                                     for(var notifKey in notifier_target)
                                     {
-                                        push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info");
+                                        push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info").then(function() {
+                                            console.log("pushed!");
+                                        });
                                     }
 
                                 });
