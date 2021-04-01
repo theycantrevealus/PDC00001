@@ -1191,6 +1191,23 @@ class Laboratorium extends Utility {
 
 	public function charge_invoice_item($parameter) {
 	    $charge_result = array();
+
+	    //Update Status menjadi V
+        $proceedLab = self::$query->update('lab_order', array(
+            'status' => 'V'
+        ))
+            ->where(array(
+                'lab_order.asesmen' => '= ?',
+                'AND',
+                'lab_order.selesai' => '= ?',
+                'AND',
+                'lab_order.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['asesmen'],
+                'false'
+            ))
+            ->execute();;
+
 	    //Ambil semua item untuk asesmen sekarang
         $LabOrder = self::$query->select('lab_order', array(
             'uid',
@@ -1230,7 +1247,7 @@ class Laboratorium extends Utility {
                 'pasien' => $parameter['pasien'],
                 'keterangan' => 'Tagihan laboratorium'
             );
-            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $NewInvoice = $Invoice->create_invoice($InvMasterParam);
             $TargetInvoice = $NewInvoice['response_unique'];
         }
 
@@ -1272,7 +1289,7 @@ class Laboratorium extends Utility {
                     ->execute();
                 $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
 
-                $InvoiceDetail = $Invoice::append_invoice(array(
+                $InvoiceDetail = $Invoice->append_invoice(array(
                     'invoice' => $TargetInvoice,
                     'item' => $DValue['tindakan'],
                     'item_origin' => 'master_tindakan',
@@ -3517,7 +3534,7 @@ class Laboratorium extends Utility {
 							//'dr_penanggung_jawab'	=>	$parameter['dokterPJ'],
 							'no_order'				=>	'LO/' . date('Y/m') . '/' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT),
 							//'status'				=>	'P', Revisi Verifikator
-                            'status'				=>	'V',
+                            'status'				=>	'N', // Dulu V
 							'pasien'				=>	$data_antrian['pasien'],
 							'kunjungan'				=>	$data_antrian['kunjungan'],
 							'created_at'			=>	parent::format_date(),
@@ -3594,7 +3611,7 @@ class Laboratorium extends Utility {
 										'tgl_ambil_sample' => (($valueTindakan['tgl_sample'] === '') ? parent::format_date() : $valueTindakan['tgl_sample']),
 										'penjamin'		=>	$valueTindakan['penjamin'],
 										'created_at'	=>	parent::format_date(),
-										'updated_at'	=>	parent::format_date()	
+										'updated_at'	=>	parent::format_date()
 									)
 								)
 								->execute();
@@ -3754,7 +3771,7 @@ class Laboratorium extends Utility {
 					$updateStatusOrder = self::$query
 						->update('lab_order', array(
 								//'status'	=>	$status_lunas
-                                'status'	=>	'V'
+                                'status'	=>	'N' // Dulu V
 							)
 						)
 						->where(

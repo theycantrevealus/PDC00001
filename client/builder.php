@@ -57,7 +57,7 @@
 										require 'pages/' . implode('/', __PAGES__) . '/index.php';
 									} else {
 										if(!$allowAccess) {
-											require 'pages/system/403.php';	
+											require 'pages/system/403.php';
 										} else {
 											require 'pages/system/404.php';
 										}
@@ -74,7 +74,6 @@
 											if(file_exists($isFile . '/' . $value . '.php')) {
 												$lastExist = $isFile . '/' . $value . '.php';
 											}
-
 											$isFile .= '/' . $value;
 										}
 
@@ -102,7 +101,7 @@
 											require $lastExist;
 										} else {
 											if(!$allowAccess) {
-												require 'pages/system/403.php';	
+												require 'pages/system/403.php';
 											} else {
 												require 'pages/system/404.php';
 											}
@@ -153,7 +152,7 @@
 				dateFormat: 'DD, dd MM yy',
 				autoclose: true
 			});
-			
+
 			moment.locale('id');
 			var parentList = [];
 
@@ -169,12 +168,12 @@
 
 					//$("a[href=\"#menu-" + hasMaster + "\"]").removeClass("collapsed").parent().addClass("open");
 					$("ul#menu-" + hasMaster).addClass("show");
-					
+
 				}
 			});
 
 			//$("ul[master-child=\"" + activeMenu + "\"").addClass("open");
-			
+
 
 			var idleCheck;
 			function reloadSession() {
@@ -218,7 +217,7 @@
 				});
 				return false;
 			});
-		
+
 			$("body").on("click", "a[href=\"#notifications_menu\"]", function() {
 				$.ajax({
 					async: false,
@@ -284,7 +283,7 @@
 							$(notifContentContainter).html("<a href=\"\">A.Demian</a> left a comment on <a href=\"\">Stack</a><br>" +
 															"<small class=\"text-muted\">1 minute ago</small>").addClass("flex");
 						}
-							
+
 						$(notifContainer).addClass("dropdown-item d-flex");
 						$(notifContainer).append(notifSenderContainer);
 						$(notifContainer).append(notifContentContainter);
@@ -350,7 +349,7 @@
 						$getScript[0] = 'script';
 						include implode('/', $getScript);
 					} else {
-						include 'script/system/404.php';	
+						include 'script/system/404.php';
 					}
 				}
 			}
@@ -418,7 +417,7 @@
                 if(command !== undefined && command !== null && command !== "") {
 
                     if(protocolLib[command] !== undefined) {
-                        if(command == "anjungan_kunjungan_panggil") {
+                        if(command === "anjungan_kunjungan_panggil") {
                             if(audio !== undefined && audio.audio !== undefined) {
                                 if(!audio.paused) {
                                     audio.audio.pause();
@@ -594,7 +593,7 @@
 			}
 			return s.join(dec);
 		}
-		
+
 
 		function bpjs_load_faskes() {
 			var dataFaskes = [];
@@ -662,7 +661,7 @@
 					title: data
 				});
 			});
-			
+
 			$(".sidebar-menu").each(function(e) {
 				$(this).find("li.sidebar-menu-item").each(function(f) {
 					var shimmer = document.createElement("DIV");
