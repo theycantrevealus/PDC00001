@@ -1,7 +1,12 @@
 <script type="text/javascript">
     $(function () {
         $("#range_sep").change(function() {
-            SEPList.ajax.reload();
+            if(
+                !Array.isArray(getDateRange("#range_sep")[0]) &&
+                !Array.isArray(getDateRange("#range_sep")[1])
+            ) {
+                SEPList.ajax.reload();
+            }
         });
 
         $("#jenis_pelayanan").select2().on("select2:select", function(e) {
@@ -42,10 +47,14 @@
                 },
                 dataSrc: function (response) {
                     var data = response.response_package.response_data;
-                    if (data === undefined) {
-                        data = [];
+                    console.clear();
+                    console.log(response);
+                    if (data === undefined || data === null) {
+                        return [];
+                    } else {
+                        return data;
                     }
-                    return data;
+
                 }
             },
             autoWidth: false,
@@ -141,7 +150,6 @@
                 type: "GET",
                 success: function (response) {
                     var dataSEP = response.response_package.response_data[0];
-                    console.log(dataSEP);
                     $("#sep_nomor").html(dataSEP.sep_no);
                     $("#sep_tanggal").html(dataSEP.sep_tanggal);
                     $("#sep_spesialis").html(dataSEP.poli_tujuan_detail.kode + " - " + dataSEP.poli_tujuan_detail.nama);
@@ -156,7 +164,6 @@
 
                         if(penjaminList[pKey].penjamin === __UIDPENJAMINBPJS__) {
                             var metaData = JSON.parse(penjaminList[pKey].rest_meta);
-                            console.log(metaData);
                             $("#sep_nomor_kartu").html(metaData.response.peserta.noKartu);
                             $("#sep_nama_peserta").html(metaData.response.peserta.nama + "<b class=\"text-info\">[" + metaData.response.peserta.mr.noMR + "]</b>");
                             $("#sep_tanggal_lahir").html(metaData.response.peserta.tglLahir);
@@ -225,7 +232,7 @@
                         if(penjaminList[pKey].penjamin === __UIDPENJAMINBPJS__) {
                             //var metaData = JSON.parse(penjaminList[pKey].penjamin_detail.rest_meta);
 
-                            console.log(penjaminList[pKey]);
+
                         }
                     }
                     $("#modal-sep").modal("show");
@@ -255,7 +262,6 @@
                         },
                         type: "DELETE",
                         success: function (response) {
-                            console.log(response);
                             if(parseInt(response.response_package.bpjs.content.metaData.code) === 200) {
                                 Swal.fire(
                                     'BPJS',
@@ -461,7 +467,6 @@
 
 
         var dataKondisiPulang = load_bpjs("get_spesialistik");
-        console.log(dataKondisiPulang);
 
 
         function load_bpjs(targetURL) {

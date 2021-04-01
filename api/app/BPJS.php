@@ -66,7 +66,7 @@ class BPJS extends Utility {
 
 	public function  __DELETE__($parameter = array()) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         switch ($parameter[6]) {
             case 'SEP':
