@@ -239,8 +239,10 @@
 			});
 
 			$("body").on("click", "#refresh_protocol", function() {
-			    notification ("info", "Refresh page", 3000, "notif_update");
-                push_socket(__ME__, "refresh", "*", "Refresh page", "info");
+
+                push_socket(__ME__, "refresh", "*", "Refresh page", "info").then(function() {
+                    notification ("info", "Refresh page", 3000, "notif_update");
+                });
             });
 		});
 

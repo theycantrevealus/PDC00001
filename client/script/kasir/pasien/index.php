@@ -1169,7 +1169,9 @@
                                 $("#form-payment-detail").modal("hide");
                                 tableKwitansi.ajax.reload();
 
-                                push_socket(__ME__, "retur_barhasil", "*", "Tidak jadi berobat", "info");
+                                push_socket(__ME__, "retur_barhasil", "*", "Tidak jadi berobat", "info").then(function() {
+                                    //
+                                });
                             }
                         });
                     } else {
