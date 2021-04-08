@@ -1515,7 +1515,7 @@ class Asesmen extends Utility {
 
 	private function set_resep_asesment($parameter, $MasterAsesmen) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         //Check Invoice
         $Invoice = new Invoice(self::$pdo);
@@ -1629,7 +1629,7 @@ class Asesmen extends Utility {
 			foreach ($parameter['resep'] as $key => $value) {
 				//Prepare Data Obat
 				$ObatDetail = new Inventori(self::$pdo);
-				$ObatInfo = $ObatDetail::get_item_detail($value['obat'])['response_data'][0];
+				$ObatInfo = $ObatDetail->get_item_detail($value['obat'])['response_data'][0];
 
 				if(in_array($value['obat'], $used_obat)) {
 					$worker = self::$query->update('resep_detail', array(
