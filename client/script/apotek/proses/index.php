@@ -94,7 +94,7 @@
         }*/
 
         //get_resep_backend
-        var tableResep= $("#table-resep").DataTable({
+        var tableResep = $("#table-resep").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",

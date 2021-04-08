@@ -230,12 +230,12 @@
 
 		
 		var tableAntrianBayarRJ = $("#table-biaya-pasien-rj").DataTable({
-			processing: true,
-			serverSide: true,
-			sPaginationType: "full_numbers",
-			bPaginate: true,
-			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
-			serverMethod: "POST",
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Invoice",
 				type: "POST",

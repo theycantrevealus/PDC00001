@@ -2,6 +2,8 @@
 <script type="text/javascript">
 	$(function() {
 
+	    var currentPenjamin = '';
+
 	    var tableServiceLabor = $("#service_labor").DataTable({
             processing: true,
             serverSide: true,
@@ -483,6 +485,8 @@
             uid = uid[uid.length - 1];
 
             var penjamin = $(this).attr("penjamin");
+
+            currentPenjamin = penjamin;
 
             //Get Detail
             $.ajax({
@@ -1077,6 +1081,15 @@
                                     tableVerifikasiLabor.ajax.reload();
                                     tableServiceLabor.ajax.reload();
                                     tableAntrianLabor.ajax.reload();
+                                    if(currentPenjamin === __UIDPENJAMINUMUM__) {
+                                        push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya laboratorium baru", "warning").then(function() {
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    } else {
+                                        push_socket(__ME__, "antrian_laboratorium_baru", "*", "Permintaan laboratorium baru", "warning").then(function() {
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    }
                                     $("#modal-detail-labor").modal("hide");
                                     /*$("#verifikasi_lab_container_" + uid + "_" + tindakan).fadeOut(function() {
                                         $("#verifikasi_lab_container_" + uid + "_" + tindakan).remove();

@@ -1412,7 +1412,9 @@
                                             "Silahkan minta pasien menunggu proses persiapan obat",
                                             "success"
                                         ).then((result) => {
-                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                            push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru BPJS", "warning").then(function() {
+                                                location.href = __HOSTNAME__ + "/apotek/resep/";
+                                            });
                                         });
                                     }
                                 }
