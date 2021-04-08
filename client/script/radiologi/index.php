@@ -8,9 +8,11 @@
             permintaan_radio_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", parameter, 3000, "hasil_order_radio");
                 tableVerifikasiRadiologi.ajax.reload();
+                tableAntrianRadiologi.ajax.reload();
             },
             antrian_radiologi_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", parameter, 3000, "hasil_order_radio");
+                tableVerifikasiRadiologi.ajax.reload();
                 tableAntrianRadiologi.ajax.reload();
             }
         };
@@ -573,10 +575,6 @@
                 console.log(command);
             }
         }*/
-
-
-
-
 	});
 </script>
 
