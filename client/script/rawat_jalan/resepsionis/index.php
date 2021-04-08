@@ -191,7 +191,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-                        if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
+                        if(row["uid_penjamin"] === __UIDPENJAMINBPJS__) {
                             if(Date(row.created_at) < Date()) {
                                 return "Antrian sudah lewat";
                             } else {
@@ -200,6 +200,7 @@
                                         return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
                                     } else {
                                         return row["penjamin"] + " <h6 class=\"nomor_sep text-success\"><i class=\"fa fa-check\"></i> " + row.sep + "</h6>";
+                                        //<button class=\"btn btn-success btn-cetak-sep\" id=\"cetak_sep_" + row.sep_uid + "\"><i class=\"fa fa-print\"></i> Cetak SEP</button>
                                     }
 
                                     //return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
@@ -227,35 +228,61 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
-										"<i class=\"fa fa-check\"></i>" +
-									"</button>" +
-                                    "<div class=\"btn-group\">" +
-                                        "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
-                                            "<i class=\"fa fa-print\"></i> Cetak" +
-                                        "</button>" +
-                                        "<div class=\"dropdown-menu\">" +
-                                            "<a id=\"cetak_kartu_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"kartu\" href=\"#\">Kartu Pasien</a>" +
-                                            "<a id=\"cetak_lab_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"lab\" href=\"#\">Label Laboratorium</a>" +
-                                            "<a id=\"cetak_tracer_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"tracer\" href=\"#\">Tracer</a>" +
-                                            "<a id=\"cetak_spbk_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"spbk\" href=\"#\">SPBK</a>" +
-                                            "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"sosial\" href=\"#\">Data Sosial Pasien</a>" +
-                                            "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"gelang\" href=\"#\">Gelang Pasien</a>" +
-                                            "<a id=\"cetak_bayi_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"bayi\" href=\"#\">Gelang Pasien Bayi</a>" +
-                                            "<a id=\"cetak_identitas_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"idenftitas\" href=\"#\">Identitas Pasien</a>" +
-                                        "</div>" +
-                                    "</div>" +
-                                    /*"<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"gelang\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"kartu\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"lab\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"tracer\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"spbk\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"sosial\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"bayi\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"identitas\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +*/
+                        if(row["uid_penjamin"] === __UIDPENJAMINBPJS__) {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
+                                "<i class=\"fa fa-check\"></i>" +
+                                "</button>" +
+                                "<div class=\"btn-group\">" +
+                                "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
+                                "<i class=\"fa fa-print\"></i> Cetak" +
+                                "</button>" +
+                                "<div class=\"dropdown-menu\">" +
+                                "<a id=\"cetak_sep_" + row.sep_uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"SEP\" href=\"#\">BPJS - SEP</a>" +
+                                "<a id=\"cetak_kartu_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"kartu\" href=\"#\">Kartu Pasien</a>" +
+                                "<a id=\"cetak_lab_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"lab\" href=\"#\">Label Laboratorium</a>" +
+                                "<a id=\"cetak_tracer_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"tracer\" href=\"#\">Tracer</a>" +
+                                "<a id=\"cetak_spbk_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"spbk\" href=\"#\">SPBK</a>" +
+                                "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"sosial\" href=\"#\">Data Sosial Pasien</a>" +
+                                "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"gelang\" href=\"#\">Gelang Pasien</a>" +
+                                "<a id=\"cetak_bayi_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"bayi\" href=\"#\">Gelang Pasien Bayi</a>" +
+                                "<a id=\"cetak_identitas_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"idenftitas\" href=\"#\">Identitas Pasien</a>" +
+                                "</div>" +
+                                "</div>" +
 
-								"</div>";
+                                "</div>";
+                        } else {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
+                                "<i class=\"fa fa-check\"></i>" +
+                                "</button>" +
+                                "<div class=\"btn-group\">" +
+                                "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
+                                "<i class=\"fa fa-print\"></i> Cetak" +
+                                "</button>" +
+                                "<div class=\"dropdown-menu\">" +
+                                "<a id=\"cetak_kartu_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"kartu\" href=\"#\">Kartu Pasien</a>" +
+                                "<a id=\"cetak_lab_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"lab\" href=\"#\">Label Laboratorium</a>" +
+                                "<a id=\"cetak_tracer_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"tracer\" href=\"#\">Tracer</a>" +
+                                "<a id=\"cetak_spbk_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"spbk\" href=\"#\">SPBK</a>" +
+                                "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"sosial\" href=\"#\">Data Sosial Pasien</a>" +
+                                "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"gelang\" href=\"#\">Gelang Pasien</a>" +
+                                "<a id=\"cetak_bayi_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"bayi\" href=\"#\">Gelang Pasien Bayi</a>" +
+                                "<a id=\"cetak_identitas_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"idenftitas\" href=\"#\">Identitas Pasien</a>" +
+                                "</div>" +
+                                "</div>" +
+                                /*"<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"gelang\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"kartu\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"lab\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"tracer\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"spbk\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"sosial\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"bayi\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"identitas\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +*/
+
+                                "</div>";
+
+                        }
 					}
 				}
 			]
@@ -1549,54 +1576,140 @@
 		});
 
 
-        $("body").on("click", ".print_manager", function() {
-            var targetSurat = $(this).attr("jenis");
-            var uid = $(this).attr("id").split("_");
-            uid = uid[uid.length - 1];
-
-            var pasien = $(this).attr("pasien");
-
-            //$("#target-judul-cetak").html("CETAK " + targetSurat.toUpperCase() + " PASIEN");
+        $("#btnCetakSEP").click(function() {
             $.ajax({
                 async: false,
-                url: __HOSTAPI__ + "/Pasien/pasien-detail/" + pasien,
-                type: "GET",
+                url: __HOST__ + "miscellaneous/print_template/bpjs_sep.php",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
+                type: "POST",
+                data: {
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    html_data_kiri: $("#data_sep_cetak_kiri").html(),
+                    html_data_kanan: $("#data_sep_cetak_kanan").html(),
+                    html_data_bawah: $("#data_sep_cetak_bawah").html()
+                },
                 success: function (response) {
-                    dataPasien = response.response_package.response_data[0];
-                    dataPasien.pc_customer = __PC_CUSTOMER__;
-                    dataPasien.pc_dokter = $("#dokter_" + uid).html();
-                    dataPasien.waktu_masuk = $("#waktu_masuk_" + uid).html();
-
-                    $.ajax({
-                        async: false,
-                        url: __HOST__ + "miscellaneous/print_template/pasien_" + targetSurat + ".php",
-                        beforeSend: function (request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        type: "POST",
-                        data: dataPasien,
-                        success: function (response) {
-                            //$("#dokumen-viewer").html(response);
-                            var containerItem = document.createElement("DIV");
-                            $(containerItem).html(response);
-                            $(containerItem).printThis({
-                                importCSS: true,
-                                base: false,
-                                pageTitle: "cetak",
-                                afterPrint: function() {
-                                    //
-                                }
-                            });
+                    //$("#dokumen-viewer").html(response);
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        pageTitle: "Cetak SEP",
+                        afterPrint: function() {
+                            //
                         }
                     });
-                },
-                error: function(response) {
-                    //
                 }
             });
+        });
+
+
+        $("body").on("click", ".print_manager", function() {
+            var targetSurat = $(this).attr("jenis");
+            if(targetSurat === "SEP") {
+                var id = $(this).attr("id").split("_");
+                id = id[id.length - 1];
+
+                $.ajax({
+                    async: false,
+                    url: __HOSTAPI__ + "/BPJS/get_sep_detail/" + id,
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    type: "GET",
+                    success: function (response) {
+
+                        var dataSEP = response.response_package.response_data[0];
+                        $("#sep_nomor").html(dataSEP.sep_no);
+                        $("#sep_tanggal").html(dataSEP.sep_tanggal);
+                        $("#sep_spesialis").html((dataSEP.poli_tujuan_detail !== undefined) ? dataSEP.poli_tujuan_detail.kode + " - " + dataSEP.poli_tujuan_detail.nama : "-");
+                        $("#sep_faskes_asal").html(dataSEP.asal_rujukan_ppk + " - " + ((dataSEP.asal_rujukan_nama !== undefined && dataSEP.asal_rujukan_nama !== null && dataSEP.asal_rujukan_nama !== "null") ? dataSEP.asal_rujukan_nama : "[TIDAK DITEMUKAN]") + "<b class=\"text-info\">[No. Rujuk: " + dataSEP.asal_rujukan_nomor + "]");
+                        $("#sep_diagnosa_awal").html(dataSEP.diagnosa_nama);
+                        $("#sep_catatan").html(dataSEP.catatan);
+                        $("#sep_kelas_rawat").html(dataSEP.kelas_rawat.nama);
+                        $("#sep_jenis_rawat").html((parseInt(dataSEP.pelayanan_jenis) === 1) ? "Rawat Inap" : "Rawat Jalan");
+
+
+                        var penjaminList = dataSEP.pasien.history_penjamin;
+                        for(var pKey in penjaminList) {
+                            if(penjaminList[pKey].penjamin === __UIDPENJAMINBPJS__) {
+                                var metaData = JSON.parse(penjaminList[pKey].rest_meta);
+                                $("#sep_nomor_kartu").html(metaData.response.peserta.noKartu);
+                                $("#sep_nama_peserta").html(metaData.response.peserta.nama + "<b class=\"text-info\">[" + metaData.response.peserta.mr.noMR + "]</b>");
+                                $("#sep_tanggal_lahir").html(metaData.response.peserta.tglLahir);
+                                $("#sep_nomor_telepon").html(metaData.response.peserta.mr.noTelepon);
+                                $("#sep_peserta").html(metaData.response.peserta.jenisPeserta.keterangan);
+                                if(
+                                    metaData.response.peserta.cob.noAsuransi !== undefined &&
+                                    metaData.response.peserta.cob.nmAsuransi !== undefined &&
+                                    metaData.response.peserta.cob.noAsuransi !== "" &&
+                                    metaData.response.peserta.cob.nmAsuransi !== "" &&
+                                    metaData.response.peserta.cob.noAsuransi !== null &&
+                                    metaData.response.peserta.cob.nmAsuransi !== null
+                                ) {
+                                    $("#sep_cob").html(metaData.response.peserta.cob.noAsuransi + " - " + metaData.response.peserta.cob.nmAsuransi);
+                                } else {
+                                    $("#sep_cob").html("-");
+                                }
+                            }
+                        }
+                        $("#modal-sep-cetak").modal("show");
+                    },
+                    error: function (response) {
+                        //
+                    }
+                });
+            } else {
+                var uid = $(this).attr("id").split("_");
+                uid = uid[uid.length - 1];
+
+                var pasien = $(this).attr("pasien");
+
+                //$("#target-judul-cetak").html("CETAK " + targetSurat.toUpperCase() + " PASIEN");
+                $.ajax({
+                    async: false,
+                    url: __HOSTAPI__ + "/Pasien/pasien-detail/" + pasien,
+                    type: "GET",
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    success: function (response) {
+                        dataPasien = response.response_package.response_data[0];
+                        dataPasien.pc_customer = __PC_CUSTOMER__;
+                        dataPasien.pc_dokter = $("#dokter_" + uid).html();
+                        dataPasien.waktu_masuk = $("#waktu_masuk_" + uid).html();
+
+                        $.ajax({
+                            async: false,
+                            url: __HOST__ + "miscellaneous/print_template/pasien_" + targetSurat + ".php",
+                            beforeSend: function (request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type: "POST",
+                            data: dataPasien,
+                            success: function (response) {
+                                //$("#dokumen-viewer").html(response);
+                                var containerItem = document.createElement("DIV");
+                                $(containerItem).html(response);
+                                $(containerItem).printThis({
+                                    importCSS: true,
+                                    base: false,
+                                    pageTitle: "cetak",
+                                    afterPrint: function() {
+                                        //
+                                    }
+                                });
+                            }
+                        });
+                    },
+                    error: function(response) {
+                        //
+                    }
+                });
+            }
         });
 	});
 
@@ -2170,6 +2283,126 @@
             <div class="modal-footer">
                 <button class="btn btn-success" id="btnProsesSEP">
                     <i class="fa fa-check"></i> Tambah
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="modal-sep-cetak" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> <span>Surat Eligibilitas Peserta</span>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6" id="data_sep_cetak_kiri">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>No. SEP</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nomor"></td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. SEP</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_tanggal"></td>
+                            </tr>
+                            <tr>
+                                <td>No. Kartu</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nomor_kartu"></td>
+                            </tr>
+                            <tr>
+                                <td>Nama Peserta</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nama_peserta"></td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. Lahir</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_tanggal_lahir"></td>
+                            </tr>
+                            <tr>
+                                <td>No. Telp</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nomor_telepon"></td>
+                            </tr>
+                            <tr>
+                                <td>Sub/Spesialis</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_spesialis"></td>
+                            </tr>
+                            <tr>
+                                <td>Faskes Penunjuk</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_faskes_asal"></td>
+                            </tr>
+                            <tr>
+                                <td>Diagnosa Awal</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_diagnosa_awal"></td>
+                            </tr>
+                            <tr>
+                                <td>Catatan</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_catatan"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-6" id="data_sep_cetak_kanan">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>Peserta</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_peserta"></td>
+                            </tr>
+                            <tr>
+                                <td>COB</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_cob"></td>
+                            </tr>
+                            <tr>
+                                <td>Jenis Rawat</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_jenis_rawat"></td>
+                            </tr>
+                            <tr>
+                                <td>Kelas Rawat</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_kelas_rawat"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-12" id="data_sep_cetak_bawah">
+                        <small>
+                            <i>
+                                <ul type="*" style="margin: 0; padding: 10px;">
+                                    <li>
+                                        Saya menyetujui BPJS Kesehatan menggunakan informasi medis pasien jika diperlukan
+                                    </li>
+                                    <li>
+                                        SEP bukan sebagai bukti penjaminan peserta
+                                    </li>
+                                </ul>
+                            </i>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnCetakSEP">
+                    <i class="fa fa-print"></i> Cetak
                 </button>
 
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>

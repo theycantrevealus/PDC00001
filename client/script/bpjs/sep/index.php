@@ -160,7 +160,7 @@
                     $("#sep_nomor").html(dataSEP.sep_no);
                     $("#sep_tanggal").html(dataSEP.sep_tanggal);
                     $("#sep_spesialis").html(dataSEP.poli_tujuan_detail.kode + " - " + dataSEP.poli_tujuan_detail.nama);
-                    $("#sep_faskes_asal").html(dataSEP.asal_rujukan_ppk + " - " + ((dataSEP.asal_rujukan_nama !== undefined && dataSEP.asal_rujukan_nama !== null && dataSEP.asal_rujukan_nama !== "null") ? dataSEP.asal_rujukan_nama : "[TIDAK DITEMUKAN]") + "<b class=\"text-info\">[No : " + dataSEP.asal_rujukan_nomor + "]");
+                    $("#sep_faskes_asal").html(dataSEP.asal_rujukan_ppk + " - " + ((dataSEP.asal_rujukan_nama !== undefined && dataSEP.asal_rujukan_nama !== null && dataSEP.asal_rujukan_nama !== "null") ? dataSEP.asal_rujukan_nama : "[TIDAK DITEMUKAN]") + "<b class=\"text-info\">[No. Rujuk: " + dataSEP.asal_rujukan_nomor + "]");
                     $("#sep_diagnosa_awal").html(dataSEP.diagnosa_nama);
                     $("#sep_catatan").html(dataSEP.catatan);
                     $("#sep_kelas_rawat").html(dataSEP.kelas_rawat.nama);

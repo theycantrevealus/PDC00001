@@ -1477,8 +1477,10 @@ class Antrian extends Utility
                     ->execute();
                 if (count($SEP['response_data']) > 0) {
                     $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['sep_no'];
+                    $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
                 } else {
                     $data['response_data'][$key]['sep'] = $SEP;
+                    $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
                 }
             }
 
@@ -1713,7 +1715,7 @@ class Antrian extends Utility
 
 
             //Cek Penjamin. Jika BPJS maka cek status SEP pada lokal
-            if ($value['uid_penjamin'] == __UIDPENJAMINBPJS__) {
+            if ($value['uid_penjamin'] === __UIDPENJAMINBPJS__) {
                 //Cek tabel SEP
                 /*$SEP = self::$query->select('penjamin_sep', array(
                     'id',
@@ -1750,8 +1752,10 @@ class Antrian extends Utility
                     ->execute();
                 if (count($SEP['response_data']) > 0) {
                     $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['sep_no'];
+                    $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
                 } else {
                     $data['response_data'][$key]['sep'] = $SEP;
+                    $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
                 }
             }
 

@@ -15,7 +15,7 @@
         }
 
         body{
-            padding: 1cm;
+            padding: .3cm;
             color: #000;
             font-family: Courier;
             text-align:center;
