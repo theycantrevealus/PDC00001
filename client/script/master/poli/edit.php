@@ -227,7 +227,7 @@
                             return {
                                 results: $.map(data, function (item) {
                                     return {
-                                        text: item.kode + " - " + item.nama,
+                                        text: item.nama,
                                         id: item.kode
                                     }
                                 })

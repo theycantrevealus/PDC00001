@@ -3,6 +3,7 @@
 	$(function(){
 
 		var selectedUID;
+		var selectedUIDPasien;
 		var selectedUIDKwitansi;
 		var selectedPoli;
 		var selectedPasien;
@@ -159,26 +160,32 @@
         });
 
 		$("body").on("click", ".btnDetailKwitansi", function() {
-			var uid = $(this).attr("id").split("_");
+		    var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
 			selectedUID = $(this).attr("invoice");
 			selectedUIDKwitansi = $(this).attr("invoice_payment");
 
 			$.ajax({
+                async: false,
 				url: __HOSTNAME__ + "/pages/kasir/pasien/payment_detail.php",
 				type: "POST",
 				success: function(response) {
 					$("#form-payment-detail").modal("show");
 					$("#payment-detail-loader").html(response);
 					$.ajax({
+                        async: false,
 						url:__HOSTAPI__ + "/Invoice/payment/" + uid,
 						beforeSend: function(request) {
 							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 						},
 						type:"GET",
 						success:function(response_data) {
+
 							var pasienInfo = response_data.response_package.response_data[0].pasien;
+
+							selectedUIDPasien = pasienInfo.uid;
+
 							if(
                                 pasienInfo.panggilan_name !== undefined &&
                                 pasienInfo.panggilan_name !== null
@@ -573,19 +580,6 @@
 
 
 
-        /*Sync.onmessage = function(evt) {
-            var signalData = JSON.parse(evt.data);
-            var command = signalData.protocols;
-            var type = signalData.type;
-            var sender = signalData.sender;
-            var receiver = signalData.receiver;
-            var time = signalData.time;
-            var parameter = signalData.parameter;
-
-            if(command !== undefined && command !== null && command !== "") {
-                protocolLib[command](command, type, parameter, sender, receiver, time);
-            }
-        }*/
 
 
 
@@ -601,6 +595,22 @@
                 tableAntrianBayarRJ.ajax.reload();
                 tableAntrianBayarRI.ajax.reload();
                 tableAntrianBayarIGD.ajax.reload();
+            },
+            asesmen_berlangsung: function(protocols, type, parameter, sender, receiver, time) {
+                if(
+                    selectedUIDPasien === parameter.pasien &&
+                    ($("#form-payment-detail").data('bs.modal') || {})._isShown
+                ) {
+                    $("#form-payment-detail").modal("hide");
+                    Swal.fire(
+                        "System",
+                        "Asesmen sedang berlangsung. Retur biaya tidak dapat dilakukan kembali",
+                        "warning"
+                    ).then((result) => {
+                        //
+                    });
+                    //$("input.returItem[value=\"" + parameter.tindakan + "\]").parent().html("<i class=\"fa fa-exclamation-circle text-warning\"></i> Asesmen Berlangsung");
+                }
             }
         };
 
@@ -686,7 +696,7 @@
                             };
 
 							var item_grouper = {};
-							console.log(invoice_detail_item);
+							//console.log(invoice_detail_item);
 							for(var invKey in invoice_detail_item) {
 							    if(invoice_detail_item[invKey].item_type === "master_tindakan")
                                 {
@@ -1021,7 +1031,9 @@
                                     var notifier_target = response.response_package.response_notifier;
                                     for(var notifKey in notifier_target)
                                     {
-                                        push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info");
+                                        push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info").then(function() {
+                                            console.log("pushed!");
+                                        });
                                     }
 
                                 });
@@ -1115,48 +1127,58 @@
 		});*/
 
 		$("#btnProsesRetur").click(function() {
-			var conf = confirm("Retur Transaksi?");
-			
-			if(conf) {
-				var itemList = [];
-				$(".returItem").each(function(e){
-					var item = $(this).val();
-					itemList.push(item);
-				});
+            Swal.fire({
+                title: "Retur Transaksi?",
+                showDenyButton: true,
+                type: "warning",
+                confirmButtonText: "Ya",
+                confirmButtonColor: "#1297fb",
+                denyButtonText: "Tidak",
+                denyButtonColor: "#ff2a2a"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var itemList = [];
+                    $(".returItem").each(function(e){
+                        var item = $(this).val();
+                        itemList.push(item);
+                    });
 
-				if(itemList.length > 0) {
-					$.ajax({
-						url: __HOSTAPI__ + "/Invoice",
-						type: "POST",
-						beforeSend: function(request) {
-							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-						},
-						data:{
-							request: "retur_biaya",
-							item:itemList,
-							invoice:selectedUID,
-							payment:selectedUIDKwitansi
-						},
-						success: function(response) {
-							console.clear();
-							console.log(response);
-							var resultCheck = 0;
-							
-							for(var returnKey in response.response_package) {
-								resultCheck += response.response_package[returnKey].response_result
-							}
+                    if(itemList.length > 0) {
+                        $.ajax({
+                            url: __HOSTAPI__ + "/Invoice",
+                            type: "POST",
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            data:{
+                                request: "retur_biaya",
+                                item:itemList,
+                                invoice:selectedUID,
+                                payment:selectedUIDKwitansi
+                            },
+                            success: function(response) {
+                                var resultCheck = 0;
 
-							if(resultCheck == $(".returItem:checked").length) {
-								$("#form-payment-detail").modal("hide");
-							}
-							$("#form-payment-detail").modal("hide");
-							tableKwitansi.ajax.reload();
-						}
-					});
-				} else {
-					alert("Pilih item yang akan diretur");
-				}
-			}
+                                for(var returnKey in response.response_package) {
+                                    resultCheck += response.response_package[returnKey].response_result
+                                }
+
+                                if(resultCheck == $(".returItem:checked").length) {
+                                    $("#form-payment-detail").modal("hide");
+                                }
+                                $("#form-payment-detail").modal("hide");
+                                tableKwitansi.ajax.reload();
+
+                                push_socket(__ME__, "retur_barhasil", "*", "Tidak jadi berobat", "info").then(function() {
+                                    //
+                                });
+                            }
+                        });
+                    } else {
+                        alert("Pilih item yang akan diretur");
+                    }
+                }
+            });
 			return false;
 		});
 	});

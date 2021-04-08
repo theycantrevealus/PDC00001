@@ -86,30 +86,30 @@
 				type: "POST",
 				success: function(response){
 					if(response.response_package.response_result > 0) {
-						push_socket(__ME__, "anjungan_kunjungan_baru", "*", "Antrian Baru dengan nomor " + response.response_package.response_antrian, "warning");
-						
-						$.ajax({
-							async: false,
-							url: __HOSTNAME__ + "/print/antrian_anjungan.php",
-							data: {
-								antrian: response.response_package.response_antrian
-							},
-							beforeSend: function(request) {
-								request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-							},
-							type: "POST",
-							success: function(html){
-								var win = window.open(document.URL, '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');
-								win.document.write(html);
-								win.document.close();
-								win.focus();
-								win.print();
-								win.close();
-							},
-							error: function(response) {
-								console.log(response);
-							}
-						});
+						push_socket(__ME__, "anjungan_kunjungan_baru", "*", "Antrian Baru dengan nomor " + response.response_package.response_antrian, "warning").then(function () {
+                            $.ajax({
+                                async: false,
+                                url: __HOSTNAME__ + "/print/antrian_anjungan.php",
+                                data: {
+                                    antrian: response.response_package.response_antrian
+                                },
+                                beforeSend: function(request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                type: "POST",
+                                success: function(html){
+                                    var win = window.open(document.URL, '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');
+                                    win.document.write(html);
+                                    win.document.close();
+                                    win.focus();
+                                    win.print();
+                                    win.close();
+                                },
+                                error: function(response) {
+                                    console.log(response);
+                                }
+                            });
+                        });
 					}
 				},
 				error: function(response) {

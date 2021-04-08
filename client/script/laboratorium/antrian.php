@@ -142,13 +142,14 @@
                     }
 
                     if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0) {
-                        push_socket(__ME__, ((mode_selesai == "Y") ? "antrian_laboratorium_selesai" : "antrian_laboratorium_simpan"), "*", "Pemeriksaan Laboratorium Selesai", "warning");
-                        Swal.fire(
-                            'Pemeriksaan Berhasil Disimpan!',
-                            response.response_package.response_message,
-                            'success'
-                        ).then((result) => {
-                            location.href = __HOSTNAME__ + "/laboratorium";
+                        push_socket(__ME__, ((mode_selesai == "Y") ? "antrian_laboratorium_selesai" : "antrian_laboratorium_simpan"), "*", "Pemeriksaan Laboratorium Selesai", "warning").then(function() {
+                            Swal.fire(
+                                'Pemeriksaan Berhasil Disimpan!',
+                                response.response_package.response_message,
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + "/laboratorium";
+                            });
                         });
                     } else {
                         notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");

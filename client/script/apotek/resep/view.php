@@ -1402,8 +1402,9 @@
                                             "Silahkan pasien menuju kasir",
                                             "success"
                                         ).then((result) => {
-                                            push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya obat baru", "warning");
-                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                            push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya obat baru", "warning").then(function() {
+                                                location.href = __HOSTNAME__ + "/apotek/resep/";
+                                            });
                                         });
                                     } else {
                                         Swal.fire(

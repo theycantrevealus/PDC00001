@@ -114,7 +114,7 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									"<a href=\"" + __HOSTNAME__ + "/rawat_jalan/dokter/antrian/" + row['uid'] + "\" class=\"btn btn-success\">" +
+									"<a pasien=\"" + row.pasien_detail.uid + "\" tindakan=\"" + row.poli_detail.tindakan_konsultasi + "\" href=\"" + __HOSTNAME__ + "/rawat_jalan/dokter/antrian/" + row['uid'] + "\" class=\"btn btn-success btnDetailAntrian\">" +
 										"<i class=\"fa fa-sign-out-alt\"></i> Proses Perobatan" +
 									"</a>" +
 								"</div>";
@@ -122,6 +122,27 @@
 				}
 			]
 		});
+
+		$("body").on("click", ".btnDetailAntrian", function() {
+		    var targetURL = $(this).attr("href");
+		    var targetAntrian = targetURL.split("/");
+		    targetAntrian = targetAntrian[targetAntrian.length - 1];
+		    var tindakanTarget = $(this).attr("tindakan");
+            var pasienTarget = $(this).attr("pasien");
+
+		    $(this).removeClass("btn-success").addClass("btn-warning").html("<i class=\"fa fa-hourglass\"></i> Processing...");
+		    //Prepare Asesmen
+            push_socket(__ME__, "asesmen_berlangsung", "*", {
+                "message": "Asesmen sudah berlangsung",
+                "antrian": targetAntrian,
+                "tindakan": tindakanTarget,
+                "pasien": pasienTarget
+            }, "info").then(function() {
+                location.href = targetURL;
+            });
+
+		    return false;
+        });
 
         /*Sync.onmessage = function(evt) {
             var signalData = JSON.parse(evt.data);
@@ -143,6 +164,9 @@
             antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
                 tableAntrian.ajax.reload();
+            },
+            retur_barhasil: function(protocols, type, parameter, sender, receiver, time) {
+                tableAntrian.ajax.reload();
             }
         };
 
@@ -154,7 +178,7 @@
 			"bInfo" : false
 		});
 
-		$("#txt_cari").on('keyup', function(){
+		$("#txt_cari").on('keyup', function() {
 			params = $("#txt_cari").val();
 
 			$("#table-list-pencarian tbody").html("");

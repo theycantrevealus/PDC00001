@@ -746,6 +746,10 @@
                         console.log(response);
                     }
                 });
+
+
+                //Auto Simpan Pertama (Agar tidak bisa retur lagi di kasir)
+                simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit);
             },
             error: function(response) {
                 console.log(response);
@@ -3344,25 +3348,33 @@
                         resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
                     }).then(function(result) {
                         if(result.response_package.response_result > 0) {
+                            console.clear();
+                            console.log(result.response_package);
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                             if(result.response_package.resep_response !== undefined && result.response_package.resep_response !== null) {
                                 if(result.response_package.resep_response.resep.length > 0 || result.response_package.resep_response.racikan.length) {
-                                    push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                                    push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
+                                        location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                    });
                                 }
                             }
 
                             if(result.response_package.radiologi !== undefined && result.response_package.radiologi !== null) {
                                 if(result.response_package.radiologi.response_result > 0 && result.response_package.radiologi.response_data[0]['status'] === "V") {
-                                    push_socket(__ME__, "permintaan_radio_baru", "*", "Permintaan radiologi dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                                    push_socket(__ME__, "permintaan_radio_baru", "*", "Permintaan radiologi dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
+                                        location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                    });
                                 }
                             }
 
                             if(result.response_package.laboratorium !== undefined && result.response_package.laboratorium !== null) {
                                 if(result.response_package.laboratorium.response_result > 0 && result.response_package.laboratorium.response_data[0]['status'] === "V") {
-                                    push_socket(__ME__, "permintaan_laboratorium_baru", "*", "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                                    push_socket(__ME__, "permintaan_laboratorium_baru", "*", "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
+                                        location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                    });
                                 }
                             }
-                            location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+
                         } else {
                             notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                         }
@@ -6568,7 +6580,7 @@
                                 <td class="wrap_content">
                                     <i class="fa fa-stop emas"></i>
                                 </td>
-                                <td>Silika/GIC</td>
+                                <td>Tambalan Sewarna Emas</td>
                             </tr>
                             <tr id="tambal_sewarna" class="need_selection" group-selection="mordor4">
                                 <td class="wrap_content">
