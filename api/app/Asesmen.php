@@ -2755,8 +2755,8 @@ class Asesmen extends Utility {
 
 	private function get_antrian_asesmen_rawat($parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
+		$dataParsed = array();
 		$listPoli = [];
 		$getPoli = self::$query
 			->select('master_poli_perawat', 
@@ -2783,8 +2783,8 @@ class Asesmen extends Utility {
 
 		$autonum = 1;
 		foreach ($antrian as $key => $value) {
-			$Poli = new Poli(self::$pdo);
-			$PoliDetail = $Poli::get_poli_detail($value['uid_poli'])['response_data'][0];
+            $Poli = new Poli(self::$pdo);
+			$PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
 
 			$cek_asesment = self::cek_asesmen_rawat_detail($PoliDetail['poli_asesmen'], $value['uid']);
 			$antrian[$key]['status_asesmen'] = false;
@@ -2808,8 +2808,26 @@ class Asesmen extends Utility {
 		foreach ($parameter as $key => $value) {
 			$antrianData = $antrian->get_antrian_by_poli($value['poli'])['response_data'];
 
-			foreach ($antrianData as $key => $value) {				
-				array_push($listPasien, $value);
+			foreach ($antrianData as $key => $value) {
+                if ($value['uid_penjamin'] === __UIDPENJAMINBPJS__) {
+                    $SEP = self::$query->select('bpjs_sep', array(
+                        'uid',
+                        'sep_no'
+                    ))
+                        ->where(array(
+                            'bpjs_sep.antrian' => '= ?',
+                            'AND',
+                            'bpjs_sep.deleted_at' => 'IS NULL'
+                        ), array(
+                            $value['uid']
+                        ))
+                        ->execute();
+                    if (count($SEP['response_data']) > 0) {
+                        array_push($listPasien, $value);
+                    }
+                } else {
+                    array_push($listPasien, $value);
+                }
 			}
 		}
 

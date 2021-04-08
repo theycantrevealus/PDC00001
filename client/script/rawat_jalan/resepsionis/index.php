@@ -989,10 +989,12 @@
                                     "SEP telah dibuat",
                                     "success"
                                 ).then((result) => {
-                                    tableAntrian.ajax.reload();
-                                    tableAntrianIGD.ajax.reload();
-                                    tableAntrianRI.ajax.reload();
-                                    $("#modal-sep-new").modal("hide");
+                                    push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning").then(function () {
+                                        tableAntrian.ajax.reload();
+                                        tableAntrianIGD.ajax.reload();
+                                        tableAntrianRI.ajax.reload();
+                                        $("#modal-sep-new").modal("hide");
+                                    });
                                 });
                             } else {
                                 Swal.fire(
