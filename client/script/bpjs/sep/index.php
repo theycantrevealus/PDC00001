@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
     $(function () {
         $("#range_sep").change(function() {
@@ -49,8 +50,7 @@
                 },
                 dataSrc: function (response) {
                     var data = response.response_package.response_data;
-                    console.clear();
-                    console.log(response);
+
                     if (data === undefined || data === null) {
                         return [];
                     } else {
@@ -143,6 +143,10 @@
         $("body").on("click", ".btn-cetak-sep", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
+
+            var SEPButton = $(this);
+            SEPButton.html("Memuat SEP...").removeClass("btn-success").addClass("btn-warning");
+
             $.ajax({
                 async: false,
                 url: __HOSTAPI__ + "/BPJS/get_sep_detail/" + id,
@@ -151,14 +155,16 @@
                 },
                 type: "GET",
                 success: function (response) {
+
                     var dataSEP = response.response_package.response_data[0];
                     $("#sep_nomor").html(dataSEP.sep_no);
                     $("#sep_tanggal").html(dataSEP.sep_tanggal);
                     $("#sep_spesialis").html(dataSEP.poli_tujuan_detail.kode + " - " + dataSEP.poli_tujuan_detail.nama);
-                    $("#sep_faskes_asal").html(dataSEP.asal_rujukan_ppk + " - " + dataSEP.asal_rujukan_nama + "<b class=\"text-info\">[No : " + dataSEP.asal_rujukan_nomor + "]");
-                    $("#sep_diagnosa_awal").html(dataSEP.diagnosa_kode + " - " + dataSEP.diagnosa_nama);
+                    $("#sep_faskes_asal").html(dataSEP.asal_rujukan_ppk + " - " + ((dataSEP.asal_rujukan_nama !== undefined && dataSEP.asal_rujukan_nama !== null && dataSEP.asal_rujukan_nama !== "null") ? dataSEP.asal_rujukan_nama : "[TIDAK DITEMUKAN]") + "<b class=\"text-info\">[No : " + dataSEP.asal_rujukan_nomor + "]");
+                    $("#sep_diagnosa_awal").html(dataSEP.diagnosa_nama);
                     $("#sep_catatan").html(dataSEP.catatan);
-                    $("#sep_kelas_rawat").html(dataSEP.kelas_rawat);
+                    $("#sep_kelas_rawat").html(dataSEP.kelas_rawat.nama);
+                    $("#sep_jenis_rawat").html((parseInt(dataSEP.pelayanan_jenis) === 1) ? "Rawat Inap" : "Rawat Jalan");
 
 
                     var penjaminList = dataSEP.pasien.history_penjamin;
@@ -170,10 +176,22 @@
                             $("#sep_tanggal_lahir").html(metaData.response.peserta.tglLahir);
                             $("#sep_nomor_telepon").html(metaData.response.peserta.mr.noTelepon);
                             $("#sep_peserta").html(metaData.response.peserta.jenisPeserta.keterangan);
-                            $("#sep_cob").html(metaData.response.peserta.cob.noAsuransi + " - " + metaData.response.peserta.cob.nmAsuransi);
+                            if(
+                                metaData.response.peserta.cob.noAsuransi !== undefined &&
+                                metaData.response.peserta.cob.nmAsuransi !== undefined &&
+                                metaData.response.peserta.cob.noAsuransi !== "" &&
+                                metaData.response.peserta.cob.nmAsuransi !== "" &&
+                                metaData.response.peserta.cob.noAsuransi !== null &&
+                                metaData.response.peserta.cob.nmAsuransi !== null
+                            ) {
+                                $("#sep_cob").html(metaData.response.peserta.cob.noAsuransi + " - " + metaData.response.peserta.cob.nmAsuransi);
+                            } else {
+                                $("#sep_cob").html("-");
+                            }
                         }
                     }
                     $("#modal-sep-cetak").modal("show");
+                    SEPButton.html("<i class=\"fa fa-print\"></i> Cetak").removeClass("btn-warning").addClass("btn-success");
                 },
                 error: function (response) {
                     //
@@ -182,12 +200,42 @@
         });
 
         $("#btnCetakSEP").click(function() {
-            //
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/bpjs_sep.php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    html_data_kiri: $("#data_sep_cetak_kiri").html(),
+                    html_data_kanan: $("#data_sep_cetak_kanan").html(),
+                    html_data_bawah: $("#data_sep_cetak_bawah").html()
+                },
+                success: function (response) {
+                    //$("#dokumen-viewer").html(response);
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        pageTitle: "Cetak SEP",
+                        afterPrint: function() {
+                            //
+                        }
+                    });
+                }
+            });
         });
 
         $("body").on("click", ".btn-edit-sep", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
+
+            var SEPButton = $(this);
+            SEPButton.html("Memuat SEP...").removeClass("btn-info").addClass("btn-warning");
+
             $.ajax({
                 async: false,
                 url: __HOSTAPI__ + "/BPJS/get_sep_detail/" + id,
@@ -196,49 +244,69 @@
                 },
                 type: "GET",
                 success: function (response) {
-                    /*
-                    no_kartu: $("#txt_bpjs_nomor").val(),
-                    ppk_pelayanan: $("#txt_bpjs_faskes").val(),
-                    kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
-                    no_mr: $("#txt_bpjs_rm").val().replace(new RegExp(/-/g),""),
-                    asal_rujukan: $("#txt_bpjs_jenis_asal_rujukan").val(),
-                    ppk_rujukan: $("#txt_bpjs_asal_rujukan").val(),
-                    tgl_rujukan: parse_tanggal_rujukan,
-                    no_rujukan: $("#txt_bpjs_nomor_rujukan").val(),
-                    catatan: $("#txt_bpjs_catatan").val(),
-                    diagnosa_awal: $("#txt_bpjs_diagnosa_awal").val(),
-                    diagnosa_kode: $("#txt_bpjs_diagnosa_awal option:selected").text(),
-                    poli: $("#txt_bpjs_poli_tujuan").val(),
-                    eksekutif: $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val(),
-                    cob: $("input[type=\"radio\"][name=\"txt_bpjs_cob\"]:checked").val(),
-                    katarak: $("input[type=\"radio\"][name=\"txt_bpjs_katarak\"]:checked").val(),
+                    var data = {};
+                    if(
+                        response.response_package.response_data !== undefined &&
+                        response.response_package.response_data.length > 0
+                    ) {
+                        data = response.response_package.response_data[0];
 
-                    laka_lantas: $("input[type=\"radio\"][name=\"txt_bpjs_laka\"]:checked").val(),
-                    laka_lantas_penjamin: selectedLakaPenjamin.join(","),
-                    laka_lantas_tanggal_kejadian: parse_tanggal_laka,
-                    laka_lantas_keterangan: $("#txt_bpjs_laka_keterangan").val(),
-                    laka_lantas_suplesi: $("input[type=\"radio\"][name=\"txt_bpjs_laka_suplesi\"]:checked").val(),
-                    laka_lantas_suplesi_nomor: $("#txt_bpjs_laka_suplesi_nomor").val(),
-                    laka_lantas_suplesi_provinsi: $("#txt_bpjs_laka_suplesi_provinsi").val(),
-                    laka_lantas_suplesi_kabupaten: $("#txt_bpjs_laka_suplesi_kabupaten").val(),
-                    laka_lantas_suplesi_kecamatan: $("#txt_bpjs_laka_suplesi_kecamatan").val(),
+                        console.clear();
+                        console.log(data);
+                        SEPButton.html("<i class=\"fa fa-pencil-alt\"></i> Edit").removeClass("btn-warning").addClass("btn-info");
 
-                    skdp: $("#txt_bpjs_skdp").val(),
-                    dpjp: $("#txt_bpjs_dpjp").val(),
-                    telepon: $("#txt_bpjs_telepon").val()
-                    * */
-
-                    var dataSEP = response.response_package.response_data[0];
-
-                    var penjaminList = dataSEP.pasien.history_penjamin;
-                    for(var pKey in penjaminList) {
-                        if(penjaminList[pKey].penjamin === __UIDPENJAMINBPJS__) {
-                            //var metaData = JSON.parse(penjaminList[pKey].penjamin_detail.rest_meta);
+                        //$("#txt_bpjs_nomor").val(data.sep_no);
+                        //$("#txt_bpjs_faskes").val();
+                        $("#txt_bpjs_rm").val().replace(new RegExp(/-/g), data.pasien.no_rm);
 
 
+                        /*
+                        no_kartu: ,
+                        ppk_pelayanan: ,
+                        kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
+                        no_mr: ,
+                        asal_rujukan: $("#txt_bpjs_jenis_asal_rujukan").val(),
+                        ppk_rujukan: $("#txt_bpjs_asal_rujukan").val(),
+                        tgl_rujukan: parse_tanggal_rujukan,
+                        no_rujukan: $("#txt_bpjs_nomor_rujukan").val(),
+                        catatan: $("#txt_bpjs_catatan").val(),
+                        diagnosa_awal: $("#txt_bpjs_diagnosa_awal").val(),
+                        diagnosa_kode: $("#txt_bpjs_diagnosa_awal option:selected").text(),
+                        poli: $("#txt_bpjs_poli_tujuan").val(),
+                        eksekutif: $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val(),
+                        cob: $("input[type=\"radio\"][name=\"txt_bpjs_cob\"]:checked").val(),
+                        katarak: $("input[type=\"radio\"][name=\"txt_bpjs_katarak\"]:checked").val(),
+
+                        laka_lantas: $("input[type=\"radio\"][name=\"txt_bpjs_laka\"]:checked").val(),
+                        laka_lantas_penjamin: selectedLakaPenjamin.join(","),
+                        laka_lantas_tanggal_kejadian: parse_tanggal_laka,
+                        laka_lantas_keterangan: $("#txt_bpjs_laka_keterangan").val(),
+                        laka_lantas_suplesi: $("input[type=\"radio\"][name=\"txt_bpjs_laka_suplesi\"]:checked").val(),
+                        laka_lantas_suplesi_nomor: $("#txt_bpjs_laka_suplesi_nomor").val(),
+                        laka_lantas_suplesi_provinsi: $("#txt_bpjs_laka_suplesi_provinsi").val(),
+                        laka_lantas_suplesi_kabupaten: $("#txt_bpjs_laka_suplesi_kabupaten").val(),
+                        laka_lantas_suplesi_kecamatan: $("#txt_bpjs_laka_suplesi_kecamatan").val(),
+
+                        skdp: $("#txt_bpjs_skdp").val(),
+                        dpjp: $("#txt_bpjs_dpjp").val(),
+                        telepon: $("#txt_bpjs_telepon").val()
+                        * */
+
+                        var dataSEP = response.response_package.response_data[0];
+
+                        var penjaminList = dataSEP.pasien.history_penjamin;
+                        for(var pKey in penjaminList) {
+                            if(penjaminList[pKey].penjamin === __UIDPENJAMINBPJS__) {
+                                //var metaData = JSON.parse(penjaminList[pKey].penjamin_detail.rest_meta);
+
+
+                            }
                         }
+                        $("#modal-sep").modal("show");
+
+                    } else {
+
                     }
-                    $("#modal-sep").modal("show");
                 },
                 error: function (response) {
                     //
@@ -1037,7 +1105,7 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-6" id="data_sep_cetak_kiri">
                         <table class="table form-mode">
                             <tr>
                                 <td>No. SEP</td>
@@ -1091,7 +1159,7 @@
                             </tr>
                         </table>
                     </div>
-                    <div class="col-6">
+                    <div class="col-6" id="data_sep_cetak_kanan">
                         <table class="table form-mode">
                             <tr>
                                 <td>Peserta</td>
@@ -1115,12 +1183,18 @@
                             </tr>
                         </table>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12" id="data_sep_cetak_bawah">
                         <small>
-                            <b>
-                                *Saya menyetujui BPJS Kesehatan menggunakan informasi medis pasien jika diperlukan<br />
-                                *SEP bukan sebagai bukti penjaminan peserta
-                            </b>
+                            <i>
+                                <ul type="*" style="margin: 0; padding: 10px;">
+                                    <li>
+                                        Saya menyetujui BPJS Kesehatan menggunakan informasi medis pasien jika diperlukan
+                                    </li>
+                                    <li>
+                                        SEP bukan sebagai bukti penjaminan peserta
+                                    </li>
+                                </ul>
+                            </i>
                         </small>
                     </div>
                 </div>

@@ -1258,6 +1258,23 @@ class BPJS extends Utility {
 
             $AntrianDetail = $Antrian->get_antrian_detail('antrian', $value['antrian']);
             $data['response_data'][$key]['antrian_detail'] = $AntrianDetail['response_data'][0];
+
+            //Kelas Rawat Detail
+            $kelas = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/kelasrawat');
+            if(intval($kelas['content']['metaData']['code']) === 200) {
+                foreach ($kelas['content']['response']['list'] as $KKey => $KValue) {
+                    if($KValue['kode'] === $value['kelas_rawat']) {
+                        $data['response_data'][$key]['kelas_rawat'] = $KValue;
+                        continue;
+                    }
+                }
+            } else {
+                $data['response_data'][$key]['kelas_rawat'] = array(
+                    'kode' => 0,
+                    'nama' => 'Tidak diketahui'
+                );
+            }
+            $data['response_data'][$key]['kelas_rawat_info'] = $kelas['content']['metaData'];
         }
 
         return $data;
