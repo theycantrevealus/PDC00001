@@ -483,6 +483,7 @@ class BPJS extends Utility {
                 if(intval($sync_content['metaData']['code']) === 200 && trim($sync_content['metaData']['message']) === 'Sukses') {
                     $data_sync = $sync_content['response']['sep'];
                     foreach ($data_sync as $dKey => $dValue) {
+
                         $SEPuid = parent::gen_uuid();
                         //Save History
 
@@ -509,11 +510,58 @@ class BPJS extends Utility {
                             }
                         }
 
+                        //Find SEP untuk hari ini dengan poli sesuai
+                        //Sync Poli BPJS
+                        $Poli = self::$query->select('master_poli', array(
+                            'uid'
+                        ))
+                            ->where(array(
+                                'master_poli.kode_bpjs' => '= ?',
+                                'AND',
+                                'master_poli.deleted_at' => 'IS NULL'
+                            ), array(
+                                $dValue['poli']
+                            ))
+                            ->execute();
+
+                        $Antrian = self::$query->select('antrian', array(
+                            'uid'
+                        ))
+                            ->where(array(
+                                'antrian.departemen' => '= ?',
+                                'AND',
+                                'antrian.pasien' => '= ?',
+                                'AND',
+                                'antrian.penjamin' => '= ?',
+                                'AND',
+                                'antrian.created_at::date' => '= date \'' . $dValue['tglSep'] . '\'',
+                                'AND',
+                                'antrian.deleted_at' => 'IS NULL',
+                            ), array(
+                                $Poli['response_data'][0]['uid'],
+                                $targetPasien,
+                                __UIDPENJAMINBPJS__
+                            ))
+                            ->execute();
+
+                        /*Cek Tanggal kunjungan beda dengan pembuatan SEP
+                         * if(count($Antrian['response_data']) > 0) {
+                            $parameter['dataObj'] = array(
+                                'departemen' => $parameter['poli'],
+                                'pasien' => $parameter['pasien'],
+                                'penjamin' => $parameter['penjamin'],
+                                'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
+                                'dokter' => $KunjunganData['response_data'][0]['dokter']
+                            );
+                            $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                        }*/
+
                         //Check duplicate
                         $check = self::get_sep_detail_dup($dValue['noSep']);
                         if(count($check['response_data']) > 0) {
                             $sep_log = self::$query->update('bpjs_sep', array(
                                 'uid' => $SEPuid,
+                                'antrian' => $Antrian['response_data'][0]['uid'],
                                 'pasien' => $targetPasien,
                                 'pelayanan_jenis' => $dValue['jnsPelayanan'],
                                 'kelas_rawat' => $dValue['kelasRawat'],
@@ -524,8 +572,9 @@ class BPJS extends Utility {
                                 'sep_no' => $dValue['noSep'],
                                 'sep_tanggal' => $dValue['tglSep'],
                                 'sep_selesai' => $dValue['tglPlgSep'],
-                                'created_at' => parent::format_date(),
-                                'updated_at' => parent::format_date()
+                                'deleted_at' => NULL
+                                /*'created_at' => parent::format_date(),
+                                'updated_at' => parent::format_date()*/
                             ))
                                 ->where(array(
                                     'bpjs_sep.deleted_at' => 'IS NULL',
@@ -539,6 +588,7 @@ class BPJS extends Utility {
                             if(isset($dValue['tglPlgSep'])) {
                                 $sep_log = self::$query->insert('bpjs_sep', array(
                                     'uid' => $SEPuid,
+                                    'antrian' => $Antrian['response_data'][0]['uid'],
                                     'pasien' => $targetPasien,
                                     'pelayanan_jenis' => $dValue['jnsPelayanan'],
                                     'kelas_rawat' => $dValue['kelasRawat'],
@@ -556,6 +606,7 @@ class BPJS extends Utility {
                             } else {
                                 $sep_log = self::$query->insert('bpjs_sep', array(
                                     'uid' => $SEPuid,
+                                    'antrian' => $Antrian['response_data'][0]['uid'],
                                     'pasien' => $targetPasien,
                                     'pelayanan_jenis' => $dValue['jnsPelayanan'],
                                     'kelas_rawat' => $dValue['kelasRawat'],
@@ -571,6 +622,9 @@ class BPJS extends Utility {
                                     ->execute();
                             }
                         }
+
+
+
                         array_push($data_sync_record, $sep_log);
                     }
                 } else {
@@ -1105,10 +1159,11 @@ class BPJS extends Utility {
                 'no_telp' => $parameter['telepon'],
                 'pegawai' => $UserData['data']->uid,
                 'sep_no' => $proceed['content']['response']['sep']['noSep'],
-                'sep_tanggal' => $proceed['content']['response']['sep']['tglSep'],
-                'sep_dinsos' => $proceed['content']['response']['sep']['informasi']['Dinsos'],
-                'sep_prolanis' => $proceed['content']['response']['sep']['informasi']['prolanisPRB'],
-                'sep_sktm' => $proceed['content']['response']['sep']['informasi']['noSKTM'],
+                'sep_tanggal' => isset($proceed['content']['response']['sep']['tglSep']) ? date('Y-m-d', strtotime($proceed['content']['response']['sep']['tglSep'])) : date('Y-m-d'),
+                'sep_dinsos' => isset($proceed['content']['response']['sep']['informasi']['Dinsos']) ? $proceed['content']['response']['sep']['informasi']['Dinsos'] : '',
+                'sep_prolanis' => isset($proceed['content']['response']['sep']['informasi']['prolanisPRB']) ? $proceed['content']['response']['sep']['informasi']['prolanisPRB'] : '',
+                'pasien' => $parameter['pasien'],
+                'sep_sktm' => isset($proceed['content']['response']['sep']['informasi']['noSKTM']) ? $proceed['content']['response']['sep']['informasi']['noSKTM'] : '',
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             ))

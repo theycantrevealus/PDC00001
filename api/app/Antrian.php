@@ -940,7 +940,7 @@ class Antrian extends Utility
             dokter,
         */
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         /*$AntrianID = $parameter['dataObj']['currentAntrianID'];*/
         unset($parameter['dataObj']['currentAntrianID']);
@@ -1567,7 +1567,8 @@ class Antrian extends Utility
                         'departemen as uid_poli',
                         'penjamin as uid_penjamin',
                         'waktu_masuk',
-                        'waktu_keluar'
+                        'waktu_keluar',
+                        'created_at'
                     )
                 )
                 ->join('pasien', array(

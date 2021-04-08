@@ -5,7 +5,9 @@
 		var MODE = false;
 		var currentAntrianType = "DEFAULT";
 		var currentAntrianUID = "";
+		var currentAntrianPasien = "";
         $(".sep").select2();
+
         $("#txt_bpjs_tanggal_rujukan").datepicker({
             dateFormat: "DD, dd MM yy",
             autoclose: true,
@@ -190,20 +192,29 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
                         if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
-							if(row['sep'] != "none") {
-								//return row["penjamin"] + " <h6 class=\"nomor_sep text-success\"><i class=\"fa fa-check\"></i> " + row.sep + "</h6>";
-                                return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
-							} else {
-							    if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
-                                    /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
-                                        "<button class=\"btn btn-warning btn-sm pull-right btn-ajukan-sep\"><i class=\"fa fa-exclamation-circle\"></i> Ajukan SEP</button>";*/
-                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                            if(Date(row.created_at) < Date()) {
+                                return "Antrian sudah lewat";
+                            } else {
+                                if(row['sep'] !== "none") {
+                                    if(row.sep.response_data !== undefined) {
+                                        return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                    } else {
+                                        return row["penjamin"] + " <h6 class=\"nomor_sep text-success\"><i class=\"fa fa-check\"></i> " + row.sep + "</h6>";
+                                    }
+
+                                    //return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
                                 } else {
-                                    /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
-                                        "<button class=\"btn btn-warning btn-sm pull-right btn-ajukan-sep\"><i class=\"fa fa-exclamation-circle\"></i> Ajukan SEP</button>";*/
-                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                    if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
+                                        /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
+                                            "<button class=\"btn btn-warning btn-sm pull-right btn-ajukan-sep\"><i class=\"fa fa-exclamation-circle\"></i> Ajukan SEP</button>";*/
+                                        return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                    } else {
+                                        /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
+                                            "<button class=\"btn btn-warning btn-sm pull-right btn-ajukan-sep\"><i class=\"fa fa-exclamation-circle\"></i> Ajukan SEP</button>";*/
+                                        return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                    }
                                 }
-							}
+                            }
 						} else {
 							return row["penjamin"];
 						}
@@ -376,8 +387,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.clear();
-                    console.log(response);
                     return response.response_package.response_data;
                 }
             },
@@ -472,7 +481,6 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function(response){
-                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 tableAntrian.ajax.reload();
                                 tableAntrianRI.ajax.reload();
@@ -515,6 +523,7 @@
             var antrian = $(this).attr("antrian");
             currentAntrianUID = antrian;
 
+
             $.ajax({
                 async: false,
                 url: __HOSTAPI__ + "/Pasien/pasien-detail/" + id,
@@ -534,6 +543,7 @@
                     }
 
                     if(bpjsMeta !== undefined) {
+                        currentAntrianPasien = data.uid;
                         $("#txt_bpjs_nama").val(data.nama);
                         $("#txt_bpjs_nik").val(data.nik);
                         $("#txt_bpjs_telepon").val(data.no_telp);
@@ -868,6 +878,7 @@
                         dataSetSEP = {
                             request: "sep_baru",
                             antrian: currentAntrianUID,
+                            pasien: currentAntrianPasien,
                             no_kartu: $("#txt_bpjs_nomor").val(),
                             ppk_pelayanan: $("#txt_bpjs_faskes").val(),
                             kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
@@ -902,6 +913,7 @@
                         dataSetSEP = {
                             request: "sep_baru",
                             antrian: currentAntrianUID,
+                            pasien: currentAntrianPasien,
                             no_kartu: $("#txt_bpjs_nomor").val(),
                             ppk_pelayanan: $("#txt_bpjs_faskes").val(),
                             kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
@@ -943,7 +955,6 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function(response){
-                            console.clear();
                             console.log(response);
                             if(parseInt(response.response_package.bpjs.content.metaData.code) === 200) {
                                 Swal.fire(
@@ -1558,7 +1569,6 @@
                     dataPasien.pc_customer = __PC_CUSTOMER__;
                     dataPasien.pc_dokter = $("#dokter_" + uid).html();
                     dataPasien.waktu_masuk = $("#waktu_masuk_" + uid).html();
-                    console.log(dataPasien);
 
                     $.ajax({
                         async: false,

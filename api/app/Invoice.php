@@ -507,7 +507,7 @@ class Invoice extends Utility
     private function proses_bayar($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $KunjunganUID = $parameter['kunjungan'];
 
         $newPaymentUID = parent::gen_uuid();
@@ -963,7 +963,7 @@ class Invoice extends Utility
                             'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
                             'dokter' => $KunjunganData['response_data'][0]['dokter']
                         );
-                        $AntrianProses = $Antrian::tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                        $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
                     }
                 }
             }

@@ -45,17 +45,19 @@
                                 </div>
                             </div>
                         </div>
-                        <table class="table table-bordered table-striped largeDataType" id="table-sep">
-                            <thead class="thead-dark">
-                            <tr>
-                                <th class="wrap_content">No</th>
-                                <th style="width: 10%;">SEP</th>
-                                <th>Pasien</th>
-                                <th class="wrap_content">Aksi</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                        <div class="card card-body">
+                            <table class="table table-bordered table-striped largeDataType" id="table-sep">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th class="wrap_content">No</th>
+                                    <th style="width: 10%;">SEP</th>
+                                    <th>Pasien</th>
+                                    <th class="wrap_content">Aksi</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

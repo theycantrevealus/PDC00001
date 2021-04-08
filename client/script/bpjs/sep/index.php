@@ -12,7 +12,9 @@
         $("#jenis_pelayanan").select2().on("select2:select", function(e) {
             SEPList.ajax.reload();
         });
+
         var refreshData = 'N';
+
         $("#btn_sync_bpjs").click(function() {
             refreshData = 'Y';
             SEPList.ajax.reload(function () {
@@ -161,7 +163,6 @@
 
                     var penjaminList = dataSEP.pasien.history_penjamin;
                     for(var pKey in penjaminList) {
-
                         if(penjaminList[pKey].penjamin === __UIDPENJAMINBPJS__) {
                             var metaData = JSON.parse(penjaminList[pKey].rest_meta);
                             $("#sep_nomor_kartu").html(metaData.response.peserta.noKartu);
@@ -170,8 +171,6 @@
                             $("#sep_nomor_telepon").html(metaData.response.peserta.mr.noTelepon);
                             $("#sep_peserta").html(metaData.response.peserta.jenisPeserta.keterangan);
                             $("#sep_cob").html(metaData.response.peserta.cob.noAsuransi + " - " + metaData.response.peserta.cob.nmAsuransi);
-
-
                         }
                     }
                     $("#modal-sep-cetak").modal("show");
@@ -180,6 +179,10 @@
                     //
                 }
             });
+        });
+
+        $("#btnCetakSEP").click(function() {
+            //
         });
 
         $("body").on("click", ".btn-edit-sep", function() {
@@ -1123,7 +1126,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-success" id="btnProsesSEP">
+                <button class="btn btn-success" id="btnCetakSEP">
                     <i class="fa fa-print"></i> Cetak
                 </button>
 
