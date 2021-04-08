@@ -130,7 +130,6 @@
             </td>
             <td style="width:45%;">
                 <span class="title"><b>PEMERINTAH PROVINSI RIAU</b></span>
-                <span class="title">DINAS KESEHATAN</span>
                 <span class="title"><?php echo $_POST['__PC_CUSTOMER__']; ?></span>
                 <br />
                 <span class="alamat"><?php echo $_POST['__PC_CUSTOMER_ADDRESS__']; ?></span>
