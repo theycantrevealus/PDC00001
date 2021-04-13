@@ -1706,14 +1706,21 @@ class BPJS extends Utility {
 
     }
 
+    private function get_rujukan_detail($parameter) {
+	    //$parameter = nomor rujukan
+
+    }
+
     private function get_rujukan_list($parameter) {
-        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/List/Peserta/' . $parameter);
+        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/RS/List/Peserta/' . $parameter);
+        //$content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/List/Peserta/' . $parameter);
         foreach ($content['content']['response']['rujukan'] as $key => $value)
         {
             $selectedFaskes = 0;
             $selectedFaskesInfo = array();
             for($a = 1; $a <= 2; $a++)
             {
+
                 $Faskes = self::get_faskes_info(array(
                     'type' => $a,
                     'kode' => $value['provPerujuk']['kode']
@@ -1725,6 +1732,11 @@ class BPJS extends Utility {
                     break;
                 }
             }
+
+            $BPJSdiagnosa = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/diagnosa/' . $content['content']['response']['rujukan'][$key]['diagnosa']['kode']);
+            $Diagnosa = (intval($BPJSdiagnosa['content']['metaData']['code']) === 200) ? $BPJSdiagnosa['content']['response']['diagnosa'][0] : array();
+            $content['content']['response']['rujukan'][$key]['diagnosa']['nama'] = $Diagnosa['nama'];
+
             $content['content']['response']['rujukan'][$key]['provPerujuk']['jenis'] = $selectedFaskes;
             $content['content']['response']['rujukan'][$key]['provPerujuk']['info'] = $selectedFaskesInfo;
         }

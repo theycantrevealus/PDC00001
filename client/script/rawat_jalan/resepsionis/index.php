@@ -805,6 +805,7 @@
                     $("#txt_bpjs_internal_db").html(diagnosa_banding);
 
 
+
                     $.ajax({
                         async: false,
                         url:__HOSTAPI__ + "/BPJS/get_rujukan_list/" + $("#txt_bpjs_nomor").val(),
@@ -825,30 +826,37 @@
                                 response.response_package.content !== undefined &&
                                 response.response_package.content.response !== null
                         ) {
-                                $("#panel-rujukan").show();
-                                var data = response.response_package.content.response.rujukan;
-                                selectedListRujukan = data;
+                                if(parseInt(response.response_package.content.metaData.code) === 200) {
+                                    $("#panel-rujukan").show();
+                                    var data = response.response_package.content.response.rujukan;
+                                    selectedListRujukan = data;
 
 
 
-                                if(data.length > 0) {
-                                    isRujukan = true;
-                                    for(var a = 0; a < data.length; a++) {
-                                        if(parseInt(data[a].pelayanan.kode) === 2) {
-                                            var selection = document.createElement("OPTION");
+                                    if(data.length > 0) {
+                                        isRujukan = true;
+                                        for(var a = 0; a < data.length; a++) {
+                                            if(parseInt(data[a].pelayanan.kode) === 2) {
+                                                var selection = document.createElement("OPTION");
 
-                                            $(selection).attr("value", data[a].noKunjungan.toUpperCase()).html(data[a].noKunjungan.toUpperCase());
-                                            $("#txt_bpjs_nomor_rujukan").append(selection);
+                                                $(selection).attr("value", data[a].noKunjungan.toUpperCase()).html(data[a].noKunjungan.toUpperCase());
+                                                $("#txt_bpjs_nomor_rujukan").append(selection);
+                                            }
                                         }
-                                    }
 
-                                    $(".informasi_rujukan").show();
-                                    $("#btnProsesSEP").show();
-                                    loadInformasiRujukan(selectedListRujukan[0]);
-                                    loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+                                        $(".informasi_rujukan").show();
+                                        $("#btnProsesSEP").show();
+                                        loadInformasiRujukan(selectedListRujukan[0]);
+                                        loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+                                    } else {
+                                        isRujukan = false;
+                                        $(".informasi_rujukan").hide();
+                                        $("#btnProsesSEP").hide();
+                                    }
                                 } else {
-                                    isRujukan = false;
+                                    isRujukan = false
                                     $(".informasi_rujukan").hide();
+                                    $("#panel-rujukan").hide();
                                     $("#btnProsesSEP").hide();
                                 }
                             } else {
@@ -1314,7 +1322,7 @@
             $("#txt_bpjs_rujuk_tanggal").html(data.tglKunjungan);
             $("#txt_bpjs_rujuk_poli").html(data.poliRujukan.kode + " - " + data.poliRujukan.nama);
             $("#txt_bpjs_rujuk_diagnosa").html(data.diagnosa.kode + " - " + data.diagnosa.nama);
-            $("#txt_bpjs_rujuk_keluhan").html((data.keluhan === "") ? "-" : data.keluhan);
+            $("#txt_bpjs_rujuk_keluhan").html((data.keluhan === "" || data.keluhan === undefined) ? "-" : data.keluhan);
             $("#txt_bpjs_rujuk_hak_kelas").html(data.peserta.hakKelas.kode + " - " + data.peserta.hakKelas.keterangan);
             $("#txt_bpjs_rujuk_jenis_peserta").html(data.peserta.jenisPeserta.kode + " - " + data.peserta.jenisPeserta.keterangan);
 
