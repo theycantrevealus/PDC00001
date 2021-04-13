@@ -177,6 +177,9 @@ class BPJS extends Utility {
                 case 'rujukan_baru':
                     return self::rujukan_baru($parameter);
                     break;
+                case 'rujukan_edit':
+                    return self::rujukan_edit($parameter);
+                    break;
 
 
 
@@ -1085,7 +1088,7 @@ class BPJS extends Utility {
     }
 
     private function get_faskes_select2($parameter) {
-        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/faskes/' . $_GET['search'] . '/' . $parameter[2]);
+        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/faskes/' . $_GET['search'] . '/' . $_GET['jenis']);
         return $content;
     }
 
@@ -1106,7 +1109,7 @@ class BPJS extends Utility {
 
     private function hapus_sep($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $parameterBuilder = array('request' => array(
             't_sep' => array(
                 'noSep' => $parameter[7],
@@ -1304,7 +1307,7 @@ class BPJS extends Utility {
 
                 $sync_content = $sync_sep['content'];
 
-                if(intval($sync_content['metaData']['code']) === 200 && trim($sync_content['metaData']['message']) === 'Sukses') {
+                if(intval($sync_content['metaData']['code']) === 200) {
                     $data_sync = $sync_content['response']['sep'];
                     foreach ($data_sync as $dKey => $dValue) {
 
@@ -1841,9 +1844,66 @@ class BPJS extends Utility {
         return $proceed;
     }
 
+    private function rujukan_edit($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $parameterBuilder = array(
+            'request' => array(
+                't_rujukan' => array(
+                    'noRujukan' => $parameter['rujukan'],
+                    'ppkDirujuk' => $parameter['tujuan'],
+                    'jnsPelayanan' => $parameter['jenis_pelayanan'],
+                    'catatan' => $parameter['catatan'],
+                    'diagRujukan' => $parameter['diagnosa'],
+                    'tipe' => $parameter['tipe'],
+                    'tipeRujukan' => $parameter['tipe'],
+                    'poliRujukan' => $parameter['poli'],
+                    'user' => $UserData['data']->nama
+                )
+            )
+        );
+
+        $proceed = self::putUrl('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/update', $parameterBuilder);
+        if(intval($proceed['content']['metaData']['code']) === 200) {
+
+            //Update Data Local
+            //Get Data Local
+            $rujukan_log = self::$query->update('bpjs_rujukan', array(
+                'tujuan_rujukan_kode' => $parameter['tujuan'],
+                'tujuan_rujukan_nama' => $parameter['tujuan_nama'],
+                'pelayanan_kode' => $parameter['jenis_pelayanan'],
+                'pelayanan_nama' => (intval($parameter['jenis_pelayanan']) === 1) ? 'Rawat Inap' : 'Rawat Jalan',
+                'diagnosa_kode' => $parameter['diagnosa'],
+                'diagnosa_nama' => $parameter['diagnosa_nama'],
+                'jenis_faskes' => $parameter['jenis_faskes'],
+                'jenis_faskes_nama' => $parameter['jenis_faskes_nama'],
+                'catatan' => $parameter['catatan'],
+                'tipe_rujukan' => $parameter['tipe'],
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'bpjs_rujukan.uid' => '= ?',
+                    'AND',
+                    'bpjs_rujukan.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['rujukan_uid']
+                ))
+                ->execute();
+        }
+
+        return array(
+            'bpjs' => $proceed,
+            'log' => $rujukan_log,
+        );
+    }
+
     private function rujukan_baru($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $Pasien = new Pasien(self::$pdo);
+        $PasienInfo =  $Pasien->get_pasien_detail('pasien', $parameter['pasien']);
+
         $parameterBuilder = array(
             'request' => array(
                 't_rujukan' => array(
@@ -1863,19 +1923,26 @@ class BPJS extends Utility {
         $uid = parent::gen_uuid();
         if(intval($proceed['content']['metaData']['code']) === 200) {
             $uid = parent::gen_uuid();
+
+            $BPJSdiagnosa = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/diagnosa/' . $parameter['diagnosa']);
+            $Diagnosa = (intval($BPJSdiagnosa['content']['metaData']['code']) === 200) ? $BPJSdiagnosa['content']['response']['diagnosa'][0] : array();
+
             $rujukan_log = self::$query->insert('bpjs_rujukan', array(
                 'uid' => $uid,
+                'tipe_rujukan' => $parameter['tipe'],
                 'request_rujukan' => $parameter['rujukan'],
-                'asal_rujukan_kode' => $proceed['content']['response']['rujukan']['AsalRujukan']['kode'],
-                'asal_rujukan_nama' => $proceed['content']['response']['rujukan']['AsalRujukan']['nama'],
-                'diagnosa_kode' => $proceed['content']['response']['rujukan']['diagnosa']['kode'],
-                'diagnosa_nama' => $proceed['content']['response']['rujukan']['diagnosa']['nama'],
-                'no_rujukan' => $proceed['content']['response']['rujukan']['noRujukan'],
-                'poli_tujuan_kode' => $proceed['content']['response']['poliTujuan']['kode'],
-                'poli_tujuan_nama' => $proceed['content']['response']['poliTujuan']['nama'],
-                'tgl_rujukan' => $proceed['content']['response']['tglRujukan'],
-                'tujuan_rujukan_kode' => $proceed['content']['response']['tujuanRujukan']['kode'],
-                'tujuan_rujukan_nama' => $proceed['content']['response']['tujuanRujukan']['nama'],
+                'asal_rujukan_kode' => (empty($proceed['content']['response']['rujukan']['AsalRujukan']['kode']) ? '' : $proceed['content']['response']['rujukan']['AsalRujukan']['kode']),
+                'asal_rujukan_nama' => (empty($proceed['content']['response']['rujukan']['AsalRujukan']['nama']) ? '' : $proceed['content']['response']['rujukan']['AsalRujukan']['nama']),
+                'diagnosa_kode' => (empty($proceed['content']['response']['rujukan']['diagnosa']['kode']) ? '' : $proceed['content']['response']['rujukan']['diagnosa']['kode']),
+                'diagnosa_nama' => (empty($proceed['content']['response']['rujukan']['diagnosa']['nama']) ? $Diagnosa['nama'] : $proceed['content']['response']['rujukan']['diagnosa']['nama']),
+                'no_rujukan' => (empty($proceed['content']['response']['rujukan']['noRujukan']) ? '' : $proceed['content']['response']['rujukan']['noRujukan']),
+                'poli_tujuan_kode' => (empty($proceed['content']['response']['poliTujuan']['kode']) ? '' : $proceed['content']['response']['poliTujuan']['kode']),
+                'poli_tujuan_nama' => (empty($proceed['content']['response']['poliTujuan']['nama']) ? '' : $proceed['content']['response']['poliTujuan']['nama']),
+                'tgl_rujukan' => (empty($proceed['content']['response']['tglRujukan']) ? date('Y-m-d') : $proceed['content']['response']['tglRujukan']),
+                'tujuan_rujukan_kode' => (empty($proceed['content']['response']['tujuanRujukan']['kode']) ? '' : $proceed['content']['response']['tujuanRujukan']['kode']),
+                'tujuan_rujukan_nama' => (empty($proceed['content']['response']['tujuanRujukan']['nama']) ? '' : $proceed['content']['response']['tujuanRujukan']['nama']),
+                'jenis_faskes' => $parameter['jenis_faskes'],
+                'jenis_faskes_nama' => $parameter['jenis_faskes_nama'],
                 'catatan' => $parameter['catatan'],
                 'sep' => $parameter['sep_uid'],
                 'pegawai' => $UserData['data']->uid,
@@ -1883,11 +1950,116 @@ class BPJS extends Utility {
                 'updated_at' => parent::format_date()
             ))
                 ->execute();
+
+            //Update SEP
+            /*$updateSEP = self::$query->update('bpjs_sep', array(
+                ''
+            ))
+                ->where(array(), array())
+                ->execute();*/
+
+            $nomor_bpjs = "";
+            foreach ($PasienInfo['response_data'] as $BPJSKey => $BPJSValue) {
+                foreach ($BPJSValue['history_penjamin'] as $JSKey => $JSValue) {
+                    if($JSValue['penjamin'] === __UIDPENJAMINBPJS__) {
+                        $readJSON = json_decode($JSValue['rest_meta'], true);
+                        $nomor_bpjs = $readJSON['response']['peserta']['noKartu'];
+                    }
+                }
+            }
+
+            $BPJS = new BPJS(self::$pdo);
+            $Rujukan = $BPJS->launchUrl('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/RS/List/Peserta/' . $nomor_bpjs);
+            if(intval($Rujukan['content']['metaData']['code']) === 200) {
+                $data = $Rujukan['content']['response']['rujukan'];
+                foreach ($data as $key => $value) {
+                    $check = self::$query->select('bpjs_rujukan', array(
+                        'uid'
+                    ))
+                        ->where(array(
+                            'bpjs_rujukan.deleted_at' => 'IS NULL',
+                            'AND',
+                            'bpjs_rujukan.sep' => '= ?'
+                        ), array(
+                            $parameter['sep_uid']
+                        ))
+                        ->execute();
+                    if (count($check['response_data']) > 0) {
+
+                        $checkItem = array(
+                            'asal_rujukan_kode' => (empty($value['provPerujuk']['kode']) ? '' : $value['provPerujuk']['kode']),
+                            'no_kunjungan' => (empty($value['noKunjungan']) ? '' : $value['noKunjungan']),
+                            'asal_rujukan_nama' => (empty($value['provPerujuk']['nama']) ? '' : $value['provPerujuk']['nama']),
+                            'diagnosa_kode' => (empty($value['diagnosa']['kode']) ? '' : $value['diagnosa']['kode']),
+                            'diagnosa_nama' => (empty($value['diagnosa']['nama']) ? '' : $value['diagnosa']['nama']),
+                            'poli_tujuan_kode' => (empty($value['poliRujukan']['kode']) ? '' : $value['poliRujukan']['kode']),
+                            'poli_tujuan_nama' => (empty($value['poliRujukan']['nama']) ? '' : $value['poliRujukan']['nama']),
+                            'tgl_rujukan' => (empty($value['tglKunjungan']) ? date('Y-m-d') : date('Y-m-d', strtotime($value['tglKunjungan']))),
+                            'keluhan' => (empty($value['keluhan']) ? '' : $value['keluhan']),
+                            'pelayanan_kode' => (empty($value['pelayanan']['kode']) ? '' : $value['pelayanan']['kode']),
+                            'pelayanan_nama' => (empty($value['pelayanan']['nama']) ? '' : $value['pelayanan']['nama']),
+                            'peserta_cob_no_asuransi' => (empty($value['peserta']['cob']['noAsuransi']) ? '' : $value['peserta']['cob']['noAsuransi']),
+                            'peserta_cob_nama_asuransi' => (empty($value['peserta']['cob']['nmAsuransi']) ? '' : $value['peserta']['cob']['nmAsuransi']),
+                            'peserta_cob_tanggal_tat' => (empty($value['peserta']['cob']['tglTAT']) ? '' : $value['peserta']['cob']['tglTAT']),
+                            'peserta_cob_tanggal_tmt' => (empty($value['peserta']['cob']['tglTMT']) ? '' : $value['peserta']['cob']['tglTMT']),
+                            'peserta_hak_kelas_keterangan' => (empty($value['peserta']['hakKelas']['keterangan']) ? '' : $value['peserta']['hakKelas']['keterangan']),
+                            'peserta_hak_kelas_kode' => (empty($value['peserta']['hakKelas']['kode']) ? '' : $value['peserta']['hakKelas']['kode']),
+                            'peserta_informasi_dinsos' => (empty($value['peserta']['informasi']['dinsos']) ? '' : $value['peserta']['informasi']['dinsos']),
+                            'peserta_informasi_no_sktm' => (empty($value['peserta']['informasi']['noSKTM']) ? '' : $value['peserta']['informasi']['noSKTM']),
+                            'peserta_informasi_prolanis_prb' => (empty($value['peserta']['informasi']['prolanisPRB']) ? '' : $value['peserta']['informasi']['prolanisPRB']),
+                            'peserta_jenis_peserta_keterangan' => (empty($value['peserta']['jenisPeserta']['keterangan']) ? '' : $value['peserta']['jenisPeserta']['keterangan']),
+                            'peserta_jenis_peserta_kode' => (empty($value['peserta']['jenisPeserta']['kode']) ? '' : $value['peserta']['jenisPeserta']['kode']),
+                            'peserta_mr_no' => (empty($value['peserta']['mr']['noMR']) ? '' : $value['peserta']['mr']['noMR']),
+                            'peserta_mr_no_telp' => (empty($value['peserta']['mr']['noTelepon']) ? '' : $value['peserta']['mr']['noTelepon']),
+                            'peserta_nama' => (empty($value['peserta']['nama']) ? '' : $value['peserta']['nama']),
+                            'peserta_nik' => (empty($value['peserta']['nik']) ? '' : $value['peserta']['nik']),
+                            'peserta_no_kartu' => (empty($value['peserta']['noKartu']) ? '' : $value['peserta']['noKartu']),
+                            'peserta_mr_pisa' => (empty($value['peserta']['pisa']) ? '' : $value['peserta']['pisa']),
+                            'peserta_mr_prov_umum_provider_kode' => (empty($value['peserta']['provUmum']['kdProvider']) ? '' : $value['peserta']['provUmum']['kdProvider']),
+                            'peserta_mr_prov_umum_provider_nama' => (empty($value['peserta']['provUmum']['nmProvider']) ? '' : $value['peserta']['provUmum']['nmProvider']),
+                            'peserta_sex' => (empty($value['peserta']['sex']) ? '' : $value['peserta']['sex']),
+                            'peserta_status_peserta_keterangan' => (empty($value['peserta']['statusPeserta']['keterangan']) ? '' : $value['peserta']['statusPeserta']['keterangan']),
+                            'peserta_status_peserta_kode' => (empty($value['peserta']['statusPeserta']['kode']) ? '' : $value['peserta']['statusPeserta']['kode']),
+                            'peserta_tanggal_cetak_kartu' => (empty($value['peserta']['tglCetakKartu']) ? '' : $value['peserta']['tglCetakKartu']),
+                            'peserta_tanggal_lahir' => (empty($value['peserta']['tglLahir']) ? '' : $value['peserta']['tglLahir']),
+                            'peserta_tanggal_tat' => (empty($value['peserta']['tglTAT']) ? '' : $value['peserta']['tglTAT']),
+                            'peserta_tanggal_tmt' => (empty($value['peserta']['tglTMT']) ? '' : $value['peserta']['tglTMT']),
+                            'peserta_umur_pelayanan' => (empty($value['peserta']['umur']['umurSaatPelayanan']) ? '' : $value['peserta']['umur']['umurSaatPelayanan']),
+                            'peserta_umur_sekarang' => (empty($value['peserta']['umur']['umurSekarang']) ? '' : $value['peserta']['umur']['umurSekarang']),
+                            'updated_at' => parent::format_date()
+
+                        );
+
+                        $allowProceed = array();
+
+                        foreach ($checkItem as $checkKey => $checkValue) {
+                            if($checkValue !== '' && !empty($checkValue)) {
+                                $allowProceed[$checkKey] = $checkValue;
+                            }
+                        }
+
+                        //TODO : Check NULL
+
+                        $proceedSync = self::$query->update('bpjs_rujukan', $allowProceed)
+                            ->where(array(
+                                'bpjs_rujukan.deleted_at' => 'IS NULL',
+                                'AND',
+                                'bpjs_rujukan.uid' => '= ?'
+                            ), array(
+                                $uid
+                            ))
+                            ->execute();
+                    }
+                }
+            }
         }
 
         return array(
+            'rujuk' => $Rujukan,
             'bpjs' => $proceed,
-            'log' => $rujukan_log
+            'log' => $rujukan_log,
+            'peserta' => $nomor_bpjs,
+            'pasien_detail' => $PasienInfo
         );
     }
 
@@ -2157,7 +2329,7 @@ class BPJS extends Utility {
 
     private function get_sep_log($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {

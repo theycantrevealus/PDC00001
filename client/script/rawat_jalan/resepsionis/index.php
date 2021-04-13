@@ -812,8 +812,12 @@
                         beforeSend: function(request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
-                        success: function(response){
+                        success: function(response) {
+                            console.clear();
+                            console.log(response);
+
                             $("#txt_bpjs_nomor_rujukan " + " option").remove();
+
                             $("#txt_bpjs_nomor_rujukan").select2("destroy");
                             $("#txt_bpjs_nomor_rujukan").select2();
                             $("#txt_bpjs_nomor_rujukan").select2("val", "");

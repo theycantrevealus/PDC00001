@@ -1883,6 +1883,25 @@ class Antrian extends Utility
             $param = ['', 'terminologi-items-detail', $value['id_jenkel']];
             $get_jenkel = $term->__GET__($param);
             $data['response_data'][$key]['jenkel'] = $get_jenkel['response_data'][0]['nama'];
+
+
+            //Penjamin
+            $Penjamin = self::$query->select('pasien_penjamin', array(
+                'penjamin',
+                'valid_awal',
+                'valid_akhir',
+                'rest_meta',
+                'terdaftar'
+            ))
+                ->where(array(
+                    'pasien_penjamin.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pasien_penjamin.pasien' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $data['response_data'][$key]['penjamin'] = $Penjamin['response_data'];
         }
 
         return $data;
