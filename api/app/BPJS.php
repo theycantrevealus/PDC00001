@@ -156,6 +156,9 @@ class BPJS extends Utility {
                 case 'sep_baru':
                     return self::sep_baru($parameter);
                     break;
+                case 'sep_edit':
+                    return self::sep_edit($parameter);
+                    break;
                 case 'sep_update':
                     return self::sep_update($parameter);
                     break;
@@ -1295,6 +1298,8 @@ class BPJS extends Utility {
         $begin = new DateTime($parameter['dari']);
         $end = new DateTime($parameter['sampai']);
 
+        $BPJSLog = array();
+
         $interval = DateInterval::createFromDateString('1 day');
         $period = new DatePeriod($begin, $interval, $end);
         $data_sync_record = array();
@@ -1309,6 +1314,7 @@ class BPJS extends Utility {
 
                 if(intval($sync_content['metaData']['code']) === 200) {
                     $data_sync = $sync_content['response']['sep'];
+                    array_push($BPJSLog, $data_sync);
                     foreach ($data_sync as $dKey => $dValue) {
 
                         $SEPuid = parent::gen_uuid();
@@ -1456,7 +1462,7 @@ class BPJS extends Utility {
                     }
                 } else {
                     if(isset($sync_content)) {
-                        array_push($data_sync_record, $sync_content);
+                        //array_push($data_sync_record, $sync_content);
                     }
                 }
             }
@@ -1624,7 +1630,7 @@ class BPJS extends Utility {
 
 
         $data['sync_record'] = $data_sync_record;
-
+        $data['bpjs_log'] = $BPJSLog;
         return $data;
     }
 
@@ -2075,6 +2081,119 @@ class BPJS extends Utility {
         );
     }
 
+    private function sep_edit($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $parameterBuilder = array(
+            'request' => array(
+                't_sep' => array(
+                    'noSep' => $parameter['sep'],
+                    'klsRawat' => $parameter['kelas_rawat'],
+                    'noMR' => $parameter['no_mr'],
+                    'rujukan' => array(
+                        'asalRujukan' => $parameter['asal_rujukan'],
+                        'tglRujukan' => $parameter['tgl_rujukan'],
+                        'noRujukan' => $parameter['no_rujukan'],
+                        'ppkRujukan' => (isset($parameter['ppk_rujukan']) && !empty($parameter['ppk_rujukan']) && $parameter['ppk_rujukan'] != '') ? $parameter['ppk_rujukan'] : '00161001'
+                    ),
+                    'catatan' => $parameter['catatan'],
+                    'diagAwal' => $parameter['diagnosa_awal'],
+                    'poli' => array(
+                        'eksekutif' => $parameter['eksekutif']
+                    ),
+                    'cob' => array(
+                        'cob' => $parameter['cob']
+                    ),
+                    'katarak' => array(
+                        'katarak' => $parameter['katarak']
+                    ),
+                    'skdp' => array(
+                        'noSurat' => $parameter['skdp'],
+                        'kodeDPJP' => $parameter['dpjp']
+                    ),
+                    'jaminan' => array(
+                        'lakaLantas' => $parameter['laka_lantas'],
+                        'penjamin' => array(
+                            'penjamin' => $parameter['laka_lantas_penjamin'],
+                            'tglKejadian' => $parameter['laka_lantas_tanggal_kejadian'],
+                            'keterangan' => $parameter['laka_lantas_keterangan'],
+                            'suplesi' => array(
+                                'suplesi' => strval($parameter['laka_lantas_suplesi']),
+                                'noSepSuplesi' => strval($parameter['laka_lantas_suplesi_nomor']),
+                                'lokasiLaka' => array(
+                                    'kdPropinsi' => strval($parameter['laka_lantas_suplesi_provinsi']),
+                                    'kdKabupaten' => strval($parameter['laka_lantas_suplesi_kabupaten']),
+                                    'kdKecamatan' => strval($parameter['laka_lantas_suplesi_kecamatan'])
+                                )
+                            )
+                        )
+                    ),
+                    'noTelp' => $parameter['telepon'],
+                    'user' => $UserData['data']->nama
+                    /*'noKartu' => $parameter['no_kartu'],
+                    'tglSep' => strval(date('Y-m-d')),
+                    'ppkPelayanan' => $parameter['ppk_pelayanan'],
+                    'jnsPelayanan' => '2',*/
+                )
+            )
+        );
+
+        $proceed = self::putUrl('/' . __BPJS_SERVICE_NAME__ . '/SEP/1.1/Update', $parameterBuilder);
+        $uid = parent::gen_uuid();
+        if(intval($proceed['content']['metaData']['code']) === 200) {
+            $sep_log = self::$query->update('bpjs_sep', array(
+                'kelas_rawat' => $parameter['kelas_rawat'],
+                'asal_rujukan_jenis' => $parameter['asal_rujukan'],
+                'asal_rujukan_tanggal' => $parameter['tgl_rujukan'],
+                'asal_rujukan_nomor' => $parameter['no_rujukan'],
+                'asal_rujukan_ppk' => $parameter['ppk_rujukan'],
+                'catatan' => $parameter['catatan'],
+                'diagnosa_kode' => $parameter['diagnosa_awal'],
+                'diagnosa_nama' => $parameter['diagnosa_kode'],
+                'poli_tujuan' => $parameter['poli'],
+                'poli_eksekutif' => $parameter['eksekutif'],
+                'pasien_cob' => $parameter['cob'],
+                'pasien_katarak' => $parameter['katarak'],
+                'laka_lantas' => $parameter['laka_lantas'],
+                'laka_lantas_penjamin' => $parameter['laka_lantas_penjamin'],
+                'laka_lantas_tanggal' => (isset($parameter['laka_lantas_tanggal_kejadian']) && !empty($parameter['laka_lantas_tanggal_kejadian'])) ? date('Y-m-d', strtotime($parameter['laka_lantas_tanggal_kejadian'])) : NULL,
+                'laka_lantas_keterangan' => $parameter['laka_lantas_keterangan'],
+                'laka_lantas_suplesi' => $parameter['laka_lantas_suplesi'],
+                'laka_lantas_suplesi_sep' => $parameter['laka_lantas_suplesi_nomor'],
+                'laka_lantas_provinsi' => $parameter['laka_lantas_suplesi_provinsi'],
+                'laka_lantas_kabupaten' => $parameter['laka_lantas_suplesi_kabupaten'],
+                'laka_lantas_kecamatan' => $parameter['laka_lantas_suplesi_kecamatan'],
+                'skdp_no_surat' => $parameter['skdp'],
+                'skdp_dpjp' => $parameter['dpjp'],
+                'skdp_dpjp_nama' => $parameter['dpjp_nama'],
+                'no_telp' => $parameter['telepon'],
+                'pegawai' => $UserData['data']->uid,
+                //'sep_no' => $proceed['content']['response']['sep']['noSep'],
+                //'sep_tanggal' => isset($proceed['content']['response']['sep']['tglSep']) ? date('Y-m-d', strtotime($proceed['content']['response']['sep']['tglSep'])) : date('Y-m-d'),
+                //'sep_dinsos' => isset($proceed['content']['response']['sep']['informasi']['Dinsos']) ? $proceed['content']['response']['sep']['informasi']['Dinsos'] : '',
+                //'sep_prolanis' => isset($proceed['content']['response']['sep']['informasi']['prolanisPRB']) ? $proceed['content']['response']['sep']['informasi']['prolanisPRB'] : '',
+                //'pasien' => $parameter['pasien'],
+                //'sep_sktm' => isset($proceed['content']['response']['sep']['informasi']['noSKTM']) ? $proceed['content']['response']['sep']['informasi']['noSKTM'] : '',
+                'spesialistik_kode' => $parameter['spesialistik_kode'],
+                'spesialistik_nama' => $parameter['spesialistik_nama'],
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'bpjs_sep.deleted_at' => 'IS NULL',
+                    'AND',
+                    'bpjs_sep.uid' => '= ?'
+                ), array(
+                    $parameter['uid']
+                ))
+                ->execute();
+        }
+        return array(
+            'bpjs' => $proceed,
+            'log' => $sep_log
+        );
+    }
+
     private function sep_baru($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
@@ -2164,6 +2283,7 @@ class BPJS extends Utility {
                 'laka_lantas_kecamatan' => $parameter['laka_lantas_suplesi_kecamatan'],
                 'skdp_no_surat' => $parameter['skdp'],
                 'skdp_dpjp' => $parameter['dpjp'],
+                'skdp_dpjp_nama' => $parameter['dpjp_nama'],
                 'no_telp' => $parameter['telepon'],
                 'pegawai' => $UserData['data']->uid,
                 'sep_no' => $proceed['content']['response']['sep']['noSep'],
@@ -2172,6 +2292,8 @@ class BPJS extends Utility {
                 'sep_prolanis' => isset($proceed['content']['response']['sep']['informasi']['prolanisPRB']) ? $proceed['content']['response']['sep']['informasi']['prolanisPRB'] : '',
                 'pasien' => $parameter['pasien'],
                 'sep_sktm' => isset($proceed['content']['response']['sep']['informasi']['noSKTM']) ? $proceed['content']['response']['sep']['informasi']['noSKTM'] : '',
+                'spesialistik_kode' => $parameter['spesialistik_kode'],
+                'spesialistik_nama' => $parameter['spesialistik_nama'],
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             ))
@@ -2229,6 +2351,7 @@ class BPJS extends Utility {
             'laka_lantas_kecamatan',
             'skdp_no_surat',
             'skdp_dpjp',
+            'skdp_dpjp_nama',
             'no_telp',
             'pegawai',
             'sep_no',
@@ -2236,6 +2359,8 @@ class BPJS extends Utility {
             'sep_dinsos',
             'sep_prolanis',
             'sep_sktm',
+            'spesialistik_kode',
+            'spesialistik_nama',
             'created_at',
             'updated_at'
         ))
@@ -2283,6 +2408,7 @@ class BPJS extends Utility {
                 );
             }
             $data['response_data'][$key]['kelas_rawat_info'] = $kelas['content']['metaData'];
+            $data['response_data'][$key]['kelas_rawat_content'] = $kelas['content']['response']['list'];
         }
 
         return $data;

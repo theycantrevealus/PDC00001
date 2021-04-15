@@ -648,20 +648,11 @@ class Rujukan extends Utility
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if($parameter[6] === 'bpjs_rujukan') {
-            $BPJS = new BPJS(self::$pdo);
-            $parameterBuilder = array('request' => array(
-                't_rujukan' => array(
-                    'noRujukan' => $parameter[7],
-                    'user' => $UserData['data']->nama
-                )
-            ));
-
-            $DeleteRujukan = $BPJS->deleteUrl('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/delete', $parameterBuilder);
-            if(intval($DeleteRujukan['content']['metaData']['code']) === 200) {
+            if(intval($parameter[8]) > 0) {
                 $worker = self::$query
                     ->delete($parameter[6])
                     ->where(array(
-                        $parameter[6] . '.no_rujukan' => '= ?'
+                        $parameter[6] . '.no_kunjungan' => '= ?'
                     ), array(
                         $parameter[7]
                     ))
@@ -690,13 +681,62 @@ class Rujukan extends Utility
                         'class' => __CLASS__
                     ));
                 }
-            }
 
-            return array(
-                'bpjs' => $DeleteRujukan,
-                'worker' => $worker,
-                'param' => $parameterBuilder
-            );
+                return array(
+                    'bpjs' => array(),
+                    'worker' => $worker
+                );
+            } else {
+                $BPJS = new BPJS(self::$pdo);
+                $parameterBuilder = array('request' => array(
+                    't_rujukan' => array(
+                        'noRujukan' => $parameter[7],
+                        'user' => $UserData['data']->nama
+                    )
+                ));
+
+                $DeleteRujukan = $BPJS->deleteUrl('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/delete', $parameterBuilder);
+                if(intval($DeleteRujukan['content']['metaData']['code']) === 200) {
+                    $worker = self::$query
+                        ->delete($parameter[6])
+                        ->where(array(
+                            $parameter[6] . '.no_rujukan' => '= ?'
+                        ), array(
+                            $parameter[7]
+                        ))
+                        ->execute();
+                    if ($worker['response_result'] > 0) {
+                        $log = parent::log(array(
+                            'type' => 'activity',
+                            'column' => array(
+                                'unique_target',
+                                'user_uid',
+                                'table_name',
+                                'action',
+                                'logged_at',
+                                'status',
+                                'login_id'
+                            ),
+                            'value' => array(
+                                $parameter[7],
+                                $UserData['data']->uid,
+                                $parameter[6],
+                                'D',
+                                parent::format_date(),
+                                'N',
+                                $UserData['data']->log_id
+                            ),
+                            'class' => __CLASS__
+                        ));
+                    }
+                }
+
+                return array(
+                    'bpjs' => $DeleteRujukan,
+                    'worker' => $worker,
+                    'param' => $parameterBuilder
+                );
+            }
         } else {
             $worker = self::$query
                 ->delete($parameter[6])

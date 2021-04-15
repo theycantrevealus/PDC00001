@@ -919,6 +919,8 @@
                             antrian: currentAntrianUID,
                             pasien: currentAntrianPasien,
                             no_kartu: $("#txt_bpjs_nomor").val(),
+                            spesialistik_kode: $("#txt_bpjs_dpjp_spesialistik").val(),
+                            spesialistik_nama: $("#txt_bpjs_dpjp_spesialistik option:selected").text(),
                             ppk_pelayanan: $("#txt_bpjs_faskes").val(),
                             kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
                             no_mr: $("#txt_bpjs_rm").val().replace(new RegExp(/-/g),""),
@@ -946,6 +948,7 @@
 
                             skdp: $("#txt_bpjs_skdp").val(),
                             dpjp: $("#txt_bpjs_dpjp").val(),
+                            dpjp_nama: $("#txt_bpjs_dpjp option:selected").text(),
                             telepon: $("#txt_bpjs_telepon").val()
                         };
                     } else {
@@ -953,6 +956,8 @@
                             request: "sep_baru",
                             antrian: currentAntrianUID,
                             pasien: currentAntrianPasien,
+                            spesialistik_kode: $("#txt_bpjs_dpjp_spesialistik").val(),
+                            spesialistik_nama: $("#txt_bpjs_dpjp_spesialistik option:selected").text(),
                             no_kartu: $("#txt_bpjs_nomor").val(),
                             ppk_pelayanan: $("#txt_bpjs_faskes").val(),
                             kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
@@ -981,6 +986,7 @@
 
                             skdp: $("#txt_bpjs_skdp").val(),
                             dpjp: $("#txt_bpjs_dpjp").val(),
+                            dpjp_nama: $("#txt_bpjs_dpjp option:selected").text(),
                             telepon: $("#txt_bpjs_telepon").val()
                         };
                     }
@@ -1014,7 +1020,7 @@
                                     response.response_package.bpjs.content.metaData.message,
                                     "warning"
                                 ).then((result) => {
-                                    $("#modal-sep-new").modal("hide");
+                                    //$("#modal-sep-new").modal("hide");
                                     /*tableAntrian.ajax.reload();
                                     tableAntrianIGD.ajax.reload();
                                     tableAntrianRI.ajax.reload();*/

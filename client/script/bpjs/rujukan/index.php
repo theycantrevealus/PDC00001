@@ -77,7 +77,7 @@
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.bpjs_rujukan !== null) {
                             var rujukanData = row.bpjs_rujukan.response_data;
-                            return (rujukanData.length > 0) ? "<b id=\"no_kunjungan_" + rujukanData[0].uid + "\">" + rujukanData[0].no_rujukan + "</b>" : "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
+                            return (rujukanData.length > 0) ? "<b kunjungan=\"" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? "1": "0") + "\" id=\"no_kunjungan_" + rujukanData[0].uid + "\">" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? rujukanData[0].no_kunjungan : rujukanData[0].no_rujukan) + "</b>" : "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
                         } else {
                             return "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
                         }
@@ -115,6 +115,8 @@
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
 
+            var isKunjungan = parseInt($("#no_kunjungan_" + id).attr("kunjungan"));
+
             Swal.fire({
                 title: "Hapus Permintaan Rujukan?",
                 showDenyButton: true,
@@ -124,7 +126,7 @@
                 if (result.isConfirmed) {
                     $.ajax({
                         async: false,
-                        url:__HOSTAPI__ + "/Rujukan/bpjs_rujukan/" + $("#no_kunjungan_" + id).html().trim(),
+                        url:__HOSTAPI__ + "/Rujukan/bpjs_rujukan/" + $("#no_kunjungan_" + id).html().trim() + "/" + isKunjungan,
                         type: "DELETE",
                         beforeSend: function(request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -132,23 +134,46 @@
                         success: function(response){
                             /*console.clear();
                             console.log(response);*/
-                            if(parseInt(response.response_package.bpjs.content.metaData.code) === 200) {
-                                Swal.fire(
-                                    "BPJS Rujukan",
-                                    "Berhasil dihapus",
-                                    "success"
-                                ).then((result) => {
-                                    RujukanList.ajax.reload();
-                                    RujukanLain.ajax.reload();
-                                });
+                            if(isKunjungan > 0) {
+                                //console.log(response);
+                                //
+                                if(parseInt(response.response_package.worker.response_result) > 0) {
+                                    Swal.fire(
+                                        "BPJS Rujukan",
+                                        "Berhasil dihapus",
+                                        "success"
+                                    ).then((result) => {
+                                        RujukanList.ajax.reload();
+                                        RujukanLain.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        "BPJS Rujukan",
+                                        "Gagal hapus rujukan",
+                                        "error"
+                                    ).then((result) => {
+                                        //
+                                    });
+                                }
                             } else {
-                                Swal.fire(
-                                    "BPJS Rujukan",
-                                    response.response_package.bpjs.content.metaData.message,
-                                    "error"
-                                ).then((result) => {
-                                    //
-                                });
+                                if(parseInt(response.response_package.bpjs.content.metaData.code) === 200) {
+                                    Swal.fire(
+                                        "BPJS Rujukan",
+                                        "Berhasil dihapus",
+                                        "success"
+                                    ).then((result) => {
+                                        RujukanList.ajax.reload();
+                                        RujukanLain.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        "BPJS Rujukan",
+                                        response.response_package.bpjs.content.metaData.message,
+                                        "error"
+                                    ).then((result) => {
+                                        //
+                                    });
+                                }
                             }
                         },
                         error: function(response) {
