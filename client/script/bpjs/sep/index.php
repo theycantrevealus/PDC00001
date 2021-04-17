@@ -842,6 +842,11 @@
             autoclose: true
         }).datepicker("setDate", new Date());
 
+        $("#claim_tanggal_kontrol").datepicker({
+            dateFormat: 'DD, dd MM yy',
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
         $("#claim_tanggal_keluar").datepicker({
             dateFormat: 'DD, dd MM yy',
             autoclose: true
@@ -853,7 +858,7 @@
             minimumInputLength: 2,
             "language": {
                 "noResults": function() {
-                    return "Faskes tidak ditemukan";
+                    return "Poli tidak ditemukan";
                 }
             },
             dropdownParent: $("#modal-sep-claim"),
@@ -881,6 +886,95 @@
                             }
                         })
                     };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
+
+        $("#claim_poli_kontrol").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function(){
+                    return "Poli tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-sep-claim"),
+            ajax: {
+                dataType: "json",
+                headers:{
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_poli",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.content.response.poli;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.nama,
+                                id: item.kode
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
+
+        $("#claim_dirujuk_ke_jenis").select2();
+
+        $("#claim_dirujuk_ke").select2({
+            minimumInputLength: 1,
+            "language": {
+                "noResults": function(){
+                    return "SEP tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-sep-claim"),
+            ajax: {
+                dataType: "json",
+                headers:{
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_faskes_select2",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        jenis:$("#claim_dirujuk_ke_jenis").val(),
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.content;
+                    if(data.metaData.message === "Sukses") {
+                        return {
+                            results: $.map(data.response.faskes, function (item) {
+                                return {
+                                    text: item.kode + " - " + item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    } else {
+                        /*Swal.fire(
+                            "Faskes tidak ditemukan",
+                            data.metaData.message,
+                            "warning"
+                        ).then((result) => {
+                            //
+                        });*/
+                    }
                 }
             }
         }).addClass("form-control").on("select2:select", function(e) {
@@ -1011,6 +1105,26 @@
             }
         }).addClass("form-control").on("select2:select", function(e) {
             //
+        });
+
+        $("#btnClaimSEP").click(function() {
+            var tglMasuk = $("#claim_tanggal_masuk").datepicker("getDate");
+            var tglKeluar = $("#claim_tanggal_keluar").datepicker("getDate");
+            var jaminan = $("#claim_jaminan").val();
+            var poli = $("#claim_poli");
+            var perawatan_ruang_rawat = $("#claim_ruang_rawat").val();
+            var perawatan_kelas_rawat = $("#claim_kelas_rawat").val();
+            var perawatan_sepsialistik = $("#claim_spesialistik").val();
+            var perawatan_cara_keluar = $("#claim_cara_keluar").val();
+            var perawatan_kondisi_pulang = $("#claim_kondisi_pulang").val();
+            var diagnosa_kode = [];
+            var procedure = [];
+            var rencana_tl_tindak_lanjut = $("#claim_rencana_tl");
+            var rencana_tl_dirujuk_ke = $("#claim_dirujuk_ke");
+            var rencana_tl_kontrol_kembali_tanggal = $("#claim_tanggal_kontrol").datepicker("getDate");
+            var rencana_tl_kontrol_kembali_poli = $("#claim_poli_kontrol");
+            var dpjp = $("#claim_dpjp").val();
+
         });
 
 
@@ -1293,6 +1407,228 @@
                 }
             });
             return selectedNama;
+        }
+
+        autoDiagnosa();
+        autoProcedure();
+
+        function autoDiagnosa() {
+            $("#claim_diagnosa tbody tr").removeClass("last-diagnosa");
+            var newRow = document.createElement("TR");
+            var newCellID = document.createElement("TD");
+            var newCellDiagnosa = document.createElement("TD");
+            var newCellLevel = document.createElement("TD");
+            var newCellAksi = document.createElement("TD");
+
+            var newDiagnosa = document.createElement("SELECT");
+            var newLevel = document.createElement("SELECT");
+            var newAksi = document.createElement("BUTTON");
+
+            $(newCellDiagnosa).append(newDiagnosa);
+            $(newCellLevel).append(newLevel);
+            $(newCellAksi).append(newAksi);
+
+
+            var level = [
+                {
+                    value: 1,
+                    caption: "Primer"
+                },
+                {
+                    value: 2,
+                    caption: "Sekunder"
+                }
+            ];
+
+            for(var key in level) {
+                $(newLevel).append("<option value=\"" + level[key].value + "\">" + level[key].caption + "</option>");
+            }
+
+
+
+            $(newDiagnosa).addClass("form-control diagnosa_claim").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Diagnosa tidak ditemukan";
+                    }
+                },
+                dropdownParent: $("#modal-sep-claim"),
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/BPJS/get_diagnosa",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.content.response.diagnosa;
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    }
+                }
+            }).addClass("form-control").on("select2:select", function(e) {
+                var id = $(this).attr("id").split("_");
+                id = id[id.length - 1];
+
+                autoDiagnosa();
+            });
+
+            $(newLevel).select2();
+            $(newAksi).addClass("btn btn-sm btn-danger deleteDiagnosa").html("<i class=\"fa fa-trash-alt\"></i>");
+
+            $(newRow).append(newCellID);
+            $(newRow).append(newCellDiagnosa);
+            $(newRow).append(newCellLevel);
+            $(newRow).append(newCellAksi);
+
+            $("#claim_diagnosa tbody").append(newRow);
+
+            $(newRow).addClass("last-diagnosa");
+            rebaseDiagnosa();
+        }
+
+        $("body").on("click", ".deleteDiagnosa", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            if(!$("#row_diagnosa_" + id).hasClass("last-diagnosa")) {
+                $("#row_diagnosa_" + id).remove();
+                rebaseDiagnosa();
+            }
+        });
+
+        function rebaseDiagnosa() {
+            $("#claim_diagnosa tbody tr").each(function(e) {
+                var id = (e + 1);
+
+                $(this).attr({
+                    "id": "row_diagnosa_" + id
+                });
+
+                $(this).find("td:eq(0)").html(id);
+                $(this).find("td:eq(1) select").attr({
+                    "id": "diagnosa_" + id
+                });
+
+                $(this).find("td:eq(2) select").attr({
+                    "id": "level_diagnosa_" + id
+                });
+
+                $(this).find("td:eq(3) button").attr({
+                    "id": "delete_diagnosa_" + id
+                });
+            });
+        }
+
+        function autoProcedure() {
+            $("#claim_procedure tbody tr").removeClass("last-procedure");
+            var newRow = document.createElement("TR");
+            var newCellID = document.createElement("TD");
+            var newCellProcedure = document.createElement("TD");
+            var newCellAksi = document.createElement("TD");
+
+            var newProcedure = document.createElement("SELECT");
+            var newAksi = document.createElement("BUTTON");
+
+            $(newCellProcedure).append(newProcedure);
+            $(newCellAksi).append(newAksi);
+
+
+
+            $(newProcedure).addClass("form-control diagnosa_claim").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Procedure tidak ditemukan";
+                    }
+                },
+                dropdownParent: $("#modal-sep-claim"),
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/BPJS/get_procedure",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.content.response.procedure;
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    }
+                }
+            }).addClass("form-control").on("select2:select", function(e) {
+                var id = $(this).attr("id").split("_");
+                id = id[id.length - 1];
+
+                autoProcedure();
+            });
+
+            $(newAksi).addClass("btn btn-sm btn-danger deleteProcedure").html("<i class=\"fa fa-trash-alt\"></i>");
+
+            $(newRow).append(newCellID);
+            $(newRow).append(newCellProcedure);
+            $(newRow).append(newCellAksi);
+
+            $("#claim_procedure tbody").append(newRow);
+
+            $(newRow).addClass("last-procedure");
+            rebaseProcedure();
+        }
+
+        $("body").on("click", ".deleteProcedure", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            if(!$("#row_procedure_" + id).hasClass("last-procedure")) {
+                $("#row_procedure_" + id).remove();
+                rebaseProcedure();
+            }
+        });
+
+        function rebaseProcedure() {
+            $("#claim_procedure tbody tr").each(function(e) {
+                var id = (e + 1);
+
+                $(this).attr({
+                    "id": "row_procedure_" + id
+                });
+
+                $(this).find("td:eq(0)").html(id);
+                $(this).find("td:eq(1) select").attr({
+                    "id": "procedure_" + id
+                });
+
+                $(this).find("td:eq(2) button").attr({
+                    "id": "delete_procedure_" + id
+                });
+            });
         }
     });
 </script>
@@ -1747,26 +2083,27 @@
                 </div>
                 <div class="row">
                     <div class="col-6 col-md-6">
-                        <h5>Diagnosa</h5>
+                        <h5>Diagnosa <b>[ICD10]</b></h5>
                         <table class="table table-bordered largeDataType" id="claim_diagnosa">
                             <thead class="thead-dark">
                                 <tr>
                                     <th class="wrap_content">No</th>
                                     <th>Diagnosa</th>
-                                    <th></th>
+                                    <th style="width: 100px;">Level</th>
+                                    <th class="wrap_content"></th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
                     </div>
                     <div class="col-6 col-md-6">
-                        <h5>Prosedur</h5>
+                        <h5>Prosedur <b>[ICD9]</b></h5>
                         <table class="table table-bordered largeDataType" id="claim_procedure">
                             <thead class="thead-dark">
                                 <tr>
                                     <th class="wrap_content">No</th>
                                     <th>Procedure</th>
-                                    <th></th>
+                                    <th class="wrap_content"></th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -1783,14 +2120,29 @@
                             <option value="4">Kontrol Kembali</option>
                         </select>
                     </div>
+
                     <div class="col-4 col-md-4 form-group">
                         <label for="">Dirujuk Ke</label>
-                        <select class="form-control" id="claim_dirujuk_ke"></select>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="">Jenis Faskes</label>
+                                <select class="form-control uppercase" id="claim_dirujuk_ke_jenis">
+                                    <option value="1">Puskesmas</option>
+                                    <option value="2">Rumah Sakit</option>
+                                </select>
+                                <hr />
+                            </div>
+                            <div class="col-md-12">
+                                <label for="">Faskes</label>
+                                <select class="form-control" id="claim_dirujuk_ke"></select>
+                            </div>
+                        </div>
                     </div>
+
                     <div class="col-4">
                         <div class="form-group">
                             <label for="">Kontrol Kembali</label>
-                            <input type="text" id="claim_tanggal_kontrol" class="form-control" />
+                            <input type="text" id="claim_tanggal_kontrol" class="form-control uppercase" />
                         </div>
                         <div class="form-group">
                             <label for="">Kontrol Poli</label>
@@ -1804,6 +2156,13 @@
                         <select class="form-control" id="claim_dpjp"></select>
                     </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnClaimSEP">
+                    <i class="fa fa-check-circle"></i> Buat Claim
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

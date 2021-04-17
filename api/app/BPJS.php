@@ -91,6 +91,9 @@ class BPJS extends Utility {
                 case 'get_diagnosa':
                     return self::get_diagnosa();
 					break;
+                case 'get_procedure':
+                    return self::get_procedure();
+                    break;
                 case 'get_poli':
                     return self::get_poli();
                     break;
@@ -1052,6 +1055,11 @@ class BPJS extends Utility {
 
 	private function get_diagnosa() {
         $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/diagnosa/' . $_GET['search']);
+        return $content;
+    }
+
+    private function get_procedure() {
+        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/procedure/' . $_GET['search']);
         return $content;
     }
 
