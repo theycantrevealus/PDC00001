@@ -63,8 +63,6 @@
                     d.sync_bpjs = refreshData;
                 },
                 dataSrc: function (response) {
-                    console.clear();
-                    console.log(response);
                     var data = response.response_package.response_data;
 
                     if (data === undefined || data === null) {
@@ -153,6 +151,7 @@
         $("body").on("click", ".btn-buat-claim", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
+            selectedSEP = $(this).attr("no_sep");
             $("#modal-sep-claim").modal("show");
         });
 
@@ -367,7 +366,7 @@
                             }
                         });
 
-                        loadKelasRawat(data.kelas_rawat.nama);
+                        loadKelasRawat("#txt_bpjs_kelas_rawat", data.kelas_rawat.nama);
 
                         $("#txt_bpjs_poli_tujuan").select2({
                             minimumInputLength: 2,
@@ -837,6 +836,28 @@
             });
         });
 
+        $("#claim_kelas_rawat").select2({
+            dropdownParent: $("#modal-sep-claim")
+        });
+
+        $("#claim_dpjp").select2({
+            dropdownParent: $("#modal-sep-claim")
+        });
+
+        $("#claim_rencana_tl").select2({
+            dropdownParent: $("#modal-sep-claim")
+        });
+
+        loadSpesialistik("#claim_spesialistik", {
+            kode: "",
+            nama: ""
+        }, {
+            kode: "",
+            nama: ""
+        });
+
+        loadKelasRawat("#claim_kelas_rawat");
+
         $("#claim_tanggal_masuk").datepicker({
             dateFormat: 'DD, dd MM yy',
             autoclose: true
@@ -994,7 +1015,7 @@
             minimumInputLength: 2,
             "language": {
                 "noResults": function() {
-                    return "Faskes tidak ditemukan";
+                    return "Ruang Rawat tidak ditemukan";
                 }
             },
             dropdownParent: $("#modal-sep-claim"),
@@ -1013,7 +1034,53 @@
                 },
                 cache: true,
                 processResults: function (response) {
-                    var data = response.response_package.content.response.list;
+                    if(parseInt(response.response_package.content.metaData.code) === 200) {
+                        var data = response.response_package.content.response.list;
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    } else {
+                        return [];
+                    }
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
+
+
+
+
+        $("#claim_kondisi_pulang").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function() {
+                    return "Kondisi Pulang tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-sep-claim"),
+            ajax: {
+                dataType: "json",
+                headers: {
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_referensi_cara_keluar",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    console.log(response);
+                    var data = response.response_package.data;
                     return {
                         results: $.map(data, function (item) {
                             return {
@@ -1069,7 +1136,7 @@
             //
         });
 
-        $("#claim_cara_keluar").select2({
+        /*$("#claim_cara_keluar").select2({
             minimumInputLength: 2,
             "language": {
                 "noResults": function() {
@@ -1105,25 +1172,127 @@
             }
         }).addClass("form-control").on("select2:select", function(e) {
             //
-        });
+        });*/
+
+        loadCaraKeluar("#claim_cara_keluar");
+        $("#claim_cara_keluar").select2();
+
+        loadKondisiPulang("#claim_kondisi_pulang");
+        $("#claim_kondisi_pulang").select2();
 
         $("#btnClaimSEP").click(function() {
             var tglMasuk = $("#claim_tanggal_masuk").datepicker("getDate");
+            var parse_tglMasuk =  tglMasuk.getFullYear() + "-" + str_pad(2, tglMasuk.getMonth()+1) + "-" + str_pad(2, tglMasuk.getDate());
             var tglKeluar = $("#claim_tanggal_keluar").datepicker("getDate");
+            var parse_tglKeluar =  tglKeluar.getFullYear() + "-" + str_pad(2, tglKeluar.getMonth()+1) + "-" + str_pad(2, tglKeluar.getDate());
             var jaminan = $("#claim_jaminan").val();
-            var poli = $("#claim_poli");
-            var perawatan_ruang_rawat = $("#claim_ruang_rawat").val();
+            var poli = $("#claim_poli").val();
+            var perawatan_ruang_rawat = ($("#claim_ruang_rawat").val() === null || $("#claim_ruang_rawat").val() === undefined) ? 1 : $("#claim_ruang_rawat").val();
             var perawatan_kelas_rawat = $("#claim_kelas_rawat").val();
-            var perawatan_sepsialistik = $("#claim_spesialistik").val();
+            var perawatan_spesialistik = $("#claim_spesialistik").val();
             var perawatan_cara_keluar = $("#claim_cara_keluar").val();
             var perawatan_kondisi_pulang = $("#claim_kondisi_pulang").val();
             var diagnosa_kode = [];
             var procedure = [];
-            var rencana_tl_tindak_lanjut = $("#claim_rencana_tl");
-            var rencana_tl_dirujuk_ke = $("#claim_dirujuk_ke");
+            var rencana_tl_tindak_lanjut = $("#claim_rencana_tl").val();
+            var rencana_tl_dirujuk_ke = $("#claim_dirujuk_ke").val();
             var rencana_tl_kontrol_kembali_tanggal = $("#claim_tanggal_kontrol").datepicker("getDate");
-            var rencana_tl_kontrol_kembali_poli = $("#claim_poli_kontrol");
+            var parse_rencana_tl_kontrol_kembali_tanggal =  rencana_tl_kontrol_kembali_tanggal.getFullYear() + "-" + str_pad(2, rencana_tl_kontrol_kembali_tanggal.getMonth()+1) + "-" + str_pad(2, rencana_tl_kontrol_kembali_tanggal.getDate());
+            var rencana_tl_kontrol_kembali_poli = $("#claim_poli_kontrol").val();
             var dpjp = $("#claim_dpjp").val();
+
+            $("#claim_diagnosa tbody tr").each(function (e) {
+                var kode = $(this).find("td:eq(1) select").val();
+                var level = $(this).find("td:eq(2) select").val();
+
+                if(kode !== undefined && kode !== null) {
+                    diagnosa_kode.push({
+                        kode: kode,
+                        level: level
+                    });
+                }
+            });
+
+            $("#claim_procedure tbody tr").each(function (e) {
+                var proc = $(this).find("td:eq(1) select").val();
+
+                if(proc !== undefined && proc !== null) {
+                    procedure.push({
+                        kode: proc
+                    });
+                }
+            });
+
+            if(diagnosa_kode.length > 0 && procedure.length > 0) {
+                Swal.fire({
+                    title: "Proses Claim Baru ?",
+                    showDenyButton: true,
+                    confirmButtonText: "Ya",
+                    denyButtonText: "Belum",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            async: false,
+                            url:__HOSTAPI__ + "/BPJS",
+                            type: "POST",
+                            data: {
+                                request: "tambah_claim",
+                                sep: selectedSEP,
+                                tgl_masuk: parse_tglMasuk,
+                                tgl_keluar: parse_tglKeluar,
+                                jaminan: jaminan,
+                                poli: poli,
+                                perawatan_ruang_rawat: perawatan_ruang_rawat,
+                                perawatan_kelas_rawat: perawatan_kelas_rawat,
+                                perawatan_spesialistik: perawatan_spesialistik,
+                                perawatan_cara_keluar: perawatan_cara_keluar,
+                                perawatan_kondisi_pulang: perawatan_kondisi_pulang,
+                                diagnosa_kode: diagnosa_kode,
+                                procedure: procedure,
+                                rencana_tl_tindak_lanjut: rencana_tl_tindak_lanjut,
+                                rencana_tl_dirujuk_ke: rencana_tl_dirujuk_ke,
+                                rencana_tl_kontrol_kembali_tanggal: parse_rencana_tl_kontrol_kembali_tanggal,
+                                rencana_tl_kontrol_kembali_poli: rencana_tl_kontrol_kembali_poli,
+                                dpjp: dpjp
+                            },
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            success: function(response){
+                                console.clear();
+                                console.log(response);
+                            },
+                            error: function(response) {
+                                console.log(response);
+                            }
+                        });
+                    }
+                });
+            } else {
+                var error_claim = [];
+                var error_message = "<ol>";
+                if(diagnosa_kode.length === 0) {
+                    error_claim.push("Isi data icd10");
+                }
+
+                if(procedure.length === 0) {
+                    error_claim.push("Isi data icd9");
+                }
+
+                for(var errKey in error_claim) {
+                    error_message += "<li>" + error_claim[errKey] + "</li>";
+                }
+
+                error_message += "</ol>";
+
+                Swal.fire(
+                    "BPJS Claim",
+                    error_message,
+                    "error"
+                ).then((result) => {
+                    //
+                });
+            }
 
         });
 
@@ -1164,7 +1333,7 @@
             $(targetTable).append(newRow);
         }
 
-        function loadKelasRawat(selected = ""){
+        function loadKelasRawat(target, selected = ""){
             $.ajax({
                 async: false,
                 url:__HOSTAPI__ + "/BPJS/get_kelas_rawat_select2",
@@ -1175,7 +1344,7 @@
                 success: function(response){
                     var data = response.response_package.content.response.list;
 
-                    $("#txt_bpjs_kelas_rawat option").remove();
+                    $(target + " option").remove();
                     var targetParse = ["0", "I", "II", "III"];
                     var targetParse2 = ["0", "1", "2", "3"];
                     for(var a = 0; a < data.length; a++) {
@@ -1213,13 +1382,94 @@
                                 }
                                 $(selection).attr("selected", "selected");
                             }
-                            $("#txt_bpjs_kelas_rawat").append(selection);
+                            $(target).append(selection);
                         } else {
                             if(data[a].nama.toUpperCase() === selected.toUpperCase()) {
                                 $(selection).attr("selected", "selected");
                             }
                         }
 
+
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
+
+        function loadCaraKeluar(target, selected = ""){
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/BPJS",
+                type: "POST",
+                data: {
+                    request: "get_referensi_cara_keluar",
+                    search: {
+                        value: ""
+                    },
+                    start: 0,
+                    length: 100,
+                    draw: 1
+                },
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var data = response.response_package.data;
+
+                    $(target + " option").remove();
+                    for(var a = 0; a < data.length; a++) {
+
+                        var selection = document.createElement("OPTION");
+                        $(selection).attr("value", data[a].kode).html(data[a].kode + " - " + data[a].nama);
+                        if(data[a].nama.toUpperCase() === selected.toUpperCase()) {
+                            $(selection).attr("selected", "selected");
+                        }
+                        $(target).append(selection);
+
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
+
+
+
+
+
+
+        function loadKondisiPulang(target, selected = ""){
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/BPJS",
+                type: "POST",
+                data: {
+                    request: "get_referensi_pasca_pulang",
+                    search: {
+                        value: ""
+                    },
+                    start: 0,
+                    length: 100,
+                    draw: 1
+                },
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var data = response.response_package.data;
+
+                    $(target + " option").remove();
+                    for(var a = 0; a < data.length; a++) {
+
+                        var selection = document.createElement("OPTION");
+                        $(selection).attr("value", data[a].kode).html(data[a].kode + " - " + data[a].nama);
+                        if(data[a].nama.toUpperCase() === selected.toUpperCase()) {
+                            $(selection).attr("selected", "selected");
+                        }
+                        $(target).append(selection);
 
                     }
                 },
@@ -1261,8 +1511,7 @@
                             $(selection).attr("value", data[a].kode).html(data[a].nama);
                             $(target).append(selection);
                         }
-
-                        loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $(target).val(), dpjp);
+                        loadDPJP((target === "txt_bpjs_dpjp_spesialistik") ? "#txt_bpjs_dpjp" : "#claim_dpjp", (target === "txt_bpjs_dpjp_spesialistik") ? $("#txt_bpjs_jenis_asal_rujukan").val() : $("#claim_dirujuk_ke_jenis").val(), $(target).val(), dpjp);
                     }
                 },
                 error: function(response) {
@@ -1546,8 +1795,6 @@
 
             $(newCellProcedure).append(newProcedure);
             $(newCellAksi).append(newAksi);
-
-
 
             $(newProcedure).addClass("form-control diagnosa_claim").select2({
                 minimumInputLength: 2,

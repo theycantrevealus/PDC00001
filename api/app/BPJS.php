@@ -142,6 +142,16 @@ class BPJS extends Utility {
                 case 'get_sep_list':
                     return self::get_sep_list($parameter);
                     break;
+                case 'get_referensi_cara_keluar':
+                    $parameter = array(
+                        'search' => array(
+                            'value' => $_GET['search']
+                        ),
+                        'start' => 0,
+                        'length' => 100,
+                        'draw' => 1
+                    );
+                    return self::get_referensi_cara_keluar($parameter);
 				default:
 					return 'Unknown request';
 			}
@@ -185,6 +195,9 @@ class BPJS extends Utility {
                     break;
                 case 'rujukan_edit':
                     return self::rujukan_edit($parameter);
+                    break;
+                case 'tambah_claim':
+                    return self::tambah_claim($parameter);
                     break;
 
 
@@ -2202,6 +2215,80 @@ class BPJS extends Utility {
         );
     }
 
+    private function tambah_claim($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $parameterBuilder = array(
+            'request' => array(
+                't_lpk' => array(
+                    'noSep' => $parameter['sep'],
+                    'tglMasuk' => $parameter['tgl_masuk'],
+                    'tglKeluar' => $parameter['tgl_keluar'],
+                    'jaminan' => $parameter['jaminan'],
+                    'poli' => array(
+                        'poli' => $parameter['poli']
+                    ),
+                    'perawatan' => array(
+                        'ruangRawat' => $parameter['perawatan_ruang_rawat'],
+                        'kelasRawat' => $parameter['perawatan_kelas_rawat'],
+                        'spesialistik' => $parameter['perawatan_spesialistik'],
+                        'caraKeluar' => $parameter['perawatan_cara_keluar'],
+                        'kondisiPulang' => $parameter['perawatan_kondisi_pulang']
+                    ),
+                    'diagnosa' => $parameter['diagnosa_kode'],
+                    'procedure' => $parameter['procedure'],
+                    'rencanaTL' => array(
+                        'tindakLanjut' => $parameter['rencana_tl_tindak_lanjut'],
+                        'dirujukKe' => array(
+                            'kodePPK' => $parameter['rencana_tl_dirujuk_ke']
+                        ),
+                        'kontrolKembali' => array(
+                            'tglKontrol' => $parameter['rencana_tl_kontrol_kembali_tanggal'],
+                            'poli' => $parameter['rencana_tl_kontrol_kembali_poli']
+                        )
+                    ),
+                    'DPJP' => $parameter['dpjp'],
+                    'user' => $UserData['data']->nama
+                )
+            )
+        );
+
+        $proceed = self::postUrl('/' . __BPJS_SERVICE_NAME__ . '/LPK/insert', $parameterBuilder);
+        $uid = parent::gen_uuid();
+        if(intval($proceed['content']['metaData']['code']) === 200) {
+            $lpk_log = self::$query->insert('bpjs_claim', array(
+                'noSEP' => $parameter['sep'],
+                'tglMasuk' => $parameter['tgl_masuk'],
+                'tglKeluar' => $parameter['tgl_keluar'],
+                'jaminan' => $parameter['jaminan'],
+                'poli' => $parameter['poli'],
+                'ruangRawat' => $parameter['perawatan_ruang_rawat'],
+                'kelasRawat' => $parameter['perawatan_kelas_rawat'],
+                'spesialistik' => $parameter['perawatan_spesialistik'],
+                'caraKeluar' => $parameter['perawatan_cara_keluar'],
+                'kondisiPulang' => $parameter['perawatan_kondisi_pulang'],
+                'diagnosa' => strval(json_encode($parameter['diagnosa_kode'])),
+                'procedure' => strval(json_encode($parameter['procedure'])),
+                'tindakLanjut' => $parameter['rencana_tl_tindak_lanjut'],
+                'dirujukKe_kodePPK' => $parameter['rencana_tl_dirujuk_ke'],
+                'kontrolKembali_tanggal' => $parameter['rencana_tl_kontrol_kembali_tanggal'],
+                'kontrolKembali_poli' => $parameter['rencana_tl_kontrol_kembali_poli'],
+                'dpjp' => $parameter['dpjp'],
+                'user' => $UserData['data']->nama,
+                'pegawai' => $UserData['data']->uid,
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+        }
+
+        return array(
+            'bpjs' => $proceed,
+            'log' => $lpk_log
+        );
+    }
+
     private function sep_baru($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
@@ -2691,33 +2778,58 @@ class BPJS extends Utility {
         return $return_value;
     }
 
-    public function postUrl($extended_url, $parameter) {
-        $url = self::$base_url . $extended_url;
+    public function postUrl($extended_url, $parameter, $type = 1) {
+        $url = ($type === 1) ? (self::$base_url . $extended_url) : $extended_url;
 
         date_default_timezone_set('UTC');
 
-        $tStamp = strval(time()-strtotime('1970-01-01 00:00:00'));
-        $signature = hash_hmac('sha256', self::$data_api ."&". $tStamp , self::$secretKey_api, true);
-        $encodedSignature = base64_encode($signature);
-        $headers = array(
-            'X-cons-id: ' . self::$data_api . ' ',
-            'X-timestamp: ' . $tStamp . ' ',
-            'X-signature: ' .$encodedSignature,
-            'Content-Type: Application/x-www-form-urlencoded',
-            'Accept: Application/JSON'
-        );
+        if($type === 1) {
+            $tStamp = strval(time()-strtotime('1970-01-01 00:00:00'));
+            $signature = hash_hmac('sha256', self::$data_api ."&". $tStamp , self::$secretKey_api, true);
+            $encodedSignature = base64_encode($signature);
+            $headers = array(
+                'X-cons-id: ' . self::$data_api . ' ',
+                'X-timestamp: ' . $tStamp . ' ',
+                'X-signature: ' .$encodedSignature,
+                'Content-Type: Application/x-www-form-urlencoded',
+                'Accept: Application/JSON'
+            );
 
-        $ch = curl_init();
+            $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($parameter));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'DEFAULT@SECLEVEL=1');
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($parameter));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'DEFAULT@SECLEVEL=1');
+        } else {
+            $tStamp = strval(time()-strtotime('1970-01-01 00:00:00'));
+            $signature = hash_hmac('sha256', __DATA_API_LIVE_APLICARES__ ."&". $tStamp , __SECRET_KEY_LIVE_APLICARES_BPJS__, true);
+            $encodedSignature = base64_encode($signature);
+            $headers = array(
+                'X-cons-id: ' . __DATA_API_LIVE_APLICARES__ . ' ',
+                'X-timestamp: ' . $tStamp . ' ',
+                'X-signature: ' .$encodedSignature,
+                'Content-Type: Application/x-www-form-urlencoded',
+                'Accept: Application/JSON'
+            );
+
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($parameter));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'DEFAULT@SECLEVEL=1');
+        }
 
 
         $content = curl_exec($ch);
