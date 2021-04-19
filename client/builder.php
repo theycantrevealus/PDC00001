@@ -57,7 +57,7 @@
 										require 'pages/' . implode('/', __PAGES__) . '/index.php';
 									} else {
 										if(!$allowAccess) {
-											require 'pages/system/403.php';	
+											require 'pages/system/403.php';
 										} else {
 											require 'pages/system/404.php';
 										}
@@ -74,7 +74,6 @@
 											if(file_exists($isFile . '/' . $value . '.php')) {
 												$lastExist = $isFile . '/' . $value . '.php';
 											}
-
 											$isFile .= '/' . $value;
 										}
 
@@ -102,7 +101,7 @@
 											require $lastExist;
 										} else {
 											if(!$allowAccess) {
-												require 'pages/system/403.php';	
+												require 'pages/system/403.php';
 											} else {
 												require 'pages/system/404.php';
 											}
@@ -153,7 +152,7 @@
 				dateFormat: 'DD, dd MM yy',
 				autoclose: true
 			});
-			
+
 			moment.locale('id');
 			var parentList = [];
 
@@ -169,12 +168,12 @@
 
 					//$("a[href=\"#menu-" + hasMaster + "\"]").removeClass("collapsed").parent().addClass("open");
 					$("ul#menu-" + hasMaster).addClass("show");
-					
+
 				}
 			});
 
 			//$("ul[master-child=\"" + activeMenu + "\"").addClass("open");
-			
+
 
 			var idleCheck;
 			function reloadSession() {
@@ -218,7 +217,7 @@
 				});
 				return false;
 			});
-		
+
 			$("body").on("click", "a[href=\"#notifications_menu\"]", function() {
 				$.ajax({
 					async: false,
@@ -240,10 +239,21 @@
 			});
 
 			$("body").on("click", "#refresh_protocol", function() {
-			    notification ("info", "Refresh page", 3000, "notif_update");
-                push_socket(__ME__, "refresh", "*", "Refresh page", "info");
+
+                push_socket(__ME__, "refresh", "*", "Refresh page", "info").then(function() {
+                    notification ("info", "Refresh page", 3000, "notif_update");
+                });
             });
 		});
+
+        function getDateRange(target) {
+            var rangeItem = $(target).val().split(" to ");
+            if(rangeItem.length > 1) {
+                return rangeItem;
+            } else {
+                return [rangeItem, rangeItem];
+            }
+        }
 
 
 
@@ -275,7 +285,7 @@
 							$(notifContentContainter).html("<a href=\"\">A.Demian</a> left a comment on <a href=\"\">Stack</a><br>" +
 															"<small class=\"text-muted\">1 minute ago</small>").addClass("flex");
 						}
-							
+
 						$(notifContainer).addClass("dropdown-item d-flex");
 						$(notifContainer).append(notifSenderContainer);
 						$(notifContainer).append(notifContentContainter);
@@ -341,7 +351,7 @@
 						$getScript[0] = 'script';
 						include implode('/', $getScript);
 					} else {
-						include 'script/system/404.php';	
+						include 'script/system/404.php';
 					}
 				}
 			}
@@ -362,14 +372,17 @@
                 type: type
             };
 
-            Sync.send(JSON.stringify(msg));
+            return new Promise((resolve, reject) => {
+                Sync.send(JSON.stringify(msg));
+                resolve(msg);
+            });
         }
 
         $(function() {
             if ("WebSocket" in window) {
 
                 //var Sync = new WebSocket(serverTarget);
-                console.log(protocolLib);
+                //console.log(protocolLib);
                 Sync = SocketCheck(serverTarget, protocolLib, tm);
 
             } else {
@@ -390,7 +403,7 @@
             var Sync = new WebSocket(serverTarget);
             Sync.onopen = function() {
                 clearInterval(tm);
-                console.log("connected");
+                //console.log("connected");
                 $(".global-sync-container").fadeOut();
             }
 
@@ -404,8 +417,9 @@
                 var parameter = signalData.parameter;
 
                 if(command !== undefined && command !== null && command !== "") {
+
                     if(protocolLib[command] !== undefined) {
-                        if(command == "anjungan_kunjungan_panggil") {
+                        if(command === "anjungan_kunjungan_panggil") {
                             if(audio !== undefined && audio.audio !== undefined) {
                                 if(!audio.paused) {
                                     audio.audio.pause();
@@ -416,10 +430,12 @@
                             }
                             audio = protocolLib[command](command, type, parameter, sender, receiver, time);
                         } else {
-                            if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
+                            if(receiver == __ME__ || sender == __ME__ || receiver == "*" || receiver == __MY_PRIVILEGES__.response_data[0]["uid"]) {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
+                                //console.log(__MY_PRIVILEGES__);
                             } else {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
+                                //alert("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
                             }
                         }
                     }
@@ -579,7 +595,7 @@
 			}
 			return s.join(dec);
 		}
-		
+
 
 		function bpjs_load_faskes() {
 			var dataFaskes = [];
@@ -647,7 +663,7 @@
 					title: data
 				});
 			});
-			
+
 			$(".sidebar-menu").each(function(e) {
 				$(this).find("li.sidebar-menu-item").each(function(f) {
 					var shimmer = document.createElement("DIV");

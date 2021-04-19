@@ -2,6 +2,21 @@
 <script type="text/javascript">
 	$(function(){
 
+	    var currentPenjamin = "";
+
+        protocolLib = {
+            permintaan_radio_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "hasil_order_radio");
+                tableVerifikasiRadiologi.ajax.reload();
+                tableAntrianRadiologi.ajax.reload();
+            },
+            antrian_radiologi_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "hasil_order_radio");
+                tableVerifikasiRadiologi.ajax.reload();
+                tableAntrianRadiologi.ajax.reload();
+            }
+        };
+
 		var tableAntrianRadiologi = $("#table-antrian-radiologi").DataTable({
 			"ajax":{
 				async: false,
@@ -177,7 +192,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button asesmen=\"" + row.uid_asesmen + "\" id=\"rad_order_" + row.uid + "\" type='button' class=\"btn btn-info btn-sm btn-verifikasi-radiologi\" data-toggle='tooltip' title=\"Verifikasi Radiologi\"'>" +
+                            "<button asesmen=\"" + row.uid_asesmen + "\" id=\"rad_order_" + row.uid + "\" type='button' penjamin=\"" + row.uid_penjamin + "\" class=\"btn btn-info btn-sm btn-verifikasi-radiologi\" data-toggle='tooltip' title=\"Verifikasi Radiologi\"'>" +
                             "<i class=\"fa fa-check\"></i>" +
                             "</a>" +
                             "</div>";
@@ -192,6 +207,7 @@
             uid = uid[uid.length - 1];
 
             var asesmen = $(this).attr("asesmen");
+            currentPenjamin = $(this).attr("penjamin");
 
             $.ajax({
                 url: __HOSTAPI__ + "/Radiologi/get-order-detail/" + uid,
@@ -301,8 +317,20 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function (response) {
-                            $("#modal-verif-radio").modal("hide");
-                            tableVerifikasiRadiologi.ajax.reload();
+                            if(currentPenjamin === __UIDPENJAMINBPJS__) {
+                                push_socket(__ME__, "antrian_radiologi_baru", "*", "Permintaan radiologi", "info").then(function() {
+                                    $("#modal-verif-radio").modal("hide");
+                                    tableVerifikasiRadiologi.ajax.reload();
+                                    tableAntrianRadiologi.ajax.reload();
+                                });
+                            } else {
+                                push_socket(__ME__, "kasir_daftar_baru", "*", "Tagihan Radiologi Baru", "info").then(function() {
+                                    $("#modal-verif-radio").modal("hide");
+                                    tableVerifikasiRadiologi.ajax.reload();
+                                    tableAntrianRadiologi.ajax.reload();
+                                });
+                            }
+
                         },
                         error: function (response) {
                             //
@@ -530,6 +558,23 @@
             var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
             $("#" + selector).append(opti_null);
         }
+
+        /*Sync.onmessage = function(evt) {
+            var signalData = JSON.parse(evt.data);
+            var command = signalData.protocols;
+            var type = signalData.type;
+            var sender = signalData.sender;
+            var receiver = signalData.receiver;
+            var time = signalData.time;
+            var parameter = signalData.parameter;
+
+            console.log(signalData);
+            if(command !== undefined && command !== null && command !== "") {
+                protocolLib.command(command, type, parameter, sender, receiver, time);
+            } else {
+                console.log(command);
+            }
+        }*/
 	});
 </script>
 

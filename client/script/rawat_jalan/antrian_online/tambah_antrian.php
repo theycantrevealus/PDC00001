@@ -66,27 +66,31 @@
 
 									updateStatusReservasiOnline(id_reservasi);
 
-									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-                                    Swal.fire(
-                                        'Berhasil ditambahkan!',
-                                        'Silahkan arahkan pasien ke kasir',
-                                        'success'
-                                    ).then((result) => {
-                                        location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then( function() {
+                                        Swal.fire(
+                                            'Berhasil ditambahkan!',
+                                            'Silahkan arahkan pasien ke kasir',
+                                            'success'
+                                        ).then((result) => {
+                                            location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                        });
                                     });
+
 					
 								} else if(response.response_package.response_notif == 'P') {
 
 									updateStatusReservasiOnline(id_reservasi);
 
-									push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-                                    Swal.fire(
-                                        'Berhasil ditambahkan!',
-                                        'Silahkan arahkan pasien ke poli',
-                                        'success'
-                                    ).then((result) => {
-                                        location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+									push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                        Swal.fire(
+                                            'Berhasil ditambahkan!',
+                                            'Silahkan arahkan pasien ke poli',
+                                            'success'
+                                        ).then((result) => {
+                                            location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                        });
                                     });
+
 								} else {
 									console.log("command not found");
 								}
@@ -133,14 +137,18 @@
 						//console.log(response)
 						if(response.response_package.response_notif == 'K') {
 
-							updateStatusReservasiOnline(id_reservasi);
+
 							
-							push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+							push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                updateStatusReservasiOnline(id_reservasi);
+                            });
 						} else if(response.response_package.response_notif == 'P') {
 
-							updateStatusReservasiOnline(id_reservasi);
 
-							push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
+
+							push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                updateStatusReservasiOnline(id_reservasi);
+                            });
 						} else {
 							console.log("command not found");
 						}

@@ -4,7 +4,10 @@
 		var params;
 		var MODE = false;
 		var currentAntrianType = "DEFAULT";
+		var currentAntrianUID = "";
+		var currentAntrianPasien = "";
         $(".sep").select2();
+
         $("#txt_bpjs_tanggal_rujukan").datepicker({
             dateFormat: "DD, dd MM yy",
             autoclose: true,
@@ -53,17 +56,94 @@
             }
         });
 
+        function loadPoli(targetted = ""){
+            var dataPoli = null;
 
-		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
+            if(targetted === __POLI_IGD__) {
+                //Show Cara data dan keterangan cara datang
+                $(".poli_igd").show();
+                $(".poli_lain").hide();
+            } else {
+                $(".poli_igd").hide();
+                $(".poli_lain").show();
+            }
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Poli/poli-available",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            if(MetaData[i].uid !== __POLI_INAP__) {
+                                if(targetted !== "") {
+                                    if(MetaData[i].uid === targetted) {
+                                        $(selection).attr("selected", "selected");
+                                    }
+                                    $("#filter_poli").append(selection);
+                                } else {
+                                    if(MetaData[i].editable) {
+                                        $("#filter_poli").append(selection);
+                                    }
+                                }
+
+                            }
+                        }
+
+                        if(targetted !== "") {
+                            $("#filter_poli").attr("disabled", "disabled");
+                        } else {
+                            $("#filter_poli").removeAttr("disabled");
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataPoli;
+        }
+
+        loadPoli();
+
+        $("#filter_poli").select2().on('change', function(){
+            tableAntrian.ajax.reload();
+        });
+
+
+		var tableAntrian = $("#table-antrian-rawat-jalan").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Antrian/antrian",
-				type: "GET",
+				type: "POST",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
+                data: function(d) {
+                    d.request = "get_list_antrian_backend";
+                    d.poli = $("#filter_poli").val();
+                },
 				dataSrc:function(response) {
 				    var data = response.response_package.response_data;
 				    var filtered = [];
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
 				    for(var key in data) {
 				        if(data[key].departemen !== "IGD") {
 				            filtered.push(data[key])
@@ -111,17 +191,31 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-					    if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
-							if(parseInt(row['sep']) > 0) {
-								return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row.sep + "</h6>";
-							} else {
-							    if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
-                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                        if(row["uid_penjamin"] === __UIDPENJAMINBPJS__) {
+                            if(Date(row.created_at) < Date()) {
+                                return "Antrian sudah lewat";
+                            } else {
+                                if(row['sep'] !== "none") {
+                                    if(row.sep.response_data !== undefined) {
+                                        return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                    } else {
+                                        return row["penjamin"] + " <h6 class=\"nomor_sep text-success\"><i class=\"fa fa-check\"></i> " + row.sep + "</h6>";
+                                        //<button class=\"btn btn-success btn-cetak-sep\" id=\"cetak_sep_" + row.sep_uid + "\"><i class=\"fa fa-print\"></i> Cetak SEP</button>
+                                    }
+
+                                    //return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
                                 } else {
-                                    return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
-							        //return row["penjamin"];
+                                    if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
+                                        /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
+                                            "<button class=\"btn btn-warning btn-sm pull-right btn-ajukan-sep\"><i class=\"fa fa-exclamation-circle\"></i> Ajukan SEP</button>";*/
+                                        return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                    } else {
+                                        /*return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>" +
+                                            "<button class=\"btn btn-warning btn-sm pull-right btn-ajukan-sep\"><i class=\"fa fa-exclamation-circle\"></i> Ajukan SEP</button>";*/
+                                        return row["penjamin"] + " <button antrian=\"" + row.uid + "\" allow_sep=\"" + ((row.waktu_keluar !== undefined) ? "1" : "0") + "\" class=\"btn btn-info btn-sm daftar_sep pull-right\" id=\"" + row.uid_pasien + "\">Daftar SEP</button>";
+                                    }
                                 }
-							}
+                            }
 						} else {
 							return row["penjamin"];
 						}
@@ -134,35 +228,61 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
-										"<i class=\"fa fa-check\"></i>" +
-									"</button>" +
-                                    "<div class=\"btn-group\">" +
-                                        "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
-                                            "<i class=\"fa fa-print\"></i> Cetak" +
-                                        "</button>" +
-                                        "<div class=\"dropdown-menu\">" +
-                                            "<a id=\"cetak_kartu_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"kartu\" href=\"#\">Kartu Pasien</a>" +
-                                            "<a id=\"cetak_lab_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"lab\" href=\"#\">Label Laboratorium</a>" +
-                                            "<a id=\"cetak_tracer_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"tracer\" href=\"#\">Tracer</a>" +
-                                            "<a id=\"cetak_spbk_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"spbk\" href=\"#\">SPBK</a>" +
-                                            "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"sosial\" href=\"#\">Data Sosial Pasien</a>" +
-                                            "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"gelang\" href=\"#\">Gelang Pasien</a>" +
-                                            "<a id=\"cetak_bayi_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"bayi\" href=\"#\">Gelang Pasien Bayi</a>" +
-                                            "<a id=\"cetak_identitas_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"idenftitas\" href=\"#\">Identitas Pasien</a>" +
-                                        "</div>" +
-                                    "</div>" +
-                                    /*"<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"gelang\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"kartu\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"lab\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"tracer\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"spbk\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"sosial\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"bayi\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
-                                    "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"identitas\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +*/
+                        if(row["uid_penjamin"] === __UIDPENJAMINBPJS__) {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
+                                "<i class=\"fa fa-check\"></i>" +
+                                "</button>" +
+                                "<div class=\"btn-group\">" +
+                                "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
+                                "<i class=\"fa fa-print\"></i> Cetak" +
+                                "</button>" +
+                                "<div class=\"dropdown-menu\">" +
+                                "<a id=\"cetak_sep_" + row.sep_uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"SEP\" href=\"#\">BPJS - SEP</a>" +
+                                "<a id=\"cetak_kartu_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"kartu\" href=\"#\">Kartu Pasien</a>" +
+                                "<a id=\"cetak_lab_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"lab\" href=\"#\">Label Laboratorium</a>" +
+                                "<a id=\"cetak_tracer_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"tracer\" href=\"#\">Tracer</a>" +
+                                "<a id=\"cetak_spbk_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"spbk\" href=\"#\">SPBK</a>" +
+                                "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"sosial\" href=\"#\">Data Sosial Pasien</a>" +
+                                "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"gelang\" href=\"#\">Gelang Pasien</a>" +
+                                "<a id=\"cetak_bayi_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"bayi\" href=\"#\">Gelang Pasien Bayi</a>" +
+                                "<a id=\"cetak_identitas_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"idenftitas\" href=\"#\">Identitas Pasien</a>" +
+                                "</div>" +
+                                "</div>" +
 
-								"</div>";
+                                "</div>";
+                        } else {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
+                                "<i class=\"fa fa-check\"></i>" +
+                                "</button>" +
+                                "<div class=\"btn-group\">" +
+                                "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
+                                "<i class=\"fa fa-print\"></i> Cetak" +
+                                "</button>" +
+                                "<div class=\"dropdown-menu\">" +
+                                "<a id=\"cetak_kartu_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"kartu\" href=\"#\">Kartu Pasien</a>" +
+                                "<a id=\"cetak_lab_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"lab\" href=\"#\">Label Laboratorium</a>" +
+                                "<a id=\"cetak_tracer_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"tracer\" href=\"#\">Tracer</a>" +
+                                "<a id=\"cetak_spbk_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"spbk\" href=\"#\">SPBK</a>" +
+                                "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"sosial\" href=\"#\">Data Sosial Pasien</a>" +
+                                "<a id=\"cetak_gelang_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"gelang\" href=\"#\">Gelang Pasien</a>" +
+                                "<a id=\"cetak_bayi_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"bayi\" href=\"#\">Gelang Pasien Bayi</a>" +
+                                "<a id=\"cetak_identitas_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" class=\"dropdown-item print_manager\" jenis=\"idenftitas\" href=\"#\">Identitas Pasien</a>" +
+                                "</div>" +
+                                "</div>" +
+                                /*"<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"gelang\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"kartu\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"lab\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"tracer\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"spbk\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"sosial\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"bayi\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +
+                                "<button id=\"cetak_" + row.uid + "\" pasien=\"" + row.uid_pasien + "\" jenis=\"identitas\" class=\"btn btn-info print_manager\"><i class=\"fa fa-print\"></i></button>" +*/
+
+                                "</div>";
+
+                        }
 					}
 				}
 			]
@@ -239,7 +359,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
-                            if(parseInt(row['sep']) > 0) {
+                            if(row['sep'] != "none") {
                                 return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row.sep + "</h6>";
                             } else {
                                 if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
@@ -306,7 +426,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
+                        return row.autonum;
                     }
                 },
                 {
@@ -332,7 +452,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row["uid_penjamin"] == __UIDPENJAMINBPJS__) {
-                            if(parseInt(row['sep']) > 0) {
+                            if(row['sep'] != "none") {
                                 return row["penjamin"] + " <h6 class=\"nomor_sep\">" + row.sep + "</h6>";
                             } else {
                                 if(row.waktu_keluar !== undefined && row.waktu_keluar !== null) {
@@ -345,11 +465,6 @@
                         } else {
                             return row["penjamin"];
                         }
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row["user_resepsionis"];
                     }
                 },
                 {
@@ -393,7 +508,6 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function(response){
-                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 tableAntrian.ajax.reload();
                                 tableAntrianRI.ajax.reload();
@@ -430,6 +544,13 @@
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
 
+            var SEPButton = $(this);
+            SEPButton.html("Memuat SEP...").removeClass("btn-info").addClass("btn-warning");
+
+            var antrian = $(this).attr("antrian");
+            currentAntrianUID = antrian;
+
+
             $.ajax({
                 async: false,
                 url: __HOSTAPI__ + "/Pasien/pasien-detail/" + id,
@@ -449,6 +570,7 @@
                     }
 
                     if(bpjsMeta !== undefined) {
+                        currentAntrianPasien = data.uid;
                         $("#txt_bpjs_nama").val(data.nama);
                         $("#txt_bpjs_nik").val(data.nik);
                         $("#txt_bpjs_telepon").val(data.no_telp);
@@ -644,8 +766,7 @@
             //======================================================================
             
             
-            var SEPButton = $(this);
-            SEPButton.html("Memuat SEP...").removeClass("btn-info").addClass("btn-warning");
+
 
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
@@ -684,6 +805,7 @@
                     $("#txt_bpjs_internal_db").html(diagnosa_banding);
 
 
+
                     $.ajax({
                         async: false,
                         url:__HOSTAPI__ + "/BPJS/get_rujukan_list/" + $("#txt_bpjs_nomor").val(),
@@ -691,36 +813,50 @@
                         beforeSend: function(request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
-                        success: function(response){
+                        success: function(response) {
+                            console.clear();
+                            console.log(response);
+
                             $("#txt_bpjs_nomor_rujukan " + " option").remove();
+
                             $("#txt_bpjs_nomor_rujukan").select2("destroy");
                             $("#txt_bpjs_nomor_rujukan").select2();
                             $("#txt_bpjs_nomor_rujukan").select2("val", "");
-                            if(response.response_package.content.response !== null) {
-                                $("#panel-rujukan").show();
-                                var data = response.response_package.content.response.rujukan;
-                                selectedListRujukan = data;
+                            if(
+                                response.response_package.content !== undefined &&
+                                response.response_package.content.response !== null
+                        ) {
+                                if(parseInt(response.response_package.content.metaData.code) === 200) {
+                                    $("#panel-rujukan").show();
+                                    var data = response.response_package.content.response.rujukan;
+                                    selectedListRujukan = data;
 
 
 
-                                if(data.length > 0) {
-                                    isRujukan = true;
-                                    for(var a = 0; a < data.length; a++) {
-                                        if(parseInt(data[a].pelayanan.kode) === 2) {
-                                            var selection = document.createElement("OPTION");
+                                    if(data.length > 0) {
+                                        isRujukan = true;
+                                        for(var a = 0; a < data.length; a++) {
+                                            if(parseInt(data[a].pelayanan.kode) === 2) {
+                                                var selection = document.createElement("OPTION");
 
-                                            $(selection).attr("value", data[a].noKunjungan.toUpperCase()).html(data[a].noKunjungan.toUpperCase());
-                                            $("#txt_bpjs_nomor_rujukan").append(selection);
+                                                $(selection).attr("value", data[a].noKunjungan.toUpperCase()).html(data[a].noKunjungan.toUpperCase());
+                                                $("#txt_bpjs_nomor_rujukan").append(selection);
+                                            }
                                         }
-                                    }
 
-                                    $(".informasi_rujukan").show();
-                                    $("#btnProsesSEP").show();
-                                    loadInformasiRujukan(selectedListRujukan[0]);
-                                    loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+                                        $(".informasi_rujukan").show();
+                                        $("#btnProsesSEP").show();
+                                        loadInformasiRujukan(selectedListRujukan[0]);
+                                        loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $("#txt_bpjs_dpjp_spesialistik").val());
+                                    } else {
+                                        isRujukan = false;
+                                        $(".informasi_rujukan").hide();
+                                        $("#btnProsesSEP").hide();
+                                    }
                                 } else {
-                                    isRujukan = false;
+                                    isRujukan = false
                                     $(".informasi_rujukan").hide();
+                                    $("#panel-rujukan").hide();
                                     $("#btnProsesSEP").hide();
                                 }
                             } else {
@@ -728,6 +864,12 @@
                                 $(".informasi_rujukan").hide();
                                 $("#panel-rujukan").hide();
                                 $("#btnProsesSEP").hide();
+                            }
+
+                            if(!isRujukan) {
+                                $("#btnProsesSEP").show();
+                                $(".informasi_rujukan").show();
+                                //$("#panel-rujukan").show();
                             }
                         },
                         error: function(response) {
@@ -770,12 +912,15 @@
 
                     var tanggal_laka = new Date($("#txt_bpjs_laka_tanggal").datepicker("getDate"));
                     var parse_tanggal_laka =  tanggal_laka.getFullYear() + "-" + str_pad(2, tanggal_laka.getMonth()+1) + "-" + str_pad(2, tanggal_laka.getDate());
-
                     if(isRujukan)
                     {
                         dataSetSEP = {
                             request: "sep_baru",
+                            antrian: currentAntrianUID,
+                            pasien: currentAntrianPasien,
                             no_kartu: $("#txt_bpjs_nomor").val(),
+                            spesialistik_kode: $("#txt_bpjs_dpjp_spesialistik").val(),
+                            spesialistik_nama: $("#txt_bpjs_dpjp_spesialistik option:selected").text(),
                             ppk_pelayanan: $("#txt_bpjs_faskes").val(),
                             kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
                             no_mr: $("#txt_bpjs_rm").val().replace(new RegExp(/-/g),""),
@@ -785,6 +930,7 @@
                             no_rujukan: $("#txt_bpjs_nomor_rujukan").val(),
                             catatan: $("#txt_bpjs_catatan").val(),
                             diagnosa_awal: $("#txt_bpjs_diagnosa_awal").val(),
+                            diagnosa_kode: $("#txt_bpjs_diagnosa_awal option:selected").text(),
                             poli: $("#txt_bpjs_poli_tujuan").val(),
                             eksekutif: $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val(),
                             cob: $("input[type=\"radio\"][name=\"txt_bpjs_cob\"]:checked").val(),
@@ -802,21 +948,27 @@
 
                             skdp: $("#txt_bpjs_skdp").val(),
                             dpjp: $("#txt_bpjs_dpjp").val(),
+                            dpjp_nama: $("#txt_bpjs_dpjp option:selected").text(),
                             telepon: $("#txt_bpjs_telepon").val()
                         };
                     } else {
                         dataSetSEP = {
                             request: "sep_baru",
+                            antrian: currentAntrianUID,
+                            pasien: currentAntrianPasien,
+                            spesialistik_kode: $("#txt_bpjs_dpjp_spesialistik").val(),
+                            spesialistik_nama: $("#txt_bpjs_dpjp_spesialistik option:selected").text(),
                             no_kartu: $("#txt_bpjs_nomor").val(),
                             ppk_pelayanan: $("#txt_bpjs_faskes").val(),
                             kelas_rawat: $("#txt_bpjs_kelas_rawat").val(),
                             no_mr: $("#txt_bpjs_rm").val().replace(new RegExp(/-/g),""),
                             asal_rujukan: $("#txt_bpjs_jenis_asal_rujukan").val(),
-                            ppk_rujukan: $("#txt_bpjs_asal_rujukan").val(),
-                            tgl_rujukan: parse_tanggal_rujukan,
-                            no_rujukan: "",
+                            ppk_rujukan: /*$("#txt_bpjs_asal_rujukan").val()*/"00010001",
+                            tgl_rujukan: <?php echo json_encode(date('Y-m-d', strtotime("-1 days"))); ?>,
+                            no_rujukan: "1234567",
                             catatan: $("#txt_bpjs_catatan").val(),
                             diagnosa_awal: $("#txt_bpjs_diagnosa_awal").val(),
+                            diagnosa_kode: $("#txt_bpjs_diagnosa_awal option:selected").text(),
                             poli: $("#txt_bpjs_poli_tujuan").val(),
                             eksekutif: $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val(),
                             cob: $("input[type=\"radio\"][name=\"txt_bpjs_cob\"]:checked").val(),
@@ -834,6 +986,7 @@
 
                             skdp: $("#txt_bpjs_skdp").val(),
                             dpjp: $("#txt_bpjs_dpjp").val(),
+                            dpjp_nama: $("#txt_bpjs_dpjp option:selected").text(),
                             telepon: $("#txt_bpjs_telepon").val()
                         };
                     }
@@ -847,22 +1000,30 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function(response){
-                            if(response.response_package.content.metaData.code === "201") {
-                                Swal.fire(
-                                    "Gagal buat SEP",
-                                    response.response_package.content.metaData.message,
-                                    "warning"
-                                ).then((result) => {
-                                });
-                            } else {
+                            console.log(response);
+                            if(parseInt(response.response_package.bpjs.content.metaData.code) === 200) {
                                 Swal.fire(
                                     "Pembuatan SEP Berhasil!",
                                     "SEP telah dibuat",
                                     "success"
                                 ).then((result) => {
-                                    console.clear();
-                                    console.log(response);
-                                    $("#modal-sep-new").modal("hide");
+                                    push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning").then(function () {
+                                        tableAntrian.ajax.reload();
+                                        tableAntrianIGD.ajax.reload();
+                                        tableAntrianRI.ajax.reload();
+                                        $("#modal-sep-new").modal("hide");
+                                    });
+                                });
+                            } else {
+                                Swal.fire(
+                                    "Gagal buat SEP",
+                                    response.response_package.bpjs.content.metaData.message,
+                                    "warning"
+                                ).then((result) => {
+                                    //$("#modal-sep-new").modal("hide");
+                                    /*tableAntrian.ajax.reload();
+                                    tableAntrianIGD.ajax.reload();
+                                    tableAntrianRI.ajax.reload();*/
                                 });
                             }
                         },
@@ -995,13 +1156,27 @@
                     var data = response.response_package.content.response.list;
 
                     $("#txt_bpjs_kelas_rawat option").remove();
+                    var targetParse = ["0", "I", "II", "III"];
                     for(var a = 0; a < data.length; a++) {
                         var selection = document.createElement("OPTION");
 
                         $(selection).attr("value", data[a].kode).html(data[a].nama);
-                        if(data[a].nama.toUpperCase() === selected.toUpperCase()) {
-                            $(selection).attr("selected", "selected");
+
+                        var checkKelasNama = data[a].nama.toUpperCase().split("KELAS");
+                        var checkSelectedKelas = selected.toUpperCase().split("KELAS");
+                        if(checkKelasNama.length > 1) {
+                            if(data[a].nama.toUpperCase() === "KELAS " + targetParse.indexOf(checkSelectedKelas[1].trim())) {
+                                $(selection).attr("selected", "selected");
+                                //console.log(data[a].nama.toUpperCase() + " >>> " + "KELAS " + targetParse.indexOf(checkSelectedKelas[1].trim()));
+                            } else {
+                                //console.log(data[a].nama.toUpperCase() + " >>> " + selected.toUpperCase());
+                            }
+                        } else {
+                            if(data[a].nama.toUpperCase() === selected.toUpperCase()) {
+                                $(selection).attr("selected", "selected");
+                            }
                         }
+
                         $("#txt_bpjs_kelas_rawat").append(selection);
                     }
                 },
@@ -1095,17 +1270,21 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    var data = response.response_package.content.response.list;
+                    if(response.response_package.content === null) {
+                        loadSpesialistik(target);
+                    } else {
+                        var data = response.response_package.content.response.list;
 
-                    $(target + " option").remove();
-                    for(var a = 0; a < data.length; a++) {
-                        var selection = document.createElement("OPTION");
+                        $(target + " option").remove();
+                        for(var a = 0; a < data.length; a++) {
+                            var selection = document.createElement("OPTION");
 
-                        $(selection).attr("value", data[a].kode).html(data[a].nama);
-                        $(target).append(selection);
+                            $(selection).attr("value", data[a].kode).html(data[a].nama);
+                            $(target).append(selection);
+                        }
+
+                        loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $(target).val());
                     }
-
-                    loadDPJP("#txt_bpjs_dpjp", $("#txt_bpjs_jenis_asal_rujukan").val(), $(target).val());
                 },
                 error: function(response) {
                     console.log(response);
@@ -1122,15 +1301,20 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    var data = response.response_package.content.response.list;
+                    if(response.response_package.content === null) {
+                        loadDPJP(target, jenis, spesialistik);
+                    } else {
+                        var data = response.response_package.content.response.list;
 
-                    $(target + " option").remove();
-                    $(target).select2('data', null);
-                    for(var a = 0; a < data.length; a++) {
-                        var selection = document.createElement("OPTION");
+                        $(target + " option").remove();
+                        $(target).select2('data', null);
+                        for(var a = 0; a < data.length; a++) {
+                            var selection = document.createElement("OPTION");
 
-                        $(selection).attr("value", data[a].kode).html(data[a].kode + " - " + data[a].nama);
-                        $(target).append(selection);
+                            $(selection).attr("value", data[a].kode).html(data[a].kode + " - " + data[a].nama);
+                            $(target).append(selection);
+                        }
+
                     }
                 },
                 error: function(response) {
@@ -1144,7 +1328,7 @@
             $("#txt_bpjs_rujuk_tanggal").html(data.tglKunjungan);
             $("#txt_bpjs_rujuk_poli").html(data.poliRujukan.kode + " - " + data.poliRujukan.nama);
             $("#txt_bpjs_rujuk_diagnosa").html(data.diagnosa.kode + " - " + data.diagnosa.nama);
-            $("#txt_bpjs_rujuk_keluhan").html((data.keluhan === "") ? "-" : data.keluhan);
+            $("#txt_bpjs_rujuk_keluhan").html((data.keluhan === "" || data.keluhan === undefined) ? "-" : data.keluhan);
             $("#txt_bpjs_rujuk_hak_kelas").html(data.peserta.hakKelas.kode + " - " + data.peserta.hakKelas.keterangan);
             $("#txt_bpjs_rujuk_jenis_peserta").html(data.peserta.jenisPeserta.kode + " - " + data.peserta.jenisPeserta.keterangan);
 
@@ -1195,6 +1379,11 @@
 			    refresh_notification();
 				reinitAntrianSync($("#txt_loket").val());
 			},
+            retur_barhasil: function(protocols, type, parameter, sender, receiver, time) {
+                tableAntrian.ajax.reload();
+                tableAntrianIGD.ajax.reload();
+                tableAntrianRI.ajax.reload();
+            }
             /*anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
                 //
             }*/
@@ -1407,55 +1596,140 @@
 		});
 
 
-        $("body").on("click", ".print_manager", function() {
-            var targetSurat = $(this).attr("jenis");
-            var uid = $(this).attr("id").split("_");
-            uid = uid[uid.length - 1];
-
-            var pasien = $(this).attr("pasien");
-
-            //$("#target-judul-cetak").html("CETAK " + targetSurat.toUpperCase() + " PASIEN");
+        $("#btnCetakSEP").click(function() {
             $.ajax({
                 async: false,
-                url: __HOSTAPI__ + "/Pasien/pasien-detail/" + pasien,
-                type: "GET",
+                url: __HOST__ + "miscellaneous/print_template/bpjs_sep.php",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
+                type: "POST",
+                data: {
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    html_data_kiri: $("#data_sep_cetak_kiri").html(),
+                    html_data_kanan: $("#data_sep_cetak_kanan").html(),
+                    html_data_bawah: $("#data_sep_cetak_bawah").html()
+                },
                 success: function (response) {
-                    dataPasien = response.response_package.response_data[0];
-                    dataPasien.pc_customer = __PC_CUSTOMER__;
-                    dataPasien.pc_dokter = $("#dokter_" + uid).html();
-                    dataPasien.waktu_masuk = $("#waktu_masuk_" + uid).html();
-                    console.log(dataPasien);
-
-                    $.ajax({
-                        async: false,
-                        url: __HOST__ + "miscellaneous/print_template/pasien_" + targetSurat + ".php",
-                        beforeSend: function (request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        type: "POST",
-                        data: dataPasien,
-                        success: function (response) {
-                            //$("#dokumen-viewer").html(response);
-                            var containerItem = document.createElement("DIV");
-                            $(containerItem).html(response);
-                            $(containerItem).printThis({
-                                importCSS: true,
-                                base: false,
-                                pageTitle: "cetak",
-                                afterPrint: function() {
-                                    //
-                                }
-                            });
+                    //$("#dokumen-viewer").html(response);
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        pageTitle: "Cetak SEP",
+                        afterPrint: function() {
+                            //
                         }
                     });
-                },
-                error: function(response) {
-                    //
                 }
             });
+        });
+
+
+        $("body").on("click", ".print_manager", function() {
+            var targetSurat = $(this).attr("jenis");
+            if(targetSurat === "SEP") {
+                var id = $(this).attr("id").split("_");
+                id = id[id.length - 1];
+
+                $.ajax({
+                    async: false,
+                    url: __HOSTAPI__ + "/BPJS/get_sep_detail/" + id,
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    type: "GET",
+                    success: function (response) {
+
+                        var dataSEP = response.response_package.response_data[0];
+                        $("#sep_nomor").html(dataSEP.sep_no);
+                        $("#sep_tanggal").html(dataSEP.sep_tanggal);
+                        $("#sep_spesialis").html((dataSEP.poli_tujuan_detail !== undefined) ? dataSEP.poli_tujuan_detail.kode + " - " + dataSEP.poli_tujuan_detail.nama : "-");
+                        $("#sep_faskes_asal").html(dataSEP.asal_rujukan_ppk + " - " + ((dataSEP.asal_rujukan_nama !== undefined && dataSEP.asal_rujukan_nama !== null && dataSEP.asal_rujukan_nama !== "null") ? dataSEP.asal_rujukan_nama : "[TIDAK DITEMUKAN]") + "<b class=\"text-info\">[No. Rujuk: " + dataSEP.asal_rujukan_nomor + "]");
+                        $("#sep_diagnosa_awal").html(dataSEP.diagnosa_nama);
+                        $("#sep_catatan").html(dataSEP.catatan);
+                        $("#sep_kelas_rawat").html(dataSEP.kelas_rawat.nama);
+                        $("#sep_jenis_rawat").html((parseInt(dataSEP.pelayanan_jenis) === 1) ? "Rawat Inap" : "Rawat Jalan");
+
+
+                        var penjaminList = dataSEP.pasien.history_penjamin;
+                        for(var pKey in penjaminList) {
+                            if(penjaminList[pKey].penjamin === __UIDPENJAMINBPJS__) {
+                                var metaData = JSON.parse(penjaminList[pKey].rest_meta);
+                                $("#sep_nomor_kartu").html(metaData.response.peserta.noKartu);
+                                $("#sep_nama_peserta").html(metaData.response.peserta.nama + "<b class=\"text-info\">[" + metaData.response.peserta.mr.noMR + "]</b>");
+                                $("#sep_tanggal_lahir").html(metaData.response.peserta.tglLahir);
+                                $("#sep_nomor_telepon").html(metaData.response.peserta.mr.noTelepon);
+                                $("#sep_peserta").html(metaData.response.peserta.jenisPeserta.keterangan);
+                                if(
+                                    metaData.response.peserta.cob.noAsuransi !== undefined &&
+                                    metaData.response.peserta.cob.nmAsuransi !== undefined &&
+                                    metaData.response.peserta.cob.noAsuransi !== "" &&
+                                    metaData.response.peserta.cob.nmAsuransi !== "" &&
+                                    metaData.response.peserta.cob.noAsuransi !== null &&
+                                    metaData.response.peserta.cob.nmAsuransi !== null
+                                ) {
+                                    $("#sep_cob").html(metaData.response.peserta.cob.noAsuransi + " - " + metaData.response.peserta.cob.nmAsuransi);
+                                } else {
+                                    $("#sep_cob").html("-");
+                                }
+                            }
+                        }
+                        $("#modal-sep-cetak").modal("show");
+                    },
+                    error: function (response) {
+                        //
+                    }
+                });
+            } else {
+                var uid = $(this).attr("id").split("_");
+                uid = uid[uid.length - 1];
+
+                var pasien = $(this).attr("pasien");
+
+                //$("#target-judul-cetak").html("CETAK " + targetSurat.toUpperCase() + " PASIEN");
+                $.ajax({
+                    async: false,
+                    url: __HOSTAPI__ + "/Pasien/pasien-detail/" + pasien,
+                    type: "GET",
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    success: function (response) {
+                        dataPasien = response.response_package.response_data[0];
+                        dataPasien.pc_customer = __PC_CUSTOMER__;
+                        dataPasien.pc_dokter = $("#dokter_" + uid).html();
+                        dataPasien.waktu_masuk = $("#waktu_masuk_" + uid).html();
+
+                        $.ajax({
+                            async: false,
+                            url: __HOST__ + "miscellaneous/print_template/pasien_" + targetSurat + ".php",
+                            beforeSend: function (request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type: "POST",
+                            data: dataPasien,
+                            success: function (response) {
+                                //$("#dokumen-viewer").html(response);
+                                var containerItem = document.createElement("DIV");
+                                $(containerItem).html(response);
+                                $(containerItem).printThis({
+                                    importCSS: true,
+                                    base: false,
+                                    pageTitle: "cetak",
+                                    afterPrint: function() {
+                                        //
+                                    }
+                                });
+                            }
+                        });
+                    },
+                    error: function(response) {
+                        //
+                    }
+                });
+            }
         });
 	});
 
@@ -1606,8 +1880,7 @@
                                         </div>
                                         <div class="col-12 col-md-9 form-group">
                                             <label for="">Faskes</label>
-                                            <select class="form-control sep" id="txt_bpjs_faskes">
-                                                <option value="<?php echo __KODE_PPK__; ?>">RSUD KAB. BINTAN - KAB. BINTAN (KEPRI)</option>
+                                            <select class="form-control sep" id="txt_bpjs_faskes" disabled>
                                                 <option value="<?php echo __KODE_PPK__; ?>">RSUD PETALA BUMI - KOTA PEKAN BARU</option>
                                             </select>
                                         </div>
@@ -2030,6 +2303,126 @@
             <div class="modal-footer">
                 <button class="btn btn-success" id="btnProsesSEP">
                     <i class="fa fa-check"></i> Tambah
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="modal-sep-cetak" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> <span>Surat Eligibilitas Peserta</span>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6" id="data_sep_cetak_kiri">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>No. SEP</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nomor"></td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. SEP</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_tanggal"></td>
+                            </tr>
+                            <tr>
+                                <td>No. Kartu</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nomor_kartu"></td>
+                            </tr>
+                            <tr>
+                                <td>Nama Peserta</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nama_peserta"></td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. Lahir</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_tanggal_lahir"></td>
+                            </tr>
+                            <tr>
+                                <td>No. Telp</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_nomor_telepon"></td>
+                            </tr>
+                            <tr>
+                                <td>Sub/Spesialis</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_spesialis"></td>
+                            </tr>
+                            <tr>
+                                <td>Faskes Penunjuk</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_faskes_asal"></td>
+                            </tr>
+                            <tr>
+                                <td>Diagnosa Awal</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_diagnosa_awal"></td>
+                            </tr>
+                            <tr>
+                                <td>Catatan</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_catatan"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-6" id="data_sep_cetak_kanan">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>Peserta</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_peserta"></td>
+                            </tr>
+                            <tr>
+                                <td>COB</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_cob"></td>
+                            </tr>
+                            <tr>
+                                <td>Jenis Rawat</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_jenis_rawat"></td>
+                            </tr>
+                            <tr>
+                                <td>Kelas Rawat</td>
+                                <td class="wrap_content">:</td>
+                                <td id="sep_kelas_rawat"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-12" id="data_sep_cetak_bawah">
+                        <small>
+                            <i>
+                                <ul type="*" style="margin: 0; padding: 10px;">
+                                    <li>
+                                        Saya menyetujui BPJS Kesehatan menggunakan informasi medis pasien jika diperlukan
+                                    </li>
+                                    <li>
+                                        SEP bukan sebagai bukti penjaminan peserta
+                                    </li>
+                                </ul>
+                            </i>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnCetakSEP">
+                    <i class="fa fa-print"></i> Cetak
                 </button>
 
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>

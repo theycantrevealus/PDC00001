@@ -14,12 +14,12 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap">Rawat Inap</a></li>
-                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap/dokter/index/<?php echo __PAGES__[4]; ?>/<?php echo __PAGES__[5]; ?>"><b id="target_pasien"></b></a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/igd">IGD</a></li>
+                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/igd/dokter/index/<?php echo __PAGES__[4]; ?>/<?php echo __PAGES__[5]; ?>"><b id="target_pasien"></b></a></li>
 					<li class="breadcrumb-item active" aria-current="page">Pemeriksaan Medis</li>
 				</ol>
 			</nav>
-            <h4><span id="nama-departemen"></span> - Pemeriksaan <b class="text-info" id="heading_nama_poli">Rawat Inap</b></h4>
+            <h4><span id="nama-departemen"></span> - Pemeriksaan <b class="text-info" id="heading_nama_poli">IGD</b></h4>
 		</div>
 	</div>
 </div>

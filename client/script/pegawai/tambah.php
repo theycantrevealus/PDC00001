@@ -358,9 +358,11 @@
                 },
                 success:function(resp) {
                     if(resp.response_package.response_result > 0) {
-                        notification ("success", "Hak modul berhasil diproses", 3000, "hasil_modul_update");
+
                         //Notify Socket
-                        push_socket(__ME__, "akses_update", targetID, "Akses Anda telah di update", "info");
+                        push_socket(__ME__, "akses_update", targetID, "Akses Anda telah di update", "info").then(function() {
+                            notification ("success", "Hak modul berhasil diproses", 3000, "hasil_modul_update");
+                        });
                     }
                     console.log(resp);
                 }

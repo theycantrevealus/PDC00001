@@ -148,7 +148,6 @@
             </td>
             <td style="width:45%;">
                 <span class="title"><b><?php echo $_POST['__PC_CUSTOMER__']; ?></b></span>
-                <span class="title">DINAS KESEHATAN</span>
                 <span class="alamat"><?php echo $_POST['__PC_CUSTOMER_ADDRESS__']; ?></span>
                 <span class="telepon">Telp. <?php echo $_POST['__PC_CUSTOMER_CONTACT__']; ?></span>
             </td>

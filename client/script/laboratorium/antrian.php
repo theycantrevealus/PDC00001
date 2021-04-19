@@ -64,6 +64,7 @@
                 let uid_tindakan = get_id[get_id.length - 2];
                 let nilai = $(this).val();
 
+
                 if (uid_tindakan in nilaiItemTindakan){
                     nilaiItemTindakan[uid_tindakan][id_nilai] = nilai;
                 } else {
@@ -110,7 +111,6 @@
                 },
                 type: "POST",
                 success: function(response){
-                    console.log(response);
                     let order_detail = 0;
                     let response_upload = 0;
                     let response_delete_doc = 0;
@@ -142,13 +142,14 @@
                     }
 
                     if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0) {
-                        push_socket(__ME__, ((mode_selesai == "Y") ? "antrian_laboratorium_selesai" : "antrian_laboratorium_simpan"), "*", "Pemeriksaan Laboratorium Selesai", "warning");
-                        Swal.fire(
-                            'Pemeriksaan Berhasil Disimpan!',
-                            response.response_package.response_message,
-                            'success'
-                        ).then((result) => {
-                            location.href = __HOSTNAME__ + "/laboratorium";
+                        push_socket(__ME__, ((mode_selesai == "Y") ? "antrian_laboratorium_selesai" : "antrian_laboratorium_simpan"), "*", "Pemeriksaan Laboratorium Selesai", "warning").then(function() {
+                            Swal.fire(
+                                'Pemeriksaan Berhasil Disimpan!',
+                                response.response_package.response_message,
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + "/laboratorium";
+                            });
                         });
                     } else {
                         notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");
@@ -163,7 +164,7 @@
 			return false;
 		});
 
-		$('#form-upload-lampiran').on('shown.bs.modal', function () {
+		$("#form-upload-lampiran").on("shown.bs.modal", function () {
 			if (file.type == "application/pdf" && file != undefined) {
 				var fileReader = new FileReader();
 				fileReader.onload = function() {
@@ -283,9 +284,15 @@
                     if (response.response_package.response_result > 0){
                         dataItem = response.response_package.response_data;
                         $.each(dataItem, function(key, item){
+
                             html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
                                     "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
                                 "</div><div class=\"card-body\">" +
+                                "<div class=\"row\">" +
+                                "<div class=\"col-12\">" +
+                                "Tanggal Ambil Sample : <b class=\"" + ((!item.allow) ? "text-danger" : "text-success") + "\">" + ((!item.allow) ? "<i class=\"fa fa-ban\"></i>" : "<i class=\"fa fa-check\"></i>") + " " + item.tgl_ambil_sample_parse + "</b><hr />" +
+                                "</div>" +
+                                "<div class=\"col-12\">" +
                                 "<table class=\"table table-bordered table-striped largeDataType\">" +
                                 "<thead class=\"thead-dark\">" +
                                     "<tr>" +
@@ -313,9 +320,14 @@
                                         nilai = "";
                                     }
 
-									// id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0)
-                                    {
+                                    var naratifMode =  "";
+                                    if(item.naratif === 'N' || item.naratif === undefined || item.naratif === null) {
+                                        naratifMode = "<input " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" />";
+                                    } else {
+                                        naratifMode = "<textarea " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" class=\"form-control inputItemTindakan\">" + nilai + "</textarea>";
+                                    }
+                                    // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
+                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0) {
                                         /*html += "<tr class=\"strikethrough\">" +
                                             "<td>"+ nomor +"</td>" +
                                             "<td>" + items.keterangan + "</td>" +
@@ -328,7 +340,7 @@
                                         html += "<tr>" +
                                             "<td>"+ nomor +"</td>" +
                                             "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
-                                            "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                            "<td>" + naratifMode + "</td>" +
                                             "<td>" + items.satuan + "</td>" +
                                             "<td>" + items.nilai_min + "</td>" +
                                             "<td>" + items.nilai_maks + "</td>" +
@@ -338,7 +350,7 @@
                                 });
                             }
 
-                            html += "</tbody></table></div></div>";
+                            html += "</tbody></table></div></div></div>";
                             $("#hasil_pemeriksaan").append(html);
                         });
                         
@@ -353,7 +365,7 @@
 		//return dataItem;
 	}
 
-	function loadLampiran(uid_order){
+	function loadLampiran(uid_order) {
 		let dataItem;
 
 		if (uid_order != ""){

@@ -146,11 +146,11 @@ class Invoice extends Utility
                 unset($payment['response_data'][$key]);
             } else {
                 $Pegawai = new Pegawai(self::$pdo);
-                $PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+                $PegawaiInfo = $Pegawai->get_detail($value['pegawai']);
                 $payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                 $Pasien = new Pasien(self::$pdo);
-                $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+                $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
                 $payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
                 $payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
@@ -392,7 +392,7 @@ class Invoice extends Utility
             ->where(array(
                 'invoice.uid' => '= ?',
                 'AND',
-                'invoice.deleted-at' => 'IS NULL'
+                'invoice.deleted_at' => 'IS NULL'
             ), array(
                 $payment['response_data'][0]['invoice']
             ))
@@ -444,34 +444,45 @@ class Invoice extends Utility
                 ) {
                     $allowReturn = false;
                 } else {
-                    if(
+                    $KonsulLib = array();
+                    //Get All Konsul Item Poli
+                    $PoliKonsul = self::$query->select('master_poli', array(
+                        'uid', 'tindakan_konsultasi'
+                    ))
+                        ->where(array(
+                            'master_poli.deleted_at' => 'IS NULL'
+                        ))
+                        ->execute();
+                    foreach ($PoliKonsul['response_data'] as $PolKey => $PolValue) {
+                        array_push($KonsulLib, $PolValue['tindakan_konsultasi']);
+                    }
+
+                    /*if(
                         $PDValue['item'] === __UIDKONSULDOKTER__ ||
                         $PDValue['item'] === __UIDKONSULDOKTER_GIGI__ ||
                         $PDValue['item'] === __UIDKONSULDOKTER_SPESIALIS__
-                    ) {
+                    ) {*/
+                    if(in_array($PDValue['item'], $KonsulLib)) {
                         $AsesmenCheck = self::$query->select('asesmen', array(
                             'uid'
                         ))
                             ->where(array(
                                 'asesmen.kunjungan' => '= ?',
                                 'AND',
-                                'asesmen.pasien' => '= ?',
-                                'AND',
-                                'asesmen.deleted_at' => 'IS NULL',
-                                'AND',
-                                'DATE(asesmen.created_at)' => '= ?'
+                                'asesmen.pasien' => '= ?'
                             ), array(
                                 $InvoiceData['response_data'][0]['kunjungan'],
-                                $InvoiceData['response_data'][0]['pasien'],
-                                date('Y-m-d')
+                                $InvoiceData['response_data'][0]['pasien']
                             ))
                             ->execute();
-
+                        $payment_detail['response_data'][$PDKey]['asesmen_check'] = $AsesmenCheck;
                         if(count($AsesmenCheck['response_data']) > 0) {
                             $allowReturn = false;
                         } else {
                             $allowReturn = true;
                         }
+                    } else {
+                        $allowReturn = false;
                     }
                 }
                 $payment_detail['response_data'][$PDKey]['allow_retur'] = $allowReturn;
@@ -496,7 +507,7 @@ class Invoice extends Utility
     private function proses_bayar($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $KunjunganUID = $parameter['kunjungan'];
 
         $newPaymentUID = parent::gen_uuid();
@@ -952,7 +963,7 @@ class Invoice extends Utility
                             'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
                             'dokter' => $KunjunganData['response_data'][0]['dokter']
                         );
-                        $AntrianProses = $Antrian::tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                        $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
                     }
                 }
             }
@@ -1058,11 +1069,26 @@ class Invoice extends Utility
                             ))
                             ->execute();
 
-                        if(
+                        $KonsulLib = array();
+                        //Get All Konsul Item Poli
+                        $PoliKonsul = self::$query->select('master_poli', array(
+                            'uid', 'tindakan_konsultasi'
+                        ))
+                            ->where(array(
+                                'master_poli.deleted_at' => 'IS NULL'
+                            ))
+                            ->execute();
+                        foreach ($PoliKonsul['response_data'] as $PolKey => $PolValue) {
+                            array_push($KonsulLib, $PolValue['tindakan_konsultasi']);
+                        }
+
+                        /*if(
                             $value === __UIDKONSULDOKTER__ ||
                             $value === __UIDKONSULDOKTER_GIGI__ ||
                             $value === __UIDKONSULDOKTER_SPESIALIS__
-                        ) {
+                        ) {*/
+
+                        if(in_array($value, $KonsulLib)) {
                             //Check status asesmen. jika sudah asesmen tidak bisa return lagi
                             $AsesmenCheck = self::$query->select('asesmen', array(
                                 'uid'
@@ -1118,7 +1144,7 @@ class Invoice extends Utility
                                 $worker['message'] = $updateAntrian;
                             }
                         } else {
-                            $worker['message'] = '';
+                            $worker['message'] = 'Ada Kesalahan';
                         }
                         array_push($detailUpdate, $worker);
                     }
@@ -1334,6 +1360,7 @@ class Invoice extends Utility
                 'discount',
                 'discount_type',
                 'penjamin',
+                'billing_group',
                 'keterangan',
                 'created_at',
                 'updated_at'
@@ -1491,6 +1518,7 @@ class Invoice extends Utility
             'discount_type' => $parameter['discount_type'],
             'pasien' => $parameter['pasien'],
             'penjamin' => $parameter['penjamin'],
+            'billing_group' => $parameter['billing_group'],
             'keterangan' => $parameter['keterangan'],
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date()

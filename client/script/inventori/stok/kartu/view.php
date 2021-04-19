@@ -120,7 +120,23 @@
                             $(newRow).append(newSaldo);
                             $(newRow).append(newKeterangan);
 
-                            $(tbodyContainer).append(newRow);
+                            if(parseFloat(batchGroup[a].log[b].masuk) === 0) {
+                                $(newRow).find("td:eq(0)").addClass("bg-warning");
+                            } else if(parseFloat(batchGroup[a].log[b].keluar) === 0) {
+                                $(newRow).find("td:eq(0)").addClass("bg-success");
+                            } else {
+                                //
+                            }
+
+                            if(
+                                parseFloat(batchGroup[a].log[b].masuk) === 0 &&
+                                parseFloat(batchGroup[a].log[b].keluar) === 0 &&
+                                parseFloat(batchGroup[a].log[b].saldo) === 0
+                            ) {
+                                //
+                            } else {
+                                $(tbodyContainer).append(newRow);
+                            }
                         }
 
                         $(batchTable).append(tbodyContainer).css({

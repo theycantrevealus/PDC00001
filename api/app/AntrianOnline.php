@@ -203,6 +203,7 @@ class AntrianOnline extends Utility {
                                     'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
                                     'discount' => 0,
                                     'discount_type' => 'N',
+                                    'billing_group' => 'administrasi',
                                     'pasien' => $parameter['dataObj']['pasien'],
                                     'penjamin' => $parameter['dataObj']['penjamin'],
                                     'keterangan' => 'Biaya kartu pasien baru'
@@ -227,6 +228,7 @@ class AntrianOnline extends Utility {
                                 'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
                                 'discount' => 0,
                                 'discount_type' => 'N',
+                                'billing_group' => 'tindakan',
                                 'pasien' => $parameter['dataObj']['pasien'],
                                 'penjamin' => $parameter['dataObj']['penjamin'],
                                 'keterangan' => 'Biaya konsultasi'
@@ -273,6 +275,7 @@ class AntrianOnline extends Utility {
                                         'qty' => 1,
                                         'harga' => floatval($HargaKartu['response_data'][0]['harga']),
                                         'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
+                                        'billing_group' => 'administrasi',
                                         'discount' => 0,
                                         'discount_type' => 'N',
                                         'pasien' => $parameter['dataObj']['pasien'],
@@ -295,6 +298,7 @@ class AntrianOnline extends Utility {
                                     'qty' => 1,
                                     'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
                                     'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
+                                    'billing_group' => 'tindakan',
                                     'discount' => 0,
                                     'discount_type' => 'N',
                                     'pasien' => $parameter['dataObj']['pasien'],
@@ -362,6 +366,7 @@ class AntrianOnline extends Utility {
                         'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
                         'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
                         'status_bayar' => 'Y', //Karena penjamin selain ini otomatis status menjadi terbayar
+                        'billing_group' => 'tindakan',
                         'discount' => 0,
                         'discount_type' => 'N',
                         'pasien' => $parameter['dataObj']['pasien'],
@@ -429,6 +434,7 @@ class AntrianOnline extends Utility {
                             'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
                             'discount' => 0,
                             'discount_type' => 'N',
+                            'billing_group' => 'administrasi',
                             'pasien' => $parameter['dataObj']['pasien'],
                             'penjamin' => $parameter['dataObj']['penjamin'],
                             'keterangan' => 'Biaya kartu pasien baru'

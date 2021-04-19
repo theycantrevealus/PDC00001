@@ -1,5 +1,13 @@
 <script type="text/javascript">
     $(function() {
+
+        protocolLib = {
+            permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "notif_pasien_baru");
+                tableResep.ajax.reload();
+            }
+        };
+
         function load_resep() {
             var selected = [];
             var resepData = [];
@@ -110,8 +118,28 @@
             $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase()/* + " <b class=\"text-danger\">" + requiredItem[requiredItemKey].counter + " <i class=\"fa fa-receipt\"></i></b>"*/ + "</li>");
         }
 
-        var tableResep= $("#table-resep").DataTable({
-            "data": load_resep(),
+        var tableResep = $("#table-resep").DataTable({
+            //"data": load_resep(),
+            "ajax":{
+                url:__HOSTAPI__ + "/Apotek",
+                type: "GET",
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var resepDataRaw = response.response_package.response_data;
+                    var parsedData = [];
+
+                    for(var resepKey in resepDataRaw) {
+                        if(
+                            resepDataRaw[resepKey].antrian.departemen != null
+                        ) {
+                            parsedData.push(resepDataRaw[resepKey]);
+                        }
+                    }
+                    return parsedData;
+                }
+            },
             autoWidth: false,
             "bInfo" : false,
             aaSorting: [[0, "asc"]],

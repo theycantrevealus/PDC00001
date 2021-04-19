@@ -144,7 +144,7 @@
             autoWidth: false,
             language: {
                 search: "",
-                searchPlaceholder: "Cari Pasien"
+                searchPlaceholder: "Cari Obat"
             },
 
 			aaSorting: [[0, "asc"]],
@@ -285,7 +285,7 @@
 
                     var data = response.response_package;
 
-                    generated_data = data.row_data;
+
 
                     $("#csv_file_data").html("");
                     var thead = "";
@@ -301,8 +301,16 @@
                     var table_view = document.createElement("TABLE");
                     $(table_view).append("<thead class=\"thead-dark\">" + thead + "</thead>");
                     $("#csv_file_data").append(table_view);
+                    var filtedData = [];
+
+                    for(var aa in data.row_data) {
+                        if(data.row_data[aa].stok > 0) {
+                            filtedData.push(data.row_data[aa]);
+                        }
+                    }
+                    generated_data = filtedData;
                     $(table_view).addClass("table table-bordered table-striped largeDataType").DataTable({
-                        data:data.row_data,
+                        data:filtedData,
                         columns : data.column_builder
                     });
 

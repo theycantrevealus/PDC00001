@@ -237,10 +237,20 @@ class Modul extends Utility {
 	}
 	
 	public function get_all() {
-		$query = self::$pdo->prepare('SELECT * FROM "public"."modul" WHERE deleted_at IS NULL');
-		$query->execute();
-		$read = $query->fetchAll(\PDO::FETCH_ASSOC);
-		return $read;
+		//$query = self::$pdo->prepare('SELECT * FROM "public"."modul" WHERE deleted_at IS NULL');
+        $query = self::$query->select('modul', array(
+            'id', 'nama', 'identifier', 'keterangan', 'created_at', 'updated_at', 'deleted_at', 'parent', 'icon', 'show_on_menu', 'show_order', 'menu_group'
+        ))
+            ->order(array(
+                'parent' => 'asc'
+            ))
+            ->where(array(
+                'modul.deleted_at' => 'IS NULL'
+            ))
+            ->execute();
+		//$query->execute();
+		//$read = $query->fetchAll(\PDO::FETCH_ASSOC);
+		return $query['response_data'];
 	}
 
 	private function reload_methods() {

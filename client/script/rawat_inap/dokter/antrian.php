@@ -3336,8 +3336,11 @@
                     }).then(function(result) {
                         if(result.response_package.response_result > 0) {
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-                            push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
-                            location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                            push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
+
+                                location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                            });
+
                         } else {
                             notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                         }
@@ -4893,14 +4896,16 @@
 
                 if(expected_response.indexOf(result.response_package.response_notif) >= 0) {
                     if(result.response_package.response_notif === 'K') {
-                        push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum konsul", "warning");
-                        Swal.fire(
-                            'Berhasil konsul!',
-                            'Silahkan arahkan pasien ke kasir',
-                            'success'
-                        ).then((result) => {
-                            location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                        push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum konsul", "warning").then(function() {
+                            Swal.fire(
+                                'Berhasil konsul!',
+                                'Silahkan arahkan pasien ke kasir',
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                            });
                         });
+
                     } else if(result.response_package.response_notif === 'P') {
                         Swal.fire(
                             'Berhasil konsul!',

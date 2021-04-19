@@ -61,6 +61,10 @@ class Poli extends Utility {
 					return self::get_set_perawat($parameter[2]);
 					break;
 
+                case 'get_poli_select2':
+                    return self::get_poli_select2($parameter);
+                    break;
+
 				default:
 					# code...
 					break;
@@ -72,6 +76,10 @@ class Poli extends Utility {
 
 	public function __POST__($parameter = array()) {
 		switch ($parameter['request']) {
+            case 'get_poli_backend':
+                return self::get_poli_backend($parameter);
+                break;
+
 			case 'tambah_poli':
 				return self::tambah_poli($parameter);
 				break;
@@ -147,11 +155,117 @@ class Poli extends Utility {
 	}
 
 	/*=============== GET POLI ================*/
+    private function get_poli_select2($parameter) {
+        $data = self::$query->select('master_poli', array(
+                'uid',
+                'nama',
+                'tindakan_konsultasi',
+                'kode_bpjs',
+                'nama_bpjs',
+                'created_at',
+                'updated_at'
+            ))
+            ->order(array(
+                'master_poli.created_at' => 'ASC'
+            ))
+            ->where(array(
+                'master_inv.deleted_at' => 'IS NULL',
+                'AND',
+                '(master_inv.kode_barang' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                'OR',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
+            ))
+            ->limit(10)
+            ->execute();
+        return $data['response_data'];
+    }
+
+    private function get_poli_backend($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'master_poli.deleted_at' => 'IS NULL',
+                'AND',
+                'master_poli.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'master_poli.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('master_poli', array(
+                'uid',
+                'nama',
+                'tindakan_konsultasi',
+                'kode_bpjs',
+                'nama_bpjs',
+                'created_at',
+                'updated_at'
+            ))
+                ->order(array(
+                    'master_poli.created_at' => 'ASC'
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('master_poli', array(
+                'uid',
+                'nama',
+                'tindakan_konsultasi',
+                'kode_bpjs',
+                'nama_bpjs',
+                'created_at',
+                'updated_at'
+            ))
+                ->order(array(
+                    'master_poli.created_at' => 'ASC'
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $Tindakan = new Tindakan(self::$pdo);
+            $TindakanDetail = $Tindakan->get_tindakan_detail($value['tindakan_konsultasi']);
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['tindakan_konsultasi'] = $TindakanDetail['response_data'][0]['nama'];
+            $autonum++;
+        }
+
+
+        $itemTotal = self::$query->select('master_poli', array(
+            'id'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
 	private function get_poli(){
 		$data = self::$query->select('master_poli', array(
 			'uid',
 			'nama',
 			'tindakan_konsultasi',
+			'kode_bpjs',
+            'nama_bpjs',
 			'created_at',
 			'updated_at'
 		))
@@ -166,7 +280,7 @@ class Poli extends Utility {
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$Tindakan = new Tindakan(self::$pdo);
-			$TindakanDetail = $Tindakan::get_tindakan_detail($value['tindakan_konsultasi']);
+			$TindakanDetail = $Tindakan->get_tindakan_detail($value['tindakan_konsultasi']);
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$data['response_data'][$key]['tindakan_konsultasi'] = $TindakanDetail['response_data'][0]['nama'];
 			$autonum++;
@@ -211,6 +325,8 @@ class Poli extends Utility {
             'nama',
             'tindakan_konsultasi',
             'poli_asesmen',
+            'kode_bpjs',
+            'nama_bpjs',
             'created_at',
             'updated_at'
         ))
@@ -1574,6 +1690,8 @@ class Poli extends Utility {
 		$poli = self::$query->update('master_poli', array(
 			'nama' => $parameter['nama'],
 			'tindakan_konsultasi' => $parameter['tindakan_konsultasi'],
+			'kode_bpjs' => $parameter['integrasi_bpjs_poli_kode'],
+            'nama_bpjs' => $parameter['integrasi_bpjs_poli_nama'],
 			'updated_at' => parent::format_date()
 		))
 		->where(array(

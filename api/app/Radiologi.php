@@ -868,8 +868,8 @@ class Radiologi extends Utility
 
     private function verifikasi_item_rad($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $processResult = array();
         foreach ($parameter['data_set'] as $key => $value) {
 
 
@@ -889,15 +889,13 @@ class Radiologi extends Utility
                     'rad_order_detail.deleted_at' => 'IS NULL',
                     'AND',
                     'rad_order_detail.tindakan' => '= ?'
-                ), array(
+                ), array (
                     $value['uid'],
                     $value['tindakan']
                 ))
                 ->execute();
 
-
-
-
+            array_push($processResult, $worker);
 
             //Update antrian nomor dan charge invoice
             $AsesmenInfo = self::$query->select('asesmen', array(
@@ -917,6 +915,8 @@ class Radiologi extends Utility
                 ->execute();
 
             $AntrianDetail = $AsesmenInfo['response_data'][0];
+            $Antrian = new Antrian(self::$pdo);
+            $AntrianData = $Antrian->get_antrian_detail('antrian', $AntrianDetail['antrian'])['response_data'][0];
 
 
             //Check Item Lab
@@ -937,7 +937,7 @@ class Radiologi extends Utility
 
                 //Update master to P
                 $master_order = self::$query->update('rad_order', array(
-                    'status' => 'P',
+                    'status' => ($AntrianData['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P', //Ke kasir bayar
                     'updated_at' => parent::format_date()
                 ))
                     ->where(array(
@@ -952,7 +952,7 @@ class Radiologi extends Utility
 
 
                 $antrian_nomor = self::$query->update('antrian_nomor', array(
-                    'status' => 'K'
+                    'status' => ($AntrianData['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'R'
                 ))
                     ->where(array(
                         'antrian_nomor.poli' => '= ?',
@@ -1029,6 +1029,8 @@ class Radiologi extends Utility
 
 
         }
+
+        return $processResult;
     }
 
     private function verifikasi_hasil($parameter) {
@@ -1083,6 +1085,23 @@ class Radiologi extends Utility
 
     public function charge_invoice_item($parameter) {
         $charge_result = array();
+
+        //Update status
+        $proceed = self::$query->update('rad_order', array(
+            'status' => 'V'
+        ))
+            ->where(array(
+                'rad_order.asesmen' => '= ?',
+                'AND',
+                'rad_order.selesai' => '= ?',
+                'AND',
+                'rad_order.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['asesmen'],
+                'false'
+            ))
+            ->execute();
+
         //Ambil semua item untuk asesmen sekarang
         $RadOrder = self::$query->select('rad_order', array(
             'uid',
@@ -1122,7 +1141,7 @@ class Radiologi extends Utility
                 'pasien' => $parameter['pasien'],
                 'keterangan' => 'Tagihan laboratorium'
             );
-            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $NewInvoice = $Invoice->create_invoice($InvMasterParam);
             $TargetInvoice = $NewInvoice['response_unique'];
         }
 
@@ -1164,7 +1183,7 @@ class Radiologi extends Utility
                     ->execute();
                 $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
 
-                $InvoiceDetail = $Invoice::append_invoice(array(
+                $InvoiceDetail = $Invoice->append_invoice(array(
                     'invoice' => $TargetInvoice,
                     'item' => $DValue['tindakan'],
                     'item_origin' => 'master_tindakan',
@@ -1176,6 +1195,7 @@ class Radiologi extends Utility
                     'discount_type' => 'N',
                     'pasien' => $value['pasien'],
                     'penjamin' => $DValue['penjamin'],
+                    'billing_group' => 'radiologi',
                     'keterangan' => 'Biaya Radiologi'
                 ));
 
@@ -1517,7 +1537,7 @@ class Radiologi extends Utility
     private function add_order_radiologi($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         //GET Last Invoice
         $lastNumber = self::$query->select('rad_order', array(
@@ -1693,11 +1713,13 @@ class Radiologi extends Utility
 
                 if (count($parameter['listTindakan']) > 0) {
                     //Cek Penjamin dulu. Jika non umum langsung lunas. gitulah kira-kira
-                    if ($data_antrian['penjamin'] == __UIDPENJAMINUMUM__) {
+                    /*if ($data_antrian['penjamin'] == __UIDPENJAMINUMUM__) {
                         $status_lunas = 'V';
                     } else {
                         $status_lunas = 'P';
-                    }
+                    }*/
+
+                    $status_lunas = 'V'; //Dulu V
 
                     $uidRadiologiOrder = parent::gen_uuid();
                     $radiologiOrder = self::$query
@@ -1850,7 +1872,7 @@ class Radiologi extends Utility
                             $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
 
                             if($parameter['charge_invoice'] === 'Y') {
-                                $InvoiceDetail = $Invoice::append_invoice(array(
+                                $InvoiceDetail = $Invoice->append_invoice(array(
                                     'invoice' => $TargetInvoice,
                                     'item' => $keyTindakan,
                                     'item_origin' => 'master_tindakan',
@@ -1862,6 +1884,7 @@ class Radiologi extends Utility
                                     'discount_type' => 'N',
                                     'pasien' => $data_antrian['pasien'],
                                     'penjamin' => $valueTindakan,
+                                    'billing_group' => 'radiologi',
                                     'keterangan' => 'Biaya Radiologi'
                                 ));
                             }
@@ -1921,7 +1944,7 @@ class Radiologi extends Utility
     private function update_hasil_radiologi($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $result = array(
             'dir_msg' => '',
             'order_detail' => array(),

@@ -164,13 +164,16 @@ class Pegawai extends Utility {
 				));
 
 				$Unit = new Unit(self::$pdo);
-				$Unit_Info = $Unit::get_unit_detail($read[0]['unit']);
+				$Unit_Info = $Unit->get_unit_detail($read[0]['unit']);
 
 				if(file_exists('../images/pegawai/' . $read[0]['uid'] . '.png')) {
 					$profile_pic = '/images/pegawai/' . $read[0]['uid'] . '.png';
 				} else {
 					$profile_pic = '/client/template/assets/images/avatar/demi.png';
 				}
+
+                //$secret_key = bin2hex(random_bytes(32));
+                $secret_key = file_get_contents('taknakal.pub');
 
 				//Register JWT
 				$iss = __HOSTNAME__;
@@ -190,15 +193,14 @@ class Pegawai extends Utility {
                     'nama' => $read[0]['nama'],
 					'log_id' => $log
 				);
-				//$secret_key = bin2hex(random_bytes(32));
-				$secret_key = file_get_contents('taknakal.pub');
+
 				$payload_info = array(
 					'iss' => $iss,
 					'iat' => $iat,
 					'nbf' => $nbf,
 					'exp' => $exp,
 					'aud' => $aud,
-					'data' => $user_arr_data,
+					'data' => $user_arr_data
 				);
 				$jwt = JWT::encode($payload_info, $secret_key);
 				
@@ -501,7 +503,7 @@ class Pegawai extends Utility {
 
 		//Load All Module
 		$Module = new Modul(self::$pdo);
-		$moduleData = $Module::get_all();
+		$moduleData = $Module->get_all();
 
 
 		//Module setter
