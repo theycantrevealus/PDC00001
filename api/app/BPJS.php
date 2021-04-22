@@ -124,6 +124,9 @@ class BPJS extends Utility {
                 case 'get_dpjp':
                     return self::get_dpjp($parameter);
                     break;
+                case 'get_dpjp_claim':
+                    return self::get_dpjp_claim($parameter);
+                    break;
                 case 'get_faskes_select2':
                     return self::get_faskes_select2($parameter);
                     break;
@@ -1111,6 +1114,11 @@ class BPJS extends Utility {
         return $content;
     }
 
+    private function get_dpjp_claim($parameter) {
+        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/dokter/' . $_GET['search']);
+        return $content;
+    }
+
     private function get_faskes_select2($parameter) {
         $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/faskes/' . $_GET['search'] . '/' . $_GET['jenis']);
         return $content;
@@ -1645,7 +1653,7 @@ class BPJS extends Utility {
                 $claimData['response_data'][$CKey]['pegawai'] = $Pegawai->get_detail($CValue['pegawai'])['response_data'][0];
             }
 
-            $data['response_data'][$key]['claim'] = $claimData['response_data'];
+            $data['response_data'][$key]['claim'] = (isset($claimData['response_data'])) ? $claimData['response_data'] : array();
             $autonum++;
         }
 
@@ -1657,7 +1665,7 @@ class BPJS extends Utility {
 
     private function get_sep_select2($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 	    //Local SEP
         $data = self::get_local_sep(array(
             'pasien' => $parameter[2],
@@ -2230,11 +2238,11 @@ class BPJS extends Utility {
                         'poli' => $parameter['poli']
                     ),
                     'perawatan' => array(
-                        'ruangRawat' => $parameter['perawatan_ruang_rawat'],
-                        'kelasRawat' => $parameter['perawatan_kelas_rawat'],
-                        'spesialistik' => $parameter['perawatan_spesialistik'],
-                        'caraKeluar' => $parameter['perawatan_cara_keluar'],
-                        'kondisiPulang' => $parameter['perawatan_kondisi_pulang']
+                        'ruangRawat' => /*$parameter['perawatan_ruang_rawat']*/'',
+                        'kelasRawat' => /*$parameter['perawatan_kelas_rawat']*/'',
+                        'spesialistik' => /*$parameter['perawatan_spesialistik']*/'',
+                        'caraKeluar' => /*$parameter['perawatan_cara_keluar']*/'',
+                        'kondisiPulang' => /*$parameter['perawatan_kondisi_pulang']*/''
                     ),
                     'diagnosa' => $parameter['diagnosa_kode'],
                     'procedure' => $parameter['procedure'],
