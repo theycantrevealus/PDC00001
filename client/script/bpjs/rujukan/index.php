@@ -77,7 +77,11 @@
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.bpjs_rujukan !== null) {
                             var rujukanData = row.bpjs_rujukan.response_data;
-                            return (rujukanData.length > 0) ? "<b kunjungan=\"" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? "1": "0") + "\" id=\"no_kunjungan_" + rujukanData[0].uid + "\">" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? rujukanData[0].no_kunjungan : rujukanData[0].no_rujukan) + "</b>" : "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
+                            if(rujukanData !== undefined && rujukanData !== null) {
+                                return (rujukanData.length > 0) ? "<b kunjungan=\"" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? "1": "0") + "\" id=\"no_kunjungan_" + rujukanData[0].uid + "\">" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? rujukanData[0].no_kunjungan : rujukanData[0].no_rujukan) + "</b>" : "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
+                            } else {
+                                return "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
+                            }
                         } else {
                             return "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
                         }
