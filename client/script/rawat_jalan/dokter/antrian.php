@@ -124,7 +124,7 @@
                     }
                 }
 
-                console.log(poliListRaw);
+                //console.log(poliListRaw);
                 poliList = poliListRaw;
                 
                 if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
@@ -2514,7 +2514,7 @@
             var keteranganRacikan = metaSwitchEdit.txt_keterangan_resep_racikan.editor.getData();
         }
 
-        $("#txt_tanda_vital_td").inputmask({
+        /*$("#txt_tanda_vital_td").inputmask({
             alias: 'decimal',
             rightAlign: true,
             placeholder: "0.00",
@@ -2548,7 +2548,7 @@
             prefix: "",
             autoGroup: false,
             digitsOptional: true
-        });
+        });*/
 
         $("#txt_berat_badan").inputmask({
             alias: 'decimal',
@@ -2880,10 +2880,10 @@
             //POLI FORM
             var keluhanUtamaData = (editorKeluhanUtamaData === undefined || editorKeluhanUtamaData === null) ? metaSwitchEdit.txt_keluhan_utama.data : editorKeluhanUtamaData.getData();
             var keluhanTambahanData = (editorKeluhanTambahanData === undefined || editorKeluhanTambahanData === null) ? metaSwitchEdit.txt_keluhan_tambahan.data : editorKeluhanTambahanData.getData();
-            var tekananDarah = $("#txt_tanda_vital_td").inputmask("unmaskedvalue");
-            var nadi = $("#txt_tanda_vital_n").inputmask("unmaskedvalue");
-            var suhu = $("#txt_tanda_vital_s").inputmask("unmaskedvalue");
-            var pernafasan = $("#txt_tanda_vital_rr").inputmask("unmaskedvalue");
+            var tekananDarah = $("#txt_tanda_vital_td").val()/*$("#txt_tanda_vital_td").inputmask("unmaskedvalue")*/;
+            var nadi = $("#txt_tanda_vital_n").val()/*$("#txt_tanda_vital_n").inputmask("unmaskedvalue")*/;
+            var suhu = $("#txt_tanda_vital_s").val()/*$("#txt_tanda_vital_s").inputmask("unmaskedvalue")*/;
+            var pernafasan = $("#txt_tanda_vital_rr").val()/*$("#txt_tanda_vital_rr").inputmask("unmaskedvalue")*/;
             var beratBadan = $("#txt_berat_badan").inputmask("unmaskedvalue");
             var tinggiBadan = $("#txt_tinggi_badan").inputmask("unmaskedvalue");
             var lingkarLengan = $("#txt_lingkar_lengan").inputmask("unmaskedvalue");
