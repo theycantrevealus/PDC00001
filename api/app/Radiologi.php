@@ -1035,9 +1035,10 @@ class Radiologi extends Utility
 
     private function verifikasi_hasil($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $update = self::$query->update('rad_order', array(
+            'petugas' => $UserData['data']->uid,
             'selesai' => 'true',
             'status' => 'D'
         ))

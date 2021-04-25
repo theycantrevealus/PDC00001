@@ -121,6 +121,8 @@
             var selectionKey = dataSetSelector.indexOf(id);
             selectedData = dataSetAll[selectionKey];
 
+
+
             var antrian = $(this).attr("antrian");
             var lab = $(this).attr("lab");
             var rad = $(this).attr("rad");
@@ -256,7 +258,6 @@
                             }
 
                             var racikanApotekData = data.racikan_apotek;
-                            console.log(racikanApotekData);
                             $(".racikanApotekCPPT tbody tr").remove();
                             for(var racikanApotekKey in racikanApotekData) {
                                 var itemApotekRacikan = racikanApotekData[racikanApotekKey].item;
@@ -299,7 +300,8 @@
                         $(".lab_loader").html(LabBuild);
                     }
 
-                    //console.log(selectedData.rad_order);
+                    console.clear();
+                    console.log(selectedData.rad_order);
 
                     //Parse Radiologi
                     for(var radKey in selectedData.rad_order) {
@@ -419,6 +421,8 @@
         });
 
         function load_radiologi(data) {
+            /*console.clear();
+            console.log(data);*/
             var returnHTML = "";
             $.ajax({
                 url: __HOSTNAME__ + "/pages/pasien/dokter/rad-single.php",
@@ -439,6 +443,10 @@
         }
 
         function load_laboratorium(data) {
+
+            data.dr_penanggung_jawab = {
+                nama: data.detail[0].dpjp_detail.nama
+            };
             var listPetugas = [];
             for(petugasKey in data.petugas) {
                 if(data.petugas[petugasKey] !== null) {
@@ -458,6 +466,7 @@
                 },
                 type:"POST",
                 success:function(response_html) {
+
                     returnHTML = response_html;
                 },
                 error: function(response_html) {

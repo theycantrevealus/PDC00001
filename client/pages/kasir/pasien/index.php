@@ -84,6 +84,7 @@
                                                         <tr>
                                                             <th class="wrap_content">No</th>
                                                             <th class="wrap_content">No. Tagihan</th>
+                                                            <th class="wrap_content">Tanggal</th>
                                                             <th>Pasien</th>
                                                             <th>Poliklinik</th>
                                                             <th class="wrap_content">Staf Pendaftaran</th>
@@ -109,6 +110,7 @@
                                                         <tr>
                                                             <th class="wrap_content">No</th>
                                                             <th class="wrap_content">No. Tagihan</th>
+                                                            <th class="wrap_content">Tanggal</th>
                                                             <th>Pasien</th>
                                                             <th>Poliklinik</th>
                                                             <th class="wrap_content">Staf Pendaftaran</th>
@@ -134,6 +136,7 @@
                                                         <tr>
                                                             <th class="wrap_content">No</th>
                                                             <th class="wrap_content">No. Tagihan</th>
+                                                            <th class="wrap_content">Tanggal</th>
                                                             <th>Pasien</th>
                                                             <th>Poliklinik</th>
                                                             <th class="wrap_content">Staf Pendaftaran</th>

@@ -94,124 +94,152 @@
 			} );
 
 
-		
+		$("#btnSimpan").click(function(e) {
+            $("#formRadioSimpan button").removeClass("clicked");
+            $(this).addClass("clicked");
+        });
 
-		$("#formHasilRadiologi").submit(function(){
+
+		$("body").on("submit", "#formRadioSimpan", function(event){
+            event.preventDefault();
+
+            var id = $(this).find('button.clicked').prop('id');
+
+
 			var form_data = new FormData(this);
 			form_data.append("request", "update-hasil-radiologi");
 			form_data.append("uid_radiologi_order", uid_order);
 			
-			//if (tindakanID !== undefined && tindakanID !== ""){
-				let keteranganPeriksa = editorKeteranganPeriksa.getData();
-				let kesimpulanPeriksa = editorKesimpulanPeriksa.getData();
-				//console.log(deletedDocList);
+			let keteranganPeriksa = editorKeteranganPeriksa.getData();
+            let kesimpulanPeriksa = editorKesimpulanPeriksa.getData();
 
-				/*formData = {
-					request : "update-hasil-radiologi",
-					keteranganPeriksa : keteranganPeriksa,
-					kesimpulanPeriksa : kesimpulanPeriksa,
-					tindakanID : tindakanID
-				};*/
-
-				form_data.append("keteranganPeriksa", keteranganPeriksa);
-				form_data.append("kesimpulanPeriksa", kesimpulanPeriksa);
-                form_data.append("detail", JSON.stringify(forSave));
-				form_data.append("tindakanID", tindakanID);
-
-				/*$("#btnSimpan").attr({
-					"disabled": "disabled"
-				});*/
-
-				for(var i = 0; i < fileList.length; i++) {
-					form_data.append("fileList[]", fileList[i]);
-				}
-
-				for (var i = 0; i < deletedDocList.length; i++){
-					form_data.append("deletedDocList[]", deletedDocList[i]);
-				}
+            form_data.append("keteranganPeriksa", keteranganPeriksa);
+            form_data.append("kesimpulanPeriksa", kesimpulanPeriksa);
+            form_data.append("detail", JSON.stringify(forSave));
+            form_data.append("tindakanID", tindakanID);
 
 
-				/*for (var value of form_data.values()) {
-				   console.log(value); 
-				}*/
+            for(var i = 0; i < fileList.length; i++) {
+                form_data.append("fileList[]", fileList[i]);
+            }
 
-                for (var pair of form_data.entries()) {
-                    //console.log(pair[0]+ ', ' + pair[1]);
-                }
+            for (var i = 0; i < deletedDocList.length; i++){
+                form_data.append("deletedDocList[]", deletedDocList[i]);
+            }
 
-				$.ajax({
-					async: false,
-					url: __HOSTAPI__ + "/Radiologi",
-					processData: false,
-					contentType: false,
-					data: form_data,
-					beforeSend: function(request) {
-						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-					},
-					type: "POST",
-					success: function(response){
-						let order_detail = 0;
-						let response_upload = 0;
-						let response_delete_doc = 0;
+            for (var pair of form_data.entries()) {
+                //console.log(pair[0]+ ', ' + pair[1]);
+            }
 
-						/*if (
-							response.response_package.order_detail !== undefined && 
-							response.response_package.order_detail !== ""
-						) {
-							order_detail = response.response_package.order_detail.response_result;
-						}*/
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Radiologi",
+                processData: false,
+                contentType: false,
+                data: form_data,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                success: function(response){
+                    let order_detail = 0;
+                    let response_upload = 0;
+                    let response_delete_doc = 0;
 
-						if (
-							response.response_package.response_upload !== undefined && 
-							response.response_package.response_upload !== ""
-						) {
-							response_upload = response.response_package.response_upload.response_result;
-							if (response_upload > 0){
-								fileList = [];
-								$("#radiologi-lampiran-table tbody").empty();
-								loadLampiran(uid_order);
-							}
-						}
-						
-						if (
-							response.response_package.response_delete_doc !== undefined && 
-							response.response_package.response_delete_doc !== ""
-						) {
-							response_delete_doc = response.response_package.response_delete_doc.response_result;
-							if (response_delete_doc > 0){
-								deletedDocList = [];
-							}
-						}
+                    /*if (
+                        response.response_package.order_detail !== undefined &&
+                        response.response_package.order_detail !== ""
+                    ) {
+                        order_detail = response.response_package.order_detail.response_result;
+                    }*/
 
-						var detailRes = response.response_package.order_detail;
-						for(var resKey in detailRes) {
-                            order_detail += detailRes[resKey].response_result;
+                    if (
+                        response.response_package.response_upload !== undefined &&
+                        response.response_package.response_upload !== ""
+                    ) {
+                        response_upload = response.response_package.response_upload.response_result;
+                        if (response_upload > 0){
+                            fileList = [];
+                            $("#radiologi-lampiran-table tbody").empty();
+                            loadLampiran(uid_order);
                         }
+                    }
 
-						if(order_detail > 0) {
-                            notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
+                    if (
+                        response.response_package.response_delete_doc !== undefined &&
+                        response.response_package.response_delete_doc !== ""
+                    ) {
+                        response_delete_doc = response.response_package.response_delete_doc.response_result;
+                        if (response_delete_doc > 0){
+                            deletedDocList = [];
+                        }
+                    }
+
+                    var detailRes = response.response_package.order_detail;
+                    for(var resKey in detailRes) {
+                        order_detail += detailRes[resKey].response_result;
+                    }
+
+                    if(order_detail > 0) {
+                        notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
+                        if(id === "btnSimpan") {
                             location.href = __HOSTNAME__ + "/radiologi";
+                        } else {
+                            var uid = uid_order;
+
+                            Swal.fire({
+                                title: "Apakah Anda yakin?",
+                                text: "Orderan selesai akan langsung terkirim pada dokter yang melakukan permintaan pemeriksaan radiologi dan tidak dapat diubah lagi. Mohon pastikan data sudah benar",
+                                showDenyButton: true,
+                                confirmButtonText: "Ya",
+                                denyButtonText: "Belum",
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    $.ajax({
+                                        url: __HOSTAPI__ + "/Radiologi",
+                                        beforeSend: function (request) {
+                                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                        },
+                                        type:"POST",
+                                        data: {
+                                            request: "verifikasi_hasil",
+                                            uid: uid
+                                        },
+                                        success:function(response) {
+                                            if(response.response_package.response_result > 0) {
+                                                Swal.fire(
+                                                    "Order Radiologi",
+                                                    "Pemeriksaan berhasil terkirim",
+                                                    "success"
+                                                ).then((result) => {
+                                                    location.href = __HOSTNAME__ + "/radiologi";
+                                                });
+                                            } else {
+                                                Swal.fire(
+                                                    "Order Radiologi",
+                                                    "Order gagal diproses",
+                                                    "error"
+                                                ).then((result) => {
+                                                    //
+                                                });
+                                            }
+                                        },
+                                        error:function(response) {
+                                            //
+                                        }
+                                    });
+                                }
+                            });
                         }
-
-
-						/*if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){
-							notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
-							location.href = __HOSTNAME__ + "/radiologi";
-						} else {
-						    console.log(response);
-							$("#btnSimpan").removeAttr("disabled");
-							notification ("warning", "Tidak Ada Data yang Disimpan", 3000, "hasil_tambah_dev");
-						}*/
-					},
-					error: function(response) {
-						notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");
-						$("#btnSimpan").removeAttr("disabled");
-						console.log("Error : ");
-						console.log(response);
-					}
-				});
-			//}
-			//}
+                    }
+                },
+                error: function(response) {
+                    notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");
+                    $("#btnSimpan").removeAttr("disabled");
+                    console.log("Error : ");
+                    console.log(response);
+                }
+            });
 
 			return false;
 		});
@@ -298,6 +326,12 @@
 			rebaseLampiran();
 			return false;
 		});
+
+
+        /*$("#btnSelesai").click(function() {
+
+
+        });*/
 	});
 
 	function loadOrder(uid_order){		//uid_radiologi_order

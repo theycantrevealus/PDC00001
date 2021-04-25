@@ -199,12 +199,12 @@ class Asesmen extends Utility {
 
             //Pasien
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
             //Poli
             $Poli = new Poli(self::$pdo);
-            $PoliInfo = $Poli::get_poli_detail($value['poli']);
+            $PoliInfo = $Poli->get_poli_detail($value['poli']);
             $data['response_data'][$key]['poli'] = $PoliInfo['response_data'][0];
 
             //Lab Order
@@ -248,7 +248,8 @@ class Asesmen extends Utility {
 
                 $detailLaborOrder = self::$query->select('lab_order_detail', array(
                     'tindakan',
-                    'keterangan'
+                    'keterangan',
+                    'dpjp'
                 ))
                     ->where(array(
                         'lab_order_detail.lab_order' => '= ?',
@@ -260,6 +261,10 @@ class Asesmen extends Utility {
                     ->execute();
 
                 foreach ($detailLaborOrder['response_data'] as $LabDetailKey => $LabDetailValue) {
+                    $DPJP = $Pegawai->get_detail($LabDetailValue['dpjp']);
+                    $detailLaborOrder['response_data'][$LabDetailKey]['dpjp_detail'] = $DPJP['response_data'][0];
+
+
                     $LabTindakan = $Laboratorium->get_lab_detail($LabDetailValue['tindakan']);
                     $detailLaborOrder['response_data'][$LabDetailKey]['tindakan'] = $LabTindakan['response_data'][0];
 

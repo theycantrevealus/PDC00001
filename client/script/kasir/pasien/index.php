@@ -119,8 +119,65 @@
 		});
 
 		$("#btnCetakFaktur").click(function() {
-		    var data = $("#payment-detail-loader").html();
-		    
+
+            var data = $("#payment-detail-loader").html();
+		    var containerTemp = document.createElement("DIV");
+		    $(containerTemp).html(data);
+
+
+            $(containerTemp).find(".row, .card-body, .card-header").css({
+                "width": "100%"
+            });
+            $(containerTemp).find(".col-4").removeClass("text-center").css({
+                "text-align": "left"
+            });
+            $(containerTemp).find("table thead tr th:eq(0)").remove();
+		    $(containerTemp).find("table tbody tr").each(function() {
+
+
+                $(this).find("td").css({
+                    "color": "#000 !important"
+                });
+
+		        var attr = $(this).find("td:eq(0)").attr("colspan");
+		        if(typeof attr !== 'undefined' && attr !== false) {
+
+                } else {
+                    $(this).find("td:eq(0)").remove();
+                }
+            });
+
+            $(containerTemp).find("table tbody tr td:eq(1)").css({
+                "width": "50px",
+                "color": "#000 !important"
+            });
+
+            $(containerTemp).find("table tbody tr td[colspan=\"5\"]").css({
+                "padding-top": "20px"
+            });
+
+            $(containerTemp).find("table tbody tr td:eq(2)").css({
+                "width": "50%",
+                "color": "#000 !important"
+            });
+
+            $(containerTemp).find("table thead").addClass("thead-dark");
+		    $(containerTemp).find("#keterangan-faktur").attr({
+                "colspan": "3"
+            });
+
+		    $(containerTemp).find("#nama-pasien-faktur span").css({
+                "display": "inline"
+            })
+
+
+
+
+
+            console.clear();
+            console.log($(containerTemp).html());
+
+
             $.ajax({
                 async: false,
                 url: __HOST__ + "miscellaneous/print_template/kasir_faktur.php",
@@ -132,17 +189,21 @@
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
-                    kwitansi_data: $("#payment-detail-loader").html(),
+                    kwitansi_data: $(containerTemp).html(),
                     pasien: $("#payment-detail-loader .info-kwitansi col-4:eq(1)").html(),
                     pegawai: $("#payment-detail-loader .info-kwitansi col-4:eq(2)").html(),
                     tgl_bayar: $("#payment-detail-loader .info-kwitansi col-4:eq(3)").html()
                 },
                 success: function (response) {
                     var containerItem = document.createElement("DIV");
+
+                    /*var win = window.open("", "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=780,height=200,top="+(screen.height-400)+",left="+(screen.width-840));
+                    win.document.body.innerHTML = response;*/
+
                     $(containerItem).html(response);
                     $(containerItem).printThis({
                         importCSS: true,
-                        base: false,
+                        base: true,
                         importStyle: true,
                         header: null,
                         footer: null,
@@ -206,18 +267,55 @@
 							$("#total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
 							$("#diskon-faktur").html(0);
 							$("#grand-total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
+
+							var billing_group = {};
+
 							for(var historyKey in historyDetail) {
-								$("#invoice_detail_history tbody").append(
+							    if(billing_group[historyDetail[historyKey].billing_group] === undefined) {
+                                    billing_group[historyDetail[historyKey].billing_group] = [];
+                                }
+
+
+                                billing_group[historyDetail[historyKey].billing_group].push({
+                                    uid: historyDetail[historyKey].item_uid,
+                                    status: historyDetail[historyKey].status,
+                                    nama: historyDetail[historyKey].item.toUpperCase(),
+                                    allow_retur: historyDetail[historyKey].allow_retur,
+                                    qty: historyDetail[historyKey].qty,
+                                    harga: historyDetail[historyKey].harga,
+                                    subtotal: historyDetail[historyKey].subtotal
+                                });
+
+								/*$("#invoice_detail_history tbody").append(
 									"<tr>" +
 										"<td>" + ((historyDetail[historyKey].status == "P") ? ((historyDetail[historyKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
 										"<td>" + historyDetail[historyKey].item.toUpperCase() + "</td>" +
-										"<td>" + historyDetail[historyKey].qty + "</td>" +
+										"<td class=\"number_style\">" + historyDetail[historyKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
 									"</tr>"
-								);
+								);*/
 							}
+
+							for(var groupKey in billing_group) {
+                                $("#invoice_detail_history tbody").append("<tr>" +
+                                    "<td></td>" +
+                                    "<td colspan=\"5\" class=\"bg-info\" style=\"color: #fff\">" + groupKey.toUpperCase() + "</td>" +
+                                    "</tr>");
+                                for(var itemKey in billing_group[groupKey]) {
+                                    $("#invoice_detail_history tbody").append(
+                                        "<tr>" +
+                                        "<td>" + ((billing_group[groupKey][itemKey].status == "P") ? ((billing_group[groupKey][itemKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + billing_group[groupKey][itemKey].uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
+                                        "<td style=\"width: 50px !important;\">" + (parseInt(itemKey) + 1)+ "</td>" +
+                                        "<td>" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
+                                        "<td class=\"number_style\">" + billing_group[groupKey][itemKey].qty + "</td>" +
+                                        "<td class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
+                                        "<td class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
+                                        "</tr>"
+                                    );
+                                }
+                            }
 						}
 					});
 				}
@@ -299,6 +397,11 @@
 						return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
+                    }
+                },
 				{
 					"data" : null, render: function(data, type, row, meta) {
 					    if(
@@ -410,6 +513,11 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
                     }
                 },
                 {
@@ -534,6 +642,11 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
                     }
                 },
                 {
