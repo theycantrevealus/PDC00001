@@ -1107,7 +1107,27 @@ class BPJS extends Utility {
     }
 
     private function get_dpjp($parameter) {
-        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/dokter/pelayanan/' . $parameter[2] . '/tglPelayanan/' . date('Y-m-d') . '/Spesialis/' . $parameter[3]);
+        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/referensi/dokter/pelayanan/' . $_GET['jenis'] . '/tglPelayanan/' . date('Y-m-d') . '/Spesialis/' . $_GET['spesialistik']);
+        if(intval($content['content']['metaData']['code']) === 200) {
+            $data_all = $content['content']['response']['list'];
+
+            $filter = array();
+
+            foreach ($data_all as $key => $value) {
+
+                $checker = stripos($value['nama'],$_GET['search']);
+                $checker_kode = stripos($value['kode'],$_GET['search']);
+                if(
+                    ($checker >= 0 && $checker !== false) ||
+                    ($checker_kode >= 0 && $checker_kode !== false)
+                ) {
+                    array_push($filter, $data_all[$key]);
+                }
+            }
+
+            $content['content']['response']['list'] = $filter;
+        }
+
         return $content;
     }
 
@@ -2230,11 +2250,11 @@ class BPJS extends Utility {
                         'poli' => $parameter['poli']
                     ),
                     'perawatan' => array(
-                        'ruangRawat' => $parameter['perawatan_ruang_rawat'],
-                        'kelasRawat' => $parameter['perawatan_kelas_rawat'],
-                        'spesialistik' => $parameter['perawatan_spesialistik'],
-                        'caraKeluar' => $parameter['perawatan_cara_keluar'],
-                        'kondisiPulang' => $parameter['perawatan_kondisi_pulang']
+                        'ruangRawat' => /*$parameter['perawatan_ruang_rawat']*/'',
+                        'kelasRawat' => /*$parameter['perawatan_kelas_rawat']*/'',
+                        'spesialistik' => /*$parameter['perawatan_spesialistik']*/'',
+                        'caraKeluar' => /*$parameter['perawatan_cara_keluar']*/'',
+                        'kondisiPulang' => /*$parameter['perawatan_kondisi_pulang']*/''
                     ),
                     'diagnosa' => $parameter['diagnosa_kode'],
                     'procedure' => $parameter['procedure'],

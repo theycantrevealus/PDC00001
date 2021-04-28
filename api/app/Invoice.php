@@ -421,6 +421,22 @@ class Invoice extends Utility
             ))
             ->execute();
 
+        $Antrian = self::$query->select('antrian', array(
+            'departemen'
+        ))
+            ->join('master_poli', array(
+                'nama'
+            ))
+            ->on(array(
+                array('antrian.departemen', '=', 'master_poli.uid')
+            ))
+            ->where(array(
+                'antrian.kunjungan' => '= ?'
+            ), array(
+                $InvoiceData['response_data'][0]['kunjungan']
+            ))
+            ->execute();
+
         foreach ($payment['response_data'] as $key => $value) {
             //get payment detail
             $payment_detail = self::$query->select('invoice_payment_detail', array(
@@ -471,7 +487,7 @@ class Invoice extends Utility
                     $KonsulLib = array();
                     //Get All Konsul Item Poli
                     $PoliKonsul = self::$query->select('master_poli', array(
-                        'uid', 'tindakan_konsultasi'
+                        'uid', 'tindakan_konsultasi', 'nama'
                     ))
                         ->where(array(
                             'master_poli.deleted_at' => 'IS NULL'
@@ -515,13 +531,14 @@ class Invoice extends Utility
 
             //Info Pegawai
             $Pegawai = new Pegawai(self::$pdo);
-            $PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+            $PegawaiInfo = $Pegawai->get_detail($value['pegawai']);
             $payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
             $payment['response_data'][$key]['tanggal_bayar'] = date("d F Y", strtotime($value['tanggal_bayar']));
             $payment['response_data'][$key]['terbayar'] = floatval($value['terbayar']);
             $payment['response_data'][$key]['sisa_bayar'] = floatval($value['sisa_bayar']);
+            $payment['response_data'][$key]['antrian'] = $Antrian['response_data'];
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
         }
 

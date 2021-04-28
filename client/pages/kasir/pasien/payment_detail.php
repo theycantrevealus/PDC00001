@@ -3,14 +3,20 @@
 		<div class="card">
 			<div class="card-header card-header-large bg-white align-items-center">
                 <div class="row info-kwitansi">
-                    <div class="col-4 text-center">
-                        <h5 class="card-header__title flex m-0" id="nama-pasien-faktur"></h5>
+                    <div class="col-6">
+                        <span class="card-header__title" id="nama-pasien-faktur"></span>
                     </div>
-                    <div class="col-4 text-center">
-                        <h5 class="card-header__title flex m-0 text-right" id="pegawai-faktur"></h5>
+                    <div class="col-6">
+                        <span class="card-header__title" id="pegawai-faktur"></span>
                     </div>
-                    <div class="col-4 text-center">
-                        <h5 class="card-header__title flex m-0 text-right" id="tanggal-faktur"></h5>
+                </div>
+                <br />
+                <div class="row info-kwitansi">
+                    <div class="col-6">
+                        <span class="card-header__title" id="tanggal-faktur"></span>
+                    </div>
+                    <div class="col-6">
+                        <span class="card-header__title" id="poli"></span>
                     </div>
                 </div>
 			</div>

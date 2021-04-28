@@ -128,8 +128,10 @@
             $(containerTemp).find(".row, .card-body, .card-header").css({
                 "width": "100%"
             });
-            $(containerTemp).find(".col-4").removeClass("text-center").css({
-                "text-align": "left"
+            $(containerTemp).find(".col-6").removeClass("text-center").css({
+                "text-align": "left",
+                "width": "50%",
+                "margin-bottom": "20px"
             });
             $(containerTemp).find("table thead tr th:eq(0)").remove();
 		    $(containerTemp).find("table tbody tr").each(function() {
@@ -190,9 +192,10 @@
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     kwitansi_data: $(containerTemp).html(),
-                    pasien: $("#payment-detail-loader .info-kwitansi col-4:eq(1)").html(),
-                    pegawai: $("#payment-detail-loader .info-kwitansi col-4:eq(2)").html(),
-                    tgl_bayar: $("#payment-detail-loader .info-kwitansi col-4:eq(3)").html()
+                    pasien: $("#payment-detail-loader .info-kwitansi col-3:eq(1)").html(),
+                    pegawai: $("#payment-detail-loader .info-kwitansi col-3:eq(2)").html(),
+                    tgl_bayar: $("#payment-detail-loader .info-kwitansi col-3:eq(3)").html(),
+                    poli: $("#payment-detail-loader .info-kwitansi col-3:eq(4)").html()
                 },
                 success: function (response) {
                     var containerItem = document.createElement("DIV");
@@ -251,9 +254,9 @@
                                 pasienInfo.panggilan_name !== undefined &&
                                 pasienInfo.panggilan_name !== null
                             ) {
-                                $("#nama-pasien-faktur").html(pasienInfo.panggilan_name.nama + " " + pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]");
+                                $("#nama-pasien-faktur").html("Pasien:<br /><b>" + pasienInfo.panggilan_name.nama + " " + pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]</b>");
                             } else {
-                                $("#nama-pasien-faktur").html(pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]");
+                                $("#nama-pasien-faktur").html("Pasien:<br /><b>" + pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]</b>");
                             }
 
 							$("#nomor-faktur").html($("#kwitansi_" + uid).html());
@@ -261,8 +264,13 @@
 							var historyData = response_data.response_package.response_data[0];
 							var historyDetail = historyData.detail;
 
-							$("#pegawai-faktur").html("Diterima Oleh : " + historyData.pegawai.nama);
-							$("#tanggal-faktur").html("Tanggal Bayar : " + historyData.tanggal_bayar);
+							$("#pegawai-faktur").html("Diterima Oleh :<br /><b>" + historyData.pegawai.nama + "</b>");
+							$("#tanggal-faktur").html("Tanggal Bayar :<br /><b>" + historyData.tanggal_bayar + "</b>");
+							var deptList = [];
+							for(var depKey in historyData.antrian) {
+							    deptList.push(historyData.antrian[depKey].nama);
+                            }
+							$("#poli").html("Departemen/Poli :<br /><b>" + deptList.join(", ") + "</b>");
 							$("#keterangan-faktur").html(historyData.keterangan);
 							$("#total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
 							$("#diskon-faktur").html(0);
