@@ -3,19 +3,19 @@
     <style type='text/css'>
 
         @page {
-            size: auto;
+            size: A5 landscape;
             margin: 0;
         }
 
         @media print {
             @page {
-                size:A4;
+                size:A5 landscape;
                 padding:0.3cm;
             }
         }
 
         body{
-            padding: 1cm;
+            padding: .3cm;
             color: #000;
             font-family: Courier;
             text-align:center;
@@ -121,26 +121,60 @@
     </style>
 
 </head>
-<body>
+<body style="size: A5 landscape">
 <div class="header">
     <table>
         <tr>
-            <td style="text-align:center; width:5%">
-                <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-icon.png" class="logo">
+            <td style="text-align:center; width:20%">
+                <img width="100%" src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/bpjs.png" class="logo">
             </td>
             <td style="width:45%;">
-                <span class="title"><b>PEMERINTAH PROVINSI RIAU</b></span>
-                <span class="title"><?php echo $_POST['__PC_CUSTOMER__']; ?></span>
-                <br />
-                <span class="alamat"><?php echo $_POST['__PC_CUSTOMER_ADDRESS__']; ?></span>
-                <span class="telepon">Telp. <?php echo $_POST['__PC_CUSTOMER_CONTACT__']; ?></span>
+                <span class="title">
+                    <h2 style="text-align: center">
+                        SURAT ELEGIBILITAS PESERTA
+                    </h2>
+                </span>
+                <span class="title">
+                    <b>
+                        <center><?php echo $_POST['__PC_CUSTOMER__']; ?></center>
+                    </b>
+                </span>
             </td>
             <td style="width:2%;"></td>
         </tr>
     </table>
-    <center style="padding: 1% 0 1% 0; font-size: 1.5rem; margin-bottom: 30px;"><b>KWINTANSI</b></center>
     <div>
-        <?php echo($_POST['kwitansi_data']); ?>
+        <table>
+            <tr>
+                <td style="vertical-align: top">
+                    <?php echo $_POST['html_data_kiri']; ?>
+                </td>
+                <td style="vertical-align: top">
+                    <?php echo $_POST['html_data_kanan']; ?>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top" colspan="2">
+                    <table>
+                        <tr>
+                            <td style="padding-right: 10px; min-height: 100px; vertical-align: top">
+                                <?php echo $_POST['html_data_bawah']; ?>
+                            </td>
+                            <td>
+                                <div style="border-bottom: solid 1px #000; height: 100px; margin: 10px;">
+                                    Pasien/Keluarga Pasien
+                                </div>
+                            </td>
+                            <td>
+                                <div style="border-bottom: solid 1px #000; height: 100px; margin: 10px;">
+                                    Petugas BPJS Kesehatan
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
 </body>

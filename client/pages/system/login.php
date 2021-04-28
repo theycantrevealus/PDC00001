@@ -139,7 +139,7 @@
                         <img src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/icon.jpg" width="60" />
                     </div>-->
                     <div class="col-6" style="padding-top: 10px;">
-                        <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/pondokcoder1280.svg" width="120" />
+                        <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" width="120" />
                     </div>
                 </div>
 			</div>

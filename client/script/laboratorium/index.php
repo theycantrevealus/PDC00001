@@ -2,6 +2,9 @@
 <script type="text/javascript">
 	$(function() {
 
+	    var currentPenjamin = '';
+	    var printMode = false;
+
 	    var tableServiceLabor = $("#service_labor").DataTable({
             processing: true,
             serverSide: true,
@@ -266,9 +269,9 @@
                                 "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
                                     "<i class=\"fa fa-sign-out-alt\"></i>" +
                                 "</a>" +
-                                "<a href=\"" + __HOSTNAME__ + "/laboratorium/cetak/" + row['uid'] + "\" target='_blank' class=\"btn btn-primary btn-sm\">" +
-                                    "<i class=\"fa fa-print\"></i>" +
-                                "</a>" +
+                                "<button class=\"btn btn-info btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
+                                "<i class=\"fa fa-print\"></i> Cetak" +
+                                "</button>" +
                                 "<button type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-success btn-sm btn-selesai\" data-toggle='tooltip' title='Tandai selesai'>" +
                                     "<i class=\"fa fa-check\"></i>" +
                                 "</a>" +
@@ -439,7 +442,6 @@
             var labLampiran = loadLampiran(uid);
 
             //console.log(labItem);
-
             $.ajax({
                 async: false,
                 url: __HOST__ + "miscellaneous/print_template/lab_hasil.php",
@@ -448,6 +450,7 @@
                 },
                 type: "POST",
                 data: {
+                    __HOSTNAME__ : __HOSTNAME__,
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
@@ -456,15 +459,29 @@
                     lab_lampiran: labLampiran
                 },
                 success: function (response) {
-                    var containerItem = document.createElement("DIV");
-                    $(containerItem).html(response);
-                    $(containerItem).printThis({
+                    /*var win = window.open("", "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=1280,height=800,top="+(screen.height-400)+",left="+(screen.width-840));
+                    win.document.body.innerHTML = response;*/
+
+                    printMode = true;
+                    $(response).printThis({
+                        printDelay: 1000,
                         importCSS: true,
-                        base: false,
+                        base: __HOSTNAME__,
+                        canvas: true,
                         pageTitle: "Laporan Laboratorium " + labPasien.pasien.no_rm,
                         afterPrint: function() {
                             //
                         }
+                    });
+
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).on("load", function () {
+
+                        /*if(printMode) {
+                            printMode = false;
+
+                        }*/
                     });
                 },
                 error: function (response) {
@@ -483,6 +500,8 @@
             uid = uid[uid.length - 1];
 
             var penjamin = $(this).attr("penjamin");
+
+            currentPenjamin = penjamin;
 
             //Get Detail
             $.ajax({
@@ -1077,6 +1096,15 @@
                                     tableVerifikasiLabor.ajax.reload();
                                     tableServiceLabor.ajax.reload();
                                     tableAntrianLabor.ajax.reload();
+                                    if(currentPenjamin === __UIDPENJAMINUMUM__) {
+                                        push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya laboratorium baru", "warning").then(function() {
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    } else {
+                                        push_socket(__ME__, "antrian_laboratorium_baru", "*", "Permintaan laboratorium baru", "warning").then(function() {
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    }
                                     $("#modal-detail-labor").modal("hide");
                                     /*$("#verifikasi_lab_container_" + uid + "_" + tindakan).fadeOut(function() {
                                         $("#verifikasi_lab_container_" + uid + "_" + tindakan).remove();

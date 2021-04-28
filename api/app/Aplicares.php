@@ -8,6 +8,7 @@ use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 use PondokCoder\BPJS as BPJS;
 use PondokCoder\Ruangan as Ruangan;
+use Spipu\Html2Pdf\Tag\Html\B;
 
 class Aplicares extends Utility {
 	static $pdo;
@@ -133,7 +134,7 @@ class Aplicares extends Utility {
 	private function get_kelas_kamar(){
 		$url = "/aplicaresws/rest/ref/kelas";
 		$BPJS = new BPJS(self::$pdo);
-		$result = $BPJS::launchUrl($url, 2);
+		$result = $BPJS->launchUrl($url, 2);
 
 		return $result['content']['response']['list'];
 	}
@@ -353,7 +354,7 @@ class Aplicares extends Utility {
 
 	private function edit_ruangan($table, $parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$dataObj = $forApi = $parameter['dataObj'];
 		$allData = $result = [];
@@ -586,14 +587,19 @@ class Aplicares extends Utility {
 	}
 
 	private function update_ruangan($parameter){
+	    $BPJS = new BPJS(self::$pdo);
+
 		$url = self::$base_url . "/rest/bed/update/" . self::$kodePPK;
 		$headers = self::get_header();
 
 		$ch = curl_init();
 		$dataJson = json_encode($parameter);
 
+		//$result = $BPJS->postUrl($url, $parameter, 2);
+
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'DEFAULT@SECLEVEL=1');
 		curl_setopt($ch, CURLOPT_TIMEOUT, 3); 
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");

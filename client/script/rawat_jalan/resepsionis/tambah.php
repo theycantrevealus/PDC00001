@@ -50,7 +50,7 @@
 				dataObj.currentAntrianID = currentAntrianID;
 
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
-					if(dataObj.penjamin == __UIDPENJAMINBPJS__) {
+					if(dataObj.penjamin === __UIDPENJAMINBPJS__) {
 
 						//Get Nomor BPJS
                         $.ajax({
@@ -121,7 +121,7 @@
                                     });
 
 								} else if(response.response_package.response_notif == 'P') {
-									push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+									/*push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
                                         Swal.fire(
                                             'Berhasil ditambahkan!',
                                             'Silahkan arahkan pasien ke poli',
@@ -129,7 +129,12 @@
                                         ).then((result) => {
                                             location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
                                         });
-                                    });
+                                    });*/
+                                    if(dataObj.penjamin === __UIDPENJAMINUMUM__) {
+                                        push_socket(__ME__, "antrian_poli_baru", "*", "Antrian poli baru", "info").then(function() {
+                                            console.log("pushed!");
+                                        });
+                                    }
 
 								} else {
 									console.log("command not found");
@@ -226,14 +231,16 @@
                             });
 
                         } else if(response.response_package.response_notif == 'P') {
-                            push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning").then(function () {
-                                Swal.fire(
-                                    'Berhasil ditambahkan!',
-                                    'Silahkan arahkan pasien ke poli',
-                                    'success'
-                                ).then((result) => {
-                                    location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
-                                });
+                            /*push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning").then(function () {
+
+                            });*/
+
+                            Swal.fire(
+                                'Berhasil ditambahkan!',
+                                'Silahkan arahkan pasien ke poli',
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
                             });
 
                         } else {

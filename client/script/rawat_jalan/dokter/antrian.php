@@ -124,7 +124,7 @@
                     }
                 }
 
-                console.log(poliListRaw);
+                //console.log(poliListRaw);
                 poliList = poliListRaw;
                 
                 if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
@@ -2514,7 +2514,7 @@
             var keteranganRacikan = metaSwitchEdit.txt_keterangan_resep_racikan.editor.getData();
         }
 
-        $("#txt_tanda_vital_td").inputmask({
+        /*$("#txt_tanda_vital_td").inputmask({
             alias: 'decimal',
             rightAlign: true,
             placeholder: "0.00",
@@ -2548,7 +2548,7 @@
             prefix: "",
             autoGroup: false,
             digitsOptional: true
-        });
+        });*/
 
         $("#txt_berat_badan").inputmask({
             alias: 'decimal',
@@ -2880,10 +2880,10 @@
             //POLI FORM
             var keluhanUtamaData = (editorKeluhanUtamaData === undefined || editorKeluhanUtamaData === null) ? metaSwitchEdit.txt_keluhan_utama.data : editorKeluhanUtamaData.getData();
             var keluhanTambahanData = (editorKeluhanTambahanData === undefined || editorKeluhanTambahanData === null) ? metaSwitchEdit.txt_keluhan_tambahan.data : editorKeluhanTambahanData.getData();
-            var tekananDarah = $("#txt_tanda_vital_td").inputmask("unmaskedvalue");
-            var nadi = $("#txt_tanda_vital_n").inputmask("unmaskedvalue");
-            var suhu = $("#txt_tanda_vital_s").inputmask("unmaskedvalue");
-            var pernafasan = $("#txt_tanda_vital_rr").inputmask("unmaskedvalue");
+            var tekananDarah = $("#txt_tanda_vital_td").val()/*$("#txt_tanda_vital_td").inputmask("unmaskedvalue")*/;
+            var nadi = $("#txt_tanda_vital_n").val()/*$("#txt_tanda_vital_n").inputmask("unmaskedvalue")*/;
+            var suhu = $("#txt_tanda_vital_s").val()/*$("#txt_tanda_vital_s").inputmask("unmaskedvalue")*/;
+            var pernafasan = $("#txt_tanda_vital_rr").val()/*$("#txt_tanda_vital_rr").inputmask("unmaskedvalue")*/;
             var beratBadan = $("#txt_berat_badan").inputmask("unmaskedvalue");
             var tinggiBadan = $("#txt_tinggi_badan").inputmask("unmaskedvalue");
             var lingkarLengan = $("#txt_lingkar_lengan").inputmask("unmaskedvalue");
@@ -2990,7 +2990,7 @@
                     var takaranKekuatan = $(this).find("td:eq(2) h6").html();
                     var takaran = parseFloat(takaranBulat) + parseFloat(takaranDecimal);
 
-                    if(obat != undefined) {
+                    if(obat !== undefined) {
                         dataRacikan.item.push({
                             "obat": obat,
                             //"qty": qty,
@@ -4615,9 +4615,18 @@
                 listTindakanLabTerpilih[lok].tgl_sample = $("#tanggal_sample_" + lok).val()
             }
 
-            console.log(listTindakanLabTerpilih);
-
-            orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, "", uid_lab_order, dataTableLabOrder, __HOSTAPI__);
+            $("#warn_tambah_labor").remove();
+            if($("#table_tindakan_lab tbody tr").length > 0) {
+                orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, "", uid_lab_order, dataTableLabOrder, __HOSTAPI__);
+            } else {
+                Swal.fire(
+                    "Order Lab",
+                    "Tambahkan Item lab sebelum order",
+                    "error"
+                ).then((result) => {
+                    $("#btnTambahTindakanLab").parent().append("<br /><b class=\"text-danger\" id=\"warn_tambah_labor\"><i class=\"fa fa-exclamation-triangle\"></i> Tambahkan Item lab sebelum order</b>");
+                });
+            }
 
         });
 

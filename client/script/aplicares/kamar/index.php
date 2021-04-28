@@ -153,7 +153,7 @@
 			}
 
 
-			if (dataObj != ""){
+			if (dataObj !== undefined){
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Aplicares",
@@ -163,6 +163,7 @@
 					},
 					type: "POST",
 					success: function(response){
+					    console.clear();
 						console.log(response);
 						tableRuangan.ajax.reload();
 						$("#form-tambah").modal("hide");

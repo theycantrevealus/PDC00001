@@ -186,16 +186,16 @@ class Pasien extends Utility
         foreach ($data['response_data'] as $key => $value) {
             //Panggilan
             $Terminologi = new Terminologi(self::$pdo);
-            $TerminologiInfo = $Terminologi::get_terminologi_items_detail('terminologi_item', $value['panggilan']);
+            $TerminologiInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['panggilan']);
             $data['response_data'][$key]['panggilan_name'] = $TerminologiInfo['response_data'][0];
 
 
             //Jenkel
-            $JenkelInfo = $Terminologi::get_terminologi_items_detail('terminologi_item', $value['jenkel']);
+            $JenkelInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['jenkel']);
             $data['response_data'][$key]['jenkel_detail'] = $JenkelInfo['response_data'][0];
 
             //Agama
-            $AgamaInfo = $Terminologi::get_terminologi_items_detail('terminologi_item', $value['agama']);
+            $AgamaInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['agama']);
             $data['response_data'][$key]['agama_detail'] = $AgamaInfo['response_data'][0];
 
             $data['response_data'][$key]['tanggal_lahir_parsed'] = date('d F Y', strtotime($value['tanggal_lahir']));

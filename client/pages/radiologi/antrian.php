@@ -37,30 +37,34 @@
 					</li>
 				</ul>
 			</div>
-			<form id="formHasilRadiologi">
-				<div class="card card-body tab-content" id="content_list">
-					<div class="tab-pane show fade active" id="tab-radiologi-1">
-						<?php require 'hasil.php'; ?>
-						<?php //require 'action_panel.php'; ?>
-					</div>
-					<div class="tab-pane show fade " id="tab-radiologi-2">
-						<?php require 'gambar.php'; ?>
-						<?php //require 'action_panel.php'; ?>
-					</div>
+            <form id="formRadioSimpan">
+                <div class="card card-body tab-content" id="content_list">
+                    <div class="tab-pane show fade active" id="tab-radiologi-1">
+                        <?php require 'hasil.php'; ?>
+                        <?php //require 'action_panel.php'; ?>
+                    </div>
+                    <div class="tab-pane show fade " id="tab-radiologi-2">
+                        <?php require 'gambar.php'; ?>
+                        <?php //require 'action_panel.php'; ?>
+                    </div>
 
-					<br />
-					<div class="row">
-						<div class="col-md-12">
-							<button type="submit" class="btn btn-success" id="btnSimpan">
-								<i class="fa fa-check-circle"></i> Simpan
-							</button>
-							<a href="<?php echo __HOSTNAME__; ?>/radiologi" class="btn btn-danger">
-								<i class="fa fa-ban"></i> Kembali
-							</a>
-						</div>
-					</div>
-				</div>
-			</form>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-info" id="btnSimpan">
+                                <i class="fa fa-save"></i> Simpan
+                            </button>
+
+                            <a href="<?php echo __HOSTNAME__; ?>/radiologi" class="btn btn-danger">
+                                <i class="fa fa-ban"></i> Kembali
+                            </a>
+                            <button class="btn btn-success pull-right" id="btnSelesai">
+                                <i class="fa fa-check-circle"></i> Selesai
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
 		</div>
 	</div>
 </div>

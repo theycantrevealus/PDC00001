@@ -107,7 +107,7 @@
     <table>
         <tr>
             <td style="text-align:center; width:5%">
-                <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-text-black.png" class="logo">
+                <img src="<?php echo $_POST['__HOSTNAME__'] ?>/template/assets/images/logo-text-black.png" class="logo" />
             </td>
             <td style="width:45%;">
                 <span class="title"><b>PEMERINTAH PROVINSI RIAU</b></span>

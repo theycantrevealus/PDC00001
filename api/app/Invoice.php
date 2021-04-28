@@ -81,7 +81,9 @@ class Invoice extends Utility
                 'AND',
                 'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
                 'AND',
-                'invoice_payment.nomor_kwitansi' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+                '(invoice_payment.nomor_kwitansi' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
             $paramValue = array(
@@ -115,6 +117,12 @@ class Invoice extends Utility
                 ->order(array(
                     $parameter['column_set'][$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
                 ))
+                ->join('pasien', array(
+                    'nama as nama_pasien'
+                ))
+                ->on(array(
+                    array('invoice_payment.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -133,6 +141,12 @@ class Invoice extends Utility
                 ->order(array(
                     $parameter['column_set'][$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
                 ))
+                ->join('pasien', array(
+                    'nama as nama_pasien'
+                ))
+                ->on(array(
+                    array('invoice_payment.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))
@@ -141,15 +155,17 @@ class Invoice extends Utility
 
         $payment['response_draw'] = $parameter['draw'];
         $autonum = 1;
+        $Pegawai = new Pegawai(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
         foreach ($payment['response_data'] as $key => $value) {
             if (!isset($value['pasien']) || !isset($value['pegawai'])) {
                 unset($payment['response_data'][$key]);
             } else {
-                $Pegawai = new Pegawai(self::$pdo);
+
                 $PegawaiInfo = $Pegawai->get_detail($value['pegawai']);
                 $payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
 
-                $Pasien = new Pasien(self::$pdo);
+
                 $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
                 $payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
@@ -192,11 +208,9 @@ class Invoice extends Utility
                 'AND',
                 '(invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
-                'pegawai.nik' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
-                'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                'OR',
-                'pegawai.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
             $paramValue = array(
@@ -232,10 +246,13 @@ class Invoice extends Utility
                 ->join('antrian_nomor', array(
                     'id'
                 ))
-                ->on(array(
-                    array('invoice.kunjungan', '=', 'antrian_nomor.kunjungan')
+                ->join('pasien', array(
+                    'nama'
                 ))
-
+                ->on(array(
+                    array('invoice.kunjungan', '=', 'antrian_nomor.kunjungan'),
+                    array('invoice.pasien', '=', 'pasien.uid')
+                ))
                 ->execute();
         } else {
             $data = self::$query->select('invoice', array(
@@ -257,8 +274,12 @@ class Invoice extends Utility
                 ->join('antrian_nomor', array(
                     'id'
                 ))
+                ->join('pasien', array(
+                    'nama'
+                ))
                 ->on(array(
-                    array('invoice.kunjungan', '=', 'antrian_nomor.kunjungan')
+                    array('invoice.kunjungan', '=', 'antrian_nomor.kunjungan'),
+                    array('invoice.pasien', '=', 'pasien.uid')
                 ))
                 ->execute();
         }
@@ -344,6 +365,8 @@ class Invoice extends Utility
 
                 $value['autonum'] = $autonum;
                 $autonum++;
+
+                $value['created_at_parse'] = date('d F Y', strtotime($value['created_at']));
                 array_push($dataResult, $value);
             }
         }
@@ -398,6 +421,22 @@ class Invoice extends Utility
             ))
             ->execute();
 
+        $Antrian = self::$query->select('antrian', array(
+            'departemen'
+        ))
+            ->join('master_poli', array(
+                'nama'
+            ))
+            ->on(array(
+                array('antrian.departemen', '=', 'master_poli.uid')
+            ))
+            ->where(array(
+                'antrian.kunjungan' => '= ?'
+            ), array(
+                $InvoiceData['response_data'][0]['kunjungan']
+            ))
+            ->execute();
+
         foreach ($payment['response_data'] as $key => $value) {
             //get payment detail
             $payment_detail = self::$query->select('invoice_payment_detail', array(
@@ -410,6 +449,7 @@ class Invoice extends Utility
                 'subtotal',
                 'discount',
                 'discount_type',
+                'billing_group',
                 'keterangan',
                 'status'
             ))
@@ -447,7 +487,7 @@ class Invoice extends Utility
                     $KonsulLib = array();
                     //Get All Konsul Item Poli
                     $PoliKonsul = self::$query->select('master_poli', array(
-                        'uid', 'tindakan_konsultasi'
+                        'uid', 'tindakan_konsultasi', 'nama'
                     ))
                         ->where(array(
                             'master_poli.deleted_at' => 'IS NULL'
@@ -491,13 +531,14 @@ class Invoice extends Utility
 
             //Info Pegawai
             $Pegawai = new Pegawai(self::$pdo);
-            $PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+            $PegawaiInfo = $Pegawai->get_detail($value['pegawai']);
             $payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
             $payment['response_data'][$key]['tanggal_bayar'] = date("d F Y", strtotime($value['tanggal_bayar']));
             $payment['response_data'][$key]['terbayar'] = floatval($value['terbayar']);
             $payment['response_data'][$key]['sisa_bayar'] = floatval($value['sisa_bayar']);
+            $payment['response_data'][$key]['antrian'] = $Antrian['response_data'];
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
         }
 
@@ -564,6 +605,7 @@ class Invoice extends Utility
                 'keterangan',
                 'subtotal',
                 'status_bayar',
+                'billing_group',
                 'pasien'
             ))
                 ->where(array(
@@ -589,6 +631,7 @@ class Invoice extends Utility
                 'discount' => $getPaymentDetail['response_data'][0]['discount'],
                 'discount_type' => $getPaymentDetail['response_data'][0]['discount_type'],
                 'keterangan' => $getPaymentDetail['response_data'][0]['keterangan'],
+                'billing_group' => $getPaymentDetail['response_data'][0]['billing_group'],
                 'penjamin' => $parameter['penjamin'],
                 'pasien' => $parameter['pasien'],
                 'created_at' => parent::format_date(),
@@ -1289,7 +1332,7 @@ class Invoice extends Utility
         foreach ($data['response_data'] as $key => $value) {
 
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
             //Antrian Info
@@ -1332,17 +1375,17 @@ class Invoice extends Utility
             foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                 //Info Poliklinik
                 $Poli = new Poli(self::$pdo);
-                $PoliInfo = $Poli::get_poli_detail($AKValue['poli']);
+                $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
                 $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                 //Info Pegawai
                 $Pegawai = new Pegawai(self::$pdo);
-                $PegawaiInfo = $Pegawai::get_detail($AKValue['pegawai']);
+                $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
                 $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                 //Info Loket
                 $Anjungan = new Anjungan(self::$pdo);
-                $AnjunganInfo = $Anjungan::get_loket_detail($AKValue['loket']);
+                $AnjunganInfo = $Anjungan->get_loket_detail($AKValue['loket']);
                 $AntrianKunjungan['response_data'][$AKKey]['loket'] = $AnjunganInfo['response_data'][0];
             }
             $data['response_data'][$key]['antrian_kunjungan'] = $AntrianKunjungan['response_data'][0];

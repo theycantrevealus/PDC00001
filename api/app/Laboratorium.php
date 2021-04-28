@@ -1040,7 +1040,7 @@ class Laboratorium extends Utility {
 
 	private function get_laboratorium_backend($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -2686,7 +2686,7 @@ class Laboratorium extends Utility {
     private function get_antrian_backend($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (!isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             if($parameter['mode'] == 'history')
@@ -2715,7 +2715,11 @@ class Laboratorium extends Utility {
                 $paramData = array(
                     'lab_order.deleted_at' => 'IS NULL',
                     'AND',
-                    'lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
                     'AND',
                     'lab_order.created_at' => 'BETWEEN ? AND ?',
                     'AND',
@@ -2727,7 +2731,11 @@ class Laboratorium extends Utility {
                 $paramData = array(
                     'lab_order.deleted_at' => 'IS NULL',
                     'AND',
-                    'lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
                     'AND',
                     'lab_order.status' => '= ?'
                 );

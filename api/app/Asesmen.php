@@ -199,12 +199,12 @@ class Asesmen extends Utility {
 
             //Pasien
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
             //Poli
             $Poli = new Poli(self::$pdo);
-            $PoliInfo = $Poli::get_poli_detail($value['poli']);
+            $PoliInfo = $Poli->get_poli_detail($value['poli']);
             $data['response_data'][$key]['poli'] = $PoliInfo['response_data'][0];
 
             //Lab Order
@@ -248,7 +248,8 @@ class Asesmen extends Utility {
 
                 $detailLaborOrder = self::$query->select('lab_order_detail', array(
                     'tindakan',
-                    'keterangan'
+                    'keterangan',
+                    'dpjp'
                 ))
                     ->where(array(
                         'lab_order_detail.lab_order' => '= ?',
@@ -260,6 +261,10 @@ class Asesmen extends Utility {
                     ->execute();
 
                 foreach ($detailLaborOrder['response_data'] as $LabDetailKey => $LabDetailValue) {
+                    $DPJP = $Pegawai->get_detail($LabDetailValue['dpjp']);
+                    $detailLaborOrder['response_data'][$LabDetailKey]['dpjp_detail'] = $DPJP['response_data'][0];
+
+
                     $LabTindakan = $Laboratorium->get_lab_detail($LabDetailValue['tindakan']);
                     $detailLaborOrder['response_data'][$LabDetailKey]['tindakan'] = $LabTindakan['response_data'][0];
 
@@ -1515,7 +1520,7 @@ class Asesmen extends Utility {
 
 	private function set_resep_asesment($parameter, $MasterAsesmen) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         //Check Invoice
         $Invoice = new Invoice(self::$pdo);
@@ -1629,7 +1634,7 @@ class Asesmen extends Utility {
 			foreach ($parameter['resep'] as $key => $value) {
 				//Prepare Data Obat
 				$ObatDetail = new Inventori(self::$pdo);
-				$ObatInfo = $ObatDetail::get_item_detail($value['obat'])['response_data'][0];
+				$ObatInfo = $ObatDetail->get_item_detail($value['obat'])['response_data'][0];
 
 				if(in_array($value['obat'], $used_obat)) {
 					$worker = self::$query->update('resep_detail', array(
@@ -2755,8 +2760,8 @@ class Asesmen extends Utility {
 
 	private function get_antrian_asesmen_rawat($parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
-
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
+		$dataParsed = array();
 		$listPoli = [];
 		$getPoli = self::$query
 			->select('master_poli_perawat', 
@@ -2783,8 +2788,8 @@ class Asesmen extends Utility {
 
 		$autonum = 1;
 		foreach ($antrian as $key => $value) {
-			$Poli = new Poli(self::$pdo);
-			$PoliDetail = $Poli::get_poli_detail($value['uid_poli'])['response_data'][0];
+            $Poli = new Poli(self::$pdo);
+			$PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
 
 			$cek_asesment = self::cek_asesmen_rawat_detail($PoliDetail['poli_asesmen'], $value['uid']);
 			$antrian[$key]['status_asesmen'] = false;
@@ -2808,8 +2813,26 @@ class Asesmen extends Utility {
 		foreach ($parameter as $key => $value) {
 			$antrianData = $antrian->get_antrian_by_poli($value['poli'])['response_data'];
 
-			foreach ($antrianData as $key => $value) {				
-				array_push($listPasien, $value);
+			foreach ($antrianData as $key => $value) {
+                if ($value['uid_penjamin'] === __UIDPENJAMINBPJS__) {
+                    $SEP = self::$query->select('bpjs_sep', array(
+                        'uid',
+                        'sep_no'
+                    ))
+                        ->where(array(
+                            'bpjs_sep.antrian' => '= ?',
+                            'AND',
+                            'bpjs_sep.deleted_at' => 'IS NULL'
+                        ), array(
+                            $value['uid']
+                        ))
+                        ->execute();
+                    if (count($SEP['response_data']) > 0) {
+                        array_push($listPasien, $value);
+                    }
+                } else {
+                    array_push($listPasien, $value);
+                }
 			}
 		}
 
