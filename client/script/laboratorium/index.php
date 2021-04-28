@@ -240,7 +240,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["waktu_order"];
+                        return "<span id=\"tanggal_labor_" + row.uid + "\">" + row["waktu_order"] + "</span>";
 					}
 				},
 				{
@@ -394,7 +394,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["waktu_order"];
+                        return "<span id=\"tanggal_labor_" + row.uid + "\">" + row["waktu_order"] + "</span>";
                     }
                 },
                 {
@@ -456,7 +456,8 @@
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     lab_pasien: labPasien,
                     lab_item: labItem,
-                    lab_lampiran: labLampiran
+                    lab_lampiran: labLampiran,
+                    tanggal: $("#tanggal_labor_" + uid).html()
                 },
                 success: function (response) {
                     /*var win = window.open("", "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=1280,height=800,top="+(screen.height-400)+",left="+(screen.width-840));

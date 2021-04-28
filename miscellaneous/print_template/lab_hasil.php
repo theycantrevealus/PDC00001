@@ -111,7 +111,6 @@
             </td>
             <td style="width:45%;">
                 <span class="title"><b>PEMERINTAH PROVINSI RIAU</b></span>
-                <span class="title">DINAS KESEHATAN</span>
                 <span class="title"><?php echo $_POST['__PC_CUSTOMER__']; ?></span>
                 <span class="alamat"><?php echo $_POST['__PC_CUSTOMER_ADDRESS__']; ?></span>
                 <span class="telepon">Telp. <?php echo $_POST['__PC_CUSTOMER_CONTACT__']; ?></span>
@@ -122,6 +121,7 @@
                     <tr><td>No. RM</td><td>:</td><td><?php echo $_POST['lab_pasien']['pasien']['no_rm'];?></td></tr>
                     <tr><td>Nama Pasien</td><td>:</td><td><?php echo $_POST['lab_pasien']['pasien']['panggilan'] . $_POST['lab_pasien']['pasien']['nama'];?></td></tr>
                     <tr><td>Tanggal Lahir</td><td>:</td><td><?php echo $_POST['lab_pasien']['pasien']['tanggal_lahir'];?></td></tr>
+                    <tr><td>Tanggal</td><td>:</td><td><?php echo $_POST['tanggal'];?></td></tr>
                 </table>
             </td>
         </tr>
