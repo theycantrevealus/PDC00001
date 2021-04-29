@@ -1159,6 +1159,7 @@
 
                                 });
                             } else {
+                                console.log(response);
                                 tableAntrianBayarRJ.ajax.reload();
                                 tableAntrianBayarRI.ajax.reload();
                                 tableAntrianBayarIGD.ajax.reload();
