@@ -23,6 +23,21 @@ class Query {
 		self::$keyType = '';
 	}
 
+	//Migrate Utility
+
+    /*
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     * */
+
 	function insert($table, $parameter = array()) {
 		$this->tables = array();
 		self::$queryValues = array();
@@ -328,6 +343,7 @@ class Query {
 			$responseBuilder = array();
 			$responseBuilder['response_query'] = self::buildQuery();// ⚠ AKTIFKAN HANYA PADA SAAT INGIN CEK QUERY !!
 			$responseBuilder['response_values'] = $usedValues;
+            $responseBuilder['response_values_parse'] = implode(',' , $usedValues);
 			$responseBuilder['response_params'] = self::$queryParams;
 			return $responseBuilder;
 		}

@@ -1099,11 +1099,11 @@
                                     tableAntrianLabor.ajax.reload();
                                     if(currentPenjamin === __UIDPENJAMINUMUM__) {
                                         push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya laboratorium baru", "warning").then(function() {
-                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                            //location.href = __HOSTNAME__ + "/apotek/resep/";
                                         });
                                     } else {
                                         push_socket(__ME__, "antrian_laboratorium_baru", "*", "Permintaan laboratorium baru", "warning").then(function() {
-                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                            //location.href = __HOSTNAME__ + "/apotek/resep/";
                                         });
                                     }
                                     $("#modal-detail-labor").modal("hide");
