@@ -169,6 +169,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         return row.antrian.departemen.nama;
                     }
                 },
@@ -266,6 +271,11 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
                     }
                 },
                 {

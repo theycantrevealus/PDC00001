@@ -65,6 +65,7 @@
 							<thead class="thead-dark">
 								<tr>
 									<th class="wrap_content">No</th>
+                                    <th>Tanggal</th>
 									<th>Poliklinik</th>
 									<th>Pasien</th>
 									<th>Dokter</th>

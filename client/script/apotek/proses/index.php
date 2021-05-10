@@ -112,7 +112,6 @@
                 },
                 dataSrc:function(response) {
                     var forReturn = [];
-                    console.log(response);
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
                         dataSet = [];
@@ -142,6 +141,11 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
                     }
                 },
                 {
@@ -233,6 +237,11 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
                     }
                 },
                 {

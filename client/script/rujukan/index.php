@@ -41,6 +41,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         return row.penjamin.nama;
                     }
                 },
