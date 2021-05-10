@@ -29,8 +29,8 @@
 							<span>Apotek</span>
 							<br />
 							<span>
-								<b class="text-warning">10 item</b> (hampir habis) <br />
-								<b class="text-danger">2 item</b> (habis)
+								<b class="text-warning" id="warning_hampir">0 item</b> (hampir habis) <br />
+								<b class="text-danger" id="warning_habis">0 item</b> (habis)
 							</span>
 							<h6 class="text-right">
 								<small><a href="<?php echo __HOSTNAME__; ?>/inventori/amprah/tambah"><i class="fa fa-cubes"></i> Amprah</a></small>
@@ -50,7 +50,7 @@
 				<div class="card card-body">
 					<div class="d-flex flex-row">
 						<div class="col-md-12">
-							<b>Perubahan Resep</b>
+							<b></b>
 						</div>
 					</div>
 				</div>

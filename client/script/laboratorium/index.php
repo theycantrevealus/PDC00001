@@ -433,6 +433,8 @@
         });
 
 
+
+
         $("body").on("click", ".btnCetak", function() {
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
@@ -689,6 +691,8 @@
             ]
         });
 
+
+
         var targettedReagenLab;
 
         var tableLab = $("#table-lab").DataTable({
@@ -759,6 +763,8 @@
                 }
             ]
         });
+
+
 
 
         $("body").on("click", ".btn-detail-lab", function() {
@@ -1558,6 +1564,18 @@
             });
             return returnHTML;
         }
+
+
+        setTimeout(function() {
+
+            tableServiceLabor.ajax.reload();
+            tableAntrianLabor.ajax.reload();
+            tableHistoryLabor.ajax.reload();
+            tableVerifikasiLabor.ajax.reload();
+            tableLab.ajax.reload();
+
+        }, 5000);
+
 	});
 </script>
 

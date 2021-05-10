@@ -1782,6 +1782,14 @@
                 });
             }
         });
+
+        setTimeout(function() {
+
+            tableAntrian.ajax.reload();
+            tableAntrianRI.ajax.reload();
+            tableAntrianIGD.ajax.reload();
+
+        }, 5000);
 	});
 
 </script>
