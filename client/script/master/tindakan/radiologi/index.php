@@ -171,7 +171,10 @@
 									tindakan: "<label id=\"tindakan_" + DataPopulator[key].uid + "\">" + DataPopulator[key].nama + "</label>",
 									tindakan_uid : DataPopulator[key].uid,
                                     mitra: DataPopulator[key].mitra,
-									action: "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-pencil-alt\"></i></button>"
+									action: "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                        "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\">" +
+                                        "<span><i class=\"fa fa-pencil-alt\"></i>Edit</span></button>" +
+                                        "</div>"
 								};
 
 								for(var KelasKey in DataPopulator[key]) {
@@ -234,7 +237,7 @@
 							"data": data[key].nama.replace(" ", "_").toLowerCase()
 						});
 					}
-					$("#table-tindakan thead tr").append("<th>Aksi</th>");
+					$("#table-tindakan thead tr").append("<th class=\"wrap_content\">Aksi</th>");
 
 					generateHeader.push({
 						"title" : "Aksi",
@@ -288,7 +291,13 @@
 											autonum: autonum,
 											tindakan: "<label id=\"tindakan_" + DataPopulator[key].uid + "\">" + DataPopulator[key].nama + "</label>",
 											tindakan_uid : DataPopulator[key].uid,
-											action: "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-pencil-alt\"></i></button> <button class=\"btn btn-danger btn-sm btn-delete-tindakan-kelas\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-trash\"></i></button>"
+											action: "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                                "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\">" +
+                                                "<span><i class=\"fa fa-pencil-alt\"></i>Edit</span></button> " +
+                                                "<button class=\"btn btn-danger btn-sm btn-delete-tindakan-kelas\" tindakan=\"" + DataPopulator[key].uid + "\">" +
+                                                "<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
+                                                "</button>" +
+                                                "</div>"
 										};
 
 										for(var KelasKey in DataPopulator[key]) {

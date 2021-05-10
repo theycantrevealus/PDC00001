@@ -34,12 +34,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button class=\"btn btn-warning btn-sm btn-edit-term-item\" id=\"term_item_edit_" + row["id"] + "\" data-toggle='tooltip' title='Edit'>" +
-										"<i class=\"fa fa-edit\"></i>" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+									"<button class=\"btn btn-info btn-sm btn-edit-term-item\" id=\"term_item_edit_" + row["id"] + "\" data-toggle='tooltip' title='Edit'>" +
+										"<span><i class=\"fa fa-pencil-alt\"></i>Edit</span>" +
 									"</button>" +
 									"<button id=\"delete_" + row['id'] + "\" class=\"btn btn-danger btn-sm btn-delete-term-item\" data-toggle='tooltip' title='Hapus'>" +
-										"<i class=\"fa fa-trash\"></i>" +
+										"<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
 									"</a>" +
 								"</div>";
 					}

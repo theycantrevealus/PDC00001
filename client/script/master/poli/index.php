@@ -84,10 +84,10 @@
 									 	"<i class=\"fa fa-list\"></i> Detail" +
 									"</button>" +*/
 									"<a href=\"" + __HOSTNAME__ + "/master/poli/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-poli\">" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+										"<span><i class=\"fa fa-edit\"></i> Edit</span>" +
 									"</a>" +
 									"<button id=\"poli_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-poli\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}

@@ -80,7 +80,9 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<a href=\"" + __HOSTNAME__ + "/inventori/do/tambah/" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail\"><i class=\"fa fa-box-open\"></i></a>";
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/inventori/do/tambah/" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail\"><i class=\"fa fa-box-open\"></i> Detail</a>" +
+                            "</div>";
 					}
 				},
 			]

@@ -2347,7 +2347,7 @@
                         "uid-obat": $("#txt_racikan_obat").val()
                     });
             }
-
+            autoRacikan();
             //$("#jlh_komposisi_" + currentRacikID + "_" + currentKomposisiID).html($("#txt_racikan_jlh").val());
             $("#takar_komposisi_" + currentRacikID + "_" + currentKomposisiID).html("<b style=\"font-size: 15pt; display: none\">" + $("#txt_racikan_takar_bulat").val() + "</b><sub nilaiExact=\"" + eval($("#txt_racikan_takar").val()) + "\">" + $("#txt_racikan_takar").val() + "</sub><h6>" + $("#txt_racikan_kekuatan").val() + "</h6>");
             //if($("#txt_racikan_jlh").val() != "" && $("#txt_racikan_takar").val()) {

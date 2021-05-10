@@ -108,7 +108,7 @@
                         if(row.rad_order.length > 0) {
                             isRad = 1
                         }
-                        return 	"<button lab=\"" + isLab + "\" rad=\"" + isRad + "\" antrian=\"" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\" id=\"detail_" + row.uid + "\"><i class=\"fa fa-eye\"></i></button>";
+                        return 	"<button lab=\"" + isLab + "\" rad=\"" + isRad + "\" antrian=\"" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\" id=\"detail_" + row.uid + "\"><i class=\"fa fa-eye\"></i> Detail</button>";
                     }
                 }
             ]
@@ -492,7 +492,9 @@
                 <canvas style="width: 100%; border: solid 1px #ccc;" id="pdfViewer"></canvas>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times"></i> Tutup
+                </button>
             </div>
         </div>
     </div>
@@ -791,7 +793,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times"></i> Tutup
+                </button>
             </div>
         </div>
     </div>

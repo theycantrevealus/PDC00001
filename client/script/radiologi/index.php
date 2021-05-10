@@ -71,13 +71,13 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<a href=\"" + __HOSTNAME__ + "/radiologi/antrian/" + row.uid + "\" class=\"btn btn-warning btn-sm\">" +
-										"<i class=\"fa fa-sign-out-alt\"></i>" +
+										"<span><i class=\"fa fa-sign-out-alt\"></i> Detail</span>" +
 									"</a>" +
 									"<button id=\"cetak_" + row.uid + "\" class=\"btn btn-primary btn-sm btnCetak\">" +
-										"<i class=\"fa fa-print\"></i>" +
+										"<span><i class=\"fa fa-print\"></i>Cetak</span>" +
 									"</button>" +
 									"<button id=\"rad_order_" + row.uid + "\" type='button' class=\"btn btn-success btn-sm btn-selesai-radiologi\" data-toggle='tooltip' title='Tandai selesai'>" +
-										"<i class=\"fa fa-check\"></i>" +
+										"<span><i class=\"fa fa-check\"></i>Selesai</span>" +
 									"</a>" +
 								"</div>";
 					}
@@ -193,7 +193,7 @@
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                             "<button asesmen=\"" + row.uid_asesmen + "\" id=\"rad_order_" + row.uid + "\" type='button' penjamin=\"" + row.uid_penjamin + "\" class=\"btn btn-info btn-sm btn-verifikasi-radiologi\" data-toggle='tooltip' title=\"Verifikasi Radiologi\"'>" +
-                            "<i class=\"fa fa-check\"></i>" +
+                            "<span><i class=\"fa fa-check\"></i>Verifikasi</span>" +
                             "</a>" +
                             "</div>";
                     }

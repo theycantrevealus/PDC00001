@@ -174,7 +174,8 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">Proses</a>" +
+                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">" +
+                            "<span><i class=\"fa fa-check\"></i>Proses</span></a>" +
                             "</div>";
                     }
                 }
@@ -264,7 +265,9 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">Proses</a>" +
+                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">" +
+                            "<span><i class=\"fa fa-check\"></i>Proses</span>" +
+                            "</a>" +
                             "</div>";
                     }
                 }

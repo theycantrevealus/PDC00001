@@ -80,7 +80,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<button id=\"rujukan_" + row.uid + "\" class=\"btn btn-info btn-sm btnRujuk\" target=\"" + row.penjamin.uid + "\">Proses</button>";
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button id=\"rujukan_" + row.uid + "\" class=\"btn btn-info btn-sm btnRujuk\" target=\"" + row.penjamin.uid + "\">" +
+                            "<span><i class=\"fa fa-pencil-alt\"></i>Proses" +
+                            "</button>" +
+                            "</div>";
                     }
                 }
             ]

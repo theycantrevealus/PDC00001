@@ -170,14 +170,7 @@
 
 		    $(containerTemp).find("#nama-pasien-faktur span").css({
                 "display": "inline"
-            })
-
-
-
-
-
-            console.clear();
-            console.log($(containerTemp).html());
+            });
 
 
             $.ajax({
@@ -385,6 +378,8 @@
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = returnedData.length;
+
+					console.log(response);
 					
 					return returnedData;
 				}
@@ -1159,6 +1154,7 @@
 
                                 });
                             } else {
+                                console.log(response);
                                 tableAntrianBayarRJ.ajax.reload();
                                 tableAntrianBayarRI.ajax.reload();
                                 tableAntrianBayarIGD.ajax.reload();
