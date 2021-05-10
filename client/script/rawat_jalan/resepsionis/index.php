@@ -231,7 +231,7 @@
                         if(row["uid_penjamin"] === __UIDPENJAMINBPJS__) {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
-                                "<i class=\"fa fa-check\"></i>" +
+                                "<i class=\"fa fa-check\"></i> Selesai" +
                                 "</button>" +
                                 "<div class=\"btn-group\">" +
                                 "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
@@ -254,7 +254,7 @@
                         } else {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
-                                "<i class=\"fa fa-check\"></i>" +
+                                "<i class=\"fa fa-check\"></i> Selesai" +
                                 "</button>" +
                                 "<div class=\"btn-group\">" +
                                 "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
@@ -471,7 +471,7 @@
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                             "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-info btn-sm btn-pasien-pulang\">" +
-                            "<i class=\"fa fa-check\"></i> Pulangkan Pasien" +
+                            "<i class=\"fa fa-check\"></i> Selesai" +
                             "</button>" +
                             "</div>";
                     }

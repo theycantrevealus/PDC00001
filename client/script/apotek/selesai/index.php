@@ -194,13 +194,13 @@
                         if(row.status_resep === "D") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
-                                "<i class=\"fa fa-bullhorn\"></i> Panggil" +
+                                "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "P") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
-                                "<i class=\"fa fa-check\"></i> Terima" +
+                                "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "S") {
@@ -295,13 +295,13 @@
                         if(row.status_resep === "D") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
-                                "<i class=\"fa fa-bullhorn\"></i> Panggil" +
+                                "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "P") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
-                                "<i class=\"fa fa-check\"></i> Terima" +
+                                "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "S") {
