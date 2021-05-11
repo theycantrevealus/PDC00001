@@ -44,7 +44,7 @@
             $("#fisioterapi_nav").remove();
         }
 
-        $(".tab-igd").remove();
+        //$(".tab-igd").remove();
 
         /*if(dataPasien.antrian.departemen !== __POLI_IGD__) {
             $(".tab-igd").remove();

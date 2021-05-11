@@ -112,7 +112,11 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return 	"<button class=\"btn btn-info btn-sm btnDetailKwitansi\" invoice_payment=\"" + row.uid + "\" invoice=\"" + row.invoice + "\" id=\"invoice_" + row.uid + "\"><i class=\"fa fa-eye\"></i></button>";
+						return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button class=\"btn btn-info btn-sm btnDetailKwitansi\" invoice_payment=\"" + row.uid + "\" invoice=\"" + row.invoice + "\" id=\"invoice_" + row.uid + "\">" +
+                            "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                            "</button>" +
+                            "</div>";
 					}
 				}
 			]
@@ -435,7 +439,11 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return 	"<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\"><i class=\"fa fa-eye\"></i></button>";
+						return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+                            "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                            "</button>" +
+                            "</div>";
 					}
 				}
 			]
@@ -553,7 +561,10 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return 	"<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\"><i class=\"fa fa-eye\"></i></button>";
+                        return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+                            "<span><i class=\"fa fa-eye\"></i>Detail</span></button>" +
+                            "</div>";
                     }
                 }
             ]
@@ -682,7 +693,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return 	"<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\"><i class=\"fa fa-eye\"></i></button>";
+                        return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+                            "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                            "</button>" +
+                            "</div>";
                     }
                 }
             ]
@@ -916,7 +931,9 @@
 										"<td>" + history_payment[hisKey].metode_bayar + "</td>" +
 										"<td>" + history_payment[hisKey].pegawai.nama + "</td>" +
 										"<td class=\"text-right\">" + number_format(history_payment[hisKey].terbayar, 2, ".", ",") + "</td>" +
-										"<td><button class=\"btn btn-sm btn-info btnDetailPayment\" id=\"payment_" + history_payment[hisKey].uid + "\"><i class=\"fa fa-eye\"></i></button></td>" +
+										"<td><button class=\"btn btn-sm btn-info btnDetailPayment\" id=\"payment_" + history_payment[hisKey].uid + "\">" +
+                                    "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                                    "</button></td>" +
 									"</tr>"
 								);
 							}

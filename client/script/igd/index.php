@@ -75,10 +75,10 @@
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                             "<a href=\"" + __HOSTNAME__ + "/igd/dokter/index/" + row.pasien.uid + "/" + row.kunjungan + "/" + row.penjamin.uid + "\" class=\"btn btn-sm btn-info\">" +
-                            "<i class=\"fa fa-sign-out-alt\"></i>" +
+                            "<span><i class=\"fa fa-sign-out-alt\"></i>Proses</span>" +
                             "</a>" +
                             "<button class=\"btn btn-sm btn-success btn-pulangkan-pasien\" id=\"pulangkan_" + row.pasien.uid + "\">" +
-                            "<i class=\"fa fa-check\"></i>" +
+                            "<span><i class=\"fa fa-check\"></i>Selesai</span>" +
                             "</button>" +
                             "</div>";
                     }
