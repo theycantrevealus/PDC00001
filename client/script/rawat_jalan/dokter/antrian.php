@@ -1818,6 +1818,7 @@
                     "id": "resep_row_" + id
                 });
                 $(this).find("td:eq(0)").html(id);
+
                 $(this).find("td:eq(1) select.resep-obat").attr({
                     "id": "resep_obat_" + id
                 });
@@ -2041,7 +2042,7 @@
 
                 $(this).find("td:eq(1) input").attr({
                     "id": "racikan_nama_" + id
-                });
+                }).val("Racikan " + id);
 
                 if($(this).find("td:eq(1) input") == "") {
                     $(this).find("td:eq(1) input").val("RACIKAN " + id);
