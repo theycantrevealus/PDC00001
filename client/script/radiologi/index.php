@@ -85,6 +85,8 @@
 			]
 		});
 
+
+
 		$("body").on("click", ".btn-selesai-radiologi", function() {
 		    var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
@@ -575,6 +577,14 @@
                 console.log(command);
             }
         }*/
+
+        setTimeout(function() {
+
+            tableAntrianRadiologi.ajax.reload();
+            tableVerifikasiRadiologi.ajax.reload();
+
+        }, 5000);
+
 	});
 </script>
 

@@ -353,6 +353,51 @@
                                         </div>
                                     </div>
                                 </li>
+                                <li>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <b>Skala Nyeri NRS(>=6th - Dewasa)</b>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <b>Total Skor</b>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" class="form-control" id="igd_skor_nyeri" />
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <b>Tipe</b>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <input type="radio" name="igd_tipe_nyeri" value="ringan" /> Ringan
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="radio" name="igd_tipe_nyeri" value="sedang" /> Sedang
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="radio" name="igd_tipe_nyeri" value="berat" /> Berat
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="radio" name="igd_tipe_nyeri" value="berat_sekali" /> Berat Sekali
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top: 50px; padding: 0px 50px;">
+                                        <div class="col-md-12" id="scale-loader-image"></div>
+                                        <div class="col-md-12" id="scale-loader-define"></div>
+                                        <div class="col-md-12" id="scale-loader"></div>
+                                        <div class="col-md-12">
+                                            <input type="text" id="txt_nrs" class="slider">
+                                        </div>
+                                    </div>
+                                </li>
                             </ol>
                         </div>
                     </div>

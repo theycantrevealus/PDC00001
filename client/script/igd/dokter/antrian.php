@@ -15,8 +15,13 @@
             values: [0,1,2,3,4,5,6,7,8,9,10]
         });
 
+
+
         var rangeDefiner = [
             {
+                text: "",
+                merge: 0
+            }, {
                 text: "Tidak",
                 merge: 1
             }, {
@@ -49,6 +54,96 @@
             }).addClass("scale-stepper");
             $("#scale-loader").append(scaleStepper)
         }
+
+        $("body").on("click", ".NRSItems", function() {
+            var currentIDNRS = $(this).attr("id").split("-");
+            currentIDNRS = currentIDNRS[currentIDNRS.length - 1];
+
+            //alert(currentIDNRS);
+
+            if(parseInt(currentIDNRS) === 0) {
+                mySlider.setValues(0);
+                mySlider.destroy();
+                mySlider = new rSlider({
+                    target: "#txt_nrs",
+                    values: [0,1,2,3,4,5,6,7,8,9,10]
+                });
+
+            } else {
+                mySlider.setValues(parseInt(currentIDNRS) * 2);
+            }
+
+        });
+
+        function renderScale(target) {
+            var NRScurrent = parseInt(target);
+
+            var NRSchildTarget = 0;
+
+
+            if(NRScurrent % 2 === 0) {
+                NRSchildTarget = (NRScurrent / 2);
+            } else {
+                NRSchildTarget = ((NRScurrent - 1) / 2);
+            }
+
+            var colorStyleNRS =  [
+                "linear-gradient(90deg, rgba(54, 198, 0, 1), rgba(102, 198, 0, 1))",
+                "linear-gradient(90deg, rgba(102, 198, 0, 1), rgba(126, 198, 0, 1))",
+                "linear-gradient(90deg, rgba(126, 198, 0, 1), rgba(192, 198, 12, 1))",
+                "linear-gradient(90deg, rgba(192, 198, 12, 1), rgba(238, 166, 1, 1))",
+                "linear-gradient(90deg, rgba(238, 166, 1, 1), rgba(238, 51, 1, 1))",
+                "linear-gradient(90deg, rgba(238, 51, 1, 1), rgba(255, 0, 0, 1))"
+            ];
+
+            $(".NRSItems").each(function() {
+                var currentIDNRS = $(this).attr("id").split("-");
+                currentIDNRS = currentIDNRS[currentIDNRS.length - 1];
+                if(currentIDNRS <= NRSchildTarget) {
+                    $(this).css({
+                        "opacity": "1",
+                        "background": colorStyleNRS[currentIDNRS]
+                    });
+                } else {
+                    $(this).css({
+                        "opacity": ".5",
+                        "background": "#ccc"
+                    });
+                }
+            });
+        }
+
+        $("body").on("DOMSubtreeModified", ".rs-tooltip", function() {
+            renderScale($(".rs-tooltip").html());
+        });
+
+
+        //INI LOHHHH
+        var imageCounter = 0;
+        $(".rs-scale span").each(function(e) {
+            $(this).css({
+                "position":"relative"
+            });
+
+            if(e % 2 == 0) {
+                var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
+                var marginLeft = $(this).find("ins").offset().left - $(".rs-scale span").eq(0).offset().left - 30;
+                var imageViewer = document.createElement("IMG");
+                $(imageViewer).attr({
+                    "src": imagesScale,
+                    "id": "NRS-" + imageCounter
+                }).css({
+                    "position": "absolute",
+                    "top": "0",
+                    "left": marginLeft + "px",
+                    "width": "100px",
+                    "height": "100px",
+                    "border-radius": "100%"
+                }).addClass("NRSItems");
+                $("#scale-loader-image").append(imageViewer);
+                imageCounter++;
+            }
+        });
 
         //var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
         var poliListRaw = [];
@@ -812,6 +907,7 @@
                             $("#igd_lokasi").val(asesmen_detail.lokasi);
 
                             mySlider.setValues(asesmen_detail.skala_rasa_sakit);
+                            renderScale($(".rs-tooltip").html());
 
                             if(asesmen_detail.status_alergi == "y") {
                                 $("#igd_status_alergi_text").removeAttr("disabled").val(asesmen_detail.status_alergi_text);
@@ -6320,6 +6416,11 @@
                 digitsOptional: true
             });*/
         }
+
+
+
+
+
     });
 
 </script>

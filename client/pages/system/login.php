@@ -127,7 +127,11 @@
 					</div>
 				</div> -->
 				<div class="form-group text-center">
-					<button class="btn btn-primary mb-5" type="submit">Login</button><br>
+					<button class="btn btn-primary mb-5" id="btnLogin" type="submit">
+                        <span>
+                            <i class="fa fa-check"></i> Login
+                        </span>
+                    </button><br>
 					<!-- <a href="<?php echo __HOSTNAME__; ?>/template/">Forgot password?</a> <br>
 					Don't have an account? <a class="text-body text-underline" href="<?php echo __HOSTNAME__; ?>/template/signup.html">Sign up!</a> -->
 				</div>
@@ -204,7 +208,10 @@
 					"left": "0"
 				}, 1500);
 
-				$("form").submit(function(){
+				$("form").submit(function() {
+				    $("#btnLogin").removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i> Validating</span>").attr({
+                        "disabled": "disabled"
+                    });
 					var email = $("#email_2").val();
 					var password = $("#password_2").val();
 					if(email != "") {
@@ -217,7 +224,9 @@
 								password:password
 							},
 							success:function(response) {
-								console.log(response);
+                                $("#btnLogin").removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-check\"></i> Login</span>").attr({
+                                    "disabled": "disabled"
+                                });
 								if(response.response_result > 0) {
 									location.reload();
 								} else {

@@ -91,7 +91,7 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<a href=\"" + __HOSTNAME__ + "/igd/dokter/antrian/" + row.uid + "/" + row.uid_pasien + "/" + row.uid_kunjungan + "\" class=\"btn btn-success btn-sm\">" +
-										"<i class=\"fa fa-eye\"></i>" +
+										"<span><i class=\"fa fa-eye\"></i>Detail</span>" +
 									"</a>" +
 								"</div>";
 					}

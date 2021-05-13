@@ -243,6 +243,12 @@
 			$("#table-list-pencarian tbody").html("<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>");
 			$("#modal-cari").modal("show");
 		});
+
+        setTimeout(function() {
+
+            tableAntrian.ajax.reload();
+
+        }, 5000);
 	});
 
 </script>

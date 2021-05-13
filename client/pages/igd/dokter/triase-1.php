@@ -294,7 +294,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row" style="margin-top: 50px; padding: 0px;">
+                        <div class="row" style="margin-top: 50px; padding: 0px 100px;">
+                            <div class="col-md-12" id="scale-loader-image"></div>
                             <div class="col-md-12" id="scale-loader-define"></div>
                             <div class="col-md-12" id="scale-loader"></div>
                             <div class="col-md-12">

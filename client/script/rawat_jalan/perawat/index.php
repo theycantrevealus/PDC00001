@@ -186,6 +186,12 @@
             }
         }*/
 
+        setTimeout(function() {
+
+            tableAntrianPerawat.ajax.reload();
+
+        }, 5000);
+
 
 
 

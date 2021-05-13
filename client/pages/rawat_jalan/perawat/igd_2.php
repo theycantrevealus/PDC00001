@@ -281,7 +281,9 @@
                                         </li>
                                     </ol>
                                 </td>
-                                <td></td>
+                                <td style="position:relative;">
+                                    <textarea class="form-control" style="position: absolute; left: 0; top: 0; height: 100%" placeholder="Evaluasi SOAP"></textarea>
+                                </td>
                             </tr>
 
 
@@ -590,7 +592,9 @@
                                         </li>
                                     </ol>
                                 </td>
-                                <td></td>
+                                <td style="position:relative;">
+                                    <textarea class="form-control" style="position: absolute; left: 0; top: 0; height: 100%" placeholder="Evaluasi SOAP"></textarea>
+                                </td>
                             </tr>
                             <tr>
                                 <td>
@@ -994,7 +998,9 @@
                                         </li>
                                     </ol>
                                 </td>
-                                <td></td>
+                                <td style="position:relative;">
+                                    <textarea class="form-control" style="position: absolute; left: 0; top: 0; height: 100%" placeholder="Evaluasi SOAP"></textarea>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

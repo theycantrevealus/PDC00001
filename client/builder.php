@@ -358,7 +358,31 @@
 		}
 	?>
 	<script type="text/javascript">
-        function push_socket(sender, protocols, receiver, parameter, type) {
+
+        function resend_socket(requestList, callback) {
+            var sendingStatus = 0;
+            for(var reqKey in requestList) {
+                push_socket(
+                    requestList[reqKey].sender,
+                    requestList[reqKey].protocol,
+                    requestList[reqKey].receiver,
+                    requestList[reqKey].message,
+                    requestList[reqKey].type
+                ).then(function() {
+                    alert(reqKey);
+                    sendingStatus++;
+                });
+            }
+
+            /*if(sendingStatus === requestList.length) {
+
+            } else {
+                resend_socket(requestList, callback);
+            }*/
+
+            callback();
+        }
+        async function push_socket(sender, protocols, receiver, parameter, type) {
 
             if(Sync.readyState === WebSocket.CLOSED) {
                 Sync = SocketCheck(serverTarget, protocolLib, tm);
@@ -389,13 +413,6 @@
                 console.log("WebSocket Not Supported");
             }
 
-
-
-
-
-
-
-
         });
 
         function SocketCheck(serverTarget, protocolLib, tm) {
@@ -404,6 +421,12 @@
             Sync.onopen = function() {
                 clearInterval(tm);
                 //console.log("connected");
+
+                /*setInterval(function() {
+                    //if (Sync.bufferedAmount == 0)
+
+                }, 2000);*/
+
                 $(".global-sync-container").fadeOut();
             }
 
