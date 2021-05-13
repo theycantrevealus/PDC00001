@@ -1148,7 +1148,7 @@ class Apotek extends Utility
                 $racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];
             }
             $data['response_data'][$key]['racikan'] = $racikan['response_data'];
-
+            $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
         }

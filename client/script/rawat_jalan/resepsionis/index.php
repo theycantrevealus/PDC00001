@@ -1120,7 +1120,11 @@
 										nik = '-';
 									}
 
-									var buttonAksi = "<td style='text-align:center;'><button id=\"btn_daftar_pasient_" + item.uid + "\" class=\"btn btn-sm btn-info btnDaftarPasien\" data-toggle=\"tooltip\" title=\"Tambah ke Antrian\"><i class=\"fa fa-user-plus\"></i></button></td>";
+									var buttonAksi = "<td style='text-align:center;'>" +
+                                        "<button id=\"btn_daftar_pasient_" + item.uid + "\" class=\"btn btn-sm btn-info btnDaftarPasien\" data-toggle=\"tooltip\" title=\"Tambah ke Antrian\">" +
+                                        "<span><i class=\"fa fa-user-plus\"></i>Tambah</span>" +
+                                        "</button>" +
+                                        "</td>";
 
 									if (item.berobat == true){
 										buttonAksi = "<td clsas=\"wrap_content\" style=\"text-align:center;\"><span class=\"badge badge-warning\">Sedang Berobat</span></td>";
