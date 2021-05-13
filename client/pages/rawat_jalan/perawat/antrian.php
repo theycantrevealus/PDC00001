@@ -29,7 +29,7 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
 			<div class="z-0">
 				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-perawat">
 					<li class="nav-item tab-biasa">
-						<a href="#tab-assesment-awal-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+						<a href="#tab-assesment-awal-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
                                 <i class="fa fa-address-book"></i>
 							</span>
@@ -53,7 +53,7 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
                         </a>
                     </li>
                     <li class="nav-item tab-igd">
-                        <a href="#tab-assesment-awal-igd-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false" aria-controls="tab-asesment-awal-igd-1">
+                        <a href="#tab-assesment-awal-igd-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="false" aria-controls="tab-asesment-awal-igd-1">
 							<span class="nav-link__count">
 								01
 							</span>
@@ -127,7 +127,7 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
-				<div class="tab-pane show fade tab-biasa" id="tab-assesment-awal-1">
+				<div class="tab-pane show fade tab-biasa active" id="tab-assesment-awal-1">
 					<?php require 'halaman1.php'; ?>
 					<?php //require 'action_panel.php'; ?>
 				</div>
@@ -139,7 +139,7 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
                     <?php require 'fisioterapi.php'; ?>
                     <?php //require 'action_panel.php'; ?>
                 </div>
-                <div class="tab-pane show fade tab-igd active" id="tab-assesment-awal-igd-1">
+                <div class="tab-pane show fade tab-igd" id="tab-assesment-awal-igd-1">
                     <?php require 'igd_1.php'; ?>
                 </div>
                 <div class="tab-pane show fade tab-igd" id="tab-assesment-awal-igd-2">

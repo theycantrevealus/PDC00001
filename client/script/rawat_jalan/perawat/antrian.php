@@ -9,7 +9,7 @@
 
 
 
-        function renderScale(target) {
+        function renderScale(target, targetInstances) {
             var NRScurrent = parseInt(target);
 
             var NRSchildTarget = 0;
@@ -30,7 +30,7 @@
                 "linear-gradient(90deg, rgba(238, 51, 1, 1), rgba(255, 0, 0, 1))"
             ];
 
-            $(".NRSItems").each(function() {
+            $(targetInstances).find(".NRSItems").each(function() {
                 var currentIDNRS = $(this).attr("id").split("-");
                 currentIDNRS = currentIDNRS[currentIDNRS.length - 1];
                 if(currentIDNRS <= NRSchildTarget) {
@@ -83,119 +83,94 @@
             }
         ];
 
-        var sliderIGDBiasa;
-        $("#tab-asesmen-perawat .nav-item").each(function() {
-            var targetPage = $(this).find(".nav-link").attr("href");
-            if($(this).find(".nav-link").hasClass("active")) {
-                if(targetPage === "#tab-assesment-awal-igd-1") {
-                    sliderIGDBiasa = new rSlider({
-                        target: "#txt_nrs",
-                        values: [0,1,2,3,4,5,6,7,8,9,10]
-                    });
+        var sliderIGDBiasa, sliderIGDBidan;
 
-                    for(var pain in rangeDefiner) {
-                        var scaleStepper = document.createElement("DIV");
-                        $(scaleStepper).css({
-                            "width": (10 * rangeDefiner[pain].merge) + "%"
-                        }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
-                        $("#scale-loader-define").append(scaleStepper)
-                    }
+        function renderSlider(id) {
+            let target;
+            return new Promise((resolve, reject) => {
+                target = new rSlider({
+                    target: id,
+                    values: [0,1,2,3,4,5,6,7,8,9,10]
+                });
 
-                    for(var a = 1; a <= 10; a++) {
-                        var scaleStepper = document.createElement("DIV");
-                        $(scaleStepper).css({
-                            "width": "10%"
-                        }).addClass("scale-stepper");
-                        $("#scale-loader").append(scaleStepper)
-                    }
+                resolve(target);
+            });
+        }
 
-                    var imageCounter = 0;
-                    $("#scale-loader-image").html("");
-                    $(".rs-scale span").each(function(e) {
-                        $(this).css({
-                            "position":"relative"
-                        });
 
-                        if(e % 2 == 0) {
-                            var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
-                            var marginLeft = $(this).find("ins").offset().left - $(".rs-scale span").eq(0).offset().left - 30;
-                            var imageViewer = document.createElement("IMG");
-                            $(imageViewer).attr({
-                                "src": imagesScale,
-                                "id": "NRS-" + imageCounter
-                            }).css({
-                                "position": "absolute",
-                                "top": "0",
-                                "left": marginLeft + "px",
-                                "width": "100px",
-                                "height": "100px",
-                                "border-radius": "100%"
-                            }).addClass("NRSItems");
-                            $("#scale-loader-image").append(imageViewer);
-                            imageCounter++;
-                        }
-                    });
-                }
-            }
-        });
 
-        $("#tab-asesmen-perawat .nav-link").click(function() {
+        $("a[data-toggle=\"tab\"]").on("shown.bs.tab", function (e) {
             var targetPage = $(this).attr("href");
             if(dataPasien.antrian.departemen === __POLI_IGD__) {
                 if(targetPage === "#tab-assesment-awal-igd-1") {
-                    $("#scale-loader-image").html("");
-                    $("#scale-loader-define").html("");
-                    sliderIGDBiasa.destroy();
-                    sliderIGDBiasa = new rSlider({
-                        target: "#txt_nrs",
-                        values: [0,1,2,3,4,5,6,7,8,9,10]
-                    });
+                    if(sliderIGDBiasa === undefined) {
+                        $("#scale-loader-image").html("");
+                        renderSlider("#txt_nrs").then(function (resolve, reject) {
+                            sliderIGDBiasa = resolve;
 
-                    for(var pain in rangeDefiner) {
-                        var scaleStepper = document.createElement("DIV");
-                        $(scaleStepper).css({
-                            "width": (10 * rangeDefiner[pain].merge) + "%"
-                        }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
-                        $("#scale-loader-define").append(scaleStepper)
-                    }
+                            var imageCounter = 0;
+                            $("#nrs_1 .rs-scale span").each(function(e) {
+                                $(this).css({
+                                    "position":"relative"
+                                });
 
-                    for(var a = 1; a <= 10; a++) {
-                        var scaleStepper = document.createElement("DIV");
-                        $(scaleStepper).css({
-                            "width": "10%"
-                        }).addClass("scale-stepper");
-                        $("#scale-loader").append(scaleStepper)
-                    }
-
-                    var imageCounter = 0;
-                    $(".rs-scale span").each(function(e) {
-                        $(this).css({
-                            "position":"relative"
+                                if(e % 2 == 0) {
+                                    var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
+                                    var marginLeft = $(this).find("ins").offset().left - $("#nrs_1 .rs-scale span").eq(0).offset().left - 30;
+                                    var imageViewer = document.createElement("IMG");
+                                    $(imageViewer).attr({
+                                        "src": imagesScale,
+                                        "id": "NRS-" + imageCounter
+                                    }).css({
+                                        "position": "absolute",
+                                        "top": "0",
+                                        "left": marginLeft + "px",
+                                        "width": "100px",
+                                        "height": "100px",
+                                        "border-radius": "100%"
+                                    }).addClass("NRSItems biasa");
+                                    $("#scale-loader-image").append(imageViewer);
+                                    imageCounter++;
+                                }
+                            });
                         });
+                    }
+                } else if(targetPage === "#tab-assesment-bidan-igd-1a") {
+                    if(sliderIGDBidan === undefined) {
+                        $("#scale-loader-image-bidan").html("");
+                        renderSlider("#txt_nrs_bidan").then(function (resolve, reject) {
+                            sliderIGDBidan = resolve;
 
-                        if(e % 2 == 0) {
-                            var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
-                            var marginLeft = $(this).find("ins").offset().left - $(".rs-scale span").eq(0).offset().left - 30;
-                            var imageViewer = document.createElement("IMG");
-                            $(imageViewer).attr({
-                                "src": imagesScale,
-                                "id": "NRS-" + imageCounter
-                            }).css({
-                                "position": "absolute",
-                                "top": "0",
-                                "left": marginLeft + "px",
-                                "width": "100px",
-                                "height": "100px",
-                                "border-radius": "100%"
-                            }).addClass("NRSItems");
-                            $("#scale-loader-image").append(imageViewer);
-                            imageCounter++;
-                        }
-                    });
+                            var imageCounter = 0;
+                            $("#nrs_2 .rs-scale span").each(function(e) {
+                                $(this).css({
+                                    "position":"relative"
+                                });
+
+                                if(e % 2 == 0) {
+                                    var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
+                                    var marginLeft = $(this).find("ins").offset().left - $("#nrs_2 .rs-scale span").eq(0).offset().left - 30;
+                                    var imageViewer = document.createElement("IMG");
+                                    $(imageViewer).attr({
+                                        "src": imagesScale,
+                                        "id": "NRS-" + imageCounter
+                                    }).css({
+                                        "position": "absolute",
+                                        "top": "0",
+                                        "left": marginLeft + "px",
+                                        "width": "100px",
+                                        "height": "100px",
+                                        "border-radius": "100%"
+                                    }).addClass("NRSItems bidan");
+                                    $("#scale-loader-image-bidan").append(imageViewer);
+                                    imageCounter++;
+                                }
+                            });
+                        });
+                    }
                 }
             }
         });
-
 
 		//IGD
         if(dataPasien.antrian.departemen === __POLI_IGD__) {
@@ -225,8 +200,12 @@
 
 
 
-            $("body").on("DOMSubtreeModified", ".rs-tooltip", function() {
-                renderScale($(".rs-tooltip").html());
+            $("body #nrs_1").on("DOMSubtreeModified", ".rs-tooltip", function() {
+                renderScale($("#nrs_1 .rs-tooltip").html(), "#nrs_1");
+            });
+
+            $("body #nrs_2").on("DOMSubtreeModified", ".rs-tooltip", function() {
+                renderScale($("#nrs_2 .rs-tooltip").html(), "#nrs_2");
             });
 
         }
