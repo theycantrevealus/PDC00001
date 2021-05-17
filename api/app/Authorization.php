@@ -84,7 +84,7 @@ class Authorization {
 		return (empty($getBearer)) ? null : $getBearer;
 	}
 
-	public function readBearerToken() {
+	public function readBearerToken($token = '') {
 		$parameter = self::getBearerToken($_SERVER);
 		$key = file_get_contents('taknakal.pub');
 		JWT::$leeway = 720000;

@@ -371,16 +371,17 @@
                         <tr>
                             <td colspan="4">
                                 <h5>Pemberian Obat / Infus</h5>
-                                <table class="table table-bordered" id="autoInfus">
+                                <table class="table table-bordered" id="autoInfusBiasa">
                                     <thead class="thead-dark">
-                                        <tr>
-                                            <th>Pukul</th>
-                                            <th>Nama Obat/Infus</th>
-                                            <th>Dosis</th>
-                                            <th>Rute</th>
-                                            <th>Libatkan Klien & Keluarga Dalam Pengambilan Keputusan</th>
-                                            <th>Diberikan Oleh</th>
-                                        </tr>
+                                    <tr>
+                                        <th>Pukul</th>
+                                        <th style="width: 30%;">Nama Obat/Infus</th>
+                                        <th style="width: 15%;">Dosis</th>
+                                        <th style="width: 15%;">Rute</th>
+                                        <th>Libatkan Klien & Keluarga Dalam Pengambilan Keputusan</th>
+                                        <th style="width: 12%;">Diberikan Oleh</th>
+                                        <th class="wrap_content">Aksi</th>
+                                    </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>

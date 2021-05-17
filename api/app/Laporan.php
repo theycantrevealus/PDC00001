@@ -32,8 +32,139 @@ class Laporan extends Utility
             case 'keuangan':
                 return self::keuangan($parameter);
                 break;
+            case 'obat_penjamin':
+                return self::obat_penjamin($parameter);
+                break;
         }
     }
+
+    private function obat_penjamin($parameter) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'invoice_payment_detail.created_at' => 'BETWEEN ? AND ?',
+                'AND',
+                'invoice_payment_detail.item_type' => '= ?',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array(
+                $parameter['from'], $parameter['to'], 'master_inv'
+            );
+        } else {
+            $paramData = array(
+                'invoice_payment_detail.created_at' => 'BETWEEN ? AND ?',
+                'AND',
+                'invoice_payment_detail.item_type' => '= ?'
+            );
+
+            $paramValue = array(
+                $parameter['from'], $parameter['to'], 'master_inv'
+            );
+        }
+
+
+        $data_populator = array();
+
+
+
+        if (intval($parameter['length']) < 0) {
+            $data = self::$query->select('invoice_payment_detail', array(
+                'item',
+                'qty',
+                'harga',
+                'subtotal',
+                'discount',
+                'discount_type',
+                'penjamin',
+                'created_at'
+            ))
+                ->join('master_inv', array(
+                    'nama',
+                    'satuan_terkecil'
+                ))
+                ->join('master_inv_satuan', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('invoice_payment_detail.item', '=', 'master_inv.uid'),
+                    array('master_inv.satuan_terkecil', '=', 'master_inv_satuan.uid')
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('invoice_payment_detail', array(
+                'item',
+                'qty',
+                'harga',
+                'subtotal',
+                'discount',
+                'discount_type',
+                'penjamin',
+                'created_at'
+            ))
+                ->join('master_inv', array(
+                    'uid',
+                    'nama',
+                    'satuan_terkecil'
+                ))
+                ->join('master_inv_satuan', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('invoice_payment_detail.item', '=', 'master_inv.uid'),
+                    array('master_inv.satuan_terkecil', '=', 'master_inv_satuan.uid')
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+        $data['response_draw'] = intval($parameter['draw']);
+        $autonum = intval($parameter['start']) + 1;
+        $Inventori = new Inventori(self::$pdo);
+
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['obat'] = $Inventori->get_item_detail($value['item'])['response_data'][0];
+            $data['response_data'][$key]['autonum'] = $autonum;
+            if(!isset($data_populator[$value['item']])) {
+                $data_populator[$value['item']] = array();
+                if(!isset($data_populator[$value['item']][$value['penjamin']])) {
+                    $data_populator[$value['item']][$value['penjamin']] = 0;
+                }
+            }
+
+            $data_populator[$value['item']][$value['penjamin']] += $value['qty'];
+        }
+
+        $data_parse = array();
+
+        foreach ($data_populator as $key => $value) {
+            array_push($data_parse, array(
+                'autonum' => $autonum,
+                'obat' => $Inventori->get_item_detail($key)['response_data'][0],
+                'penjamin' => $value
+            ));
+            $autonum++;
+        }
+
+        $data['response_data'] = $data_parse;
+        $data['recordsTotal'] = count($data_parse);
+        $data['recordsFiltered'] = count($data_parse);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+        return $data;
+    }
+
+
+
+
+
+
+
+
+
 
     private function keuangan($parameter) {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
@@ -157,6 +288,8 @@ class Laporan extends Utility
                 ->execute();
 
             $data['response_data'][$key]['payment'] = $Payment['response_data'][0];
+
+            $data['response_data'][$key]['created_at_parse'] = date('d F Y', strtotime($value['created_at']));
 
             $data['response_data'][$key]['autonum'] = $autonum;
 
