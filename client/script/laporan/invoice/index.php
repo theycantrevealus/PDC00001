@@ -78,7 +78,9 @@
                     }
 
                     for(var keyData in rawData) {
-                        returnedData.push(rawData[keyData]);
+                        if(rawData[keyData].payment !== null && rawData[keyData].payment !== undefined) {
+                            returnedData.push(rawData[keyData]);
+                        }
                     }
 
 
@@ -108,13 +110,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        var metode = (row.payment !== null) ? row.payment.metode_bayar : "-";
-                        return metode;
+                        return (row.payment !== null) ? row.payment.metode_bayar : "-";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return ((row.pasien.panggilan_name !== null && row.pasien.panggilan_name !== undefined) ? row.pasien.panggilan_name : "") + " " + row.pasien.nama;
+                        return ((row.pasien.panggilan_name !== null && row.pasien.panggilan_name !== undefined) ? row.pasien.panggilan_name.nama : "") + " " + row.pasien.nama;
                     }
                 },
                 {

@@ -413,6 +413,10 @@
                 console.log("WebSocket Not Supported");
             }
 
+            $(".buttons-excel, .buttons-csv").css({
+                "margin": "0 5px"
+            }).removeClass("btn-secondary").addClass("btn-info").find("span").prepend("<i class=\"fa fa-dolly-flatbed\"></i>");
+
         });
 
         function SocketCheck(serverTarget, protocolLib, tm) {

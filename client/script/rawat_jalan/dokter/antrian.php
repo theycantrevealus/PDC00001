@@ -4581,8 +4581,8 @@
                 //listTindakanLabTerpilih = {};
             }
             else {
-                alert("Pilih nilai lab yang ingin diuji");
-                console.log(listTindakanLabTerpilih[uidTindakanLab]);
+                //alert("Pilih nilai lab yang ingin diuji");
+                //console.log(listTindakanLabTerpilih[uidTindakanLab]);
             }
         });
 

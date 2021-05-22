@@ -31,7 +31,19 @@ $judul_laporan = 'Laporan Pemakaian Obat';
                     <div class="card-body">
                         <div class="card-body tab-content" style="min-height: 100px;">
                             <div class="tab-pane active show fade" id="perpenjamin">
-                                <input id="range_laporan" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <input id="range_laporan" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-primary" id="btnCetak">
+                                            <span>
+                                                <i class="fa fa-print"></i> Cetak
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <br />
                                 <div class="table-responsive">
                                     <table class="table border-bottom table-bordered" id="tabel-laporan-obat-penjamin">
                                         <thead class="thead-dark">

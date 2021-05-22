@@ -995,7 +995,7 @@
                             }
 
                             me.parent().html("<button class=\"btn btn-danger btn-sm btn-delete-infus\" id=\"btn_delete_infus_" + target + "_" + id + "\"><span><i class=\"fa fa-trash-alt\"></i> Hapus </span></button>");*/
-                            //me.remove();
+                                //me.remove();
                         } else {
                             console.log(response);
                             me.addClass("btn-success").removeClass("btn-warning").html("<span><i class=\"fa fa-check\"></i> OK</span>");

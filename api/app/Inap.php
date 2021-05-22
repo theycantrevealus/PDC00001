@@ -268,7 +268,7 @@ class Inap extends Utility
 
     private function tambah_asesmen($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $Antrian = new Antrian(self::$pdo);
         $parameter['dataObj'] = array(
@@ -278,7 +278,7 @@ class Inap extends Utility
             'prioritas' => 36,
             'dokter' => $UserData['data']->uid
         );
-        $AntrianProses = $Antrian::tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+        $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
 
         return $AntrianProses;
     }

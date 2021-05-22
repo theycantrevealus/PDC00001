@@ -32,18 +32,183 @@ class Laporan extends Utility
             case 'keuangan':
                 return self::keuangan($parameter);
                 break;
+            case 'penyakit':
+                return self::penyakit($parameter);
+                break;
             case 'obat_penjamin':
                 return self::obat_penjamin($parameter);
                 break;
         }
     }
 
+    private function penyakit($parameter) {
+        $ICDUnique = array();
+        $ICDUnSorted = array();
+
+        $Poli = new Poli(self::$pdo);
+        $data = self::$query->select('asesmen', array(
+            'uid',
+            'poli',
+            'antrian',
+            'pasien'
+        ))
+            ->join('antrian', array(
+                'departemen'
+            ))
+            ->on(array(
+                array('asesmen.antrian', '=', 'antrian.uid')
+            ))
+            ->where(array(
+                'asesmen.created_at' => 'BETWEEN ? AND ?',
+            ), array(
+                $parameter['from'], $parameter['to']
+            ))
+            ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            $PoliDetail = $Poli->get_poli_detail($value['departemen'])['response_data'][0];
+            $AsesmenDokter = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
+                'icd10_kerja',
+                'icd10_banding',
+            ))
+                ->where(array(
+                    'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?',
+                    'AND',
+                    'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['antrian']
+                ))
+                ->execute();
+            $icd10_kerja = explode(',', $AsesmenDokter['response_data'][0]['icd10_kerja']);
+            $icd10_banding = explode(',', $AsesmenDokter['response_data'][0]['icd10_banding']);
+            foreach ($icd10_kerja as $icdKey => $icdValue) {
+                if(!is_nan($icdValue) && !empty($icdValue) && $icdValue !== '') {
+                    $ICD10 = self::$query->select('master_icd_10', array(
+                        'id', 'kode', 'nama'
+                    ))
+                        ->where(array(
+                            'master_icd_10.id' => '= ?',
+                            'AND',
+                            'master_icd_10.deleted_at' => 'IS NULL'
+                        ), array(
+                            $icdValue
+                        ))
+                        ->execute();
+                    if(count($ICD10['response_data']) > 0) {
+                        if(!isset($ICDUnique[$ICD10['response_data'][0]['kode']]) && $ICDUnique[$ICD10['response_data'][0]['kode']] !== '') {
+                            $ICDUnique[$ICD10['response_data'][0]['kode']] = array(
+                                'detail' => $ICD10['response_data'][0],
+                                'count' => 0
+                            );
+                        }
+
+                        $ICDUnique[$ICD10['response_data'][0]['kode']]['count'] += 1;
+                    }
+                }
+            }
+
+            foreach ($icd10_banding as $icdKey => $icdValue) {
+                if(!is_nan($icdValue) && !empty($icdValue) && $icdValue !== '') {
+                    $ICD10 = self::$query->select('master_icd_10', array(
+                        'id', 'kode', 'nama'
+                    ))
+                        ->where(array(
+                            'master_icd_10.id' => '= ?',
+                            'AND',
+                            'master_icd_10.deleted_at' => 'IS NULL'
+                        ), array(
+                            $icdValue
+                        ))
+                        ->execute();
+
+                    if(count($ICD10['response_data']) > 0) {
+                        if(!isset($ICDUnique[$ICD10['response_data'][0]['kode']]) && $ICDUnique[$ICD10['response_data'][0]['kode']] !== '') {
+                            $ICDUnique[$ICD10['response_data'][0]['kode']] = array(
+                                'detail' => $ICD10['response_data'][0],
+                                'count' => 0
+                            );
+                        }
+
+                        $ICDUnique[$ICD10['response_data'][0]['kode']]['count'] += 1;
+                    }
+                }
+            }
+            $data['response_data'][$key]['icd10_kerja'] = $icd10_kerja;
+            $data['response_data'][$key]['icd10_banding'] = $icd10_banding;
+        }
+
+        foreach ($ICDUnique as $key => $value) {
+            array_push($ICDUnSorted, $value);
+        }
+
+
+
+
+
+
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $data_all = $ICDUnSorted;
+
+            $filter = array();
+
+            foreach ($data_all as $key => $value) {
+                $checker_nama = stripos($value['detail']['nama'],$parameter['search']['value']);
+                $checker_kode = stripos($value['detail']['kode'],$parameter['search']['value']);
+                if(
+                ($checker_nama >= 0 && $checker_nama !== false) ||
+                ($checker_kode >= 0 && $checker_kode !== false)
+                ) {
+                    array_push($filter, $data_all[$key]);
+                }
+            }
+
+            usort($filter, function($a, $b) {
+                return $a['count'] <=> $b['count'];
+            });
+            $autonum = 1;
+            foreach ($filter as $key => $value) {
+                $filter[$key]['autonum'] = $autonum;
+                $autonum++;
+            }
+
+            $prepare = array(
+                'data' => array_slice($filter, intval($parameter['start']), intval($parameter['length'])),
+                'recordsTotal' => count($filter),
+                'recordsFiltered' => count($filter),
+                'length' => intval($parameter['length']),
+                'start' => intval($parameter['start']),
+                'response_draw' => $parameter['draw']
+            );
+        } else {
+            usort($ICDUnSorted, function($a, $b) {
+                return $b['count'] <=> $a['count'];
+            });
+
+            $autonum = 1;
+            foreach ($ICDUnSorted as $key => $value) {
+                $ICDUnSorted[$key]['autonum'] = $autonum;
+                $autonum++;
+            }
+
+            $prepare = array(
+                'data' => array_slice($ICDUnSorted, intval($parameter['start']), intval($parameter['length'])),
+                'recordsTotal' => count($ICDUnSorted),
+                'recordsFiltered' => count($ICDUnSorted),
+                'length' => intval($parameter['length']),
+                'start' => intval($parameter['start']),
+                'response_draw' => $parameter['draw']
+            );
+        }
+
+        return $prepare;
+    }
+
     private function obat_penjamin($parameter) {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
-                'invoice_payment_detail.created_at' => 'BETWEEN ? AND ?',
+                'invoice_detail.created_at' => 'BETWEEN ? AND ?',
                 'AND',
-                'invoice_payment_detail.item_type' => '= ?',
+                'invoice_detail.item_type' => '= ?',
                 'AND',
                 'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
             );
@@ -53,9 +218,9 @@ class Laporan extends Utility
             );
         } else {
             $paramData = array(
-                'invoice_payment_detail.created_at' => 'BETWEEN ? AND ?',
+                'invoice_detail.created_at' => 'BETWEEN ? AND ?',
                 'AND',
-                'invoice_payment_detail.item_type' => '= ?'
+                'invoice_detail.item_type' => '= ?'
             );
 
             $paramValue = array(
@@ -69,7 +234,7 @@ class Laporan extends Utility
 
 
         if (intval($parameter['length']) < 0) {
-            $data = self::$query->select('invoice_payment_detail', array(
+            $data = self::$query->select('invoice_detail', array(
                 'item',
                 'qty',
                 'harga',
@@ -87,13 +252,13 @@ class Laporan extends Utility
                     'nama'
                 ))
                 ->on(array(
-                    array('invoice_payment_detail.item', '=', 'master_inv.uid'),
+                    array('invoice_detail.item', '=', 'master_inv.uid'),
                     array('master_inv.satuan_terkecil', '=', 'master_inv_satuan.uid')
                 ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
-            $data = self::$query->select('invoice_payment_detail', array(
+            $data = self::$query->select('invoice_detail', array(
                 'item',
                 'qty',
                 'harga',
@@ -112,11 +277,11 @@ class Laporan extends Utility
                     'nama'
                 ))
                 ->on(array(
-                    array('invoice_payment_detail.item', '=', 'master_inv.uid'),
+                    array('invoice_detail.item', '=', 'master_inv.uid'),
                     array('master_inv.satuan_terkecil', '=', 'master_inv_satuan.uid')
                 ))
-                ->offset(intval($parameter['start']))
-                ->limit(intval($parameter['length']))
+                /*->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))*/
                 ->where($paramData, $paramValue)
                 ->execute();
         }
@@ -124,8 +289,15 @@ class Laporan extends Utility
         $data['response_draw'] = intval($parameter['draw']);
         $autonum = intval($parameter['start']) + 1;
         $Inventori = new Inventori(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        $dataPenjamin = $Penjamin->get_penjamin()['response_data'];
 
         foreach ($data['response_data'] as $key => $value) {
+            /*if($value['penjamin'] === __UIDPENJAMINUMUM__) {
+                //Ambil dari payment
+            } else {
+
+            }*/
             $data['response_data'][$key]['obat'] = $Inventori->get_item_detail($value['item'])['response_data'][0];
             $data['response_data'][$key]['autonum'] = $autonum;
             if(!isset($data_populator[$value['item']])) {
@@ -133,23 +305,48 @@ class Laporan extends Utility
                 if(!isset($data_populator[$value['item']][$value['penjamin']])) {
                     $data_populator[$value['item']][$value['penjamin']] = 0;
                 }
+
+                foreach ($dataPenjamin as $PenjaminKey => $PenjaminValue) {
+                    if(!isset($data_populator[$value['item']][$PenjaminValue['uid']])) {
+                        $data_populator[$value['item']][$PenjaminValue['uid']] = 0;
+                    }
+                }
             }
 
             $data_populator[$value['item']][$value['penjamin']] += $value['qty'];
         }
 
+
+
+
+
         $data_parse = array();
 
         foreach ($data_populator as $key => $value) {
-            array_push($data_parse, array(
+            $total = 0;
+            $rowParse = array(
+                'autonum' => $autonum,
+                'obat' => $Inventori->get_item_detail($key)['response_data'][0],
+                'total' => 0
+            );
+
+            foreach ($value as $itemKey => $itemValue) {
+                $rowParse[$itemKey] = $itemValue;
+                $total+=$itemValue;
+            }
+
+            /*array_push($data_parse, array(
                 'autonum' => $autonum,
                 'obat' => $Inventori->get_item_detail($key)['response_data'][0],
                 'penjamin' => $value
-            ));
+            ));*/
+            $rowParse['total'] = $total;
+            array_push($data_parse, $rowParse);
+
             $autonum++;
         }
 
-        $data['response_data'] = $data_parse;
+        $data['response_data'] = array_slice($data_parse, intval($parameter['start']), intval($parameter['length']));
         $data['recordsTotal'] = count($data_parse);
         $data['recordsFiltered'] = count($data_parse);
         $data['length'] = intval($parameter['length']);

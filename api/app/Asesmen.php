@@ -2919,12 +2919,16 @@ class Asesmen extends Utility {
 		$antrian = self::get_list_antrian($listPoli);
 
 		$autonum = 1;
+		$Pegawai = new Pegawai(self::$pdo);
+        $Poli = new Poli(self::$pdo);
 		foreach ($antrian as $key => $value) {
-            $Poli = new Poli(self::$pdo);
+
 			$PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
 
 			$cek_asesment = self::cek_asesmen_rawat_detail($PoliDetail['poli_asesmen'], $value['uid']);
 			$antrian[$key]['status_asesmen'] = false;
+            $antrian[$key]['uid_kunjungan'] = $cek_asesment['response_data'][0]['uid_kunjungan'];
+            $antrian[$key]['perawat'] = $Pegawai->get_detail($cek_asesment['response_data'][0]['perawat'])['response_data'][0];
 
 			if ($cek_asesment['response_result'] > 0){
 				$antrian[$key]['uid_asesmen_rawat'] = $cek_asesment['response_data'][0]['uid'];
@@ -2942,11 +2946,11 @@ class Asesmen extends Utility {
 		$antrian = new Antrian(self::$pdo);
 
 		$listPasien = [];
-		foreach ($parameter as $key => $value) {
+		foreach ($parameter as $Pkey => $value) {
 			$antrianData = $antrian->get_antrian_by_poli($value['poli'])['response_data'];
 
-			foreach ($antrianData as $key => $value) {
-                if ($value['uid_penjamin'] === __UIDPENJAMINBPJS__) {
+			foreach ($antrianData as $key => $Pvalue) {
+                if ($Pvalue['uid_penjamin'] === __UIDPENJAMINBPJS__) {
                     $SEP = self::$query->select('bpjs_sep', array(
                         'uid',
                         'sep_no'
@@ -2956,14 +2960,14 @@ class Asesmen extends Utility {
                             'AND',
                             'bpjs_sep.deleted_at' => 'IS NULL'
                         ), array(
-                            $value['uid']
+                            $Pvalue['uid']
                         ))
                         ->execute();
                     if (count($SEP['response_data']) > 0) {
-                        array_push($listPasien, $value);
+                        array_push($listPasien, $Pvalue);
                     }
                 } else {
-                    array_push($listPasien, $value);
+                    array_push($listPasien, $Pvalue);
                 }
 			}
 		}
@@ -3050,7 +3054,7 @@ class Asesmen extends Utility {
 
 	private function cek_asesmen_rawat_detail($poli_prefix, $parameter){
 		$data = self::$query
-				->select('asesmen_rawat_' . $poli_prefix, array('uid','antrian'))
+				->select('asesmen_rawat_' . $poli_prefix, array('uid','antrian','kunjungan as uid_kunjungan','perawat'))
 				->where(array(
 							'deleted_at' => 'IS NULL',
 							'AND',

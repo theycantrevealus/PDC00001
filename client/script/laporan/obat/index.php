@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
     $(function() {
         function getDateRange(target) {
@@ -45,15 +46,13 @@
             $("#tabel-laporan-obat-penjamin thead tr").append("<th style=\"width: 200px\">" + penjaminData[pKey].nama.toUpperCase() + "</th>");
             var target_name = penjaminData[pKey].uid;
             penjaminColumn.push({
-                "data" : null, render: function(data, type, row, meta) {
-                    return "<span id=\"jumlah_penjamin_" + row.obat.uid + "_" + target_name + "\"></span>";
-                }
+                data : penjaminData[pKey].uid
             });
         }
 
         penjaminColumn.push({
             "data" : null, render: function(data, type, row, meta) {
-                return "";
+                return "<span id=\"total_" + data.obat.uid + "\">" + row.total + "</span>";
             }
         });
 
@@ -87,8 +86,11 @@
                 },
                 dataSrc:function(response) {
 
-                    console.clear();
-                    console.log(response);
+
+                    returnedData = [];
+                    /*console.clear();
+                    console.log(response);*/
+
 
 
                     var rawData = response.response_package.response_data;
@@ -117,13 +119,51 @@
             columns : penjaminColumn,
             drawCallback: function () {
                 var api = this.api();
-                for(var a in returnedData) {
-                    for(var b in returnedData[a].penjamin) {
-                        console.log("#jumlah_penjamin_" + returnedData[a].obat.uid + "_" + b);
-                        $("#jumlah_penjamin_" + returnedData[a].obat.uid + "_" + b).html(returnedData[a].penjamin[b]);
-                    }
-                }
+
             }
+        });
+
+        $("#btnCetak").click(function () {
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/laporan_pemakaian_obat.php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    __HOSTNAME__: __HOSTNAME__,
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    __NAMA_SAYA__ : __MY_NAME__,
+                    __PENJAMIN__ : penjaminData,
+                    __JUDUL__ : "Laporan Pemakaian Obat \n per Penjamin",
+                    __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
+                    __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
+                    data: returnedData
+
+                },
+                success: function (response) {
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        importStyle: true,
+                        header: null,
+                        footer: null,
+                        pageTitle: "Kwitansi",
+                        afterPrint: function() {
+                            $("#form-payment-detail").modal("hide");
+                        }
+                    });
+                },
+                error: function (response) {
+                    //
+                }
+            });
+            return false;
         });
     });
 </script>

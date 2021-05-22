@@ -1720,7 +1720,7 @@ class Radiologi extends Utility
                         $status_lunas = 'P';
                     }*/
 
-                    $status_lunas = 'V'; //Dulu V
+                    $status_lunas = 'N'; //Dulu V
 
                     $uidRadiologiOrder = parent::gen_uuid();
                     $radiologiOrder = self::$query

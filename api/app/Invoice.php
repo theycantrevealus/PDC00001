@@ -287,6 +287,14 @@ class Invoice extends Utility
         $dataResult = array();
         $data['response_draw'] = intval($parameter['draw']);
         $autonum = intval($parameter['start']) + 1;
+        $Poli = new Poli(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+        $Anjungan = new Anjungan(self::$pdo);
+        $PoliListIdentifier = array();
+        $PoliList = array();
+
+
         foreach ($data['response_data'] as $key => $value) {
             //Antrian Info
             $AntrianKunjungan = self::$query->select('antrian_nomor', array(
@@ -314,8 +322,7 @@ class Invoice extends Utility
                 ))
                 ->execute();
             if (count($AntrianKunjungan['response_data']) > 0) {
-                $Pasien = new Pasien(self::$pdo);
-                $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+                $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
                 $value['pasien'] = $PasienInfo['response_data'][0];
 
 
@@ -347,22 +354,45 @@ class Invoice extends Utility
 
                 foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                     //Info Poliklinik
-                    $Poli = new Poli(self::$pdo);
-                    $PoliInfo = $Poli::get_poli_detail($AKValue['poli']);
+                    $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
+
+
+                    //Antrian Poli Populator
+                    $PoliPopulator = self::$query->select('antrian', array(
+                        'departemen',
+                        'dokter'
+                    ))
+                        ->where(array(
+                            'antrian.kunjungan' => '= ?',
+                            'AND',
+                            'antrian.deleted_at' => 'IS NULL'
+                        ), array(
+                            $AKValue['kunjungan']
+                        ))
+                        ->execute();
+                    foreach ($PoliPopulator['response_data'] as $PoliPopKey => $PoliPopValue) {
+                        $PoliPopulator['response_data'][$PoliPopKey]['dokter'] = $Pegawai->get_detail($PoliPopValue['dokter'])['response_data'][0];
+                        $PoliPopulator['response_data'][$PoliPopKey]['poli'] = $Poli->get_poli_detail($PoliPopValue['departemen'])['response_data'][0];
+                    }
+                    $AntrianKunjungan['response_data'][$AKKey]['poli_list'] = $PoliPopulator['response_data'];
+
+
+                    /*if(!in_array($AKValue['poli'], $PoliListIdentifier)) {
+                        array_push($PoliListIdentifier, $AKValue['poli']);
+                        array_push($PoliList, $PoliInfo)['response_data'][0];
+                    }*/
                     $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                     //Info Pegawai
-                    $Pegawai = new Pegawai(self::$pdo);
-                    $PegawaiInfo = $Pegawai::get_detail($AKValue['pegawai']);
+                    $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
                     $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                     //Info Loket
-                    $Anjungan = new Anjungan(self::$pdo);
-                    $AnjunganInfo = $Anjungan::get_loket_detail($AKValue['loket']);
+                    $AnjunganInfo = $Anjungan->get_loket_detail($AKValue['loket']);
                     $AntrianKunjungan['response_data'][$AKKey]['loket'] = $AnjunganInfo['response_data'][0];
                 }
                 $value['antrian_kunjungan'] = $AntrianKunjungan['response_data'][0];
-
+                //$value['poli_list'] = $PoliList;
                 $value['autonum'] = $autonum;
                 $autonum++;
 

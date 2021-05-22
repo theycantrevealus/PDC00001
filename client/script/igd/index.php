@@ -73,8 +73,10 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        var jabatan_filter = (__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) ? "dokter" : "perawat";
+
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/igd/dokter/index/" + row.pasien.uid + "/" + row.kunjungan + "/" + row.penjamin.uid + "\" class=\"btn btn-sm btn-info\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/igd/" + jabatan_filter + "/index/" + row.pasien.uid + "/" + row.kunjungan + "/" + row.penjamin.uid + "\" class=\"btn btn-sm btn-info\">" +
                             "<span><i class=\"fa fa-sign-out-alt\"></i>Proses</span>" +
                             "</a>" +
                             "<button class=\"btn btn-sm btn-success btn-pulangkan-pasien\" id=\"pulangkan_" + row.pasien.uid + "\">" +
