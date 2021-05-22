@@ -664,7 +664,6 @@
 
 		$("input[name='riwayat_merokok_option']").on('change', function(){
         	let value = $(this).val();
-
         	disableLainnya('riwayat_merokok', value, "y");
         });
 
@@ -1180,21 +1179,33 @@
 								$this.val("y").prop('checked', true);
 
 								$("#riwayat_merokok").removeAttr("disabled");
-							}
+							} else {
+                                $("#riwayat_merokok").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
 
 							if ($("#riwayat_miras").val() != ""){
 								let $this = $("input:radio[name='riwayat_miras_option']");
 								$this.val("y").prop('checked', true);
 
 								$("#riwayat_miras").removeAttr("disabled");
-							}
+							} else {
+                                $("#riwayat_miras").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
 
 							if ($("#riwayat_obt_terlarang").val() != ""){
 								let $this = $("input:radio[name='riwayat_obt_terlarang_option']");
 								$this.val("y").prop('checked', true);
 
 								$("#riwayat_obt_terlarang").removeAttr("disabled");
-							}
+							} else {
+                                $("#riwayat_obt_terlarang").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
 		                }
 
 						//IGD Modul Infus
