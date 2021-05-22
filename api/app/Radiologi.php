@@ -1092,13 +1092,16 @@ class Radiologi extends Utility
             'status' => 'V'
         ))
             ->where(array(
-                'rad_order.asesmen' => '= ?',
+                'rad_order.kunjungan' => '= ?',
                 'AND',
+                /*'rad_order.asesmen' => '= ?',
+                'AND',*/
                 'rad_order.selesai' => '= ?',
                 'AND',
                 'rad_order.deleted_at' => 'IS NULL'
             ), array(
-                $parameter['asesmen'],
+                //$parameter['asesmen'],
+                $parameter['kunjungan'],
                 'false'
             ))
             ->execute();

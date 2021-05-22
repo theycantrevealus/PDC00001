@@ -428,7 +428,11 @@
 					    for(var az in row.antrian_kunjungan.poli_list) {
 					        poliList.push(row.antrian_kunjungan.poli_list[az].poli.nama);
                         }
-						return poliList.join(", ");
+					    if(poliList.length > 0) {
+                            return poliList.join(", ");
+                        } else {
+                            return row.antrian_kunjungan.poli.nama;
+                        }
 					}
 				},
 				{

@@ -141,24 +141,22 @@
                                     </button-->
                                 </div>
                                 <div class="card-body">
-                                    <div class="table-responsive border-bottom">
-                                        <table class="table table-bordered table-striped largeDataType" id="table-antrian-RI" style="font-size: 0.9rem;">
-                                            <thead class="thead-dark">
-                                            <tr>
-                                                <th class="wrap_content">No</th>
-                                                <th>Waktu Masuk</th>
-                                                <th class="wrap_content">No. RM</th>
-                                                <th>Pasien</th>
-                                                <th>Dokter</th>
-                                                <th>Penjamin</th>
-                                                <th>Aksi</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
+                                    <table class="table table-bordered table-striped largeDataType" id="table-antrian-RI" style="font-size: 0.9rem;">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Waktu Masuk</th>
+                                            <th class="wrap_content">No. RM</th>
+                                            <th>Pasien</th>
+                                            <th>Dokter</th>
+                                            <th>Penjamin</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
 
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -171,25 +169,23 @@
                                     </button>
                                 </div>
                                 <div class="card-body">
-                                    <div class="table-responsive border-bottom">
-                                        <table class="table table-bordered table-striped largeDataType" id="table-antrian-IGD" style="font-size: 0.9rem;">
-                                            <thead class="thead-dark">
-                                            <tr>
-                                                <th class="wrap_content">No</th>
-                                                <th>Waktu Masuk</th>
-                                                <th class="wrap_content">No. RM</th>
-                                                <th>Pasien</th>
-                                                <th>Dokter</th>
-                                                <th>Penjamin</th>
-                                                <th>Oleh</th>
-                                                <th>Aksi</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
+                                    <table class="table table-bordered table-striped largeDataType" id="table-antrian-IGD" style="font-size: 0.9rem;">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Waktu Masuk</th>
+                                            <th class="wrap_content">No. RM</th>
+                                            <th>Pasien</th>
+                                            <th>Dokter</th>
+                                            <th>Penjamin</th>
+                                            <th>Oleh</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
 
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
