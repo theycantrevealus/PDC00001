@@ -593,8 +593,6 @@
                         $("#txt_tanda_vital_n").val(asesmen_detail.nadi);
                         $("#txt_tanda_vital_rr").val(asesmen_detail.pernafasan);
                         $("#txt_berat_badan").val(asesmen_detail.berat_badan);*/
-                        /*alert(asesmen_detail.tinggi_badan);
-                        alert(asesmen_detail.lingkar_lengan_atas);*/
                         //$("#txt_tinggi_badan").val(asesmen_detail.tinggi_badan);
                         //$("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
 
@@ -4581,8 +4579,13 @@
                 //listTindakanLabTerpilih = {};
             }
             else {
-                alert("Pilih nilai lab yang ingin diuji");
-                console.log(listTindakanLabTerpilih[uidTindakanLab]);
+                Swal.fire(
+                    "Order Lab",
+                    "Pilih nilai lab yang ingin diuji",
+                    "error"
+                ).then((result) => {
+                    console.log(listTindakanLabTerpilih[uidTindakanLab]);
+                });
             }
         });
 
@@ -5017,13 +5020,13 @@
                 Swal.fire({
                     title: 'Data sudah benar?',
                     showDenyButton: true,
-                    confirmButtonText: `Ya. Cetak`,
+                    confirmButtonText: `Ya`,
                     denyButtonText: `Belum`,
                 }).then((result) => {
                     if (result.isConfirmed) {
 
                         const simpanDataProcess = new Promise(function(resolve, reject) {
-                            resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+                            resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
                         }).then(function(result) {
                             if(result.response_package.response_result > 0) {
                                 $.ajax({

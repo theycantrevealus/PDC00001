@@ -1,7 +1,9 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/js/rSlider.min.js"></script>
 <link href="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.css" type="text/css" rel="stylesheet" />
 <script type="text/javascript">
-	$(function(){
+	$(function() {
+
+        var d = new Date();
 
 
 
@@ -9,7 +11,7 @@
 
 
 
-        function renderScale(target) {
+        function renderScale(target, targetInstances) {
             var NRScurrent = parseInt(target);
 
             var NRSchildTarget = 0;
@@ -30,7 +32,7 @@
                 "linear-gradient(90deg, rgba(238, 51, 1, 1), rgba(255, 0, 0, 1))"
             ];
 
-            $(".NRSItems").each(function() {
+            $(targetInstances).find(".NRSItems").each(function() {
                 var currentIDNRS = $(this).attr("id").split("-");
                 currentIDNRS = currentIDNRS[currentIDNRS.length - 1];
                 if(currentIDNRS <= NRSchildTarget) {
@@ -55,6 +57,7 @@
 		var allData = {};
 		var uid_antrian = __PAGES__[3];
 		var dataPasien = loadPasien(uid_antrian);
+
 
 		var riwayat_bidan = dataPasien.asesmen_bidan;
 
@@ -83,119 +86,94 @@
             }
         ];
 
-        var sliderIGDBiasa;
-        $("#tab-asesmen-perawat .nav-item").each(function() {
-            var targetPage = $(this).find(".nav-link").attr("href");
-            if($(this).find(".nav-link").hasClass("active")) {
-                if(targetPage === "#tab-assesment-awal-igd-1") {
-                    sliderIGDBiasa = new rSlider({
-                        target: "#txt_nrs",
-                        values: [0,1,2,3,4,5,6,7,8,9,10]
-                    });
+        var sliderIGDBiasa, sliderIGDBidan;
 
-                    for(var pain in rangeDefiner) {
-                        var scaleStepper = document.createElement("DIV");
-                        $(scaleStepper).css({
-                            "width": (10 * rangeDefiner[pain].merge) + "%"
-                        }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
-                        $("#scale-loader-define").append(scaleStepper)
-                    }
+        function renderSlider(id) {
+            let target;
+            return new Promise((resolve, reject) => {
+                target = new rSlider({
+                    target: id,
+                    values: [0,1,2,3,4,5,6,7,8,9,10]
+                });
 
-                    for(var a = 1; a <= 10; a++) {
-                        var scaleStepper = document.createElement("DIV");
-                        $(scaleStepper).css({
-                            "width": "10%"
-                        }).addClass("scale-stepper");
-                        $("#scale-loader").append(scaleStepper)
-                    }
+                resolve(target);
+            });
+        }
 
-                    var imageCounter = 0;
-                    $("#scale-loader-image").html("");
-                    $(".rs-scale span").each(function(e) {
-                        $(this).css({
-                            "position":"relative"
-                        });
 
-                        if(e % 2 == 0) {
-                            var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
-                            var marginLeft = $(this).find("ins").offset().left - $(".rs-scale span").eq(0).offset().left - 30;
-                            var imageViewer = document.createElement("IMG");
-                            $(imageViewer).attr({
-                                "src": imagesScale,
-                                "id": "NRS-" + imageCounter
-                            }).css({
-                                "position": "absolute",
-                                "top": "0",
-                                "left": marginLeft + "px",
-                                "width": "100px",
-                                "height": "100px",
-                                "border-radius": "100%"
-                            }).addClass("NRSItems");
-                            $("#scale-loader-image").append(imageViewer);
-                            imageCounter++;
-                        }
-                    });
-                }
-            }
-        });
 
-        $("#tab-asesmen-perawat .nav-link").click(function() {
+        $("a[data-toggle=\"tab\"]").on("shown.bs.tab", function (e) {
             var targetPage = $(this).attr("href");
             if(dataPasien.antrian.departemen === __POLI_IGD__) {
                 if(targetPage === "#tab-assesment-awal-igd-1") {
-                    $("#scale-loader-image").html("");
-                    $("#scale-loader-define").html("");
-                    sliderIGDBiasa.destroy();
-                    sliderIGDBiasa = new rSlider({
-                        target: "#txt_nrs",
-                        values: [0,1,2,3,4,5,6,7,8,9,10]
-                    });
+                    if(sliderIGDBiasa === undefined) {
+                        $("#scale-loader-image").html("");
+                        renderSlider("#txt_nrs").then(function (resolve, reject) {
+                            sliderIGDBiasa = resolve;
 
-                    for(var pain in rangeDefiner) {
-                        var scaleStepper = document.createElement("DIV");
-                        $(scaleStepper).css({
-                            "width": (10 * rangeDefiner[pain].merge) + "%"
-                        }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
-                        $("#scale-loader-define").append(scaleStepper)
-                    }
+                            var imageCounter = 0;
+                            $("#nrs_1 .rs-scale span").each(function(e) {
+                                $(this).css({
+                                    "position":"relative"
+                                });
 
-                    for(var a = 1; a <= 10; a++) {
-                        var scaleStepper = document.createElement("DIV");
-                        $(scaleStepper).css({
-                            "width": "10%"
-                        }).addClass("scale-stepper");
-                        $("#scale-loader").append(scaleStepper)
-                    }
-
-                    var imageCounter = 0;
-                    $(".rs-scale span").each(function(e) {
-                        $(this).css({
-                            "position":"relative"
+                                if(e % 2 == 0) {
+                                    var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
+                                    var marginLeft = $(this).find("ins").offset().left - $("#nrs_1 .rs-scale span").eq(0).offset().left - 30;
+                                    var imageViewer = document.createElement("IMG");
+                                    $(imageViewer).attr({
+                                        "src": imagesScale,
+                                        "id": "NRS-" + imageCounter
+                                    }).css({
+                                        "position": "absolute",
+                                        "top": "0",
+                                        "left": marginLeft + "px",
+                                        "width": "100px",
+                                        "height": "100px",
+                                        "border-radius": "100%"
+                                    }).addClass("NRSItems biasa");
+                                    $("#scale-loader-image").append(imageViewer);
+                                    imageCounter++;
+                                }
+                            });
                         });
+                    }
+                } else if(targetPage === "#tab-assesment-bidan-igd-1a") {
+                    if(sliderIGDBidan === undefined) {
+                        $("#scale-loader-image-bidan").html("");
+                        renderSlider("#txt_nrs_bidan").then(function (resolve, reject) {
+                            sliderIGDBidan = resolve;
 
-                        if(e % 2 == 0) {
-                            var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
-                            var marginLeft = $(this).find("ins").offset().left - $(".rs-scale span").eq(0).offset().left - 30;
-                            var imageViewer = document.createElement("IMG");
-                            $(imageViewer).attr({
-                                "src": imagesScale,
-                                "id": "NRS-" + imageCounter
-                            }).css({
-                                "position": "absolute",
-                                "top": "0",
-                                "left": marginLeft + "px",
-                                "width": "100px",
-                                "height": "100px",
-                                "border-radius": "100%"
-                            }).addClass("NRSItems");
-                            $("#scale-loader-image").append(imageViewer);
-                            imageCounter++;
-                        }
-                    });
+                            var imageCounter = 0;
+                            $("#nrs_2 .rs-scale span").each(function(e) {
+                                $(this).css({
+                                    "position":"relative"
+                                });
+
+                                if(e % 2 == 0) {
+                                    var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
+                                    var marginLeft = $(this).find("ins").offset().left - $("#nrs_2 .rs-scale span").eq(0).offset().left - 30;
+                                    var imageViewer = document.createElement("IMG");
+                                    $(imageViewer).attr({
+                                        "src": imagesScale,
+                                        "id": "NRS-" + imageCounter
+                                    }).css({
+                                        "position": "absolute",
+                                        "top": "0",
+                                        "left": marginLeft + "px",
+                                        "width": "100px",
+                                        "height": "100px",
+                                        "border-radius": "100%"
+                                    }).addClass("NRSItems bidan");
+                                    $("#scale-loader-image-bidan").append(imageViewer);
+                                    imageCounter++;
+                                }
+                            });
+                        });
+                    }
                 }
             }
         });
-
 
 		//IGD
         if(dataPasien.antrian.departemen === __POLI_IGD__) {
@@ -225,12 +203,20 @@
 
 
 
-            $("body").on("DOMSubtreeModified", ".rs-tooltip", function() {
-                renderScale($(".rs-tooltip").html());
+            $("body #nrs_1").on("DOMSubtreeModified", ".rs-tooltip", function() {
+                renderScale($("#nrs_1 .rs-tooltip").html(), "#nrs_1");
+            });
+
+            $("body #nrs_2").on("DOMSubtreeModified", ".rs-tooltip", function() {
+                renderScale($("#nrs_2 .rs-tooltip").html(), "#nrs_2");
             });
 
         }
 
+        /*setInterval(function () {
+            var d = new Date();
+            $(".last-infus td:eq(0)").html(d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds());
+        }, 1000);*/
 
 
 
@@ -394,6 +380,109 @@
             rebasePartus();
         });
 
+		function simpanAsesmen(allData, dataPasien, btnSelesai) {
+            $(".inputan").each(function(){
+                var value = $(this).val();
+
+                if (value != "" && value != null){
+                    $this = $(this);
+                    var name = $(this).attr("id");
+
+                    if(name !== undefined) {
+
+                        allData[name] = value;
+                    } else {
+                        //
+                    }
+                }
+            });
+
+            $("input[type=checkbox]:not(:checked)").each(function(){
+                var name = $(this).attr("id");
+                allData[name] = null;
+            });
+
+            $("input[type=checkbox]:checked").each(function(){
+                var name = $(this).attr("id");
+                allData[name] = 1;
+            });
+
+            $("input[type=radio]:checked").each(function(){
+                var value = $(this).val();
+                if (value != ""){
+                    var name = $(this).attr("name");
+                    allData[name] = value;
+                }
+            });
+
+            var partusList = [];
+
+            $("#riwayat_hamil tbody tr").each(function(e) {
+                var tanggal_partus = $(this).find("td:eq(1)").attr("tanggal");
+                var usia_kehamilan = $(this).find("td:eq(2)").html();
+                var tempat_partus = $(this).find("td:eq(3)").html();
+                var jenis_partus = $(this).find("td:eq(4)").html();
+                var penolong = $(this).find("td:eq(5)").html();
+                var nifas = $(this).find("td:eq(6)").html();
+                var jenkel_anak = $(this).find("td:eq(7)").html();
+                var bb_anak = $(this).find("td:eq(8)").html();
+                var keadaan_sekarang = $(this).find("td:eq(9)").html();
+                var keterangan = $(this).find("td:eq(10)").html();
+
+                partusList.push({
+                    tanggal: tanggal_partus,
+                    usia: usia_kehamilan,
+                    tempat: tempat_partus,
+                    jenis: jenis_partus,
+                    penolong: penolong,
+                    nifas: nifas,
+                    jenkel_anak: jenkel_anak,
+                    bb_anak: bb_anak,
+                    keadaan_sekarang: keadaan_sekarang,
+                    keterangan: keterangan
+                });
+            });
+
+            allData["partus_list"] = partusList;
+
+            delete allData['simetris'];
+            delete allData['riwayat_merokok_option'];
+            delete allData['riwayat_miras_option'];
+            delete allData['riwayat_obt_terlarang_option'];
+
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Asesmen",
+                data: {
+                    request : "update_asesmen_rawat",
+                    dataAntrian : dataPasien.antrian,
+                    dataPasien: dataPasien.pasien,
+                    dataObj : allData
+                },
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                success: function(response){
+                    btnSelesai.removeAttr("disabled");
+                    console.clear();
+                    console.log(response);
+                    if(response.response_package.response_result > 0) {
+                        notification ("success", "Berhasil Simpan Data", 3000, "hasil_tambah_dev");
+                    } else {
+                        notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
+                    }
+
+                    //location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+                },
+                error: function(response) {
+                    btnSelesai.removeAttr("disabled");
+                    console.log("Error : ");
+                    console.log(response);
+                }
+            });
+        }
+
 		$("#btnSelesai").on('click', function(){
 			var btnSelesai = $(this);
 			btnSelesai.attr('disabled', 'disabled');
@@ -408,7 +497,11 @@
                 denyButtonColor: `#ff2a2a`
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $(".inputan").each(function(){
+                    simpanAsesmen(allData, dataPasien, btnSelesai);
+
+
+
+                    /*$(".inputan").each(function(){
                         var value = $(this).val();
 
                         if (value != "" && value != null){
@@ -496,8 +589,6 @@
                             } else {
                                 //notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                             }
-                            console.clear();
-                            console.log(response.response_package);
 
                             location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
                         },
@@ -506,7 +597,7 @@
                             console.log("Error : ");
                             console.log(response);
                         }
-                    });
+                    });*/
                 } else {
                     btnSelesai.removeAttr("disabled");
                 }
@@ -752,6 +843,173 @@
             tableTerapi.ajax.reload();
             return false;
         });
+
+
+
+        $("body").on("click", ".btn-delete-infus", function () {
+            var target = $(this).attr("target");
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            var server_id = $(this).attr("server-id");
+            var asesmen = $(this).attr("asesmen");
+
+            var me = $(this);
+
+            Swal.fire({
+                title: "Hapus Jadwal Infus?",
+                showDenyButton: true,
+                type: 'warning',
+                confirmButtonText: `Ya`,
+                confirmButtonColor: `#1297fb`,
+                denyButtonText: `Batal`,
+                denyButtonColor: `#ff2a2a`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    me.addClass("btn-warning").removeClass("btn-danger").html("<span><i class=\"fa fa-hourglass-half\"></i> Processing...</span>");
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Asesmen",
+                        type: "POST",
+                        data: {
+                            request: "hapus_igd_infus",
+                            id: server_id,
+                            asesmen: asesmen,
+                            dataAntrian: dataPasien.antrian
+                        },
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function (response) {
+                            var data = response.response_package.response_result;
+
+                            if(data > 0) {
+                                loadPasien(uid_antrian);
+                                autoInfus("#autoInfusBidan", "bidan");
+                                autoInfus("#autoInfusBiasa", "biasa");
+                                me.addClass("btn-danger").removeClass("btn-warning").html("<span><i class=\"fa fa-trash-alt\"></i> Hapus</span>");
+                            } else {
+                                console.log(response);
+                                me.addClass("btn-danger").removeClass("btn-warning").html("<span><i class=\"fa fa-trash-alt\"></i> Hapus</span>");
+                            }
+                        },
+                        error: function (response) {
+                            console.log(response);
+                            me.addClass("btn-danger").removeClass("btn-warning").html("<span><i class=\"fa fa-trash-alt\"></i> Hapus</span>");
+                        }
+                    });
+                }
+            });
+        });
+
+        autoInfus("#autoInfusBidan", "bidan");
+        autoInfus("#autoInfusBiasa", "biasa");
+
+        $("body").on("click", ".btn-approve-infus", function () {
+            var target = $(this).attr("target");
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+            var me = $(this);
+
+
+            var obat = $("#obat_auto_infus_" + target + "_" + id).val();
+            var dosis = $("#dosis_auto_infus_" + target + "_" + id).val();
+            var rute = $("#rute_auto_infus_" + target + "_" + id).val();
+            var libat = $("#libat_auto_infus_" + target + "_" + id).val();
+
+            if(
+                obat !== null &&
+                obat !== undefined &&
+                obat !== "" &&
+
+                dosis !== null &&
+                dosis !== undefined &&
+                dosis !== "" &&
+
+                rute !== null &&
+                rute !== undefined &&
+                rute !== "" &&
+
+                libat !== null &&
+                libat !== undefined &&
+                libat !== ""
+            ) {
+                me.addClass("btn-warning").removeClass("btn-success").html("<span><i class=\"fa fa-hourglass-half\"></i> Processing...</span>");
+                $.ajax({
+                    async: false,
+                    url: __HOSTAPI__ + "/Asesmen",
+                    type: "POST",
+                    data: {
+                        request: "update_igd_infus",
+                        obat: obat,
+                        dosis: dosis,
+                        rute: rute,
+                        libat: libat,
+                        target: target,
+                        dataAntrian: dataPasien.antrian
+                    },
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    success: function (response) {
+                        var data = response.response_package.response_result;
+                        if(data > 0) {
+                            var d = new Date();
+                            /*$("#row_auto_infus_" + target + "_" + id + " td").each(function(e) {
+                                if(e === 0) {
+                                    $(this).html(d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds());
+                                }
+
+                                if(e === 1) {
+                                    var getObat = $(this).find("select option:selected").text();
+                                    $(this).html(getObat);
+                                    $(this).find("DIV").css({
+                                        "color": "#112b4a"
+                                    });
+                                }
+
+                                if(e === 2) {
+                                    var getDosis = $(this).find("input").val();
+                                    $(this).html(getDosis);
+                                }
+
+                                if(e === 3) {
+                                    var getRute = $(this).find("input").val();
+                                    $(this).html(getRute);
+                                }
+
+                                if(e === 4) {
+                                    var getLibat = $(this).find("input").val();
+                                    $(this).html(getLibat);
+                                }
+                            });*/
+
+                            loadPasien(uid_antrian);
+                            autoInfus("#autoInfusBidan", "bidan");
+                            autoInfus("#autoInfusBiasa", "biasa");
+
+                            /*if(target === "bidan") {
+                                autoInfus("#autoInfusBidan", target);
+                            } else {
+                                autoInfus("#autoInfusBiasa", target);
+                            }
+
+                            me.parent().html("<button class=\"btn btn-danger btn-sm btn-delete-infus\" id=\"btn_delete_infus_" + target + "_" + id + "\"><span><i class=\"fa fa-trash-alt\"></i> Hapus </span></button>");*/
+                                //me.remove();
+                        } else {
+                            console.log(response);
+                            me.addClass("btn-success").removeClass("btn-warning").html("<span><i class=\"fa fa-check\"></i> OK</span>");
+                        }
+                    },
+                    error: function (response) {
+                        console.log(response);
+                        me.addClass("btn-success").removeClass("btn-warning").html("<span><i class=\"fa fa-check\"></i> OK</span>");
+                    }
+                });
+            } else {
+
+            }
+        });
 	});
 
 	function loadTermSelectBox(selector, id_term, selected = ""){
@@ -826,8 +1084,8 @@
 	            beforeSend: function(request) {
 	                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 	            },
-	            success: function(response){
-	            	if (response.response_package != ""){
+	            success: function(response) {
+				    if (response.response_package != ""){
 	            		MetaData = response.response_package;
 
                         var uidPasien = "";
@@ -843,7 +1101,7 @@
 		                    $("#" + key).val(item);
 		                });
 
-		                if (MetaData.antrian.penjamin != <?= json_encode(__UIDPENJAMINBPJS__) ?>) {
+		                if (MetaData.antrian.penjamin != __UIDPENJAMINBPJS__) {
 		                	$(".rujukan-bpjs").attr("hidden", true);
 		                } else {
 		                    //
@@ -855,7 +1113,7 @@
 							$(".pria").attr("hidden",true);
 						}
 
-						if (MetaData.asesmen_rawat != ""){
+						if (MetaData.asesmen_rawat != "") {
 
                             let cara_masuk = $("input[name='cara_masuk']").val();
 		                	$.each(MetaData.asesmen_rawat, function(key, item) {
@@ -938,6 +1196,43 @@
 								$("#riwayat_obt_terlarang").removeAttr("disabled");
 							}
 		                }
+
+						//IGD Modul Infus
+                        if(MetaData.asesmen_infus !== undefined) {
+                            $("#autoInfusBidan tbody tr").remove();
+                            $("#autoInfusBiasa tbody tr").remove();
+                            for(var infusKey in MetaData.asesmen_infus) {
+                                if(MetaData.asesmen_infus[infusKey].igd_type === "bidan") {
+                                    autoInfus("#autoInfusBidan", "bidan", {
+                                        dihapus_oleh: MetaData.asesmen_infus[infusKey].dihapus_oleh,
+                                        deleted_at: MetaData.asesmen_infus[infusKey].deleted_at,
+                                        asesmen: MetaData.asesmen_infus[infusKey].asesmen,
+                                        serverID: MetaData.asesmen_infus[infusKey].id,
+                                        pukul: MetaData.asesmen_infus[infusKey].pukul,
+                                        obat: MetaData.asesmen_infus[infusKey].obat,
+                                        dosis: MetaData.asesmen_infus[infusKey].dosis,
+                                        rute: MetaData.asesmen_infus[infusKey].rute,
+                                        keputusan: MetaData.asesmen_infus[infusKey].keputusan,
+                                        oleh: MetaData.asesmen_infus[infusKey].oleh
+                                    });
+                                } else {
+                                    autoInfus("#autoInfusBiasa", "biasa", {
+                                        dihapus_oleh: MetaData.asesmen_infus[infusKey].dihapus_oleh,
+                                        deleted_at: MetaData.asesmen_infus[infusKey].deleted_at,
+                                        asesmen: MetaData.asesmen_infus[infusKey].asesmen,
+                                        serverID: MetaData.asesmen_infus[infusKey].id,
+                                        pukul: MetaData.asesmen_infus[infusKey].pukul,
+                                        obat: MetaData.asesmen_infus[infusKey].obat,
+                                        dosis: MetaData.asesmen_infus[infusKey].dosis,
+                                        rute: MetaData.asesmen_infus[infusKey].rute,
+                                        keputusan: MetaData.asesmen_infus[infusKey].keputusan,
+                                        oleh: MetaData.asesmen_infus[infusKey].oleh
+                                    });
+                                }
+                            }
+                            /*autoInfus("#autoInfusBidan", "bidan");
+                            autoInfus("#autoInfusBiasa", "biasa");*/
+                        }
 	            	}
 	            },
 	            error: function(response) {
@@ -967,6 +1262,199 @@
 			$('input:checkbox[name='+ name +']').prop('checked', true);
 		}
 	}
+
+
+    function autoInfus(targetTable, classify, setter = {}) {
+        $(targetTable + " tbody tr").removeClass("last-infus");
+
+        var row = document.createElement("TR");
+        var containerPukul = document.createElement("TD");
+        var containerObat = document.createElement("TD");
+        var containerDosis = document.createElement("TD");
+        var containerRute = document.createElement("TD");
+        var containerLibat = document.createElement("TD");
+        var containerOleh = document.createElement("TD");
+        var containerAksi = document.createElement("TD");
+
+
+        var Obat = document.createElement("SELECT");
+        var Dosis = document.createElement("INPUT");
+        var Rute = document.createElement("INPUT");
+        var Libat = document.createElement("INPUT");
+
+        $(Obat).addClass("form-control auto_infus_obat");
+        $(Dosis).addClass("form-control");
+        $(Rute).addClass("form-control");
+        $(Libat).addClass("form-control");
+
+        if(
+            setter.obat !== undefined && setter.obat !== null
+        ) {
+            $(containerPukul).html(setter.pukul);
+            $(containerObat).html("<span>" + setter.obat.nama + "</span>");
+            $(containerDosis).html(setter.dosis);
+            $(containerRute).html(setter.rute);
+            $(containerLibat).html(setter.keputusan);
+            $(containerOleh).html(setter.oleh.nama);
+            if(setter.deleted_at !== null) {
+                $(containerPukul).css({
+                    "text-decoration": "line-through"
+                });
+                $(containerObat).append("<br /><b class=\"text-info\"><i class=\"fa fa-info-circle\"></i> Dihapus oleh : " + setter.dihapus_oleh + "</b>");
+                $(containerObat).find("span").css({
+                    "text-decoration": "line-through"
+                });
+                $(containerDosis).css({
+                    "text-decoration": "line-through"
+                });
+                $(containerRute).css({
+                    "text-decoration": "line-through"
+                });
+                $(containerLibat).css({
+                    "text-decoration": "line-through"
+                });
+                $(containerOleh).css({
+                    "text-decoration": "line-through"
+                });
+                $(containerAksi).html("<div class=\"wrap-content\"><i class=\"fa fa-trash-alt\"></i> Terhapus</div>");
+            } else {
+                $(containerAksi).html("<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                    "<button asesmen=\"" + setter.asesmen + "\" server-id=\"" + setter.serverID + "\" class=\"btn btn-sm btn-danger btn-delete-infus\"><span><i class=\"fa fa-trash-alt\"></i> Hapus</span></button>" +
+                    "</div>");
+            }
+        } else {
+            $(containerPukul).html(setter.pukul);
+            $(containerObat).append(Obat);
+            $(containerDosis).append(Dosis);
+            $(containerRute).append(Rute);
+            $(containerLibat).append(Libat);
+            $(containerOleh).html(__MY_NAME__);
+            $(containerAksi).html("<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                "<button class=\"btn btn-sm btn-success btn-approve-infus\" target=\"" + classify + "\"><span><i class=\"fa fa-check\"></i> OK</span></button>" +
+                "</div>");
+        }
+
+
+        $(row).append(containerPukul);
+        $(row).append(containerObat);
+        $(row).append(containerDosis);
+        $(row).append(containerRute);
+        $(row).append(containerLibat);
+        $(row).append(containerOleh);
+        $(row).append(containerAksi);
+
+        $(row).addClass("last-infus");
+        $(targetTable + " tbody").append(row);
+
+        $(Obat).select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function(){
+                    return "Barang tidak ditemukan";
+                }
+            },
+            ajax: {
+                dataType: "json",
+                headers:{
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url: __HOSTAPI__ + "/Inventori/get_item_select2",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.response_data;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                "id": item.uid,
+                                "satuan_terkecil": item.satuan_terkecil.nama,
+                                "data-value": item["data-value"],
+                                "penjamin-list": item["penjamin"],
+                                "satuan-caption": item["satuan-caption"],
+                                "satuan-terkecil": item["satuan-terkecil"],
+                                "text": "<div style=\"color:" + ((item.stok > 0) ? "#12a500" : "#cf0000") + ";\">" + item.nama.toUpperCase() + "</div>",
+                                "html": 	"<div class=\"select2_item_stock\">" +
+                                    "<div style=\"color:" + ((item.stok > 0) ? "#12a500" : "#cf0000") + "\">" + item.nama.toUpperCase() + "</div>" +
+                                    "<div>" + item.stok + "</div>" +
+                                    "</div>",
+                                "title": item.nama
+                            }
+                        })
+                    };
+                }
+            },
+            placeholder: "Pilih Obat",
+            selectOnClose: true,
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            templateResult: function(data) {
+                return data.html;
+            },
+            templateSelection: function(data) {
+                return data.text;
+            }
+        }).on("select2:select", function(e) {
+            var data = e.params.data;
+            $(this).children("[value=\""+ data["id"] + "\"]").attr({
+                "data-value": data["data-value"],
+                "penjamin-list": data["penjamin-list"],
+                "satuan-caption": data["satuan-caption"],
+                "satuan-terkecil": data["satuan-terkecil"]
+            });
+        });
+
+        rebaseInfus(targetTable, classify);
+    }
+
+    function rebaseInfus(targetTable, classify) {
+        $(targetTable + " tbody tr").each(function (e) {
+            var id = (e + 1);
+            $(this).attr({
+                "id": "row_auto_infus_" + classify + "_" + id
+            });
+
+            $(this).find("td:eq(0)").attr({
+                "id": "pukul_auto_infus_" + classify + "_" + id
+            });
+
+            $(this).find("td:eq(1) select").attr({
+                "id": "obat_auto_infus_" + classify + "_" + id
+            });
+
+            $(this).find("td:eq(2) input").attr({
+                "id": "dosis_auto_infus_" + classify + "_" + id
+            });
+
+            $(this).find("td:eq(3) input").attr({
+                "id": "rute_auto_infus_" + classify + "_" + id
+            });
+
+            $(this).find("td:eq(4) input").attr({
+                "id": "libat_auto_infus_" + classify + "_" + id
+            });
+
+            $(this).find("td:eq(6) button.btn-approve-infus").attr({
+                "id": "approve_auto_infus_" + classify + "_" + id
+            });
+
+            $(this).find("td:eq(6) button.btn-delete-infus").attr({
+                "id": "hapus_auto_infus_" + classify + "_" + id
+            });
+        });
+    }
+
+
+
+
+
+
 </script>
 
 

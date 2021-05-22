@@ -175,7 +175,8 @@
             <th>Nama Pasien</th>
             <th>Jumlah</th>
             <th>Dibayar</th>
-            <th>Belum Bayar</th>
+            <th>Sisa Bayar</th>
+            <th>Kwitansi</th>
         </tr>
         </thead>
         <tbody>
@@ -213,6 +214,7 @@
                     <td class="number_style"><?php echo number_format($itemValue['total_after_discount'], 2, '.', ','); ?></td>
                     <td class="number_style"><?php echo (isset($itemValue['payment']) ? number_format($itemValue['payment']['terbayar'], 2, '.', ',') : '0.00'); ?></td>
                     <td class="number_style"><?php echo number_format($total, 2, '.', ','); ?></td>
+                    <td class="number_style"><?php echo isset($itemValue['payment']) ? $itemValue['payment']['nomor_kwitansi'] : '-'; ?></td>
                 </tr>
                 <?php
             }

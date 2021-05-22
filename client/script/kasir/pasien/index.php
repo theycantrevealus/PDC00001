@@ -355,6 +355,7 @@
 					if(returnedData == undefined || returnedData.response_package == undefined) {
 						returnedData = [];
 					}
+					console.log(response);
 					for(var InvKeyData in response.response_package.response_data) {
 					    if(
                             response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
@@ -383,7 +384,7 @@
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = returnedData.length;
 
-					console.log(response);
+					//console.log(response);
 					
 					return returnedData;
 				}
@@ -423,7 +424,15 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.antrian_kunjungan.poli.nama;
+					    var poliList = [];
+					    for(var az in row.antrian_kunjungan.poli_list) {
+					        poliList.push(row.antrian_kunjungan.poli_list[az].poli.nama);
+                        }
+					    if(poliList.length > 0) {
+                            return poliList.join(", ");
+                        } else {
+                            return row.antrian_kunjungan.poli.nama;
+                        }
 					}
 				},
 				{
@@ -759,6 +768,8 @@
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
+			var me = $(this);
+			me.removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i>Loading</span>");
 			var poli = $(this).attr("poli");
 			var pasien = $(this).attr("pasien");
 			var penjamin = $(this).attr("penjamin");
@@ -939,6 +950,7 @@
 							}
 
 							$("#form-invoice").modal("show");
+                            me.removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-eye\"></i>Detail</span>");
 						},
 						error: function(response) {
 							console.log("Error : " + response);
@@ -1125,7 +1137,20 @@
                 confirmButtonText: `Sudah`,
                 confirmButtonColor: `#1297fb`,
                 denyButtonText: `Belum`,
-                denyButtonColor: `#ff2a2a`
+                denyButtonColor: `#ff2a2a`,
+                onOpen(popup) {
+                    var oldContentDeny = $(".swal2-deny").html();
+                    $(".swal2-deny").html("");
+                    $(".swal2-deny").append("<span><i class=\"fa fa-times\"></i>" + oldContentDeny + "</span>").removeClass("swal2-deny").addClass("btn btn-danger");
+
+                    var oldContentConfirm = $(".swal2-confirm").html();
+                    $(".swal2-confirm").html("");
+                    $(".swal2-confirm").append("<span><i class=\"fa fa-check\"></i>" + oldContentConfirm + "</span>").removeClass("swal2-confirm").addClass("btn btn-success").css({
+                        "background-color": "#48BA16",
+                        "border-color": "#48BA16",
+                        "box-shadow": "inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.075)"
+                    });
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
@@ -1149,11 +1174,24 @@
                         },
                         success:function(response) {
                             if(response.response_package.response_result > 0) {
-                                Swal.fire(
-                                    "Pembayaran Berhasil!",
-                                    response.response_package.response_message,
-                                    "success"
-                                ).then((result) => {
+                                Swal.fire({
+                                    title: "Pembayaran Berhasil!",
+                                    type: "success",
+                                    html: response.response_package.response_message,
+                                    onOpen(popup) {
+                                        var oldContentDeny = $(".swal2-deny").html();
+                                        $(".swal2-deny").html("");
+                                        $(".swal2-deny").append("<span><i class=\"fa fa-times\"></i>" + oldContentDeny + "</span>").removeClass("swal2-deny").addClass("btn btn-danger");
+
+                                        var oldContentConfirm = $(".swal2-confirm").html();
+                                        $(".swal2-confirm").html("");
+                                        $(".swal2-confirm").append("<span><i class=\"fa fa-check\"></i>" + oldContentConfirm + "</span>").removeClass("swal2-confirm").addClass("btn btn-success").css({
+                                            "background-color": "#48BA16",
+                                            "border-color": "#48BA16",
+                                            "box-shadow": "inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.075)"
+                                        });
+                                    }
+                                }).then((result) => {
                                     tableAntrianBayarRJ.ajax.reload();
                                     tableAntrianBayarRI.ajax.reload();
                                     tableAntrianBayarIGD.ajax.reload();
@@ -1351,8 +1389,8 @@
 				
 			</div>
 			<div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnBayar"><i class="fa fa-check"></i> Proses</button>
 				<button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Kembali</button>
-				<button type="button" class="btn btn-success" id="btnBayar"><i class="fa fa-check"></i> Proses</button>
 			</div>
 		</div>
 	</div>

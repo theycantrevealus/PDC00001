@@ -2026,12 +2026,17 @@ class Antrian extends Utility
             ->execute();
 
         $autonum = 1;
+        $pegawai = new Pegawai(self::$pdo);
+        $pasien = new Pasien(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
             $autonum++;
 
-            $pegawai = new Pegawai(self::$pdo);
+            $get_pasien = $pasien->get_pasien_detail('pasien', $value['uid_pasien']);
+            $data['response_data'][$key]['pasien_detail'] = $get_pasien['response_data'][0];
+
+
             $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
             $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
 

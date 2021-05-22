@@ -19,9 +19,6 @@
 
         var rangeDefiner = [
             {
-                text: "",
-                merge: 0
-            }, {
                 text: "Tidak",
                 merge: 1
             }, {

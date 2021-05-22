@@ -76,6 +76,36 @@
                                 </li>
 
                                 <li>
+                                    <h6>Transportasi Waktu Datang</h6>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="simetris" value="s" checked/>
+                                                <label class="form-check-label">
+                                                    Ambulance RSPB
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="simetris" value="a" />
+                                                <label class="form-check-label">
+                                                    Ambulance Lain
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="simetris" value="a" />
+                                                <label class="form-check-label">
+                                                    Kendaraan Lain
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li>
                                     <h6>Riwayat Penyakit Dulu</h6>
                                     <div class="row">
                                         <div class="col-md-3">
@@ -389,10 +419,10 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row" style="margin-top: 50px; padding: 0px 50px;">
-                                        <div class="col-md-12" id="scale-loader-image"></div>
+                                    <div class="row" style="margin-top: 50px; padding: 0px 50px; position: relative" id="nrs_1">
+                                        <div class="col-md-12 scale-loader-image" id="scale-loader-image"></div>
                                         <div class="col-md-12" id="scale-loader-define"></div>
-                                        <div class="col-md-12" id="scale-loader"></div>
+                                        <div class="col-md-12 scale-loader" id="scale-loader"></div>
                                         <div class="col-md-12">
                                             <input type="text" id="txt_nrs" class="slider">
                                         </div>
