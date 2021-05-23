@@ -224,9 +224,7 @@
 								password:password
 							},
 							success:function(response) {
-                                $("#btnLogin").removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-check\"></i> Login</span>").attr({
-                                    "disabled": "disabled"
-                                });
+                                $("#btnLogin").removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-check\"></i> Login</span>").removeAttr("disabled");
 								if(response.response_result > 0) {
 									location.reload();
 								} else {
