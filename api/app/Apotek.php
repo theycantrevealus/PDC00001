@@ -84,6 +84,7 @@ class Apotek extends Utility
                     $parameter['status'] = 'L';
                     return self::get_resep_backend($parameter);
                     break;
+
                 case 'get_resep_selesai_backend':
                     /*$parameter['status'] = 'D';
                     $selesai = self::get_resep_backend($parameter);
@@ -112,6 +113,10 @@ class Apotek extends Utility
 
                     return self::get_resep_serah_backend($parameter);
 
+                    break;
+                case 'get_resep_igd':
+                    $parameter['status'] = 'L';
+                    return self::get_resep_backend($parameter);
                     break;
                 case 'proses_resep':
                     return self::proses_resep($parameter);
@@ -1172,23 +1177,39 @@ class Apotek extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-            $paramData = array(
-                'resep.deleted_at' => 'IS NULL',
-                'AND',
-                'resep.status_resep' => '= ?'
-            );
+        if(isset($parameter['request_type'])) {
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'resep.deleted_at' => 'IS NULL'
+                );
 
-            $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
+                $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
+            } else {
+                $paramData = array(
+                    'resep.deleted_at' => 'IS NULL'
+                );
+
+                $paramValue = array();
+            }
         } else {
-            $paramData = array(
-                'resep.deleted_at' => 'IS NULL',
-                'AND',
-                'resep.status_resep' => '= ?'
-                //'resep.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
-            );
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'resep.deleted_at' => 'IS NULL',
+                    'AND',
+                    'resep.status_resep' => '= ?'
+                );
 
-            $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
+                $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
+            } else {
+                $paramData = array(
+                    'resep.deleted_at' => 'IS NULL',
+                    'AND',
+                    'resep.status_resep' => '= ?'
+                    //'resep.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+                );
+
+                $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
+            }
         }
 
 
@@ -1388,16 +1409,16 @@ class Apotek extends Utility
         foreach ($data['response_data'] as $key => $value) {
             //Dokter Info
             $Pegawai = new Pegawai(self::$pdo);
-            $PegawaiInfo = $Pegawai::get_detail($value['dokter']);
+            $PegawaiInfo = $Pegawai->get_detail($value['dokter']);
             $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
 
             //Get Antrian Detail
             $Antrian = new Antrian(self::$pdo);
-            $AntrianInfo = $Antrian::get_antrian_detail('antrian', $value['antrian']);
+            $AntrianInfo = $Antrian->get_antrian_detail('antrian', $value['antrian']);
 
             //Departemen Info
             $Poli = new Poli(self::$pdo);
-            $PoliInfo = $Poli::get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
+            $PoliInfo = $Poli->get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
             $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
             $data['response_data'][$key]['antrian'] = $AntrianInfo['response_data'][0];
 
@@ -1424,7 +1445,7 @@ class Apotek extends Utility
                 ->execute();
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 $Inventori = new Inventori(self::$pdo);
-                $InventoriInfo = $Inventori::get_item_detail($ResValue['obat']);
+                $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
             }
             $data['response_data'][$key]['detail'] = $resep_detail['response_data'];
@@ -1484,7 +1505,7 @@ class Apotek extends Utility
                     ->execute();
                 foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
                     $Inventori = new Inventori(self::$pdo);
-                    $InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
+                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
 
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }

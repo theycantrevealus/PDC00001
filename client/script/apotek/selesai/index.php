@@ -18,8 +18,6 @@
                 },
                 type:"GET",
                 success:function(response) {
-                    console.clear();
-                    console.log(response);
                     var resepDataRaw = response.response_package.response_data;
                     for(var resepKey in resepDataRaw) {
                         if(
@@ -135,7 +133,7 @@
                 },
                 dataSrc:function(response) {
                     var forReturn = [];
-                    console.log(response);
+
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
                         dataSet = [];
@@ -143,7 +141,7 @@
 
                     for(var dKey in dataSet) {
                         if(dataSet[dKey].departemen !== undefined) {
-                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                            if(dataSet[dKey].antrian.departemen.uid !== __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid !== __POLI_INAP__) {
                                 forReturn.push(dataSet[dKey]);
                             }
                         }
@@ -153,7 +151,7 @@
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
 
-                    return dataSet;
+                    return forReturn;
                 }
             },
             autoWidth: false,
@@ -247,7 +245,7 @@
 
                     for(var dKey in dataSet) {
                         if(dataSet[dKey].antrian.departemen !== undefined) {
-                            if(dataSet[dKey].antrian.departemen.uid == __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid == __POLI_INAP__) {
+                            if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
                                 forReturn.push(dataSet[dKey]);
                             }
                         }
@@ -645,7 +643,7 @@
                                 tableResep.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
                             } else {
-                                console.log(response);
+
                             }
                         },
                         error: function(response) {
@@ -681,7 +679,7 @@
                                 tableResep.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
                             } else {
-                                console.log(response);
+
                             }
                         },
                         error: function(response) {
