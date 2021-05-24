@@ -5023,8 +5023,8 @@
                     confirmButtonText: `Ya`,
                     denyButtonText: `Belum`,
                 }).then((result) => {
+                    //latest
                     if (result.isConfirmed) {
-
                         const simpanDataProcess = new Promise(function(resolve, reject) {
                             resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
                         }).then(function(result) {
@@ -5040,7 +5040,7 @@
                                         request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                                     },
                                     type: "POST",
-                                    success: function(response){
+                                    success: function(response) {
                                         proceed(response);
                                     },
                                     error: function(response) {

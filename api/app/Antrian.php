@@ -293,6 +293,7 @@ class Antrian extends Utility
                     'keterangan' => 'Biaya konsultasi'
                 ));
                 //$antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
+
                 $updateNomorAntrian = self::$query->update('antrian_nomor', array(
                     'status' => 'K',
                     'prioritas' => $parameter['dataObj']['prioritas'],

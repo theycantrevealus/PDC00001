@@ -1235,8 +1235,7 @@ class Asesmen extends Utility {
 
 
 				//Kasus Spesial FisioTerapi. Memang beda sendiri dia. aut of de boks. Paten kaleee
-                if($PoliDetail['uid'] === __UIDFISIOTERAPI__)
-                {
+                if($PoliDetail['uid'] === __UIDFISIOTERAPI__) {
                     $saveParam = array(
                         'keluhan_utama' => $parameter['keluhan_utama'],
                         'keluhan_tambahan' => $parameter['keluhan_tambahan'],
@@ -1525,8 +1524,6 @@ class Asesmen extends Utility {
 		if($parameter['poli'] !== __POLI_INAP__) {
 		    //Pasien Keluar Poli
             if($parameter['charge_invoice'] === 'Y') {
-
-
                 //Pasien Keluar Poli
 
                 if($parameter['poli'] !== __POLI_IGD__) {
@@ -2994,10 +2991,11 @@ class Asesmen extends Utility {
             $cek_asesment = self::cek_asesmen_medis_detail($PoliDetail['poli_asesmen'], $value['uid']);
             $antrian['response_data'][$key]['status_asesmen'] = false;
 
-            if ($cek_asesment['response_result'] > 0){
+            if ($cek_asesment['response_result'] > 0) {
                 $antrian['response_data'][$key]['uid_asesmen_medis'] = $cek_asesment['response_data'][0]['uid'];
                 $antrian['response_data'][$key]['status_asesmen'] = true;
             }
+
             //Pasien Detail
             $Pasien = new Pasien(self::$pdo);
             $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['uid_pasien']);

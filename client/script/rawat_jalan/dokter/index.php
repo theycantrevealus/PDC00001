@@ -36,7 +36,7 @@
 
 		var params;
 
-		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
+		var tableAntrian = $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis",
 				type: "GET",
@@ -45,6 +45,7 @@
 				},
 				dataSrc:function(response) {
 				    var data = response.response_package.response_data;
+				    console.log(response);
 				    var parsedData = [];
 				    for(var key in data) {
 				        if(data[key].uid_poli !== __POLI_INAP__ && data[key].uid_poli !== __POLI_IGD__) {
