@@ -836,35 +836,39 @@ class Invoice extends Utility
                         $parameter['invoice']
                     ))
                     ->execute();
-                if ($getPaymentResult['response_data'][0]['item'] != __UID_KARTU__) {
-                    $KonsulListItem = array();
-                    //List semua biaya konsultasi dari setting poli
-                    $poliKonsulPrice = self::$query->select('master_poli', array(
-                        'uid',
-                        'tindakan_konsultasi'
-                    ))
-                        ->where(array(
-                            'master_poli.deleted_at' => 'IS NULL'
-                        ))
-                        ->execute();
+                $KonsulListItem = array();
+                foreach ($getPaymentResult['response_data'] as $itemKonsulKey => $ItemKonsulValue) {
+                    if ($getPaymentResult['response_data'][$itemKonsulKey]['item'] != __UID_KARTU__) {
 
-                    foreach ($poliKonsulPrice['response_data'] as $PKKey => $PKValue) {
-                        if (!in_array($PKValue['tindakan_konsultasi'], $KonsulListItem)) {
-                            array_push($KonsulListItem, $PKValue['tindakan_konsultasi']);
+                        //List semua biaya konsultasi dari setting poli
+                        $poliKonsulPrice = self::$query->select('master_poli', array(
+                            'uid',
+                            'tindakan_konsultasi'
+                        ))
+                            ->where(array(
+                                'master_poli.deleted_at' => 'IS NULL'
+                            ))
+                            ->execute();
+
+                        foreach ($poliKonsulPrice['response_data'] as $PKKey => $PKValue) {
+                            if (!in_array($PKValue['tindakan_konsultasi'], $KonsulListItem)) {
+                                array_push($KonsulListItem, $PKValue['tindakan_konsultasi']);
+                            }
+                        }
+
+                        if (
+                            in_array($getPaymentResult['response_data'][$itemKonsulKey]['item'], $KonsulListItem) &&
+                            $getPaymentResult['response_data'][$itemKonsulKey]['item_type'] == 'master_tindakan' &&
+                            $getPaymentResult['response_data'][$itemKonsulKey]['status_bayar'] == 'Y'
+                        ) {
+                            $allowAntrian = true;
+                        } else {
+                            $allowAntrian = false;
+                            break;
                         }
                     }
-
-                    if (
-                        in_array($getPaymentResult['response_data'][0]['item'], $KonsulListItem) &&
-                        $getPaymentResult['response_data'][0]['item_type'] == 'master_tindakan' &&
-                        $getPaymentResult['response_data'][0]['status_bayar'] == 'Y'
-                    ) {
-                        $allowAntrian = true;
-                    } else {
-                        $allowAntrian = false;
-                        break;
-                    }
                 }
+
             }
         } else {
             $allowAntrian = true;
