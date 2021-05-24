@@ -641,9 +641,10 @@
                         success:function(response) {
                             if(response.response_package.response_result > 0) {
                                 tableResep.ajax.reload();
+                                tableResep2.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
                             } else {
-
+                                console.log(response);
                             }
                         },
                         error: function(response) {
@@ -677,9 +678,10 @@
                         success:function(response) {
                             if(response.response_package.response_result > 0) {
                                 tableResep.ajax.reload();
+                                tableResep2.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
                             } else {
-
+                                console.log(response);
                             }
                         },
                         error: function(response) {
