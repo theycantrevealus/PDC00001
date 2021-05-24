@@ -369,7 +369,7 @@
                     requestList[reqKey].message,
                     requestList[reqKey].type
                 ).then(function() {
-                    alert(reqKey);
+                    //alert(reqKey);
                     sendingStatus++;
                 });
             }
@@ -452,7 +452,7 @@
                                     audio.audio.pause();
                                     audio.audio.currentTime = 0;
                                 } else {
-                                    alert();
+                                    //alert();
                                 }
                             }
                             audio = protocolLib[command](command, type, parameter, sender, receiver, time);
