@@ -426,10 +426,10 @@
 					"data" : null, render: function(data, type, row, meta) {
 					    var poliList = [];
 					    for(var az in row.antrian_kunjungan.poli_list) {
-					        poliList.push(row.antrian_kunjungan.poli_list[az].poli.nama);
+					        poliList.push("<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli_list[az].poli.nama + "</span>");
                         }
 					    if(poliList.length > 0) {
-                            return poliList.join(", ");
+                            return poliList.join(" ");
                         } else {
                             return row.antrian_kunjungan.poli.nama;
                         }
@@ -443,7 +443,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span style=\"display: block\" class=\"text-right\">" + number_format(row.total_after_discount, 2, ".", ",") + "</span>";
+						return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(row.total_after_discount, 2, ".", ",") + "</span>";
 					}
 				},
 				{

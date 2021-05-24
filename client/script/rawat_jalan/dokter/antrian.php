@@ -3289,8 +3289,8 @@
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     metaSwitchEdit));
             }).then(function(result) {
-                /*console.clear();
-                console.log(result);*/
+                console.clear();
+                console.log(result);
 
                 if(result.response_package.response_result > 0) {
                     notification ("success", "Asesmen Berhasil Disimpan", 1000, "hasil_tambah_dev");

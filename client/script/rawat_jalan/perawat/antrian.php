@@ -467,13 +467,17 @@
                     btnSelesai.removeAttr("disabled");
                     console.clear();
                     console.log(response);
-                    if(response.response_package.response_result > 0) {
+                    if(
+                        response.response_package.response_result > 0 ||
+                        response.response_package.asesmen.response_result > 0 ||
+                    ) {
                         notification ("success", "Berhasil Simpan Data", 3000, "hasil_tambah_dev");
+                        location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
                     } else {
                         notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                     }
 
-                    //location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+
                 },
                 error: function(response) {
                     btnSelesai.removeAttr("disabled");
