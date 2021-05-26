@@ -6395,25 +6395,25 @@
                                         <option value="" disabled selected>Pilih Dokter</option>
                                     </select>
                                 </div>
-                                <div class="col-12 col-md-6 mb-3">
+                                <!--div class="col-12 col-md-6 mb-3">
                                     <label>Kamar <span class="red">*</span></label>
                                     <select id="inap_kamar" class="form-control select2 inputan_inap" required>
                                         <option value="" disabled selected>Pilih Kamar</option>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 mb-3">
-                                    <label>Bangsal <span class="red">*</span></label>
+                                    <label>Ranjang <span class="red">*</span></label>
                                     <select id="inap_bed" class="form-control select2 inputan_inap" required>
-                                        <option value="" disabled selected>Pilih Bangsal</option>
+                                        <option value="" disabled selected>Pilih Ranjang</option>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 mb-3" id="group_inap_tanggal_masuk">
                                     <label>Tanggal Masuk <span class="red">*</span></label>
                                     <input type="date" id="inap_tanggal_masuk" class="form-control input-group" required />
-                                </div>
-                                <div class="col-12 col-md-6 mb-3">
+                                </div-->
+                                <div class="col-12 col-md-12 mb-12">
                                     <label>Keterangan <span class="red">*</span></label>
-                                    <input type="text" id="inap_keterangan" class="form-control" placeholder="Keterangan" />
+                                    <textarea type="text" id="inap_keterangan" class="form-control" placeholder="Keterangan"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -6422,9 +6422,15 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="btnProsesInap">
-                    <i class="fa fa-check"></i> Pindah Rawat Inap
+                    <span>
+                        <i class="fa fa-check"></i> Pindah Rawat Inap
+                    </span>
                 </button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
             </div>
         </div>
     </div>
