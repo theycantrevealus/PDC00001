@@ -2184,7 +2184,7 @@ class Asesmen extends Utility {
 
             if ($new_asesmen_tindakan['response_result'] > 0) {
                 if ($parameter['charge_invoice'] === 'Y') {
-                    $InvoiceDetail = $Invoice::append_invoice(array(
+                    $InvoiceDetail = $Invoice->append_invoice(array(
                         'invoice' => $TargetInvoice,
                         'item' => $value['item'],
                         'item_origin' => 'master_tindakan',

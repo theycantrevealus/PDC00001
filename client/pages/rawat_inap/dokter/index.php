@@ -4,7 +4,7 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap">Rawat Inap</a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap/dokter">Rawat Inap</a></li>
 					<li class="breadcrumb-item active" aria-current="page"><b id="target_pasien"></b></li>
 				</ol>
 			</nav>
@@ -60,24 +60,37 @@
 			</div>
 			<div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">List Asesmen</h5>
-                    <button class="btn btn-info pull-right" id="btnTambahAsesmen">
-                        <i class="fa fa-plus"></i> Tambah Asesmen
-                    </button>
+                    <h5 class="card-header__title flex m-0">Pelayanan</h5>
+                </div>
+                <div class="card-header card-header-tabs-basic nav" role="tablist">
+                    <a href="#dokter" class="active" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">Dokter</a>
+                    <a href="#perawat" data-toggle="tab" role="tab" aria-selected="false">Perawat</a>
+                    <a href="#obat" data-toggle="tab" role="tab" aria-selected="false">Obat dan BHP</a>
+                    <a href="#biaya" data-toggle="tab" role="tab" aria-selected="false">Biaya</a>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
-                        <thead class="thead-dark">
-                        <tr>
-                            <th class="wrap_content">No</th>
-                            <th>Tgl</th>
-                            <th class="wrap_content">Aksi</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <button class="btn btn-info pull-right" id="btnTambahAsesmen">
+                                <i class="fa fa-plus"></i> Tambah Asesmen
+                            </button>
+                        </div>
+                        <div class="col-lg-12">
+                            <br />
+                            <table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th class="wrap_content">No</th>
+                                    <th>Tgl</th>
+                                    <th class="wrap_content">Aksi</th>
+                                </tr>
+                                </thead>
+                                <tbody>
 
-                        </tbody>
-                    </table>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 			</div>
 		</div>
