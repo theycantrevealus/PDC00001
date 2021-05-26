@@ -463,7 +463,7 @@
 
 			var newNilaiMin = document.createElement("INPUT");
 			$(newCellNilaiMin).append(newNilaiMin);
-			$(newNilaiMin).addClass("form-control nilai_min_selection").inputmask({
+			/*$(newNilaiMin).addClass("form-control nilai_min_selection").inputmask({
 				alias: "decimal",
 				rightAlign: true,
 				placeholder: "0.00",
@@ -471,11 +471,11 @@
                 placeholder: "0",
 				autoGroup: false,
 				digitsOptional: true
-			});
+			});*/
 
 			var newNilaiMax = document.createElement("INPUT");
 			$(newCellNilaiMax).append(newNilaiMax);
-			$(newNilaiMax).addClass("form-control nilai_max_selection").inputmask({
+			/*$(newNilaiMax).addClass("form-control nilai_max_selection").inputmask({
 				alias: "decimal",
 				rightAlign: true,
 				placeholder: "0.00",
@@ -483,7 +483,7 @@
                 placeholder: "0",
 				autoGroup: false,
 				digitsOptional: true
-			});
+			});*/
 			
 			var newNilaiSatuan = document.createElement("INPUT");
 			$(newCellNilaiSatuan).append(newNilaiSatuan);
@@ -742,8 +742,10 @@
 
 			var nilai = [];
 			$("#nilai-lab tbody tr").each(function() {
-				var nilaiDataMin = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
-				var nilaiDataMax = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+				/*var nilaiDataMin = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
+				var nilaiDataMax = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");*/
+                var nilaiDataMin = $(this).find("td:eq(1) input").val();
+                var nilaiDataMax = $(this).find("td:eq(2) input").val();
 				var nilaiDataSatuan = $(this).find("td:eq(3) input").val();
 				var nilaiDataKeterangan = $(this).find("td:eq(4) input").val();
 
@@ -769,7 +771,7 @@
 				}
 			});*/
 
-			if(kode != "" && nama != "") {
+			if(nama != "") {
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Laboratorium",
@@ -790,7 +792,8 @@
 					},
 					type: "POST",
 					success: function(response){
-                        if(response.response_package[0].response_result > 0)
+					    console.log(response);
+                        if(response.response_package.response_result > 0)
                         {
                             Swal.fire(
                                 'Laboratorium',

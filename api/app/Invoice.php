@@ -2,6 +2,7 @@
 
 namespace PondokCoder;
 
+use PondokCoder\Authorization as Authorization;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Pasien as Pasien;
@@ -80,7 +81,9 @@ class Invoice extends Utility
                 'AND',
                 'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
                 'AND',
-                'invoice_payment.nomor_kwitansi' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+                '(invoice_payment.nomor_kwitansi' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
             $paramValue = array(
@@ -111,6 +114,15 @@ class Invoice extends Utility
                 'metode_bayar',
                 'tanggal_bayar'
             ))
+                ->order(array(
+                    $parameter['column_set'][$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+                ))
+                ->join('pasien', array(
+                    'nama as nama_pasien'
+                ))
+                ->on(array(
+                    array('invoice_payment.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -126,6 +138,15 @@ class Invoice extends Utility
                 'metode_bayar',
                 'tanggal_bayar'
             ))
+                ->order(array(
+                    $parameter['column_set'][$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
+                ))
+                ->join('pasien', array(
+                    'nama as nama_pasien'
+                ))
+                ->on(array(
+                    array('invoice_payment.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))
@@ -134,16 +155,18 @@ class Invoice extends Utility
 
         $payment['response_draw'] = $parameter['draw'];
         $autonum = 1;
+        $Pegawai = new Pegawai(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
         foreach ($payment['response_data'] as $key => $value) {
             if (!isset($value['pasien']) || !isset($value['pegawai'])) {
                 unset($payment['response_data'][$key]);
             } else {
-                $Pegawai = new Pegawai(self::$pdo);
-                $PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+
+                $PegawaiInfo = $Pegawai->get_detail($value['pegawai']);
                 $payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
 
-                $Pasien = new Pasien(self::$pdo);
-                $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+
+                $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
                 $payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
                 $payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
@@ -183,7 +206,11 @@ class Invoice extends Utility
                 'AND',
                 'invoice.created_at' => 'BETWEEN ? AND ?',
                 'AND',
-                'invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+                '(invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
             $paramValue = array(
@@ -197,7 +224,7 @@ class Invoice extends Utility
             );
 
             $paramValue = array(
-                $parameter['from'], $parameter['to']
+                date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day'))
             );
         }
 
@@ -219,8 +246,12 @@ class Invoice extends Utility
                 ->join('antrian_nomor', array(
                     'id'
                 ))
+                ->join('pasien', array(
+                    'nama'
+                ))
                 ->on(array(
-                    array('invoice.kunjungan', '=', 'antrian_nomor.kunjungan')
+                    array('invoice.kunjungan', '=', 'antrian_nomor.kunjungan'),
+                    array('invoice.pasien', '=', 'pasien.uid')
                 ))
                 ->execute();
         } else {
@@ -243,8 +274,12 @@ class Invoice extends Utility
                 ->join('antrian_nomor', array(
                     'id'
                 ))
+                ->join('pasien', array(
+                    'nama'
+                ))
                 ->on(array(
-                    array('invoice.kunjungan', '=', 'antrian_nomor.kunjungan')
+                    array('invoice.kunjungan', '=', 'antrian_nomor.kunjungan'),
+                    array('invoice.pasien', '=', 'pasien.uid')
                 ))
                 ->execute();
         }
@@ -252,6 +287,14 @@ class Invoice extends Utility
         $dataResult = array();
         $data['response_draw'] = intval($parameter['draw']);
         $autonum = intval($parameter['start']) + 1;
+        $Poli = new Poli(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+        $Anjungan = new Anjungan(self::$pdo);
+        $PoliListIdentifier = array();
+        $PoliList = array();
+
+
         foreach ($data['response_data'] as $key => $value) {
             //Antrian Info
             $AntrianKunjungan = self::$query->select('antrian_nomor', array(
@@ -279,8 +322,7 @@ class Invoice extends Utility
                 ))
                 ->execute();
             if (count($AntrianKunjungan['response_data']) > 0) {
-                $Pasien = new Pasien(self::$pdo);
-                $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+                $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
                 $value['pasien'] = $PasienInfo['response_data'][0];
 
 
@@ -312,24 +354,49 @@ class Invoice extends Utility
 
                 foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                     //Info Poliklinik
-                    $Poli = new Poli(self::$pdo);
-                    $PoliInfo = $Poli::get_poli_detail($AKValue['poli']);
+                    $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
+
+
+                    //Antrian Poli Populator
+                    $PoliPopulator = self::$query->select('antrian', array(
+                        'departemen',
+                        'dokter'
+                    ))
+                        ->where(array(
+                            'antrian.kunjungan' => '= ?',
+                            'AND',
+                            'antrian.deleted_at' => 'IS NULL'
+                        ), array(
+                            $AKValue['kunjungan']
+                        ))
+                        ->execute();
+                    foreach ($PoliPopulator['response_data'] as $PoliPopKey => $PoliPopValue) {
+                        $PoliPopulator['response_data'][$PoliPopKey]['dokter'] = $Pegawai->get_detail($PoliPopValue['dokter'])['response_data'][0];
+                        $PoliPopulator['response_data'][$PoliPopKey]['poli'] = $Poli->get_poli_detail($PoliPopValue['departemen'])['response_data'][0];
+                    }
+                    $AntrianKunjungan['response_data'][$AKKey]['poli_list'] = $PoliPopulator['response_data'];
+
+
+                    /*if(!in_array($AKValue['poli'], $PoliListIdentifier)) {
+                        array_push($PoliListIdentifier, $AKValue['poli']);
+                        array_push($PoliList, $PoliInfo)['response_data'][0];
+                    }*/
                     $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                     //Info Pegawai
-                    $Pegawai = new Pegawai(self::$pdo);
-                    $PegawaiInfo = $Pegawai::get_detail($AKValue['pegawai']);
+                    $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
                     $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                     //Info Loket
-                    $Anjungan = new Anjungan(self::$pdo);
-                    $AnjunganInfo = $Anjungan::get_loket_detail($AKValue['loket']);
+                    $AnjunganInfo = $Anjungan->get_loket_detail($AKValue['loket']);
                     $AntrianKunjungan['response_data'][$AKKey]['loket'] = $AnjunganInfo['response_data'][0];
                 }
                 $value['antrian_kunjungan'] = $AntrianKunjungan['response_data'][0];
-
+                //$value['poli_list'] = $PoliList;
                 $value['autonum'] = $autonum;
                 $autonum++;
+
+                $value['created_at_parse'] = date('d F Y', strtotime($value['created_at']));
                 array_push($dataResult, $value);
             }
         }
@@ -348,7 +415,7 @@ class Invoice extends Utility
         return $data;
     }
 
-    private function get_payment($parameter)
+    public function get_payment($parameter)
     {
         $payment = self::$query->select('invoice_payment', array(
             'uid',
@@ -371,6 +438,35 @@ class Invoice extends Utility
             ))
             ->execute();
 
+        $InvoiceData = self::$query->select('invoice', array(
+            'kunjungan',
+            'pasien'
+        ))
+            ->where(array(
+                'invoice.uid' => '= ?',
+                'AND',
+                'invoice.deleted_at' => 'IS NULL'
+            ), array(
+                $payment['response_data'][0]['invoice']
+            ))
+            ->execute();
+
+        $Antrian = self::$query->select('antrian', array(
+            'departemen'
+        ))
+            ->join('master_poli', array(
+                'nama'
+            ))
+            ->on(array(
+                array('antrian.departemen', '=', 'master_poli.uid')
+            ))
+            ->where(array(
+                'antrian.kunjungan' => '= ?'
+            ), array(
+                $InvoiceData['response_data'][0]['kunjungan']
+            ))
+            ->execute();
+
         foreach ($payment['response_data'] as $key => $value) {
             //get payment detail
             $payment_detail = self::$query->select('invoice_payment_detail', array(
@@ -383,6 +479,7 @@ class Invoice extends Utility
                 'subtotal',
                 'discount',
                 'discount_type',
+                'billing_group',
                 'keterangan',
                 'status'
             ))
@@ -410,18 +507,68 @@ class Invoice extends Utility
                 $payment_detail['response_data'][$PDKey]['harga'] = floatval($PDValue['harga']);
                 $payment_detail['response_data'][$PDKey]['subtotal'] = floatval($PDValue['subtotal']);
                 $payment_detail['response_data'][$PDKey]['discount'] = floatval($PDValue['discount']);
+
+                $allowReturn = false;
+                if(
+                    $PDValue['item'] === __UID_KARTU__
+                ) {
+                    $allowReturn = false;
+                } else {
+                    $KonsulLib = array();
+                    //Get All Konsul Item Poli
+                    $PoliKonsul = self::$query->select('master_poli', array(
+                        'uid', 'tindakan_konsultasi', 'nama'
+                    ))
+                        ->where(array(
+                            'master_poli.deleted_at' => 'IS NULL'
+                        ))
+                        ->execute();
+                    foreach ($PoliKonsul['response_data'] as $PolKey => $PolValue) {
+                        array_push($KonsulLib, $PolValue['tindakan_konsultasi']);
+                    }
+
+                    /*if(
+                        $PDValue['item'] === __UIDKONSULDOKTER__ ||
+                        $PDValue['item'] === __UIDKONSULDOKTER_GIGI__ ||
+                        $PDValue['item'] === __UIDKONSULDOKTER_SPESIALIS__
+                    ) {*/
+                    if(in_array($PDValue['item'], $KonsulLib)) {
+                        $AsesmenCheck = self::$query->select('asesmen', array(
+                            'uid'
+                        ))
+                            ->where(array(
+                                'asesmen.kunjungan' => '= ?',
+                                'AND',
+                                'asesmen.pasien' => '= ?'
+                            ), array(
+                                $InvoiceData['response_data'][0]['kunjungan'],
+                                $InvoiceData['response_data'][0]['pasien']
+                            ))
+                            ->execute();
+                        $payment_detail['response_data'][$PDKey]['asesmen_check'] = $AsesmenCheck;
+                        if(count($AsesmenCheck['response_data']) > 0) {
+                            $allowReturn = false;
+                        } else {
+                            $allowReturn = true;
+                        }
+                    } else {
+                        $allowReturn = false;
+                    }
+                }
+                $payment_detail['response_data'][$PDKey]['allow_retur'] = $allowReturn;
             }
             $payment['response_data'][$key]['detail'] = $payment_detail['response_data'];
 
             //Info Pegawai
             $Pegawai = new Pegawai(self::$pdo);
-            $PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+            $PegawaiInfo = $Pegawai->get_detail($value['pegawai']);
             $payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
             $payment['response_data'][$key]['tanggal_bayar'] = date("d F Y", strtotime($value['tanggal_bayar']));
             $payment['response_data'][$key]['terbayar'] = floatval($value['terbayar']);
             $payment['response_data'][$key]['sisa_bayar'] = floatval($value['sisa_bayar']);
+            $payment['response_data'][$key]['antrian'] = $Antrian['response_data'];
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
         }
 
@@ -431,7 +578,7 @@ class Invoice extends Utility
     private function proses_bayar($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $KunjunganUID = $parameter['kunjungan'];
 
         $newPaymentUID = parent::gen_uuid();
@@ -445,7 +592,8 @@ class Invoice extends Utility
 
 
         $ResepMaster = self::$query->select('resep', array(
-            'uid'
+            'uid',
+            'asesmen'
         ))
             ->where(array(
                 'resep.kunjungan' => '= ?',
@@ -462,6 +610,19 @@ class Invoice extends Utility
             ))
             ->execute();
 
+        $RacikanMaster = self::$query->select('racikan', array(
+            'uid',
+            'asesmen'
+        ))
+            ->where(array(
+                'racikan.asesmen' => '= ?',
+                'AND',
+                'racikan.deleted_at' => 'IS NULL',
+            ), array(
+                $ResepMaster['response_data'][0]['asesmen']
+            ))
+            ->execute();
+
         foreach ($parameter['invoice_item'] as $key => $value) { //Update status bayar pada invoice item
             $getPaymentDetail = self::$query->select('invoice_detail', array(
                 'item',
@@ -474,6 +635,7 @@ class Invoice extends Utility
                 'keterangan',
                 'subtotal',
                 'status_bayar',
+                'billing_group',
                 'pasien'
             ))
                 ->where(array(
@@ -499,6 +661,7 @@ class Invoice extends Utility
                 'discount' => $getPaymentDetail['response_data'][0]['discount'],
                 'discount_type' => $getPaymentDetail['response_data'][0]['discount_type'],
                 'keterangan' => $getPaymentDetail['response_data'][0]['keterangan'],
+                'billing_group' => $getPaymentDetail['response_data'][0]['billing_group'],
                 'penjamin' => $parameter['penjamin'],
                 'pasien' => $parameter['pasien'],
                 'created_at' => parent::format_date(),
@@ -513,20 +676,40 @@ class Invoice extends Utility
                     count($ResepMaster['response_data']) > 0 &&
                     $getPaymentDetail['response_data'][0]['item_type'] == 'master_inv'
                 ) { //Obat
-                    $updateResep = self::$query->update('resep_detail', array(
-                        'status' => 'L'
-                    ))
-                        ->where(array(
-                            'resep_detail.obat' => '= ?',
-                            'AND',
-                            'resep_detail.resep' => '= ?',
-                            'AND',
-                            'resep_detail.deleted_at' => 'IS NULL'
-                        ), array(
-                            $getPaymentDetail['response_data'][0]['item'],
-                            $ResepMaster['response_data'][0]['uid']
+
+                    foreach ($ResepMaster['response_data'] as $RMKey => $RMValue) {
+                        $updateResep = self::$query->update('resep_detail', array(
+                            'status' => 'L'
                         ))
-                        ->execute();
+                            ->where(array(
+                                'resep_detail.obat' => '= ?',
+                                'AND',
+                                'resep_detail.resep' => '= ?',
+                                'AND',
+                                'resep_detail.deleted_at' => 'IS NULL'
+                            ), array(
+                                $getPaymentDetail['response_data'][0]['item'],
+                                $RMValue['uid']
+                            ))
+                            ->execute();
+                        foreach ($RacikanMaster['response_data'] as $RcMKey => $RcMValue) {
+                            $updateRacikan = self::$query->update('racikan_detail', array(
+                                'status' => 'L'
+                            ))
+                                ->where(array(
+                                    'racikan_detail.racikan' => '= ?',
+                                    'AND',
+                                    'racikan_detail.asesmen' => '= ?',
+                                    'AND',
+                                    'racikan_detail.deleted_at' => 'IS NULL'
+                                ), array(
+                                    $RcMValue['uid'],
+                                    $RMValue['asesmen']
+                                ))
+                                ->execute();
+                        }
+                    }
+
                     $goto_apotek = true;
                 }
 
@@ -653,35 +836,39 @@ class Invoice extends Utility
                         $parameter['invoice']
                     ))
                     ->execute();
-                if ($getPaymentResult['response_data'][0]['item'] != __UID_KARTU__) {
-                    $KonsulListItem = array();
-                    //List semua biaya konsultasi dari setting poli
-                    $poliKonsulPrice = self::$query->select('master_poli', array(
-                        'uid',
-                        'tindakan_konsultasi'
-                    ))
-                        ->where(array(
-                            'master_poli.deleted_at' => 'IS NULL'
-                        ))
-                        ->execute();
+                $KonsulListItem = array();
+                foreach ($getPaymentResult['response_data'] as $itemKonsulKey => $ItemKonsulValue) {
+                    if ($getPaymentResult['response_data'][$itemKonsulKey]['item'] != __UID_KARTU__) {
 
-                    foreach ($poliKonsulPrice['response_data'] as $PKKey => $PKValue) {
-                        if (!in_array($PKValue['tindakan_konsultasi'], $KonsulListItem)) {
-                            array_push($KonsulListItem, $PKValue['tindakan_konsultasi']);
+                        //List semua biaya konsultasi dari setting poli
+                        $poliKonsulPrice = self::$query->select('master_poli', array(
+                            'uid',
+                            'tindakan_konsultasi'
+                        ))
+                            ->where(array(
+                                'master_poli.deleted_at' => 'IS NULL'
+                            ))
+                            ->execute();
+
+                        foreach ($poliKonsulPrice['response_data'] as $PKKey => $PKValue) {
+                            if (!in_array($PKValue['tindakan_konsultasi'], $KonsulListItem)) {
+                                array_push($KonsulListItem, $PKValue['tindakan_konsultasi']);
+                            }
+                        }
+
+                        if (
+                            in_array($getPaymentResult['response_data'][$itemKonsulKey]['item'], $KonsulListItem) &&
+                            $getPaymentResult['response_data'][$itemKonsulKey]['item_type'] == 'master_tindakan' &&
+                            $getPaymentResult['response_data'][$itemKonsulKey]['status_bayar'] == 'Y'
+                        ) {
+                            $allowAntrian = true;
+                        } else {
+                            $allowAntrian = false;
+                            break;
                         }
                     }
-
-                    if (
-                        in_array($getPaymentResult['response_data'][0]['item'], $KonsulListItem) &&
-                        $getPaymentResult['response_data'][0]['item_type'] == 'master_tindakan' &&
-                        $getPaymentResult['response_data'][0]['status_bayar'] == 'Y'
-                    ) {
-                        $allowAntrian = true;
-                    } else {
-                        $allowAntrian = false;
-                        break;
-                    }
                 }
+
             }
         } else {
             $allowAntrian = true;
@@ -733,24 +920,38 @@ class Invoice extends Utility
         //$parameter['discount_type']
 
         if (count($checkStatusPasien['response_data']) > 0) {
-            $UpdateResepMaster = self::$query->update('resep', array(
-                'status_resep' => 'L',
-                'updated_at' => parent::format_date()
-            ))
-                ->where(array(
-                    'resep.kunjungan' => '= ?',
-                    'AND',
-                    'resep.pasien' => '= ?',
-                    'AND',
-                    'resep.uid' => '= ?',
-                    'AND',
-                    'resep.deleted_at' => 'IS NULL'
-                ), array(
-                    $KunjunganUID,
-                    $parameter['pasien'],
-                    $ResepMaster['response_data'][0]['uid']
+            foreach ($ResepMaster['response_data'] as $RMKey => $RMValue) {
+                $UpdateResepMaster = self::$query->update('resep', array(
+                    'status_resep' => 'L',
+                    'updated_at' => parent::format_date()
                 ))
-                ->execute();
+                    ->where(array(
+                        'resep.kunjungan' => '= ?',
+                        'AND',
+                        'resep.pasien' => '= ?',
+                        'AND',
+                        'resep.uid' => '= ?',
+                        'AND',
+                        'resep.deleted_at' => 'IS NULL'
+                    ), array(
+                        $KunjunganUID,
+                        $parameter['pasien'],
+                        $RMValue['uid']
+                    ))
+                    ->execute();
+                $UpdateRacikanMaster = self::$query->update('racikan', array(
+                    'status' => 'L',
+                    'updated_at' => parent::format_date()
+                ))
+                    ->where(array(
+                        'racikan.asesmen' => '= ?',
+                        'AND',
+                        'racikan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $RMValue['asesmen']
+                    ))
+                    ->execute();
+            }
         }
 
         //Invoice before payment
@@ -823,7 +1024,8 @@ class Invoice extends Utility
                 if ($allowAntrian == true) {
                     //Pembayaran Kartu Non Umum Segera masukkan pada antrian poliklinik
                     $KunjunganData = self::$query->select('antrian_nomor', array(
-                        'dokter'
+                        'dokter',
+                        'prioritas'
                     ))
                         ->where(array(
                             'antrian_nomor.pasien' => '= ?',
@@ -835,15 +1037,17 @@ class Invoice extends Utility
                         ))
                         ->execute();
 
-                    $Antrian = new Antrian(self::$pdo);
-                    $parameter['dataObj'] = array(
-                        'departemen' => $parameter['poli'],
-                        'pasien' => $parameter['pasien'],
-                        'penjamin' => $parameter['penjamin'],
-                        'prioritas' => 36,
-                        'dokter' => $KunjunganData['response_data'][0]['dokter']
-                    );
-                    $AntrianProses = $Antrian::tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                    if($parameter['poli'] !== __POLI_IGD__) {
+                        $Antrian = new Antrian(self::$pdo);
+                        $parameter['dataObj'] = array(
+                            'departemen' => $parameter['poli'],
+                            'pasien' => $parameter['pasien'],
+                            'penjamin' => $parameter['penjamin'],
+                            'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
+                            'dokter' => $KunjunganData['response_data'][0]['dokter']
+                        );
+                        $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                    }
                 }
             }
 
@@ -902,9 +1106,11 @@ class Invoice extends Utility
     private function retur_biaya($parameter)
     {
         $PaymentUID = parent::gen_uuid();
+
         //Get Invoice
         $InvoicePayment = self::$query->select('invoice_payment', array(
-            'uid'
+            'uid',
+            'invoice'
         ))
             ->where(array(
                 'invoice_payment.invoice' => '= ?',
@@ -915,26 +1121,121 @@ class Invoice extends Utility
                 $parameter['payment']
             ))
             ->execute();
-        if (count($InvoicePayment['response_data'])) {
-            $detailUpdate = array();
-            foreach ($parameter['item'] as $key => $value) {
-                $worker = self::$query->update('invoice_payment_detail', array(
-                    'status' => 'R'
+        if (count($InvoicePayment['response_data']) > 0) {
+            $InvoiceData = self::$query->select('invoice', array(
+                'kunjungan',
+                'pasien'
+            ))
+                ->where(array(
+                    'invoice.uid' => '= ?',
+                    'AND',
+                    'invoice.deleted_at' => 'IS NULL'
+                ), array(
+                    $InvoicePayment['response_data'][0]['invoice']
                 ))
-                    ->where(array(
-                        'invoice_payment_detail.invoice_payment' => '= ?',
-                        'AND',
-                        'invoice_payment_detail.item' => '= ?'
-                    ), array(
-                        $InvoicePayment['response_data'][0]['uid'],
-                        $value
-                    ))
-                    ->execute();
-                array_push($detailUpdate, $worker);
+                ->execute();
+
+            if(count($InvoiceData['response_data']) > 0) {
+                $detailUpdate = array();
+                foreach ($parameter['item'] as $key => $value) {
+                    if($value !== __UID_KARTU__) { //Kartu tidak bisa return
+                        $worker = self::$query->update('invoice_payment_detail', array(
+                            'status' => 'R'
+                        ))
+                            ->where(array(
+                                'invoice_payment_detail.invoice_payment' => '= ?',
+                                'AND',
+                                'invoice_payment_detail.item' => '= ?'
+                            ), array(
+                                $InvoicePayment['response_data'][0]['uid'],
+                                $value
+                            ))
+                            ->execute();
+
+                        $KonsulLib = array();
+                        //Get All Konsul Item Poli
+                        $PoliKonsul = self::$query->select('master_poli', array(
+                            'uid', 'tindakan_konsultasi'
+                        ))
+                            ->where(array(
+                                'master_poli.deleted_at' => 'IS NULL'
+                            ))
+                            ->execute();
+                        foreach ($PoliKonsul['response_data'] as $PolKey => $PolValue) {
+                            array_push($KonsulLib, $PolValue['tindakan_konsultasi']);
+                        }
+
+                        /*if(
+                            $value === __UIDKONSULDOKTER__ ||
+                            $value === __UIDKONSULDOKTER_GIGI__ ||
+                            $value === __UIDKONSULDOKTER_SPESIALIS__
+                        ) {*/
+
+                        if(in_array($value, $KonsulLib)) {
+                            //Check status asesmen. jika sudah asesmen tidak bisa return lagi
+                            $AsesmenCheck = self::$query->select('asesmen', array(
+                                'uid'
+                            ))
+                                ->where(array(
+                                    'asesmen.kunjungan' => '= ?',
+                                    'AND',
+                                    'asesmen.pasien' => '= ?',
+                                    'AND',
+                                    'asesmen.deleted_at' => 'IS NULL',
+                                    'AND',
+                                    'DATE(asesmen.created_at)' => '= ?'
+                                ), array(
+                                    $InvoiceData['response_data'][0]['kunjungan'],
+                                    $InvoiceData['response_data'][0]['pasien'],
+                                    date('Y-m-d')
+                                ))
+                                ->execute();
+
+                            if(count($AsesmenCheck['response_data']) > 0) {
+                                //Sudah di asesmen, tidak bisa retur lagi
+                                $worker['message'] = 'Sudah di asesmen, tidak bisa retur lagi';
+                            } else {
+                                //Cancel antrian
+                                $updateKunjungan = self::$query->update('kunjungan', array(
+                                    'waktu_keluar' => parent::format_date()
+                                ))
+                                    ->where(array(
+                                        'kunjungan.uid' => '= ?',
+                                        'AND',
+                                        'kunjungan.deleted_at' => 'IS NULL'
+                                    ), array(
+                                        $InvoiceData['response_data'][0]['kunjungan']
+                                    ))
+                                    ->execute();
+
+                                $updateAntrian = self::$query->update('antrian', array(
+                                    'waktu_keluar' => parent::format_date(),
+                                    'deleted_at' => parent::format_date()
+                                ))
+                                    ->where(array(
+                                        'antrian.kunjungan' => '= ?',
+                                        'AND',
+                                        'antrian.pasien' => '= ?',
+                                        'AND',
+                                        'antrian.deleted_at' => 'IS NULL'
+                                    ), array(
+                                        $InvoiceData['response_data'][0]['kunjungan'],
+                                        $InvoiceData['response_data'][0]['pasien']
+                                    ))
+                                    ->execute();
+
+                                $worker['message'] = $updateAntrian;
+                            }
+                        } else {
+                            $worker['message'] = 'Ada Kesalahan';
+                        }
+                        array_push($detailUpdate, $worker);
+                    }
+                }
+                return $detailUpdate;
+            } else {
+                return $InvoiceData;
             }
-            return $detailUpdate;
-        } else {
-            //
         }
     }
 
@@ -1032,6 +1333,7 @@ class Invoice extends Utility
                 $AnjunganInfo = $Anjungan::get_loket_detail($AKValue['loket']);
                 $AntrianKunjungan['response_data'][$AKKey]['loket'] = $AnjunganInfo['response_data'][0];
             }
+
             $data['response_data'][$key]['antrian_kunjungan'] = $AntrianKunjungan['response_data'][0];
 
             $data['response_data'][$key]['autonum'] = $autonum;
@@ -1070,7 +1372,7 @@ class Invoice extends Utility
         foreach ($data['response_data'] as $key => $value) {
 
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
             //Antrian Info
@@ -1113,17 +1415,17 @@ class Invoice extends Utility
             foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                 //Info Poliklinik
                 $Poli = new Poli(self::$pdo);
-                $PoliInfo = $Poli::get_poli_detail($AKValue['poli']);
+                $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
                 $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                 //Info Pegawai
                 $Pegawai = new Pegawai(self::$pdo);
-                $PegawaiInfo = $Pegawai::get_detail($AKValue['pegawai']);
+                $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
                 $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                 //Info Loket
                 $Anjungan = new Anjungan(self::$pdo);
-                $AnjunganInfo = $Anjungan::get_loket_detail($AKValue['loket']);
+                $AnjunganInfo = $Anjungan->get_loket_detail($AKValue['loket']);
                 $AntrianKunjungan['response_data'][$AKKey]['loket'] = $AnjunganInfo['response_data'][0];
             }
             $data['response_data'][$key]['antrian_kunjungan'] = $AntrianKunjungan['response_data'][0];
@@ -1141,6 +1443,7 @@ class Invoice extends Utility
                 'discount',
                 'discount_type',
                 'penjamin',
+                'billing_group',
                 'keterangan',
                 'created_at',
                 'updated_at'
@@ -1283,6 +1586,9 @@ class Invoice extends Utility
 
     public function append_invoice($parameter)
     {
+        $Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
         $Invoice = self::$query->insert('invoice_detail', array(
             'invoice' => $parameter['invoice'],
             'item' => $parameter['item'],
@@ -1295,6 +1601,7 @@ class Invoice extends Utility
             'discount_type' => $parameter['discount_type'],
             'pasien' => $parameter['pasien'],
             'penjamin' => $parameter['penjamin'],
+            'billing_group' => $parameter['billing_group'],
             'keterangan' => $parameter['keterangan'],
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date()

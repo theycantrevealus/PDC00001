@@ -1,5 +1,17 @@
 <script type="text/javascript">
+
 	$(function(){
+
+        protocolLib = {
+            antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
+                tableAntrianPerawat.ajax.reload();
+            },
+            retur_barhasil: function(protocols, type, parameter, sender, receiver, time) {
+                tableAntrianPerawat.ajax.reload();
+            }
+        };
+
 		var antrian_count = 0;
 		function loadDokter(poli, selected = ""){
 			var populateDokter = "";
@@ -37,7 +49,7 @@
 				},
 				dataSrc:function(response) {
 					antrian_count = response.response_package.length;
-					console.log(response);
+					//console.log(response);
 					return response.response_package;
 				}
 			},
@@ -99,7 +111,7 @@
 						var button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-info' data-toggle='tooltip' title='Isi Assesmen Pasien'><i class='fa fa-address-card'></i> Proses</a>";
 
 						if (row['status_asesmen'] === true){
-							button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-warning' data-toggle='tooltip' title='Edit Assesmen Pasien'><i class='fa fa-address-card'></i> Edit</a>";
+							button = "<a href='"+ __HOSTNAME__ +"/rawat_jalan/perawat/antrian/"+ row['uid'] +"' class='btn btn-success' data-toggle='tooltip' title='Edit Assesmen Pasien'><i class='fa fa-check-circle'></i> Edit</a>";
 						}
 
 						return "<div class=\"btn-group \" role=\"group\" aria-label=\"Basic example\">" + button + "</div>";
@@ -107,10 +119,20 @@
 				}
 			],
 			rowCallback: function (row, data) {
-				if (data['status_assesmen'] === true){
-					$(row).css({"background-color":"#E0F5E5","color":"#000"});
-				}
-				$(".selector_dokter").select2();
+			    if (data['status_assesmen'] === true){
+					$(row).find("td").css({
+                        "background":"#fffcd0",
+                        "color":"#000"
+					});
+				} else {
+                    $(row).find("td").css({
+                        "background":"#E0F5E5",
+                        "color":"#000"
+                    });
+                }
+
+                $(row).find("select").select2();
+				//$(".selector_dokter").select2();
 			}
 		});
 
@@ -150,7 +172,7 @@
 		});
 
 
-        Sync.onmessage = function(evt) {
+        /*Sync.onmessage = function(evt) {
             var signalData = JSON.parse(evt.data);
             var command = signalData.protocols;
             var type = signalData.type;
@@ -162,16 +184,17 @@
             if(command !== undefined && command !== null && command !== "") {
                 protocolLib[command](command, type, parameter, sender, receiver, time);
             }
-        }
+        }*/
+
+        setTimeout(function() {
+
+            tableAntrianPerawat.ajax.reload();
+
+        }, 5000);
 
 
 
-        var protocolLib = {
-            antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
-                notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
-                tableAntrianPerawat.ajax.reload();
-            }
-        };
+
 
 	});
 

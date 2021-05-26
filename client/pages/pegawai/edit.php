@@ -42,7 +42,7 @@
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
-				<div class="tab-pane active show fade" id="tab-awal-1">
+				<div class="tab-pane show fade" id="tab-awal-1">
 					<div class="card">
 						<div class="card-header card-header-large bg-white d-flex align-items-center">
 							<h5 class="card-header__title flex m-0">Informasi Pengguna</h5>
@@ -89,7 +89,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="tab-pane show fade" id="tab-awal-2">
+				<div class="tab-pane active show fade" id="tab-awal-2">
 					<div class="card">
 						<div class="card-header card-header-large bg-white d-flex align-items-center">
 							<h5 class="card-header__title flex m-0">Akses Pengguna</h5>

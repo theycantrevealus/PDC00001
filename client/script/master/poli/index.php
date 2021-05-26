@@ -4,14 +4,51 @@
 
 		var MODE = "tambah", selectedUID;
 		var tablePoli = $("#table-poli").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
 			"ajax":{
-				url: __HOSTAPI__ + "/Poli/poli",
-				type: "GET",
+				url: __HOSTAPI__ + "/Poli",
+				type: "POST",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
+                data: function(d) {
+                    d.request = "get_poli_backend";
+                },
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+				    var returnData = [];
+                    var rawData = [];
+				    if(
+				        response === undefined ||
+                        response === null ||
+                        response.response_package === undefined ||
+                        response.response_package === null) {
+                        rawData = [];
+                        response.draw = 1;
+                        response.recordsTotal = 0;
+                        response.recordsFiltered = 0;
+                    } else {
+                        rawData = response.response_package.response_data;
+                        for(var polKey in rawData) {
+                            if(
+                                //rawData[polKey].uid !== __UIDFISIOTERAPI__ &&
+                                //rawData[polKey].uid !== __POLI_INAP__ &&
+                                //rawData[polKey].uid !== __POLI_IGD__ &&
+                                rawData[polKey].uid !== __POLI_LAB__
+                            ) {
+                                returnData.push(rawData[polKey]);
+                            }
+                        }
+
+                        response.draw = parseInt(response.response_package.response_draw);
+                        response.recordsTotal = response.response_package.recordsTotal;
+                        response.recordsFiltered = response.response_package.recordsFiltered;
+                    }
+					return returnData;
 				}
 			},
 			autoWidth: false,
@@ -35,6 +72,11 @@
 						return "<span id=\"konsul_" + row["uid"] + "\">" + ((row["tindakan_konsultasi"] == undefined) ? "-" : row["tindakan_konsultasi"]) + "</span>";
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return  (row.kode_bpjs === undefined || row.kode_bpjs === null) ? "<h6 class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum Set</h6>" : row.nama_bpjs;
+                    }
+                },
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
@@ -42,10 +84,10 @@
 									 	"<i class=\"fa fa-list\"></i> Detail" +
 									"</button>" +*/
 									"<a href=\"" + __HOSTNAME__ + "/master/poli/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-poli\">" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+										"<span><i class=\"fa fa-edit\"></i> Edit</span>" +
 									"</a>" +
 									"<button id=\"poli_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-poli\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}

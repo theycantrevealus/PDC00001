@@ -9,7 +9,7 @@
 		});
 
 		//INIT DATA
-		let targetID = <?php echo json_encode($targetID); ?>;
+		let targetID = __PAGES__[2];
 		var accessData = reload_access_data(targetID);
 		$.ajax({
 			url:__HOSTAPI__ + "/Pegawai/detail/" + targetID,
@@ -22,14 +22,14 @@
 				$("#txt_nama_pegawai").val(resp.response_package.response_data[0].nama);
 				basic.croppie('bind', {
 					url: __HOST__ + resp.response_package.response_data[0].profile_pic,
-					points: [0, 0, 200, 200]
+					points: [0, 0, 200, 200],
+                    zoom: 1
 				}).then(function() {
 					//
 				});
 				reload_jabatan(resp.response_package.response_data[0].jabatan);
 				reload_unit(resp.response_package.response_data[0].unit);
 				render_module(resp.response_package.response_module);
-				
 				
 			},
 			error: function(resp) {
@@ -65,8 +65,6 @@
 					success:function(resp) {
 						if(resp.response_package.response_result > 0) {
 							location.href = __HOSTNAME__ + "/pegawai";
-						} else {
-							alert(resp.response_package.response_message);
 						}
 					},
 					error:function(resp) {
@@ -83,7 +81,7 @@
 				var newModuleRow = document.createElement("TR");
 				$(newModuleRow).attr({
 					"id": "module_row_" + dataMeta[key].id
-				});
+				}).addClass((dataMeta[key].parent === 0) ? "module_row_" + dataMeta[key].id : "module_row_" + dataMeta[key].parent);
 
 				var newModuleName = document.createElement("TD");
 				var newModulePages = document.createElement("TD");
@@ -115,11 +113,19 @@
 				if(dataMeta[key].parent == 0) {
 					$("#module-table tbody").append(newModuleRow);
 				} else {
+                    if($("tr.module_row_" + dataMeta[key].parent).length === 0) {
+                        //$(newModuleRow).insertAfter($("#module-table tbody tr#module_row_" + dataMeta[key].parent));
+                    } else {
+                        /*if(dataMeta[key].parent == 36) {
+                            alert($("tr.module_row_" + dataMeta[key].parent + ":last-child").length);
+                        }*/
+                        $(newModuleRow).insertAfter($("tr.module_row_" + dataMeta[key].parent + ":eq(" + ($("tr.module_row_" + dataMeta[key].parent + ":last-child").length - 1) + ")"));
+                    }
+
 					var paddingSet = ($("module_row_" + dataMeta[key].parent).css("padding-left") == undefined) ? 0 : $("module_row_" + dataMeta[key].parent).css("padding-left");
 					$(newModuleName).css({
 						"padding-left": (paddingSet + 50) + "px"
 					});
-					$(newModuleRow).insertAfter("#module-table tbody tr#module_row_" + dataMeta[key].parent);
 				}
 			}
 		}
@@ -330,9 +336,11 @@
 				},
 				success:function(resp) {
 					if(resp.response_package.response_result > 0) {
-						notification ("success", "Hak modul berhasil diproses", 3000, "hasil_modul_update");
+
 						//Notify Socket
-						push_socket(__ME__, "akses_update", targetID, "Akses Anda telah di update", "info");
+						push_socket(__ME__, "akses_update", targetID, "Akses Anda telah di update", "info").then(function() {
+                            notification ("success", "Hak modul berhasil diproses", 3000, "hasil_modul_update");
+                        });
 					}
 					console.log(resp);
 				}

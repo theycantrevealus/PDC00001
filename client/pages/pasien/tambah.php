@@ -25,7 +25,7 @@
 			<div class="col-lg-8 card-form__body card-body">
 				<div class="form-row">
 					<div class="col-12 col-md-4 mb-3">
-						<label for="no_rm">Nomor Rekam Medis <span >*</span></label>
+						<label for="no_rm">Nomor Rekam Medis <span class="red">*</span></label>
 						<input type="text" autocomplete="off" class="inputan form-control uppercase no_rm required" id="no_rm" name="no_rm" placeholder="00-00-00">
 						<span style="color: #dc3545; font-size: 0.8rem;" id="error-no-rm"></span>
 					</div>
@@ -47,8 +47,8 @@
 						<span style="color: #dc3545; font-size: 0.8rem;" id="error-nik"></span>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
-						<label for="nik">Email <span class="red">*</span></label>
-						<input type="email" class="form-control inputan required" placeholder="email" value="" name="email" id="email">
+						<label for="email">Email</label>
+						<input type="email" class="form-control inputan" placeholder="email" value="" name="email" id="email">
 						<span style="color: #dc3545; font-size: 0.8rem;" id="error-email"></span>
 					</div>
 					<div class="col-12 col-md-6 mb-3">
@@ -131,7 +131,7 @@
 						<input type="text" class="form-control uppercase inputan" name="nama_ayah" placeholder="Nama Ayah">
 					</div>
 					<div class="col-12 col-md-6 mb-3">
-						<label for="nama_ibu">Nama Ibu <span >*</span></label>
+						<label for="nama_ibu">Nama Ibu <span class="red">*</span></label>
 						<input type="text" class="form-control uppercase inputan required" name="nama_ibu" placeholder="Nama Ibu" id="nama_ibu">
 					</div> 
 					<div class="col-12 col-md-6 mb-3">

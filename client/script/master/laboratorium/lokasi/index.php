@@ -32,10 +32,10 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-lokasi\" id=\"lokasi_edit_" + row["uid"] + "\">" +
-										"<i class=\"fa fa-pencil\"></i> Edit" +
+										"<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
 									"</button>" +
 									"<button id=\"lokasi_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-lokasi\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}

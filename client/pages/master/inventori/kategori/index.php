@@ -26,9 +26,9 @@
 				<table class="table table-bordered" id="table-kategori">
 					<thead>
 						<tr>
-							<th style="width: 20px;">No</th>
+							<th class="wrap_content">No</th>
 							<th>Nama</th>
-							<th>Aksi</th>
+							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>
 					<tbody></tbody>

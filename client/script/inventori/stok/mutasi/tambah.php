@@ -13,9 +13,9 @@
 		$("#txt_unit_asal").select2();
 		$("#txt_unit_tujuan").select2();
 
-		//autoTable("#table-detail-amprah");
+		autoTable("#table-detail-amprah");
 
-		/*function autoTable(target, setter = {
+		function autoTable(target, setter = {
 			item: "",
 			satuan : "",
 			permintaan : ""
@@ -87,7 +87,7 @@
 				}
 			});
 			return satuanData;
-		}*/
+		}
 
 		function load_unit(target, exclude, selected = "") {
 			var unitData;
@@ -156,26 +156,26 @@
 
 
 
-
-
 		var tableCurrentStock = $("#table-detail-mutasi").DataTable({
 			processing: true,
 			serverSide: true,
 			sPaginationType: "full_numbers",
 			bPaginate: true,
-			lengthMenu: [[-1], ["All"]],
+			lengthMenu: [[100], ["100"]],
 			serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Inventori",
 				type: "POST",
 				data: function(d){
 					d.request = "get_stok_gudang";
-					d.gudang = __UNIT__.gudang;
+					d.gudang = /*__UNIT__.gudang*/ $("#txt_unit_asal").val();
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+				    console.clear();
+				    console.log(response);
 					var dataSet = response.response_package.response_data;
 					if(dataSet == undefined) {
 						dataSet = [];
@@ -271,6 +271,10 @@
 				metaDataOpname[id][batch].nilai = $(this).inputmask("unmaskedvalue");
 			}
 		});
+
+        $("#txt_unit_asal").change(function () {
+            tableCurrentStock.ajax.reload();
+        });
 
 		var metaData = {};
 

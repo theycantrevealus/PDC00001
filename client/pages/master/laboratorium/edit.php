@@ -51,7 +51,7 @@
 								04
 								<b class="lab-tab-status text-success" id="status-4"><i class="fa fa-check-circle"></i></b>
 							</span>
-							Nilai Laboratorium
+							Format Hasil Laboratorium
 						</a>
 					</li>
 				</ul>

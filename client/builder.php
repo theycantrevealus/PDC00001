@@ -12,7 +12,9 @@
 		if(__PAGES__[0] == 'anjungan') {
 			require 'pages/anjungan/index.php';
 		} else if(__PAGES__[0] == 'display') {
-			require 'pages/display/index.php';
+            require 'pages/display/index.php';
+        } else if(__PAGES__[0] == 'display_jadwal_operasi') {
+			require 'pages/display_jadwal_operasi/index.php';
 		}
 	?>
 	<div class="mdk-header-layout js-mdk-header-layout">
@@ -55,7 +57,7 @@
 										require 'pages/' . implode('/', __PAGES__) . '/index.php';
 									} else {
 										if(!$allowAccess) {
-											require 'pages/system/403.php';	
+											require 'pages/system/403.php';
 										} else {
 											require 'pages/system/404.php';
 										}
@@ -72,7 +74,6 @@
 											if(file_exists($isFile . '/' . $value . '.php')) {
 												$lastExist = $isFile . '/' . $value . '.php';
 											}
-
 											$isFile .= '/' . $value;
 										}
 
@@ -100,7 +101,7 @@
 											require $lastExist;
 										} else {
 											if(!$allowAccess) {
-												require 'pages/system/403.php';	
+												require 'pages/system/403.php';
 											} else {
 												require 'pages/system/404.php';
 											}
@@ -125,11 +126,11 @@
 				?>
 			</div>
 			<div class="content-shimmer">
-				<span>
-					<img width="80" height="80" src="<?php echo __HOSTNAME__; ?>/template/assets/images/preloader4.gif" />
+				<center>
+					<img width="240" height="220" src="<?php echo __HOSTNAME__; ?>/template/assets/images/preloader.gif" />
 					<br />
 					Loading...
-				</span>
+				</center>
 			</div>
 		</div>
 	</div>
@@ -151,7 +152,7 @@
 				dateFormat: 'DD, dd MM yy',
 				autoclose: true
 			});
-			
+
 			moment.locale('id');
 			var parentList = [];
 
@@ -167,12 +168,12 @@
 
 					//$("a[href=\"#menu-" + hasMaster + "\"]").removeClass("collapsed").parent().addClass("open");
 					$("ul#menu-" + hasMaster).addClass("show");
-					
+
 				}
 			});
 
 			//$("ul[master-child=\"" + activeMenu + "\"").addClass("open");
-			
+
 
 			var idleCheck;
 			function reloadSession() {
@@ -216,7 +217,7 @@
 				});
 				return false;
 			});
-		
+
 			$("body").on("click", "a[href=\"#notifications_menu\"]", function() {
 				$.ajax({
 					async: false,
@@ -237,97 +238,24 @@
 				});
 			});
 
-			if ("WebSocket" in window) {
-				var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
-				
-				Sync = new WebSocket(serverTarget);
-				Sync.onopen = function() {
-					$(".global-sync-container").fadeOut();
-				}
-
-				Sync.onmessage = function(evt) {
-					var signalData = JSON.parse(evt.data);
-					var command = signalData.protocols;
-					var type = signalData.type;
-					var sender = signalData.sender;
-					var receiver = signalData.receiver;
-					var time = signalData.time;
-					var parameter = signalData.parameter;
-
-					if(command !== undefined && command !== null && command !== "") {
-						if(protocolLibGLOBAL[command] !== undefined) {
-							if(receiver == __ME__ || sender == __ME__ || receiver == "*") {
-								protocolLibGLOBAL[command](command, type, parameter, sender, receiver, time);
-							}
-						}
-					}
-				}
-
-				var protocolLibGLOBAL = {
-					akses_update: function(protocols, type, parameter, sender, receiver, time) {
-						if(sender != receiver) {
-							$.ajax({
-								url:__HOSTAPI__ + "/Pegawai",
-								beforeSend: function(request) {
-									request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-								},
-								type:"POST",
-								data: {
-									"request": "refresh_pegawai_access",
-									"uid": __ME__
-								},
-								success:function(resp) {
-									notification ("info", "Hak modul Anda sudah diupdate. Refresh halaman untuk akses baru", 3000, "hasil_modul_update");
-								}
-							});
-						} else {
-							//
-						}
-					},
-                    refresh: function(protocols, type, parameter, sender, receiver, time) {
-					    location.reload();
-                    }
-				};
-
-				Sync.onclose = function() {
-					$(".global-sync-container").fadeIn();
-					var tryCount = 1;
-					setInterval(function() {
-						console.clear();
-						console.log("CPR..." + tryCount);
-						var checkSocket = SocketCheck(serverTarget);
-						tryCount++;
-					}, 1000);
-				}
-
-				Sync.onerror = function() {
-					$(".global-sync-container").fadeIn();
-					var tryCount = 1;
-					setInterval(function() {
-						console.clear();
-						console.log("CPR..." + tryCount);
-						var checkSocket = SocketCheck(serverTarget);
-						tryCount++;
-					}, 1000);
-				}
-
-				return Sync;
-			} else {
-				console.log("WebSocket Not Supported");
-			}
-
-			function SocketCheck(__HOST__) {
-				var checkSocket = new WebSocket(__HOST__);
-				checkSocket.onopen = function() {
-					location.reload();
-				}
-			}
-
 			$("body").on("click", "#refresh_protocol", function() {
-			    notification ("info", "Refresh page", 3000, "notif_update");
-                push_socket(__ME__, "refresh", "*", "Refresh page", "info");
+
+                push_socket(__ME__, "refresh", "*", "Refresh page", "info").then(function() {
+                    notification ("info", "Refresh page", 3000, "notif_update");
+                });
             });
 		});
+
+        function getDateRange(target) {
+            var rangeItem = $(target).val().split(" to ");
+            if(rangeItem.length > 1) {
+                return rangeItem;
+            } else {
+                return [rangeItem, rangeItem];
+            }
+        }
+
+
 
 		function refresh_notification() {
 			$.ajax({
@@ -357,7 +285,7 @@
 							$(notifContentContainter).html("<a href=\"\">A.Demian</a> left a comment on <a href=\"\">Stack</a><br>" +
 															"<small class=\"text-muted\">1 minute ago</small>").addClass("flex");
 						}
-							
+
 						$(notifContainer).addClass("dropdown-item d-flex");
 						$(notifContainer).append(notifSenderContainer);
 						$(notifContainer).append(notifContentContainter);
@@ -376,17 +304,37 @@
 			});
 		}
 
-		function push_socket(sender, protocols, receiver, parameter, type) {
-			var msg = {
-				protocols: protocols,
-				sender: sender,
-				receiver: receiver,
-				parameter: parameter,
-				type: type
-			};
 
-			Sync.send(JSON.stringify(msg));
-		}
+
+        var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
+		var Sync;
+        var tm;
+        var protocolLib = {
+            akses_update: function(protocols, type, parameter, sender, receiver, time) {
+                if(sender != receiver) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Pegawai",
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        data: {
+                            "request": "refresh_pegawai_access",
+                            "uid": __ME__
+                        },
+                        success:function(resp) {
+                            notification ("info", "Hak modul Anda sudah diupdate. Refresh halaman untuk akses baru", 3000, "hasil_modul_update");
+                        }
+                    });
+                } else {
+                    //
+                }
+            },
+            refresh: function(protocols, type, parameter, sender, receiver, time) {
+                location.reload();
+            }
+        };
+
 	</script>
 	<?php
 		if(empty(__PAGES__[0])) {
@@ -403,13 +351,149 @@
 						$getScript[0] = 'script';
 						include implode('/', $getScript);
 					} else {
-						include 'script/system/404.php';	
+						include 'script/system/404.php';
 					}
 				}
 			}
 		}
 	?>
 	<script type="text/javascript">
+
+        function resend_socket(requestList, callback) {
+            var sendingStatus = 0;
+            for(var reqKey in requestList) {
+                push_socket(
+                    requestList[reqKey].sender,
+                    requestList[reqKey].protocol,
+                    requestList[reqKey].receiver,
+                    requestList[reqKey].message,
+                    requestList[reqKey].type
+                ).then(function() {
+                    //alert(reqKey);
+                    sendingStatus++;
+                });
+            }
+
+            /*if(sendingStatus === requestList.length) {
+
+            } else {
+                resend_socket(requestList, callback);
+            }*/
+
+            callback();
+        }
+        async function push_socket(sender, protocols, receiver, parameter, type) {
+
+            if(Sync.readyState === WebSocket.CLOSED) {
+                Sync = SocketCheck(serverTarget, protocolLib, tm);
+            }
+
+            var msg = {
+                protocols: protocols,
+                sender: sender,
+                receiver: receiver,
+                parameter: parameter,
+                type: type
+            };
+
+            return new Promise((resolve, reject) => {
+                Sync.send(JSON.stringify(msg));
+                resolve(msg);
+            });
+        }
+
+        $(function() {
+            if ("WebSocket" in window) {
+
+                //var Sync = new WebSocket(serverTarget);
+                //console.log(protocolLib);
+                Sync = SocketCheck(serverTarget, protocolLib, tm);
+
+            } else {
+                console.log("WebSocket Not Supported");
+            }
+
+            $(".buttons-excel, .buttons-csv").css({
+                "margin": "0 5px"
+            }).removeClass("btn-secondary").addClass("btn-info").find("span").prepend("<i class=\"fa fa-dolly-flatbed\"></i>");
+
+        });
+
+        function SocketCheck(serverTarget, protocolLib, tm) {
+            var audio;
+            var Sync = new WebSocket(serverTarget);
+            Sync.onopen = function() {
+                clearInterval(tm);
+                //console.log("connected");
+
+                /*setInterval(function() {
+                    //if (Sync.bufferedAmount == 0)
+
+                }, 2000);*/
+
+                $(".global-sync-container").fadeOut();
+            }
+
+            Sync.onmessage = function(evt) {
+                var signalData = JSON.parse(evt.data);
+                var command = signalData.protocols;
+                var type = signalData.type;
+                var sender = signalData.sender;
+                var receiver = signalData.receiver;
+                var time = signalData.time;
+                var parameter = signalData.parameter;
+
+                if(command !== undefined && command !== null && command !== "") {
+
+                    if(protocolLib[command] !== undefined) {
+                        if(command === "anjungan_kunjungan_panggil") {
+                            if(audio !== undefined && audio.audio !== undefined) {
+                                if(!audio.paused) {
+                                    audio.audio.pause();
+                                    audio.audio.currentTime = 0;
+                                } else {
+                                    //alert();
+                                }
+                            }
+                            audio = protocolLib[command](command, type, parameter, sender, receiver, time);
+                        } else {
+                            if(receiver == __ME__ || sender == __ME__ || receiver == "*" || receiver == __MY_PRIVILEGES__.response_data[0]["uid"]) {
+                                protocolLib[command](command, type, parameter, sender, receiver, time);
+                                //console.log(__MY_PRIVILEGES__);
+                            } else {
+                                protocolLib[command](command, type, parameter, sender, receiver, time);
+                                //alert("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            Sync.onclose = function() {
+                $(".global-sync-container").fadeIn();
+                var tryCount = 1;
+                tm = setInterval(function() {
+                    console.clear();
+                    console.log("CPR..." + tryCount);
+                    Sync = SocketCheck(serverTarget, protocolLib, tm);
+                    tryCount++;
+                }, 3000);
+            }
+
+            Sync.onerror = function() {
+                /*$(".global-sync-container").fadeIn();
+                var tryCount = 1;
+                tm = setInterval(function() {
+                    console.clear();
+                    console.log("CPR..." + tryCount);
+                    Sync = SocketCheck(serverTarget, protocolLib);
+                    tryCount++;
+                }, 3000);*/
+            }
+
+            return Sync;
+        }
+
 		function inArray(needle, haystack) {
 			var length = haystack.length;
 			for(var i = 0; i < length; i++) {
@@ -417,6 +501,69 @@
 			}
 			return false;
 		}
+
+        var floatContainer = document.createElement("DIV");
+        $(floatContainer).addClass("manual_container");
+        $("body").append(floatContainer);
+
+        function notify_manual(mode, title, time, identifier, setTo, pos = "left") {
+            var alertContainer = document.createElement("DIV");
+            var alertTitle = document.createElement("STRONG");
+            var alertDismiss = document.createElement("BUTTON");
+            var alertCloseButton = document.createElement("SPAN");
+
+            $(alertContainer).addClass("alert alert-dismissible fade show alert-" + mode).attr({
+                "role": "alert",
+                "id": identifier
+            });
+
+            $(alertTitle).html(title);
+
+            $(alertDismiss).attr({
+                "type": "button",
+                "data-dismiss": "alert",
+                "aria-label": "Close"
+            }).addClass("close");
+
+            $(alertCloseButton).attr({
+                "aria-hidden": true
+            }).html("&times;");
+
+            $(alertContainer).append(alertTitle);
+            $(alertDismiss).append(alertCloseButton);
+            $(alertContainer).append(alertDismiss);
+
+            var parentPos = $(setTo).offset();
+            if(parentPos !== undefined) {
+                var topPos = parentPos.top;
+                var leftPos = parentPos.left;
+
+                var marginFrom = 30;
+
+                var floatContainer = document.createElement("DIV");
+                $(floatContainer).append(alertContainer);
+
+                $(floatContainer).addClass("manual_container");
+
+                $("body").append(floatContainer);
+
+                if(pos === "left") {
+                    $(".manual_container").css({
+                        "top": topPos + "px",
+                        "left": (leftPos - $(floatContainer).width() - marginFrom) + "px"
+                    });
+                } else if(pos === "bottom") {
+                    $(".manual_container").css({
+                        "top": (topPos - $(floatContainer).width() - marginFrom) + "px",
+                        "left": leftPos + "px"
+                    });
+                }
+
+                setTimeout(function() {
+                    $(alertContainer).fadeOut();
+                }, time);
+            }
+        }
 
 		function notification (mode, title, time, identifier) {
 			var alertContainer = document.createElement("DIV");
@@ -475,7 +622,7 @@
 			}
 			return s.join(dec);
 		}
-		
+
 
 		function bpjs_load_faskes() {
 			var dataFaskes = [];
@@ -543,7 +690,7 @@
 					title: data
 				});
 			});
-			
+
 			$(".sidebar-menu").each(function(e) {
 				$(this).find("li.sidebar-menu-item").each(function(f) {
 					var shimmer = document.createElement("DIV");

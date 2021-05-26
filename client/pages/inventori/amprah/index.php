@@ -70,9 +70,35 @@
 							<tbody></tbody>
 						</table>
 					</div>
-					<div class="tab-pane show fade" id="tab-history">
-						
-					</div>
+                    <div class="tab-pane show fade" id="tab-history">
+                        <div class="row">
+                            <div class="col-md-2 text-right" style="padding: 10px">
+                                Filter Tanggal:
+                            </div>
+                            <div class="col-md-6" style="border: solid 1px #ccc">
+                                <input id="range_amprah_selesai" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                            </div>
+                            <div class="col-md-4">
+                                <!--<a href="<?php /*echo __HOSTNAME__; */?>/inventori/amprah/tambah" class="btn btn-info pull-right">
+									<i class="fa fa-plus"></i> Amprah Baru
+								</a>-->
+                            </div>
+                        </div>
+                        <hr />
+                        <table class="table table-bordered" id="table-list-amprah-selesai">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>Tanggal</th>
+                                <th>Kode Amprah</th>
+                                <th>Diminta Oleh</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
 				</div>
 			</div>
 		</div>

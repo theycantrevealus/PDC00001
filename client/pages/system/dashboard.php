@@ -9,7 +9,7 @@
 			</nav>
 			<h4 class="m-0">Dashboard</h4>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/template/" class="btn btn-success ml-3">New Report</a>
+		<!--a href="<?php echo __HOSTNAME__; ?>/template/" class="btn btn-success ml-3">New Report</a-->
 	</div>
 </div>
 
@@ -20,24 +20,67 @@
 
 	<div class="alert alert-soft-warning d-flex align-items-center card-margin" role="alert">
 		<i class="material-icons mr-3">error_outline</i>
-		<div class="text-body"><strong>API gateways are now Offline.</strong> Please try the API later. If you want to stay up to date follow our <a href="<?php echo __HOSTNAME__; ?>/template/">Status Page </a></div>
+		<div class="text-body"><strong>Selamat Datang.</strong> <?php echo __PC_CUSTOMER__; ?></div>
 	</div>
-	<!-- <div class="row card-group-row">
-		<div class="col-md-12 card-group-row__col">
-			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<?php echo json_encode($_SESSION['akses_halaman_link']); ?>
-			</div>
-		</div>
-	</div>
+    <?php
+    if($_SESSION['jabatan']['response_data'][0]['nama'] === 'Administrator') {
+        ?>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="z-0">
+                <ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-dokter">
+                    <li class="nav-item">
+                        <a href="#master_labor" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+							<span class="nav-link__count">
+								<i class="fa fa-address-book"></i>
+							</span>
+                            Laboratorium
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#master_radio" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+							<span class="nav-link__count">
+								<i class="fa fa-address-book"></i>
+							</span>
+                            Radiologi
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card card-body tab-content">
+                <div class="tab-pane show fade active" id="master_labor">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header card-header-large bg-white">
+                                    <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Item Laboratorium tanpa nilai uji</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-bordered largeDataType" id="monitoring_master_labor">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Nama</th>
+                                            <th class="wrap_content">Aksi</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane show fade" id="master_radio">
+                </div>
+            </div>
+        </div>
+    </div>
+        <?php
+    }
+    ?>
 
-	<div class="row card-group-row">
-		<div class="col-md-12 card-group-row__col">
-			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<?php echo json_encode($_SESSION['akses_halaman']); ?>
-			</div>
-		</div>
-	</div> -->
-	<div class="row card-group-row">
+	<!--div class="row card-group-row">
 		<div class="col-lg-4 col-md-6 card-group-row__col">
 			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
 				<div class="flex">
@@ -999,5 +1042,5 @@
 		</div>
 
 
-	</div>
+	</div-->
 </div>

@@ -11,109 +11,160 @@
         loadPasien(uid_order);
         loadLabOrderItem(uid_order);
 		loadLampiran(uid_order);
+        var form_data = new FormData();
 
-		$("#formHasilLab").submit(function(){
+        var mode_selesai = "N";
 
-			$(".inputItemTindakan").each(function(){
-				let get_id = $(this).attr("id").split("_");
-				let id_nilai = get_id[get_id.length - 1];
-				let uid_tindakan = get_id[get_id.length - 2];
-				let nilai = $(this).val();
-
-				if (uid_tindakan in nilaiItemTindakan){
-                    nilaiItemTindakan[uid_tindakan][id_nilai] = nilai; 
-                } else {
-                    nilaiItemTindakan[uid_tindakan] = {[id_nilai]: nilai}; 
+		$("#btnSelesai").click(function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Selesai pemeriksaan laboratorium?',
+                text: 'Setelah selesai, pemeriksaan sudah tidak dapat diedit lagi dan langsung menjadi riwayat pemeriksaan',
+                showDenyButton: true,
+                //showCancelButton: true,
+                confirmButtonText: `Ya`,
+                denyButtonText: `Belum`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    mode_selesai = "Y";
+                    form_data.append("selesai", "Y");
+                    $("#formHasilLab").submit();
+                } else if (result.isDenied) {
+                    //
                 }
-			});
+            });
+            return false;
+        });
 
-			var form_data = new FormData(this);
-			form_data.append("request", "update-hasil-lab");
-			form_data.append("uid_order", uid_order);
-			console.clear();
-			console.log(JSON.stringify(nilaiItemTindakan));
-			form_data.append('data_nilai', JSON.stringify(nilaiItemTindakan));
-			
+        $("#btnSimpan").click(function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Simpan data pemeriksaan laboratorium?',
+                text: 'Simpan dahulu hasil pemeriksaan untuk di-edit lagi',
+                showDenyButton: true,
+                //showCancelButton: true,
+                confirmButtonText: `Ya`,
+                denyButtonText: `Belum`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    mode_selesai = "N";
+                    form_data.append("selesai", "N");
+                    $("#formHasilLab").submit();
+                } else if (result.isDenied) {
+                    //
+                }
+            });
+            return false;
+        });
 
-			for(var i = 0; i < fileList.length; i++) {
-				form_data.append("fileList[]", fileList[i]);
-			}
+		$("#formHasilLab").submit(function() {
+            $(".inputItemTindakan").each(function(){
+                let get_id = $(this).attr("id").split("_");
+                let id_nilai = get_id[get_id.length - 1];
+                let uid_tindakan = get_id[get_id.length - 2];
+                let nilai = $(this).val();
 
-			for (var i = 0; i < deletedDocList.length; i++){
-				form_data.append("deletedDocList[]", deletedDocList[i]);
-			}
 
-			// for (var value of form_data.values()) {
-			//    console.log(value); 
-			// }	`
+                if (uid_tindakan in nilaiItemTindakan){
+                    nilaiItemTindakan[uid_tindakan][id_nilai] = nilai;
+                } else {
+                    nilaiItemTindakan[uid_tindakan] = {[id_nilai]: nilai};
+                }
+            });
 
-			// let form_data = {
-			// 	request : 'update-hasil-lab',
-			// 	uid_order : uid_order,
-			// 	data_nilai : nilaiItemTindakan
-			// }
 
-			//console.log(form_data);
+            form_data.append("request", "update-hasil-lab");
+            form_data.append("uid_order", uid_order);
+            form_data.append("kesan", $("#kesan").val());
+            form_data.append("anjuran", $("#anjuran").val());
+            form_data.append('data_nilai', JSON.stringify(nilaiItemTindakan));
 
-			$.ajax({
-				async: false,
-				url: __HOSTAPI__ + "/Laboratorium",
-				processData: false,
-				contentType: false,
-				data: form_data,
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type: "POST",
-				success: function(response){
-					console.log(response);
-					let order_detail = 0;
-					let response_upload = 0;
-					let response_delete_doc = 0;
 
-					if (response.response_package.order_detail !== undefined && 
-						response.response_package.order_detail !== ''
-					){
-						order_detail = response.response_package.order_detail.response_result;
-					}
+            for(var i = 0; i < fileList.length; i++) {
+                form_data.append("fileList[]", fileList[i]);
+            }
 
-					if (response.response_package.response_upload !== undefined && 
-						response.response_package.response_upload !== ''
-					){
-						response_upload = response.response_package.response_upload.response_result;
-						if (response_upload > 0){
-							fileList = [];
-							$("#labor-lampiran-table tbody").empty();
-							loadLampiran(uid_order);
-						}
-					}
-					
-					if (response.response_package.response_delete_doc !== undefined && 
-						response.response_package.response_delete_doc !== ''
-					){
-						response_delete_doc = response.response_package.response_delete_doc.response_result;
-						if (response_delete_doc > 0){
-							deletedDocList = [];
-						}
-					}
+            for (var i = 0; i < deletedDocList.length; i++){
+                form_data.append("deletedDocList[]", deletedDocList[i]);
+            }
 
-					if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0){
-						notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
-						location.href = __HOSTNAME__ + "/laboratorium";
-					} else {
-						//notification ("danger", "Data Gagal Disimpan" /*response.response_package*/, 3000, "hasil_tambah_dev");
-					}
-				},
-				error: function(response) {
-					console.log("Error : ");
-					console.log(response);
-				}
-			});
+            // for (var value of form_data.values()) {
+            //    console.log(value);
+            // }	`
 
+            // let form_data = {
+            // 	request : 'update-hasil-lab',
+            // 	uid_order : uid_order,
+            // 	data_nilai : nilaiItemTindakan
+            // }
+
+            //console.log(form_data);
+
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Laboratorium",
+                processData: false,
+                contentType: false,
+                data: form_data,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                success: function(response){
+                    let order_detail = 0;
+                    let response_upload = 0;
+                    let response_delete_doc = 0;
+
+                    if (response.response_package.order_detail !== undefined &&
+                        response.response_package.order_detail !== ''
+                    ){
+                        order_detail = response.response_package.order_detail.response_result;
+                    }
+
+                    if (response.response_package.response_upload !== undefined &&
+                        response.response_package.response_upload !== ''
+                    ){
+                        response_upload = response.response_package.response_upload.response_result;
+                        if (response_upload > 0){
+                            fileList = [];
+                            $("#labor-lampiran-table tbody").empty();
+                            loadLampiran(uid_order);
+                        }
+                    }
+
+                    if (response.response_package.response_delete_doc !== undefined &&
+                        response.response_package.response_delete_doc !== ''
+                    ){
+                        response_delete_doc = response.response_package.response_delete_doc.response_result;
+                        if (response_delete_doc > 0){
+                            deletedDocList = [];
+                        }
+                    }
+
+                    if (order_detail > 0 || response_upload > 0 || response_delete_doc > 0) {
+                        push_socket(__ME__, ((mode_selesai == "Y") ? "antrian_laboratorium_selesai" : "antrian_laboratorium_simpan"), "*", "Pemeriksaan Laboratorium Selesai", "warning").then(function() {
+                            Swal.fire(
+                                'Pemeriksaan Berhasil Disimpan!',
+                                response.response_package.response_message,
+                                'success'
+                            ).then((result) => {
+                                location.href = __HOSTNAME__ + "/laboratorium";
+                            });
+                        });
+                    } else {
+                        notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");
+                    }
+                },
+                error: function(response) {
+                    notification ("danger", "Data Gagal Disimpan", 3000, "hasil_tambah_dev");
+                    console.log("Error : ");
+                    console.log(response);
+                }
+            });
 			return false;
 		});
 
-		$('#form-upload-lampiran').on('shown.bs.modal', function () {
+		$("#form-upload-lampiran").on("shown.bs.modal", function () {
 			if (file.type == "application/pdf" && file != undefined) {
 				var fileReader = new FileReader();
 				fileReader.onload = function() {
@@ -233,7 +284,15 @@
                     if (response.response_package.response_result > 0){
                         dataItem = response.response_package.response_data;
                         $.each(dataItem, function(key, item){
-                            html = "<p><h7><b>"+ item.nama + "</b></h7></p>" +
+
+                            html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
+                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
+                                "</div><div class=\"card-body\">" +
+                                "<div class=\"row\">" +
+                                "<div class=\"col-12\">" +
+                                "Tanggal Ambil Sample : <b class=\"" + ((!item.allow) ? "text-danger" : "text-success") + "\">" + ((!item.allow) ? "<i class=\"fa fa-ban\"></i>" : "<i class=\"fa fa-check\"></i>") + " " + item.tgl_ambil_sample_parse + "</b><hr />" +
+                                "</div>" +
+                                "<div class=\"col-12\">" +
                                 "<table class=\"table table-bordered table-striped largeDataType\">" +
                                 "<thead class=\"thead-dark\">" +
                                     "<tr>" +
@@ -261,9 +320,14 @@
                                         nilai = "";
                                     }
 
-									// id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0)
-                                    {
+                                    var naratifMode =  "";
+                                    if(item.naratif === 'N' || item.naratif === undefined || item.naratif === null) {
+                                        naratifMode = "<input " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" />";
+                                    } else {
+                                        naratifMode = "<textarea " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" class=\"form-control inputItemTindakan\">" + nilai + "</textarea>";
+                                    }
+                                    // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
+                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0) {
                                         /*html += "<tr class=\"strikethrough\">" +
                                             "<td>"+ nomor +"</td>" +
                                             "<td>" + items.keterangan + "</td>" +
@@ -276,7 +340,7 @@
                                         html += "<tr>" +
                                             "<td>"+ nomor +"</td>" +
                                             "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
-                                            "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                            "<td>" + naratifMode + "</td>" +
                                             "<td>" + items.satuan + "</td>" +
                                             "<td>" + items.nilai_min + "</td>" +
                                             "<td>" + items.nilai_maks + "</td>" +
@@ -286,10 +350,7 @@
                                 });
                             }
 
-                            html += '</tbody>\
-                                </table><hr />';
-                            
-
+                            html += "</tbody></table></div></div></div>";
                             $("#hasil_pemeriksaan").append(html);
                         });
                         
@@ -304,7 +365,7 @@
 		//return dataItem;
 	}
 
-	function loadLampiran(uid_order){
+	function loadLampiran(uid_order) {
 		let dataItem;
 
 		if (uid_order != ""){

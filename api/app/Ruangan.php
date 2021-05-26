@@ -39,7 +39,7 @@ class Ruangan extends Utility {
 					break;
 
 				default:
-					# code...
+                    return self::get_ruangan('master_unit_ruangan');
 					break;
 			}
 		} catch (QueryException $e) {
@@ -185,7 +185,7 @@ class Ruangan extends Utility {
 					->where(array(
 							$table . '.deleted_at' => 'IS NULL',
 							'AND',
-							$table . '.uid_lantai' => '= ?'
+							$table . '.lantai' => '= ?'
 						),
 						array($parameter)
 					)

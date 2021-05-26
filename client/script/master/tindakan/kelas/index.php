@@ -32,12 +32,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-tindakan\" id=\"tindakan_edit_" + row["uid"] + "\" cat=\"rj\"" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+										"<span><i class=\"fa fa-edit\"></i> Edit</span>" +
 									"</button>" +
 									"<button id=\"tindakan_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-tindakan\" cat=\"rj\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}
@@ -113,12 +113,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-tindakan\" id=\"tindakan_edit_" + row["uid"] + "\" cat=\"rj\"" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+										"<span><i class=\"fa fa-edit\"></i> Edit</span>" +
 									"</button>" +
 									"<button id=\"tindakan_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-tindakan\" cat=\"rj\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}
@@ -196,12 +196,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-tindakan\" id=\"tindakan_edit_" + row["uid"] + "\" cat=\"rj\"" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+										"<span><i class=\"fa fa-edit\"></i> Edit</span>" +
 									"</button>" +
 									"<button id=\"tindakan_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-tindakan\" cat=\"rj\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}
@@ -291,12 +291,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-tindakan\" id=\"tindakan_edit_" + row["uid"] + "\" cat=\"rj\"" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+										"<span><i class=\"fa fa-edit\"></i> Edit</span>" +
 									"</button>" +
 									"<button id=\"tindakan_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-tindakan\" cat=\"rj\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}
@@ -374,12 +374,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-tindakan\" id=\"tindakan_edit_" + row["uid"] + "\" cat=\"ri\"" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+										"<span><i class=\"fa fa-edit\"></i> Edit</span>" +
 									"</button>" +
 									"<button id=\"tindakan_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-tindakan\" cat=\"ri\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}

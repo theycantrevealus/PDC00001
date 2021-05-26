@@ -49,13 +49,13 @@
 						var kategoriObat = "";
 						for(var kategoriObatKey in row["kategori_obat"]) {
 						    if(row["kategori_obat"][kategoriObatKey].kategori != null) {
-                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-info\">" + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
+                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tag\"></i> " + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
                             }
 						}
 
 						return 		"<div class=\"row\">" +
 										"<div class=\"col-md-2\">" +
-											"<img style=\"border-radius: 5px;\" src=\"" + __HOST__ + row.image + "\" width=\"60\" height=\"60\" />" +
+											"<center><img style=\"border-radius: 5px;\" src=\"" + __HOST__ + row.image + "\" width=\"60\" height=\"60\" /></center>" +
 										"</div>" +
 										"<div class=\"col-md-10\">" +
 											"<b><i>" + ((row["kode_barang"] == undefined) ? "[KODE_BARANG]" : row["kode_barang"].toUpperCase()) + "</i></b><br />" +

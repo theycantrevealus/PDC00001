@@ -24,7 +24,6 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/inputmask/dist/inputmask.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/jstree/jstree.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/croppie-master/croppie.min.js"></script>
-<script src="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/js/rSlider.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/moment/moment.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/jquery-ui-1.12.1/jquery-ui.min.js"></script>
 <!-- <script src="<?php echo __HOSTNAME__; ?>/plugins/jquery-ui-1.12.1/ui/i18n/jquery-ui-i18n.min.js"></script> -->
@@ -33,4 +32,5 @@
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/select2.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/pdfjs/build/pdf.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.rowgroup.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.all.min.js"></script>

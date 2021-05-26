@@ -14,26 +14,27 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					//return response.response_package.response_data;
-					console.clear();
-					console.log(response);
-					var data = response.response_package;
+				    var data = response.response_package;
 					var autonum = 1;
 					var returnData = [];
 					for(var key in data) {
-						returnData.push({
-							"nama": data[key].nama,
-							"uid_ruangan": data[key].uid_ruangan,
-							"autonum": autonum,
-							"kode_ruangan": data[key].koderuang,
-							"kodekelas": data[key].kodekelas,
-							"kapasitas": data[key].kapasitas,
-							"tersedia": data[key].tersedia,
-							"tersediapria": data[key].tersediapria,
-							"tersediawanita": data[key].tersediawanita,
-							"tersediapriawanita": data[key].tersediapriawanita,
-						});
-						autonum++;
+					    if(data[key] !== null && data[key] !== undefined) {
+					        if(data[key].nama !== undefined) {
+                                returnData.push({
+                                    "nama": String(data[key].nama),
+                                    "uid_ruangan": String(data[key].uid_ruangan),
+                                    "autonum": autonum,
+                                    "kode_ruangan": String(data[key].koderuang),
+                                    "kodekelas": String(data[key].kodekelas),
+                                    "kapasitas": String(data[key].kapasitas),
+                                    "tersedia": String(data[key].tersedia),
+                                    "tersediapria": String(data[key].tersediapria),
+                                    "tersediawanita": String(data[key].tersediawanita),
+                                    "tersediapriawanita": String(data[key].tersediapriawanita),
+                                });
+                                autonum++;
+                            }
+                        }
 					}
 					return returnData;
 				}
@@ -91,15 +92,15 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									/*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
 										"<i class=\"fa fa-list\"></i> Detail" +
 									"</button>" +*/
 									"<button id=\"ruangan_edit_" + row['uid_ruangan'] + "\" class=\"btn btn-info btn-sm btn-edit-ruangan\" data-toggle='tooltip' title='Edit'>" +
-										"<i class=\"fa fa-edit\"></i>" +
+										"<span><i class=\"fa fa-edit\"></i>Edit</span>" +
 									"</button>" +
 									"<button id=\"ruangan_delete_" + row['uid_ruangan'] + "\" class=\"btn btn-danger btn-sm btn-delete-ruangan\" data-toggle='tooltip' title='Hapus'>" +
-										"<i class=\"fa fa-trash\"></i>" +
+										"<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}
@@ -152,7 +153,7 @@
 			}
 
 
-			if (dataObj != ""){
+			if (dataObj !== undefined){
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Aplicares",
@@ -162,6 +163,7 @@
 					},
 					type: "POST",
 					success: function(response){
+					    console.clear();
 						console.log(response);
 						tableRuangan.ajax.reload();
 						$("#form-tambah").modal("hide");
@@ -281,7 +283,6 @@
 				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 			},
 			success: function(response){
-				console.log(response);
 				var MetaData = response.response_package.response_data;
 
 				for(i = 0; i < MetaData.length; i++){
@@ -310,6 +311,7 @@
 				request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 			},
 			success: function(response){
+			    //console.log(response);
 				var MetaData = response.response_package;
 
 				if (MetaData.length > 0){
@@ -335,7 +337,7 @@
 </script>
 
 <div id="form-tambah" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog modal-md bg-danger" role="document">
+	<div class="modal-dialog modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modal-large-title"><span id="title-form"></span> Ruangan</h5>

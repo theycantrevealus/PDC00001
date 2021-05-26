@@ -7,8 +7,10 @@ sync.php
 .htaccess
 composer.lock
 composer.json
-
+vendor
 node_modules/
+testSSP/
+images/
 images/produk/
 images/pegawai/
 images/igd/
@@ -24,7 +26,7 @@ api/sync.php
 api/constant.php
 api/app/Connection.php
 api/app/Utility.php
-api/vendor/
+api/vendor
 api/email_template/
 api/*.txt
 api/*.pem
@@ -33,8 +35,6 @@ api/*.key
 api/*.req
 api/*.crt
 api/*.sql
-
-config.php
 *.txt
 *.pem
 *.pub
@@ -43,3 +43,5 @@ config.php
 *.crt
 *.sql
 *.png
+*.zip
+head.php

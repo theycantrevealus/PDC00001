@@ -10,9 +10,6 @@
 			</nav>
 			<h4>Inventori - Barang Masuk</h4>
 		</div>
-		<a href="<?php echo __HOSTNAME__; ?>/inventori/do/tambah" class="btn btn-sm btn-info" id="btnTambahDo">
-			<i class="fa fa-plus"></i> Tambah
-		</a>
 	</div>
 </div>
 
@@ -49,9 +46,10 @@
 							<tr>
 								<th class="wrap_content">No</th>
 								<th>PO</th>
+                                <th>Tanggal</th>
 								<th>Pemasok</th>
 								<th>Dibuat Oleh</th>
-								<th>Aksi</th>
+								<th class="wrap_content">Aksi</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
@@ -68,7 +66,7 @@
 								<th>Pemasok</th>
 								<th>Invoice</th>
 								<th>Pegawai</th>
-								<th>Status</th>
+								<!--<th>Status</th>-->
 								<th>Aksi</th>
 							</tr>
 						</thead>
