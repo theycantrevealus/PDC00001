@@ -1103,6 +1103,12 @@ class Antrian extends Utility
             );
 
             $parameterValue = array();
+        } else if($condition === 'inap') {
+            $paramKey = array(
+                'antrian.deleted_at' => 'IS NULL'
+            );
+
+            $parameterValue = array();
         } else {
             $paramKey = array(
                 'antrian.waktu_keluar' => 'IS NULL',
@@ -1115,50 +1121,96 @@ class Antrian extends Utility
             $parameterValue = array($parameter);
         }
 
-        $data = self::$query->select('antrian', array(
-            'uid',
-            'pasien as uid_pasien',
-            'dokter as uid_dokter',
-            'departemen as uid_poli',
-            'penjamin as uid_penjamin',
-            'waktu_masuk',
-            'prioritas'
-        ))
-            ->join('pasien', array(
-                'nama as pasien',
-                'no_rm'
+
+
+        if($condition === 'inap') {
+            $data = self::$query->select('antrian', array(
+                'uid',
+                'pasien as uid_pasien',
+                'dokter as uid_dokter',
+                'departemen as uid_poli',
+                'penjamin as uid_penjamin',
+                'waktu_masuk',
+                'waktu_keluar',
+                'prioritas'
             ))
-            ->join('master_poli', array(
-                'nama as departemen'
+                ->join('pasien', array(
+                    'nama as pasien',
+                    'no_rm'
+                ))
+                ->join('pegawai', array(
+                    'nama as dokter'
+                ))
+                ->join('master_penjamin', array(
+                    'nama as penjamin'
+                ))
+                ->join('kunjungan', array(
+                    'uid as uid_kunjungan',
+                    'pegawai as uid_resepsionis'
+                ))
+                ->on(array(
+                    /*array('pasien.uid','=', 'antrian.pasien'),
+                    array('master_poli.uid','=', 'antrian.departemen'),
+                    array('pegawai.uid','=', 'antrian.dokter'),
+                    array('master_penjamin.uid','=', 'antrian.penjamin'),
+                    array('kunjungan.uid','=', 'antrian.kunjungan')*/
+                    array('antrian.pasien', '=', 'pasien.uid'),
+                    array('antrian.dokter', '=', 'pegawai.uid'),
+                    array('antrian.penjamin', '=', 'master_penjamin.uid'),
+                    array('antrian.kunjungan', '=', 'kunjungan.uid')
+                ))
+                ->where($paramKey, $parameterValue)
+                ->order(array(
+                    'antrian.prioritas' => 'DESC',
+                    'antrian.waktu_masuk' => 'DESC'
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('antrian', array(
+                'uid',
+                'pasien as uid_pasien',
+                'dokter as uid_dokter',
+                'departemen as uid_poli',
+                'penjamin as uid_penjamin',
+                'waktu_masuk',
+                'prioritas'
             ))
-            ->join('pegawai', array(
-                'nama as dokter'
-            ))
-            ->join('master_penjamin', array(
-                'nama as penjamin'
-            ))
-            ->join('kunjungan', array(
-                'uid as uid_kunjungan',
-                'pegawai as uid_resepsionis'
-            ))
-            ->on(array(
-                /*array('pasien.uid','=', 'antrian.pasien'),
-                array('master_poli.uid','=', 'antrian.departemen'),
-                array('pegawai.uid','=', 'antrian.dokter'),
-                array('master_penjamin.uid','=', 'antrian.penjamin'),
-                array('kunjungan.uid','=', 'antrian.kunjungan')*/
-                array('antrian.pasien', '=', 'pasien.uid'),
-                array('antrian.departemen', '=', 'master_poli.uid'),
-                array('antrian.dokter', '=', 'pegawai.uid'),
-                array('antrian.penjamin', '=', 'master_penjamin.uid'),
-                array('antrian.kunjungan', '=', 'kunjungan.uid')
-            ))
-            ->where($paramKey, $parameterValue)
-            ->order(array(
-                'antrian.prioritas' => 'DESC',
-                'antrian.waktu_masuk' => 'DESC'
-            ))
-            ->execute();
+                ->join('pasien', array(
+                    'nama as pasien',
+                    'no_rm'
+                ))
+                ->join('master_poli', array(
+                    'nama as departemen'
+                ))
+                ->join('pegawai', array(
+                    'nama as dokter'
+                ))
+                ->join('master_penjamin', array(
+                    'nama as penjamin'
+                ))
+                ->join('kunjungan', array(
+                    'uid as uid_kunjungan',
+                    'pegawai as uid_resepsionis'
+                ))
+                ->on(array(
+                    /*array('pasien.uid','=', 'antrian.pasien'),
+                    array('master_poli.uid','=', 'antrian.departemen'),
+                    array('pegawai.uid','=', 'antrian.dokter'),
+                    array('master_penjamin.uid','=', 'antrian.penjamin'),
+                    array('kunjungan.uid','=', 'antrian.kunjungan')*/
+                    array('antrian.pasien', '=', 'pasien.uid'),
+                    array('antrian.departemen', '=', 'master_poli.uid'),
+                    array('antrian.dokter', '=', 'pegawai.uid'),
+                    array('antrian.penjamin', '=', 'master_penjamin.uid'),
+                    array('antrian.kunjungan', '=', 'kunjungan.uid')
+                ))
+                ->where($paramKey, $parameterValue)
+                ->order(array(
+                    'antrian.prioritas' => 'DESC',
+                    'antrian.waktu_masuk' => 'DESC'
+                ))
+                ->execute();
+        }
 
         $autonum = 1;
         foreach ($data['response_data'] as $key => $value) {
@@ -1811,13 +1863,13 @@ class Antrian extends Utility
             $data['response_data'][$key]['kunjungan_detail'] = $Kunjungan['response_data'][0];
 
             $Pasien = new Pasien(self::$pdo);
-            $PasienData = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienData = $Pasien->get_pasien_detail('pasien', $value['pasien']);
 
             $Terminologi = new Terminologi(self::$pdo);
             $Penjamin = new Penjamin(self::$pdo);
 
             $Poli = new Poli(self::$pdo);
-            $PoliData = $Poli::get_poli_detail($value['departemen']);
+            $PoliData = $Poli->get_poli_detail($value['departemen']);
             $data['response_data'][$key]['poli_info'] = $PoliData['response_data'][0];
 
             $PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
