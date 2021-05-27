@@ -23,8 +23,9 @@
                     } else {
                         var data = response.response_package.response_data;
                         for(var key in data) {
-                            if(data[key].pasien !== null && data[key].pasien !== undefined) {}
-                            returnedData.push(data[key]);
+                            if(data[key].pasien !== null && data[key].pasien !== undefined) {
+                                returnedData.push(data[key]);
+                            }
                         }
                     }
 
