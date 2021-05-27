@@ -96,6 +96,41 @@
                     <div class="tab-pane show fade" id="perawat">
                     </div>
                     <div class="tab-pane show fade" id="obat">
+                        <div class="row">
+                            <div class="col-lg-7">
+                                <table class="table table-bordered table-striped largeDataType" id="table-resep-inap">
+                                    <thead class="thead-dark">
+                                    <tr>
+                                        <th class="wrap_content">No</th>
+                                        <th class="wrap_content">Tgl</th>
+                                        <th>Resep</th>
+                                        <th>Racikan</th>
+                                        <th class="wrap_content">Aksi</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-lg-5">
+                                <table class="table table-bordered table-striped largeDataType" id="table-rekap-obat-inap">
+                                    <thead class="thead-dark">
+                                    <tr>
+                                        <th class="wrap_content">No</th>
+                                        <th>Nama</th>
+                                        <th>Satuan</th>
+                                        <th>Tersedia</th>
+                                        <th>Resep</th>
+                                        <th class="wrap_content">Aksi</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     <div class="tab-pane show fade" id="biaya">
                     </div>

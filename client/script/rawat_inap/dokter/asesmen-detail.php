@@ -2,6 +2,96 @@
 <script type="text/javascript">
     $(function() {
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "";
+        var tableResep = $("#table-resep-inap").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: function(d) {
+                    d.request = "resep_inap";
+                    d.pasien = __PAGES__[3];
+                    d.kunjungan = __PAGES__[4];
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var returnedData = [];
+                    console.log(response);
+                    if(response.response_package === undefined || response.response_package.response_data === undefined) {
+                        returnedData = [];
+                    } else {
+                        returnedData = response.response_package.response_data;
+                    }
+
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = returnedData.length;
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Resep"
+            },
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.created_at_parsed + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        var detail = row.detail;
+                        var parsedDetail = "<div class=\"row\">";
+                        for(var a in detail) {
+                            if(detail[a].detail.nama !== "") {
+                                parsedDetail += "<div class=\"col-md-12\">" +
+                                    "<span class=\"badge badge-info\">" + detail[a].detail.nama + "</span><br />" +
+                                    "<div style=\"padding-left: 20px;\">" + detail[a].signa_qty + " &times; " + detail[a].signa_pakai + " <label class=\"text-info\">[" + detail[a].qty + "]</label></div>" +
+                                    "</div>";
+                            }
+                        }
+                        parsedDetail += "</div>";
+                        return parsedDetail;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button class=\"btn btn-success btn-sm\">" +
+                            "<span><i class=\"fa fa-eye\"></i>Berikan Obat</span>" +
+                            "</button>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+
+
         var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
             "ajax":{
                 url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis/inap",
@@ -12,7 +102,6 @@
                 dataSrc:function(response) {
                     var filteredData = [];
                     var data = response.response_package.response_data;
-                    console.log(data);
 
                     for(var a = 0; a < data.length; a++) {
                         if(

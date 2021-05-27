@@ -135,6 +135,12 @@
                             resepDataRaw[resepKey].antrian.departemen != null
                         ) {
                             parsedData.push(resepDataRaw[resepKey]);
+                        } else {
+                            resepDataRaw[resepKey].antrian.departemen = {
+                                uid: __POLI_INAP__,
+                                nama: "Rawat Inap"
+                            };
+                            parsedData.push(resepDataRaw[resepKey]);
                         }
                     }
                     return parsedData;

@@ -12,6 +12,15 @@
                 var data = response.response_package[0];
                 if(data.resep !== undefined) {
                     currentMetaData = data.detail;
+                    if(
+                        currentMetaData.departemen === undefined ||
+                        currentMetaData.departemen === null
+                    ) {
+                        currentMetaData.departemen = {
+                            uid: __POLI_INAP__,
+                            nama: "Rawat Inap"
+                        };
+                    }
                     $(".nama_pasien").html((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama);
                     $(".jk_pasien").html(currentMetaData.pasien.jenkel_detail.nama);
                     $(".tanggal_lahir_pasien").html(currentMetaData.pasien.tanggal_lahir_parsed);

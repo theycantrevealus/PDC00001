@@ -1202,7 +1202,7 @@ class Asesmen extends Utility {
 			$returnResponse = array();
 
 			//Poli Asesmen Check
-            if($PoliDetail['uid'] === __POLI_INAP__) {
+            if($parameter['poli'] === __POLI_INAP__) {
                 $poli_check = self::$query->select('asesmen_medis_inap', array(
                     'uid'
                 ))
@@ -1412,7 +1412,7 @@ class Asesmen extends Utility {
                 }
 
                 //Update
-                if($PoliDetail['uid'] === __POLI_INAP__) {
+                if($parameter['poli'] === __POLI_INAP__) {
                     $worker = self::$query->update('asesmen_medis_inap', $saveParam)
                         ->where(array(
                             'asesmen_medis_inap.deleted_at' => 'IS NULL',
@@ -1557,7 +1557,7 @@ class Asesmen extends Utility {
 					),
 					'class'=>__CLASS__
 				));
-                if($PoliDetail['uid'] === __POLI_INAP__) {
+                if($parameter['poli'] === __POLI_INAP__) {
                     $worker = self::new_asesmen($parameter, $NewAsesmen, 'inap', $PoliDetail['uid']);
                 } else {
                     $worker = self::new_asesmen($parameter, $NewAsesmen, $PoliDetail['poli_asesmen'], $PoliDetail['uid']);
