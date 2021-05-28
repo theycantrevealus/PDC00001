@@ -940,8 +940,7 @@ class Antrian extends Utility
 
     /*=================== GET ANTRIAN ====================*/
 
-    public function tambah_antrian($table, $parameter, $uid_kunjungan)
-    {
+    public function tambah_antrian($table, $parameter, $uid_kunjungan) {
         /*dataObj Key
             kunjungan,
             poli,
@@ -1006,17 +1005,17 @@ class Antrian extends Utility
                         'AND',
                         'antrian_nomor.poli' => '= ?',
                         'AND',
-                        'antrian_nomor.dokter' => '= ?',
-                        'AND',
+                        /*'antrian_nomor.dokter' => '= ?',
+                        'AND',*/
                         'antrian_nomor.penjamin' => '= ?',
                         'AND',
                         'antrian_nomor.status' => '= ?'
                     ), array(
                             $allData['pasien'],
                             $allData['departemen'],
-                            $allData['dokter'],
+                            //$allData['dokter'],
                             $allData['penjamin'],
-                            'N'
+                            'K' //Dulu N?
                         )
                     )
                     ->execute();

@@ -956,6 +956,7 @@
                                     nama: invoice_detail_item[invKey].item.nama.toUpperCase(),
                                     qty: invoice_detail_item[invKey].qty,
                                     departemen: invoice_detail_item[invKey].departemen,
+                                    departemen_info: invoice_detail_item[invKey].departemen_info,
                                     keterangan: invoice_detail_item[invKey].keterangan,
                                     penjamin: invoice_detail_item[invKey].penjamin.nama,
                                     harga: number_format(invoice_detail_item[invKey].harga, 2, ".", ","),
@@ -994,7 +995,7 @@
                                         "<tr>" +
                                         "<td>" + detailData[itemDetailKey].status_bayar + "</td>" +
                                         "<td>" + detailData[itemDetailKey].autonum + "</td>" +
-                                        "<td>" + detailData[itemDetailKey].nama + "<br /><b class=\"text-muted\">" + detailData[itemDetailKey].keterangan + "</b>" + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + detailData[itemDetailKey].penjamin + "</span></td>" +
+                                        "<td>" + detailData[itemDetailKey].nama + "<br /><label class=\"text-info\">[" + detailData[itemDetailKey].departemen_info.nama + "]</label><br /><b class=\"text-muted\">" + detailData[itemDetailKey].keterangan + "</b>" + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + detailData[itemDetailKey].penjamin + "</span></td>" +
                                         "<td>" + detailData[itemDetailKey].qty + "</td>" +
                                         "<td class=\"text-right\">" + detailData[itemDetailKey].harga + "</td>" +
                                         "<td class=\"text-right\">" + detailData[itemDetailKey].total + "</td>" +
@@ -1254,6 +1255,8 @@
                             keterangan:$("#keterangan-faktur").val()
                         },
                         success:function(response) {
+                            console.clear();
+                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 Swal.fire({
                                     title: "Pembayaran Berhasil!",
@@ -1290,7 +1293,6 @@
 
                                 });
                             } else {
-                                //console.log(response);
                                 tableAntrianBayarRJ.ajax.reload();
                                 tableAntrianBayarRI.ajax.reload();
                                 tableAntrianBayarIGD.ajax.reload();

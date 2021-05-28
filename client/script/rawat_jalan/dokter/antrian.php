@@ -4792,11 +4792,17 @@
         }
 
         $("#btnKonsul").click(function() {
-            $("#form-konsul").modal("show");
+            const simpanDataProcess = new Promise(function(resolve, rejector) {
+                resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+            }).then(function(result) {
+                if (result.response_package.response_result > 0) {
+                    $("#form-konsul").modal("show");
 
-            loadPenjamin("konsul", pasien_penjamin_uid);
-            loadPoli("konsul");
-            loadPrioritas(prioritas_antrian);
+                    loadPenjamin("konsul", pasien_penjamin_uid);
+                    loadPoli("konsul");
+                    loadPrioritas(prioritas_antrian);
+                }
+            });
         });
 
         $("#inap_kamar").change(function() {
@@ -5038,18 +5044,18 @@
                 dataObj.pj_pasien = kunjungan.pj_pasien;
                 dataObj.info_didapat_dari = kunjungan.info_didapat_dari;
 
-                Swal.fire({
-                    title: 'Data sudah benar?',
-                    showDenyButton: true,
-                    confirmButtonText: `Ya`,
-                    denyButtonText: `Belum`,
-                }).then((result) => {
-                    //latest
-                    if (result.isConfirmed) {
-                        const simpanDataProcess = new Promise(function(resolve, reject) {
-                            resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
-                        }).then(function(result) {
-                            if(result.response_package.response_result > 0) {
+                const simpanDataProcess = new Promise(function(resolve, rejector) {
+                    resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+                }).then(function(result) {
+                    if(result.response_package.response_result > 0) {
+                        Swal.fire({
+                            title: 'Data sudah benar?',
+                            showDenyButton: true,
+                            confirmButtonText: `Ya`,
+                            denyButtonText: `Belum`,
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y");
                                 $.ajax({
                                     async: false,
                                     url: __HOSTAPI__ + "/Antrian",
@@ -5069,16 +5075,12 @@
                                         console.log(response);
                                     }
                                 });
-                            } else {
-                                notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
+                            } else if(result.isDenied) {
+                                reject();
                             }
                         });
-
-                        //simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan);
-
-
-                    } else if(result.isDenied) {
-                        reject();
+                    } else {
+                        notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                     }
                 });
             }).then(function(result) {

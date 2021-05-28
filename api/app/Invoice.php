@@ -316,10 +316,12 @@ class Invoice extends Utility
                 ->where(array(
                     'antrian_nomor.kunjungan' => '= ?',
                     'AND',
-                    'antrian_nomor.status' => '= ?'
+                    '(antrian_nomor.status' => '= ?',
+                    'OR',
+                    'antrian_nomor.status' => '= ?)'
                 ), array(
                     $value['kunjungan'],
-                    'K'
+                    'K', 'V'
                 ))
                 ->execute();
             if (count($AntrianKunjungan['response_data']) > 0) {
@@ -589,8 +591,7 @@ class Invoice extends Utility
         return $payment;
     }
 
-    private function proses_bayar($parameter)
-    {
+    private function proses_bayar($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $KunjunganUID = $parameter['kunjungan'];
@@ -603,6 +604,26 @@ class Invoice extends Utility
         $goto_poli = false;
         $goto_lab = false;
         $goto_rad = false;
+        $KonsulListItem = array();
+        $KonsulRequest = array();
+        $Antrian = new Antrian(self::$pdo);
+        $antrian_item = array();
+
+        //List semua biaya konsultasi dari setting poli
+        $poliKonsulPrice = self::$query->select('master_poli', array(
+            'uid',
+            'tindakan_konsultasi'
+        ))
+            ->where(array(
+                'master_poli.deleted_at' => 'IS NULL'
+            ))
+            ->execute();
+
+        foreach ($poliKonsulPrice['response_data'] as $PKKey => $PKValue) {
+            if (!in_array($PKValue['tindakan_konsultasi'], $KonsulListItem)) {
+                array_push($KonsulListItem, $PKValue['tindakan_konsultasi']);
+            }
+        }
 
 
         $ResepMaster = self::$query->select('resep', array(
@@ -837,7 +858,9 @@ class Invoice extends Utility
                     'keterangan',
                     'subtotal',
                     'penjamin',
-                    'status_bayar'
+                    'status_bayar',
+                    'departemen',
+                    'billing_group'
                 ))
                     ->where(array(
                         'invoice_detail.deleted_at' => 'IS NULL',
@@ -850,35 +873,36 @@ class Invoice extends Utility
                         $parameter['invoice']
                     ))
                     ->execute();
-                $KonsulListItem = array();
+
                 foreach ($getPaymentResult['response_data'] as $itemKonsulKey => $ItemKonsulValue) {
-                    if ($getPaymentResult['response_data'][$itemKonsulKey]['item'] != __UID_KARTU__) {
-
-                        //List semua biaya konsultasi dari setting poli
-                        $poliKonsulPrice = self::$query->select('master_poli', array(
-                            'uid',
-                            'tindakan_konsultasi'
-                        ))
-                            ->where(array(
-                                'master_poli.deleted_at' => 'IS NULL'
-                            ))
-                            ->execute();
-
-                        foreach ($poliKonsulPrice['response_data'] as $PKKey => $PKValue) {
-                            if (!in_array($PKValue['tindakan_konsultasi'], $KonsulListItem)) {
-                                array_push($KonsulListItem, $PKValue['tindakan_konsultasi']);
-                            }
+                    if (
+                        $getPaymentResult['response_data'][$itemKonsulKey]['item'] !== __UID_KARTU__ &&
+                        in_array($getPaymentResult['response_data'][$itemKonsulKey]['item'], $KonsulListItem) &&
+                        $getPaymentResult['response_data'][$itemKonsulKey]['item_type'] == 'master_tindakan' &&
+                        $getPaymentResult['response_data'][$itemKonsulKey]['billing_group'] == 'tindakan'
+                    ) {
+                        //Daftarkan poli selain poli awal
+                        if(!in_array($getPaymentResult['response_data'][$itemKonsulKey]['departemen'], $KonsulRequest)) {
+                            array_push($KonsulRequest, $getPaymentResult['response_data'][$itemKonsulKey]['departemen']);
                         }
+                    }
+                }
 
-                        if (
-                            in_array($getPaymentResult['response_data'][$itemKonsulKey]['item'], $KonsulListItem) &&
-                            $getPaymentResult['response_data'][$itemKonsulKey]['item_type'] == 'master_tindakan' &&
-                            $getPaymentResult['response_data'][$itemKonsulKey]['status_bayar'] == 'Y'
-                        ) {
-                            $allowAntrian = true;
-                        } else {
-                            $allowAntrian = false;
-                            break;
+                if(count($KonsulRequest) > 0) { //Ada konsultasi lain
+                    $allowAntrian = true;
+                } else {
+                    foreach ($getPaymentResult['response_data'] as $itemKonsulKey => $ItemKonsulValue) {
+                        if ($getPaymentResult['response_data'][$itemKonsulKey]['item'] !== __UID_KARTU__) {
+                            if (
+                                in_array($getPaymentResult['response_data'][$itemKonsulKey]['item'], $KonsulListItem) &&
+                                $getPaymentResult['response_data'][$itemKonsulKey]['item_type'] == 'master_tindakan' &&
+                                $getPaymentResult['response_data'][$itemKonsulKey]['status_bayar'] == 'Y'
+                            ) {
+                                $allowAntrian = true;
+                            } else {
+                                $allowAntrian = false;
+                                break;
+                            }
                         }
                     }
                 }
@@ -899,6 +923,10 @@ class Invoice extends Utility
                 $parameter['pasien']
             ))
             ->execute();
+
+
+
+
         if ($allowAntrian) {
             if (count($checkStatusPasien['response_data']) > 0) {
                 $allowAntrian = true;
@@ -1035,8 +1063,7 @@ class Invoice extends Utility
                     'class' => __CLASS__
                 ));
 
-                if ($allowAntrian == true) {
-                    //Pembayaran Kartu Non Umum Segera masukkan pada antrian poliklinik
+                if ($allowAntrian) {
                     $KunjunganData = self::$query->select('antrian_nomor', array(
                         'dokter',
                         'prioritas'
@@ -1051,16 +1078,33 @@ class Invoice extends Utility
                         ))
                         ->execute();
 
-                    if($parameter['poli'] !== __POLI_IGD__) {
-                        $Antrian = new Antrian(self::$pdo);
-                        $parameter['dataObj'] = array(
-                            'departemen' => $parameter['poli'],
-                            'pasien' => $parameter['pasien'],
-                            'penjamin' => $parameter['penjamin'],
-                            'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
-                            'dokter' => $KunjunganData['response_data'][0]['dokter']
-                        );
-                        $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                    if(count($KonsulRequest) > 0) {
+                        foreach ($KonsulRequest as $KonsulKey => $KonsulValue) {
+                            $parameter['dataObj'] = array(
+                                'departemen' => $KonsulValue, //Ubah poli dulu sesuai dengan tagihan konsul
+                                'pasien' => $parameter['pasien'],
+                                'penjamin' => $parameter['penjamin'],
+                                'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
+                                'dokter' => $KunjunganData['response_data'][0]['dokter']
+                            );
+                            $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                            array_push($antrian_item, $AntrianProses);
+                        }
+                    } else {
+                        //Pembayaran Kartu Non Umum Segera masukkan pada antrian poliklinik
+
+                        if($parameter['poli'] !== __POLI_IGD__) {
+
+                            $parameter['dataObj'] = array(
+                                'departemen' => $parameter['poli'], //Ubah poli dulu sesuai dengan tagihan konsul
+                                'pasien' => $parameter['pasien'],
+                                'penjamin' => $parameter['penjamin'],
+                                'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
+                                'dokter' => $KunjunganData['response_data'][0]['dokter']
+                            );
+                            $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                            array_push($antrian_item, $AntrianProses);
+                        }
                     }
                 }
             }
@@ -1109,6 +1153,9 @@ class Invoice extends Utility
             } else {
                 $worker['response_message'] = '[ARAHAN TIDAK DITEMUKAN]';
             }
+            $worker['parameter_list'] = $parameter;
+            $worker['antrian_item'] = $antrian_item;
+            $worker['konsul_request'] = $KonsulRequest;
             $worker['response_notifier'] = $notifier_target;
             return $worker;
         } else {
@@ -1383,6 +1430,10 @@ class Invoice extends Utility
             ->execute();
 
         $autonum = 1;
+        $Poli = new Poli(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+        $Anjungan = new Anjungan(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
 
             $Pasien = new Pasien(self::$pdo);
@@ -1428,17 +1479,16 @@ class Invoice extends Utility
 
             foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                 //Info Poliklinik
-                $Poli = new Poli(self::$pdo);
                 $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
                 $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                 //Info Pegawai
-                $Pegawai = new Pegawai(self::$pdo);
+
                 $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
                 $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                 //Info Loket
-                $Anjungan = new Anjungan(self::$pdo);
+
                 $AnjunganInfo = $Anjungan->get_loket_detail($AKValue['loket']);
                 $AntrianKunjungan['response_data'][$AKKey]['loket'] = $AnjunganInfo['response_data'][0];
             }
@@ -1485,10 +1535,14 @@ class Invoice extends Utility
                     ))
                     ->execute();
 
-                $Penjamin = new Penjamin(self::$pdo);
+
                 $PenjaminInfo = $Penjamin->get_penjamin_detail($IDValue['penjamin']);
                 $InvoiceDetail['response_data'][$IDKey]['penjamin'] = $PenjaminInfo['response_data'][0];
-
+                $InvoiceDetailPoliInfo = $Poli->get_poli_detail($IDValue['departemen']);
+                $InvoiceDetail['response_data'][$IDKey]['departemen_info'] = count($InvoiceDetailPoliInfo['response_data']) > 0 ? $InvoiceDetailPoliInfo['response_data'][0] : array(
+                    'uid' => __POLI_INAP__,
+                    'nama' => 'Rawat Inap'
+                );
                 $InvoiceDetail['response_data'][$IDKey]['item'] = $Item['response_data'][0];
                 $InvoiceDetail['response_data'][$IDKey]['item']['allow_retur'] = ($IDValue['item'] == __UID_KARTU__) ? false : true;
                 $InvoiceDetail['response_data'][$IDKey]['status_berobat'] = $Asesmen['response_data'][0];

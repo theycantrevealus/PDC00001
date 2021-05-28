@@ -45,13 +45,15 @@
 				},
 				dataSrc:function(response) {
 				    var data = response.response_package.response_data;
-				    console.log(response);
 				    var parsedData = [];
 				    for(var key in data) {
 				        if(data[key].uid_poli !== __POLI_INAP__ && data[key].uid_poli !== __POLI_IGD__) {
 				            parsedData.push(data[key]);
                         }
-                        myPoli.push(data[key].departemen);
+				        if(myPoli.indexOf(data[key].departemen) < 0) {
+                            myPoli.push(data[key].departemen);
+                        }
+
                     }
 
                     $("#current-poli").prepend(myPoli.join(", "));

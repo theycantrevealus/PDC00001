@@ -1611,6 +1611,27 @@ class Asesmen extends Utility {
                     'pasien' => $parameter['pasien'],
                     'departemen' => $parameter['poli']
                 ));
+
+                if($parameter['penjamin'] === __UIDPENJAMINUMUM__) {
+                    $antrian_nomor = self::$query->update('antrian_nomor', array(
+                        'status' => 'K'
+                    ))
+                        ->where(array(
+                            'antrian_nomor.pasien' => '= ?',
+                            'AND',
+                            'antrian_nomor.kunjungan' => '= ?',
+                            'AND',
+                            'antrian_nomor.poli' => '= ?',
+                            'AND',
+                            'antrian_nomor.poli.deleted_at' => 'IS NULL'
+                        ), array(
+                            $parameter['pasien'],
+                            $parameter['kunjungan'],
+                            $parameter['poli']
+                        ))
+                        ->execute();
+                }
+
                 $returnResponse['rad_response'] = $ChargeRad;
             }
         } else {
@@ -2152,9 +2173,9 @@ class Asesmen extends Utility {
         foreach ($parameter['tindakan'] as $key => $value) {
             if (!in_array($value['item'], $requested)) {
                 array_push($requested, $value['item']);
-            } else {
+            }/* else {
                 array_push($requested, $value['item']);
-            }
+            }*/
         }
         $returnResponse = array();
         $registered = array();
