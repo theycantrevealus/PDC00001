@@ -58,6 +58,9 @@ class Inap extends Utility
             case 'pulangkan_pasien':
                 return self::pulangkan_pasien($parameter);
                 break;
+            case 'get_nurse_station':
+                return self::get_nurse_station($parameter);
+                break;
             default:
                 return self::get_all($parameter);
         }
@@ -67,9 +70,14 @@ class Inap extends Utility
         //
     }
 
+    private function get_nurse_station($parameter) {
+        //Todo: Master Nurse Station
+        return array();
+    }
+
     private function pulangkan_pasien($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $worker = self::$query->update('rawat_inap', array(
             'waktu_keluar' => parent::format_date(),
@@ -283,7 +291,8 @@ class Inap extends Utility
                     'pasien' => $parameter['pasien'],
                     'penjamin' => $parameter['penjamin'],
                     'billing_group' => 'tarif_kamar',
-                    'keterangan' => 'Biaya Kamar Rawat Inap'
+                    'keterangan' => 'Biaya Kamar Rawat Inap',
+                    'departemen' => __POLI_INAP__
                 ));
             }
 

@@ -710,7 +710,7 @@ class Inventori extends Utility
     private function tambah_kategori($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $check = self::duplicate_check(array(
             'table' => 'master_inv_kategori',
@@ -4520,10 +4520,10 @@ class Inventori extends Utility
         return $data;
     }
 
-    private function tambah_mutasi($parameter)
+    public function tambah_mutasi($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         //Get Last AI tahun ini
         $lastID = self::$query->select('inventori_mutasi', array(

@@ -293,6 +293,7 @@ class Invoice extends Utility
         $Anjungan = new Anjungan(self::$pdo);
         $PoliListIdentifier = array();
         $PoliList = array();
+        $total_split = 0;
 
 
         foreach ($data['response_data'] as $key => $value) {
@@ -327,9 +328,14 @@ class Invoice extends Utility
 
 
                 $statusLunas = false;
+                $departemen_terkait = array();
+
+
                 //Detail Pembayaran
                 $InvoiceDetail = self::$query->select('invoice_detail', array(
-                    'status_bayar'
+                    'status_bayar',
+                    'subtotal',
+                    'departemen'
                 ))
                     ->where(array(
                         'invoice_detail.invoice' => '= ?',
@@ -349,7 +355,15 @@ class Invoice extends Utility
                     }
                 }
 
+                foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
+                    if(!in_array($IDValue['departemen'], $departemen_terkait)) {
+                        array_push($departemen_terkait, $IDValue['departemen']);
+                    }
+                }
+
                 $value['lunas'] = $statusLunas;
+                $value['departemen_terkait'] = $departemen_terkait;
+                $value['invoice_detail'] = $InvoiceDetail['response_data'];
 
 
                 foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
@@ -1446,7 +1460,8 @@ class Invoice extends Utility
                 'billing_group',
                 'keterangan',
                 'created_at',
-                'updated_at'
+                'updated_at',
+                'departemen'
             ))
                 ->where(array(
                     'invoice_detail.invoice' => '= ?',
@@ -1471,7 +1486,7 @@ class Invoice extends Utility
                     ->execute();
 
                 $Penjamin = new Penjamin(self::$pdo);
-                $PenjaminInfo = $Penjamin::get_penjamin_detail($IDValue['penjamin']);
+                $PenjaminInfo = $Penjamin->get_penjamin_detail($IDValue['penjamin']);
                 $InvoiceDetail['response_data'][$IDKey]['penjamin'] = $PenjaminInfo['response_data'][0];
 
                 $InvoiceDetail['response_data'][$IDKey]['item'] = $Item['response_data'][0];

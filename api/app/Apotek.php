@@ -181,14 +181,19 @@ class Apotek extends Utility
         //
     }
 
-    private function proses_resep($parameter)
-    {
+    private function proses_resep($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+
+
+
+
+
 
         $usedBatch = array();
         $rawBatch = array();
-
+        $Inventori = new Inventori(self::$pdo);
 
         //Potong Stok
         $resepItem = self::$query->select('resep_detail', array(
@@ -207,8 +212,7 @@ class Apotek extends Utility
         foreach ($resepItem['response_data'] as $key => $value)
         {
             //Potong Batch terdekat
-            $Inventori = new Inventori(self::$pdo);
-            $InventoriBatch = $Inventori::get_item_batch($value['obat']);
+            $InventoriBatch = $Inventori->get_item_batch($value['obat']);
 
             $kebutuhan = floatval($value['qty']);
 
@@ -273,8 +277,7 @@ class Apotek extends Utility
             foreach ($racikanItem['response_data'] as $rIKey => $rIValue)
             {
                 //Potong Batch terdekat
-                $Inventori = new Inventori(self::$pdo);
-                $InventoriBatch = $Inventori::get_item_batch($rIValue['obat']);
+                $InventoriBatch = $Inventori->get_item_batch($rIValue['obat']);
 
                 $kebutuhan = floatval($rValue['qty']);
 
@@ -315,127 +318,183 @@ class Apotek extends Utility
             }
         }
 
-        $updateResult = 0;
-        $updateProgress = array();
+        if($parameter['departemen'] === __POLI_INAP__) {
+            //Todo: Mutasikan stok ke nurse station terkait
+            $itemMutasi = array();
+            foreach ($usedBatch as $bKey => $bValue) {
+                array_push($itemMutasi, array(
+                    $bValue['barang'] . '|' . $bValue['batch'] => array(
+                        'mutasi' => $bValue['qty'],
+                        'keterangan' => 'Mutasi kebutuhan rawat inap'
+                    )
+                ));
+            }
 
-        foreach ($usedBatch as $bKey => $bValue)
-        {
-            //Stok Sebelum Update
-            $getStok = self::$query->select('inventori_stok', array(
-                'id',
-                'gudang',
-                'barang',
-                'stok_terkini'
+            //Ambil informasi nurse station dan gudang tujuan dari rawat inap
+            $RawatInap = self::$query->select('rawat_inap', array(
+                'nurse_station',
+                'pasien',
+                'dokter'
             ))
+                ->join('nurse_station', array(
+                    'kode',
+                    'nama',
+                    'gudang'
+                ))
                 ->where(array(
-                    'inventori_stok.gudang' => '= ?',
+                    'rawat_inap.kunjungan' => '= ?',
                     'AND',
-                    'inventori_stok.barang' => '= ?'
+                    'rawat_inap.dokter' => '= ?',
+                    'AND',
+                    'rawat_inap.penjamin' => '= ?',
+                    'AND',
+                    'rawat_inap.deleted_at' => 'IS NULL',
+                    'AND',
+                    'nurse_station.deleted_at' => 'IS NULL'
                 ), array(
-                    $bValue['gudang'],
-                    $bValue['barang']
+                    $parameter['antrian']['kunjungan'],
+                    $parameter['antrian']['dokter'],
+                    $parameter['antrian']['penjamindokter']
                 ))
                 ->execute();
 
+            $Mutasi = $Inventori->tambah_mutasi(array(
+                'access_token' => $parameter['access_token'],
+                'dari' => $UserData['data']->gudang,
+                'ke' => $RawatInap['response_data'][0]['gudang'],
+                'keterangan' => 'Kebutuhan Resep Rawat Inap',
+                'item' => $itemMutasi
+            ));
+            //Mutasikan Stok
 
-            //Potong Stok
-            if(
-                floatval($bValue['qty']) > 0 &&
-                floatval($getStok['response_data'][0]['stok_terkini']) > floatval($bValue['qty'])
-            )
+
+
+
+
+
+        } else {
+            //Jika bukan Rawat Inap potong seperti biasa
+            $updateResult = 0;
+            $updateProgress = array();
+
+            foreach ($usedBatch as $bKey => $bValue)
             {
-                $updateStok = self::$query->update('inventori_stok', array(
-                    'stok_terkini' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($bValue['qty']))
+                //Stok Sebelum Update
+                $getStok = self::$query->select('inventori_stok', array(
+                    'id',
+                    'gudang',
+                    'barang',
+                    'stok_terkini'
                 ))
                     ->where(array(
                         'inventori_stok.gudang' => '= ?',
                         'AND',
-                        'inventori_stok.barang' => '= ?',
-                        'AND',
-                        'inventori_stok.batch' => '= ?'
+                        'inventori_stok.barang' => '= ?'
                     ), array(
                         $bValue['gudang'],
-                        $bValue['barang'],
-                        $bValue['batch']
+                        $bValue['barang']
                     ))
                     ->execute();
-                if($updateStok['response_result'] > 0)
+
+
+                //Potong Stok
+                if(
+                    floatval($bValue['qty']) > 0 &&
+                    floatval($getStok['response_data'][0]['stok_terkini']) > floatval($bValue['qty'])
+                )
                 {
-                    //Log Stok
-                    $stokLog = self::$query->insert('inventori_stok_log', array(
-                        'barang' => $bValue['barang'],
-                        'batch'=> $bValue['batch'],
-                        'gudang' => $bValue['gudang'],
-                        'masuk' => 0,
-                        'keluar' => floatval($bValue['qty']),
-                        'saldo' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($bValue['qty'])),
-                        'type' => __STATUS_BARANG_KELUAR__,
-                        'jenis_transaksi' => 'resep',
-                        'uid_foreign' => $parameter['resep'],
-                        'keterangan' => ''
+                    $updateStok = self::$query->update('inventori_stok', array(
+                        'stok_terkini' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($bValue['qty']))
                     ))
+                        ->where(array(
+                            'inventori_stok.gudang' => '= ?',
+                            'AND',
+                            'inventori_stok.barang' => '= ?',
+                            'AND',
+                            'inventori_stok.batch' => '= ?'
+                        ), array(
+                            $bValue['gudang'],
+                            $bValue['barang'],
+                            $bValue['batch']
+                        ))
                         ->execute();
-                    $updateResult += $stokLog['response_result'];
+                    if($updateStok['response_result'] > 0)
+                    {
+                        //Log Stok
+                        $stokLog = self::$query->insert('inventori_stok_log', array(
+                            'barang' => $bValue['barang'],
+                            'batch'=> $bValue['batch'],
+                            'gudang' => $bValue['gudang'],
+                            'masuk' => 0,
+                            'keluar' => floatval($bValue['qty']),
+                            'saldo' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($bValue['qty'])),
+                            'type' => __STATUS_BARANG_KELUAR__,
+                            'jenis_transaksi' => 'resep',
+                            'uid_foreign' => $parameter['resep'],
+                            'keterangan' => ''
+                        ))
+                            ->execute();
+                        $updateResult += $stokLog['response_result'];
+                    }
+                    array_push($updateProgress, $updateStok);
                 }
-                array_push($updateProgress, $updateStok);
             }
-        }
 
-        if($updateResult == count($usedBatch))
-        {
-            //Update Resep
-            $updateResep = self::$query->update('resep', array(
-                'status_resep' => 'D'
-            ))
-                ->where(array(
-                    'resep.uid' => '= ?'
-                ), array(
-                    $parameter['resep']
+            if($updateResult == count($usedBatch)) {
+                //Update Resep
+                $updateResep = self::$query->update('resep', array(
+                    'status_resep' => 'D'
                 ))
-                ->execute();
+                    ->where(array(
+                        'resep.uid' => '= ?'
+                    ), array(
+                        $parameter['resep']
+                    ))
+                    ->execute();
 
-            //Update Racikan
-            $updateRacikan = self::$query->update('racikan', array(
-                'status' => 'D'
-            ))
-                ->where(array(
-                    'racikan.asesmen' => '= ?',
-                    'AND',
-                    'racikan.status' => '= ?',
-                    'AND',
-                    'racikan.deleted_at' => 'IS NULL'
-                ), array(
-                    $parameter['asesmen'],
-                    'L'
+                //Update Racikan
+                $updateRacikan = self::$query->update('racikan', array(
+                    'status' => 'D'
                 ))
-                ->execute();
-        } else {
-            //Update Resep
-            $updateResep = self::$query->update('resep', array(
-                'status_resep' => 'D'
-            ))
-                ->where(array(
-                    'resep.uid' => '= ?'
-                ), array(
-                    $parameter['resep']
+                    ->where(array(
+                        'racikan.asesmen' => '= ?',
+                        'AND',
+                        'racikan.status' => '= ?',
+                        'AND',
+                        'racikan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['asesmen'],
+                        'L'
+                    ))
+                    ->execute();
+            } else {
+                //Update Resep
+                $updateResep = self::$query->update('resep', array(
+                    'status_resep' => 'D'
                 ))
-                ->execute();
+                    ->where(array(
+                        'resep.uid' => '= ?'
+                    ), array(
+                        $parameter['resep']
+                    ))
+                    ->execute();
 
-            //Update Racikan
-            $updateRacikan = self::$query->update('racikan', array(
-                'status' => 'D'
-            ))
-                ->where(array(
-                    'racikan.asesmen' => '= ?',
-                    'AND',
-                    'racikan.status' => '= ?',
-                    'AND',
-                    'racikan.deleted_at' => 'IS NULL'
-                ), array(
-                    $parameter['asesmen'],
-                    'L'
+                //Update Racikan
+                $updateRacikan = self::$query->update('racikan', array(
+                    'status' => 'D'
                 ))
-                ->execute();
+                    ->where(array(
+                        'racikan.asesmen' => '= ?',
+                        'AND',
+                        'racikan.status' => '= ?',
+                        'AND',
+                        'racikan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['asesmen'],
+                        'L'
+                    ))
+                    ->execute();
+            }
         }
 
         return array(
