@@ -60,31 +60,56 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         var detail = row.detail;
-                        var parsedDetail = "<div class=\"row\">";
-                        for(var a in detail) {
-                            if(detail[a].detail.nama !== "") {
-                                parsedDetail += "<div class=\"col-md-12\">" +
-                                    "<span class=\"badge badge-info\">" + detail[a].detail.nama + "</span><br />" +
-                                    "<div style=\"padding-left: 20px;\">" + detail[a].signa_qty + " &times; " + detail[a].signa_pakai + " <label class=\"text-info\">[" + detail[a].qty + "]</label></div>" +
-                                    "</div>";
+                        var parsedDetail = "<span class=\"text-danger\"><i class=\"fa fa-times-circle\"></i> Tidak ada resep</span>";
+                        if(detail.length > 0) {
+                            parsedDetail = "<div class=\"row\">";
+                            for(var a in detail) {
+                                if(detail[a].detail.nama !== "") {
+                                    parsedDetail += "<div class=\"col-md-12\">" +
+                                        "<span class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-tablets\"></i> " + detail[a].detail.nama + "</span><br />" +
+                                        "<div style=\"padding-left: 20px;\">" + detail[a].signa_qty + " &times; " + detail[a].signa_pakai + " <label class=\"text-info\">[" + detail[a].qty + "]</label></div>" +
+                                        "</div>";
+                                }
                             }
+                            parsedDetail += "</div>";
                         }
-                        parsedDetail += "</div>";
+
                         return parsedDetail;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "";
+                        var racikan = row.racikan;
+                        var parsedDetail = "<span class=\"text-danger\"><i class=\"fa fa-times-circle\"></i> Tidak ada racikan</span>";
+                        if(racikan.length > 0) {
+                            parsedDetail = "<div class=\"row\">";
+                            for(var a in racikan) {
+                                var detailRacikan = racikan[a].detail;
+                                parsedDetail += "<div class=\"col-md-12\">" +
+                                    "<span class=\"badge badge-success badge-custom-caption\">" + racikan[a].kode + "</span><br />" +
+                                    "<div style=\"padding-left: 20px;\">" + racikan[a].signa_qty + " &times; " + racikan[a].signa_pakai + " <label class=\"text-info\">[" + racikan[a].qty + "]</label></div>" +
+                                    "<ol>";
+                                for(var b in detailRacikan) {
+                                    parsedDetail += "<span style=\"margin-bottom: 5px;\" class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-tablets\"></i> " + detailRacikan[b].detail.nama + "</span>";
+                                }
+                                parsedDetail += "</ul></div>";
+                            }
+                            parsedDetail += "</div>";
+                        }
+                        return parsedDetail;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-success btn-sm\">" +
-                            "<span><i class=\"fa fa-eye\"></i>Berikan Obat</span>" +
-                            "</button>" +
-                            "</div>";
+                        if(row.status_resep === "N") {
+                            return "<span class=\"badge badge-warning badge-custom-caption\"><i class=\"fa fa-info-circle\"></i> Menunggu Verifikasi</span>";
+                        } else {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button class=\"btn btn-success btn-sm\">" +
+                                "<span><i class=\"fa fa-eye\"></i>Berikan Obat</span>" +
+                                "</button>" +
+                                "</div>";
+                        }
                     }
                 }
             ]

@@ -1200,7 +1200,8 @@ class Radiologi extends Utility
                     'pasien' => $value['pasien'],
                     'penjamin' => $DValue['penjamin'],
                     'billing_group' => 'radiologi',
-                    'keterangan' => 'Biaya Radiologi'
+                    'keterangan' => 'Biaya Radiologi',
+                    'departemen' => $parameter['departemen']
                 ));
 
                 array_push($charge_result, $InvoiceDetail);
@@ -1212,7 +1213,7 @@ class Radiologi extends Utility
     private function tambah_jenis_tindakan($table, $parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $check = self::duplicate_check(array(
             'table' => $table,

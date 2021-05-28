@@ -216,7 +216,10 @@
                     }
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].antrian.departemen !== undefined) {
+                        if(
+                            dataSet[dKey].antrian.departemen !== undefined &&
+                            dataSet[dKey].antrian.departemen !== null
+                        ) {
                             if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
                                 forReturn.push(dataSet[dKey]);
                             } else {

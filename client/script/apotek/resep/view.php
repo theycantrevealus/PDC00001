@@ -1400,7 +1400,8 @@
                                 pasien:currentMetaData.pasien.uid,
                                 penjamin: currentMetaData.penjamin.uid,
                                 resep: resepItem,
-                                racikan: racikanItem
+                                racikan: racikanItem,
+                                departemen: currentMetaData.departemen.uid
                             },
                             success:function(response) {
                                 console.log(response);
@@ -1439,7 +1440,7 @@
                             "Pastikan semua obat memiliki stok tersedia",
                             "warning"
                         ).then((result) => {
-                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                            //location.href = __HOSTNAME__ + "/apotek/resep/";
                         });
                     }
                 }

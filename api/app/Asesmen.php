@@ -1599,7 +1599,8 @@ class Asesmen extends Utility {
                 $ChargeLab = $Laboratorium->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
-                    'pasien' => $parameter['pasien']
+                    'pasien' => $parameter['pasien'],
+                    'departemen' => $parameter['poli']
                 ));
                 $returnResponse['lab_response'] = $ChargeLab;
 
@@ -1607,7 +1608,8 @@ class Asesmen extends Utility {
                 $ChargeRad = $Radiologi->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
-                    'pasien' => $parameter['pasien']
+                    'pasien' => $parameter['pasien'],
+                    'departemen' => $parameter['poli']
                 ));
                 $returnResponse['rad_response'] = $ChargeRad;
             }
@@ -2063,7 +2065,7 @@ class Asesmen extends Utility {
                     //SetDetail
                     foreach ($parameter['resep'] as $key => $value) {
                         $ObatDetail = new Inventori(self::$pdo);
-                        $ObatInfo = $ObatDetail::get_item_detail($value['obat'])['response_data'][0];
+                        $ObatInfo = $ObatDetail->get_item_detail($value['obat'])['response_data'][0];
 
                         $newResepDetail = self::$query->insert('resep_detail', array(
                             'resep' => $uid,
@@ -2143,6 +2145,9 @@ class Asesmen extends Utility {
 
 	private function set_tindakan_asesment($parameter, $MasterAsesmen)
     {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
         $requested = array();
         foreach ($parameter['tindakan'] as $key => $value) {
             if (!in_array($value['item'], $requested)) {
@@ -2177,7 +2182,7 @@ class Asesmen extends Utility {
                 'pasien' => $parameter['pasien'],
                 'keterangan' => 'Tagihan tindakan perobatan'
             );
-            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $NewInvoice = $Invoice->create_invoice($InvMasterParam);
             $TargetInvoice = $NewInvoice['response_unique'];
         }
 
@@ -2280,7 +2285,8 @@ class Asesmen extends Utility {
                         'pasien' => $parameter['pasien'],
                         'penjamin' => $parameter['penjamin'],
                         'billing_group' => 'tindakan',
-                        'keterangan' => 'Biaya Tindakan Perobatan'
+                        'keterangan' => 'Biaya Tindakan Perobatan',
+                        'departemen' => $parameter['poli']
                     ));
 
                     array_push($returnResponse, $InvoiceDetail);

@@ -777,7 +777,7 @@ class Apotek extends Utility
 
     private function detail_resep_verifikator($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $resep_dokter = self::$query->select('resep', array(
             'uid',
@@ -805,23 +805,31 @@ class Apotek extends Utility
         foreach($resep_dokter['response_data'] as $key => $value) {
             //Dokter Info
             $Pegawai = new Pegawai(self::$pdo);
-            $PegawaiInfo = $Pegawai::get_detail($value['dokter']);
+            $PegawaiInfo = $Pegawai->get_detail($value['dokter']);
             $resep_dokter['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
 
             //Pasien Info
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $resep_dokter['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
             //Get Antrian Detail
             $Antrian = new Antrian(self::$pdo);
-            $AntrianInfo = $Antrian::get_antrian_detail('antrian', $value['antrian']);
+            $AntrianInfo = $Antrian->get_antrian_detail('antrian', $value['antrian']);
             $resep_dokter['response_data'][$key]['antrian'] = $AntrianInfo['response_data'][0];
 
             //Departemen Info
-            $Poli = new Poli(self::$pdo);
-            $PoliInfo = $Poli::get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
-            $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
+            if($AntrianInfo['response_data'][0]['departemen'] === __POLI_INAP__) {
+                $AntrianInfo['response_data'][0]['departemen'] = array(
+                    'uid' => __POLI_INAP__,
+                    'nama' => 'Rawat Inap'
+                );
+            } else {
+                $Poli = new Poli(self::$pdo);
+                $PoliInfo = $Poli->get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
+                $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
+            }
+
 
 
 
@@ -844,12 +852,12 @@ class Apotek extends Utility
                 ->execute();
             foreach ($resep_verifikator['response_data'] as $ResKey => $ResValue) {
                 $Inventori = new Inventori(self::$pdo);
-                $InventoriInfo = $Inventori::get_item_detail($ResValue['item']);
+                $InventoriInfo = $Inventori->get_item_detail($ResValue['item']);
                 $resep_verifikator['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
 
                 //Batch Info
                 $Inventori = new Inventori(self::$pdo);
-                $InventoriBatch = $Inventori::get_item_batch($ResValue['item']);
+                $InventoriBatch = $Inventori->get_item_batch($ResValue['item']);
                 $resep_verifikator['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
                 $total_sedia = 0;
                 foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
@@ -1360,16 +1368,24 @@ class Apotek extends Utility
         if(isset($parameter['request_type'])) {
             if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
                 $paramData = array(
-                    'resep.deleted_at' => 'IS NULL'
+                    'resep.deleted_at' => 'IS NULL',
+                    'AND',
+                    '(resep.status_resep' => '= ?',
+                    'OR',
+                    'resep.status_resep' => '= ?)'
                 );
 
-                $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
+                $paramValue = array('V', 'K');
             } else {
                 $paramData = array(
-                    'resep.deleted_at' => 'IS NULL'
+                    'resep.deleted_at' => 'IS NULL',
+                    'AND',
+                    '(resep.status_resep' => '= ?',
+                    'OR',
+                    'resep.status_resep' => '= ?)'
                 );
 
-                $paramValue = array();
+                $paramValue = array('V', 'K');
             }
         } else {
             if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
@@ -1393,38 +1409,74 @@ class Apotek extends Utility
         }
 
 
-        if ($parameter['length'] < 0) {
-            $data = self::$query->select('resep', array(
-                'uid',
-                'kunjungan',
-                'antrian',
-                'asesmen',
-                'dokter',
-                'pasien',
-                'total',
-                'status_resep',
-                'created_at',
-                'updated_at'
-            ))
-                ->where($paramData, $paramValue)
-                ->execute();
+        if(isset($parameter['request_type'])) {
+            if ($parameter['length'] < 0) {
+                $data = self::$query->select('resep', array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'asesmen',
+                    'dokter',
+                    'pasien',
+                    'total',
+                    'status_resep',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where($paramData, $paramValue)
+                    ->execute();
+            } else {
+                $data = self::$query->select('resep', array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'asesmen',
+                    'dokter',
+                    'pasien',
+                    'total',
+                    'status_resep',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where($paramData, $paramValue)
+                    ->offset(intval($parameter['start']))
+                    ->limit(intval($parameter['length']))
+                    ->execute();
+            }
         } else {
-            $data = self::$query->select('resep', array(
-                'uid',
-                'kunjungan',
-                'antrian',
-                'asesmen',
-                'dokter',
-                'pasien',
-                'total',
-                'status_resep',
-                'created_at',
-                'updated_at'
-            ))
-                ->where($paramData, $paramValue)
-                ->offset(intval($parameter['start']))
-                ->limit(intval($parameter['length']))
-                ->execute();
+            if ($parameter['length'] < 0) {
+                $data = self::$query->select('resep', array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'asesmen',
+                    'dokter',
+                    'pasien',
+                    'total',
+                    'status_resep',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where($paramData, $paramValue)
+                    ->execute();
+            } else {
+                $data = self::$query->select('resep', array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'asesmen',
+                    'dokter',
+                    'pasien',
+                    'total',
+                    'status_resep',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where($paramData, $paramValue)
+                    ->offset(intval($parameter['start']))
+                    ->limit(intval($parameter['length']))
+                    ->execute();
+            }
         }
 
 
@@ -1444,9 +1496,17 @@ class Apotek extends Utility
             $AntrianInfo = $Antrian->get_antrian_detail('antrian', $value['antrian']);
 
             //Departemen Info
-            $Poli = new Poli(self::$pdo);
-            $PoliInfo = $Poli->get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
-            $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
+            if($AntrianInfo['response_data'][0]['departemen'] === __POLI_INAP__) {
+                $AntrianInfo['response_data'][0]['departemen'] = array(
+                    'uid' => __POLI_INAP__,
+                    'nama' => 'Rawat Inap'
+                );
+            } else {
+                $Poli = new Poli(self::$pdo);
+                $PoliInfo = $Poli->get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
+                $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
+            }
+
             $data['response_data'][$key]['antrian'] = $AntrianInfo['response_data'][0];
 
             //Get resep detail
@@ -1473,11 +1533,11 @@ class Apotek extends Utility
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 //Batch Info
                 $Inventori = new Inventori(self::$pdo);
-                $InventoriBatch = $Inventori::get_item_batch($ResValue['obat']);
+                $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
 
                 $Inventori = new Inventori(self::$pdo);
-                $InventoriInfo = $Inventori::get_item_detail($ResValue['obat']);
+                $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
             }
             $data['response_data'][$key]['detail'] = $resep_detail['response_data'];
@@ -1537,7 +1597,7 @@ class Apotek extends Utility
                     ->execute();
                 foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
                     $Inventori = new Inventori(self::$pdo);
-                    $InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
+                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
 
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }
@@ -1762,7 +1822,8 @@ class Apotek extends Utility
                 'pasien' => $parameter['pasien'],
                 'penjamin' => $parameter['penjamin'],
                 'billing_group' => 'obat',
-                'keterangan' => 'Biaya resep obat'
+                'keterangan' => 'Biaya resep obat',
+                'departemen' => $parameter['departemen']
             ));
             array_push($invoice_detail, $AppendInvoice);
 
@@ -1806,7 +1867,8 @@ class Apotek extends Utility
                     'pasien' => $parameter['pasien'],
                     'billing_group' => 'obat',
                     'penjamin' => $parameter['penjamin'],
-                    'keterangan' => 'Biaya racikan obat'
+                    'keterangan' => 'Biaya racikan obat',
+                    'departemen' => $parameter['departemen']
                 ));
                 array_push($invoice_detail, $AppendInvoice);
             }
@@ -1885,7 +1947,7 @@ class Apotek extends Utility
             $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
         } else {
             $InvMasterParam['keterangan'] = '';
-            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $NewInvoice = $Invoice->create_invoice($InvMasterParam);
             $TargetInvoice = $NewInvoice['response_unique'];
         }
 

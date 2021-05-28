@@ -224,8 +224,7 @@ class Antrian extends Utility
         $worker = '';
     }
 
-    private function tambah_kunjungan($table, $parameter)
-    {
+    private function tambah_kunjungan($table, $parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
@@ -290,7 +289,8 @@ class Antrian extends Utility
                     'pasien' => $parameter['dataObj']['currentPasien'],
                     'penjamin' => $parameter['dataObj']['penjamin'],
                     'billing_group' => 'tindakan',
-                    'keterangan' => 'Biaya konsultasi'
+                    'keterangan' => 'Biaya konsultasi',
+                    'departemen' => $parameter['dataObj']['departemen']
                 ));
                 //$antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
 
@@ -369,7 +369,8 @@ class Antrian extends Utility
                     'pasien' => $parameter['dataObj']['currentPasien'],
                     'penjamin' => $parameter['dataObj']['penjamin'],
                     'billing_group' => 'tindakan',
-                    'keterangan' => 'Biaya konsultasi'
+                    'keterangan' => 'Biaya konsultasi',
+                    'departemen' => $parameter['dataObj']['departemen']
                 ));
 
                 unset($parameter['dataObj']['currentPasien']);
@@ -584,7 +585,7 @@ class Antrian extends Utility
                                 ->execute();
 
                             if (count($checkBiayaKartu['response_data']) <= 0) { //Biaya Kartu
-                                $Invoice = $SInvoice::append_invoice(array(
+                                $Invoice = $SInvoice->append_invoice(array(
                                     'invoice' => $InvoiceCheck['response_data'][0]['uid'],
                                     'item' => __UID_KARTU__,
                                     'item_origin' => 'master_tindakan',
@@ -596,11 +597,12 @@ class Antrian extends Utility
                                     'pasien' => $parameter['dataObj']['currentPasien'],
                                     'penjamin' => $parameter['dataObj']['penjamin'],
                                     'billing_group' => 'administrasi',
-                                    'keterangan' => 'Biaya kartu pasien baru'
+                                    'keterangan' => 'Biaya kartu pasien baru',
+                                    'departemen' => $parameter['dataObj']['departemen']
                                 ));
                             }
 
-                            $HargaTindakan = $SInvoice::get_harga_tindakan(array(
+                            $HargaTindakan = $SInvoice->get_harga_tindakan(array(
                                 'poli' => $parameter['dataObj']['departemen'],
                                 'kelas' => __UID_KELAS_GENERAL_RJ__,
                                 'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
@@ -609,7 +611,7 @@ class Antrian extends Utility
 
                             //print_r($HargaTindakan['response_data']);
 
-                            $Invoice = $SInvoice::append_invoice(array(
+                            $Invoice = $SInvoice->append_invoice(array(
                                 'invoice' => $InvoiceCheck['response_data'][0]['uid'],
                                 'item' => $PoliTindakanInfo['tindakan_konsultasi'],
                                 'item_origin' => 'master_tindakan',
@@ -621,10 +623,11 @@ class Antrian extends Utility
                                 'pasien' => $parameter['dataObj']['currentPasien'],
                                 'penjamin' => $parameter['dataObj']['penjamin'],
                                 'billing_group' => 'tindakan',
-                                'keterangan' => 'Biaya konsultasi'
+                                'keterangan' => 'Biaya konsultasi',
+                                'departemen' => $parameter['dataObj']['departemen']
                             ));
                         } else { //Belum ada invoice master umum
-                            $Invoice = $SInvoice::create_invoice(array(
+                            $Invoice = $SInvoice->create_invoice(array(
                                 'kunjungan' => $uid,
                                 'pasien' => $parameter['dataObj']['pasien'],
                                 'keterangan' => ''
@@ -658,7 +661,7 @@ class Antrian extends Utility
                                             'keterangan' => 'Biaya kartu pasien baru'
                                         ));
                                     }*/
-                                    $Invoice = $SInvoice::append_invoice(array(
+                                    $Invoice = $SInvoice->append_invoice(array(
                                         'invoice' => $NewInvoiceUID,
                                         'item' => __UID_KARTU__,
                                         'item_origin' => 'master_tindakan',
@@ -670,18 +673,19 @@ class Antrian extends Utility
                                         'pasien' => $parameter['dataObj']['currentPasien'],
                                         'penjamin' => $parameter['dataObj']['penjamin'],
                                         'billing_group' => 'administrasi',
-                                        'keterangan' => 'Biaya kartu pasien baru'
+                                        'keterangan' => 'Biaya kartu pasien baru',
+                                        'departemen' => $parameter['dataObj']['departemen']
                                     ));
                                 }
 
-                                $HargaTindakan = $SInvoice::get_harga_tindakan(array(
+                                $HargaTindakan = $SInvoice->get_harga_tindakan(array(
                                     'poli' => $parameter['dataObj']['departemen'],
                                     'kelas' => __UID_KELAS_GENERAL_RJ__,
                                     'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
                                     'penjamin' => $parameter['dataObj']['penjamin']
                                 ));
 
-                                $Invoice = $SInvoice::append_invoice(array(
+                                $Invoice = $SInvoice->append_invoice(array(
                                     'invoice' => $NewInvoiceUID,
                                     'item' => $PoliTindakanInfo['tindakan_konsultasi'],
                                     'item_origin' => 'master_tindakan',
@@ -693,7 +697,8 @@ class Antrian extends Utility
                                     'pasien' => $parameter['dataObj']['currentPasien'],
                                     'penjamin' => $parameter['dataObj']['penjamin'],
                                     'billing_group' => 'tindakan',
-                                    'keterangan' => 'Biaya konsultasi'
+                                    'keterangan' => 'Biaya konsultasi',
+                                    'departemen' => $parameter['dataObj']['departemen']
                                 ));
                             } else {
                                 //
@@ -785,7 +790,7 @@ class Antrian extends Utility
 
                     } else { //Belum ada Invoice Master
 
-                        $Invoice = $SInvoice::create_invoice(array(
+                        $Invoice = $SInvoice->create_invoice(array(
                             'kunjungan' => $uid,
                             'pasien' => $parameter['dataObj']['pasien'],
                             'keterangan' => 'Kunjungan Penjamin BPJS'
@@ -797,14 +802,14 @@ class Antrian extends Utility
 
                     //Simpan tagihan penjamin
 
-                    $HargaTindakan = $SInvoice::get_harga_tindakan(array(
+                    $HargaTindakan = $SInvoice->get_harga_tindakan(array(
                         'poli' => $parameter['dataObj']['departemen'],
                         'kelas' => __UID_KELAS_GENERAL_RJ__,
                         'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
                         'penjamin' => $parameter['dataObj']['penjamin']
                     ));
 
-                    $Invoice = $SInvoice::append_invoice(array(
+                    $Invoice = $SInvoice->append_invoice(array(
                         'invoice' => $InvoiceUID,
                         'item' => $PoliTindakanInfo['tindakan_konsultasi'],
                         'item_origin' => 'master_tindakan',
@@ -817,7 +822,8 @@ class Antrian extends Utility
                         'pasien' => $parameter['dataObj']['currentPasien'],
                         'penjamin' => $parameter['dataObj']['penjamin'],
                         'billing_group' => 'tindakan',
-                        'keterangan' => 'Biaya konsultasi'
+                        'keterangan' => 'Biaya konsultasi',
+                        'departemen' => $parameter['dataObj']['departemen']
                     ));
 
 
@@ -854,7 +860,7 @@ class Antrian extends Utility
                             ))
                             ->execute();
                         $Pasien = new Pasien(self::$pdo);
-                        $PasienDetail = $Pasien::get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
+                        $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
                         $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
 
                         if ($antrianKunjungan['response_result'] > 0) {
@@ -877,7 +883,7 @@ class Antrian extends Utility
 
 
                         //Dikenakan Biaya Kartu Jika Pasien Baru
-                        $Invoice = $SInvoice::append_invoice(array(
+                        $Invoice = $SInvoice->append_invoice(array(
                             'invoice' => $InvoiceUID,
                             'item' => __UID_KARTU__,
                             'item_origin' => 'master_tindakan',
@@ -889,7 +895,8 @@ class Antrian extends Utility
                             'pasien' => $parameter['dataObj']['currentPasien'],
                             'penjamin' => $parameter['dataObj']['penjamin'],
                             'billing_group' => 'administrasi',
-                            'keterangan' => 'Biaya kartu pasien baru'
+                            'keterangan' => 'Biaya kartu pasien baru',
+                            'departemen' => $parameter['dataObj']['departemen']
                         ));
 
 
@@ -913,7 +920,7 @@ class Antrian extends Utility
                             ->execute();
 
                         $Pasien = new Pasien(self::$pdo);
-                        $PasienDetail = $Pasien::get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
+                        $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
                         $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
                         $antrianKunjungan['response_data'][0]['response_invoice'] = 'asd';
                         $antrianKunjungan['response_notif'] = 'K';

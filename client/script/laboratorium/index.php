@@ -683,7 +683,7 @@
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                             "<button penjamin=\"" + row.uid_penjamin + "\" type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail-verif\" data-toggle='tooltip' title='Detail'>" +
-                            "<i class=\"fa fa-search\"></i>" +
+                            "<span><i class=\"fa fa-search\"></i> Detail</span>" +
                             "</a>" +
                             "</div>";
                     }

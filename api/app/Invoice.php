@@ -1587,7 +1587,7 @@ class Invoice extends Utility
     public function append_invoice($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $Invoice = self::$query->insert('invoice_detail', array(
             'invoice' => $parameter['invoice'],
@@ -1603,6 +1603,7 @@ class Invoice extends Utility
             'penjamin' => $parameter['penjamin'],
             'billing_group' => $parameter['billing_group'],
             'keterangan' => $parameter['keterangan'],
+            'departemen' => $parameter['departemen'],
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date()
         ))

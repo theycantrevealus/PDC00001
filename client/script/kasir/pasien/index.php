@@ -383,8 +383,6 @@
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = returnedData.length;
-
-					//console.log(response);
 					
 					return returnedData;
 				}
@@ -425,8 +423,27 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 					    var poliList = [];
+					    var uniquePoliList = [];
 					    for(var az in row.antrian_kunjungan.poli_list) {
-					        poliList.push("<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli_list[az].poli.nama + "</span>");
+					        var targetPoli = {
+					            uid: "",
+                                nama: ""
+                            };
+					        if(row.antrian_kunjungan.poli_list[az].poli !== null) {
+                                targetPoli = {
+                                    uid: row.antrian_kunjungan.poli_list[az].poli.uid,
+                                    nama: row.antrian_kunjungan.poli_list[az].poli.nama
+                                };
+                            } else {
+                                targetPoli = {
+                                    uid: __POLI_INAP__,
+                                    nama: "Rawat Inap"
+                                };
+                            }
+					        if(uniquePoliList.indexOf(targetPoli.uid) < 0) {
+					            uniquePoliList.push(targetPoli.uid);
+                                poliList.push("<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + targetPoli.nama + "</span>");
+                            }
                         }
 					    if(poliList.length > 0) {
                             return poliList.join(" ");
@@ -1203,13 +1220,13 @@
                                     for(var notifKey in notifier_target)
                                     {
                                         push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info").then(function() {
-                                            console.log("pushed!");
+                                            //console.log("pushed!");
                                         });
                                     }
 
                                 });
                             } else {
-                                console.log(response);
+                                //console.log(response);
                                 tableAntrianBayarRJ.ajax.reload();
                                 tableAntrianBayarRI.ajax.reload();
                                 tableAntrianBayarIGD.ajax.reload();
