@@ -226,10 +226,10 @@
                 },
                 dataSrc:function(response) {
                     var returnedData = [];
-                    if(returnedData == undefined || returnedData.response_package == undefined) {
+                    if(response.response_package == undefined || response.response_package.response_data == undefined) {
                         returnedData = [];
                     } else {
-                        returnedData = returnedData.response_package.response_data;
+                        returnedData = response.response_package.response_data;
                     }
 
                     response.draw = parseInt(response.response_package.response_draw);
@@ -247,12 +247,12 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "";
+                        return row.autonum;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "";
+                        return row.kode + " - " + row.nama;
                     }
                 },
                 {
