@@ -53,6 +53,10 @@ class Pegawai extends Utility {
 
             return self::get_all_dokter_select2();
 
+        } else if($parameter[1] == 'get_all_perawat_select2') {
+
+		    return self::get_all_perawat_select2();
+
 		} else {
 
 			//__HOST__/Pegawai
@@ -1476,6 +1480,39 @@ class Pegawai extends Utility {
             ->execute();
 
         return $Dokter;
+    }
+
+    private function get_all_perawat_select2(){
+        $Perawat = self::$query->select('pegawai', array(
+                'uid',
+                'nama AS nama_perawat'
+            )
+        )
+            ->join('pegawai_jabatan', array(
+                    'uid AS uid_jabatan',
+                    'nama AS nama_jabatan'
+                )
+            )
+            ->on(
+                array(
+                    array('pegawai.jabatan', '=', 'pegawai_jabatan.uid')
+                )
+            )
+            ->where(
+                array(
+                    'pegawai.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                    'AND',
+                    'pegawai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai_jabatan.nama' => '= ?'
+                ), array(
+                    'Perawat'
+                )
+            )
+            ->limit(10)
+            ->execute();
+
+        return $Perawat;
     }
 
 

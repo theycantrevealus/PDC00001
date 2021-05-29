@@ -61,6 +61,9 @@ class Inap extends Utility
             case 'get_nurse_station':
                 return self::get_nurse_station($parameter);
                 break;
+            case 'tambah_nurse_station':
+                return self::tambah_nurse_station($parameter);
+                break;
             default:
                 return self::get_all($parameter);
         }
@@ -70,9 +73,214 @@ class Inap extends Utility
         //
     }
 
+    private function duplicate_check($parameter)
+    {
+        return self::$query
+            ->select($parameter['table'], array(
+                'uid',
+                'nama'
+            ))
+            ->where(array(
+                $parameter['table'] . '.deleted_at' => 'IS NULL',
+                'AND',
+                $parameter['table'] . '.nama' => '= ?'
+            ), array(
+                $parameter['check']
+            ))
+            ->execute();
+    }
+
+    private function tambah_nurse_station($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $check = self::duplicate_check(array(
+            'table' => 'nurse_station',
+            'check' => $parameter['nama']
+        ));
+        if (count($check['response_data']) > 0) {
+            $check['response_message'] = 'Duplicate data detected';
+            $check['response_result'] = 0;
+            unset($check['response_data']);
+            return $check;
+        } else {
+            $uid = parent::gen_uuid();
+            $process = self::$query->insert('nurse_station', array(
+                'uid' => $uid,
+                'nama' => $parameter['nama'],
+                'kode' => $parameter['kode'],
+                'unit' => $parameter['unit'],
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+
+            if($process['response_result'] > 0) {
+                $log = parent::log(array(
+                    'type' => 'activity',
+                    'column' => array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value' => array(
+                        $uid,
+                        $UserData['data']->uid,
+                        'nurse_station',
+                        'I',
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class' => __CLASS__
+                ));
+
+                //Process Ranjang dan Petugas
+
+                foreach ($parameter['petugas'] as $key => $value) {
+                    $entry_petugas = self::$query->insert('nurse_station_petugas', array(
+                        'nurse_station' => $uid,
+                        'petugas' => $value,
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                    if($entry_petugas['response_result'] > 0) {
+                        $log = parent::log(array(
+                            'type' => 'activity',
+                            'column' => array(
+                                'unique_target',
+                                'user_uid',
+                                'table_name',
+                                'action',
+                                'logged_at',
+                                'status',
+                                'login_id'
+                            ),
+                            'value' => array(
+                                $entry_petugas['response_unique'],
+                                $UserData['data']->uid,
+                                'nurse_station_petugas',
+                                'I',
+                                parent::format_date(),
+                                'N',
+                                $UserData['data']->log_id
+                            ),
+                            'class' => __CLASS__
+                        ));
+                    }
+                }
+
+                foreach ($parameter['ranjang'] as $key => $value) {
+                    $entry_ranjang = self::$query->insert('nurse_station_ranjang', array(
+                        'nurse_station' => $uid,
+                        'ranjang' => $value,
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                    if($entry_ranjang['response_result'] > 0) {
+                        $log = parent::log(array(
+                            'type' => 'activity',
+                            'column' => array(
+                                'unique_target',
+                                'user_uid',
+                                'table_name',
+                                'action',
+                                'logged_at',
+                                'status',
+                                'login_id'
+                            ),
+                            'value' => array(
+                                $entry_ranjang['response_unique'],
+                                $UserData['data']->uid,
+                                'nurse_station_petugas',
+                                'I',
+                                parent::format_date(),
+                                'N',
+                                $UserData['data']->log_id
+                            ),
+                            'class' => __CLASS__
+                        ));
+                    }
+                }
+            }
+            return $process;
+        }
+    }
+
     private function get_nurse_station($parameter) {
         //Todo: Master Nurse Station
-        return array();
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'nurse_station.deleted_at' => 'IS NULL',
+                'AND',
+                '(nurse_station.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'nurse_station.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'nurse_station.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('nurse_station', array(
+                'uid',
+                'kode',
+                'nama',
+                'unit',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('nurse_station', array(
+                'uid',
+                'kode',
+                'nama',
+                'unit',
+                'created_at',
+                'updated_at'
+            ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+
+
+        $itemTotal = self::$query->select('nurse_station', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
     }
 
     private function pulangkan_pasien($parameter) {

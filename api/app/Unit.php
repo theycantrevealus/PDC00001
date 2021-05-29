@@ -30,6 +30,9 @@ class Unit extends Utility {
 				case 'get_unit_detail':
 					return self::get_unit_detail($parameter[2]);
 					break;
+                case 'get_unit_select2':
+                    return self::get_unit_select2($parameter);
+                    break;
 				default:
 					return self::get_unit();
 			}
@@ -75,7 +78,7 @@ class Unit extends Utility {
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$Inventori = new Inventori(self::$pdo);
-			$InventoriDetail = $Inventori::get_gudang_detail($value['gudang'])['response_data'][0];
+			$InventoriDetail = $Inventori->get_gudang_detail($value['gudang'])['response_data'][0];
 			$data['response_data'][$key]['gudang'] = $InventoriDetail;
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
@@ -83,6 +86,40 @@ class Unit extends Utility {
 
 		return $data;
 	}
+
+	private function get_unit_select2($parameter){
+        $Unit = self::$query->select('master_unit', array(
+                'uid',
+                'nama',
+                'kode'
+            )
+        )
+            ->join('master_inv_gudang', array(
+                    'uid AS uid_gudang',
+                    'nama AS nama_gudang'
+                )
+            )
+            ->on(
+                array(
+                    array('master_unit.gudang', '=', 'master_inv_gudang.uid')
+                )
+            )
+            ->where(
+                array(
+                    '((master_unit.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                    'OR',
+                    'master_unit.kode' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')',
+                    'OR',
+                    'master_inv_gudang.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')',
+                    'AND',
+                    'master_unit.deleted_at' => 'IS NULL'
+                ), array()
+            )
+            ->limit(10)
+            ->execute();
+
+        return $Unit;
+    }
 
 	public function get_unit_detail($parameter) {
 		$data = self::$query->select('master_unit', array(
