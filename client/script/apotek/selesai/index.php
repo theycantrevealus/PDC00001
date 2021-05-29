@@ -139,13 +139,17 @@
                         dataSet = [];
                     }
 
+
+
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen !== undefined) {
+                        if(dataSet[dKey].antrian.departemen !== undefined) {
                             if(dataSet[dKey].antrian.departemen.uid !== __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid !== __POLI_INAP__) {
                                 forReturn.push(dataSet[dKey]);
                             }
                         }
                     }
+
+                    console.log(forReturn);
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
