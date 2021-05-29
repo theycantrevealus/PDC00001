@@ -3,6 +3,7 @@
 namespace PondokCoder;
 
 use PondokCoder\Authorization as Authorization;
+use PondokCoder\Invoice as Invoice;
 use PondokCoder\Penjamin as Penjamin;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
@@ -45,6 +46,9 @@ class Inap extends Utility
             case 'tambah_inap':
                 return self::tambah_inap($parameter);
                 break;
+            case 'update_inap':
+                return self::edit_inap($parameter);
+                break;
             case 'get_rawat_inap':
                 return self::get_all($parameter);
                 break;
@@ -53,6 +57,9 @@ class Inap extends Utility
                 break;
             case 'pulangkan_pasien':
                 return self::pulangkan_pasien($parameter);
+                break;
+            case 'get_nurse_station':
+                return self::get_nurse_station($parameter);
                 break;
             default:
                 return self::get_all($parameter);
@@ -63,9 +70,14 @@ class Inap extends Utility
         //
     }
 
+    private function get_nurse_station($parameter) {
+        //Todo: Master Nurse Station
+        return array();
+    }
+
     private function pulangkan_pasien($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $worker = self::$query->update('rawat_inap', array(
             'waktu_keluar' => parent::format_date(),
@@ -86,30 +98,32 @@ class Inap extends Utility
 
     private function get_all($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
                 'rawat_inap.deleted_at' => 'IS NULL',
                 'AND',
-                'rawat_inap.dokter' => '= ?',
-                'AND',
+                /*'rawat_inap.dokter' => '= ?',
+                'AND',*/
                 'rawat_inap.waktu_keluar' => 'IS NULL'
             );
 
-            $paramValue = array($UserData['data']->uid);
+            //$paramValue = array($UserData['data']->uid);
+            $paramValue = array();
         } else {
             $paramData = array(
                 'rawat_inap.deleted_at' => 'IS NULL',
                 'AND',
-                'rawat_inap.dokter' => '= ?',
-                'AND',
+                /*'rawat_inap.dokter' => '= ?',
+                'AND',*/
                 'rawat_inap.waktu_keluar' => 'IS NULL'
                 /*'AND',
                 'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''*/
             );
 
-            $paramValue = array($UserData['data']->uid);
+            //$paramValue = array($UserData['data']->uid);
+            $paramValue = array();
         }
 
 
@@ -202,18 +216,131 @@ class Inap extends Utility
         return $data;
     }
 
+    private function edit_inap($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $old = self::$query->select('rawat_inap', array(
+            'uid', 'pasien', 'dokter', 'penjamin', 'kunjungan', 'waktu_masuk', 'waktu_keluar', 'kamar', 'bed', 'keterangan',
+            'created_at', 'updated_at', 'deleted_at', 'jenis_pulang', 'alasan_pulang'
+        ))
+            ->where(array(
+                'rawat_inap.deleted_at' => 'IS NULL',
+                'AND',
+                'rawat_inap.uid' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+        $worker = self::$query->update('rawat_inap', array(
+            'kamar' => $parameter['kamar'],
+            'bed' => $parameter['bed'],
+            'keterangan' => $parameter['keterangan'],
+            'updated_at' => parent::format_date()
+        ))
+            ->where(array(
+                'rawat_inap.deleted_at' => 'IS NULL',
+                'AND',
+                'rawat_inap.uid' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
+        if($worker['response_result'] > 0) {
+
+            if($parameter['bed'] !== $old['response_data'][0]['bed']) {
+                //Charge Biaya Kamar
+                $Bed = new Bed(self::$pdo);
+                $BedInfo = $Bed->get_bed_detail('master_unit_bed', $parameter['bed']);
+
+                $Invoice = new Invoice(self::$pdo);
+                $InvoiceCheck = self::$query->select('invoice', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'invoice.kunjungan' => '= ?',
+                        'AND',
+                        'invoice.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['kunjungan']
+                    ))
+                    ->execute();
+
+                if(count($InvoiceCheck['response_data']) > 0) {
+                    $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+                } else {
+                    $InvMasterParam = array(
+                        'kunjungan' => $parameter['kunjungan'],
+                        'pasien' => $parameter['pasien'],
+                        'keterangan' => 'Tagihan tindakan perobatan'
+                    );
+                    $NewInvoice = $Invoice->create_invoice($InvMasterParam);
+                    $TargetInvoice = $NewInvoice['response_unique'];
+                }
+
+                $InvoiceDetail = $Invoice->append_invoice(array(
+                    'invoice' => $TargetInvoice,
+                    'item' => $parameter['bed'],
+                    'item_origin' => 'master_unit_bed',
+                    'qty' => 1,
+                    'harga' => $BedInfo['response_data'][0]['tarif'],
+                    'status_bayar' => 'N',
+                    'subtotal' => $BedInfo['response_data'][0]['tarif'],
+                    'discount' => 0,
+                    'discount_type' => 'N',
+                    'pasien' => $parameter['pasien'],
+                    'penjamin' => $parameter['penjamin'],
+                    'billing_group' => 'tarif_kamar',
+                    'keterangan' => 'Biaya Kamar Rawat Inap',
+                    'departemen' => __POLI_INAP__
+                ));
+            }
+
+            $log = parent::log(array(
+                'type' => 'activity',
+                'column' => array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'old_value',
+                    'new_value',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value' => array(
+                    $parameter['uid'],
+                    $UserData['data']->uid,
+                    'rawat_inap',
+                    'U',
+                    json_encode($old['response_data'][0]),
+                    json_encode($parameter),
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class' => __CLASS__
+            ));
+        }
+
+        $worker['invoice'] = $InvoiceDetail;
+        return $worker;
+    }
+
     private function tambah_inap($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $uid = parent::gen_uuid();
         $worker = self::$query->insert('rawat_inap', array(
             'uid' => $uid,
             'pasien' => $parameter['pasien'],
             'dokter' => $parameter['dokter'],
             'penjamin' => $parameter['penjamin'],
-            'waktu_masuk' => date('Y-m-d', strtotime($parameter['waktu_masuk'])),
-            'kamar' => $parameter['kamar'],
-            'bed' => $parameter['bed'],
+            //'waktu_masuk' => date('Y-m-d', strtotime($parameter['waktu_masuk'])),
+            'waktu_masuk' => date('Y-m-d'),
+            //'kamar' => $parameter['kamar'],
+            //'bed' => $parameter['bed'],
             'kunjungan' => $parameter['kunjungan'],
             'keterangan' => $parameter['keterangan'],
             'created_at' => parent::format_date(),

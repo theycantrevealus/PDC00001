@@ -49,7 +49,7 @@
 						var kategoriObat = "";
 						for(var kategoriObatKey in row["kategori_obat"]) {
 						    if(row["kategori_obat"][kategoriObatKey].kategori != null) {
-                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-info\">" + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
+                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tag\"></i> " + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
                             }
 						}
 

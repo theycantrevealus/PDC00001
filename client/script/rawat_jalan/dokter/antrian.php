@@ -124,7 +124,6 @@
                     }
                 }
 
-                //console.log(poliListRaw);
                 poliList = poliListRaw;
                 
                 if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
@@ -782,8 +781,6 @@
                     //console.error( err.stack );
                 });
             $(this).remove();
-            console.clear();
-            console.log(metaSwitchEdit);
         });
 
         $("#btn_tambah_icd10_kerja").click(function() {
@@ -2843,8 +2840,6 @@
                                         $("#dokumen-viewer").html("");
                                     }
                                 });
-                            } else {
-                                console.log(response);
                             }
                         },
                         error: function(response) {
@@ -3241,9 +3236,6 @@
 
 
 
-            //console.clear();
-            //console.log(formData);
-
             $.ajax({
                 async: false,
                 url: __HOSTAPI__ + "/Asesmen",
@@ -3254,7 +3246,6 @@
                 type: "POST",
                 success: function(response) {
                     savingResult = response;
-                    //console.log(savingResult);
                 },
                 error: function(response) {
                     console.clear();
@@ -3289,9 +3280,6 @@
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     metaSwitchEdit));
             }).then(function(result) {
-                /*console.clear();
-                console.log(result);*/
-
                 if(result.response_package.response_result > 0) {
                     notification ("success", "Asesmen Berhasil Disimpan", 1000, "hasil_tambah_dev");
                 } else {
@@ -3349,8 +3337,6 @@
                         resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
                     }).then(function(result) {
                         if(result.response_package.response_result > 0) {
-                            console.clear();
-                            console.log(result.response_package);
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
 
 
@@ -4070,6 +4056,48 @@
             ]
         });
 
+        $("#inap_dokter").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function(){
+                    return "Dokter tidak ditemukan";
+                }
+            },
+            placeholder:"Cari Dokter",
+            dropdownParent: $("#form-inap"),
+            ajax: {
+                dataType: "json",
+                headers:{
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/Pegawai/get_all_dokter_select2",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.response_data;
+                    console.clear();
+                    console.log(data);
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.nama_dokter,
+                                id: item.uid
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            var data = e.params.data;
+
+        });
+
         function loadLabDetailOrder(uid_lab_order, status_disabled) {
             let dataDetail;
             let tindakanTerpilih = {};
@@ -4531,9 +4559,6 @@
                 listTindakanLabTerpilih[uidTindakanLab].item.length > 0 &&
                 uidTindakanLab != null
             ) {
-                console.clear();
-                console.log(uidTindakanLab);
-                console.log(listTindakanLabTerpilih);
                 $("#lab_nilai_order").html("");
                 let dataTindakan = $("#tindakan_lab").select2('data');
                 let namaPenjamin;
@@ -4589,6 +4614,8 @@
             }
         });
 
+
+
         $("#table_tindakan_lab tbody").on('click', '.btnHapusTindakanLab', function(){
             let uid_tindakan = $(this).data("uid");
             let nama_tindakan = $(this).data("nama");
@@ -4625,8 +4652,6 @@
                 },
                 type: "POST",
                 success: function(response) {
-                    console.clear();
-                    console.log(response);
                     if(response.response_package.response_result > 0) {
                         notification ("success", "Laboratorium Berhasil Diorder", 3000, "hasil_tambah_dev");
                     } else {
@@ -4767,11 +4792,17 @@
         }
 
         $("#btnKonsul").click(function() {
-            $("#form-konsul").modal("show");
+            const simpanDataProcess = new Promise(function(resolve, rejector) {
+                resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+            }).then(function(result) {
+                if (result.response_package.response_result > 0) {
+                    $("#form-konsul").modal("show");
 
-            loadPenjamin("konsul", pasien_penjamin_uid);
-            loadPoli("konsul");
-            loadPrioritas(prioritas_antrian);
+                    loadPenjamin("konsul", pasien_penjamin_uid);
+                    loadPoli("konsul");
+                    loadPrioritas(prioritas_antrian);
+                }
+            });
         });
 
         $("#inap_kamar").change(function() {
@@ -4803,10 +4834,10 @@
                         data: {
                             request: "tambah_inap",
                             pasien: pasien_uid,
-                            waktu_masuk: $("#inap_tanggal_masuk").val(),
-                            kamar: $("#inap_kamar").val(),
+                            //waktu_masuk: $("#inap_tanggal_masuk").val(),
+                            //kamar: $("#inap_kamar").val(),
                             penjamin: $("#inap_penjamin").val(),
-                            bed: $("#inap_bed").val(),
+                            //bed: $("#inap_bed").val(),
                             dokter: $("#inap_dokter").val(),
                             kunjungan: kunjungan.uid,
                             keterangan: $("#inap_keterangan").val()
@@ -4823,8 +4854,6 @@
                                 ).then((result) => {
                                     $("#form-inap").modal("hide");
                                 });
-                            } else {
-                                console.log(response);
                             }
                         },
                         error: function(response) {
@@ -4876,8 +4905,6 @@
                                 ).then((result) => {
                                     $("#form-rujuk").modal("hide");
                                 });
-                            } else {
-                                console.log(response);
                             }
                         },
                         error: function(response) {
@@ -5017,18 +5044,18 @@
                 dataObj.pj_pasien = kunjungan.pj_pasien;
                 dataObj.info_didapat_dari = kunjungan.info_didapat_dari;
 
-                Swal.fire({
-                    title: 'Data sudah benar?',
-                    showDenyButton: true,
-                    confirmButtonText: `Ya`,
-                    denyButtonText: `Belum`,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-
-                        const simpanDataProcess = new Promise(function(resolve, reject) {
-                            resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
-                        }).then(function(result) {
-                            if(result.response_package.response_result > 0) {
+                const simpanDataProcess = new Promise(function(resolve, rejector) {
+                    resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+                }).then(function(result) {
+                    if(result.response_package.response_result > 0) {
+                        Swal.fire({
+                            title: 'Data sudah benar?',
+                            showDenyButton: true,
+                            confirmButtonText: `Ya`,
+                            denyButtonText: `Belum`,
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y");
                                 $.ajax({
                                     async: false,
                                     url: __HOSTAPI__ + "/Antrian",
@@ -5040,7 +5067,7 @@
                                         request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                                     },
                                     type: "POST",
-                                    success: function(response){
+                                    success: function(response) {
                                         proceed(response);
                                     },
                                     error: function(response) {
@@ -5048,16 +5075,12 @@
                                         console.log(response);
                                     }
                                 });
-                            } else {
-                                notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
+                            } else if(result.isDenied) {
+                                reject();
                             }
                         });
-
-                        //simpanAsesmen(antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan);
-
-
-                    } else if(result.isDenied) {
-                        reject();
+                    } else {
+                        notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                     }
                 });
             }).then(function(result) {
@@ -5081,8 +5104,6 @@
                         ).then((result) => {
                             location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                         });
-                    } else {
-                        console.log("command not found");
                     }
                 } else {
                     console.log(result);
@@ -5161,7 +5182,6 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    console.log(response);
                     var MetaData = dataPoli = response.response_package.response_data;
 
                     if (MetaData !== undefined){
@@ -5180,7 +5200,7 @@
         }
 
         $(".inputan_konsul").select2();
-        $(".inputan_inap").select2();
+        $("#inap_penjamin").select2();
         $(".inputan_rujuk").select2();
 
         var parserSymbol = {
@@ -5322,7 +5342,6 @@
                     if(metaSelOrdo[dbT].hilang) {
                         setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-times text-danger\"></i>");
                         tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " mis");
-                        console.log(dbT + " mis | " + targetClassGroup);
                     } else if(metaSelOrdo[dbT].fracture) {
                         setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-hashtag text-info\"></i>");
                         tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " cfr");
@@ -6391,29 +6410,27 @@
                                 </div>
                                 <div class="col-12 col-md-6 mb-3">
                                     <label>Dokter <span class="red">*</span></label>
-                                    <select id="inap_dokter" class="form-control select2 inputan_inap" required>
-                                        <option value="" disabled selected>Pilih Dokter</option>
-                                    </select>
+                                    <select id="inap_dokter" class="form-control select2 inputan_inap"></select>
                                 </div>
-                                <div class="col-12 col-md-6 mb-3">
+                                <!--div class="col-12 col-md-6 mb-3">
                                     <label>Kamar <span class="red">*</span></label>
                                     <select id="inap_kamar" class="form-control select2 inputan_inap" required>
                                         <option value="" disabled selected>Pilih Kamar</option>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 mb-3">
-                                    <label>Bangsal <span class="red">*</span></label>
+                                    <label>Ranjang <span class="red">*</span></label>
                                     <select id="inap_bed" class="form-control select2 inputan_inap" required>
-                                        <option value="" disabled selected>Pilih Bangsal</option>
+                                        <option value="" disabled selected>Pilih Ranjang</option>
                                     </select>
                                 </div>
                                 <div class="col-12 col-md-6 mb-3" id="group_inap_tanggal_masuk">
                                     <label>Tanggal Masuk <span class="red">*</span></label>
                                     <input type="date" id="inap_tanggal_masuk" class="form-control input-group" required />
-                                </div>
-                                <div class="col-12 col-md-6 mb-3">
+                                </div-->
+                                <div class="col-12 col-md-12 mb-12">
                                     <label>Keterangan <span class="red">*</span></label>
-                                    <input type="text" id="inap_keterangan" class="form-control" placeholder="Keterangan" />
+                                    <textarea type="text" id="inap_keterangan" class="form-control" placeholder="Keterangan"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -6422,9 +6439,15 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="btnProsesInap">
-                    <i class="fa fa-check"></i> Pindah Rawat Inap
+                    <span>
+                        <i class="fa fa-check"></i> Pindah Rawat Inap
+                    </span>
                 </button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
             </div>
         </div>
     </div>

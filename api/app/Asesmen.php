@@ -530,7 +530,7 @@ class Asesmen extends Utility {
 
 			//Poli Info
 			$Poli = new Poli(self::$pdo);
-			$PoliDetail = $Poli::get_poli_detail($antrian['response_data'][0]['departemen'])['response_data'][0];
+			$PoliDetail = $Poli->get_poli_detail($antrian['response_data'][0]['departemen'])['response_data'][0];
 
 
 			$Rawat = self::$query->select('asesmen_rawat_' . $PoliDetail['poli_asesmen'], array(
@@ -1202,17 +1202,32 @@ class Asesmen extends Utility {
 			$returnResponse = array();
 
 			//Poli Asesmen Check
-			$poli_check = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
-				'uid'
-			))
-			->where(array(
-				'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
-				'AND',
-				'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.asesmen' => '= ?'
-			), array(
-				$check['response_data'][0]['uid']
-			))
-			->execute();
+            if($parameter['poli'] === __POLI_INAP__) {
+                $poli_check = self::$query->select('asesmen_medis_inap', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'asesmen_medis_inap.deleted_at' => 'IS NULL',
+                        'AND',
+                        'asesmen_medis_inap.asesmen' => '= ?'
+                    ), array(
+                        $check['response_data'][0]['uid']
+                    ))
+                    ->execute();
+            } else {
+                $poli_check = self::$query->select('asesmen_medis_' . $PoliDetail['poli_asesmen'], array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
+                        'AND',
+                        'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.asesmen' => '= ?'
+                    ), array(
+                        $check['response_data'][0]['uid']
+                    ))
+                    ->execute();
+            }
+
 
 			if(count($poli_check['response_data']) > 0) {
                 $selectedICD9 = array();
@@ -1235,8 +1250,7 @@ class Asesmen extends Utility {
 
 
 				//Kasus Spesial FisioTerapi. Memang beda sendiri dia. aut of de boks. Paten kaleee
-                if($PoliDetail['uid'] === __UIDFISIOTERAPI__)
-                {
+                if($PoliDetail['uid'] === __UIDFISIOTERAPI__) {
                     $saveParam = array(
                         'keluhan_utama' => $parameter['keluhan_utama'],
                         'keluhan_tambahan' => $parameter['keluhan_tambahan'],
@@ -1396,36 +1410,69 @@ class Asesmen extends Utility {
                         'updated_at' => parent::format_date()
                     );
                 }
-				//Update
-				$worker = self::$query->update('asesmen_medis_' . $PoliDetail['poli_asesmen'], $saveParam)
-				->where(array(
-					'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
-					'AND',
-					'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.uid' => '= ?',
-					'AND',
-					'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.kunjungan' => '= ?',
-					'AND',
-					'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?',
-					'AND',
-					'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.pasien' => '= ?',
-					'AND',
-					'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.dokter' => '= ?',
-					'AND',
-					'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.asesmen' => '= ?'
-				), array(
-					$poli_check['response_data'][0]['uid'],
-					$parameter['kunjungan'],
-					$parameter['antrian'],
-					$parameter['pasien'],
-					$UserData['data']->uid,
-					$check['response_data'][0]['uid']
-				))
-				->execute();
 
-				if($worker['response_result'] > 0) {
+                //Update
+                if($parameter['poli'] === __POLI_INAP__) {
+                    $worker = self::$query->update('asesmen_medis_inap', $saveParam)
+                        ->where(array(
+                            'asesmen_medis_inap.deleted_at' => 'IS NULL',
+                            'AND',
+                            'asesmen_medis_inap.uid' => '= ?',
+                            'AND',
+                            'asesmen_medis_inap.kunjungan' => '= ?',
+                            'AND',
+                            'asesmen_medis_inap.antrian' => '= ?',
+                            'AND',
+                            'asesmen_medis_inap.pasien' => '= ?',
+                            'AND',
+                            'asesmen_medis_inap.dokter' => '= ?',
+                            'AND',
+                            'asesmen_medis_inap.asesmen' => '= ?'
+                        ), array(
+                            $poli_check['response_data'][0]['uid'],
+                            $parameter['kunjungan'],
+                            $parameter['antrian'],
+                            $parameter['pasien'],
+                            $UserData['data']->uid,
+                            $check['response_data'][0]['uid']
+                        ))
+                        ->execute();
+                } else {
+                    $worker = self::$query->update('asesmen_medis_' . $PoliDetail['poli_asesmen'], $saveParam)
+                        ->where(array(
+                            'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
+                            'AND',
+                            'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.uid' => '= ?',
+                            'AND',
+                            'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.kunjungan' => '= ?',
+                            'AND',
+                            'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?',
+                            'AND',
+                            'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.pasien' => '= ?',
+                            'AND',
+                            'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.dokter' => '= ?',
+                            'AND',
+                            'asesmen_medis_' . $PoliDetail['poli_asesmen'] . '.asesmen' => '= ?'
+                        ), array(
+                            $poli_check['response_data'][0]['uid'],
+                            $parameter['kunjungan'],
+                            $parameter['antrian'],
+                            $parameter['pasien'],
+                            $UserData['data']->uid,
+                            $check['response_data'][0]['uid']
+                        ))
+                        ->execute();
+                }
+
+
+
+				if($worker['response_result'] > 0) { //Berhasil simpan asesmen
 					//Update asesmen medis
 
                     if($PoliDetail['uid'] === __POLI_IGD__) {
+
+                        //Pasti Selalu selesai
+                        //Update
 
                     } else {
                         $updateAsesmen = self::$query->update('asesmen', array(
@@ -1463,7 +1510,11 @@ class Asesmen extends Utility {
                     }
 				}
 			} else {
-				$worker = self::new_asesmen($parameter, $check['response_data'][0]['uid'], $PoliDetail['poli_asesmen'], $PoliDetail['uid']);
+                if($parameter['poli'] === __POLI_INAP__) {
+                    $worker = self::new_asesmen($parameter, $check['response_data'][0]['uid'], 'inap', $PoliDetail['uid']);
+                } else {
+                    $worker = self::new_asesmen($parameter, $check['response_data'][0]['uid'], $PoliDetail['poli_asesmen'], $PoliDetail['uid']);
+                }
 			}
 
 			$returnResponse = $worker;
@@ -1506,8 +1557,12 @@ class Asesmen extends Utility {
 					),
 					'class'=>__CLASS__
 				));
+                if($parameter['poli'] === __POLI_INAP__) {
+                    $worker = self::new_asesmen($parameter, $NewAsesmen, 'inap', $PoliDetail['uid']);
+                } else {
+                    $worker = self::new_asesmen($parameter, $NewAsesmen, $PoliDetail['poli_asesmen'], $PoliDetail['uid']);
+                }
 
-				$worker = self::new_asesmen($parameter, $NewAsesmen, $PoliDetail['poli_asesmen'], $PoliDetail['uid']);
 
 				$returnResponse = $worker;
 			} else {
@@ -1525,10 +1580,7 @@ class Asesmen extends Utility {
 		if($parameter['poli'] !== __POLI_INAP__) {
 		    //Pasien Keluar Poli
             if($parameter['charge_invoice'] === 'Y') {
-
-
                 //Pasien Keluar Poli
-
                 if($parameter['poli'] !== __POLI_IGD__) {
                     $keluar = self::$query->update('antrian', array(
                         'waktu_keluar' => parent::format_date()
@@ -1547,7 +1599,8 @@ class Asesmen extends Utility {
                 $ChargeLab = $Laboratorium->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
-                    'pasien' => $parameter['pasien']
+                    'pasien' => $parameter['pasien'],
+                    'departemen' => $parameter['poli']
                 ));
                 $returnResponse['lab_response'] = $ChargeLab;
 
@@ -1555,10 +1608,60 @@ class Asesmen extends Utility {
                 $ChargeRad = $Radiologi->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
-                    'pasien' => $parameter['pasien']
+                    'pasien' => $parameter['pasien'],
+                    'departemen' => $parameter['poli']
                 ));
+
+                if($parameter['penjamin'] === __UIDPENJAMINUMUM__) {
+                    $antrian_nomor = self::$query->update('antrian_nomor', array(
+                        'status' => 'K'
+                    ))
+                        ->where(array(
+                            'antrian_nomor.pasien' => '= ?',
+                            'AND',
+                            'antrian_nomor.kunjungan' => '= ?',
+                            'AND',
+                            'antrian_nomor.poli' => '= ?',
+                            'AND',
+                            'antrian_nomor.poli.deleted_at' => 'IS NULL'
+                        ), array(
+                            $parameter['pasien'],
+                            $parameter['kunjungan'],
+                            $parameter['poli']
+                        ))
+                        ->execute();
+                }
+
                 $returnResponse['rad_response'] = $ChargeRad;
             }
+        } else {
+		    //Todo: INAP SEGMENT
+            $keluar = self::$query->update('antrian', array(
+                'waktu_keluar' => parent::format_date()
+            ))
+                ->where(array(
+                    'antrian.uid' => '= ?',
+                    'AND',
+                    'antrian.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['antrian']
+                ))
+                ->execute();
+            $Laboratorium = new Laboratorium(self::$pdo);
+            $ChargeLab = $Laboratorium->charge_invoice_item(array(
+                'asesmen' => $MasterUID,
+                'kunjungan' => $parameter['kunjungan'],
+                'pasien' => $parameter['pasien']
+            ));
+            $returnResponse['lab_response'] = $ChargeLab;
+
+            $Radiologi = new Radiologi(self::$pdo);
+            $ChargeRad = $Radiologi->charge_invoice_item(array(
+                'asesmen' => $MasterUID,
+                'kunjungan' => $parameter['kunjungan'],
+                'pasien' => $parameter['pasien']
+            ));
+            $returnResponse['rad_response'] = $ChargeRad;
         }
 
         //Check Radiologi
@@ -1983,7 +2086,7 @@ class Asesmen extends Utility {
                     //SetDetail
                     foreach ($parameter['resep'] as $key => $value) {
                         $ObatDetail = new Inventori(self::$pdo);
-                        $ObatInfo = $ObatDetail::get_item_detail($value['obat'])['response_data'][0];
+                        $ObatInfo = $ObatDetail->get_item_detail($value['obat'])['response_data'][0];
 
                         $newResepDetail = self::$query->insert('resep_detail', array(
                             'resep' => $uid,
@@ -2063,13 +2166,16 @@ class Asesmen extends Utility {
 
 	private function set_tindakan_asesment($parameter, $MasterAsesmen)
     {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
         $requested = array();
         foreach ($parameter['tindakan'] as $key => $value) {
             if (!in_array($value['item'], $requested)) {
                 array_push($requested, $value['item']);
-            } else {
+            }/* else {
                 array_push($requested, $value['item']);
-            }
+            }*/
         }
         $returnResponse = array();
         $registered = array();
@@ -2097,7 +2203,7 @@ class Asesmen extends Utility {
                 'pasien' => $parameter['pasien'],
                 'keterangan' => 'Tagihan tindakan perobatan'
             );
-            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $NewInvoice = $Invoice->create_invoice($InvMasterParam);
             $TargetInvoice = $NewInvoice['response_unique'];
         }
 
@@ -2187,7 +2293,7 @@ class Asesmen extends Utility {
 
             if ($new_asesmen_tindakan['response_result'] > 0) {
                 if ($parameter['charge_invoice'] === 'Y') {
-                    $InvoiceDetail = $Invoice::append_invoice(array(
+                    $InvoiceDetail = $Invoice->append_invoice(array(
                         'invoice' => $TargetInvoice,
                         'item' => $value['item'],
                         'item_origin' => 'master_tindakan',
@@ -2200,7 +2306,8 @@ class Asesmen extends Utility {
                         'pasien' => $parameter['pasien'],
                         'penjamin' => $parameter['penjamin'],
                         'billing_group' => 'tindakan',
-                        'keterangan' => 'Biaya Tindakan Perobatan'
+                        'keterangan' => 'Biaya Tindakan Perobatan',
+                        'departemen' => $parameter['poli']
                     ));
 
                     array_push($returnResponse, $InvoiceDetail);
@@ -2490,8 +2597,14 @@ class Asesmen extends Utility {
             );
         }
 		//insert
-		$worker = self::$query->insert('asesmen_medis_' . $poli, $saveParam)
-		->execute();
+        if($poli_uid === __POLI_INAP__) {
+            $worker = self::$query->insert('asesmen_medis_inap', $saveParam)
+                ->execute();
+        } else {
+            $worker = self::$query->insert('asesmen_medis_' . $poli, $saveParam)
+                ->execute();
+        }
+
 
 		if($worker['response_result'] > 0) {
 			$log = parent::log(array(
@@ -2994,10 +3107,11 @@ class Asesmen extends Utility {
             $cek_asesment = self::cek_asesmen_medis_detail($PoliDetail['poli_asesmen'], $value['uid']);
             $antrian['response_data'][$key]['status_asesmen'] = false;
 
-            if ($cek_asesment['response_result'] > 0){
+            if ($cek_asesment['response_result'] > 0) {
                 $antrian['response_data'][$key]['uid_asesmen_medis'] = $cek_asesment['response_data'][0]['uid'];
                 $antrian['response_data'][$key]['status_asesmen'] = true;
             }
+
             //Pasien Detail
             $Pasien = new Pasien(self::$pdo);
             $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['uid_pasien']);

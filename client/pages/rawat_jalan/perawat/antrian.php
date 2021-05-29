@@ -52,7 +52,7 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
                             Terapis
                         </a>
                     </li>
-                    <li class="nav-item tab-igd">
+                    <!--li class="nav-item tab-igd">
                         <a href="#tab-assesment-awal-igd-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="false" aria-controls="tab-asesment-awal-igd-1">
 							<span class="nav-link__count">
 								01
@@ -123,11 +123,11 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
 							</span>
                             Askep [BIDAN]
                         </a>
-                    </li>
+                    </li-->
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
-				<div class="tab-pane show fade tab-biasa" id="tab-assesment-awal-1">
+				<div class="tab-pane show fade tab-biasa active" id="tab-assesment-awal-1">
 					<?php require 'halaman1.php'; ?>
 					<?php //require 'action_panel.php'; ?>
 				</div>
@@ -163,7 +163,7 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
                 <div class="tab-pane show fade tab-igd" id="tab-assesment-bidan-igd-4a">
                     <?php require 'igd_4a.php'; ?>
                 </div>
-                <div class="tab-pane show fade tab-igd active" id="tab-assesment-bidan-igd-5a">
+                <div class="tab-pane show fade tab-igd" id="tab-assesment-bidan-igd-5a">
                     <?php require 'igd_5a.php'; ?>
                 </div>
 			</div>

@@ -36,7 +36,7 @@
                             </div>
                             <div class="card-body tab-content">
                                 <div class="tab-pane active show fade">
-                                    <table class="table table-bordered largeDataType" id="table-item">
+                                    <table class="table table-padding largeDataType" id="table-item">
                                         <thead class="thead-dark">
                                         <tr>
                                             <th class="wrap_content">No</th>

@@ -27,10 +27,16 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 				<a href="#keluhan-tambahan" data-toggle="tab" role="tab" aria-selected="false">Keluhan Tambahan</a>
 			</div>
 			<div class="card-body tab-content">
-				<div class="tab-pane active show fade" id="keluhan-utama">
+				<div class="tab-pane active show fade" id="keluhan-utama" style="min-height: 200px">
+                    <div class="edit-switch-container" target="txt_keluhan_utama">
+                        <i class="fa fa-pencil-alt"></i> Edit
+                    </div>
 					<div id="txt_keluhan_utama"></div>
 				</div>
-				<div class="tab-pane show fade" id="keluhan-tambahan">
+				<div class="tab-pane show fade" id="keluhan-tambahan" style="min-height: 200px">
+                    <div class="edit-switch-container" target="txt_keluhan_tambahan">
+                        <i class="fa fa-pencil-alt"></i> Edit
+                    </div>
 					<div id="txt_keluhan_tambahan"></div>
 				</div>
 			</div>
@@ -47,6 +53,9 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 				<div class="row">
                     <div class="col-lg-6">
                         Pemeriksaan Fisik
+                        <div class="edit-switch-container" target="txt_pemeriksaan_fisik" style="min-height: 200px">
+                            <i class="fa fa-pencil-alt"></i> Edit
+                        </div>
                         <div class="special-tab-fisioterapi col-md-12">
                             <div class="form-group">
                                 <label for="txt_icd_10_kerja">ICD 9</label>
@@ -178,7 +187,10 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 				<a href="#asesmen-banding" data-toggle="tab" role="tab" aria-selected="false">Diagnosa Banding</a>
 			</div>
 			<div class="card-body tab-content">
-				<div class="tab-pane active show fade" id="asesmen-kerja">
+				<div class="tab-pane active show fade" id="asesmen-kerja" style="min-height: 200px">
+                    <div class="edit-switch-container" target="txt_diagnosa_kerja">
+                        <i class="fa fa-pencil-alt"></i> Edit
+                    </div>
 					<div class="form-group">
 						<label for="txt_icd_10_kerja">ICD 10</label>
 						<div class="row">
@@ -208,7 +220,10 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 						<div id="txt_diagnosa_kerja"></div>
 					</div>
 				</div>
-				<div class="tab-pane show fade" id="asesmen-banding">
+				<div class="tab-pane show fade" id="asesmen-banding" style="min-height: 200px">
+                    <div class="edit-switch-container" target="txt_diagnosa_banding">
+                        <i class="fa fa-pencil-alt"></i> Edit
+                    </div>
 					<div class="form-group">
 						<label for="txt_icd_10_banding">ICD 10</label>
 						<div class="row">
@@ -244,7 +259,10 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
 				<h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Planning : Penatalaksanaan/Pengobatan/Rencana Tindakan/Konsultasi/Edukasi</h5>
 			</div>
-			<div class="card-body">
+			<div class="card-body" style="min-height: 200px">
+                <div class="edit-switch-container" target="txt_planning">
+                    <i class="fa fa-pencil-alt"></i> Edit
+                </div>
 				<div id="txt_planning"></div>
 			</div>
 		</div>

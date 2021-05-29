@@ -14,7 +14,7 @@
 			<nav aria-label="breadcrumb">
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap">Rawat Inap</a></li>
+					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap/dokter">Rawat Inap</a></li>
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap/dokter/index/<?php echo __PAGES__[4]; ?>/<?php echo __PAGES__[5]; ?>"><b id="target_pasien"></b></a></li>
 					<li class="breadcrumb-item active" aria-current="page">Pemeriksaan Medis</li>
 				</ol>
@@ -28,7 +28,7 @@
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12">
 			<div class="z-0">
-				<ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-inap">
 					<li class="nav-item">
 						<a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
@@ -75,8 +75,8 @@
 							Resep
 						</a>
 					</li>
-					<li class="nav-item">
-						<a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+					<!--li class="nav-item">
+						<a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false" disabled>
 							<span class="nav-link__count">
 								<i class="fa fa-flask"></i>
 							</span>
@@ -84,7 +84,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+						<a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false" disabled>
 							<span class="nav-link__count">
 								<i class="fa fa-life-ring"></i>
 							</span>
@@ -98,7 +98,7 @@
 							</span>
 							CPPT
 						</a>
-                    </li>
+                    </li-->
                     <li class="nav-item">
 						<a href="#tab-poli-8" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">

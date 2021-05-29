@@ -390,7 +390,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-12">
-                                        <input type="text" class="form-control inputan riwayat_merokok" disabled="disabled" id="riwayat_merokok" placeholder="Riwayat Merokok" />
+                                        <input type="text" class="form-control inputan riwayat_merokok" id="riwayat_merokok" placeholder="Riwayat Merokok" disabled />
                                     </div>
                                 </div>
                             </li>

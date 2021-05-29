@@ -201,25 +201,36 @@
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d){
-                    d.request = "get_resep_lunas_backend";
+                    d.request = "get_resep_igd";
+                    d.request_type = "igd_inap";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+
                     var forReturn = [];
                     var dataSet = response.response_package.response_data;
-                    if(dataSet == undefined) {
+                    if(dataSet === undefined) {
                         dataSet = [];
                     }
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen !== undefined) {
-                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                        if(
+                            dataSet[dKey].antrian.departemen !== undefined &&
+                            dataSet[dKey].antrian.departemen !== null
+                        ) {
+                            if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
                                 forReturn.push(dataSet[dKey]);
+                            } else {
+                                console.log(dataSet[dKey].antrian.departemen);
                             }
+                        } else {
+                            console.log(dataSet[dKey]);
                         }
                     }
+
+                    console.log(forReturn);
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;

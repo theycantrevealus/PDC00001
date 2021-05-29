@@ -355,7 +355,7 @@
 					if(returnedData == undefined || returnedData.response_package == undefined) {
 						returnedData = [];
 					}
-					console.log(response);
+
 					for(var InvKeyData in response.response_package.response_data) {
 					    if(
                             response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
@@ -383,8 +383,6 @@
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = returnedData.length;
-
-					//console.log(response);
 					
 					return returnedData;
 				}
@@ -425,31 +423,59 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 					    var poliList = [];
+					    var uniquePoliList = [];
 					    for(var az in row.antrian_kunjungan.poli_list) {
-					        poliList.push(row.antrian_kunjungan.poli_list[az].poli.nama);
+					        var targetPoli = {
+					            uid: "",
+                                nama: ""
+                            };
+					        if(row.antrian_kunjungan.poli_list[az].poli !== null) {
+                                targetPoli = {
+                                    uid: row.antrian_kunjungan.poli_list[az].poli.uid,
+                                    nama: row.antrian_kunjungan.poli_list[az].poli.nama
+                                };
+                            } else {
+                                targetPoli = {
+                                    uid: __POLI_INAP__,
+                                    nama: "Rawat Inap"
+                                };
+                            }
+					        if(uniquePoliList.indexOf(targetPoli.uid) < 0) {
+					            uniquePoliList.push(targetPoli.uid);
+                                poliList.push("<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + targetPoli.nama + "</span>");
+                            }
                         }
 					    if(poliList.length > 0) {
-                            return poliList.join(", ");
+                            return poliList.join(" ");
                         } else {
-                            return row.antrian_kunjungan.poli.nama;
+                            return "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli.nama + "</span>";
                         }
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						//return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
-                        return row.antrian_kunjungan.pegawai.nama;
+						return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span style=\"display: block\" class=\"text-right\">" + number_format(row.total_after_discount, 2, ".", ",") + "</span>";
+                        var invDetail = row.invoice_detail;
+                        var totalParse = 0;
+                        for(var a in invDetail) {
+                            if(
+                                invDetail[a].departemen !== __POLI_INAP__ &&
+                                invDetail[a].departemen !== __POLI_IGD__
+                            ) {
+                                totalParse += parseFloat(invDetail[a].subtotal);
+                            }
+                        }
+                        return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+                            "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"RJ\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
                             "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
                             "</button>" +
                             "</div>";
@@ -486,6 +512,7 @@
                 },
                 dataSrc:function(response) {
                     var returnedData = [];
+
                     if(returnedData == undefined || returnedData.response_package == undefined) {
                         returnedData = [];
                     }
@@ -507,7 +534,13 @@
                                     returnedData.push(response.response_package.response_data[InvKeyData]);
                                 }
                             } else {
-                                //
+                                if(response.response_package.response_data[InvKeyData].departemen_terkait.indexOf(__POLI_INAP__) >= 0) {
+                                    returnedData.push(response.response_package.response_data[InvKeyData]);
+                                }
+                            }
+                        } else {
+                            if(response.response_package.response_data[InvKeyData].departemen_terkait.indexOf(__POLI_INAP__) >= 0) {
+                                returnedData.push(response.response_package.response_data[InvKeyData]);
                             }
                         }
                     }
@@ -554,24 +587,30 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian_kunjungan.poli.nama;
+                        return "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> Rawat Inap</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        //return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
-                        return row.antrian_kunjungan.pegawai.nama;
+                        return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span style=\"display: block\" class=\"text-right\">" + number_format(row.total_after_discount, 2, ".", ",") + "</span>";
+                        var invDetail = row.invoice_detail;
+                        var totalParse = 0;
+                        for(var a in invDetail) {
+                            if(invDetail[a].departemen === __POLI_INAP__) {
+                                totalParse += parseFloat(invDetail[a].subtotal);
+                            }
+                        }
+                        return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+                            "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"RI\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
                             "<span><i class=\"fa fa-eye\"></i>Detail</span></button>" +
                             "</div>";
                     }
@@ -664,12 +703,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
+                        return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
+                        return "<span class=\"wrap_content\">" + row.created_at_parse + "</span>";
                     }
                 },
                 {
@@ -686,24 +725,31 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian_kunjungan.poli.nama;
+                        return "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> IGD</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         //return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
-                        return row.antrian_kunjungan.pegawai.nama;
+                        return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span style=\"display: block\" class=\"text-right\">" + number_format(row.total_after_discount, 2, ".", ",") + "</span>";
+                        var invDetail = row.invoice_detail;
+                        var totalParse = 0;
+                        for(var a in invDetail) {
+                            if(invDetail[a].departemen === __POLI_IGD__) {
+                                totalParse += parseFloat(invDetail[a].subtotal);
+                            }
+                        }
+                        return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-info btn-sm btnDetail\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+                            "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"IGD\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
                             "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
                             "</button>" +
                             "</div>";
@@ -774,6 +820,7 @@
 			var pasien = $(this).attr("pasien");
 			var penjamin = $(this).attr("penjamin");
 			var kunjungan = $(this).attr("kunjungan");
+			var classified =  $(this).attr("classified");
 
 			selectedUID = uid;
 			selectedPoli = poli;
@@ -834,11 +881,41 @@
                                 "biaya_racikan":{
                                     caption:"Biaya Racikan",
                                     item: []
+                                },
+                                "tarif_kamar": {
+                                    caption:"Tarif Kamar",
+                                    item: []
                                 }
                             };
 
 							var item_grouper = {};
-							//console.log(invoice_detail_item);
+							var filteredClassified = [];
+                            for(var invKey in invoice_detail_item) {
+                                if(classified === 'RJ') {
+                                    if(
+                                        invoice_detail_item[invKey].departemen !== __POLI_INAP__ &&
+                                        invoice_detail_item[invKey].departemen !== __POLI_IGD__
+                                    ) {
+                                        filteredClassified.push(invoice_detail_item[invKey]);
+                                    }
+                                } else if(classified === 'RI') {
+                                    if(
+                                        invoice_detail_item[invKey].departemen === __POLI_INAP__
+                                    ) {
+                                        filteredClassified.push(invoice_detail_item[invKey]);
+                                    }
+                                } else if(classified === 'IGD') {
+                                    if(
+                                        invoice_detail_item[invKey].departemen === __POLI_IGD__
+                                    ) {
+                                        filteredClassified.push(invoice_detail_item[invKey]);
+                                    }
+                                }
+
+                            }
+
+                            invoice_detail_item = filteredClassified;
+
 							for(var invKey in invoice_detail_item) {
 							    if(invoice_detail_item[invKey].item_type === "master_tindakan")
                                 {
@@ -878,6 +955,9 @@
                                     autonum: invoice_detail_item[invKey].autonum,
                                     nama: invoice_detail_item[invKey].item.nama.toUpperCase(),
                                     qty: invoice_detail_item[invKey].qty,
+                                    departemen: invoice_detail_item[invKey].departemen,
+                                    departemen_info: invoice_detail_item[invKey].departemen_info,
+                                    keterangan: invoice_detail_item[invKey].keterangan,
                                     penjamin: invoice_detail_item[invKey].penjamin.nama,
                                     harga: number_format(invoice_detail_item[invKey].harga, 2, ".", ","),
                                     total: number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",")
@@ -898,6 +978,8 @@
                                     parseName = "Radiologi";
                                 } else if(itemKey === "administrasi"){
                                     parseName = "Administrasi";
+                                } else if(itemKey === "tarif_kamar"){
+                                    parseName = "Tarif Kamar";
                                 } else {
 							        parseName = "Unspecified";
                                 }
@@ -913,7 +995,7 @@
                                         "<tr>" +
                                         "<td>" + detailData[itemDetailKey].status_bayar + "</td>" +
                                         "<td>" + detailData[itemDetailKey].autonum + "</td>" +
-                                        "<td>" + detailData[itemDetailKey].nama + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + detailData[itemDetailKey].penjamin + "</span></td>" +
+                                        "<td>" + detailData[itemDetailKey].nama + "<br /><label class=\"text-info\">[" + detailData[itemDetailKey].departemen_info.nama + "]</label><br /><b class=\"text-muted\">" + detailData[itemDetailKey].keterangan + "</b>" + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + detailData[itemDetailKey].penjamin + "</span></td>" +
                                         "<td>" + detailData[itemDetailKey].qty + "</td>" +
                                         "<td class=\"text-right\">" + detailData[itemDetailKey].harga + "</td>" +
                                         "<td class=\"text-right\">" + detailData[itemDetailKey].total + "</td>" +
@@ -1173,6 +1255,8 @@
                             keterangan:$("#keterangan-faktur").val()
                         },
                         success:function(response) {
+                            console.clear();
+                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 Swal.fire({
                                     title: "Pembayaran Berhasil!",
@@ -1203,13 +1287,12 @@
                                     for(var notifKey in notifier_target)
                                     {
                                         push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info").then(function() {
-                                            console.log("pushed!");
+                                            //console.log("pushed!");
                                         });
                                     }
 
                                 });
                             } else {
-                                console.log(response);
                                 tableAntrianBayarRJ.ajax.reload();
                                 tableAntrianBayarRI.ajax.reload();
                                 tableAntrianBayarIGD.ajax.reload();

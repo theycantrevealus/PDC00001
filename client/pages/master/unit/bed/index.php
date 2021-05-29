@@ -29,6 +29,7 @@
 							<th>Nama Bed</th>
 							<th>Ruangan</th>
 							<th>Lantai</th>
+                            <th>Tarif/Hari</th>
 							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>

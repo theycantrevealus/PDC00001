@@ -12,7 +12,7 @@
         <button type="button" class="btn btn-purple" id="btnInap">
             <i class="fa fa-bed"></i> Pindah Rawat Inap
         </button>-->
-		<a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/dokter" class="btn btn-danger">
+		<a href="<?php echo __HOSTNAME__; ?>/rawat_jalan/dokter" class="btn btn-danger pull-right">
 			<i class="fa fa-ban"></i> Kembali
 		</a>
 	</div>

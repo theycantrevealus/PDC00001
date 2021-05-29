@@ -1303,7 +1303,8 @@ class Laboratorium extends Utility {
                     'pasien' => $value['pasien'],
                     'penjamin' => $DValue['penjamin'],
                     'billing_group' => 'laboratorium',
-                    'keterangan' => 'Biaya Laboratorium'
+                    'keterangan' => 'Biaya Laboratorium',
+                    'departemen' => $parameter['departemen']
                 ));
 
                 array_push($charge_result, $InvoiceDetail);

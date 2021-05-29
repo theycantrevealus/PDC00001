@@ -467,13 +467,17 @@
                     btnSelesai.removeAttr("disabled");
                     console.clear();
                     console.log(response);
-                    if(response.response_package.response_result > 0) {
+                    if(
+                        response.response_package.response_result > 0 ||
+                        response.response_package.asesmen.response_result > 0
+                    ) {
                         notification ("success", "Berhasil Simpan Data", 3000, "hasil_tambah_dev");
+                        location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
                     } else {
                         notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                     }
 
-                    //location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+
                 },
                 error: function(response) {
                     btnSelesai.removeAttr("disabled");
@@ -664,7 +668,6 @@
 
 		$("input[name='riwayat_merokok_option']").on('change', function(){
         	let value = $(this).val();
-
         	disableLainnya('riwayat_merokok', value, "y");
         });
 
@@ -1180,21 +1183,33 @@
 								$this.val("y").prop('checked', true);
 
 								$("#riwayat_merokok").removeAttr("disabled");
-							}
+							} else {
+                                $("#riwayat_merokok").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
 
 							if ($("#riwayat_miras").val() != ""){
 								let $this = $("input:radio[name='riwayat_miras_option']");
 								$this.val("y").prop('checked', true);
 
 								$("#riwayat_miras").removeAttr("disabled");
-							}
+							} else {
+                                $("#riwayat_miras").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
 
 							if ($("#riwayat_obt_terlarang").val() != ""){
 								let $this = $("input:radio[name='riwayat_obt_terlarang_option']");
 								$this.val("y").prop('checked', true);
 
 								$("#riwayat_obt_terlarang").removeAttr("disabled");
-							}
+							} else {
+                                $("#riwayat_obt_terlarang").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
 		                }
 
 						//IGD Modul Infus

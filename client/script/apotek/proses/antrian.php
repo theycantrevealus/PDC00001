@@ -442,7 +442,8 @@
                         data:{
                             request: "proses_resep",
                             resep: resepUID,
-                            asesmen: targettedData.asesmen
+                            asesmen: targettedData.asesmen,
+                            departemen: targettedData.antrian.departemen
                         },
                         type:"POST",
                         success:function(response) {
