@@ -267,7 +267,7 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
-                                    "<i class=\"fa fa-sign-out-alt\"></i>" +
+                                    "<i class=\"fa fa-sign-out-alt\"></i> Proses" +
                                 "</a>" +
                                 "<button class=\"btn btn-info btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
                                 "<i class=\"fa fa-print\"></i> Cetak" +
