@@ -104,7 +104,7 @@
                             var newSaldo = document.createElement("TD");
                             var newKeterangan = document.createElement("TD");
 
-                            $(newTgl).html(batchGroup[a].log[b].logged_at);
+                            $(newTgl).html("<span>" + batchGroup[a].log[b].logged_at + "</span>");
                             $(newDoc).html(batchGroup[a].log[b].dokumen);
                             //$(newUraian).html(batchGroup[a].log[b].batch.batch);
                             $(newMasuk).html(number_format(batchGroup[a].log[b].masuk, 2, ",", ".")).addClass("number_style");
@@ -121,9 +121,9 @@
                             $(newRow).append(newKeterangan);
 
                             if(parseFloat(batchGroup[a].log[b].masuk) === 0) {
-                                $(newRow).find("td:eq(0)").addClass("bg-warning");
+                                $(newRow).find("td:eq(0) span").addClass("badge badge-warning badge-custom-caption");
                             } else if(parseFloat(batchGroup[a].log[b].keluar) === 0) {
-                                $(newRow).find("td:eq(0)").addClass("bg-success");
+                                $(newRow).find("td:eq(0) span").addClass("badge badge-success badge-custom-caption");
                             } else {
                                 //
                             }

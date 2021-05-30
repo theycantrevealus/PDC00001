@@ -252,17 +252,40 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.kode + " - " + row.nama;
+                        return "<h5 class=\"text-info\">[" + row.kode + "]</h5>" + row.nama;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "";
+                        var parseRanjang = "<div class=\"row\">";
+                        var dataRanjang = row.ranjang;
+                        for(var a in dataRanjang) {
+
+                            var status_ranjang =  "";
+                            if(dataRanjang[a].status === null || dataRanjang[a].status === undefined) {
+                                status_ranjang = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Tidak ada Pelayanan</span>";
+                            }
+                            parseRanjang += "<div class=\"col-lg-3\">" +
+                                "<i class=\"fa fa-bed\"></i> " + dataRanjang[a].detail.nama +
+                                "</div>" +
+                                "<div class=\"col-lg-9\">" + status_ranjang +
+                                "</div>";
+                        }
+                        parseRanjang += "</div>";
+                        return parseRanjang;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "";
+                        var parsePetugas = "<ul>";
+                        var dataPetugas = row.petugas;
+                        for(var a in dataPetugas) {
+                            parsePetugas += "<li>" +
+                                dataPetugas[a].nama_petugas
+                                "</li>";
+                        }
+                        dataPetugas += "</ul>";
+                        return parsePetugas;
                     }
                 },
                 {

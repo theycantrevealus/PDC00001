@@ -3414,7 +3414,7 @@
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                             push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
 
-                                location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                location.href = __HOSTNAME__ + "/rawat_inap/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid;
                             });
 
                         } else {

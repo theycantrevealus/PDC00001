@@ -1216,10 +1216,9 @@ class Inventori extends Utility
         return $data;
     }
 
-    private function tambah_gudang($parameter)
-    {
+    public function tambah_gudang($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $check = self::duplicate_check(array(
             'table' => 'master_inv_gudang',
@@ -1264,14 +1263,14 @@ class Inventori extends Utility
                     'class' => __CLASS__
                 ));
             }
+            $worker['response_unique'] = $uid;
             return $worker;
         }
     }
 
-    private function edit_gudang($parameter)
-    {
+    private function edit_gudang($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $old = self::get_gudang_detail($parameter['uid']);
 
@@ -4524,6 +4523,7 @@ class Inventori extends Utility
     {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $mutasiDetailRecorded = array();
 
         //Get Last AI tahun ini
         $lastID = self::$query->select('inventori_mutasi', array(
@@ -4588,6 +4588,8 @@ class Inventori extends Utility
                     ))
                         ->returning('id')
                         ->execute();
+
+                    array_push($mutasiDetailRecorded, $mutasi_detail);
 
 
                     if ($mutasi_detail['response_result'] > 0) {
@@ -4664,6 +4666,11 @@ class Inventori extends Utility
                         }
 
 
+
+
+
+
+
                         //Update Stok Tujuan
                         $stok_ke_old = self::$query->select('inventori_stok', array(
                             'stok_terkini'
@@ -4715,16 +4722,19 @@ class Inventori extends Utility
                                 'gudang' => $parameter['ke'],
                                 'masuk' => floatval($value['mutasi']),
                                 'keluar' => 0,
-                                'saldo' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) + floatval($value['mutasi']),
+                                'saldo' => floatval($stok_ke_old['response_data'][0]['stok_terkini']) + floatval($value['mutasi']),
                                 'type' => __STATUS_MUTASI_STOK__
                             ))
                                 ->execute();
                         }
                     }
+                } else {
+                    array_push($mutasiDetailRecorded, $value[$key]['mutasi']);
                 }
             }
         }
-
+        $worker['parameter_detail'] = $parameter['item'];
+        $worker['detail'] = $mutasiDetailRecorded;
         return $worker;
     }
 

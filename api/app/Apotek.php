@@ -317,55 +317,93 @@ class Apotek extends Utility
                 }
             }
         }
-
+        $itemMutasi = array();
         if($parameter['departemen'] === __POLI_INAP__) {
             //Todo: Mutasikan stok ke nurse station terkait
-            $itemMutasi = array();
-            foreach ($usedBatch as $bKey => $bValue) {
-                array_push($itemMutasi, array(
-                    $bValue['barang'] . '|' . $bValue['batch'] => array(
-                        'mutasi' => $bValue['qty'],
-                        'keterangan' => 'Mutasi kebutuhan rawat inap'
-                    )
+
+            if(count($usedBatch) > 0) {
+                foreach ($usedBatch as $bKey => $bValue) {
+                    if(!isset($itemMutasi[$bValue['barang'] . '|' . $bValue['batch']])) {
+                        $itemMutasi[$bValue['barang'] . '|' . $bValue['batch']] = array(
+                            'mutasi' => $bValue['qty'],
+                            'keterangan' => 'Mutasi kebutuhan rawat inap'
+                        );
+                    }
+                }
+
+                //Ambil informasi nurse station dan gudang tujuan dari rawat inap
+                $RawatInap = self::$query->select('rawat_inap', array(
+                    'nurse_station',
+                    'pasien',
+                    'dokter'
+                ))
+                    ->join('nurse_station', array(
+                        'kode as kode_ns',
+                        'nama as nama_ns',
+                        'unit'
+                    ))
+                    ->join('master_unit', array(
+                        'kode as kode_unit',
+                        'nama as nama_unit',
+                        'gudang'
+                    ))
+                    ->on(array(
+                        array('rawat_inap.nurse_station', '=', 'nurse_station.uid'),
+                        array('nurse_station.unit', '=', 'master_unit.uid')
+                    ))
+                    ->where(array(
+                        'rawat_inap.kunjungan' => '= ?',
+                        'AND',
+                        'rawat_inap.dokter' => '= ?',
+                        'AND',
+                        'rawat_inap.penjamin' => '= ?',
+                        'AND',
+                        'rawat_inap.deleted_at' => 'IS NULL',
+                        'AND',
+                        'nurse_station.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['antrian']['kunjungan'],
+                        $parameter['antrian']['dokter'],
+                        $parameter['antrian']['penjamin']
+                    ))
+                    ->execute();
+
+                $Mutasi = $Inventori->tambah_mutasi(array(
+                    'access_token' => $parameter['access_token'],
+                    'dari' => $UserData['data']->gudang,
+                    'ke' => $RawatInap['response_data'][0]['gudang'],
+                    'keterangan' => 'Kebutuhan Resep Rawat Inap',
+                    'item' => $itemMutasi
                 ));
+
+                if($Mutasi['response_result'] > 0) {
+                    $updateResep = self::$query->update('resep', array(
+                        'status_resep' => 'D'
+                    ))
+                        ->where(array(
+                            'resep.uid' => '= ?'
+                        ), array(
+                            $parameter['resep']
+                        ))
+                        ->execute();
+
+                    //Update Racikan
+                    $updateRacikan = self::$query->update('racikan', array(
+                        'status' => 'D'
+                    ))
+                        ->where(array(
+                            'racikan.asesmen' => '= ?',
+                            'AND',
+                            'racikan.status' => '= ?',
+                            'AND',
+                            'racikan.deleted_at' => 'IS NULL'
+                        ), array(
+                            $parameter['asesmen'],
+                            'L'
+                        ))
+                        ->execute();
+                }
             }
-
-            //Ambil informasi nurse station dan gudang tujuan dari rawat inap
-            $RawatInap = self::$query->select('rawat_inap', array(
-                'nurse_station',
-                'pasien',
-                'dokter'
-            ))
-                ->join('nurse_station', array(
-                    'kode',
-                    'nama',
-                    'gudang'
-                ))
-                ->where(array(
-                    'rawat_inap.kunjungan' => '= ?',
-                    'AND',
-                    'rawat_inap.dokter' => '= ?',
-                    'AND',
-                    'rawat_inap.penjamin' => '= ?',
-                    'AND',
-                    'rawat_inap.deleted_at' => 'IS NULL',
-                    'AND',
-                    'nurse_station.deleted_at' => 'IS NULL'
-                ), array(
-                    $parameter['antrian']['kunjungan'],
-                    $parameter['antrian']['dokter'],
-                    $parameter['antrian']['penjamindokter']
-                ))
-                ->execute();
-
-            $Mutasi = $Inventori->tambah_mutasi(array(
-                'access_token' => $parameter['access_token'],
-                'dari' => $UserData['data']->gudang,
-                'ke' => $RawatInap['response_data'][0]['gudang'],
-                'keterangan' => 'Kebutuhan Resep Rawat Inap',
-                'item' => $itemMutasi
-            ));
-            //Mutasikan Stok
 
 
 
@@ -503,6 +541,10 @@ class Apotek extends Utility
             'racikan' => $racikan,
             'raw_batch' => $rawBatch,
             'stok_progress' => $updateProgress,
+            'informasi_inap' => $RawatInap,
+            'mutasi' => $Mutasi,
+            'batch' => $usedBatch,
+            'parse_mutas' => $itemMutasi,
             'stok_result' => ($updateResult == count($usedBatch)) ? 1 : 0
         );
     }

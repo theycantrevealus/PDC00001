@@ -141,9 +141,9 @@ class Unit extends Utility {
 		return $data;
 	}
 
-	private function tambah_unit($parameter) {
+	public function tambah_unit($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
 		$worker = self::$query->insert('master_unit', array(
 			'uid' => $uid,

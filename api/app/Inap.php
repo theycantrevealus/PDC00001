@@ -93,6 +93,8 @@ class Inap extends Utility
     private function tambah_nurse_station($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $Inventori = new Inventori(self::$pdo);
+        $Unit = new Unit(self::$pdo);
 
         $check = self::duplicate_check(array(
             'table' => 'nurse_station',
@@ -104,6 +106,31 @@ class Inap extends Utility
             unset($check['response_data']);
             return $check;
         } else {
+            //Check Kode pada Stok Point
+            /*$KodeCheck = self::$query->select('master_unit', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_unit.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_unit.kode' => '= ?'
+                ), array(
+                    $parameter['kode']
+                ))
+                ->execute();
+            if(count($KodeCheck['response_data']) > 0) {
+                $KodeCheck['response_message'] = 'Duplicate data detected';
+                $KodeCheck['response_result'] = 0;
+                unset($KodeCheck['response_data']);
+                return $KodeCheck;
+            } else {
+
+
+
+
+
+            }*/
+
             $uid = parent::gen_uuid();
             $process = self::$query->insert('nurse_station', array(
                 'uid' => $uid,
@@ -208,6 +235,22 @@ class Inap extends Utility
                         ));
                     }
                 }
+
+                //Todo: Auto Gudang dan Stok Point
+                //Create Gudang
+                /*$Gudang = $Inventori->tambah_gudang(array(
+                    'access_token' => $parameter['access_token'],
+                    'nama' => 'Inventori ' . $parameter['nama']
+                ));
+
+                if($Gudang['response_result'] > 0) {
+                    $UnitProcess = $Unit->tambah_unit(array(
+                        'nama' => $parameter['nama'],
+                        'kode' => $parameter['kode'],
+                        'gudang' => $Gudang['response_unique']
+                    ));
+                }*/
+
             }
             return $process;
         }
@@ -262,7 +305,71 @@ class Inap extends Utility
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $Bed = new Bed(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
+            //Get Ranjang
+            $Ranjang = self::$query->select('nurse_station_ranjang', array(
+                'ranjang'
+            ))
+                ->where(array(
+                    'nurse_station_ranjang.deleted_at' => 'IS NULL',
+                    'AND',
+                    'nurse_station_ranjang.nurse_station' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($Ranjang['response_data'] as $RK => $RV) {
+                //Check Ketersediaan Ranjang
+                $CheckRanjang = self::$query->select('rawat_inap', array(
+                    'pasien',
+                    'dokter'
+                ))
+                    ->join('pasien', array(
+                        'nama as nama_pasien'
+                    ))
+                    ->on(array(
+                        array('rawat_inap.pasien', '=', 'pasien.uid')
+                    ))
+                    ->where(array(
+                        'rawat_inap.deleted_at' => 'IS NULL',
+                        'AND',
+                        'rawat_inap.bed' => '= ?',
+                        'AND',
+                        'rawat_inap.nurse_station' => '= ?',
+                        'AND',
+                        'rawat_inap.waktu_keluar' => 'IS NULL'
+                    ), array(
+                        $RV['ranjang'],
+                        $value['uid']
+                    ))
+                    ->execute();
+                $Ranjang['response_data'][$RK]['status'] = $CheckRanjang['response_data'][0];
+                $Ranjang['response_data'][$RK]['detail'] = $Bed->get_bed_detail('master_unit_bed', $RV['ranjang'])['response_data'][0];
+
+            }
+            $data['response_data'][$key]['ranjang'] = $Ranjang['response_data'];
+
+            //Get Petugas
+            $Petugas = self::$query->select('nurse_station_petugas', array(
+                'petugas'
+            ))
+                ->join('pegawai', array(
+                    'nama as nama_petugas'
+                ))
+                ->on(array(
+                    array('nurse_station_petugas.petugas', '=', 'pegawai.uid')
+                ))
+                ->where(array(
+                    'nurse_station_petugas.deleted_at' => 'IS NULL',
+                    'AND',
+                    'nurse_station_petugas.nurse_station' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $data['response_data'][$key]['petugas'] = $Petugas['response_data'];
+
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
         }
@@ -375,31 +482,55 @@ class Inap extends Utility
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $Pasien = new Pasien(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        $Ruangan = new Ruangan(self::$pdo);
+        $Bed = new Bed(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
 
             //Pasien
-            $Pasien = new Pasien(self::$pdo);
-            $PasienDetail = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienDetail['response_data'][0];
 
             //Dokter
-            $Pegawai = new Pegawai(self::$pdo);
             $PegawaiDetail = $Pegawai->get_detail($value['dokter']);
             $data['response_data'][$key]['dokter'] = $PegawaiDetail['response_data'][0];
 
             //Penjamin
-            $Penjamin = new Penjamin(self::$pdo);
             $PenjaminDetail = $Penjamin->get_penjamin_detail($value['penjamin']);
             $data['response_data'][$key]['penjamin'] = $PenjaminDetail['response_data'][0];
 
             //Ruangan
-            $Ruangan = new Ruangan(self::$pdo);
             $RuanganDetail = $Ruangan->get_ruangan_detail('master_unit_ruangan', $value['kamar']);
             $data['response_data'][$key]['kamar'] = $RuanganDetail['response_data'][0];
 
+            //Nurse Station
+            $NurseStation = self::$query->select('nurse_station_ranjang', array(
+                'nurse_station'
+            ))
+                ->join('nurse_station', array(
+                    'kode as kode_ns',
+                    'nama as nama_ns'
+                ))
+                ->on(array(
+                    array('nurse_station_ranjang.nurse_station', '=', 'nurse_station.uid')
+                ))
+                ->order(array(
+                    'nurse_station_ranjang.created_at' => 'DESC'
+                ))
+                ->where(array(
+                    'nurse_station_ranjang.ranjang' => '= ?',
+                    'AND',
+                    'nurse_station_ranjang.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['bed']
+                ))
+                ->execute();
+            $data['response_data'][$key]['nurse_station'] = $NurseStation['response_data'][0];
+
             //Bed
-            $Bed = new Bed(self::$pdo);
             $BedDetail = $Bed->get_bed_detail('master_unit_bed', $value['bed']);
             $data['response_data'][$key]['bed'] = $BedDetail['response_data'][0];
 
@@ -439,10 +570,30 @@ class Inap extends Utility
                 $parameter['uid']
             ))
             ->execute();
+
+
+        //Dapatkan Nurse Station
+        $NurseStation = self::$query->select('nurse_station_ranjang', array(
+            'nurse_station'
+        ))
+            ->order(array(
+                'created_at' => 'DESC'
+            ))
+            ->where(array(
+                'nurse_station_ranjang.ranjang' => '= ?',
+                'AND',
+                'nurse_station_ranjang.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['bed']
+            ))
+            ->execute();
+
+
         $worker = self::$query->update('rawat_inap', array(
             'kamar' => $parameter['kamar'],
             'bed' => $parameter['bed'],
             'keterangan' => $parameter['keterangan'],
+            'nurse_station' => $NurseStation['response_data'][0]['nurse_station'],
             'updated_at' => parent::format_date()
         ))
             ->where(array(
