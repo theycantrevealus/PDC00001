@@ -8,6 +8,8 @@
 
         refresh_kartu();
 
+
+
         function getDateRange(target) {
             var rangeKartu = $(target).val().split(" to ");
             if(rangeKartu.length > 1) {
@@ -31,6 +33,7 @@
                     var data = resp.response_package.response_data[0];
 
                     $("#nama_barang").html(data.nama);
+                    $("#item_name").html(data.nama.toUpperCase());
                     $("#kemasan_barang").html(data.satuan_terkecil_info.nama);
 
 
@@ -91,7 +94,7 @@
 
                         var tbodyContainer = document.createElement("TBODY");
 
-                        $(batchIdentifierInfo).html(batchGroup[a].batch_info.batch);
+                        $(batchIdentifierInfo).html("<span class=\"badge badge-custom-caption badge-info\" style=\"margin-left: 10px;\">" + batchGroup[a].batch_info.batch + "</span>");
 
 
                         for(var b in batchGroup[a].log) {
@@ -104,13 +107,14 @@
                             var newSaldo = document.createElement("TD");
                             var newKeterangan = document.createElement("TD");
 
-                            $(newTgl).html("<span>" + batchGroup[a].log[b].logged_at + "</span>");
-                            $(newDoc).html(batchGroup[a].log[b].dokumen);
+                            $(newTgl).html("<b>" + batchGroup[a].log[b].logged_at + "</b>");
+                            $(newDoc).html("<span class=\"wrap_content\">" + batchGroup[a].log[b].dokumen + "</span>");
                             //$(newUraian).html(batchGroup[a].log[b].batch.batch);
                             $(newMasuk).html(number_format(batchGroup[a].log[b].masuk, 2, ",", ".")).addClass("number_style");
                             $(newKeluar).html(number_format(batchGroup[a].log[b].keluar, 2, ",", ".")).addClass("number_style");
                             $(newSaldo).html(number_format(batchGroup[a].log[b].saldo, 2, ",", ".")).addClass("number_style");
-                            $(newKeterangan).html(batchGroup[a].log[b].keterangan);
+                            $(newKeterangan).html("<span>Stok " + ((parseFloat(batchGroup[a].log[b].masuk) === 0) ? "Keluar <i class=\"fa fa-arrow-alt-circle-up\"></i>" : "Masuk <i class=\"fa fa-arrow-alt-circle-down\"></i>") + "</span>" +
+                                "<p style=\"padding: 10px 5px\"><b>Keterangan:</b><br />" + batchGroup[a].log[b].keterangan + "</p>");
 
                             $(newRow).append(newTgl);
                             $(newRow).append(newDoc);
@@ -121,9 +125,9 @@
                             $(newRow).append(newKeterangan);
 
                             if(parseFloat(batchGroup[a].log[b].masuk) === 0) {
-                                $(newRow).find("td:eq(0) span").addClass("badge badge-warning badge-custom-caption");
+                                $(newRow).find("td:eq(5) span").addClass("badge badge-warning badge-custom-caption");
                             } else if(parseFloat(batchGroup[a].log[b].keluar) === 0) {
-                                $(newRow).find("td:eq(0) span").addClass("badge badge-success badge-custom-caption");
+                                $(newRow).find("td:eq(5) span").addClass("badge badge-success badge-custom-caption");
                             } else {
                                 //
                             }
@@ -144,7 +148,7 @@
                         });
 
 
-                        $("#loadResult").append(batchIdentifierInfo).append(batchTable);
+                        $("#loadResult").append(batchIdentifierInfo).append("<br />").append(batchTable);
                         /*var newRow = document.createElement("TR");
                         var newTgl = document.createElement("TD");
                         var newDoc = document.createElement("TD");

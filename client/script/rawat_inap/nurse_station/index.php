@@ -1,7 +1,8 @@
 <script type="text/javascript">
     $(function () {
         var MODE = "NEW";
-
+        var usedNS = {};
+        var currentNS = "";
         var dataSetPetugas = [];
         var currentPetugas = [];
         var selectedPetugas = [];
@@ -12,6 +13,7 @@
         var currentRanjang = [];
         var selectedRanjang = [];
         var currentRanjangUID = "";
+        var allow_manage = true;
 
         var dataPetugas = $('#listPetugas').DataTable({
             data: dataSetPetugas,
@@ -73,7 +75,7 @@
             currentPetugas = [
                 (dataSetPetugas.length + 1),
                 "<b class=\"text-info\">" + data.jabatan + "</b><br />" + data.text,
-                "<button class=\"btn btn-sm btn-danger\">" +
+                "<button uid=\"" + currentPetugasUID + "\" class=\"btn btn-sm btn-danger btnDeletePetugas\" id=\"target_petugas_" + (dataSetPetugas.length + 1) + "\">" +
                 "<span>" +
                 "<i class=\"fa fa-times\"></i> Hapus" +
                 "</span>" +
@@ -133,20 +135,31 @@
                 (dataSetRanjang.length + 1),
                 $("#filterRuangan option:selected").text(),
                 $("#filterRanjang option:selected").text(),
-                "<button class=\"btn btn-sm btn-danger\">" +
+                "<button uid=\"" + currentRanjangUID + "\" class=\"btn btn-sm btn-danger btnDeleteRanjang\" id=\"target_ranjang_" + (dataSetPetugas.length + 1) + "\">" +
                 "<span>" +
                 "<i class=\"fa fa-times\"></i> Hapus" +
                 "</span>" +
                 "</button>"
             ];
-            if(selectedRanjang.indexOf(currentRanjangUID) < 0) {
-                selectedRanjang.push(currentRanjangUID);
-                dataSetRanjang.push(currentRanjang);
-                dataRanjang.clear().rows.add(dataSetRanjang).draw();
+
+            if(usedBed.indexOf(currentRanjangUID) < 0) {
+                if(selectedRanjang.indexOf(currentRanjangUID) < 0) {
+                    selectedRanjang.push(currentRanjangUID);
+                    dataSetRanjang.push(currentRanjang);
+                    dataRanjang.clear().rows.add(dataSetRanjang).draw();
+                } else {
+                    Swal.fire(
+                        "Nurse Station",
+                        "Ranjang sudah ditambahkan",
+                        "warning"
+                    ).then((result) => {
+                        //
+                    });
+                }
             } else {
                 Swal.fire(
                     "Nurse Station",
-                    "Ranjang sudah ditambahkan",
+                    "Ranjang sudah terdaftar pada nurse station lain",
                     "warning"
                 ).then((result) => {
                     //
@@ -232,6 +245,9 @@
                         returnedData = response.response_package.response_data;
                     }
 
+                    usedNS = response.response_package.usedNS;
+                    usedBed = response.response_package.usedBed;
+
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = returnedData.length;
@@ -264,12 +280,17 @@
                             var status_ranjang =  "";
                             if(dataRanjang[a].status === null || dataRanjang[a].status === undefined) {
                                 status_ranjang = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Tidak ada Pelayanan</span>";
+                            } else {
+                                status_ranjang = "<b>" + dataRanjang[a].status.nama_pasien + "</b><br />" + dataRanjang[a].status.nama_dokter;
                             }
                             parseRanjang += "<div class=\"col-lg-3\">" +
                                 "<i class=\"fa fa-bed\"></i> " + dataRanjang[a].detail.nama +
                                 "</div>" +
                                 "<div class=\"col-lg-9\">" + status_ranjang +
                                 "</div>";
+                            if(a < dataRanjang.length - 1) {
+                                parseRanjang += "<div class=\"col-lg-12\"><hr /></div>";
+                            }
                         }
                         parseRanjang += "</div>";
                         return parseRanjang;
@@ -290,12 +311,197 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "";
+                        var checkRanjang = row.ranjang;
+                        var allowManageRanjang = false;
+                        for(var a in checkRanjang) {
+                            if(!checkRanjang[a].allow_manage) {
+                                allowManageRanjang = false;
+                                break;
+                            } else {
+                                allowManageRanjang = true;
+                            }
+                        }
+                        console.log(row);
+
+                        if(allowManageRanjang) {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button id=\"edit_" + row.uid + "\" class=\"btn btn-info btn-sm btnEditNS\">" +
+                                "<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
+                                "</button>" +
+                                "<button id=\"delete_" + row.uid + "\" class=\"btn btn-danger btn-sm btnDeleteNS\">" +
+                                "<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
+                                "</button>" +
+                                "</div>";
+                        } else {
+                            return "<span class=\"text-warning wrap_content\"><i class=\"fa fa-exclamation-triangle\"></i> Nurse Station sedang aktif</span>";
+                        }
                     }
                 }
             ]
         });
 
+        $("body").on("click", ".btnDeleteNS", function () {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+            Swal.fire({
+                title: "Hapus Nurse Station?",
+                text: "Nurse Station akan tetap ada namun di non-aktifkan",
+                showDenyButton: true,
+                //showCancelButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Inap/nurse_station/" + uid,
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "DELETE",
+                        success: function (response) {
+                            var result = response.response_package.response_result;
+                            if(result > 0) {
+                                ns.ajax.reload();
+                            }
+                        },
+                        error: function (response) {
+                            //
+                        }
+                    });
+                }
+            });
+        });
+
+        $("body").on("click", ".btnEditNS", function () {
+            MODE = "EDIT";
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+            currentNS = uid;
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Inap/detail_ns/" + uid,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "GET",
+                success: function(response) {
+                    var result = response.response_package.response_data[0];
+                    console.log(result);
+                    allow_manage = response.response_package.allow_manage;
+                    if(!allow_manage) {
+                        Swal.fire(
+                            "Nurse Station",
+                            "Kosongkan nurse station sebelum melakukan perubahan data",
+                            "warning"
+                        ).then((result) => {
+                            //
+                        });
+
+                    } else {
+                        $("#txt_kode").val(result.kode);
+                        $("#txt_nama").val(result.nama);
+                        $("#txt_unit").append("<option value=\"" + result.uid_unit + "\">" + result.kode_unit + " - " + result.nama_unit + "</option>");
+                        $('#txt_unit').val(result.uid_unit).trigger("change");
+                        var petugas = result.petugas;
+                        dataSetPetugas = [];
+                        selectedPetugas = [];
+                        for(var a in petugas) {
+                            if(selectedPetugas.indexOf(petugas[a].petugas) < 0) {
+                                selectedPetugas.push(petugas[a].petugas);
+                            }
+
+                            var composePetugas = [
+                                (dataSetPetugas.length + 1),
+                                "<b class=\"text-info\">" + petugas[a].nama_jabatan + "</b><br />" + petugas[a].nama_petugas,
+                                "<button uid=\"" + petugas[a].petugas + "\" class=\"btn btn-sm btn-danger btnDeletePetugas\" id=\"target_petugas_" + (dataSetPetugas.length + 1) + "\">" +
+                                "<span>" +
+                                "<i class=\"fa fa-times\"></i> Hapus" +
+                                "</span>" +
+                                "</button>"
+                            ];
+                            dataSetPetugas.push(composePetugas);
+                        }
+                        dataPetugas.clear().rows.add(dataSetPetugas).draw();
+
+                        var ranjang = result.ranjang;
+                        dataSetRanjang = [];
+                        selectedRanjang = [];
+                        for(var a in ranjang) {
+                            if(selectedRanjang.indexOf(ranjang[a].detail.uid) < 0) {
+                                selectedRanjang.push(ranjang[a].detail.uid);
+                            }
+
+                            var composeRanjang = [
+                                (dataSetRanjang.length + 1),
+                                ranjang[a].detail.ruangan_detail.nama,
+                                ranjang[a].detail.nama,
+                                "<button uid=\"" + ranjang[a].detail.uid + "\" class=\"btn btn-sm btn-danger btnDeleteRanjang\" id=\"target_ranjang_" + (dataSetRanjang.length + 1) + "\">" +
+                                "<span>" +
+                                "<i class=\"fa fa-times\"></i> Hapus" +
+                                "</span>" +
+                                "</button>"
+                            ];
+
+                            dataSetRanjang.push(composeRanjang);
+                        }
+                        dataRanjang.clear().rows.add(dataSetRanjang).draw();
+
+                        $("#form-nurse-station").modal("show");
+                    }
+                },
+                error: function(response) {
+                    console.clear();
+                    console.log(response);
+                }
+            });
+        });
+
+
+        $("body").on("click", ".btnDeleteRanjang", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            var uid = $(this).attr("uid");
+            selectedRanjang.splice(selectedRanjang.indexOf(uid), 1);
+            usedBed.splice(selectedRanjang.indexOf(uid), 1);
+
+            for(var a in dataSetRanjang) {
+                if(parseInt(dataSetRanjang[a][0]) === parseInt(id)) {
+                    dataSetRanjang.splice(a, 1);
+                }
+            }
+            dataSetRanjang = rebaseDataSet(dataSetRanjang, "btnDeleteRanjang", "target_ranjang_", uid);
+            dataRanjang.clear().rows.add(dataSetRanjang).draw();
+        });
+
+        $("body").on("click", ".btnDeletePetugas", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            var uid = $(this).attr("uid");
+            selectedPetugas.splice(selectedPetugas.indexOf(uid), 1);
+
+            for(var a in dataSetPetugas) {
+                if(parseInt(dataSetPetugas[a][0]) === parseInt(id)) {
+                    dataSetPetugas.splice(a, 1);
+                }
+            }
+            dataSetPetugas = rebaseDataSet(dataSetPetugas, "btnDeletePetugas", "target_petugas_", uid);
+            dataPetugas.clear().rows.add(dataSetPetugas).draw();
+        });
+
+        function rebaseDataSet(data, classifier, composeItem, uid) {
+            for(var a in data) {
+                data[a][0] = (parseInt(a) + 1);
+                data[a][data[a].length - 1] = "<button uid=\"" + uid + "\" class=\"btn btn-sm btn-danger " + classifier + "\" id=\"" + composeItem + (parseInt(a) + 1) + "\">" +
+                    "<span>" +
+                    "<i class=\"fa fa-times\"></i> Hapus" +
+                    "</span>" +
+                    "</button>";
+            }
+            return data;
+        }
 
 
         $("#btnTambahNS").click(function () {
@@ -356,41 +562,81 @@
             var getRanjang = selectedRanjang;
 
             Swal.fire({
-                title: 'Tambah Nurse Station?',
-                text: 'Pastikan data sudah benar. Data akan digunakan untuk pelayanan rawat inap',
+                title: "Tambah Nurse Station?",
+                text: "Pastikan data sudah benar. Data akan digunakan untuk pelayanan rawat inap",
                 showDenyButton: true,
                 //showCancelButton: true,
-                confirmButtonText: `Ya`,
-                denyButtonText: `Belum`,
+                confirmButtonText: "Ya",
+                denyButtonText: "Belum",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        async: false,
-                        url: __HOSTAPI__ + "/Inap",
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        data: {
-                            request: "tambah_nurse_station",
-                            nama: nama,
-                            kode: kode,
-                            unit: unit,
-                            petugas: getPetugas,
-                            ranjang: getRanjang
-                        },
-                        type: "POST",
-                        success: function(response) {
-                            var result = response.response_package.response_result;
-                            if(result > 0) {
-                                $("#form-nurse-station").modal("hide");
-                                ns.ajax.reload();
+                    if(MODE === "NEW") {
+                        $.ajax({
+                            async: false,
+                            url: __HOSTAPI__ + "/Inap",
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            data: {
+                                request: "tambah_nurse_station",
+                                nama: nama,
+                                kode: kode,
+                                unit: unit,
+                                petugas: getPetugas,
+                                ranjang: getRanjang
+                            },
+                            type: "POST",
+                            success: function(response) {
+                                var result = response.response_package.response_result;
+                                if(result > 0) {
+                                    $("#form-nurse-station").modal("hide");
+                                    ns.ajax.reload();
+                                }
+                            },
+                            error: function(response) {
+                                console.clear();
+                                console.log(response);
                             }
-                        },
-                        error: function(response) {
-                            console.clear();
-                            console.log(response);
-                        }
-                    });
+                        });
+                    } else {
+                        $.ajax({
+                            async: false,
+                            url: __HOSTAPI__ + "/Inap",
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            data: {
+                                request: "edit_nurse_station",
+                                uid: currentNS,
+                                nama: nama,
+                                kode: kode,
+                                unit: unit,
+                                petugas: getPetugas,
+                                ranjang: getRanjang
+                            },
+                            type: "POST",
+                            success: function(response) {
+                                var result = response.response_package.response_result;
+                                if(result > 0) {
+                                    $("#form-nurse-station").modal("hide");
+                                    ns.ajax.reload();
+                                } else {
+                                    Swal.fire(
+                                        "Nurse Station",
+                                        "Gagal Update Nurse Station",
+                                        "warning"
+                                    ).then((result) => {
+                                        ns.ajax.reload();
+                                        console.log(response);
+                                    });
+                                }
+                            },
+                            error: function(response) {
+                                console.clear();
+                                console.log(response);
+                            }
+                        });
+                    }
                 }
             });
         });

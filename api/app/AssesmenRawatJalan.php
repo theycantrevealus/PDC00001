@@ -163,7 +163,7 @@ class AssesmenRawatJalan extends Utility {
 		$allData['antrian'] = $parameter['uid_antrian'];
 		$allData['no_rm'] = $dataPasien['no_rm'];
 		$allData['pasien'] = $dataPasien['uid'];
-		$allData['perawat'] = $UserData['data']->uid;
+		$allData['perawat2'] = $UserData['data']->uid;
 		$allData['waktu_pengkajian'] = parent::format_date();
 		$allData['departemen'] = $dataAntrian['departemen'];
 		$allData['created_at'] = parent::format_date();

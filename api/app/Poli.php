@@ -53,11 +53,11 @@ class Poli extends Utility {
 					return self::get_poli_tindakan($parameter[2]);
 					break;
 
-				case 'poli-avail-perawat':
+				case 'poli-avail-perawat2':
 					return self::get_avail_perawat($parameter[2]);
 					break;
 
-				case 'poli-set-perawat':
+				case 'poli-set-perawat2':
 					return self::get_set_perawat($parameter[2]);
 					break;
 
@@ -344,7 +344,7 @@ class Poli extends Utility {
 
 			$data['response_data'][$key]['tindakan'] = self::get_poli_tindakan($parameter)['response_data'];
 			$data['response_data'][$key]['dokter'] = self::get_set_dokter($parameter)['response_data'];
-			$data['response_data'][$key]['perawat'] = self::get_set_perawat($parameter)['response_data'];
+			$data['response_data'][$key]['perawat2'] = self::get_set_perawat($parameter)['response_data'];
 		}
 
 		return $data;
@@ -496,11 +496,11 @@ class Poli extends Utility {
 
 		$poli = self::$query->delete('master_poli_perawat')
 		->where(array(
-			'master_poli_perawat.perawat' => '= ?',
+			'master_poli_perawat.perawat2' => '= ?',
 			'AND',
 			'master_poli_perawat.poli' => '= ?'
 		), array(
-			$parameter['perawat'],
+			$parameter['perawat2'],
 			$parameter['poli']
 		))
 		->execute();
@@ -518,7 +518,7 @@ class Poli extends Utility {
 						'login_id'
 					),
 					'value'=>array(
-						$parameter['perawat'] . '|' . $parameter['poli'],
+						$parameter['perawat2'] . '|' . $parameter['poli'],
 						$UserData['data']->uid,
 						'master_poli_perawat',
 						'D',
@@ -738,14 +738,14 @@ class Poli extends Utility {
 		$check = self::$query->select('master_poli_perawat', array(
 			'id',
 			'poli',
-			'perawat'
+			'perawat2'
 		))
 		->where(array(
-			'master_poli_perawat.perawat' => '= ?',
+			'master_poli_perawat.perawat2' => '= ?',
 			'AND',
 			'master_poli_perawat.poli' => '= ?'
 		), array(
-			$parameter['perawat'],
+			$parameter['perawat2'],
 			$parameter['poli']
 		))
 		->execute();
@@ -755,11 +755,11 @@ class Poli extends Utility {
 				'deleted_at' => NULL
 			))
 			->where(array(
-				'master_poli_perawat.perawat' => '= ?',
+				'master_poli_perawat.perawat2' => '= ?',
 				'AND',
 				'master_poli_perawat.poli' => '= ?'
 			), array(
-				$parameter['perawat'],
+				$parameter['perawat2'],
 				$parameter['poli']
 			))
 			->execute();
@@ -791,7 +791,7 @@ class Poli extends Utility {
 		} else {
 			$worker = self::$query->insert('master_poli_perawat', array(
 				'poli' => $parameter['poli'],
-				'perawat' => $parameter['perawat'],
+				'perawat2' => $parameter['perawat2'],
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))
@@ -1012,7 +1012,7 @@ class Poli extends Utility {
 		$columnTarget = array(
 			'id',
 			'poli',
-			'perawat',
+			'perawat2',
 			'created_at',
 			'updated_at'
 		);
@@ -1050,7 +1050,7 @@ class Poli extends Utility {
 			))
 			->on(array(
 				array(
-					'master_poli_perawat.perawat' => 'pegawai.uid'
+					'master_poli_perawat.perawat2' => 'pegawai.uid'
 				)
 			))
 			->where($paramData, $paramValue)
@@ -1064,7 +1064,7 @@ class Poli extends Utility {
 				'nama as nama_perawat'
 			))
 			->on(array(
-				array('master_poli_perawat.perawat', '=', 'pegawai.uid')
+				array('master_poli_perawat.perawat2', '=', 'pegawai.uid')
 			))
 			->where($paramData, $paramValue)
 			->order(array(
@@ -1276,13 +1276,13 @@ class Poli extends Utility {
 
     public function get_poli_by_perawat($parameter) {
         $CheckPoli = self::$query->select('master_poli_perawat', array(
-            'perawat',
+            'perawat2',
             'poli'
         ))
             ->where(array(
                 'deleted_at' => 'IS NULL',
                 'AND',
-                'perawat' => '= ?'
+                'perawat2' => '= ?'
             ), array(
                 $parameter
             ))
@@ -1321,7 +1321,7 @@ class Poli extends Utility {
 
 		$filterPerawat = array();
 		$CheckPoli = self::$query->select('master_poli_perawat', array(
-			'perawat'
+			'perawat2'
 		))
 		->where(array(
 			'deleted_at' => 'IS NULL',
@@ -1333,8 +1333,8 @@ class Poli extends Utility {
 		->execute();
 
 		foreach ($CheckPoli['response_data'] as $key => $value) {
-			if(!in_array($value['perawat'], $filterPerawat)) {
-				array_push($filterPerawat, $value['perawat']);
+			if(!in_array($value['perawat2'], $filterPerawat)) {
+				array_push($filterPerawat, $value['perawat2']);
 			}
 		}
 
@@ -1349,7 +1349,7 @@ class Poli extends Utility {
 
 	private function get_set_perawat($parameter) {
 		$CheckPoli = self::$query->select('master_poli_perawat', array(
-			'perawat'
+			'perawat2'
 		))
 		->where(array(
 			'deleted_at' => 'IS NULL',
@@ -1362,7 +1362,7 @@ class Poli extends Utility {
 
 		foreach ($CheckPoli['response_data'] as $key => $value) {
 			$Pegawai = new Pegawai(self::$pdo);
-			$NamaPerawat = $Pegawai::get_detail($value['perawat']);
+			$NamaPerawat = $Pegawai::get_detail($value['perawat2']);
 			$CheckPoli['response_data'][$key]['nama'] = $NamaPerawat['response_data'][0]['nama'];
 		}
 
@@ -1375,15 +1375,15 @@ class Poli extends Utility {
 		
 		$readPerawat = self::$query->select('master_poli_perawat', array(
 			'poli',
-			'perawat'
+			'perawat2'
 		))
 		->where(array(
 			'poli' => '= ?',
 			'AND',
-			'perawat' => '= ?'
+			'perawat2' => '= ?'
 		), array(
 			$parameter['poli'],
-			$parameter['perawat']
+			$parameter['perawat2']
 		))
 		->execute();
 
@@ -1395,10 +1395,10 @@ class Poli extends Utility {
 			->where(array(
 				'poli' => '= ?',
 				'AND',
-				'perawat' => '= ?'
+				'perawat2' => '= ?'
 			), array(
 				$parameter['poli'],
-				$parameter['perawat']
+				$parameter['perawat2']
 			))
 			->execute();
 
@@ -1429,7 +1429,7 @@ class Poli extends Utility {
 		} else {
 			$worker = self::$query->insert('master_poli_perawat', array(
 				'poli' => $parameter['poli'],
-				'perawat' => $parameter['perawat'],
+				'perawat2' => $parameter['perawat2'],
 				'pegawai' => $UserData['data']->uid,
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
@@ -1473,10 +1473,10 @@ class Poli extends Utility {
 		->where(array(
 			'poli' => '= ?',
 			'AND',
-			'perawat' => '= ?'
+			'perawat2' => '= ?'
 		), array(
 			$parameter['poli'],
-			$parameter['perawat']
+			$parameter['perawat2']
 		))
 		->returning('id')
 		->execute();

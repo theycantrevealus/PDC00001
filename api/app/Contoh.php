@@ -47,7 +47,7 @@ class Contoh extends Utility {
                     no_rm character varying(15) NOT NULL,
                     pasien uuid NOT NULL,
                     departemen uuid NOT NULL,
-                    perawat uuid NOT NULL,
+                    perawat2 uuid NOT NULL,
                     pj_pasien character varying,
                     info_dari character varying,
                     waktu_pengkajian timestamp without time zone NOT NULL,

@@ -35,9 +35,9 @@
                                         <thead class="thead-dark">
                                         <tr>
                                             <th class="wrap_content">No</th>
-                                            <th style="width: 30%;">Nama</th>
-                                            <th>Asuhan</th>
-                                            <th>Petugas</th>
+                                            <th style="width: 10%;">Nama</th>
+                                            <th style="width: 10%;">Asuhan</th>
+                                            <th style="width: 10%;">Petugas</th>
                                             <th class="wrap_content">Aksi</th>
                                         </tr>
                                         </thead>
