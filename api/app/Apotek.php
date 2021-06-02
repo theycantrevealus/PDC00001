@@ -423,12 +423,6 @@ class Apotek extends Utility
                         ->execute();
                 }
             }
-
-
-
-
-
-
         } else {
             //Jika bukan Rawat Inap potong seperti biasa
             $updateResult = 0;
