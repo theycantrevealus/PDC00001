@@ -207,6 +207,7 @@ class Pegawai extends Utility {
                     //Load Perawat Data
                     $PoliData = $Poli->get_poli_by_perawat($read[0]['uid']);
                     $_SESSION['poli'] = $PoliData;
+                    $NurseStationList = array();
 
                     $NurseStation = self::$query->select('nurse_station_petugas', array(
                         'nurse_station'
@@ -229,12 +230,16 @@ class Pegawai extends Utility {
                     if(count($NurseStation['response_data']) > 0) {
                         $UnitMulti = array();
                         foreach ($NurseStation['response_data'] as $NSKey => $NSValue) {
+                            if(!in_array($NSValue['nurse_station'], $NurseStationList)) {
+                                array_push($NurseStationList, $NSValue['nurse_station']);
+                            }
+
                             array_push($UnitMulti, $Unit->get_unit_detail($NSValue['unit']))['response_data'][0];
                         }
                         $_SESSION['unit_multi'] = $UnitMulti;
                         $Unit_Info = $Unit->get_unit_detail($NurseStation['response_data'][0]['unit'])['response_data'][0];
                     }
-
+                    $_SESSION['nurse_station'] = $NurseStationList;
                     $_SESSION['unit'] = $Unit_Info;
 
                     $user_arr_data = array(
@@ -1321,7 +1326,7 @@ class Pegawai extends Utility {
                                     ->where(array(
                                         'master_poli_perawat.poli' => '= ?',
                                         'AND',
-                                        'master_poli_perawat.perawat2' => '= ?'
+                                        'master_poli_perawat.perawat' => '= ?'
                                     ), array(
                                         $targettedPoli,
                                         $targettedPegawai
@@ -1335,7 +1340,7 @@ class Pegawai extends Utility {
                                         ->where(array(
                                             'master_poli_perawat.poli' => '= ?',
                                             'AND',
-                                            'master_poli_perawat.perawat2' => '= ?'
+                                            'master_poli_perawat.perawat' => '= ?'
                                         ), array(
                                             $targettedPoli,
                                             $targettedPegawai
@@ -1344,7 +1349,7 @@ class Pegawai extends Utility {
                                 } else {
                                     $workerPerawatPoli = self::$query->insert('master_poli_perawat', array(
                                         'poli' => $targettedPoli,
-                                        'perawat2' => $targettedPegawai,
+                                        'perawat' => $targettedPegawai,
                                         'created_at' => parent::format_date(),
                                         'updated_at' => parent::format_date()
                                     ))

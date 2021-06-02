@@ -29,6 +29,7 @@
             __UNIT__ = __UNIT_MULTI__[0]['response_data'][0];
         }
     }
+    var __NURSE_STATION__ = <?php echo json_encode($_SESSION['nurse_station']); ?>;
 
 	var __UIDPENJAMINUMUM__ = <?php echo json_encode(__UIDPENJAMINUMUM__); ?>;
 	var __UIDPENJAMINBPJS__ = <?php echo json_encode(__UIDPENJAMINBPJS__); ?>;

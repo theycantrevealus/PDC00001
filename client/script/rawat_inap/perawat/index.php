@@ -26,7 +26,7 @@
                         for(var key in data) {
                             if(
                                 data[key].pasien !== null && data[key].pasien !== undefined &&
-                                data[key].dokter.uid === __ME__
+                                __NURSE_STATION__.indexOf(data[key].nurse_station.nurse_station) >= 0
                             ) {
                                 data[key].autonum = autonum;
                                 returnedData.push(data[key]);
@@ -81,7 +81,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/rawat_inap/dokter/asesmen-detail/" + row.pasien.uid + "/" + row.kunjungan + "/" + row.penjamin.uid + "\" class=\"btn btn-sm btn-info btnProsesInap\" id=\"btn_proses_" + row.uid + "\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/rawat_inap/perawat/asesmen-detail/" + row.pasien.uid + "/" + row.kunjungan + "/" + row.penjamin.uid + "\" class=\"btn btn-sm btn-info btnProsesInap\" id=\"btn_proses_" + row.uid + "\">" +
                             "<span><i class=\"fa fa-sign-out-alt\"></i> Proses</span>" +
                             "<a>" +
                             "</div>";

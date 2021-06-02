@@ -192,6 +192,7 @@ class Apotek extends Utility
 
 
         $usedBatch = array();
+        $usedBatchInap = array();
         $rawBatch = array();
         $Inventori = new Inventori(self::$pdo);
 
@@ -223,6 +224,15 @@ class Apotek extends Utility
                 {
                     if($kebutuhan > $bValue['stok_terkini'])
                     {
+                        if($parameter['departemen'] === __POLI_INAP__) {
+                            //Racikan tidak usah charge stok karena stok dianggap habis diproses
+                            array_push($usedBatchInap, array(
+                                'batch' => $bValue['batch'],
+                                'barang' => $value['obat'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'qty' => $bValue['stok_terkini']
+                            ));
+                        }
                         $kebutuhan -= $bValue['stok_terkini'];
                         array_push($usedBatch, array(
                             'batch' => $bValue['batch'],
@@ -231,6 +241,15 @@ class Apotek extends Utility
                             'qty' => $bValue['stok_terkini']
                         ));
                     } else {
+                        if($parameter['departemen'] === __POLI_INAP__) {
+                            //Racikan tidak usah charge stok karena stok dianggap habis diproses
+                            array_push($usedBatchInap, array(
+                                'batch' => $bValue['batch'],
+                                'barang' => $value['obat'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'qty' => $bValue['stok_terkini']
+                            ));
+                        }
                         array_push($usedBatch, array(
                             'batch' => $bValue['batch'],
                             'barang' => $value['obat'],
@@ -321,8 +340,8 @@ class Apotek extends Utility
         if($parameter['departemen'] === __POLI_INAP__) {
             //Todo: Mutasikan stok ke nurse station terkait
 
-            if(count($usedBatch) > 0) {
-                foreach ($usedBatch as $bKey => $bValue) {
+            if(count($usedBatchInap) > 0) {
+                foreach ($usedBatchInap as $bKey => $bValue) {
                     if(!isset($itemMutasi[$bValue['barang'] . '|' . $bValue['batch']])) {
                         $itemMutasi[$bValue['barang'] . '|' . $bValue['batch']] = array(
                             'mutasi' => $bValue['qty'],
@@ -1371,11 +1390,11 @@ class Apotek extends Utility
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 //Batch Info
                 $Inventori = new Inventori(self::$pdo);
-                $InventoriBatch = $Inventori::get_item_batch($ResValue['obat']);
+                $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
 
                 $Inventori = new Inventori(self::$pdo);
-                $InventoriInfo = $Inventori::get_item_detail($ResValue['obat']);
+                $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
             }
             $data['response_data'][$key]['detail'] = $resep_detail['response_data'];
@@ -1398,12 +1417,9 @@ class Apotek extends Utility
                 ->where(array(
                     'racikan.asesmen' => '= ?',
                     'AND',
-                    'racikan.status' => '= ?',
-                    'AND',
                     'racikan.deleted_at' => 'IS NULL'
                 ), array(
-                    $value['asesmen'],
-                    'N'
+                    $value['asesmen']
                 ))
                 ->execute();
             foreach ($racikan['response_data'] as $RDKey => $RDValue) {

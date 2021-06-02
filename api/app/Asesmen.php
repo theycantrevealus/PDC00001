@@ -171,7 +171,7 @@ class Asesmen extends Utility {
             'antrian' => $parameter['antrian'],
             'pasien' => $parameter['pasien'],
             'dokter' => $UserData['data']->uid,
-            'perawat2' => $parameter['perawat2'],
+            'perawat' => $parameter['perawat'],
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date(),
             'status' => 'N'
@@ -225,7 +225,7 @@ class Asesmen extends Utility {
                 'pasien',
                 'antrian',
                 'dokter',
-                'perawat2',
+                'perawat',
                 'status',
                 'created_at',
                 'updated_at'
@@ -248,7 +248,7 @@ class Asesmen extends Utility {
                 'pasien',
                 'antrian',
                 'dokter',
-                'perawat2',
+                'perawat',
                 'status',
                 'created_at',
                 'updated_at'
@@ -2872,7 +2872,7 @@ class Asesmen extends Utility {
 				$parameter['dataObj']['departemen'] = $parameter['dataAntrian']['departemen'];
 
 
-				$rawat = self::new_asesmen_rawat($parameter['dataObj'], $MasterUID, $PoliDetail['poli_asesmen']);
+				$rawat = self::new_asesmen_rawat($parameter['dataObj'], $MasterUID, $PoliDetail['poli_asesmen'], $parameter);
 			}
 
 			$returnResponse = $rawat;
@@ -2923,7 +2923,7 @@ class Asesmen extends Utility {
 				$parameter['dataObj']['kunjungan'] = $parameter['dataAntrian']['kunjungan'];
 				$parameter['dataObj']['departemen'] = $parameter['dataAntrian']['departemen'];
 
-				$rawat = self::new_asesmen_rawat($parameter['dataObj'], $NewAsesmen, $PoliDetail['poli_asesmen']);
+				$rawat = self::new_asesmen_rawat($parameter['dataObj'], $NewAsesmen, $PoliDetail['poli_asesmen'], $parameter);
 
 				$returnResponse = ["asesmen"=>$rawat,"asesmen_rawat"=>$rawat];
 			} else {
@@ -3012,11 +3012,11 @@ class Asesmen extends Utility {
 			->select('master_poli_perawat', 
 				array(
 					'poli',
-					'perawat2'
+					'perawat'
 				)
 			)
 			->where(array(
-					'master_poli_perawat.perawat2' => '= ?',
+					'master_poli_perawat.perawat' => '= ?',
 					'AND',
 					'master_poli_perawat.deleted_at' => 'IS NULL'
 				), array(
@@ -3041,7 +3041,7 @@ class Asesmen extends Utility {
 			$cek_asesment = self::cek_asesmen_rawat_detail($PoliDetail['poli_asesmen'], $value['uid']);
 			$antrian[$key]['status_asesmen'] = false;
             $antrian[$key]['uid_kunjungan'] = $cek_asesment['response_data'][0]['uid_kunjungan'];
-            $antrian[$key]['perawat2'] = $Pegawai->get_detail($cek_asesment['response_data'][0]['perawat2'])['response_data'][0];
+            $antrian[$key]['perawat'] = $Pegawai->get_detail($cek_asesment['response_data'][0]['perawat'])['response_data'][0];
 
 			if ($cek_asesment['response_result'] > 0){
 				$antrian[$key]['uid_asesmen_rawat'] = $cek_asesment['response_data'][0]['uid'];
@@ -3168,7 +3168,7 @@ class Asesmen extends Utility {
 
 	private function cek_asesmen_rawat_detail($poli_prefix, $parameter){
 		$data = self::$query
-				->select('asesmen_rawat_' . $poli_prefix, array('uid','antrian','kunjungan as uid_kunjungan','perawat2'))
+				->select('asesmen_rawat_' . $poli_prefix, array('uid','antrian','kunjungan as uid_kunjungan','perawat'))
 				->where(array(
 							'deleted_at' => 'IS NULL',
 							'AND',
@@ -3196,9 +3196,9 @@ class Asesmen extends Utility {
 		return $data;
 	}
 
-	private function new_asesmen_rawat($dataAsesmen, $uid_asesmen, $poli) {
+	private function new_asesmen_rawat($dataAsesmen, $uid_asesmen, $poli, $parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
 
         $DataPartus = $dataAsesmen['partus_list'];
@@ -3210,7 +3210,7 @@ class Asesmen extends Utility {
 
 		$dataAsesmen['uid'] = $uid;
 		$dataAsesmen['asesmen'] = $uid_asesmen;
-		$dataAsesmen['perawat2'] = $UserData['data']->uid;
+		$dataAsesmen['perawat'] = $UserData['data']->uid;
 		$dataAsesmen['waktu_pengkajian'] = parent::format_date();
 
 		$dataAsesmen['created_at'] = parent::format_date();
@@ -3240,7 +3240,7 @@ class Asesmen extends Utility {
 					'login_id'
 				),
 				'value'=>array(
-					$parent,
+					$uid,
 					$UserData['data']->uid,
 					'asesmen_rawat_' . $poli,
 					'I',
@@ -3294,7 +3294,7 @@ class Asesmen extends Utility {
                     array_push($proceed_bidan_id, $checkBidan['response_data'][0]['id']);
                 } else {
                     $proceed_bidan = self::$query->insert('asesmen_kebidanan', array(
-                        'asesmen' => $MasterUID,
+                        'asesmen' => $uid_asesmen,
                         'tanggal_partus' => $partValue['tanggal'],
                         'usia_kehamilan' => $partValue['usia'],
                         'tempat_partus' => $partValue['tempat'],
@@ -3367,7 +3367,7 @@ class Asesmen extends Utility {
 	}
 
 	//function for get pasien detail data
-	private function get_data_pasien($parameter){		//$parameter = uid pasien
+	private function get_data_pasien($parameter) {		//$parameter = uid pasien
 		/*--------- GET NO RM --------------- */
 		$pasien = new Pasien(self::$pdo);
 		$param = ['','pasien-detail', $parameter];
