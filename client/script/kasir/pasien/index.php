@@ -356,6 +356,7 @@
 						returnedData = [];
 					}
 
+
 					for(var InvKeyData in response.response_package.response_data) {
 					    if(
                             response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
@@ -372,7 +373,18 @@
                                     if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
                                         response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
                                     }
-                                    returnedData.push(response.response_package.response_data[InvKeyData]);
+                                    var showIt = false;
+                                    for(var az in response.response_package.response_data[InvKeyData].invoice_detail) {
+                                        if(response.response_package.response_data[InvKeyData].invoice_detail[az].status_bayar === "N" && response.response_package.response_data[InvKeyData].invoice_detail[az].departemen !== __POLI_INAP__) {
+                                            showIt = true;
+                                        } else {
+                                            showIt = false;
+                                            break;
+                                        }
+                                    }
+                                    if(showIt) {
+                                        returnedData.push(response.response_package.response_data[InvKeyData]);
+                                    }
                                 }
                             } else {
                                 //

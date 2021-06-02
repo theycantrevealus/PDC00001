@@ -22,11 +22,18 @@
                 },
                 dataSrc:function(response) {
                     var returnedData = [];
-                    console.log(response);
+                    var rawData = [];
+
                     if(response.response_package === undefined || response.response_package.response_data === undefined) {
-                        returnedData = [];
+                        rawData = [];
                     } else {
-                        returnedData = response.response_package.response_data;
+                        rawData = response.response_package.response_data;
+                    }
+
+                    for(var a in rawData) {
+                        if(rawData[a].antrian_detail.departemen === __POLI_INAP__) {
+                            returnedData.push(rawData[a]);
+                        }
                     }
 
 

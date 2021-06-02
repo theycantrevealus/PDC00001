@@ -1636,32 +1636,34 @@ class Asesmen extends Utility {
             }
         } else {
 		    //Todo: INAP SEGMENT
-            $keluar = self::$query->update('antrian', array(
-                'waktu_keluar' => parent::format_date()
-            ))
-                ->where(array(
-                    'antrian.uid' => '= ?',
-                    'AND',
-                    'antrian.deleted_at' => 'IS NULL'
-                ), array(
-                    $parameter['antrian']
+            if($parameter['charge_invoice'] === 'Y') {
+                $keluar = self::$query->update('antrian', array(
+                    'waktu_keluar' => parent::format_date()
                 ))
-                ->execute();
-            $Laboratorium = new Laboratorium(self::$pdo);
-            $ChargeLab = $Laboratorium->charge_invoice_item(array(
-                'asesmen' => $MasterUID,
-                'kunjungan' => $parameter['kunjungan'],
-                'pasien' => $parameter['pasien']
-            ));
-            $returnResponse['lab_response'] = $ChargeLab;
+                    ->where(array(
+                        'antrian.uid' => '= ?',
+                        'AND',
+                        'antrian.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['antrian']
+                    ))
+                    ->execute();
+                $Laboratorium = new Laboratorium(self::$pdo);
+                $ChargeLab = $Laboratorium->charge_invoice_item(array(
+                    'asesmen' => $MasterUID,
+                    'kunjungan' => $parameter['kunjungan'],
+                    'pasien' => $parameter['pasien']
+                ));
+                $returnResponse['lab_response'] = $ChargeLab;
 
-            $Radiologi = new Radiologi(self::$pdo);
-            $ChargeRad = $Radiologi->charge_invoice_item(array(
-                'asesmen' => $MasterUID,
-                'kunjungan' => $parameter['kunjungan'],
-                'pasien' => $parameter['pasien']
-            ));
-            $returnResponse['rad_response'] = $ChargeRad;
+                $Radiologi = new Radiologi(self::$pdo);
+                $ChargeRad = $Radiologi->charge_invoice_item(array(
+                    'asesmen' => $MasterUID,
+                    'kunjungan' => $parameter['kunjungan'],
+                    'pasien' => $parameter['pasien']
+                ));
+                $returnResponse['rad_response'] = $ChargeRad;
+            }
         }
 
         //Check Radiologi

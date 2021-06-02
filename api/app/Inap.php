@@ -110,6 +110,9 @@ class Inap extends Utility
             case 'edit_nurse_station':
                 return self::edit_nurse_station($parameter);
                 break;
+            case 'tambah_riwayat_resep_inap':
+                return self::tambah_riwayat_resep_inap($parameter);
+                break;
             default:
                 return self::get_all($parameter);
         }
@@ -130,13 +133,21 @@ class Inap extends Utility
             ->join('master_unit', array(
                 'uid as uid_unit',
                 'nama as nama_unit',
-                'kode as kode_unit'
+                'kode as kode_unit',
+                'gudang'
+            ))
+            ->join('master_inv_gudang', array(
+                'uid as uid_gudang',
+                'nama as nama_gudang'
             ))
             ->on(array(
-                array('nurse_station.unit', '=', 'master_unit.uid')
+                array('nurse_station.unit', '=', 'master_unit.uid'),
+                array('master_unit.gudang', '=', 'master_inv_gudang.uid')
             ))
             ->where(array(
                 'nurse_station.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv_gudang.deleted_at' => 'IS NULL',
                 'AND',
                 'nurse_station.uid' => '= ?'
             ), array(
@@ -241,6 +252,137 @@ class Inap extends Utility
                 $parameter['check']
             ))
             ->execute();
+    }
+
+    private function tambah_riwayat_resep_inap($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $allowedNS = array();
+
+        foreach ($UserData['data']->nurse_station as $key => $value) {
+            if(!in_array($value->nurse_station, $allowedNS)) {
+                array_push($allowedNS, $value->nurse_station);
+            }
+        }
+
+        $proceed = array();
+
+        if(in_array($parameter['nurse_station'], $allowedNS)) {
+            foreach ($parameter['item'] as $key => $value) {
+                $process = self::$query->insert('rawat_inap_riwayat_obat', array(
+                    'petugas' => $UserData['data']->uid,
+                    'resep' => $value['resep'],
+                    'obat' => $value['obat'],
+                    'qty' => $value['qty'],
+                    'nurse_station' => $parameter['nurse_station'],
+                    'keterangan' => $value['keterangan'],
+                    'logged_at' => parent::format_date()
+                ))
+                    ->execute();
+                if(
+                    $value['charge_stock'] === "true" &&
+                    $process['response_result'] > 0
+                ) {
+                    //Charge Stok
+                    $NS = self::get_ns_detail($parameter['nurse_station'])['response_data'][0];
+
+                    $StokPre = self::$query->select('inventori_stok', array(
+                        'batch',
+                        'stok_terkini'
+                    ))
+                        ->where(array(
+                            'inventori_stok.gudang' => '= ?',
+                            'AND',
+                            'inventori_stok.barang' => '= ?'
+                        ), array(
+                            $NS['uid_gudang'],
+                            $value['obat']
+                        ))
+                        ->execute();
+
+                    if(count($StokPre['response_data']) > 0) {
+                        $usedBatch = array();
+                        $kebutuhan = floatval($value['qty']);
+
+                        foreach ($StokPre['response_data'] as $batchKey => $batchValue) {
+                            if($kebutuhan > 0) {
+                                if(floatval($batchValue['stok_terkini']) <= $kebutuhan) {
+                                    if(!isset($usedBatch[$batchValue['batch']])) {
+                                        $usedBatch[$batchValue['batch']] = array(
+                                            'terpakai' => floatval($batchValue['stok_terkini']),
+                                            'sisa' => $kebutuhan - floatval($batchValue['stok_terkini'])
+                                        );
+                                    }
+                                    $kebutuhan -= floatval($batchValue['stok_terkini']);
+                                } else {
+                                    if(!isset($usedBatch[$batchValue['batch']])) {
+                                        $usedBatch[$batchValue['batch']] = array(
+                                            'terpakai' => $kebutuhan,
+                                            'sisa' => floatval($batchValue['stok_terkini']) - $kebutuhan
+                                        );
+                                    }
+                                    $kebutuhan = 0;
+                                }
+                            }
+                        }
+
+                        //potong stok
+                        $stok_record = array();
+                        $stok_record_log = array();
+                        foreach ($usedBatch as $uBKey => $ubValue) {
+                            $procStok = self::$query->update('inventori_stok', array(
+                                'stok_terkini' => $ubValue['sisa']
+                            ))
+                                ->where(array(
+                                    'inventori_stok.gudang' => '= ?',
+                                    'AND',
+                                    'inventori_stok.barang' => '= ?',
+                                    'AND',
+                                    'inventori_stok.batch' => '= ?'
+                                ), array(
+                                    $NS['uid_gudang'],
+                                    $value['obat'],
+                                    $uBKey
+                                ))
+                                ->execute();
+                            if($procStok['response_result'] > 0) {
+                                //Catat Stok log
+                                $stok_log = self::$query->insert('inventori_stok_log', array(
+                                    'barang' => $value['obat'],
+                                    'batch' => $uBKey,
+                                    'gudang' => $NS['uid_gudang'],
+                                    'masuk' => 0,
+                                    'keluar' => floatval($ubValue['terpakai']),
+                                    'saldo' => floatval($ubValue['sisa']),
+                                    'type' => __STATUS_BARANG_KELUAR__,
+                                    'logged_at' => parent::format_date(),
+                                    'jenis_transaksi' => 'resep',
+                                    'uid_foreign' => $value['resep'],
+                                    'keterangan' => 'Pemberian Obat Rawat Inap. ' . $value['keterangan']
+                                ))
+                                    ->execute();
+                                array_push($stok_record_log, $stok_log);
+                            }
+                            array_push($stok_record, $procStok);
+
+                        }
+                        $StokPre['stok_proc'] = $stok_record;
+                        $StokPre['stok_proc_log'] = $stok_record_log;
+                    }
+                }
+
+                $process['param'] = $value;
+                $process['stock_pre'] = $StokPre;
+                $process['batch'] = $usedBatch;
+
+                array_push($proceed, $process);
+            }
+        } else {
+            $proceed = $allowedNS;
+        }
+
+
+        return $proceed;
     }
 
     private function edit_nurse_station($parameter) {
@@ -872,8 +1014,9 @@ class Inap extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $allowSave = false;
+
         //Check Sebelum Save
-        $Ranjang = self::$query->select('nurse_station_ranjang', array(
+        /*$Ranjang = self::$query->select('nurse_station_ranjang', array(
             'ranjang'
         ))
             ->where(array(
@@ -885,40 +1028,38 @@ class Inap extends Utility
             ))
             ->execute();
         foreach ($Ranjang['response_data'] as $RK => $RV) {
-            //Check Ketersediaan Ranjang
-            $CheckRanjang = self::$query->select('rawat_inap', array(
-                'pasien',
-                'dokter'
+
+        }*/
+
+        //Check Ketersediaan Ranjang
+        $CheckRanjang = self::$query->select('rawat_inap', array(
+            'pasien',
+            'dokter'
+        ))
+            ->join('pasien', array(
+                'nama as nama_pasien'
             ))
-                ->join('pasien', array(
-                    'nama as nama_pasien'
-                ))
-                ->join('pegawai', array(
-                    'nama as nama_dokter'
-                ))
-                ->on(array(
-                    array('rawat_inap.pasien', '=', 'pasien.uid'),
-                    array('rawat_inap.dokter', '=', 'pegawai.uid')
-                ))
-                ->where(array(
-                    'rawat_inap.deleted_at' => 'IS NULL',
-                    'AND',
-                    'rawat_inap.bed' => '= ?',
-                    'AND',
-                    'rawat_inap.nurse_station' => '= ?',
-                    'AND',
-                    'rawat_inap.waktu_keluar' => 'IS NULL'
-                ), array(
-                    $RV['ranjang'],
-                    $parameter['uid']
-                ))
-                ->execute();
-            if(count($CheckRanjang['response_data']) > 0) {
-                $allowSave = false;
-                break;
-            } else {
-                $allowSave = true;
-            }
+            ->join('pegawai', array(
+                'nama as nama_dokter'
+            ))
+            ->on(array(
+                array('rawat_inap.pasien', '=', 'pasien.uid'),
+                array('rawat_inap.dokter', '=', 'pegawai.uid')
+            ))
+            ->where(array(
+                'rawat_inap.deleted_at' => 'IS NULL',
+                'AND',
+                'rawat_inap.bed' => '= ?',
+                'AND',
+                'rawat_inap.waktu_keluar' => 'IS NULL'
+            ), array(
+                $parameter['bed']
+            ))
+            ->execute();
+        if(count($CheckRanjang['response_data']) > 0) {
+            $allowSave = false;
+        } else {
+            $allowSave = true;
         }
 
         if($allowSave) {

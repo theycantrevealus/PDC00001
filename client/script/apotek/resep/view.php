@@ -52,6 +52,7 @@
                     }
 
                     var racikan_detail = data.racikan;
+                    console.log(racikan_detail);
                     for(var racikanKey in racikan_detail) {
                         autoRacikan({
                             uid: racikan_detail[racikanKey].uid,

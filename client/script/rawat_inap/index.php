@@ -163,9 +163,14 @@
                                     $("#form-inap").modal("hide");
                                 });
                             } else {
-                                console.log(response);
+                                Swal.fire(
+                                    "Rawat Inap",
+                                    response.response_package.response_message,
+                                    "warning"
+                                ).then((result) => {
+                                    //
+                                });
                             }
-                            console.log(response);
                         },
                         error: function(response) {
                             console.log(response);

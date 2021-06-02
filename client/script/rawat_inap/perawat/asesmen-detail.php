@@ -2,6 +2,7 @@
 <script type="text/javascript">
     $(function() {
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "", targettedDataResep = {};
+        var nurse_station = __PAGES__[6];
         var tableResep = $("#table-resep-inap").DataTable({
             processing: true,
             serverSide: true,
@@ -246,16 +247,34 @@
                 var newResepNo = document.createElement("TD");
                 var newResepItem = document.createElement("TD");
                 var newResepQty = document.createElement("TD");
+                var newResepQtyCount = document.createElement("INPUT");
+                var newResepRemark = document.createElement("TEXTAREA");
+                $(newResepQtyCount).val(parseFloat(targettedDataResep.detail[a].signa_pakai)).inputmask({
+                    alias: 'decimal',
+                    rightAlign: true,
+                    placeholder: "0.00",
+                    prefix: "",
+                    autoGroup: false,
+                    digitsOptional: true
+                }).css({
+                    "max-width": "50px",
+                    "float": "right"
+                });
+                $(newResepRemark).addClass("form-control").attr({
+                    "placeholder": "Keterangan Tambahan"
+                });
 
                 $(newResepNo).html(autonum);
-                $(newResepItem).html(targettedDataResep.detail[a].detail.nama);
-                $(newResepQty).html("<h6 class=\"number_style\">" + parseFloat(targettedDataResep.detail[a].signa_pakai) + "</h6>");
+                $(newResepItem).html(targettedDataResep.detail[a].detail.nama).attr({
+                    "uid": targettedDataResep.detail[a].detail.uid
+                }).append(newResepRemark);
+                $(newResepQty).append(newResepQtyCount);
 
                 $(newResepConfRow).append(newResepNo);
                 $(newResepConfRow).append(newResepItem);
                 $(newResepConfRow).append(newResepQty);
-
-                $("#list-konfirmasi-berikan-obat").append(newResepConfRow);
+                $(newResepConfRow).addClass("resep_item");
+                $("#list-konfirmasi-berikan-obat tbody").append(newResepConfRow);
                 autonum += 1;
             }
 
@@ -264,20 +283,98 @@
                 var newResepNo = document.createElement("TD");
                 var newResepItem = document.createElement("TD");
                 var newResepQty = document.createElement("TD");
+                var newResepQtyCount = document.createElement("INPUT");
+                var newResepRemark = document.createElement("TEXTAREA");
+                $(newResepQtyCount).val(parseFloat(targettedDataResep.racikan[a].signa_pakai)).inputmask({
+                    alias: 'decimal',
+                    rightAlign: true,
+                    placeholder: "0.00",
+                    prefix: "",
+                    autoGroup: false,
+                    digitsOptional: true
+                }).css({
+                    "max-width": "50px",
+                    "float": "right"
+                });
+                $(newResepRemark).addClass("form-control").attr({
+                    "placeholder": "Keterangan Tambahan"
+                });
 
                 $(newResepNo).html(autonum);
-                $(newResepItem).html(targettedDataResep.racikan[a].kode);
-                $(newResepQty).html("<h6 class=\"number_style\">" + parseFloat(targettedDataResep.racikan[a].signa_pakai) + "</h6>");
+                $(newResepItem).html(targettedDataResep.racikan[a].kode).attr({
+                    "uid": targettedDataResep.racikan[a].kode
+                }).append(newResepRemark);
+                $(newResepQty).append(newResepQtyCount);
 
                 $(newResepConfRow).append(newResepNo);
                 $(newResepConfRow).append(newResepItem);
                 $(newResepConfRow).append(newResepQty);
-
-                $("#list-konfirmasi-berikan-obat").append(newResepConfRow);
+                $(newResepConfRow).addClass("racikan_item");
+                $("#list-konfirmasi-berikan-obat tbody").append(newResepConfRow);
                 autonum += 1;
             }
 
             $("#form-konfirmasi-berikan-resep").modal("show");
+        });
+
+        $("#btnKonfirmasiBerikanObat").click(function () {
+            var resep = targettedDataResep.uid;
+            var item = [];
+
+            $("#list-konfirmasi-berikan-obat tbody tr").each(function () {
+                var row = $(this);
+                var obat = $(this).find("td:eq(1)").attr("uid");
+                var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                var keterangan = $(this).find("td:eq(1) textarea").val();
+                if(obat !== "" && qty > 0) {
+                    item.push({
+                        resep: resep,
+                        obat: obat,
+                        qty: qty,
+                        keterangan: keterangan,
+                        charge_stock: row.hasClass("resep_item")
+                    });
+                }
+            });
+
+            if(item.length > 0) {
+                Swal.fire({
+                    title: "Riwayat Pemberian Obat",
+                    text: "Pastikan semua obat dan jumlah sudah sesuai dengan resep. Apakah data sudah benar?",
+                    showDenyButton: true,
+                    confirmButtonText: "Ya",
+                    denyButtonText: "Tidak",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url:__HOSTAPI__ + "/Inap",
+                            async:false,
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type:"POST",
+                            data: {
+                                request: "tambah_riwayat_resep_inap",
+                                nurse_station: nurse_station,
+                                item: item
+                            },
+                            success:function(response) {
+                                $("#form-berikan-resep").modal("hide");
+                                $("#form-konfirmasi-berikan-resep").modal("hide");
+
+                                /*var result = response.response_package.response_result;
+                                if(result > 0) {
+                                    $("#form-berikan-resep").modal("hide");
+                                    $("#form-konfirmasi-berikan-resep").modal("hide");
+                                }*/
+                            },
+                            error: function(response) {
+                                console.log(response);
+                            }
+                        });
+                    }
+                });
+            }
         });
 
         function load_product_resep(target, selectedData = "", appendData = true) {
@@ -446,11 +543,11 @@
                                 statusSedia = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia <br />" + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                             } else {
                                 statusSedia = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia <br />" + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
-                            }*/
+                            }
 
-                            /*if((parseFloat(data.detail[a].qty) - parseFloat(jlh_sedia)) > 0) {
+                            if((parseFloat(data.detail[a].qty) - parseFloat(jlh_sedia)) > 0) {
                                 statusSedia += "<br /><b class=\"text-warning\"><i class=\"fa fa-exclamation-circle\"></i>Butuh Amprah : " + number_format(parseFloat(data.detail[a].qty) - parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
-                                $("#btnSelesai").attr({
+                                $("#btnSubmitBerikanObat").attr({
                                     "disabled": "disabled"
                                 }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
                             } else {
@@ -458,7 +555,7 @@
                                 if (typeof attr !== typeof undefined && attr !== false) {
                                     // ...
                                 } else {
-                                    $("#btnSelesai").removeAttr("disabled").removeClass("btn-danger").addClass("btn-success").html("<i class=\"fa fa-check\"></i> Selesai");
+                                    //$("#btnSubmitBerikanObat").removeAttr("disabled").removeClass("btn-danger").addClass("btn-success").html("<i class=\"fa fa-check\"></i> Selesai");
                                 }
                             }*/
 
@@ -524,6 +621,7 @@
                         var kebutuhan_racikan = parseFloat(data.racikan[b].qty);
                         var jlh_sedia = 0;
                         var butuh_amprah = 0;
+
                         for(bKey in selectedBatchRacikan)
                         {
                             if(selectedBatchRacikan[bKey].harga > harga_tertinggi_racikan)    //Selalu ambil harga tertinggi
@@ -598,14 +696,14 @@
                                 statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + racikanDetail[racDetailKey].sedia + "</b>";
                             }*/
 
-                            if(parseFloat(data.racikan[b].qty) <= parseFloat(jlh_sedia))
+                            /*if(parseFloat(data.racikan[b].qty) <= parseFloat(jlh_sedia))
                             {
                                 statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia <br />" + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                             } else {
                                 statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia <br />" + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
-                            }
+                            }*/
 
-                            if((parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia)) > 0) {
+                            /*if((parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia)) > 0) {
                                 statusSediaRacikan += "<br /><b class=\"text-info\"><i class=\"fa fa-exclamation-circle\"> Stok : " + number_format(parseFloat(data.racikan[b].qty) -parseFloat(jlh_sedia), 2, ".", ",") + "</i></b>";
                                 $("#btnSelesai").attr({
                                     "disabled": "disabled"
@@ -619,7 +717,7 @@
                                 } else {
                                     $("#btnSelesai").removeAttr("disabled").removeClass("btn-danger").addClass("btn-success").html("<i class=\"fa fa-check\"></i> Selesai");
                                 }
-                            }
+                            }*/
 
                             $(newCellRacikanObat).append("<h5 class=\"text-info\">" + RacikanObatData.data[0].nama + " <b class=\"text-danger text-right\">[" + racikanDetail[racDetailKey].kekuatan + "]</b></h5>").append(statusSediaRacikan);
 
@@ -630,12 +728,12 @@
                             $(newRacikanObat).append("<option value=\"" + RacikanObatData.data[0].uid + "\">" + RacikanObatData.data[0].nama + "</option>").val(RacikanObatData.data[0].uid).trigger("change");
 
 
-                            $(newCellRacikanObat).append("<b style=\"padding-top: 10px; display: block\">Batch Terpakai:</b>");
+                            /*$(newCellRacikanObat).append("<b style=\"padding-top: 10px; display: block\">Batch Terpakai:</b>");
                             $(newCellRacikanObat).append("<span id=\"racikan_batch_" + data.racikan[b].uid + "_" + racDetailKey + "\" class=\"selected_batch\"><ol></ol></span>");
                             for(var batchSelKey in selectedBatchListRacikan)
                             {
                                 $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ")</li>");
-                            }
+                            }*/
 
                             $(newCellRacikanObat).attr({
                                 harga: harga_tertinggi_racikan
@@ -849,8 +947,16 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-                <button type="button" class="btn btn-primary" id="btnSubmitBerikanObat">Berikan</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSubmitBerikanObat">
+                    <span>
+                        <i class="fa fa-pills"></i> Berikan
+                    </span>
+                </button>
             </div>
         </div>
     </div>
@@ -879,8 +985,16 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-                <button type="button" class="btn btn-primary" id="btnKonfirmasiBerikanObat">Berikan</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
+                <button type="button" class="btn btn-success" id="btnKonfirmasiBerikanObat">
+                    <span>
+                        <i class="fa fa-check-circle"></i> Sudah Benar
+                    </span>
+                </button>
             </div>
         </div>
     </div>

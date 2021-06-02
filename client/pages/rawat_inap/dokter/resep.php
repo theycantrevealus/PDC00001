@@ -29,6 +29,9 @@
 						</div>
 						<div class="col-md-12" style="margin-top: 20px;">
 							<b>Keterangan:</b>
+                            <div class="edit-switch-container" target="txt_keterangan_resep">
+                                <i class="fa fa-pencil-alt"></i> Edit
+                            </div>
 							<div id="txt_keterangan_resep"></div>
 						</div>
 					</div>
@@ -51,6 +54,9 @@
 						</div>
 						<div class="col-md-12" style="margin-top: 20px;">
 							<b>Keterangan Resep Racikan:</b>
+                            <div class="edit-switch-container" target="txt_keterangan_resep_racikan">
+                                <i class="fa fa-pencil-alt"></i> Edit
+                            </div>
 							<div id="txt_keterangan_resep_racikan"></div>
 						</div>
 					</div>

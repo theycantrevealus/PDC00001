@@ -190,7 +190,11 @@
                     }
                 });
 
-                $(".nama_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
+                $("#target_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
+                $("#nama-departemen").html("Asesmen");
+                $("#target_pasien").parent().attr({
+                    "href": __HOSTNAME__ + "/rawat_inap/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid
+                });
                 $(".jk_pasien").html(pasien_jenkel);
                 $(".tanggal_lahir_pasien").html(pasien_tanggal_lahir);
                 $(".penjamin_pasien").html(pasien_penjamin);
@@ -3406,7 +3410,6 @@
                 denyButtonText: `Belum`,
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     const simpanDataProcess = new Promise(function(resolve, reject) {
                         resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
                     }).then(function(result) {

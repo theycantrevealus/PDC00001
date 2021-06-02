@@ -254,6 +254,7 @@
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
                     var selectedBatchRacikan = refreshBatch(racikanDetail[racDetailKey].obat);
+                    console.log(selectedBatchRacikan);
                     var selectedBatchListRacikan = [];
                     var harga_tertinggi_racikan = 0;
                     var kebutuhan_racikan = parseFloat(data.racikan[b].qty);
@@ -285,7 +286,6 @@
                         } else {
                             butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
                         }
-
                     }
 
 

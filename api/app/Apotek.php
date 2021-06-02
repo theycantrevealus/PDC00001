@@ -247,7 +247,7 @@ class Apotek extends Utility
                                 'batch' => $bValue['batch'],
                                 'barang' => $value['obat'],
                                 'gudang' => $bValue['gudang']['uid'],
-                                'qty' => $bValue['stok_terkini']
+                                'qty' => $kebutuhan
                             ));
                         }
                         array_push($usedBatch, array(
@@ -705,8 +705,8 @@ class Apotek extends Utility
                 }
 
                 $RacikanValue['item'] = $RacikanDetailData['response_data'];
+                array_push($dataResponse['racikan'], $RacikanValue);
             }
-            array_push($dataResponse['racikan'], $RacikanValue);
         }
 
         return array($dataResponse);
@@ -715,7 +715,7 @@ class Apotek extends Utility
     private function detail_resep($parameter, $status = 'N')
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $data = self::$query->select('resep', array(
             'uid',
@@ -1358,8 +1358,13 @@ class Apotek extends Utility
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $Inventori = new Inventori(self::$pdo);
+        $Antrian = new Antrian(self::$pdo);
 
         foreach ($data['response_data'] as $key => $value) {
+            $AntrianDetail = $Antrian->get_antrian_detail('antrian', $value['antrian']);
+            $data['response_data'][$key]['antrian_detail'] = $AntrianDetail['response_data'][0];
+
             //Get resep detail
             $resep_detail = self::$query->select('resep_detail', array(
                 'id',
@@ -1383,11 +1388,9 @@ class Apotek extends Utility
                 ->execute();
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 //Batch Info
-                $Inventori = new Inventori(self::$pdo);
                 $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
 
-                $Inventori = new Inventori(self::$pdo);
                 $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
             }
@@ -1444,8 +1447,7 @@ class Apotek extends Utility
                     ))
                     ->execute();
                 foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
-                    $Inventori = new Inventori(self::$pdo);
-                    $InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
+                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
 
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }
