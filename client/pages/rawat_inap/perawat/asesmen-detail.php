@@ -60,7 +60,14 @@
             </div>
             <div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">Pelayanan</h5>
+                    <h5 class="card-header__title flex m-0">
+                        Pelayanan
+                        <button class="pull-right btn btn-success">
+                            <span>
+                                <i class="fa fa-check-circle"></i> Pulangkan Pasien
+                            </span>
+                        </button>
+                    </h5>
                 </div>
                 <div class="card-header card-header-tabs-basic nav" role="tablist">
                     <a href="#dokter" class="" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">Dokter</a>
@@ -71,11 +78,6 @@
                 <div class="card-body tab-content" style="min-height: 100px;">
                     <div class="tab-pane show fade" id="dokter">
                         <div class="row">
-                            <div class="col-lg-12">
-                                <button class="btn btn-info pull-right" id="btnTambahAsesmen">
-                                    <i class="fa fa-plus"></i> Tambah Asesmen
-                                </button>
-                            </div>
                             <div class="col-lg-12">
                                 <br />
                                 <table class="table table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
@@ -102,7 +104,7 @@
                             </div>
                             <div class="card-header card-header-tabs-basic nav" role="tablist">
                                 <a href="#resep" class="active" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">Resep dan Racikan</a>
-                                <a href="#rekap_obat" class="" data-toggle="tab" role="tab" aria-selected="false">Rekapitulasi Obat</a>
+                                <a href="#riwayat_obat" class="" data-toggle="tab" role="tab" aria-selected="false">Riwayat Pemberian Obat</a>
                             </div>
                             <div class="card-body tab-content" style="min-height: 100px;">
                                 <div class="tab-pane active show fade" id="resep">
@@ -121,16 +123,17 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="tab-pane show fade" id="rekap_obat">
-                                    <table class="table table-bordered table-striped largeDataType" id="table-rekap-obat-inap">
+                                <div class="tab-pane show fade" id="riwayat_obat">
+                                    <table class="table table-bordered table-striped largeDataType" id="table-riwayat-obat-inap">
                                         <thead class="thead-dark">
                                         <tr>
                                             <th class="wrap_content">No</th>
-                                            <th>Nama</th>
-                                            <th>Satuan</th>
-                                            <th>Tersedia</th>
-                                            <th>Resep</th>
-                                            <th class="wrap_content">Aksi</th>
+                                            <th class="wrap_content">Waktu</th>
+                                            <th class="wrap_content">Kode Resep</th>
+                                            <th style="width: 30%">Obat</th>
+                                            <th class="wrap_content">Jumlah</th>
+                                            <th class="wrap_content">Oleh</th>
+                                            <th>Keterangan</th>
                                         </tr>
                                         </thead>
                                         <tbody>

@@ -52,7 +52,6 @@
                     }
 
                     var racikan_detail = data.racikan;
-                    console.log(racikan_detail);
                     for(var racikanKey in racikan_detail) {
                         autoRacikan({
                             uid: racikan_detail[racikanKey].uid,
@@ -465,28 +464,29 @@
                                 total_kebutuhan = $("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue");
                                 kebutuhan = $("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue");
 
-                                for(bKey in batchData)
-                                {
-                                    if(batchData[bKey].harga > harga_tertinggi)
-                                    {
-                                        harga_tertinggi = batchData[bKey].harga;
-                                    }
-
-                                    if(kebutuhan > 0)
-                                    {
-
-                                        if(kebutuhan > batchData[bKey].stok_terkini)
+                                for(bKey in batchData) {
+                                    if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
+                                        if(batchData[bKey].harga > harga_tertinggi)
                                         {
-                                            batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
-                                        } else {
-                                            batchData[bKey].used = parseFloat(kebutuhan);
-                                        }
-                                        kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
-                                        if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
-                                            selectedBatchList.push(batchData[bKey]);
-                                            uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                            harga_tertinggi = batchData[bKey].harga;
                                         }
 
+                                        if(kebutuhan > 0 && batchData[bKey].stok_terkini > 0)
+                                        {
+
+                                            if(kebutuhan > batchData[bKey].stok_terkini)
+                                            {
+                                                batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
+                                            } else {
+                                                batchData[bKey].used = parseFloat(kebutuhan);
+                                            }
+                                            kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
+                                            if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
+                                                selectedBatchList.push(batchData[bKey]);
+                                                uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                            }
+
+                                        }
                                     }
                                 }
 
@@ -539,25 +539,27 @@
 
                                 for(bKey in batchData)
                                 {
-                                    if(batchData[bKey].harga > harga_tertinggi)
-                                    {
-                                        harga_tertinggi = batchData[bKey].harga;
-                                    }
-
-                                    if(kebutuhan > 0)
-                                    {
-                                        if(kebutuhan > batchData[bKey].stok_terkini)
+                                    if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
+                                        if(batchData[bKey].harga > harga_tertinggi)
                                         {
-                                            batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
-                                        } else {
-                                            batchData[bKey].used = parseFloat(kebutuhan);
-                                        }
-                                        kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
-                                        if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
-                                            selectedBatchList.push(batchData[bKey]);
-                                            uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                            harga_tertinggi = batchData[bKey].harga;
                                         }
 
+                                        if(kebutuhan > 0 && batchData[bKey].stok_terkini > 0)
+                                        {
+                                            if(kebutuhan > batchData[bKey].stok_terkini)
+                                            {
+                                                batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
+                                            } else {
+                                                batchData[bKey].used = parseFloat(kebutuhan);
+                                            }
+                                            kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
+                                            if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
+                                                selectedBatchList.push(batchData[bKey]);
+                                                uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                            }
+
+                                        }
                                     }
                                 }
 
@@ -1405,7 +1407,6 @@
                                 departemen: currentMetaData.departemen.uid
                             },
                             success:function(response) {
-                                console.log(response);
                                 if(response.response_package.antrian.response_result > 0) {
                                     if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
                                         Swal.fire(
@@ -1435,7 +1436,6 @@
                             }
                         });
                     } else {
-                        console.log("GAGAL");
                         Swal.fire(
                             "Verifikasi Gagal!",
                             "Pastikan semua obat memiliki stok tersedia",

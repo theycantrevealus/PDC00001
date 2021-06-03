@@ -113,6 +113,9 @@ class Inap extends Utility
             case 'tambah_riwayat_resep_inap':
                 return self::tambah_riwayat_resep_inap($parameter);
                 break;
+            case 'riwayat_obat_inap':
+                return self::riwayat_obat_inap($parameter);
+                break;
             default:
                 return self::get_all($parameter);
         }
@@ -252,6 +255,127 @@ class Inap extends Utility
                 $parameter['check']
             ))
             ->execute();
+    }
+
+    private function riwayat_obat_inap($parameter) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array();
+
+            $paramValue = array();
+        } else {
+            $paramData = array();
+
+            $paramValue = array();
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('rawat_inap_riwayat_obat', array(
+                'id',
+                'petugas',
+                'resep',
+                'obat',
+                'keterangan',
+                'qty',
+                'nurse_station',
+                'logged_at'
+            ))
+                ->join('pegawai', array(
+                    'nama as nama_petugas'
+                ))
+                ->on(array(
+                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid')
+                ))
+                ->order(array(
+                    'logged_at' => 'DESC'
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('rawat_inap_riwayat_obat', array(
+                'id',
+                'petugas',
+                'resep',
+                'obat',
+                'keterangan',
+                'qty',
+                'nurse_station',
+                'logged_at'
+            ))
+                ->join('pegawai', array(
+                    'nama as nama_petugas'
+                ))
+                ->on(array(
+                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid')
+                ))
+                ->order(array(
+                    'logged_at' => 'DESC'
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        $Inventori = new Inventori(self::$pdo);
+
+        $returnedData = array();
+        foreach ($data['response_data'] as $key => $value) {
+            //Resep
+            $resep = self::$query->select('resep', array(
+                'kode'
+            ))
+                ->where(array(
+                    'resep.uid' => '= ?'
+                ), array(
+                    $value['resep']
+                ))
+                ->execute();
+            $value['resep_kode'] = $resep['response_data'][0]['kode'];
+            //Master Inv
+            $InventoriDetail = $Inventori->get_item_detail($value['obat']);
+            $NamaObat = (count(($InventoriDetail['response_data'])) > 0) ? $InventoriDetail['response_data'][0]['nama'] : $value['obat'];
+            $value['obat'] = $NamaObat;
+            $value['logged_at'] = date('d F Y, H:i', strtotime($value['logged_at']));
+
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $checker = stripos($NamaObat, $parameter['search']['value']);
+                if($checker >= 0 && $checker !== false) {
+                    $value['autonum'] = $autonum;
+                    array_push($returnedData, $value);
+                    $autonum++;
+                }
+            } else {
+                $value['autonum'] = $autonum;
+                array_push($returnedData, $value);
+                $autonum++;
+            }
+
+        }
+
+
+
+        $itemTotal = self::$query->select('rawat_inap_riwayat_obat', array(
+            'id'
+        ))
+            ->join('pegawai', array(
+                'nama as nama_petugas'
+            ))
+            ->on(array(
+                array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid')
+            ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['response_data'] = $returnedData;
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
     }
 
     private function tambah_riwayat_resep_inap($parameter) {
@@ -1065,7 +1189,7 @@ class Inap extends Utility
         if($allowSave) {
             $old = self::$query->select('rawat_inap', array(
                 'uid', 'pasien', 'dokter', 'penjamin', 'kunjungan', 'waktu_masuk', 'waktu_keluar', 'kamar', 'bed', 'keterangan',
-                'created_at', 'updated_at', 'deleted_at', 'jenis_pulang', 'alasan_pulang'
+                'created_at', 'updated_at', 'deleted_at', 'jenis_pulang', 'alasan_pulang', 'petugas'
             ))
                 ->where(array(
                     'rawat_inap.deleted_at' => 'IS NULL',
@@ -1095,6 +1219,7 @@ class Inap extends Utility
 
 
             $worker = self::$query->update('rawat_inap', array(
+                'petugas' => $UserData['data']->uid,
                 'kamar' => $parameter['kamar'],
                 'bed' => $parameter['bed'],
                 'keterangan' => $parameter['keterangan'],

@@ -2067,8 +2067,20 @@ class Asesmen extends Utility {
                 //New Resep
                 $uid = parent::gen_uuid();
 
+                $lastNumber = self::$query->select('resep', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'EXTRACT(month FROM created_at)' => '= ?'
+                    ), array(
+                        intval(date('m'))
+                    ))
+                    ->execute();
+                $Kode = 'RSP-' . date('Y/m') . '-' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT);
+
                 $newResep = self::$query->insert('resep',array(
                     'uid' => $uid,
+                    'kode' => $Kode,
                     'kunjungan' => $parameter['kunjungan'],
                     'antrian' => $parameter['antrian'],
                     'keterangan' => $parameter['keteranganResep'],

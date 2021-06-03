@@ -3,6 +3,90 @@
     $(function() {
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "", targettedDataResep = {};
         var nurse_station = __PAGES__[6];
+
+        var tableRiwayatObat = $("#table-riwayat-obat-inap").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Inap",
+                type: "POST",
+                data: function(d) {
+                    d.request = "riwayat_obat_inap";
+                    d.pasien = __PAGES__[3];
+                    d.kunjungan = __PAGES__[4];
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var returnedData = [];
+                    console.log(response);
+                    if(response.response_package === undefined || response.response_package.response_data === undefined) {
+                        returnedData = [];
+                    } else {
+                        returnedData = response.response_package.response_data;
+                    }
+
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Resep"
+            },
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.logged_at + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return (row.resep_kode === null) ? "<h6 class=\"text-center\">-</h6>" : "<span class=\"badge badge-info badge-custom-caption\">" + row.resep_kode + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.obat + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<h6 class=\"number_style\">" + row.qty + "</h6>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.nama_petugas + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.keterangan;
+                    }
+                }
+            ]
+        });
+
         var tableResep = $("#table-resep-inap").DataTable({
             processing: true,
             serverSide: true,
@@ -32,7 +116,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = returnedData.length;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
 
                     return returnedData;
                 }
@@ -361,6 +445,7 @@
                             success:function(response) {
                                 $("#form-berikan-resep").modal("hide");
                                 $("#form-konfirmasi-berikan-resep").modal("hide");
+                                tableRiwayatObat.ajax.reload();
 
                                 /*var result = response.response_package.response_result;
                                 if(result > 0) {

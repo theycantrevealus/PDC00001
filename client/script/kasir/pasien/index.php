@@ -525,7 +525,7 @@
                 dataSrc:function(response) {
                     var returnedData = [];
 
-                    if(returnedData == undefined || returnedData.response_package == undefined) {
+                    if(response == undefined || response.response_package == undefined) {
                         returnedData = [];
                     }
                     for(var InvKeyData in response.response_package.response_data) {
