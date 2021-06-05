@@ -530,7 +530,16 @@ class Asesmen extends Utility {
 
 			//Poli Info
 			$Poli = new Poli(self::$pdo);
-			$PoliDetail = $Poli->get_poli_detail($antrian['response_data'][0]['departemen'])['response_data'][0];
+			if($antrian['response_data'][0]['departemen'] === __POLI_INAP__) {
+                $PoliDetail = array(
+                    'uid' => __POLI_INAP__,
+                    'nama' => 'Rawat Inap',
+                    'poli_asesmen' => 'inap'
+                );
+            } else {
+                $PoliDetail = $Poli->get_poli_detail($antrian['response_data'][0]['departemen'])['response_data'][0];
+            }
+
 
 
 			$Rawat = self::$query->select('asesmen_rawat_' . $PoliDetail['poli_asesmen'], array(
@@ -821,7 +830,7 @@ class Asesmen extends Utility {
 					$ICD10KerjaJoined = array();
 					foreach ($ICD10KerjaRaw as $ICD10KRKey => $ICD10KRValue) {
 						$ICD10 = new Icd(self::$pdo);
-						$parseICD10 = $ICD10::get_icd_detail('master_icd_10', $ICD10KRValue);
+						$parseICD10 = $ICD10->get_icd_detail('master_icd_10', $ICD10KRValue);
 						if(count($parseICD10['response_data']) > 0) {
 							array_push($ICD10KerjaJoined, array(
 								'id' => $ICD10KRValue,
@@ -907,40 +916,69 @@ class Asesmen extends Utility {
 
 
 				//Resep Detail
-				$resep = self::$query->select('resep', array(
-					'uid',
-					'keterangan',
-					'keterangan_racikan'
-				))
-				->where(array(
-					'resep.deleted_at' => 'IS NULL',
-					'AND',
-					'resep.kunjungan' => '= ?',
-					'AND',
-					'resep.antrian' => '= ?',
-					'AND',
-					'resep.asesmen' => '= ?',
-					'AND',
-					'resep.dokter' => '= ?',
-					'AND',
-					'resep.pasien' => '= ?',
-					'AND',
-					'(resep.status_resep' => '= ?',
-                    'OR',
-                    'resep.status_resep' => '= ?',
-                    'OR',
-                    ' resep.status_resep' => '= ?)',
-				), array(
-					$antrian['response_data'][0]['kunjungan'],
-					$antrian['response_data'][0]['uid'],
-					$data['response_data'][0]['asesmen'],
-					$data['response_data'][0]['dokter'],
-					$data['response_data'][0]['pasien'],
-                    ($isCPPT) ? 'L' : 'C',
-                    ($isCPPT) ? 'P' : 'C',
-                    ($isCPPT) ? 'S' : 'C'
-				))
-				->execute();
+                if($antrian['response_data'][0]['departemen'] === __POLI_INAP__) {
+                    $resep = self::$query->select('resep', array(
+                        'uid',
+                        'keterangan',
+                        'keterangan_racikan'
+                    ))
+                        ->where(array(
+                            'resep.deleted_at' => 'IS NULL',
+                            'AND',
+                            'resep.kunjungan' => '= ?',
+                            'AND',
+                            'resep.antrian' => '= ?',
+                            'AND',
+                            'resep.asesmen' => '= ?',
+                            'AND',
+                            'resep.dokter' => '= ?',
+                            'AND',
+                            'resep.pasien' => '= ?'
+                        ), array(
+                            $antrian['response_data'][0]['kunjungan'],
+                            $antrian['response_data'][0]['uid'],
+                            $data['response_data'][0]['asesmen'],
+                            $data['response_data'][0]['dokter'],
+                            $data['response_data'][0]['pasien']
+                        ))
+                        ->execute();
+                } else {
+                    $resep = self::$query->select('resep', array(
+                        'uid',
+                        'keterangan',
+                        'keterangan_racikan'
+                    ))
+                        ->where(array(
+                            'resep.deleted_at' => 'IS NULL',
+                            'AND',
+                            'resep.kunjungan' => '= ?',
+                            'AND',
+                            'resep.antrian' => '= ?',
+                            'AND',
+                            'resep.asesmen' => '= ?',
+                            'AND',
+                            'resep.dokter' => '= ?',
+                            'AND',
+                            'resep.pasien' => '= ?',
+                            'AND',
+                            '(resep.status_resep' => '= ?',
+                            'OR',
+                            'resep.status_resep' => '= ?',
+                            'OR',
+                            ' resep.status_resep' => '= ?)',
+                        ), array(
+                            $antrian['response_data'][0]['kunjungan'],
+                            $antrian['response_data'][0]['uid'],
+                            $data['response_data'][0]['asesmen'],
+                            $data['response_data'][0]['dokter'],
+                            $data['response_data'][0]['pasien'],
+                            ($isCPPT) ? 'L' : 'C',
+                            ($isCPPT) ? 'P' : 'C',
+                            ($isCPPT) ? 'S' : 'C'
+                        ))
+                        ->execute();
+                }
+
 				$racikanData = array();
 				$racikanApotekData = array();
 				foreach ($resep['response_data'] as $key => $value) {
@@ -969,7 +1007,7 @@ class Asesmen extends Utility {
 					->execute();
 					foreach ($resepDetail['response_data'] as $RDKey => $RDValue) {
 					    $Inventori = new Inventori(self::$pdo);
-                        $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori::get_item_detail($RDValue['obat'])['response_data'][0];
+                        $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori->get_item_detail($RDValue['obat'])['response_data'][0];
                     }
 					$resep['response_data'][$key]['resep_detail'] = $resepDetail['response_data'];
 
@@ -1729,7 +1767,8 @@ class Asesmen extends Utility {
         
 
 		$check = self::$query->select('resep', array(
-			'uid'
+			'uid',
+            'kode'
 		))
 		->where(array(
 			'resep.kunjungan' => '= ?',
@@ -1760,6 +1799,7 @@ class Asesmen extends Utility {
 		
 		if(count($check['response_data']) > 0) {
 			$uid = $check['response_data'][0]['uid'];
+			$Kode = $check['response_data'][0]['kode'];
 
 			//Update resep master
 			$resepUpdate = self::$query->update('resep', array(
@@ -1886,7 +1926,7 @@ class Asesmen extends Utility {
 
 			foreach ($racikanOld['response_data'] as $key => $value) {
 				$racikanUpdate = self::$query->update('racikan', array(
-					'kode' => $parameter['racikan'][$key]['nama'],
+					'kode' => '['. $Kode . ']' . $parameter['racikan'][$key]['nama'],
 					'aturan_pakai' => intval($parameter['racikan'][$key]['aturanPakai']),
 					'keterangan' => $parameter['racikan'][$key]['keterangan'],
 					'signa_qty' => $parameter['racikan'][$key]['signaKonsumsi'],
@@ -2021,7 +2061,7 @@ class Asesmen extends Utility {
 				$newRacikan = self::$query->insert('racikan', array(
 					'uid' => $newRacikanUID,
 					'asesmen' => $MasterAsesmen,
-					'kode' => $value['nama'],
+					'kode' => '['. $Kode . ']' . $value['nama'],
 					'total' => 0,
 					'signa_qty' => $value['signaKonsumsi'],
                     'keterangan' => $value['keterangan'],
@@ -2125,7 +2165,7 @@ class Asesmen extends Utility {
                             'uid' => $uid_racikan,
                             'asesmen' => $MasterAsesmen,
                             //'resep' => $uid,
-                            'kode' => $value['nama'],
+                            'kode' => '['. $Kode . ']' . $value['nama'],
                             'signa_qty' => $value['signaKonsumsi'],
                             'signa_pakai' => $value['signaTakar'],
                             'keterangan' => $value['keterangan'],
@@ -3115,7 +3155,15 @@ class Asesmen extends Utility {
 		$returnData = array();
 		foreach ($antrian['response_data'] as $key => $value) {
             $Poli = new Poli(self::$pdo);
-            $PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
+            if($value['uid_poli'] === __POLI_INAP__) {
+                $PoliDetail = array(
+                    'poli_asesmen' => 'inap'
+                );
+            } else {
+                $PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
+            }
+
+
             $antrian['response_data'][$key]['poli_detail'] = $PoliDetail;
 
             $cek_asesment = self::cek_asesmen_medis_detail($PoliDetail['poli_asesmen'], $value['uid']);
@@ -3123,6 +3171,7 @@ class Asesmen extends Utility {
 
             if ($cek_asesment['response_result'] > 0) {
                 $antrian['response_data'][$key]['uid_asesmen_medis'] = $cek_asesment['response_data'][0]['uid'];
+                $antrian['response_data'][$key]['asesmen_detail'] = $cek_asesment['response_data'][0];
                 $antrian['response_data'][$key]['status_asesmen'] = true;
             }
 
@@ -3197,7 +3246,7 @@ class Asesmen extends Utility {
 
 	private function cek_asesmen_medis_detail($poli_prefix, $parameter){
 		$data = self::$query
-				->select('asesmen_medis_' . $poli_prefix, array('uid','antrian'))
+				->select('asesmen_medis_' . $poli_prefix, array('uid','antrian', 'keluhan_utama'))
 				->where(array(
 							'deleted_at' => 'IS NULL',
 							'AND',

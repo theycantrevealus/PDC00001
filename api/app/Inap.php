@@ -116,6 +116,9 @@ class Inap extends Utility
             case 'riwayat_obat_inap':
                 return self::riwayat_obat_inap($parameter);
                 break;
+            case 'kalkulasi_sisa_obat':
+                return self::kalkulasi_sisa_obat($parameter);
+                break;
             default:
                 return self::get_all($parameter);
         }
@@ -255,6 +258,219 @@ class Inap extends Utility
                 $parameter['check']
             ))
             ->execute();
+    }
+
+    private function kalkulasi_sisa_obat($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $FilteredData = array();
+        $Inventori = new Inventori(self::$pdo);
+        //Dapatkan Resep Dokter
+        $Resep = self::$query->select('resep', array(
+            'uid',
+            'asesmen',
+            'antrian',
+            'kunjungan',
+            'keterangan',
+            'keterangan_racikan'
+        ))
+            ->where(array(
+                'resep.pasien' => '= ?',
+                'AND',
+                'resep.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['pasien']
+            ))
+            ->execute();
+
+        $Unit = self::get_ns_detail($parameter['nurse_station'])['response_data'][0];
+
+        $Antrian = new Antrian(self::$pdo);
+
+        foreach ($Resep['response_data'] as $key => $value) {
+            //Antrian Detail
+            $AntrianDetail = $Antrian->get_antrian_detail('antrian', $value['antrian'])['response_data'][0];
+
+            if(
+                $AntrianDetail['departemen'] === __POLI_INAP__ &&
+                is_null($AntrianDetail['kunjungan_detail']['waktu_keluar'])
+            ) {
+                $resepDetail = self::$query->select('resep_detail', array(
+                    'id',
+                    'resep',
+                    'obat',
+                    'harga',
+                    'signa_qty',
+                    'signa_pakai',
+                    'keterangan',
+                    'aturan_pakai',
+                    'qty',
+                    'satuan',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where(array(
+                        'resep_detail.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep_detail.resep' => '= ?'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+                foreach ($resepDetail['response_data'] as $resDKey => $resDValue) {
+                    $resepDetail['response_data'][$resDKey]['obat'] = $Inventori->get_item_detail($resDValue['obat'])['response_data'][0];
+                    //yang sudah diberikan
+                    $TotalPemberian = array();
+                    $Berikan = self::$query->select('inventori_stok_log', array(
+                        'barang',
+                        'batch',
+                        'gudang',
+                        'masuk',
+                        'keluar',
+                        'saldo'
+                    ))
+                        ->where(array(
+                            'inventori_stok_log.barang' => '= ?',
+                            'AND',
+                            'inventori_stok_log.type' => '= ?',
+                            'AND',
+                            'inventori_stok_log.gudang' => '= ?'
+                        ), array(
+                            $resDValue['obat'],
+                            __STATUS_BARANG_KELUAR_INAP__,
+                            $Unit['uid_gudang']
+                        ))
+                        ->execute();
+                    foreach ($Berikan['response_data'] as $BerKey => $BerValue) {
+                        if(!isset($TotalPemberian[$BerValue['barang']])) {
+                            $TotalPemberian[$BerValue['barang']] = array();
+                        }
+
+                        if(!isset($TotalPemberian[$BerValue['barang']][$BerValue['batch']])) {
+                            $TotalPemberian[$BerValue['barang']][$BerValue['batch']] = array(
+                                'keluar' => floatval($BerValue['keluar']),
+                                'sisa' => 0
+                            );
+                        }
+                    }
+
+                    foreach ($TotalPemberian as $batchD => $batchVal) {
+                        foreach ($batchVal as $bCountKey => $bCountVal) {
+                            //Check Stok pada NS
+                            $Stok = self::$query->select('inventori_stok', array(
+                                'barang',
+                                'batch',
+                                'gudang',
+                                'stok_terkini'
+                            ))
+                                ->where(array(
+                                    'inventori_stok.gudang' => '= ?',
+                                    'AND',
+                                    'inventori_stok.batch' => '= ?',
+                                    'AND',
+                                    'inventori_stok.barang' => '= ?'
+                                ), array(
+                                    $Unit['uid_gudang'],
+                                    $bCountKey,
+                                    $batchD
+                                ))
+                                ->execute();
+
+                            if(count($Stok['response_data']) > 0) {
+                                foreach ($Stok['response_data'] as $StKey => $StValue) {
+                                    $TotalPemberian[$StValue['barang']][$StValue['batch']]['sisa'] = floatval($resDValue['qty']) - floatval($TotalPemberian[$StValue['barang']][$StValue['batch']]['keluar']);
+                                }
+                            }
+                        }
+                    }
+
+                    $resepDetail['response_data'][$resDKey]['terpakai'] = $TotalPemberian;
+                    $resepDetail['response_data'][$resDKey]['unit'] = $Unit;
+                }
+
+                $Resep['response_data'][$key]['detail'] = $resepDetail['response_data'];
+
+
+
+
+
+
+                $Racikan = self::$query->select('racikan', array(
+                    'uid',
+                    'asesmen',
+                    'kode',
+                    'qty'
+                ))
+                    ->join('asesmen', array(
+                        'poli',
+                        'pasien',
+                        'kunjungan'
+                    ))
+                    ->join('kunjungan', array(
+                        'waktu_keluar'
+                    ))
+                    ->on(array(
+                        array('racikan.asesmen', '=', 'asesmen.uid'),
+                        array('asesmen.kunjungan', '=', 'kunjungan.uid')
+                    ))
+                    ->where(array(
+                        'asesmen.pasien' => '= ?',
+                        'AND',
+                        'asesmen.poli' => '= ?',
+                        'AND',
+                        'kunjungan.waktu_keluar' => 'IS NULL',
+                        'AND',
+                        'racikan.asesmen' => '= ?',
+                        'AND',
+                        'racikan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['pasien'],
+                        __POLI_INAP__,
+                        $value['asesmen']
+                    ))
+                    ->execute();
+
+                foreach ($Racikan['response_data'] as $RacKey => $RacValue) {
+                    $TotalRacikan = 0;
+                    //Check Pemberian
+                    $Riwayat = self::$query->select('rawat_inap_riwayat_obat', array(
+                        'qty'
+                    ))
+                        ->where(array(
+                            'rawat_inap_riwayat_obat.resep' => '= ?',
+                            'AND',
+                            'rawat_inap_riwayat_obat.obat' => '= ?'
+                        ), array(
+                            $value['uid'],
+                            $RacValue['kode']
+                        ))
+                        ->execute();
+                    foreach ($Riwayat['response_data'] as $RRKey => $RRValue) {
+                        $TotalRacikan += floatval($RRValue['qty']);
+                    }
+
+                    $Racikan['response_data'][$RacKey]['total_diberikan'] = $TotalRacikan;
+                }
+
+                $Resep['response_data'][$key]['racikan'] = $Racikan['response_data'];
+
+
+
+
+
+
+
+
+                array_push($FilteredData, $Resep['response_data'][$key]);
+            } else {
+                array_push($FilteredData, is_null($AntrianDetail['kunjungan_detail']['waktu_keluar']));
+            }
+        }
+
+
+
+
+        return $FilteredData;
     }
 
     private function riwayat_obat_inap($parameter) {
@@ -478,7 +694,7 @@ class Inap extends Utility
                                     'masuk' => 0,
                                     'keluar' => floatval($ubValue['terpakai']),
                                     'saldo' => floatval($ubValue['sisa']),
-                                    'type' => __STATUS_BARANG_KELUAR__,
+                                    'type' => __STATUS_BARANG_KELUAR_INAP__,
                                     'logged_at' => parent::format_date(),
                                     'jenis_transaksi' => 'resep',
                                     'uid_foreign' => $value['resep'],

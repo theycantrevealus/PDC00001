@@ -43,6 +43,9 @@ class Invoice extends Utility
                 case 'kwitansi':
                     return self::get_kwitansi($parameter);
                     break;
+                case 'biaya_pasien_total':
+                    return self::biaya_pasien_total($parameter[2]);
+                    break;
                 default:
                     return self::get_biaya_pasien();
             }
@@ -73,6 +76,72 @@ class Invoice extends Utility
         } catch (QueryException $e) {
             return 'Error => ' . $e;
         }
+    }
+
+    private function biaya_pasien_total($parameter) {
+        $data = self::$query->select('invoice', array(
+            'uid',
+            'nomor_invoice',
+            'kunjungan',
+            'pasien',
+            'total_pre_discount',
+            'discount',
+            'discount_type',
+            'total_after_discount',
+            'keterangan',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'invoice.deleted_at' => 'IS NULL',
+                'AND',
+                'invoice.pasien' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+        $Inventori = new Inventori(self::$pdo);
+        $Bed = new Bed(self::$pdo);
+        $Tindakan = new Tindakan(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $InvoiceItem = self::$query->select('invoice_detail', array(
+                'id',
+                'invoice',
+                'item',
+                'item_type',
+                'qty',
+                'harga',
+                'status_bayar',
+                'subtotal',
+                'departemen',
+                'keterangan',
+                'billing_group'
+            ))
+                ->where(array(
+                    'invoice_detail.invoice' => '= ?',
+                    'AND',
+                    'invoice_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($InvoiceItem['response_data'] as $itemKey => $itemValue) {
+                if($itemValue['item_type'] === 'master_tindakan') {
+                    $InvoiceItem['response_data'][$itemKey]['item'] = $Tindakan->get_tindakan_detail($itemValue['item'])['response_data'][0];
+                } else if($itemValue['item_type'] === 'master_unit_bed') {
+                    $InvoiceItem['response_data'][$itemKey]['item'] = $Bed->get_bed_detail($itemValue['item_type'], $itemValue['item'])['response_data'][0];
+                } else if($itemValue['item_type'] === 'master_inv') {
+                    $InvoiceItem['response_data'][$itemKey]['item'] = $Inventori->get_item_detail($itemValue['item'])['response_data'][0];
+                } else {
+                    $InvoiceItem['response_data'][$itemKey]['item'] = array(
+                        'uid' => $itemValue,
+                        'nama' => 'Tidak diketahui'
+                    );
+                }
+            }
+            $data['response_data'][$key]['detail'] = $InvoiceItem['response_data'];
+        }
+        return $data;
     }
 
     private function get_kwitansi($parameter)

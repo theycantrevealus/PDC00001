@@ -19,7 +19,14 @@
             <div class="card-group">
                 <div class="card card-body">
                     <div class="d-flex flex-row">
-                        <div class="col-md-3">
+                        <div class="col-md-1">
+                            <a href="<?php echo __HOSTNAME__; ?>/rawat_inap/perawat">
+                                <span>
+                                    <i class="fa fa-chevron-circle-left"></i> Kembali
+                                </span>
+                            </a>
+                        </div>
+                        <div class="col-md-2">
                             <span id="rm_pasien" class="text-info"></span>
                             <br />
                             <b id="nama_pasien"></b>
@@ -30,7 +37,7 @@
                             <br />
                             <span id="alamat_pasien"></span>
                         </div>
-                        <div class="col-md-9">
+                        <div class="col-md-8">
                             <div class="form-row" data-toggle="dragula">
                                 <div class="col-md col-lg-3 handy print_manager" id="gelang">
                                     <div class="card form-row__card text-white bg-primary">
@@ -62,7 +69,7 @@
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
                     <h5 class="card-header__title flex m-0">
                         Pelayanan
-                        <button class="pull-right btn btn-success">
+                        <button class="pull-right btn btn-success" id="btnPulangkanPasien">
                             <span>
                                 <i class="fa fa-check-circle"></i> Pulangkan Pasien
                             </span>
@@ -145,6 +152,18 @@
                         </div>
                     </div>
                     <div class="tab-pane show fade" id="biaya">
+                        <table class="table table-bordered table-striped largeDataType" id="biaya_pasien">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>Item</th>
+                                <th class="wrap_content">Jlh</th>
+                                <th class="wrap_content">Harga</th>
+                                <th class="wrap_content">Subtotal</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
             </div>

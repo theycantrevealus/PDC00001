@@ -2,6 +2,147 @@
 <script type="text/javascript">
     $(function() {
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "";
+
+        $.ajax({
+            url: __HOSTAPI__ + "/Invoice/biaya_pasien_total/" + __PAGES__[3],
+            async:false,
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type:"GET",
+            success:function(response) {
+                var data = [];
+                if(response.response_package.response_data !== undefined && response.response_package.response_data !== null) {
+                    data = response.response_package.response_data;
+                }
+                var filtered = [];
+                for(var a in data) {
+                    for(var b in data[a].detail) {
+                        if(data[a].detail[b].departemen === __POLI_INAP__) {
+                            filtered.push({
+                                invoice: data[a].nomor_invoice,
+                                item: data[a].detail[b].item.nama,
+                                qty: data[a].detail[b].qty,
+                                harga: data[a].detail[b].harga,
+                                subtotal: data[a].detail[b].subtotal,
+                                keterangan: data[a].detail[b].keterangan
+                            });
+                        }
+                    }
+                }
+
+                var autonum = 1;
+                for(var a in filtered) {
+                    var newRow = document.createElement("TR");
+                    var newNo = document.createElement("TD");
+                    var newItem = document.createElement("TD");
+                    var newJlh = document.createElement("TD");
+                    var newHarga = document.createElement("TD");
+                    var newSub = document.createElement("TD");
+
+                    $(newNo).html(autonum);
+                    $(newItem).html("<span class=\"badge badge-info badge-custom-caption\">" + filtered[a].invoice + "</span><b style=\"padding-left: 20px;\">" + filtered[a].item + "</b><p>" + filtered[a].keterangan + "</p>");
+                    $(newJlh).html(filtered[a].qty).addClass("number_style");
+                    $(newHarga).html(filtered[a].harga).addClass("number_style");
+                    $(newSub).html(filtered[a].subtotal).addClass("number_style");
+
+                    $(newRow).append(newNo);
+                    $(newRow).append(newItem);
+                    $(newRow).append(newJlh);
+                    $(newRow).append(newHarga);
+                    $(newRow).append(newSub);
+
+                    $("#biaya_pasien tbody").append(newRow);
+                    autonum++;
+                }
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+
+        var tableRiwayatObat = $("#table-riwayat-obat-inap").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Inap",
+                type: "POST",
+                data: function(d) {
+                    d.request = "riwayat_obat_inap";
+                    d.pasien = __PAGES__[3];
+                    d.kunjungan = __PAGES__[4];
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var returnedData = [];
+                    if(response.response_package === undefined || response.response_package.response_data === undefined) {
+                        returnedData = [];
+                    } else {
+                        returnedData = response.response_package.response_data;
+                    }
+
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Resep"
+            },
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.logged_at + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return (row.resep_kode === null) ? "<h6 class=\"text-center\">-</h6>" : "<span class=\"badge badge-info badge-custom-caption\">" + row.resep_kode + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.obat + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<h6 class=\"number_style\">" + row.qty + "</h6>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.nama_petugas + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.keterangan;
+                    }
+                }
+            ]
+        });
+
         var tableResep = $("#table-resep-inap").DataTable({
             processing: true,
             serverSide: true,
@@ -105,24 +246,9 @@
                         }
                         return parsedDetail;
                     }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        if(row.status_resep === "N") {
-                            return "<span class=\"badge badge-warning badge-custom-caption\"><i class=\"fa fa-info-circle\"></i> Menunggu Verifikasi</span>";
-                        } else {
-                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<button class=\"btn btn-success btn-sm\">" +
-                                "<span><i class=\"fa fa-eye\"></i>Berikan Obat</span>" +
-                                "</button>" +
-                                "</div>";
-                        }
-                    }
                 }
             ]
         });
-
-
 
         var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
             "ajax":{
@@ -168,6 +294,7 @@
                             },
                             type:"GET",
                             success:function(response) {
+
                                 var pasienData = response.response_package.response_data;
                                 $("#target_pasien").html(pasienData[0].nama);
                                 $("#rm_pasien").html(pasienData[0].no_rm);
@@ -177,6 +304,7 @@
                                 $("#tanggal_lahir_pasien").html(pasienData[0].tanggal_lahir_parsed);
                                 $("#tempat_lahir_pasien").html(pasienData[0].tempat_lahir);
                                 $("#alamat_pasien").html(pasienData[0].alamat);
+
                             },
                             error: function(response) {
                                 console.log(response);
@@ -201,7 +329,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_masuk;
+                        return "<span class=\"wrap_content\">" + row.waktu_masuk + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.asesmen_detail.keluhan_utama.substr(0, 150) + "...";
                     }
                 },
                 {

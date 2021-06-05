@@ -4,6 +4,114 @@
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "", targettedDataResep = {};
         var nurse_station = __PAGES__[6];
 
+        $.ajax({
+            url: __HOSTAPI__ + "/Invoice/biaya_pasien_total/" + __PAGES__[3],
+            async:false,
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type:"GET",
+            success:function(response) {
+                var data = [];
+                if(response.response_package.response_data !== undefined && response.response_package.response_data !== null) {
+                    data = response.response_package.response_data;
+                }
+                var filteredLunas = [], filteredTunggak = [];
+                var totalLunas = 0, totalTunggak = 0;
+                for(var a in data) {
+                    for(var b in data[a].detail) {
+                        if(data[a].detail[b].departemen === __POLI_INAP__) {
+                            if(data[a].detail[b].status_bayar === "Y") {
+                                filteredLunas.push({
+                                    invoice: data[a].nomor_invoice,
+                                    item: data[a].detail[b].item.nama,
+                                    qty: data[a].detail[b].qty,
+                                    harga: data[a].detail[b].harga,
+                                    subtotal: data[a].detail[b].subtotal,
+                                    keterangan: data[a].detail[b].keterangan
+                                });
+                                totalLunas += parseFloat(data[a].detail[b].subtotal);
+                            } else {
+                                filteredTunggak.push({
+                                    invoice: data[a].nomor_invoice,
+                                    item: data[a].detail[b].item.nama,
+                                    qty: data[a].detail[b].qty,
+                                    harga: data[a].detail[b].harga,
+                                    subtotal: data[a].detail[b].subtotal,
+                                    keterangan: data[a].detail[b].keterangan
+                                });
+                                totalTunggak += parseFloat(data[a].detail[b].subtotal);
+                            }
+                        }
+                    }
+                }
+
+                var autonum = 1;
+                for(var a in filteredLunas) {
+                    var newRow = document.createElement("TR");
+                    var newNo = document.createElement("TD");
+                    var newItem = document.createElement("TD");
+                    var newJlh = document.createElement("TD");
+                    var newHarga = document.createElement("TD");
+                    var newSub = document.createElement("TD");
+
+                    $(newNo).html(autonum);
+                    $(newItem).html("<span class=\"badge badge-info badge-custom-caption pull-right\">" + filteredLunas[a].invoice + "</span>" +
+                        "<h6 style=\"padding-left: 20px;\">" + filteredLunas[a].item + " <br /><span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</span></h6><p>" + filteredLunas[a].keterangan + "</p>");
+                    $(newJlh).html(filteredLunas[a].qty).addClass("number_style");
+                    $(newHarga).html(number_format(filteredTunggak[a].harga, 2, ".", ",")).addClass("number_style");
+                    $(newSub).html(number_format(filteredTunggak[a].subtotal, 2, ".", ",")).addClass("number_style");
+
+                    $(newRow).append(newNo);
+                    $(newRow).append(newItem);
+                    $(newRow).append(newJlh);
+                    $(newRow).append(newHarga);
+                    $(newRow).append(newSub);
+
+                    $("#biaya_pasien tbody").append(newRow);
+                    autonum++;
+                }
+
+                for(var a in filteredTunggak) {
+                    var newRow = document.createElement("TR");
+                    var newNo = document.createElement("TD");
+                    var newItem = document.createElement("TD");
+                    var newJlh = document.createElement("TD");
+                    var newHarga = document.createElement("TD");
+                    var newSub = document.createElement("TD");
+
+                    $(newNo).html(autonum);
+                    $(newItem).html("<span class=\"badge badge-info badge-custom-caption pull-right\">" + filteredTunggak[a].invoice + "</span>" +
+                        "<h6 style=\"padding-left: 20px;\">" + filteredTunggak[a].item + "<br /><span class=\"text-danger\"><i class=\"fa fa-times-circle\"></i> Tunggakan</span></h6><p>" + filteredTunggak[a].keterangan + "</p>");
+                    $(newJlh).html(filteredTunggak[a].qty).addClass("number_style");
+                    $(newHarga).html(number_format(filteredTunggak[a].harga, 2, ".", ",")).addClass("number_style");
+                    $(newSub).html(number_format(filteredTunggak[a].subtotal, 2, ".", ",")).addClass("number_style");
+
+                    $(newRow).append(newNo);
+                    $(newRow).append(newItem);
+                    $(newRow).append(newJlh);
+                    $(newRow).append(newHarga);
+                    $(newRow).append(newSub);
+
+                    $("#biaya_pasien tbody").append(newRow);
+                    autonum++;
+                }
+
+                $("#biaya_pasien tbody").append("<tr>" +
+                    "<td colspan=\"4\" class=\"text-right\">Total Lunas</td>" +
+                    "<td class=\"number_style text-success\">" + number_format(totalLunas, 2, ".", ",") + "</td>" +
+                    "</tr>");
+
+                $("#biaya_pasien tbody").append("<tr>" +
+                    "<td colspan=\"4\" class=\"text-right\">Total Tunggakan</td>" +
+                    "<td class=\"number_style text-danger\">" + number_format(totalTunggak, 2, ".", ",") + "</td>" +
+                    "</tr>");
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+
         var tableRiwayatObat = $("#table-riwayat-obat-inap").DataTable({
             processing: true,
             serverSide: true,
@@ -24,7 +132,6 @@
                 },
                 dataSrc:function(response) {
                     var returnedData = [];
-                    console.log(response);
                     if(response.response_package === undefined || response.response_package.response_data === undefined) {
                         returnedData = [];
                     } else {
@@ -187,6 +294,8 @@
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.status_resep === "N") {
                             return "<span class=\"badge badge-warning badge-custom-caption\"><i class=\"fa fa-info-circle\"></i> Menunggu Verifikasi</span>";
+                        } else if(row.status_resep === "K" || row.status_resep === "P") {
+                            return "<span class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-info-circle\"></i> Belum Diserahkan</span>";
                         } else {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm berikanObat\" id=\"resep_" + row.uid + "\">" +
@@ -881,6 +990,137 @@
             });
         });
 
+        $("#btnPulangkanPasien").click(function () {
+            Swal.fire({
+                title: "Pemulangan Pasien",
+                text: "Pasien sudah dapat pulang?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Belum",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                                        //Get Riwayat Pemberian Obat
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Inap",
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "POST",
+                        data: {
+                            request: "kalkulasi_sisa_obat",
+                            pasien: __PAGES__[3],
+                            nurse_station: nurse_station
+                        },
+                        success: function (response) {
+                            var data = [];
+
+                            //console.log(response);
+                            if(response.response_package !== undefined) {
+                                data = response.response_package;
+                            }
+
+                            var dataFiltered = [];
+
+                            for(var a in data) {
+                                for(var b in data[a].detail) {
+                                    var sisaPakai = 0;
+
+
+                                    for(var c in data[a].detail[b].terpakai) {
+                                        for(var d in data[a].detail[b].terpakai[c]) {
+                                            sisaPakai += data[a].detail[b].terpakai[c][d].sisa;
+                                        }
+                                    }
+
+                                    dataFiltered.push({
+                                        type: 'resep',
+                                        nama: data[a].detail[b].obat.nama,
+                                        sisa: sisaPakai
+                                    });
+
+                                    if(
+                                        data[a].racikan !== undefined &&
+                                        data[a].racikan.length > 0
+                                    ) {
+                                        for(var rk in data[a].racikan) {
+                                            //total_diberikan
+                                            dataFiltered.push({
+                                                type: 'racikan',
+                                                nama: data[a].racikan[rk].kode,
+                                                sisa: data[a].racikan[rk].qty - data[a].racikan[rk].total_diberikan
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+
+                            $("#list-sisa-obat tbody").html("");
+
+                            var autonum = 1;
+                            for(var a in dataFiltered) {
+                                var newRow = document.createElement("TR");
+                                var newNo = document.createElement("TD");
+                                var newObat = document.createElement("TD");
+                                var newSisa = document.createElement("TD");
+                                var newAktual = document.createElement("TD");
+                                var newRemark = document.createElement("TD");
+
+                                var actualInput = document.createElement("INPUT");
+                                var remark = document.createElement("INPUT");
+
+                                $(newRow).attr({
+                                    type: dataFiltered[a].type
+                                });
+
+                                $(actualInput).inputmask({
+                                    alias: 'decimal',
+                                    rightAlign: true,
+                                    placeholder: "0.00",
+                                    prefix: "",
+                                    autoGroup: false,
+                                    digitsOptional: true
+                                }).addClass("form-control");
+
+                                $(remark).addClass("form-control");
+
+                                $(newNo).html(autonum);
+                                $(newObat).html(dataFiltered[a].nama);
+                                $(newSisa).html(dataFiltered[a].sisa).addClass("number_style");
+
+                                $(newRow).append(newNo);
+                                $(newRow).append(newObat);
+                                $(newRow).append(newSisa);
+                                $(newRow).append(newAktual);
+                                $(newRow).append(newRemark);
+
+                                $(newAktual).append(actualInput);
+                                $(newRemark).append(remark);
+
+                                $("#list-sisa-obat tbody").append(newRow);
+                                autonum++;
+                            }
+
+                            $("#form-kalkulasi-sisa-obat").modal("show");
+
+
+                        },
+                        error: function (response) {
+                            //
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btnKonfirmasiSisaObat").click(function () {
+            var dataSetMutasi = [];
+            $("#list-sisa-obat tbody tr").each(function () {
+                var type = $(this).attr("type");
+
+            });
+        });
+
 
 
         $(".print_manager").click(function() {
@@ -1078,6 +1318,61 @@
                 <button type="button" class="btn btn-success" id="btnKonfirmasiBerikanObat">
                     <span>
                         <i class="fa fa-check-circle"></i> Sudah Benar
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="form-kalkulasi-sisa-obat" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Konfirmasi Sisa Obat</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <br />
+                        <table class="table table-bordered largeDataType" id="list-sisa-obat">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>Obat/Racikan</th>
+                                <th class="wrap_content">Sisa</th>
+                                <th style="width: 200px;">Sisa Aktual</th>
+                                <th>Keterangan per Obat/Racikan</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <br />
+                        <label for="remark_kembalikan_obat">Keterangan:</label>
+                        <textarea style="min-height: 150px;" class="form-control" id="remark_kembalikan_obat" placeholder="Keterangan pengembalian obat rawat inap..."></textarea>
+                    </div>
+                    <div class="col-md-12" style="padding-top: 20px;">
+                        <span class="text-info">
+                            <i class="fa fa-info-circle"></i> Informasi Pengembalian Obat Sisa Rawat Inap
+                        </span>
+                        <ol type="1">
+                            <li>Obat racikan tidak dihitung dalam stok. Perlakuan sisa racikan akan ditanggung pasien</li>
+                            <li>Pengembalian obat kepada apotek. Setelah data stok pengembalian obat diisi maka sistem akan melakukan laporan mutasi nurse station kepada apotek. Silahkan kembalikan obat sesuai jumlah yang diisi</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
+                <button type="button" class="btn btn-success" id="btnKonfirmasiSisaObat">
+                    <span>
+                        <i class="fa fa-check-circle"></i> Proses Data
                     </span>
                 </button>
             </div>

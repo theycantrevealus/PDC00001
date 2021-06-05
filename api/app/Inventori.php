@@ -4665,7 +4665,7 @@ class Inventori extends Utility
                                 'masuk' => 0,
                                 'keluar' => floatval($value['mutasi']),
                                 'saldo' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) - floatval($value['mutasi']),
-                                'type' => __STATUS_MUTASI_STOK__,
+                                'type' => (isset($parameter['inap'])) ? __STATUS_BARANG_KELUAR_INAP__ : __STATUS_MUTASI_STOK__,
                                 'keterangan' => $parameter['keterangan']
                             ))
                                 ->execute();
@@ -4722,7 +4722,7 @@ class Inventori extends Utility
 
                         if ($update_stok_old_ke['response_result'] > 0) {
                             //Update Stok Log Ke
-                            $update_dari_log = self::$query->insert('inventori_stok_log', array(
+                            $update_ke_log = self::$query->insert('inventori_stok_log', array(
                                 'barang' => $ItemUIDBatch[0],
                                 'batch' => $ItemUIDBatch[1],
                                 'uid_foreign' => $uid,
@@ -4731,7 +4731,7 @@ class Inventori extends Utility
                                 'masuk' => floatval($value['mutasi']),
                                 'keluar' => 0,
                                 'saldo' => floatval($stok_ke_old['response_data'][0]['stok_terkini']) + floatval($value['mutasi']),
-                                'type' => __STATUS_MUTASI_STOK__,
+                                'type' => (isset($parameter['inap'])) ? __STATUS_BARANG_MASUK_INAP__ : __STATUS_MUTASI_STOK__,
                                 'keterangan' => $parameter['keterangan']
                             ))
                                 ->execute();
