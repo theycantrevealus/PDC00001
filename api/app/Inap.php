@@ -33,6 +33,13 @@ class Inap extends Utility
             case 'detail_ns':
                 return self::get_ns_detail($parameter[2]);
                 break;
+            case 'sedia_obat':
+                return self::sedia_obat(array(
+                    'resep' => $parameter[2],
+                    'pasien' => $parameter[3],
+                    'obat' => $parameter[4]
+                ));
+                break;
             default:
                 return array();
                 break;
@@ -119,12 +126,34 @@ class Inap extends Utility
             case 'kalkulasi_sisa_obat':
                 return self::kalkulasi_sisa_obat($parameter);
                 break;
+            case 'kalkulasi_sisa_obat_2':
+                return self::kalkulasi_sisa_obat_2($parameter);
+                break;
             default:
                 return self::get_all($parameter);
         }
     }
 
-    private function get_ns_detail($parameter) {
+    private function sedia_obat($parameter) {
+        $data = self::$query->select('rawat_inap_batch', array(
+            'qty'
+        ))
+            ->where(array(
+                'rawat_inap_batch.resep' => '= ?',
+                'AND',
+                'rawat_inap_batch.pasien' => '= ?',
+                'AND',
+                'rawat_inap_batch.obat' => '= ?'
+            ), array(
+                $parameter['resep'],
+                $parameter['pasien'],
+                $parameter['obat']
+            ))
+            ->execute();
+        return $data;
+    }
+
+    public function get_ns_detail($parameter) {
         $allowManage = true;
         $Bed = new Bed(self::$pdo);
         $Ruangan = new Ruangan(self::$pdo);
@@ -258,6 +287,42 @@ class Inap extends Utility
                 $parameter['check']
             ))
             ->execute();
+    }
+
+    private function kalkulasi_sisa_obat_2($parameter) {
+        $Inventori = new Inventori(self::$pdo);
+        $data = self::$query->select('rawat_inap_batch', array(
+            'qty',
+            'batch',
+            'obat'
+        ))
+            ->join('resep', array(
+                'kunjungan'
+            ))
+            ->join('kunjungan', array(
+                'waktu_keluar'
+            ))
+            ->on(array(
+                array('rawat_inap_batch.resep', '=', 'resep.uid'),
+                array('resep.kunjungan', '=', 'kunjungan.uid')
+            ))
+            ->where(array(
+                'rawat_inap_batch.gudang' => '= ?',
+                'AND',
+                'rawat_inap_batch.pasien' => '= ?',
+                'AND',
+                'kunjungan.waktu_keluar' => 'IS NULL'
+            ), array(
+                $parameter['gudang'],
+                $parameter['pasien']
+            ))
+            ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['detail'] = $Inventori->get_item_detail($value['obat'])['response_data'][0];
+            $data['response_data'][$key]['batch'] = $Inventori->get_batch_detail($value['batch'])['response_data'][0];
+        }
+
+        return $data;
     }
 
     private function kalkulasi_sisa_obat($parameter) {
@@ -453,14 +518,6 @@ class Inap extends Utility
                 }
 
                 $Resep['response_data'][$key]['racikan'] = $Racikan['response_data'];
-
-
-
-
-
-
-
-
                 array_push($FilteredData, $Resep['response_data'][$key]);
             } else {
                 array_push($FilteredData, is_null($AntrianDetail['kunjungan_detail']['waktu_keluar']));
@@ -701,7 +758,41 @@ class Inap extends Utility
                                     'keterangan' => 'Pemberian Obat Rawat Inap. ' . $value['keterangan']
                                 ))
                                     ->execute();
-                                array_push($stok_record_log, $stok_log);
+                                if($stok_log['response_result'] > 0) {
+                                    array_push($stok_record_log, $stok_log);
+
+                                    $OldStokNS = self::$query->select('rawat_inap_batch', array(
+                                        'id',
+                                        'qty'
+                                    ))
+                                        ->where(array(
+                                            'rawat_inap_batch.resep' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.obat' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.batch' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.gudang' => '= ?'
+                                        ), array(
+                                            $value['resep'],
+                                            $value['obat'],
+                                            $uBKey,
+                                            $NS['uid_gudang']
+                                        ))
+                                        ->execute();
+                                    if(count($OldStokNS['response_data']) > 0) {
+                                        //Kurangi Stok NS
+                                        $updateStokNS = self::$query->update('rawat_inap_batch', array(
+                                            'qty' => floatval($OldStokNS['response_data'][0]['qty']) - floatval($ubValue['terpakai'])
+                                        ))
+                                            ->where(array(
+                                                'rawat_inap_batch.id' => '= ?'
+                                            ), array(
+                                                $OldStokNS['response_data'][0]['id']
+                                            ))
+                                            ->execute();
+                                    }
+                                }
                             }
                             array_push($stok_record, $procStok);
 

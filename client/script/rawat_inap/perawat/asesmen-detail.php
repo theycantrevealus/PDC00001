@@ -3,6 +3,23 @@
     $(function() {
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "", targettedDataResep = {};
         var nurse_station = __PAGES__[6];
+        var nurse_station_info = {};
+
+        $.ajax({
+            url: __HOSTAPI__ + "/Inap/detail_ns/" + __PAGES__[6],
+            async: false,
+            beforeSend: function (request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type: "GET",
+            success: function (response) {
+                nurse_station_info = response.response_package.response_data[0];
+                console.log(nurse_station_info);
+            },
+            error: function (response) {
+                //
+            }
+        });
 
         $.ajax({
             url: __HOSTAPI__ + "/Invoice/biaya_pasien_total/" + __PAGES__[3],
@@ -208,6 +225,7 @@
                     d.request = "resep_inap";
                     d.pasien = __PAGES__[3];
                     d.kunjungan = __PAGES__[4];
+                    d.nurse_station = nurse_station;
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -219,6 +237,15 @@
                     } else {
                         returnedData = response.response_package.response_data;
                     }
+
+                    /*var filteredData = [];
+                    for(var a in returnedData) {
+                        for(var b in returnedData[a].detail) {
+                            for(var c in returnedData[a].detail[b].stok_ns) {
+
+                            }
+                        }
+                    }*/
 
 
                     response.draw = parseInt(response.response_package.response_draw);
@@ -458,9 +485,32 @@
                 });
 
                 $(newResepNo).html(autonum);
-                $(newResepItem).html(targettedDataResep.detail[a].detail.nama).attr({
-                    "uid": targettedDataResep.detail[a].detail.uid
-                }).append(newResepRemark);
+
+                //Check Ketersediaan Obat NS
+                $.ajax({
+                    url: __HOSTAPI__ + "/Inap/sedia_obat/" + targettedDataResep.uid + "/" + __PAGES__[3] + "/" + targettedDataResep.detail[a].detail.uid,
+                    async: false,
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    type: "GET",
+                    success: function (response) {
+                        var batchList = response.response_package.response_data;
+                        var totalItem = 0;
+                        for(var bbA in batchList) {
+                            totalItem += parseFloat(batchList[bbA].qty);
+                        }
+
+                        $(newResepItem).html(targettedDataResep.detail[a].detail.nama + "<br />Sedia: " + totalItem).attr({
+                            "uid": targettedDataResep.detail[a].detail.uid
+                        }).append(newResepRemark);
+                    },
+                    error: function (response) {
+                        //
+                    }
+                });
+
+
                 $(newResepQty).append(newResepQtyCount);
 
                 $(newResepConfRow).append(newResepNo);
@@ -1008,21 +1058,28 @@
                         },
                         type: "POST",
                         data: {
-                            request: "kalkulasi_sisa_obat",
+                            request: "kalkulasi_sisa_obat_2",
                             pasien: __PAGES__[3],
+                            gudang: nurse_station_info.gudang,
                             nurse_station: nurse_station
                         },
                         success: function (response) {
                             var data = [];
-
-                            //console.log(response);
+                            /*console.clear();
+                            console.log(response);*/
                             if(response.response_package !== undefined) {
-                                data = response.response_package;
+                                data = response.response_package.response_data;
                             }
 
                             var dataFiltered = [];
-
                             for(var a in data) {
+                                dataFiltered.push({
+                                    type: 'resep',
+                                    nama: data[a].detail.nama,
+                                    sisa: parseFloat(data[a].qty)
+                                });
+                            }
+                            /*for(var a in data) {
                                 for(var b in data[a].detail) {
                                     var sisaPakai = 0;
 
@@ -1053,7 +1110,7 @@
                                         }
                                     }
                                 }
-                            }
+                            }*/
 
                             $("#list-sisa-obat tbody").html("");
 
@@ -1080,7 +1137,7 @@
                                     prefix: "",
                                     autoGroup: false,
                                     digitsOptional: true
-                                }).addClass("form-control");
+                                }).addClass("form-control").val(parseFloat(dataFiltered[a].sisa));
 
                                 $(remark).addClass("form-control");
 
@@ -1117,7 +1174,11 @@
             var dataSetMutasi = [];
             $("#list-sisa-obat tbody tr").each(function () {
                 var type = $(this).attr("type");
+                var qtySisa = parseFloat($(this).find("td:eq(2)").html());
+                var qtyAct = parseFloat($(this).find("td:eq(2)").html());
+                dataSetMutasi.push({
 
+                });
             });
         });
 
@@ -1359,7 +1420,7 @@
                         </span>
                         <ol type="1">
                             <li>Obat racikan tidak dihitung dalam stok. Perlakuan sisa racikan akan ditanggung pasien</li>
-                            <li>Pengembalian obat kepada apotek. Setelah data stok pengembalian obat diisi maka sistem akan melakukan laporan mutasi nurse station kepada apotek. Silahkan kembalikan obat sesuai jumlah yang diisi</li>
+                            <li>Pengembalian obat kepada apotek. Setelah data stok pengembalian obat diisi maka sistem akan melakukan <b class="uppercase">operasi mutasi dari nurse station kepada apotek</b>. Silahkan kembalikan obat sesuai jumlah yang diisi</li>
                         </ol>
                     </div>
                 </div>

@@ -69,7 +69,8 @@ class Apotek extends Utility
         try {
             switch ($parameter['request']) {
                 case 'revisi_resep':
-                    return self::revisi_resep($parameter);
+                    //return self::revisi_resep($parameter);
+                    return array();
                     break;
                 case 'verifikasi_resep':
                     return self::verifikasi_resep($parameter);
@@ -412,7 +413,9 @@ class Apotek extends Utility
                                     'AND',
                                     'rawat_inap_batch.resep' => '= ?',
                                     'AND',
-                                    'rawat_inap_batch.gudang' => '= ?'
+                                    'rawat_inap_batch.gudang' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.deleted_at' => 'IS NULL'
                                 ), array(
                                     $BarangBatch[0],
                                     $BarangBatch[1],
@@ -1349,6 +1352,8 @@ class Apotek extends Utility
     }
 
     private function resep_inap($parameter) {
+        $Unit = new Inap(self::$pdo);
+        $UnitDetail = $Unit->get_ns_detail($parameter['nurse_station'])['response_data'][0];
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
                 'resep.deleted_at' => 'IS NULL',
@@ -1444,6 +1449,24 @@ class Apotek extends Utility
 
                 $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
+
+                //Check Ketersediaan Obat pada NS
+                $NSInap = self::$query->select('rawat_inap_batch', array(
+                    'qty'
+                ))
+                    ->where(array(
+                        'rawat_inap_batch.gudang' => '= ?',
+                        'AND',
+                        'rawat_inap_batch.obat' => '= ?',
+                        'AND',
+                        'rawat_inap_batch.resep' => '= ?'
+                    ), array(
+                        $UnitDetail['uid_gudang'],
+                        $ResValue['obat'],
+                        $value['uid']
+                    ))
+                    ->execute();
+                $resep_detail['response_data'][$ResKey]['stok_ns'] = $NSInap['response_data'];
             }
             $data['response_data'][$key]['detail'] = $resep_detail['response_data'];
 
