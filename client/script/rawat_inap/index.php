@@ -59,7 +59,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return (row.kamar !== null) ? "<span bed=\"" + row.bed.uid + "\" kamar=\"" + row.kamar.uid + "\" id=\"kamar_" + row.uid + "\">" + row.kamar.nama + "</span><br />" + row.bed.nama : "";
+                        return (row.kamar !== null) ? "<span bed=\"" + row.bed.uid + "\" kamar=\"" + row.kamar.uid + "\" id=\"kamar_" + row.uid + "\">" + row.kamar.nama + "</span><br />" + row.bed.nama  + "<br /><b class=\"text-info\">[" + row.nurse_station.kode_ns + "]</b> " +row.nurse_station.nama_ns: "";
                     }
                 },
                 {
@@ -152,7 +152,9 @@
                         beforeSend: function(request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
-                        success: function(response){
+                        success: function(response) {
+                            console.clear();
+                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 Swal.fire(
                                     "Rawat Inap",
@@ -163,9 +165,14 @@
                                     $("#form-inap").modal("hide");
                                 });
                             } else {
-                                console.log(response);
+                                Swal.fire(
+                                    "Rawat Inap",
+                                    response.response_package.response_message,
+                                    "warning"
+                                ).then((result) => {
+                                    //
+                                });
                             }
-                            console.log(response);
                         },
                         error: function(response) {
                             console.log(response);

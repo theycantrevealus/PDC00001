@@ -74,7 +74,7 @@
 									<th>Pasien</th>
 									<th>Dokter</th>
 									<th>Penjamin</th>
-									<th>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody></tbody>

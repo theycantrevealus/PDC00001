@@ -69,7 +69,8 @@ class Apotek extends Utility
         try {
             switch ($parameter['request']) {
                 case 'revisi_resep':
-                    return self::revisi_resep($parameter);
+                    //return self::revisi_resep($parameter);
+                    return array();
                     break;
                 case 'verifikasi_resep':
                     return self::verifikasi_resep($parameter);
@@ -192,6 +193,7 @@ class Apotek extends Utility
 
 
         $usedBatch = array();
+        $usedBatchInap = array();
         $rawBatch = array();
         $Inventori = new Inventori(self::$pdo);
 
@@ -223,6 +225,15 @@ class Apotek extends Utility
                 {
                     if($kebutuhan > $bValue['stok_terkini'])
                     {
+                        if($parameter['departemen'] === __POLI_INAP__) {
+                            //Racikan tidak usah charge stok karena stok dianggap habis diproses
+                            array_push($usedBatchInap, array(
+                                'batch' => $bValue['batch'],
+                                'barang' => $value['obat'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'qty' => $bValue['stok_terkini']
+                            ));
+                        }
                         $kebutuhan -= $bValue['stok_terkini'];
                         array_push($usedBatch, array(
                             'batch' => $bValue['batch'],
@@ -231,6 +242,15 @@ class Apotek extends Utility
                             'qty' => $bValue['stok_terkini']
                         ));
                     } else {
+                        if($parameter['departemen'] === __POLI_INAP__) {
+                            //Racikan tidak usah charge stok karena stok dianggap habis diproses
+                            array_push($usedBatchInap, array(
+                                'batch' => $bValue['batch'],
+                                'barang' => $value['obat'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'qty' => $kebutuhan
+                            ));
+                        }
                         array_push($usedBatch, array(
                             'batch' => $bValue['batch'],
                             'barang' => $value['obat'],
@@ -317,61 +337,146 @@ class Apotek extends Utility
                 }
             }
         }
-
+        $itemMutasi = array();
         if($parameter['departemen'] === __POLI_INAP__) {
             //Todo: Mutasikan stok ke nurse station terkait
-            $itemMutasi = array();
-            foreach ($usedBatch as $bKey => $bValue) {
-                array_push($itemMutasi, array(
-                    $bValue['barang'] . '|' . $bValue['batch'] => array(
-                        'mutasi' => $bValue['qty'],
-                        'keterangan' => 'Mutasi kebutuhan rawat inap'
-                    )
+
+            if(count($usedBatchInap) > 0) {
+                foreach ($usedBatchInap as $bKey => $bValue) {
+                    if(!isset($itemMutasi[$bValue['barang'] . '|' . $bValue['batch']])) {
+                        $itemMutasi[$bValue['barang'] . '|' . $bValue['batch']] = array(
+                            'mutasi' => $bValue['qty'],
+                            'keterangan' => 'Mutasi kebutuhan rawat inap'
+                        );
+                    }
+                }
+
+                //Ambil informasi nurse station dan gudang tujuan dari rawat inap
+                $RawatInap = self::$query->select('rawat_inap', array(
+                    'nurse_station',
+                    'pasien',
+                    'dokter'
+                ))
+                    ->join('nurse_station', array(
+                        'kode as kode_ns',
+                        'nama as nama_ns',
+                        'unit'
+                    ))
+                    ->join('master_unit', array(
+                        'kode as kode_unit',
+                        'nama as nama_unit',
+                        'gudang'
+                    ))
+                    ->on(array(
+                        array('rawat_inap.nurse_station', '=', 'nurse_station.uid'),
+                        array('nurse_station.unit', '=', 'master_unit.uid')
+                    ))
+                    ->where(array(
+                        'rawat_inap.kunjungan' => '= ?',
+                        'AND',
+                        'rawat_inap.dokter' => '= ?',
+                        'AND',
+                        'rawat_inap.penjamin' => '= ?',
+                        'AND',
+                        'rawat_inap.deleted_at' => 'IS NULL',
+                        'AND',
+                        'nurse_station.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['antrian']['kunjungan'],
+                        $parameter['antrian']['dokter'],
+                        $parameter['antrian']['penjamin']
+                    ))
+                    ->execute();
+
+                $Mutasi = $Inventori->tambah_mutasi(array(
+                    'access_token' => $parameter['access_token'],
+                    'dari' => $UserData['data']->gudang,
+                    'ke' => $RawatInap['response_data'][0]['gudang'],
+                    'keterangan' => 'Kebutuhan Resep Rawat Inap',
+                    'inap' => true,
+                    'item' => $itemMutasi
                 ));
+
+                if($Mutasi['response_result'] > 0) {
+
+                    //Update batch rawat inap
+                    foreach ($itemMutasi as $mutBatch => $mutValue) {
+                        if(floatval($mutValue['mutasi']) > 0) {
+                            $BarangBatch = explode('|', $mutBatch);
+                            $inapBatch = self::$query->select('rawat_inap_batch', array(
+                                'id'
+                            ))
+                                ->where(array(
+                                    'rawat_inap_batch.obat' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.batch' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.resep' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.gudang' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.deleted_at' => 'IS NULL'
+                                ), array(
+                                    $BarangBatch[0],
+                                    $BarangBatch[1],
+                                    $parameter['resep'],
+                                    $RawatInap['response_data'][0]['gudang']
+                                ))
+                                ->execute();
+                            if(count($inapBatch['response_data']) > 0) {
+                                $updateBatchInap = self::$query->update('rawat_inap_batch', array(
+                                    'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
+                                    'updated_at' => parent::format_date()
+                                ))
+                                    ->where(array(
+                                        'rawat_inap_batch.id' => '= ?'
+                                    ), array(
+                                        $inapBatch['response_data'][0]['id']
+                                    ))
+                                    ->execute();
+                            } else {
+                                $updateBatchInap = self::$query->insert('rawat_inap_batch', array(
+                                    'gudang' => $RawatInap['response_data'][0]['gudang'],
+                                    'pasien' => $RawatInap['response_data'][0]['pasien'],
+                                    'resep' => $parameter['resep'],
+                                    'obat' => $BarangBatch[0],
+                                    'batch' => $BarangBatch[1],
+                                    'qty' => floatval($mutValue['mutasi']),
+                                    'created_at' => parent::format_date(),
+                                    'updated_at' => parent::format_date()
+                                ))
+                                    ->execute();
+                            }
+                        }
+                    }
+
+                    $updateResep = self::$query->update('resep', array(
+                        'status_resep' => 'D'
+                    ))
+                        ->where(array(
+                            'resep.uid' => '= ?'
+                        ), array(
+                            $parameter['resep']
+                        ))
+                        ->execute();
+
+                    //Update Racikan
+                    $updateRacikan = self::$query->update('racikan', array(
+                        'status' => 'D'
+                    ))
+                        ->where(array(
+                            'racikan.asesmen' => '= ?',
+                            'AND',
+                            'racikan.status' => '= ?',
+                            'AND',
+                            'racikan.deleted_at' => 'IS NULL'
+                        ), array(
+                            $parameter['asesmen'],
+                            'L'
+                        ))
+                        ->execute();
+                }
             }
-
-            //Ambil informasi nurse station dan gudang tujuan dari rawat inap
-            $RawatInap = self::$query->select('rawat_inap', array(
-                'nurse_station',
-                'pasien',
-                'dokter'
-            ))
-                ->join('nurse_station', array(
-                    'kode',
-                    'nama',
-                    'gudang'
-                ))
-                ->where(array(
-                    'rawat_inap.kunjungan' => '= ?',
-                    'AND',
-                    'rawat_inap.dokter' => '= ?',
-                    'AND',
-                    'rawat_inap.penjamin' => '= ?',
-                    'AND',
-                    'rawat_inap.deleted_at' => 'IS NULL',
-                    'AND',
-                    'nurse_station.deleted_at' => 'IS NULL'
-                ), array(
-                    $parameter['antrian']['kunjungan'],
-                    $parameter['antrian']['dokter'],
-                    $parameter['antrian']['penjamindokter']
-                ))
-                ->execute();
-
-            $Mutasi = $Inventori->tambah_mutasi(array(
-                'access_token' => $parameter['access_token'],
-                'dari' => $UserData['data']->gudang,
-                'ke' => $RawatInap['response_data'][0]['gudang'],
-                'keterangan' => 'Kebutuhan Resep Rawat Inap',
-                'item' => $itemMutasi
-            ));
-            //Mutasikan Stok
-
-
-
-
-
-
         } else {
             //Jika bukan Rawat Inap potong seperti biasa
             $updateResult = 0;
@@ -503,6 +608,10 @@ class Apotek extends Utility
             'racikan' => $racikan,
             'raw_batch' => $rawBatch,
             'stok_progress' => $updateProgress,
+            'informasi_inap' => $RawatInap,
+            'mutasi' => $Mutasi,
+            'batch' => $usedBatch,
+            'parse_mutas' => $itemMutasi,
             'stok_result' => ($updateResult == count($usedBatch)) ? 1 : 0
         );
     }
@@ -593,7 +702,7 @@ class Apotek extends Utility
                 ->execute();
             foreach ($resepDetail['response_data'] as $RDKey => $RDValue) {
                 $Inventori = new Inventori(self::$pdo);
-                $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori::get_item_detail($RDValue['obat'])['response_data'][0];
+                $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori->get_item_detail($RDValue['obat'])['response_data'][0];
             }
             $dataResponse['resep'] = $resepDetail['response_data'];
 
@@ -650,8 +759,8 @@ class Apotek extends Utility
                 }
 
                 $RacikanValue['item'] = $RacikanDetailData['response_data'];
+                array_push($dataResponse['racikan'], $RacikanValue);
             }
-            array_push($dataResponse['racikan'], $RacikanValue);
         }
 
         return array($dataResponse);
@@ -660,7 +769,7 @@ class Apotek extends Utility
     private function detail_resep($parameter, $status = 'N')
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $data = self::$query->select('resep', array(
             'uid',
@@ -1243,6 +1352,8 @@ class Apotek extends Utility
     }
 
     private function resep_inap($parameter) {
+        $Unit = new Inap(self::$pdo);
+        $UnitDetail = $Unit->get_ns_detail($parameter['nurse_station'])['response_data'][0];
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
                 'resep.deleted_at' => 'IS NULL',
@@ -1303,8 +1414,13 @@ class Apotek extends Utility
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $Inventori = new Inventori(self::$pdo);
+        $Antrian = new Antrian(self::$pdo);
 
         foreach ($data['response_data'] as $key => $value) {
+            $AntrianDetail = $Antrian->get_antrian_detail('antrian', $value['antrian']);
+            $data['response_data'][$key]['antrian_detail'] = $AntrianDetail['response_data'][0];
+
             //Get resep detail
             $resep_detail = self::$query->select('resep_detail', array(
                 'id',
@@ -1328,13 +1444,29 @@ class Apotek extends Utility
                 ->execute();
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 //Batch Info
-                $Inventori = new Inventori(self::$pdo);
-                $InventoriBatch = $Inventori::get_item_batch($ResValue['obat']);
+                $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
 
-                $Inventori = new Inventori(self::$pdo);
-                $InventoriInfo = $Inventori::get_item_detail($ResValue['obat']);
+                $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
+
+                //Check Ketersediaan Obat pada NS
+                $NSInap = self::$query->select('rawat_inap_batch', array(
+                    'qty'
+                ))
+                    ->where(array(
+                        'rawat_inap_batch.gudang' => '= ?',
+                        'AND',
+                        'rawat_inap_batch.obat' => '= ?',
+                        'AND',
+                        'rawat_inap_batch.resep' => '= ?'
+                    ), array(
+                        $UnitDetail['uid_gudang'],
+                        $ResValue['obat'],
+                        $value['uid']
+                    ))
+                    ->execute();
+                $resep_detail['response_data'][$ResKey]['stok_ns'] = $NSInap['response_data'];
             }
             $data['response_data'][$key]['detail'] = $resep_detail['response_data'];
 
@@ -1356,12 +1488,9 @@ class Apotek extends Utility
                 ->where(array(
                     'racikan.asesmen' => '= ?',
                     'AND',
-                    'racikan.status' => '= ?',
-                    'AND',
                     'racikan.deleted_at' => 'IS NULL'
                 ), array(
-                    $value['asesmen'],
-                    'N'
+                    $value['asesmen']
                 ))
                 ->execute();
             foreach ($racikan['response_data'] as $RDKey => $RDValue) {
@@ -1392,8 +1521,7 @@ class Apotek extends Utility
                     ))
                     ->execute();
                 foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
-                    $Inventori = new Inventori(self::$pdo);
-                    $InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
+                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
 
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }

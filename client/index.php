@@ -23,6 +23,13 @@
 	var __MY_NAME__ = <?php echo json_encode($_SESSION['nama']); ?>;
 	var __MY_PRIVILEGES__ = <?php echo json_encode($_SESSION['jabatan']); ?>;
 	var __UNIT__ = <?php echo json_encode($_SESSION['unit']); ?>;
+    var __UNIT_MULTI__ = <?php echo json_encode($_SESSION['unit_multi']); ?>;
+    if(__UNIT__ === null) {
+        if(__UNIT_MULTI__ !== null) {
+            __UNIT__ = __UNIT_MULTI__[0]['response_data'][0];
+        }
+    }
+    var __NURSE_STATION__ = <?php echo json_encode($_SESSION['nurse_station']); ?>;
 
 	var __UIDPENJAMINUMUM__ = <?php echo json_encode(__UIDPENJAMINUMUM__); ?>;
 	var __UIDPENJAMINBPJS__ = <?php echo json_encode(__UIDPENJAMINBPJS__); ?>;

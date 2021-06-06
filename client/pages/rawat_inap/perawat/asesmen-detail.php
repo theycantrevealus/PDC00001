@@ -37,7 +37,7 @@
                             <br />
                             <span id="alamat_pasien"></span>
                         </div>
-                        <div class="col-md-9">
+                        <div class="col-md-8">
                             <div class="form-row" data-toggle="dragula">
                                 <div class="col-md col-lg-3 handy print_manager" id="gelang">
                                     <div class="card form-row__card text-white bg-primary">
@@ -67,30 +67,31 @@
             </div>
             <div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">Pelayanan</h5>
+                    <h5 class="card-header__title flex m-0">
+                        Pelayanan
+                        <button class="pull-right btn btn-success" id="btnPulangkanPasien">
+                            <span>
+                                <i class="fa fa-check-circle"></i> Pulangkan Pasien
+                            </span>
+                        </button>
+                    </h5>
                 </div>
                 <div class="card-header card-header-tabs-basic nav" role="tablist">
-                    <a href="#dokter" class="active" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">Dokter</a>
+                    <a href="#dokter" class="" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">Dokter</a>
                     <a href="#perawat" data-toggle="tab" role="tab" aria-selected="false">Perawat</a>
-                    <a href="#obat" class="" data-toggle="tab" role="tab" aria-selected="false">Obat dan BHP</a>
+                    <a href="#obat" class="active" data-toggle="tab" role="tab" aria-selected="false">Obat dan BHP</a>
                     <a href="#biaya" data-toggle="tab" role="tab" aria-selected="false">Biaya</a>
                 </div>
                 <div class="card-body tab-content" style="min-height: 100px;">
-                    <div class="tab-pane active show fade" id="dokter">
+                    <div class="tab-pane show fade" id="dokter">
                         <div class="row">
                             <div class="col-lg-12">
-                                <button class="btn btn-info pull-right" id="btnTambahAsesmen">
-                                    <i class="fa fa-plus"></i> Tambah Asesmen
-                                </button>
-                            </div>
-                            <div class="col-lg-12">
                                 <br />
-                                <table class="table table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+                                <table class="table table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
                                     <thead class="thead-dark">
                                     <tr>
                                         <th class="wrap_content">No</th>
-                                        <th class="wrap_content">Tgl</th>
-                                        <th>Keluhan Utama</th>
+                                        <th>Tgl</th>
                                         <th class="wrap_content">Aksi</th>
                                     </tr>
                                     </thead>
@@ -103,7 +104,7 @@
                     </div>
                     <div class="tab-pane show fade" id="perawat">
                     </div>
-                    <div class="tab-pane show fade" id="obat">
+                    <div class="tab-pane active show fade" id="obat">
                         <div class="card">
                             <div class="card-header card-header-large bg-white d-flex align-items-center">
                                 <h5 class="card-header__title flex m-0">Obat dan BHP</h5>
@@ -121,6 +122,7 @@
                                             <th class="wrap_content">Tgl</th>
                                             <th>Resep</th>
                                             <th>Racikan</th>
+                                            <th class="wrap_content">Aksi</th>
                                         </tr>
                                         </thead>
                                         <tbody>

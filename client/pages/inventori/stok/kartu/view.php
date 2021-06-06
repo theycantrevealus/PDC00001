@@ -5,10 +5,10 @@
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/inventori/stok/kartu">Kartu Stok</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Gudang</li>
+                    <li class="breadcrumb-item active" id="item_name" aria-current="page"></li>
                 </ol>
             </nav>
-            <h4><span id="nama-departemen"></span>Master Inventori</h4>
+            <h4><span id="nama-departemen"></span>Kartu Stok</h4>
         </div>
         <!-- <a href="<?php echo __HOSTNAME__; ?>/master/inventori/gudang/tambah" class="btn btn-info btn-sm ml-3">
 			<i class="fa fa-plus"></i> Tambah Gudang
@@ -34,11 +34,11 @@
                                         <table class="table form-mode">
                                             <tr>
                                                 <td>Nama Barang</td>
-                                                <td>:</td>
+                                                <td class="wrap_content">:</td>
                                                 <td id="nama_barang"></td>
 
                                                 <td>Periode</td>
-                                                <td>:</td>
+                                                <td class="wrap_content">:</td>
                                                 <td style="width: 30%">
                                                     <input id="range_stok" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
                                                 </td>

@@ -11,7 +11,6 @@
             },
             type:"GET",
             success:function(response) {
-                console.log(response);
                 targettedData = response.response_package.response_data[0];
                 $("#nama-pasien").attr({
                     "set-penjamin": targettedData.antrian.penjamin_data.uid
@@ -255,6 +254,7 @@
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
                     var selectedBatchRacikan = refreshBatch(racikanDetail[racDetailKey].obat);
+                    console.log(selectedBatchRacikan);
                     var selectedBatchListRacikan = [];
                     var harga_tertinggi_racikan = 0;
                     var kebutuhan_racikan = parseFloat(data.racikan[b].qty);
@@ -286,7 +286,6 @@
                         } else {
                             butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
                         }
-
                     }
 
 
@@ -442,13 +441,12 @@
                         data:{
                             request: "proses_resep",
                             resep: resepUID,
+                            antrian: targettedData.antrian,
                             asesmen: targettedData.asesmen,
                             departemen: targettedData.antrian.departemen
                         },
                         type:"POST",
                         success:function(response) {
-                            console.clear();
-                            console.log(response);
                             if(response.response_package.stok_result > 0)
                             {
                                 push_socket(__ME__, "resep_selesai_proses", "*", "Resep pasien a/n. " + $("#nama-pasien").html() + " selesai diproses!", "info").then(function() {
@@ -467,7 +465,7 @@
                                     "success"
                                 ).then((result) => {
                                     location.href = __HOSTNAME__ + "/apotek/proses";
-                                });209
+                                });
                             }
                         },
                         error: function(response) {

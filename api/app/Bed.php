@@ -65,6 +65,10 @@ class Bed extends Utility {
 				return self::edit_bed('master_unit_bed', $parameter);
 				break;
 
+            case 'bed-ruangan':
+                return self::bed_ruangan_back_end($parameter);
+                break;
+
 			default:
 				# code...
 				break;
@@ -182,6 +186,10 @@ class Bed extends Utility {
 
 	    $data['response_data'] = $avail;
 	    return $data;
+    }
+
+    private function bed_ruangan_back_end($parameter) {
+
     }
 
 	private function get_bed_ruangan($table, $parameter){

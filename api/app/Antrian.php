@@ -1853,7 +1853,7 @@ class Antrian extends Utility
             $Kunjungan = self::$query->select('kunjungan', array(
                 'uid',
                 'waktu_masuk',
-                'waktu_masuk',
+                'waktu_keluar',
                 'pegawai',
                 'pj_pasien',
                 'info_didapat_dari'
@@ -1881,14 +1881,14 @@ class Antrian extends Utility
             $PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
 
             //Terminologi Jenis Kelamin
-            $TerminologiJenkel = $Terminologi::get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
+            $TerminologiJenkel = $Terminologi->get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
             $PasienData['response_data'][0]['jenkel_nama'] = $TerminologiJenkel['response_data'][0]['nama'];
 
             $data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
 
 
             //Penjamin
-            $data['response_data'][$key]['penjamin_data'] = $Penjamin::get_penjamin_detail($value['penjamin'])['response_data'][0];
+            $data['response_data'][$key]['penjamin_data'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
         }
         return $data;
     }

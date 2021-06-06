@@ -78,6 +78,7 @@
 		function render_module(dataMeta, parent = 0) {
 			//$("#module-table tbody tr").remove();
 			for(var key in dataMeta) {
+
 				var newModuleRow = document.createElement("TR");
 				$(newModuleRow).attr({
 					"id": "module_row_" + dataMeta[key].id
@@ -104,7 +105,7 @@
 					"<label class=\"custom-control-label\" for=\"module-allow-" + dataMeta[key].id + "\">Yes</label>"
 				);
 
-				$(newModuleName).html(dataMeta[key].nama)
+				$(newModuleName).html("<span style=\"" + ((dataMeta[key].level > 1) ? "" : "font-weight: bolder") + "\" class=\"" + ((dataMeta[key].level > 1) ? "" : "text-info") + "\">" + dataMeta[key].nama + "</span>")
 				$(newModulePages).html("<a href=\"" + __HOSTNAME__ + "/" + dataMeta[key].identifier + "\"><span class=\"badge badge-success\"><i style=\"margin-right: 8px;\" class=\"fa fa-link\"></i>" + __HOSTNAME__ + "</span><span class=\"badge badge-warning\">/" + dataMeta[key].identifier + "</span>");
 
 				$(newModuleRow).append(newModuleName);
@@ -114,7 +115,7 @@
 					$("#module-table tbody").append(newModuleRow);
 				} else {
                     if($("tr.module_row_" + dataMeta[key].parent).length === 0) {
-                        //$(newModuleRow).insertAfter($("#module-table tbody tr#module_row_" + dataMeta[key].parent));
+                        $(newModuleRow).insertAfter($("#module-table tbody tr#module_row_" + dataMeta[key].parent));
                     } else {
                         /*if(dataMeta[key].parent == 36) {
                             alert($("tr.module_row_" + dataMeta[key].parent + ":last-child").length);
@@ -124,7 +125,7 @@
 
 					var paddingSet = ($("module_row_" + dataMeta[key].parent).css("padding-left") == undefined) ? 0 : $("module_row_" + dataMeta[key].parent).css("padding-left");
 					$(newModuleName).css({
-						"padding-left": (paddingSet + 50) + "px"
+						"padding-left": (paddingSet + (25 * parseInt(dataMeta[key].level))) + "px"
 					});
 				}
 			}

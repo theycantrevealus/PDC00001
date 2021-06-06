@@ -151,7 +151,7 @@ class CPPT extends Utility {
 				'antrian',
 				'pasien',
 				'dokter',
-				'perawat'
+				'perawat2'
 			))
 
                 ->where(array(

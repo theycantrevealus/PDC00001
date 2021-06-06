@@ -119,6 +119,8 @@
                 prioritas_antrian = antrianData.prioritas;
                 kunjungan = antrianData.kunjungan_detail;
 
+
+
                 for(var poliSetKey in poliListRawList)
                 {
                     if(poliListRawList[poliSetKey].poli.response_data[0] !== undefined) {
@@ -160,37 +162,15 @@
                 pasien_penjamin = antrianData.penjamin_data.nama;
                 pasien_penjamin_uid = antrianData.penjamin_data.uid;
 
-                /*========================= CPPT ==========================*/
-
-                $("#cppt_pagination").pagination({
-                    dataSource: __HOSTAPI__ + "/CPPT/semua/" + __PAGES__[3] + "/" + pasien_uid,
-                    locator: 'response_package.response_data',
-                    totalNumberLocator: function(response) {
-                        return response.response_package.response_total;
-                    },
-                    pageSize: 1,
-                    ajax: {
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                            $("#cppt_loader").html("Memuat data CPPT...");
-                        }
-                    },
-                    callback: function(data, pagination) {
-                        var dataHtml = "<ul style=\"list-style-type: none;\">";
-
-                        $.each(data, function (index, item) {
-                            if(item.uid !== __PAGES__[3]) {
-                                dataHtml += "<li>" + load_cppt(item) + "</li>";
-                            }
-                        });
-
-                        dataHtml += "</ul>";
-
-                        $("#cppt_loader").html(dataHtml);
-                    }
+                $("#tombolKembaliInap").attr({
+                    "href": __HOSTNAME__ + "/rawat_inap/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid + "/" + pasien_penjamin_uid
                 });
 
-                $(".nama_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
+                $("#target_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
+                $("#nama-departemen").html("Asesmen");
+                $("#target_pasien").parent().attr({
+                    "href": __HOSTNAME__ + "/rawat_inap/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid
+                });
                 $(".jk_pasien").html(pasien_jenkel);
                 $(".tanggal_lahir_pasien").html(pasien_tanggal_lahir);
                 $(".penjamin_pasien").html(pasien_penjamin);
@@ -203,6 +183,7 @@
                     },
                     type:"GET",
                     success:function(response) {
+                        console.log(response);
                         if(
                             response.response_package.response_data[0].status_asesmen !== null &&
                             response.response_package.response_data[0].status_asesmen !== undefined
@@ -3343,40 +3324,41 @@
             return savingResult;
         }
 
-
-        $("#tab-asesmen-inap .nav-link").click(function() {
-            if(allowEdit) {
-                const simpanDataProcess = new Promise(function(resolve, reject) {
-                    console.log(metaSwitchEdit.txt_keluhan_utama.editor);
-                    resolve(simpanAsesmen(
-                        antrianData,
-                        UID,
-                        metaSwitchEdit.txt_keluhan_utama.editor,
-                        metaSwitchEdit.txt_keluhan_tambahan.editor,
-                        metaSwitchEdit.txt_pemeriksaan_fisik.editor,
-                        editorTerapisAnamnesa,
-                        editorTerapisTataLaksana,
-                        editorTerapisEvaluasi,
-                        editorTerapisHasil,
-                        editorTerapisKesimpulan,
-                        editorTerapisRekomendasi,
-                        metaSwitchEdit.txt_diagnosa_kerja.editor,
-                        metaSwitchEdit.txt_diagnosa_banding.editor,
-                        metaSwitchEdit.txt_planning.editor,
-                        metaSwitchEdit.txt_keterangan_resep.editor,
-                        metaSwitchEdit.txt_keterangan_resep_racikan.editor,
-                        metaSwitchEdit));
-                }).then(function(result) {
-                    //console.clear();
-                    //console.log(result);
-                    if(result.response_package.response_result > 0) {
-                        notification ("success", "Asesmen Berhasil Disimpan", 1000, "hasil_tambah_dev");
-                    } else {
-                        notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
-                    }
-                });
-            }
-        });
+        if(allowEdit) {
+            $("#tab-asesmen-inap .nav-link").click(function() {
+                if(allowEdit) {
+                    const simpanDataProcess = new Promise(function(resolve, reject) {
+                        console.log(metaSwitchEdit.txt_keluhan_utama.editor);
+                        resolve(simpanAsesmen(
+                            antrianData,
+                            UID,
+                            metaSwitchEdit.txt_keluhan_utama.editor,
+                            metaSwitchEdit.txt_keluhan_tambahan.editor,
+                            metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                            editorTerapisAnamnesa,
+                            editorTerapisTataLaksana,
+                            editorTerapisEvaluasi,
+                            editorTerapisHasil,
+                            editorTerapisKesimpulan,
+                            editorTerapisRekomendasi,
+                            metaSwitchEdit.txt_diagnosa_kerja.editor,
+                            metaSwitchEdit.txt_diagnosa_banding.editor,
+                            metaSwitchEdit.txt_planning.editor,
+                            metaSwitchEdit.txt_keterangan_resep.editor,
+                            metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                            metaSwitchEdit));
+                    }).then(function(result) {
+                        //console.clear();
+                        //console.log(result);
+                        if(result.response_package.response_result > 0) {
+                            notification ("success", "Asesmen Berhasil Disimpan", 1000, "hasil_tambah_dev");
+                        } else {
+                            notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
+                        }
+                    });
+                }
+            });
+        }
 
 
 
@@ -3406,7 +3388,6 @@
                 denyButtonText: `Belum`,
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     const simpanDataProcess = new Promise(function(resolve, reject) {
                         resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
                     }).then(function(result) {
@@ -3414,7 +3395,7 @@
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                             push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
 
-                                location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                location.href = __HOSTNAME__ + "/rawat_inap/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid;
                             });
 
                         } else {

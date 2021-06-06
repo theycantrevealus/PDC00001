@@ -4822,9 +4822,10 @@
         $("#btnProsesInap").click(function() {
             Swal.fire({
                 title: 'Daftar untuk rawat inap?',
+                text: "Asesmen akan otomatis tertutup. Silahkan pastikan asesmen sudah selesai diisi dengan benar",
                 showDenyButton: true,
-                confirmButtonText: `Ya`,
-                denyButtonText: `Belum`,
+                confirmButtonText: "Ya",
+                denyButtonText: "Belum",
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
@@ -4847,12 +4848,19 @@
                         },
                         success: function(response){
                             if(response.response_package.response_result > 0) {
-                                Swal.fire(
-                                    "Rawat Inap",
-                                    "Pasien berhasil didaftarkan untuk rawat inap",
-                                    "success"
-                                ).then((result) => {
-                                    $("#form-inap").modal("hide");
+                                const simpanDataProcess = new Promise(function(resolve, rejector) {
+                                    resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
+                                }).then(function(AssesmenResult) {
+                                    if(AssesmenResult.response_package.response_result > 0) {
+                                        Swal.fire(
+                                            "Rawat Inap",
+                                            "Pasien berhasil didaftarkan untuk rawat inap",
+                                            "success"
+                                        ).then((result) => {
+                                            //$("#form-inap").modal("hide");
+                                            location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                        });
+                                    }
                                 });
                             }
                         },
