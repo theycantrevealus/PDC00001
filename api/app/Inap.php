@@ -139,7 +139,8 @@ class Inap extends Utility
 
     private function sedia_obat($parameter) {
         $data = self::$query->select('rawat_inap_batch', array(
-            'qty'
+            'qty',
+            'batch'
         ))
             ->where(array(
                 'rawat_inap_batch.resep' => '= ?',
@@ -153,6 +154,11 @@ class Inap extends Utility
                 $parameter['obat']
             ))
             ->execute();
+        $Inventori = new Inventori(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['batch'] = $Inventori->get_batch_detail($value['batch'])['response_data'][0];
+            $data['response_data'][$key]['batch']['expired_date_parsed'] = date('d F Y', strtotime($data['response_data'][$key]['batch']['expired_date']));
+        }
         return $data;
     }
 
@@ -374,6 +380,62 @@ class Inap extends Utility
                     'logged_at' => parent::format_date()
                 ))
                     ->execute();
+
+                if($proceed_catat['response_result'] > 0) {
+                    //Kurangi invoice pasien, kasihan masa disuruh tanggung obatnya. NGOAHAHAHAHA!!!
+                    $Invoice = new Invoice(self::$pdo);
+                    $InvoiceCheck = self::$query->select('invoice', array(
+                        'uid'
+                    ))
+                        ->where(array(
+                            'invoice.kunjungan' => '= ?',
+                            'AND',
+                            'invoice.deleted_at' => 'IS NULL'
+                        ), array(
+                            $parameter['kunjungan']
+                        ))
+                        ->execute();
+
+                    $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+                    $InvDetail = self::$query->select('invoice_detail', array(
+                        'qty'
+                    ))
+                        ->where(array(
+                            'invoice_detail.invoice' => '= ?',
+                            'AND',
+                            'invoice_detail.item_type' => '= ?',
+                            'AND',
+                            'invoice_detail.item' => '= ?',
+                            'AND',
+                            'invoice_detail.status_bayar' => '= ?'
+                        ), array(
+                            $TargetInvoice,
+                            'master_inv',
+                            $bValue['obat'],
+                            'N'
+                        ))
+                        ->execute();
+                    if(count($InvDetail['response_data']) > 0) {
+                        $invItemUpdate = self::$query->update('invoice_detail', array(
+                            'qty' => floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual'])
+                        ))
+                            ->where(array(
+                                'invoice_detail.invoice' => '= ?',
+                                'AND',
+                                'invoice_detail.item_type' => '= ?',
+                                'AND',
+                                'invoice_detail.item' => '= ?',
+                                'AND',
+                                'invoice_detail.status_bayar' => '= ?'
+                            ), array(
+                                $TargetInvoice,
+                                'master_inv',
+                                $bValue['obat'],
+                                'N'
+                            ))
+                            ->execute();
+                    }
+                }
             }
 
             //Pulangkan Pasien
@@ -1218,7 +1280,6 @@ class Inap extends Utility
                     }
                 }
 
-                //Todo: Auto Gudang dan Stok Point
                 //Create Gudang
                 /*$Gudang = $Inventori->tambah_gudang(array(
                     'access_token' => $parameter['access_token'],
@@ -1563,6 +1624,8 @@ class Inap extends Utility
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $allowSave = false;
 
+        $NSLog = array();
+
         //Check Sebelum Save
         /*$Ranjang = self::$query->select('nurse_station_ranjang', array(
             'ranjang'
@@ -1613,7 +1676,7 @@ class Inap extends Utility
         if($allowSave) {
             $old = self::$query->select('rawat_inap', array(
                 'uid', 'pasien', 'dokter', 'penjamin', 'kunjungan', 'waktu_masuk', 'waktu_keluar', 'kamar', 'bed', 'keterangan',
-                'created_at', 'updated_at', 'deleted_at', 'jenis_pulang', 'alasan_pulang', 'petugas'
+                'created_at', 'updated_at', 'deleted_at', 'jenis_pulang', 'alasan_pulang', 'petugas', 'nurse_station'
             ))
                 ->where(array(
                     'rawat_inap.deleted_at' => 'IS NULL',
@@ -1662,6 +1725,134 @@ class Inap extends Utility
             if($worker['response_result'] > 0) {
 
                 if($parameter['bed'] !== $old['response_data'][0]['bed']) {
+
+                    //Check perpindahan nurse station untuk auto mutasi stok obat yang ada pada pasien bersangkutan
+                    if($NurseStation['response_data'][0]['nurse_station'] !== $old['response_data'][0]['nurse_station']) {
+                        $Inventori = new Inventori(self::$pdo);
+
+                        $OldUnit = self::get_ns_detail($old['response_data'][0]['nurse_station'])['response_data'][0];
+                        $NewUnit = self::get_ns_detail($NurseStation['response_data'][0]['nurse_station'])['response_data'][0];
+                        $itemDetailMutasi = array();
+
+
+                        //Ambil semua resep yang pernah dibuat
+                        $Resep = self::$query->select('resep', array(
+                            'uid'
+                        ))
+                            ->where(array(
+                                'resep.kunjungan' => '= ?',
+                                'AND',
+                                'resep.deleted_at' => 'IS NULL'
+                            ), array(
+                                $parameter['kunjungan']
+                            ))
+                            ->execute();
+                        foreach ($Resep['response_data'] as $RKey => $RValue) { //Detail Obat yang pernah dibuat
+                            $ResepChange = self::$query->select('resep_change_log', array(
+                                'item'
+                            ))
+                                ->where(array(
+                                    'resep_change_log.resep' => '= ?'
+                                ), array(
+                                    $RValue['uid']
+                                ))
+                                ->execute();
+                            foreach ($ResepChange['response_data'] as $RCKey => $RCValue) { //Check semua stok yang ada
+
+                                $NSStok = self::$query->select('rawat_inap_batch', array(
+                                    'obat',
+                                    'qty',
+                                    'batch'
+                                ))
+                                    ->where(array(
+                                        'rawat_inap_batch.resep' => '= ?',
+                                        'AND',
+                                        'rawat_inap_batch.gudang' => '= ?',
+                                        'AND',
+                                        'rawat_inap_batch.pasien' => '= ?'
+                                    ), array(
+                                        $RValue['uid'],
+                                        $OldUnit['gudang'],
+                                        $old['response_data'][0]['pasien']
+                                    ))
+                                    ->execute();
+
+                                foreach ($NSStok['response_data'] as $NSKey => $NSValue) {
+                                    if(!isset($itemDetailMutasi[$NSValue['obat'] . '|' . $NSValue['batch']])) {
+                                        $itemDetailMutasi[$NSValue['obat'] . '|' . $NSValue['batch']] = array(
+                                            'mutasi' => floatval($NSValue['qty']),
+                                            'keterangan' => 'Mutasi pindah rawat inap'
+                                        );
+                                    }
+                                }
+
+                            }
+                        }
+
+
+
+                        $Mutasi = $Inventori->tambah_mutasi(array(
+                            'access_token' => $parameter['access_token'],
+                            'dari' => $OldUnit['gudang'],
+                            'ke' => $NewUnit['gudang'],
+                            'keterangan' => 'Kebutuhan pindah Nurse Station Rawat Inap',
+                            'inap' => true,
+                            'item' => $itemDetailMutasi
+                        ));
+
+                        $NSLog['mutasi'] = $Mutasi;
+
+                        if($Mutasi['response_result'] > 0) {
+
+                            //Update batch rawat inap
+                            foreach ($Resep['response_data'] as $RKey => $RValue) {
+                                foreach ($itemDetailMutasi as $mutBatch => $mutValue) {
+                                    if (floatval($mutValue['mutasi']) > 0) {
+                                        $BarangBatch = explode('|', $mutBatch);
+
+                                        $updateBatchInapLama = self::$query->update('rawat_inap_batch', array(
+                                            'qty' => 0,
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->where(array(
+                                                'rawat_inap_batch.obat' => '= ?',
+                                                'AND',
+                                                'rawat_inap_batch.batch' => '= ?',
+                                                'AND',
+                                                'rawat_inap_batch.resep' => '= ?',
+                                                'AND',
+                                                'rawat_inap_batch.gudang' => '= ?',
+                                                'AND',
+                                                'rawat_inap_batch.pasien' => '= ?',
+                                                'AND',
+                                                'rawat_inap_batch.deleted_at' => 'IS NULL'
+                                            ), array(
+                                                $BarangBatch[0],
+                                                $BarangBatch[1],
+                                                $RValue['uid'],
+                                                $OldUnit['gudang'],
+                                                $old['response_data'][0]['pasien']
+                                            ))
+                                            ->execute();
+
+
+                                        $updateBatchInapBaru = self::$query->insert('rawat_inap_batch', array(
+                                            'gudang' => $NewUnit['gudang'],
+                                            'pasien' => $old['response_data'][0]['pasien'],
+                                            'resep' => $RValue['uid'],
+                                            'obat' => $BarangBatch[0],
+                                            'batch' => $BarangBatch[1],
+                                            'qty' => floatval($mutValue['mutasi']),
+                                            'created_at' => parent::format_date(),
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->execute();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     //Charge Biaya Kamar
                     $Bed = new Bed(self::$pdo);
                     $BedInfo = $Bed->get_bed_detail('master_unit_bed', $parameter['bed']);
@@ -1685,7 +1876,7 @@ class Inap extends Utility
                         $InvMasterParam = array(
                             'kunjungan' => $parameter['kunjungan'],
                             'pasien' => $parameter['pasien'],
-                            'keterangan' => 'Tagihan tindakan perobatan'
+                            'keterangan' => 'Tagihan rawat inap'
                         );
                         $NewInvoice = $Invoice->create_invoice($InvMasterParam);
                         $TargetInvoice = $NewInvoice['response_unique'];
@@ -1738,6 +1929,7 @@ class Inap extends Utility
             }
 
             $worker['invoice'] = $InvoiceDetail;
+            $worker['ns'] = $NSLog;
             return $worker;
         } else {
             return array(

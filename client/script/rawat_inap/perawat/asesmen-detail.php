@@ -15,7 +15,6 @@
             type: "GET",
             success: function (response) {
                 nurse_station_info = response.response_package.response_data[0];
-                console.log(nurse_station_info);
             },
             error: function (response) {
                 //
@@ -363,7 +362,7 @@
                         selectedKunjungan = filteredData[0].uid_kunjungan;
                         selectedPenjamin = filteredData[0].uid_penjamin;
                         selected_waktu_masuk = filteredData[0].waktu_masuk;
-                        //console.log(filteredData[0].pasien_detail);
+
                         $("#target_pasien").html(filteredData[0].pasien);
                         $("#rm_pasien").html(filteredData[0].no_rm);
                         $("#nama_pasien").html((filteredData[0].pasien_detail.panggilan_name === null) ? filteredData[0].pasien_detail.nama : filteredData[0].pasien_detail.panggilan_name.nama + " " +  filteredData[0].pasien_detail.nama);
@@ -463,6 +462,7 @@
         $("#btnSubmitBerikanObat").click(function () {
             var autonum = 1;
             $("#list-konfirmasi-berikan-obat tbody").html("");
+
             for(var a in targettedDataResep.detail) {
                 var newResepConfRow = document.createElement("TR");
                 var newResepNo = document.createElement("TD");
@@ -480,10 +480,15 @@
                 }).css({
                     "max-width": "50px",
                     "float": "right"
+                }).attr({
+                    "disabled": "disabled"
                 });
+
                 $(newResepRemark).addClass("form-control").attr({
                     "placeholder": "Keterangan Tambahan"
                 });
+
+                var kebutuhan = parseFloat(targettedDataResep.detail[a].signa_pakai);
 
                 $(newResepNo).html(autonum);
 
@@ -498,11 +503,40 @@
                     success: function (response) {
                         var batchList = response.response_package.response_data;
                         var totalItem = 0;
+                        var saranBatch = [];
                         for(var bbA in batchList) {
                             totalItem += parseFloat(batchList[bbA].qty);
+                            if(kebutuhan > 0) {
+                                if(parseFloat(batchList[bbA].qty) > kebutuhan) {
+                                    saranBatch.push("<span class=\"badge badge-info badge-custom-caption\">" + batchList[bbA].batch.batch + " [" + batchList[bbA].batch.expired_date_parsed + "](" + kebutuhan + ")</span>");
+                                    kebutuhan = 0;
+                                } else {
+                                    kebutuhan -= parseFloat(batchList[bbA].qty);
+                                }
+                            }
+
+                            console.log(batchList[bbA]);
                         }
 
-                        $(newResepItem).html(targettedDataResep.detail[a].detail.nama + "<br />Sedia: " + totalItem).attr({
+                        /*var batchListUsed = targettedDataResep.detail[a].batch;
+                        var usedBatch = {};*/
+
+                        /*for(var zbU in batchListUsed) {
+                            if(batchListUsed[zbU].gudang.uid === nurse_station_info.gudang) {
+                                if(usedBatch[batchListUsed[zbU].batch]) {
+                                    usedBatch[batchListUsed[zbU].batch] = 0;
+                                }
+                                //
+                                if(batchListUsed[zbU].stok_terkini > kebutuhan) {
+                                    usedBatch[batchListUsed[zbU].batch] = kebutuhan;
+                                    kebutuhan = 0;
+                                } else if(batchListUsed[zbU].stok_terkini < kebutuhan) {
+                                    //Tidak mencukupi
+                                }
+                            }
+                        }*/
+
+                        $(newResepItem).html(targettedDataResep.detail[a].detail.nama + "<br />Sedia: " + totalItem + "<hr /><b>Saran Batch:</b><br />" + saranBatch.join(",") + "<hr />").attr({
                             "uid": targettedDataResep.detail[a].detail.uid
                         }).append(newResepRemark);
                     },
@@ -1002,7 +1036,7 @@
                             $(newCellRacikanKeterangan).attr("rowspan", racikanDetail.length);
                             $("#load-detail-racikan tbody").append(newRacikanRow);
                         } else {
-                            console.log("No Batch");
+                            //console.log("No Batch");
                         }
                     }
                 }
