@@ -4743,6 +4743,7 @@ class Inventori extends Utility
             }
         }
         $worker['parameter_detail'] = $parameter['item'];
+        $worker['response_unique'] = $uid;
         $worker['detail'] = $mutasiDetailRecorded;
         return $worker;
     }

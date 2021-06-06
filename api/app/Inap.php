@@ -129,6 +129,9 @@ class Inap extends Utility
             case 'kalkulasi_sisa_obat_2':
                 return self::kalkulasi_sisa_obat_2($parameter);
                 break;
+            case 'konfirmasi_retur_obat':
+                return self::konfirmasi_retur_obat($parameter);
+                break;
             default:
                 return self::get_all($parameter);
         }
@@ -287,6 +290,120 @@ class Inap extends Utility
                 $parameter['check']
             ))
             ->execute();
+    }
+
+    private function konfirmasi_retur_obat($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $Inventori = new Inventori(self::$pdo);
+        $parsedItem = array();
+
+        $usedBatchInap = $parameter['item'];
+
+        foreach ($usedBatchInap as $bKey => $bValue) {
+
+            //Proses Stok
+            $oldStok = self::$query->select('rawat_inap_batch', array(
+                'gudang',
+                'pasien',
+                'resep',
+                'obat',
+                'qty',
+                'batch'
+            ))
+                ->where(array(
+                    'rawat_inap_batch.pasien' => '= ?',
+                    'AND',
+                    'rawat_inap_batch.batch' => '= ?',
+                    'AND',
+                    'rawat_inap_batch.obat' => '= ?'
+                ), array(
+                    $parameter['pasien'],
+                    $bValue['batch'],
+                    $bValue['obat']
+                ))
+                ->execute();
+            if(count($oldStok['response_data']) > 0) {
+                $updateStok = self::$query->update('rawat_inap_batch', array(
+                    'qty' => floatval($oldStok['response_data'][0]['qty']) - floatval($bValue['aktual'])
+                ))
+                    ->where(array(
+                        'rawat_inap_batch.pasien' => '= ?',
+                        'AND',
+                        'rawat_inap_batch.batch' => '= ?',
+                        'AND',
+                        'rawat_inap_batch.obat' => '= ?'
+                    ), array(
+                        $parameter['pasien'],
+                        $bValue['batch'],
+                        $bValue['obat']
+                    ))
+                    ->execute();
+                if($updateStok['response_result'] > 0) {
+                    if(!isset($parsedItem[$bValue['obat'] . '|' . $bValue['batch']])) {
+                        $parsedItem[$bValue['obat'] . '|' . $bValue['batch']] = array(
+                            'mutasi' => $bValue['aktual'],
+                            'keterangan' => $bValue['keterangan']
+                        );
+                    }
+                }
+            }
+        }
+
+        $Mutasi = $Inventori->tambah_mutasi(array(
+            'access_token' => $parameter['access_token'],
+            'dari' => $parameter['gudang'],
+            'ke' => __GUDANG_APOTEK__,
+            'keterangan' => 'Retur Obat Inap. ' . $parameter['remark'],
+            'inap' => true,
+            'item' => $parsedItem
+        ));
+
+        if($Mutasi['response_result'] > 0) {
+            //Catat Informasi retur obat
+            $mutasi_uid = $Mutasi['response_unique'];
+            foreach ($usedBatchInap as $bKey => $bValue) {
+                $proceed_catat = self::$query->insert('rawat_inap_retur_obat', array(
+                    'mutasi' => $mutasi_uid,
+                    'petugas' => $UserData['data']->uid,
+                    'obat' => $bValue['obat'],
+                    'batch' => $bValue['batch'],
+                    'sisa' => $bValue['sisa'],
+                    'aktual' => $bValue['aktual'],
+                    'keterangan' => $bValue['keterangan'],
+                    'logged_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+            //Pulangkan Pasien
+            $Kunjungan = self::$query->update('kunjungan', array(
+                'waktu_keluar' => parent::format_date()
+            ))
+                ->where(array(
+                    'kunjungan.uid' => '= ?',
+                    'AND',
+                    'kunjungan.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['kunjungan']
+                ))
+                ->execute();
+
+            if($Kunjungan['response_result'] > 0) {
+                $Pulang = self::pulangkan_pasien(array(
+                    'access_token' => $parameter['access_token'],
+                    'uid' => $parameter['pasien'],
+                    'jenis' => $parameter['jenis'],
+                    'keterangan' => $parameter['keterangan']
+                ));
+            }
+        }
+
+        return array(
+            'mutasi' => $Mutasi,
+            'kunjungan' => $Kunjungan,
+            'pulang' => $Pulang
+        );
     }
 
     private function kalkulasi_sisa_obat_2($parameter) {

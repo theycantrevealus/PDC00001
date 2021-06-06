@@ -2,6 +2,7 @@
 <script type="text/javascript">
     $(function() {
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "", targettedDataResep = {};
+        var kelompokObat = {};
         var nurse_station = __PAGES__[6];
         var nurse_station_info = {};
 
@@ -1065,96 +1066,106 @@
                         },
                         success: function (response) {
                             var data = [];
-                            /*console.clear();
-                            console.log(response);*/
                             if(response.response_package !== undefined) {
                                 data = response.response_package.response_data;
                             }
 
-                            var dataFiltered = [];
+
+
                             for(var a in data) {
-                                dataFiltered.push({
-                                    type: 'resep',
-                                    nama: data[a].detail.nama,
-                                    sisa: parseFloat(data[a].qty)
-                                });
-                            }
-                            /*for(var a in data) {
-                                for(var b in data[a].detail) {
-                                    var sisaPakai = 0;
-
-
-                                    for(var c in data[a].detail[b].terpakai) {
-                                        for(var d in data[a].detail[b].terpakai[c]) {
-                                            sisaPakai += data[a].detail[b].terpakai[c][d].sisa;
-                                        }
-                                    }
-
-                                    dataFiltered.push({
-                                        type: 'resep',
-                                        nama: data[a].detail[b].obat.nama,
-                                        sisa: sisaPakai
-                                    });
-
-                                    if(
-                                        data[a].racikan !== undefined &&
-                                        data[a].racikan.length > 0
-                                    ) {
-                                        for(var rk in data[a].racikan) {
-                                            //total_diberikan
-                                            dataFiltered.push({
-                                                type: 'racikan',
-                                                nama: data[a].racikan[rk].kode,
-                                                sisa: data[a].racikan[rk].qty - data[a].racikan[rk].total_diberikan
-                                            });
-                                        }
-                                    }
+                                if(kelompokObat[data[a].detail.uid] === undefined) {
+                                    kelompokObat[data[a].detail.uid] = {
+                                        detail: data[a].detail,
+                                        batch: {}
+                                    };
                                 }
-                            }*/
+
+                                if(kelompokObat[data[a].detail.uid].batch[data[a].batch.uid] === undefined) {
+                                    kelompokObat[data[a].detail.uid].batch[data[a].batch.uid] = {
+                                        detail: data[a].batch,
+                                        sisa: parseFloat(data[a].qty),
+                                        aktual: parseFloat(data[a].qty),
+                                        keterangan: ""
+                                    };
+                                }
+                            }
 
                             $("#list-sisa-obat tbody").html("");
 
                             var autonum = 1;
-                            for(var a in dataFiltered) {
-                                var newRow = document.createElement("TR");
-                                var newNo = document.createElement("TD");
-                                var newObat = document.createElement("TD");
-                                var newSisa = document.createElement("TD");
-                                var newAktual = document.createElement("TD");
-                                var newRemark = document.createElement("TD");
+                            for(var a in kelompokObat) {
+                                var batchCounter = 1;
+                                var batchLength = 0;
+                                for(var b in kelompokObat[a].batch) {
+                                    batchLength++;
+                                }
 
-                                var actualInput = document.createElement("INPUT");
-                                var remark = document.createElement("INPUT");
+                                for(var b in kelompokObat[a].batch) {
+                                    var newrowBatch = document.createElement("TR");
+                                    var newSisa = document.createElement("TD");
+                                    var newAktual = document.createElement("TD");
+                                    var newRemark = document.createElement("TD");
+                                    var batchCaption = document.createElement("TD");
 
-                                $(newRow).attr({
-                                    type: dataFiltered[a].type
-                                });
+                                    $(newSisa).html(kelompokObat[a].batch[b].sisa).addClass("number_style");
+                                    var actualInput = document.createElement("INPUT");
+                                    var remark = document.createElement("INPUT");
 
-                                $(actualInput).inputmask({
-                                    alias: 'decimal',
-                                    rightAlign: true,
-                                    placeholder: "0.00",
-                                    prefix: "",
-                                    autoGroup: false,
-                                    digitsOptional: true
-                                }).addClass("form-control").val(parseFloat(dataFiltered[a].sisa));
+                                    $(actualInput).inputmask({
+                                        alias: 'decimal',
+                                        rightAlign: true,
+                                        placeholder: "0.00",
+                                        prefix: "",
+                                        autoGroup: false,
+                                        digitsOptional: true
+                                    }).addClass("form-control actual_input").val(parseFloat(kelompokObat[a].batch[b].sisa)).attr({
+                                        "id": "actual_" + kelompokObat[a].batch[b].detail.uid,
+                                        "produk": kelompokObat[a].detail.uid
+                                    });
 
-                                $(remark).addClass("form-control");
+                                    $(remark).addClass("form-control remark_actual").attr({
+                                        "placeholder": "Keterangan " + kelompokObat[a].batch[b].detail.batch,
+                                        "id": "remark_" + kelompokObat[a].batch[b].detail.uid,
+                                        "produk": kelompokObat[a].detail.uid
+                                    });
 
-                                $(newNo).html(autonum);
-                                $(newObat).html(dataFiltered[a].nama);
-                                $(newSisa).html(dataFiltered[a].sisa).addClass("number_style");
+                                    if(batchCounter === 1) {
+                                        var newRow = document.createElement("TR");
+                                        var newNo = document.createElement("TD");
+                                        var newObat = document.createElement("TD");
 
-                                $(newRow).append(newNo);
-                                $(newRow).append(newObat);
-                                $(newRow).append(newSisa);
-                                $(newRow).append(newAktual);
-                                $(newRow).append(newRemark);
+                                        $(newNo).html(autonum).attr({
+                                            "rowspan": batchLength
+                                        });
 
-                                $(newAktual).append(actualInput);
-                                $(newRemark).append(remark);
+                                        $(newObat).html(kelompokObat[a].detail.nama).attr({
+                                            "rowspan": batchLength
+                                        });
 
-                                $("#list-sisa-obat tbody").append(newRow);
+                                        $(newRow).append(newNo);
+                                        $(newRow).append(newObat);
+                                        $(newRow).append(batchCaption);
+                                        $(newRow).append(newSisa);
+                                        $(newRow).append(newAktual);
+                                        $(newRow).append(newRemark);
+                                        $("#list-sisa-obat tbody").append(newRow);
+
+                                    } else {
+                                        $(newrowBatch).append(batchCaption);
+                                        $(newrowBatch).append(newSisa);
+                                        $(newrowBatch).append(newAktual);
+                                        $(newrowBatch).append(newRemark);
+                                        $("#list-sisa-obat tbody").append(newrowBatch);
+                                    }
+
+                                    $(newAktual).append(actualInput);
+                                    $(newRemark).append(remark);
+
+                                    $(batchCaption).html(kelompokObat[a].batch[b].detail.batch);
+
+                                    batchCounter++;
+                                }
+
                                 autonum++;
                             }
 
@@ -1170,15 +1181,69 @@
             });
         });
 
-        $("#btnKonfirmasiSisaObat").click(function () {
-            var dataSetMutasi = [];
-            $("#list-sisa-obat tbody tr").each(function () {
-                var type = $(this).attr("type");
-                var qtySisa = parseFloat($(this).find("td:eq(2)").html());
-                var qtyAct = parseFloat($(this).find("td:eq(2)").html());
-                dataSetMutasi.push({
+        $("body").on("keyup", ".actual_input", function () {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+            var barang = $(this).attr("produk");
+            kelompokObat[barang].batch[uid].aktual = parseFloat($(this).inputmask("unmaskedvalue"));
+        });
 
-                });
+        $("body").on("keyup", ".remark_actual", function () {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+            var barang = $(this).attr("produk");
+            kelompokObat[barang].batch[uid].keterangan = $(this).val();
+        });
+
+
+        $("#btnKonfirmasiSisaObat").click(function () {
+            Swal.fire({
+                title: "Rawat Inap",
+                text: "Selesaikan pelayanan rawat inap?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Tidak",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var remarkAll = $("#remark_kembalikan_obat").val();
+                    var parsedData = [];
+
+                    for(var a in kelompokObat) {
+                        for(var b in kelompokObat[a].batch) {
+                            parsedData.push({
+                                obat: kelompokObat[a].detail.uid,
+                                batch: kelompokObat[a].batch[b].detail.uid,
+                                sisa: kelompokObat[a].batch[b].sisa,
+                                aktual: kelompokObat[a].batch[b].aktual,
+                                keterangan: kelompokObat[a].batch[b].keterangan
+                            });
+                        }
+                    }
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Inap",
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "POST",
+                        data: {
+                            request: "konfirmasi_retur_obat",
+                            gudang: nurse_station_info.gudang,
+                            pasien: __PAGES__[3],
+                            item: parsedData,
+                            remark: remarkAll,
+                            kunjungan: __PAGES__[4],
+                            jenis: $("input[name=\"txt_jenis_pulang\"]:checked").val(),
+                            keterangan: $("#txt_keterangan_pulang").val()
+                        },
+                        success: function (response) {
+                            location.href = __HOSTNAME__ + "/rawat_inap/perawat";
+                        },
+                        error: function (response) {
+
+                        }
+                    });
+                }
             });
         });
 
@@ -1392,27 +1457,68 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal-large-title">Konfirmasi Sisa Obat</h5>
+                <h5 class="modal-title" id="modal-large-title">Selesai Pelayanan Rawat Inap</h5>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-12">
-                        <br />
-                        <table class="table table-bordered largeDataType" id="list-sisa-obat">
-                            <thead class="thead-dark">
-                            <tr>
-                                <th class="wrap_content">No</th>
-                                <th>Obat/Racikan</th>
-                                <th class="wrap_content">Sisa</th>
-                                <th style="width: 200px;">Sisa Aktual</th>
-                                <th>Keterangan per Obat/Racikan</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                        <br />
-                        <label for="remark_kembalikan_obat">Keterangan:</label>
-                        <textarea style="min-height: 150px;" class="form-control" id="remark_kembalikan_obat" placeholder="Keterangan pengembalian obat rawat inap..."></textarea>
+                        <div class="card">
+                            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                <h5 class="card-header__title flex m-0">Informasi pasien pulang</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group col-md-12">
+                                    <h6>Jenis Pulang</h6>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="txt_jenis_pulang" value="P" checked/>
+                                                <label class="form-check-label">
+                                                    PAPS
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="txt_jenis_pulang" value="D" />
+                                                <label class="form-check-label">
+                                                    Dokter
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label for="txt_keterangan_pulang">Keterangan Pulang:</label>
+                                    <textarea placeholder="Keterangan pasien pulang" style="min-height: 100px;" class="form-control" id="txt_keterangan_pulang"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                <h5 class="card-header__title flex m-0">Manajemen Farmasi</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered largeDataType" id="list-sisa-obat">
+                                    <thead class="thead-dark">
+                                    <tr>
+                                        <th class="wrap_content">No</th>
+                                        <th>Obat/Racikan</th>
+                                        <th class="wrap_content">Batch</th>
+                                        <th class="wrap_content">Sisa</th>
+                                        <th style="width: 200px;">Sisa Aktual</th>
+                                        <th>Keterangan per Obat/Racikan</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                                <br />
+                                <label for="remark_kembalikan_obat">Keterangan Mutasi:</label>
+                                <textarea style="min-height: 150px;" class="form-control" id="remark_kembalikan_obat" placeholder="Keterangan pengembalian obat rawat inap..."></textarea>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-12" style="padding-top: 20px;">
                         <span class="text-info">
@@ -1420,7 +1526,7 @@
                         </span>
                         <ol type="1">
                             <li>Obat racikan tidak dihitung dalam stok. Perlakuan sisa racikan akan ditanggung pasien</li>
-                            <li>Pengembalian obat kepada apotek. Setelah data stok pengembalian obat diisi maka sistem akan melakukan <b class="uppercase">operasi mutasi dari nurse station kepada apotek</b>. Silahkan kembalikan obat sesuai jumlah yang diisi</li>
+                            <li>Pengembalian obat kepada apotek. Setelah data stok pengembalian obat diisi maka sistem akan melakukan <b class="uppercase text-danger">operasi mutasi dari nurse station kepada apotek</b>. Silahkan kembalikan obat sesuai jumlah yang diisi</li>
                         </ol>
                     </div>
                 </div>
