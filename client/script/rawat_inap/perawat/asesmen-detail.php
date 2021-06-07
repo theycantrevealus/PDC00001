@@ -462,6 +462,7 @@
         $("#btnSubmitBerikanObat").click(function () {
             var autonum = 1;
             $("#list-konfirmasi-berikan-obat tbody").html("");
+            var allowSubmit = true;
 
             for(var a in targettedDataResep.detail) {
                 var newResepConfRow = document.createElement("TR");
@@ -491,6 +492,8 @@
                 var kebutuhan = parseFloat(targettedDataResep.detail[a].signa_pakai);
 
                 $(newResepNo).html(autonum);
+
+                var currentTotal = 0;
 
                 //Check Ketersediaan Obat NS
                 $.ajax({
@@ -536,6 +539,8 @@
                             }
                         }*/
 
+                        currentTotal = totalItem;
+
                         $(newResepItem).html(targettedDataResep.detail[a].detail.nama + "<br />Sedia: " + totalItem + "<hr /><b>Saran Batch:</b><br />" + saranBatch.join(",") + "<hr />").attr({
                             "uid": targettedDataResep.detail[a].detail.uid
                         }).append(newResepRemark);
@@ -544,6 +549,14 @@
                         //
                     }
                 });
+
+                if(allowSubmit) {
+                    if(currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) {
+                        allowSubmit = false;
+                    } else {
+                        allowSubmit = true;
+                    }
+                }
 
 
                 $(newResepQty).append(newResepQtyCount);
@@ -590,6 +603,10 @@
                 $(newResepConfRow).addClass("racikan_item");
                 $("#list-konfirmasi-berikan-obat tbody").append(newResepConfRow);
                 autonum += 1;
+            }
+
+            if(!allowSubmit) {
+                $("#btnKonfirmasiBerikanObat").remove();
             }
 
             $("#form-konfirmasi-berikan-resep").modal("show");
