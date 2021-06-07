@@ -1812,6 +1812,7 @@ class Inap extends Utility
 
                                         $updateBatchInapLama = self::$query->update('rawat_inap_batch', array(
                                             'qty' => 0,
+                                            'deleted_at' => parent::format_date(),
                                             'updated_at' => parent::format_date()
                                         ))
                                             ->where(array(
