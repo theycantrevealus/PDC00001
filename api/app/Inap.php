@@ -956,13 +956,14 @@ class Inap extends Utility
                                             $value['resep'],
                                             $value['obat'],
                                             $uBKey,
-                                            $NS['uid_gudang']
+                                            $NS['gudang']
                                         ))
                                         ->execute();
                                     if(count($OldStokNS['response_data']) > 0) {
                                         //Kurangi Stok NS
                                         $updateStokNS = self::$query->update('rawat_inap_batch', array(
-                                            'qty' => floatval($OldStokNS['response_data'][0]['qty']) - floatval($ubValue['terpakai'])
+                                            //'qty' => floatval($OldStokNS['response_data'][0]['qty']) - floatval($ubValue['terpakai'])
+                                            'qty' => floatval($ubValue['sisa'])
                                         ))
                                             ->where(array(
                                                 'rawat_inap_batch.id' => '= ?'
@@ -970,15 +971,20 @@ class Inap extends Utility
                                                 $OldStokNS['response_data'][0]['id']
                                             ))
                                             ->execute();
+                                        array_push($stok_record, $updateStokNS);
                                     }
                                 }
                             }
-                            array_push($stok_record, $procStok);
+                            //array_push($stok_record, $procStok);
 
                         }
                         $StokPre['stok_proc'] = $stok_record;
                         $StokPre['stok_proc_log'] = $stok_record_log;
+                    } else {
+                        $StokPre = 'failed';
                     }
+                } else {
+                    $process['failed'] = $value['charge_stock'];
                 }
 
                 $process['param'] = $value;
@@ -1812,6 +1818,7 @@ class Inap extends Utility
 
                                         $updateBatchInapLama = self::$query->update('rawat_inap_batch', array(
                                             'qty' => 0,
+                                            'deleted_at' => parent::format_date(),
                                             'updated_at' => parent::format_date()
                                         ))
                                             ->where(array(

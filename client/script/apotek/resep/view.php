@@ -448,6 +448,13 @@
                 type:"GET",
                 success:function(response) {
                     batchData = response.response_package.response_data;
+
+                    /*var dates = [];
+                    for(var a in response.response_package) {
+                        dates.push(response.response_package[a].expired_sort);
+                    }
+                    console.log(dates);*/
+
                     if(batchData !== null) {
                         if(rowTarget !== "") {
 
@@ -465,28 +472,38 @@
                                 kebutuhan = $("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue");
 
                                 for(bKey in batchData) {
+
                                     if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
-                                        if(batchData[bKey].harga > harga_tertinggi)
-                                        {
+
+                                        if(batchData[bKey].harga > harga_tertinggi) {
                                             harga_tertinggi = batchData[bKey].harga;
                                         }
 
-                                        if(kebutuhan > 0 && batchData[bKey].stok_terkini > 0)
-                                        {
+                                        if(kebutuhan > 0 && batchData[bKey].stok_terkini > 0) {
 
-                                            if(kebutuhan > batchData[bKey].stok_terkini)
-                                            {
+                                            if(kebutuhan > batchData[bKey].stok_terkini) {
+                                                console.log("Ada " + parseFloat(batchData[bKey].stok_terkini) + " di " + batchData[bKey].gudang.uid);
+                                                console.log(kebutuhan);
+
                                                 batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
+                                                kebutuhan -= parseFloat(batchData[bKey].stok_terkini);
+                                                if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
+                                                    selectedBatchList.push(batchData[bKey]);
+                                                    uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                                }
                                             } else {
                                                 batchData[bKey].used = parseFloat(kebutuhan);
-                                            }
-                                            kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
-                                            if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
-                                                selectedBatchList.push(batchData[bKey]);
-                                                uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                                kebutuhan = 0;
+                                                if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
+                                                    selectedBatchList.push(batchData[bKey]);
+                                                    uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
+                                                }
                                             }
 
+
                                         }
+                                    } else {
+                                        console.log("Ada " + parseFloat(batchData[bKey].stok_terkini) + " di " + batchData[bKey].gudang.uid);
                                     }
                                 }
 

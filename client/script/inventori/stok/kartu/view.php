@@ -31,6 +31,8 @@
                 success:function(resp) {
                     $("#loadResult").html("");
                     var data = resp.response_package.response_data[0];
+                    console.log(resp);
+
 
                     $("#nama_barang").html(data.nama);
                     $("#item_name").html(data.nama.toUpperCase());
@@ -94,7 +96,7 @@
 
                         var tbodyContainer = document.createElement("TBODY");
 
-                        $(batchIdentifierInfo).html("<span class=\"badge badge-custom-caption badge-info\" style=\"margin-left: 10px;\">" + batchGroup[a].batch_info.batch + "</span>");
+                        $(batchIdentifierInfo).html("<span class=\"badge badge-custom-caption badge-info\" style=\"margin-left: 10px;\">" + batchGroup[a].batch_info.batch + " [" + batchGroup[a].batch_info.expired_date_parsed + "]</span>");
 
 
                         for(var b in batchGroup[a].log) {

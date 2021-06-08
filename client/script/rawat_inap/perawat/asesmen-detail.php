@@ -238,21 +238,56 @@
                         returnedData = response.response_package.response_data;
                     }
 
-                    /*var filteredData = [];
-                    for(var a in returnedData) {
-                        for(var b in returnedData[a].detail) {
-                            for(var c in returnedData[a].detail[b].stok_ns) {
+                    var filteredData = [];
 
+                    for(var a in returnedData) {
+                        var currentResepQty = 0;
+                        var ResepStokTersedia = 0;
+
+                        var currentRacikanQty = 0;
+                        var RacikanStokTerpakai = 0;
+
+                        var habis = true;
+
+                        for(var b in returnedData[a].detail) {
+                            currentResepQty = parseFloat(returnedData[a].detail[b].qty);
+                            for(var c in returnedData[a].detail[b].stok_ns) {
+                                ResepStokTersedia += parseFloat(returnedData[a].detail[b].stok_ns[c].qty);
                             }
                         }
-                    }*/
 
+                        for(var x in returnedData[a].racikan) {
+                            currentRacikanQty = parseFloat(returnedData[a].racikan[x].qty);
+                            for(var y in returnedData[a].racikan[x].ns_qty) {
+                                RacikanStokTerpakai += parseFloat(returnedData[a].racikan[x].ns_qty[y].qty);
+                            }
+                        }
+
+                        if(
+                            returnedData[a].racikan.length > 0 &&
+                            returnedData[a].detail.length > 0
+                        ) {
+                            habis = (((currentResepQty > ResepStokTersedia) || ResepStokTersedia === 0) && (currentRacikanQty === RacikanStokTerpakai));
+                        } else {
+                            if(returnedData[a].racikan.length === 0) {
+                                habis = ((currentRacikanQty === RacikanStokTerpakai) || RacikanStokTersedia === 0);
+                            } else if (returnedData[a].detail.length === 0) {
+                                habis = ((currentResepQty > ResepStokTersedia) || ResepStokTersedia === 0);
+                            } else {
+                                habis = false;
+                            }
+                        }
+
+                        returnedData[a].habis = habis;
+
+                        filteredData.push(returnedData[a]);
+                    }
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
 
-                    return returnedData;
+                    return filteredData;
                 }
             },
             autoWidth: false,
@@ -324,11 +359,15 @@
                         } else if(row.status_resep === "K" || row.status_resep === "P") {
                             return "<span class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-info-circle\"></i> Belum Diserahkan</span>";
                         } else {
-                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<button class=\"btn btn-success btn-sm berikanObat\" id=\"resep_" + row.uid + "\">" +
-                                "<span><i class=\"fa fa-eye\"></i>Berikan Obat</span>" +
-                                "</button>" +
-                                "</div>";
+                            if(row.habis) {
+                                return "<span class=\"badge badge-danger badge-custom-caption\"><i class=\"fa fa-times-circle\"></i> Stok Habis</span>";
+                            } else {
+                                return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                    "<button class=\"btn btn-success btn-sm berikanObat\" id=\"resep_" + row.uid + "\">" +
+                                    "<span><i class=\"fa fa-eye\"></i>Berikan Obat</span>" +
+                                    "</button>" +
+                                    "</div>";
+                            }
                         }
                     }
                 }
@@ -435,12 +474,17 @@
             id = id[id.length - 1];
 
             $.ajax({
-                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + id,
+                url:__HOSTAPI__ + "/Apotek",
                 async:false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                type:"GET",
+                type:"POST",
+                data: {
+                    request: "detail_resep_verifikator_post",
+                    uid: id,
+                    nurse_station: nurse_station
+                },
                 success:function(response) {
                     targettedDataResep = response.response_package.response_data[0];
                     $("#form-berikan-resep").modal("show");
@@ -462,6 +506,7 @@
         $("#btnSubmitBerikanObat").click(function () {
             var autonum = 1;
             $("#list-konfirmasi-berikan-obat tbody").html("");
+            var allowSubmit = true;
 
             for(var a in targettedDataResep.detail) {
                 var newResepConfRow = document.createElement("TR");
@@ -470,19 +515,11 @@
                 var newResepQty = document.createElement("TD");
                 var newResepQtyCount = document.createElement("INPUT");
                 var newResepRemark = document.createElement("TEXTAREA");
-                $(newResepQtyCount).val(parseFloat(targettedDataResep.detail[a].signa_pakai)).inputmask({
-                    alias: 'decimal',
-                    rightAlign: true,
-                    placeholder: "0.00",
-                    prefix: "",
-                    autoGroup: false,
-                    digitsOptional: true
-                }).css({
-                    "max-width": "50px",
-                    "float": "right"
-                }).attr({
-                    "disabled": "disabled"
-                });
+                var sisaStok = 0;
+                for(var ax in targettedDataResep.detail[a].stok_ns) {
+                    sisaStok += parseFloat(targettedDataResep.detail[a].stok_ns[ax].qty);
+                }
+
 
                 $(newResepRemark).addClass("form-control").attr({
                     "placeholder": "Keterangan Tambahan"
@@ -491,6 +528,8 @@
                 var kebutuhan = parseFloat(targettedDataResep.detail[a].signa_pakai);
 
                 $(newResepNo).html(autonum);
+
+                var currentTotal = 0;
 
                 //Check Ketersediaan Obat NS
                 $.ajax({
@@ -514,8 +553,6 @@
                                     kebutuhan -= parseFloat(batchList[bbA].qty);
                                 }
                             }
-
-                            console.log(batchList[bbA]);
                         }
 
                         /*var batchListUsed = targettedDataResep.detail[a].batch;
@@ -536,7 +573,25 @@
                             }
                         }*/
 
-                        $(newResepItem).html(targettedDataResep.detail[a].detail.nama + "<br />Sedia: " + totalItem + "<hr /><b>Saran Batch:</b><br />" + saranBatch.join(",") + "<hr />").attr({
+                        currentTotal = totalItem;
+
+                        $(newResepQtyCount).val(parseFloat(targettedDataResep.detail[a].signa_pakai)).inputmask({
+                            alias: 'decimal',
+                            rightAlign: true,
+                            placeholder: "0.00",
+                            prefix: "",
+                            autoGroup: false,
+                            digitsOptional: true
+                        }).css({
+                            "max-width": "50px",
+                            "float": "right"
+                        }).attr({
+                            "disabled": "disabled"
+                        });
+
+
+
+                        $(newResepItem).html("<span class=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-danger" : "") + "\" style=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-decoration: line-through" : "") + "\">" + targettedDataResep.detail[a].detail.nama + "</span><br />Sedia: " + totalItem + "<hr /><b>Saran Batch:</b><br />" + saranBatch.join(",") + "<hr />").attr({
                             "uid": targettedDataResep.detail[a].detail.uid
                         }).append(newResepRemark);
                     },
@@ -544,6 +599,18 @@
                         //
                     }
                 });
+
+                if(allowSubmit) {
+                    if(currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) {
+                        allowSubmit = false;
+                    } else {
+                        allowSubmit = true;
+                    }
+                }
+
+                if(currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) {
+                    $(newResepConfRow).addClass("habis");
+                }
 
 
                 $(newResepQty).append(newResepQtyCount);
@@ -563,7 +630,13 @@
                 var newResepQty = document.createElement("TD");
                 var newResepQtyCount = document.createElement("INPUT");
                 var newResepRemark = document.createElement("TEXTAREA");
-                $(newResepQtyCount).val(parseFloat(targettedDataResep.racikan[a].signa_pakai)).inputmask({
+
+                var racikanTerpakai = 0;
+                for(var ay in targettedDataResep.racikan[a].ns_qty) {
+                    racikanTerpakai += parseFloat(targettedDataResep.racikan[a].ns_qty[ay].qty);
+                }
+
+                $(newResepQtyCount).val(((racikanTerpakai === parseFloat(targettedDataResep.racikan[a].qty)) ? 0 : parseFloat(targettedDataResep.racikan[a].signa_pakai))).inputmask({
                     alias: 'decimal',
                     rightAlign: true,
                     placeholder: "0.00",
@@ -573,13 +646,15 @@
                 }).css({
                     "max-width": "50px",
                     "float": "right"
+                }).attr({
+                    "disabled": "disabled"
                 });
                 $(newResepRemark).addClass("form-control").attr({
                     "placeholder": "Keterangan Tambahan"
                 });
 
                 $(newResepNo).html(autonum);
-                $(newResepItem).html(targettedDataResep.racikan[a].kode).attr({
+                $(newResepItem).html("<span class=\"" + ((racikanTerpakai >= parseFloat(targettedDataResep.racikan[a].qty)) ? "text-danger" : "") + "\" style=\"" + ((racikanTerpakai >= parseFloat(targettedDataResep.racikan[a].qty)) ? "text-decoration: line-through" : "") + "\">" +targettedDataResep.racikan[a].kode + "</span>").attr({
                     "uid": targettedDataResep.racikan[a].kode
                 }).append(newResepRemark);
                 $(newResepQty).append(newResepQtyCount);
@@ -587,9 +662,16 @@
                 $(newResepConfRow).append(newResepNo);
                 $(newResepConfRow).append(newResepItem);
                 $(newResepConfRow).append(newResepQty);
+                if(racikanTerpakai >= parseFloat(targettedDataResep.racikan[a].qty)) {
+                    $(newResepConfRow).addClass("habis");
+                }
                 $(newResepConfRow).addClass("racikan_item");
                 $("#list-konfirmasi-berikan-obat tbody").append(newResepConfRow);
                 autonum += 1;
+            }
+
+            if(!allowSubmit) {
+                //$("#btnKonfirmasiBerikanObat").remove();
             }
 
             $("#form-konfirmasi-berikan-resep").modal("show");
@@ -600,20 +682,24 @@
             var item = [];
 
             $("#list-konfirmasi-berikan-obat tbody tr").each(function () {
-                var row = $(this);
-                var obat = $(this).find("td:eq(1)").attr("uid");
-                var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
-                var keterangan = $(this).find("td:eq(1) textarea").val();
-                if(obat !== "" && qty > 0) {
-                    item.push({
-                        resep: resep,
-                        obat: obat,
-                        qty: qty,
-                        keterangan: keterangan,
-                        charge_stock: row.hasClass("resep_item")
-                    });
+                if(!$(this).hasClass("habis")) {
+                    var row = $(this);
+                    var obat = $(this).find("td:eq(1)").attr("uid");
+                    var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                    var keterangan = $(this).find("td:eq(1) textarea").val();
+                    if(obat !== "" && qty > 0) {
+                        item.push({
+                            resep: resep,
+                            obat: obat,
+                            qty: qty,
+                            keterangan: keterangan,
+                            charge_stock: row.hasClass("resep_item")
+                        });
+                    }
                 }
             });
+
+
 
             if(item.length > 0) {
                 Swal.fire({
@@ -637,6 +723,9 @@
                                 item: item
                             },
                             success:function(response) {
+                                console.clear();
+                                console.log(item);
+                                console.log(response);
                                 $("#form-berikan-resep").modal("hide");
                                 $("#form-konfirmasi-berikan-resep").modal("hide");
                                 tableRiwayatObat.ajax.reload();

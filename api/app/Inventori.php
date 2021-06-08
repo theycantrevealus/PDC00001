@@ -1576,7 +1576,7 @@ class Inventori extends Utility
 
             //Data Penjamin
             $PenjaminObat = new Penjamin(self::$pdo);
-            $ListPenjaminObat = $PenjaminObat::get_penjamin_obat($value['uid'])['response_data'];
+            $ListPenjaminObat = $PenjaminObat->get_penjamin_obat($value['uid'])['response_data'];
             foreach ($ListPenjaminObat as $PenjaminKey => $PenjaminValue) {
                 $ListPenjaminObat[$PenjaminKey]['profit'] = floatval($PenjaminValue['profit']);
             }
@@ -1663,6 +1663,7 @@ class Inventori extends Utility
 
     public function get_item_batch($parameter)
     {
+        $filteredData = array();
         $data = self::$query->select('inventori_stok', array(
             'batch',
             'barang',
@@ -1682,8 +1683,8 @@ class Inventori extends Utility
             $batch_info = self::get_batch_detail($value['batch'])['response_data'][0];
 
             if (
-                $batch_info['expired_date'] < date('Y-m-d') ||
-                floatval($value['stok_terkini']) < 0
+                strtotime($batch_info['expired_date']) < strtotime(date('Y-m-d')) &&
+                floatval($value['stok_terkini']) > 0
             ) { //Expired jangan dijual
                 unset($data['response_data'][$key]);
             } else {
@@ -1695,19 +1696,26 @@ class Inventori extends Utility
                 $data['response_data'][$key]['expired_sort'] = $batch_info['expired_date'];
                 $data['response_data'][$key]['harga'] = $batch_info['harga'];
                 $data['response_data'][$key]['profit'] = $batch_info['profit'];
+
+                array_push($filteredData, $data['response_data'][$key]);
             }
         }
 
         //Sort Batch before return
-        /*$sorted = $data['response_data'];
-        array_multisort($sorted, SORT_ASC, $data['response_data']);
-        $data['response_data'] = $sorted;*/
-        usort($data['response_data'], function ($a, $b)
-        {
+        $original = $filteredData;
+        /*$sort = array();
+        foreach ($original as $key => $part) {
+            $sort[$key] = strtotime($part['expired_sort']);
+        }
+        array_multisort($sort, SORT_ASC, $original);
+        $data['response_data'] = $original;*/
+        usort($original, function($a, $b){
             $t1 = strtotime($a['expired_sort']);
             $t2 = strtotime($b['expired_sort']);
             return $t1 - $t2;
         });
+
+        $data['response_data'] = $original;
         return $data;
     }
 
@@ -1737,6 +1745,8 @@ class Inventori extends Utility
                 ));
 
                 $data['response_data'][$key]['harga'] = floatval($Price['response_data'][0]['harga']);
+
+                $data['response_data'][$key]['expired_date_parsed'] = date('d F Y', strtotime($value['expired_date']));
 
                 //Tambahkan Keuntungan yang diinginkan dari master inventori
                 $Profit = self::get_penjamin($value['barang']);
