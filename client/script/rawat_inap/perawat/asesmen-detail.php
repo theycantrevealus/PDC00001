@@ -240,6 +240,7 @@
 
                     var filteredData = [];
 
+
                     for(var a in returnedData) {
                         var currentResepQty = 0;
                         var ResepStokTersedia = 0;
@@ -249,14 +250,14 @@
 
                         var habis = true;
 
-                        for(var b in returnedData[a].detail) {
+                        for(var b in returnedData[a].detail) { //Resep
                             currentResepQty = parseFloat(returnedData[a].detail[b].qty);
                             for(var c in returnedData[a].detail[b].stok_ns) {
                                 ResepStokTersedia += parseFloat(returnedData[a].detail[b].stok_ns[c].qty);
                             }
                         }
 
-                        for(var x in returnedData[a].racikan) {
+                        for(var x in returnedData[a].racikan) { //Racikan
                             currentRacikanQty = parseFloat(returnedData[a].racikan[x].qty);
                             for(var y in returnedData[a].racikan[x].ns_qty) {
                                 RacikanStokTerpakai += parseFloat(returnedData[a].racikan[x].ns_qty[y].qty);
@@ -267,12 +268,18 @@
                             returnedData[a].racikan.length > 0 &&
                             returnedData[a].detail.length > 0
                         ) {
-                            habis = (((currentResepQty > ResepStokTersedia) || ResepStokTersedia === 0) && (currentRacikanQty === RacikanStokTerpakai));
+                            habis = (((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0) && (currentRacikanQty === RacikanStokTerpakai));
                         } else {
-                            if(returnedData[a].racikan.length === 0) {
-                                habis = ((currentRacikanQty === RacikanStokTerpakai) || RacikanStokTersedia === 0);
-                            } else if (returnedData[a].detail.length === 0) {
-                                habis = ((currentResepQty > ResepStokTersedia) || ResepStokTersedia === 0);
+                            if(
+                                returnedData[a].racikan.length > 0 &&
+                                returnedData[a].detail.length === 0
+                            ) {
+                                habis = ((currentRacikanQty === RacikanStokTerpakai));
+                            } else if (
+                                returnedData[a].detail.length > 0 &&
+                                returnedData[a].racikan.length === 0
+                            ) {
+                                habis = ((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0);
                             } else {
                                 habis = false;
                             }
@@ -282,6 +289,8 @@
 
                         filteredData.push(returnedData[a]);
                     }
+
+
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
@@ -723,9 +732,6 @@
                                 item: item
                             },
                             success:function(response) {
-                                console.clear();
-                                console.log(item);
-                                console.log(response);
                                 $("#form-berikan-resep").modal("hide");
                                 $("#form-konfirmasi-berikan-resep").modal("hide");
                                 tableRiwayatObat.ajax.reload();
@@ -1183,6 +1189,7 @@
                         type: "POST",
                         data: {
                             request: "kalkulasi_sisa_obat_2",
+                            kunjungan: selectedKunjungan,
                             pasien: __PAGES__[3],
                             gudang: nurse_station_info.gudang,
                             nurse_station: nurse_station
@@ -1193,9 +1200,15 @@
                                 data = response.response_package.response_data;
                             }
 
+                            console.log(data);
 
+
+
+                            var kebutuhan = 0;
 
                             for(var a in data) {
+                                kebutuhan = parseFloat(data[a].resep);
+
                                 if(kelompokObat[data[a].detail.uid] === undefined) {
                                     kelompokObat[data[a].detail.uid] = {
                                         detail: data[a].detail,
@@ -1204,12 +1217,30 @@
                                 }
 
                                 if(kelompokObat[data[a].detail.uid].batch[data[a].batch.uid] === undefined) {
-                                    kelompokObat[data[a].detail.uid].batch[data[a].batch.uid] = {
-                                        detail: data[a].batch,
-                                        sisa: parseFloat(data[a].qty),
-                                        aktual: parseFloat(data[a].qty),
-                                        keterangan: ""
-                                    };
+                                    if(kebutuhan > 0) {
+                                        if(kebutuhan > parseFloat(data[a].qty)) {
+                                            kelompokObat[data[a].detail.uid].batch[data[a].batch.uid] = {
+                                                detail: data[a].batch,
+                                                sisa: 0,
+                                                aktual: 0,
+                                                keterangan: ""
+                                            };
+                                            kebutuhan -= parseFloat(data[a].qty);
+
+
+                                        } else {
+                                            kelompokObat[data[a].detail.uid].batch[data[a].batch.uid] = {
+                                                detail: data[a].batch,
+                                                sisa: kebutuhan - parseFloat(data[a].berikan),
+                                                aktual: kebutuhan - parseFloat(data[a].berikan),
+                                                keterangan: ""
+                                            };
+                                            kebutuhan -= parseFloat(data[a].berikan);
+
+                                        }
+
+
+                                    }
                                 }
                             }
 
@@ -1319,7 +1350,10 @@
         });
 
 
+
+
         $("#btnKonfirmasiSisaObat").click(function () {
+
             Swal.fire({
                 title: "Rawat Inap",
                 text: "Selesaikan pelayanan rawat inap?",
@@ -1330,6 +1364,8 @@
                 if (result.isConfirmed) {
                     var remarkAll = $("#remark_kembalikan_obat").val();
                     var parsedData = [];
+
+
 
                     for(var a in kelompokObat) {
                         for(var b in kelompokObat[a].batch) {
@@ -1342,6 +1378,7 @@
                             });
                         }
                     }
+
                     $.ajax({
                         async: false,
                         url: __HOSTAPI__ + "/Inap",
