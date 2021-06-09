@@ -155,12 +155,19 @@
                         returnedData = response.response_package.response_data;
                     }
 
+                    var filteredData = [];
+                    for(var a in returnedData) {
+                        if(returnedData[a].resep_pasien === __PAGES__[3]) {
+                            filteredData.push(returnedData[a]);
+                        }
+                    }
+
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
 
-                    return returnedData;
+                    return filteredData;
                 }
             },
             autoWidth: false,
@@ -186,6 +193,11 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return (row.resep_kode === null) ? "<h6 class=\"text-center\">-</h6>" : "<span class=\"badge badge-info badge-custom-caption\">" + row.resep_kode + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.resep_pasien_detail.nama + "</span>";
                     }
                 },
                 {

@@ -137,6 +137,7 @@
                                             <th class="wrap_content">No</th>
                                             <th class="wrap_content">Waktu</th>
                                             <th class="wrap_content">Kode Resep</th>
+                                            <th class="wrap_content">Pasien</th>
                                             <th style="width: 30%">Obat</th>
                                             <th class="wrap_content">Jumlah</th>
                                             <th class="wrap_content">Oleh</th>
