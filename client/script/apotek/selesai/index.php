@@ -143,8 +143,10 @@
 
                     for(var dKey in dataSet) {
                         if(dataSet[dKey].antrian.departemen !== undefined) {
-                            if(dataSet[dKey].antrian.departemen.uid !== __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid !== __POLI_INAP__) {
-                                forReturn.push(dataSet[dKey]);
+                            if(dataSet[dKey].antrian.departemen !== null) {
+                                if(dataSet[dKey].antrian.departemen.uid !== __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid !== __POLI_INAP__) {
+                                    forReturn.push(dataSet[dKey]);
+                                }
                             }
                         }
                     }
@@ -249,8 +251,13 @@
 
                     for(var dKey in dataSet) {
                         if(dataSet[dKey].antrian.departemen !== undefined) {
-                            if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
-                                forReturn.push(dataSet[dKey]);
+                            if(
+                                dataSet[dKey].antrian.departemen !== undefined &&
+                                dataSet[dKey].antrian.departemen !== null
+                            ) {
+                                if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+                                    forReturn.push(dataSet[dKey]);
+                                }
                             }
                         }
                     }
@@ -282,7 +289,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.departemen.nama;
+                        return (row.antrian.departemen !== undefined) ? row.antrian.departemen.nama : "";
                     }
                 },
                 {

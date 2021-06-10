@@ -427,7 +427,7 @@ class Inap extends Utility
                         if(count($InvDetail['response_data']) > 0) {
                             $invItemUpdate = self::$query->update('invoice_detail', array(
                                 'qty' => floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual']),
-                                'harga' => floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual']) * floatval($InvDetail['response_data'][0]['harga'])
+                                'subtotal' => (floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual'])) * floatval($InvDetail['response_data'][0]['harga'])
                             ))
                                 ->where(array(
                                     'invoice_detail.invoice' => '= ?',
@@ -826,12 +826,14 @@ class Inap extends Utility
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
         $Inventori = new Inventori(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
 
         $returnedData = array();
         foreach ($data['response_data'] as $key => $value) {
             //Resep
             $resep = self::$query->select('resep', array(
-                'kode'
+                'kode',
+                'pasien'
             ))
                 ->where(array(
                     'resep.uid' => '= ?'
@@ -840,6 +842,8 @@ class Inap extends Utility
                 ))
                 ->execute();
             $value['resep_kode'] = $resep['response_data'][0]['kode'];
+            $value['resep_pasien'] = $resep['response_data'][0]['pasien'];
+            $value['resep_pasien_detail'] = $Pasien->get_pasien_detail('pasien', $value['resep_pasien'])['response_data'][0];
             //Master Inv
             $InventoriDetail = $Inventori->get_item_detail($value['obat']);
             $NamaObat = (count(($InventoriDetail['response_data'])) > 0) ? $InventoriDetail['response_data'][0]['nama'] : $value['obat'];
@@ -1771,7 +1775,8 @@ class Inap extends Utility
                 'bed' => $parameter['bed'],
                 'keterangan' => $parameter['keterangan'],
                 'nurse_station' => $NurseStation['response_data'][0]['nurse_station'],
-                'updated_at' => parent::format_date()
+                'updated_at' => parent::format_date(),
+                'waktu_masuk' => parent::format_date()
             ))
                 ->where(array(
                     'rawat_inap.deleted_at' => 'IS NULL',
