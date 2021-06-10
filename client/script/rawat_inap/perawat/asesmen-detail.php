@@ -567,6 +567,7 @@
                         for(var bbA in batchList) {
                             console.log(batchList[bbA]);
                             if(parseFloat(batchList[bbA].qty) > 0) {
+
                                 totalItem += parseFloat(batchList[bbA].qty);
                                 if(kebutuhan > 0) {
                                     if(parseFloat(batchList[bbA].qty) > kebutuhan) {
