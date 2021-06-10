@@ -566,7 +566,6 @@
                         var saranBatch = [];
                         for(var bbA in batchList) {
                             if(parseFloat(batchList[bbA].qty) > 0 && batchList[bbA].resep === targettedDataResep.uid) {
-
                                 totalItem += parseFloat(batchList[bbA].qty);
                                 if(kebutuhan > 0) {
                                     if(parseFloat(batchList[bbA].qty) > kebutuhan) {
@@ -744,6 +743,7 @@
                             data: {
                                 request: "tambah_riwayat_resep_inap",
                                 nurse_station: nurse_station,
+                                gudang: nurse_station_info.gudang,
                                 item: item
                             },
                             success:function(response) {

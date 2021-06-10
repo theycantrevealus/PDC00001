@@ -158,7 +158,7 @@ class Inap extends Utility
         $Inventori = new Inventori(self::$pdo);
         $filtered = array();
         foreach ($data['response_data'] as $key => $value) {
-            if(floatval($value['qty']) > 0) {
+            if(floatval($value['qty']) > 0 && $value['resep'] === $parameter['resep']) {
                 $data['response_data'][$key]['batch'] = $Inventori->get_batch_detail($value['batch'])['response_data'][0];
                 $data['response_data'][$key]['batch']['expired_date_parsed'] = date('d F Y', strtotime($data['response_data'][$key]['batch']['expired_date']));
 
@@ -931,6 +931,7 @@ class Inap extends Utility
 
                     $StokPre = self::$query->select('inventori_stok', array(
                         'batch',
+                        'gudang',
                         'stok_terkini'
                     ))
                         ->where(array(
@@ -938,7 +939,7 @@ class Inap extends Utility
                             'AND',
                             'inventori_stok.barang' => '= ?'
                         ), array(
-                            $NS['uid_gudang'],
+                            $parameter['gudang'],
                             $value['obat']
                         ))
                         ->execute();
@@ -962,7 +963,7 @@ class Inap extends Utility
                         $StokPre['response_data'] = $original;
 
                         foreach ($StokPre['response_data'] as $batchKey => $batchValue) {
-                            if($kebutuhan > 0 && floatval($batchValue['stok_terkini']) > 0) {
+                            if($kebutuhan > 0 && floatval($batchValue['stok_terkini']) > 0 && $batchValue['gudang'] === $parameter['gudang']) {
                                 if(floatval($batchValue['stok_terkini']) <= $kebutuhan) {
                                     if(!isset($usedBatch[$batchValue['batch']])) {
                                         $usedBatch[$batchValue['batch']] = array(
