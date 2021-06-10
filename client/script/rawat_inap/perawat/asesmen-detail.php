@@ -565,7 +565,6 @@
                         var totalItem = 0;
                         var saranBatch = [];
                         for(var bbA in batchList) {
-                            console.log(batchList[bbA]);
                             if(parseFloat(batchList[bbA].qty) > 0 && batchList[bbA].resep === targettedDataResep.uid) {
                                 totalItem += parseFloat(batchList[bbA].qty);
                                 if(kebutuhan > 0) {
@@ -711,9 +710,10 @@
                     var obat = $(this).find("td:eq(1)").attr("uid");
                     var batch = {};
                     $(this).find("td:eq(1) .badge").each(function () {
+                        alert();
                         var currentBatch = $(this).attr("id");
                         var currentBatchQty = $(this).attr("qty");
-                        if(batch[currentBatch] !== undefined) {
+                        if(batch[currentBatch] === undefined) {
                             batch[currentBatch] = currentBatchQty;
                         }
 
@@ -735,6 +735,7 @@
 
 
 
+            console.log(item);
             if(item.length > 0) {
                 Swal.fire({
                     title: "Riwayat Pemberian Obat",
@@ -758,6 +759,7 @@
                                 item: item
                             },
                             success:function(response) {
+                                console.log(response);
                                 $("#form-berikan-resep").modal("hide");
                                 $("#form-konfirmasi-berikan-resep").modal("hide");
                                 tableRiwayatObat.ajax.reload();

@@ -911,6 +911,9 @@ class Inap extends Utility
         $Inventori = new Inventori(self::$pdo);
 
         if(in_array($parameter['nurse_station'], $allowedNS)) {
+
+            $ProceedBatch = array();
+
             foreach ($parameter['item'] as $key => $value) {
                 $process = self::$query->insert('rawat_inap_riwayat_obat', array(
                     'petugas' => $UserData['data']->uid,
@@ -929,7 +932,18 @@ class Inap extends Utility
                     //Charge Stok
                     $NS = self::get_ns_detail($parameter['nurse_station'])['response_data'][0];
 
-                    $StokPre = self::$query->select('inventori_stok', array(
+                    foreach ($value['batch'] as $BBSKey => $BBSValue) {
+                        if(!isset($ProceedBatch[$BBSKey])) {
+                            $ProceedBatch[$BBSKey] = array(
+                                'barang' => $value['obat'],
+                                'qty' => $BBSValue,
+                                'resep' => $value['resep'],
+                                'keterangan' => $value['keterangan']
+                            );
+                        }
+                    }
+
+                    /*$StokPre = self::$query->select('inventori_stok', array(
                         'batch',
                         'gudang',
                         'stok_terkini'
@@ -1064,17 +1078,113 @@ class Inap extends Utility
                         $StokPre['stok_proc_log'] = $stok_record_log;
                     } else {
                         $StokPre = 'failed';
-                    }
+                    }*/
                 } else {
                     $process['failed'] = $value['charge_stock'];
                 }
 
                 $process['param'] = $value;
-                $process['stock_pre'] = $StokPre;
-                $process['batch'] = $usedBatch;
+                /*$process['stock_pre'] = $StokPre;
+                $process['batch'] = $usedBatch;*/
 
                 array_push($proceed, $process);
             }
+
+            $ProceedBatchProcess = array();
+
+            foreach ($ProceedBatch as $key => $value) {
+                $StokPre = self::$query->select('inventori_stok', array(
+                    'batch',
+                    'barang',
+                    'gudang',
+                    'stok_terkini'
+                ))
+                    ->where(array(
+                        'inventori_stok.gudang' => '= ?',
+                        'AND',
+                        'inventori_stok.barang' => '= ?',
+                        'AND',
+                        'inventori_stok.batch' => '= ?'
+                    ), array(
+                        $parameter['gudang'],
+                        $value['barang'],
+                        $key
+                    ))
+                    ->execute();
+
+                array_push($ProceedBatchProcess, $StokPre);
+
+                if(count($StokPre['response_data']) > 0) {
+                    //Update Stok
+                    $procStok = self::$query->update('inventori_stok', array(
+                        'stok_terkini' => floatval($StokPre['response_data'][0]['stok_terkini']) - floatval($value['qty'])
+                    ))
+                        ->where(array(
+                            'inventori_stok.gudang' => '= ?',
+                            'AND',
+                            'inventori_stok.barang' => '= ?',
+                            'AND',
+                            'inventori_stok.batch' => '= ?'
+                        ), array(
+                            $parameter['gudang'],
+                            $value['barang'],
+                            $key
+                        ))
+                        ->execute();
+
+                    if($procStok['response_result'] > 0) {
+                        //Catat Stok log
+                        $stok_log = self::$query->insert('inventori_stok_log', array(
+                            'barang' => $value['barang'],
+                            'batch' => $key,
+                            'gudang' => $parameter['gudang'],
+                            'masuk' => 0,
+                            'keluar' => floatval($value['qty']),
+                            'saldo' => (floatval($StokPre['response_data'][0]['stok_terkini']) - floatval($value['qty'])),
+                            'type' => __STATUS_BARANG_KELUAR_INAP__,
+                            'logged_at' => parent::format_date(),
+                            'jenis_transaksi' => 'resep',
+                            'uid_foreign' => $value['resep'],
+                            'keterangan' => 'Pemberian Obat Rawat Inap. ' . $value['keterangan']
+                        ))
+                            ->execute();
+                        if($stok_log['response_result'] > 0) {
+                            $OldStokNS = self::$query->select('rawat_inap_batch', array(
+                                'id',
+                                'qty'
+                            ))
+                                ->where(array(
+                                    'rawat_inap_batch.resep' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.obat' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.batch' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.gudang' => '= ?'
+                                ), array(
+                                    $value['resep'],
+                                    $value['barang'],
+                                    $key,
+                                    $parameter['gudang']
+                                ))
+                                ->execute();
+                            if(count($OldStokNS['response_data']) > 0) {
+                                //Kurangi Stok NS
+                                $updateStokNS = self::$query->update('rawat_inap_batch', array(
+                                    'qty' => (floatval($StokPre['response_data'][0]['stok_terkini']) - floatval($value['qty']))
+                                ))
+                                    ->where(array(
+                                        'rawat_inap_batch.id' => '= ?'
+                                    ), array(
+                                        $OldStokNS['response_data'][0]['id']
+                                    ))
+                                    ->execute();
+                            }
+                        }
+                    }
+                }
+            }
+            $proceed['batch'] = $ProceedBatchProcess;
         } else {
             $proceed = $allowedNS;
         }
