@@ -565,11 +565,12 @@
                         var totalItem = 0;
                         var saranBatch = [];
                         for(var bbA in batchList) {
+                            console.log(batchList[bbA]);
                             if(parseFloat(batchList[bbA].qty) > 0 && batchList[bbA].resep === targettedDataResep.uid) {
                                 totalItem += parseFloat(batchList[bbA].qty);
                                 if(kebutuhan > 0) {
+                                    saranBatch.push("<span class=\"badge badge-info badge-custom-caption\" qty=\"" + kebutuhan + "\" id=\"" + batchList[bbA].batch.uid + "\">" + batchList[bbA].batch.batch + " [" + batchList[bbA].batch.expired_date_parsed + "](" + kebutuhan + ")</span>");
                                     if(parseFloat(batchList[bbA].qty) > kebutuhan) {
-                                        saranBatch.push("<span class=\"badge badge-info badge-custom-caption\">" + batchList[bbA].batch.batch + " [" + batchList[bbA].batch.expired_date_parsed + "](" + kebutuhan + ")</span>");
                                         kebutuhan = 0;
                                     } else {
                                         kebutuhan -= parseFloat(batchList[bbA].qty);
@@ -708,6 +709,15 @@
                 if(!$(this).hasClass("habis")) {
                     var row = $(this);
                     var obat = $(this).find("td:eq(1)").attr("uid");
+                    var batch = {};
+                    $(this).find("td:eq(1) .badge").each(function () {
+                        var currentBatch = $(this).attr("id");
+                        var currentBatchQty = $(this).attr("qty");
+                        if(batch[currentBatch] !== undefined) {
+                            batch[currentBatch] = currentBatchQty;
+                        }
+
+                    });
                     var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
                     var keterangan = $(this).find("td:eq(1) textarea").val();
                     if(obat !== "" && qty > 0) {
@@ -715,6 +725,7 @@
                             resep: resep,
                             obat: obat,
                             qty: qty,
+                            batch: batch,
                             keterangan: keterangan,
                             charge_stock: row.hasClass("resep_item")
                         });

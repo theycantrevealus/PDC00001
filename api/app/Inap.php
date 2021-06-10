@@ -964,7 +964,7 @@ class Inap extends Utility
 
                         foreach ($StokPre['response_data'] as $batchKey => $batchValue) {
                             if($kebutuhan > 0 && floatval($batchValue['stok_terkini']) > 0 && $batchValue['gudang'] === $parameter['gudang']) {
-                                if(floatval($batchValue['stok_terkini']) <= $kebutuhan) {
+                                if(floatval($batchValue['stok_terkini']) < $kebutuhan) {
                                     if(!isset($usedBatch[$batchValue['batch']])) {
                                         $usedBatch[$batchValue['batch']] = array(
                                             'terpakai' => floatval($batchValue['stok_terkini']),
