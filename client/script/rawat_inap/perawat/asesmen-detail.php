@@ -1221,8 +1221,6 @@
 
                             console.log(data);
 
-
-
                             var kebutuhan = 0;
 
                             for(var a in data) {
@@ -1236,8 +1234,8 @@
                                 }
 
                                 if(kelompokObat[data[a].detail.uid].batch[data[a].batch.uid] === undefined) {
-                                    if(kebutuhan > 0) {
-                                        if(kebutuhan > parseFloat(data[a].qty)) {
+                                    if(kebutuhan > 0 && parseFloat(data[a].qty) > 0) {
+                                        if(parseFloat(data[a].berikan) > kebutuhan) {
                                             kelompokObat[data[a].detail.uid].batch[data[a].batch.uid] = {
                                                 detail: data[a].batch,
                                                 sisa: 0,
@@ -1257,8 +1255,6 @@
                                             kebutuhan -= parseFloat(data[a].berikan);
 
                                         }
-
-
                                     }
                                 }
                             }
