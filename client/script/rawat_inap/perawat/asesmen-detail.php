@@ -710,7 +710,6 @@
                     var obat = $(this).find("td:eq(1)").attr("uid");
                     var batch = {};
                     $(this).find("td:eq(1) .badge").each(function () {
-                        alert();
                         var currentBatch = $(this).attr("id");
                         var currentBatchQty = $(this).attr("qty");
                         if(batch[currentBatch] === undefined) {
