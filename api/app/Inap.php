@@ -907,6 +907,8 @@ class Inap extends Utility
 
         $proceed = array();
 
+        $Inventori = new Inventori(self::$pdo);
+
         if(in_array($parameter['nurse_station'], $allowedNS)) {
             foreach ($parameter['item'] as $key => $value) {
                 $process = self::$query->insert('rawat_inap_riwayat_obat', array(
@@ -944,8 +946,22 @@ class Inap extends Utility
                         $usedBatch = array();
                         $kebutuhan = floatval($value['qty']);
 
+                        //Sorting Stok
                         foreach ($StokPre['response_data'] as $batchKey => $batchValue) {
-                            if($kebutuhan > 0) {
+                            $StokPre['response_data'][$batchKey]['batch_detail'] = $Inventori->get_batch_detail($batchValue['batch']);
+                        }
+
+                        $original = $StokPre['response_data'];
+                        usort($original, function($a, $b){
+                            $t1 = strtotime($a['expired_sort']);
+                            $t2 = strtotime($b['expired_sort']);
+                            return $t1 - $t2;
+                        });
+
+                        $StokPre['response_data'] = $original;
+
+                        foreach ($StokPre['response_data'] as $batchKey => $batchValue) {
+                            if($kebutuhan > 0 && floatval($batchValue['stok_terkini']) > 0) {
                                 if(floatval($batchValue['stok_terkini']) <= $kebutuhan) {
                                     if(!isset($usedBatch[$batchValue['batch']])) {
                                         $usedBatch[$batchValue['batch']] = array(
