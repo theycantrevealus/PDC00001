@@ -85,31 +85,34 @@
                     var butuh_amprah = 0;
                     for(bKey in selectedBatchResep)
                     {
-                        if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
-                        {
-                            harga_tertinggi = parseFloat(selectedBatchResep[bKey].harga);
-                        }
-
-                        if(kebutuhan > 0)
-                        {
-
-                            if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
+                        if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang && parseFloat(selectedBatchResep[bKey].stok_terkini) > 0) {
+                            if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
                             {
-                                selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
+                                harga_tertinggi = parseFloat(selectedBatchResep[bKey].harga);
+                            }
+
+                            if(kebutuhan > 0)
+                            {
+
+                                if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
+                                {
+                                    selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
+                                } else {
+                                    selectedBatchResep[bKey].used = kebutuhan;
+                                }
+                                kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
+                                if(selectedBatchResep[bKey].used > 0)
+                                {
+                                    selectedBatchList.push(selectedBatchResep[bKey]);
+                                }
+                            }
+
+                            if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang) {
+                                jlh_sedia += selectedBatchResep[bKey].stok_terkini;
                             } else {
-                                selectedBatchResep[bKey].used = kebutuhan;
+                                butuh_amprah += selectedBatchResep[bKey].stok_terkini;
                             }
-                            kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
-                            if(selectedBatchResep[bKey].used > 0)
-                            {
-                                selectedBatchList.push(selectedBatchResep[bKey]);
-                            }
-                        }
 
-                        if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang) {
-                            jlh_sedia += selectedBatchResep[bKey].stok_terkini;
-                        } else {
-                            butuh_amprah += selectedBatchResep[bKey].stok_terkini;
                         }
                     }
 
