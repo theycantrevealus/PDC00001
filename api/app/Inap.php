@@ -155,10 +155,16 @@ class Inap extends Utility
             ))
             ->execute();
         $Inventori = new Inventori(self::$pdo);
+        $filtered = array();
         foreach ($data['response_data'] as $key => $value) {
-            $data['response_data'][$key]['batch'] = $Inventori->get_batch_detail($value['batch'])['response_data'][0];
-            $data['response_data'][$key]['batch']['expired_date_parsed'] = date('d F Y', strtotime($data['response_data'][$key]['batch']['expired_date']));
+            if(floatval($value['qty']) > 0) {
+                $data['response_data'][$key]['batch'] = $Inventori->get_batch_detail($value['batch'])['response_data'][0];
+                $data['response_data'][$key]['batch']['expired_date_parsed'] = date('d F Y', strtotime($data['response_data'][$key]['batch']['expired_date']));
+
+                array_push($filtered, $data['response_data'][$key]);
+            }
         }
+        $data['response_data'] = $filtered;
         return $data;
     }
 
