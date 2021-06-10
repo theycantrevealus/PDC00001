@@ -565,6 +565,7 @@
                         var totalItem = 0;
                         var saranBatch = [];
                         for(var bbA in batchList) {
+                            console.log(batchList[bbA]);
                             if(parseFloat(batchList[bbA].qty) > 0) {
                                 totalItem += parseFloat(batchList[bbA].qty);
                                 if(kebutuhan > 0) {
