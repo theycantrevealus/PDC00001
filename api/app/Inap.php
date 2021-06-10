@@ -140,7 +140,8 @@ class Inap extends Utility
     private function sedia_obat($parameter) {
         $data = self::$query->select('rawat_inap_batch', array(
             'qty',
-            'batch'
+            'batch',
+            'resep'
         ))
             ->where(array(
                 'rawat_inap_batch.resep' => '= ?',

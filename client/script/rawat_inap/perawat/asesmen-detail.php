@@ -565,7 +565,7 @@
                         var totalItem = 0;
                         var saranBatch = [];
                         for(var bbA in batchList) {
-                            if(parseFloat(batchList[bbA].qty) > 0) {
+                            if(parseFloat(batchList[bbA].qty) > 0 && batchList[bbA].resep === targettedDataResep.uid) {
 
                                 totalItem += parseFloat(batchList[bbA].qty);
                                 if(kebutuhan > 0) {
