@@ -612,7 +612,7 @@
 
 
 
-                        $(newResepItem).html("<span class=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-danger" : "") + "\" style=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-decoration: line-through" : "") + "\">" + targettedDataResep.detail[a].detail.nama + "</span><br />Sedia: " + totalItem + "<hr /><b>Saran Batch:</b><br />" + saranBatch.join(",") + "<hr />").attr({
+                        $(newResepItem).html("<span class=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-danger" : "") + "\" style=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-decoration: line-through" : "") + "\">" + targettedDataResep.detail[a].detail.nama + "</span><br />Sedia: " + /*totalItem*/ sisaStok + "<hr /><b>Saran Batch:</b><br />" + saranBatch.join(",") + "<hr />").attr({
                             "uid": targettedDataResep.detail[a].detail.uid
                         }).append(newResepRemark);
                     },
