@@ -750,6 +750,7 @@
                                 $("#form-berikan-resep").modal("hide");
                                 $("#form-konfirmasi-berikan-resep").modal("hide");
                                 tableRiwayatObat.ajax.reload();
+                                tableResep.ajax.reload();
 
                                 /*var result = response.response_package.response_result;
                                 if(result > 0) {
