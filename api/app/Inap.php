@@ -1148,6 +1148,7 @@ class Inap extends Utility
                             'keterangan' => 'Pemberian Obat Rawat Inap. ' . $value['keterangan']
                         ))
                             ->execute();
+
                         if($stok_log['response_result'] > 0) {
                             $OldStokNS = self::$query->select('rawat_inap_batch', array(
                                 'id',
@@ -1169,9 +1170,44 @@ class Inap extends Utility
                                 ))
                                 ->execute();
                             if(count($OldStokNS['response_data']) > 0) {
+
+                                //Qty Resep
+                                $QtyResep = self::$query->select('resep_change_log', array(
+                                    'qty'
+                                ))
+                                    ->where(array(
+                                        'resep_change_log.item' => '= ?',
+                                        'AND',
+                                        'resep_change_log.resep' => '= ?'
+                                    ), array(
+                                        $value['barang'],
+                                        $value['resep']
+                                    ))
+                                    ->execute();
+
+                                $TotalPenggunaan = 0;
+
+                                //History Sebelumnya
+                                $HistoryResep = self::$query->select('rawat_inap_riwayat_obat', array(
+                                    'qty'
+                                ))
+                                    ->where(array(
+                                        'rawat_inap_riwayat_obat.resep' => '= ?',
+                                        'AND',
+                                        'rawat_inap_riwayat_obat.obat' => '= ?'
+                                    ), array(
+                                        $value['resep'],
+                                        $value['barang']
+                                    ))
+                                    ->execute();
+                                foreach ($HistoryResep['response_data'] as $KSLKey => $KSLValue) {
+                                    $TotalPenggunaan += floatval($KSLValue['qty']);
+                                }
+
                                 //Kurangi Stok NS
                                 $updateStokNS = self::$query->update('rawat_inap_batch', array(
-                                    'qty' => (floatval($StokPre['response_data'][0]['stok_terkini']) - floatval($value['qty']))
+                                    //'qty' => (floatval($StokPre['response_data'][0]['stok_terkini']) - floatval($value['qty']))
+                                    'qty' => (floatval($QtyResep['response_data'][0]['qty']) - $TotalPenggunaan)
                                 ))
                                     ->where(array(
                                         'rawat_inap_batch.id' => '= ?'
