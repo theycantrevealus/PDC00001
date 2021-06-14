@@ -65,6 +65,7 @@
 
                 var autonum = 1;
                 for(var a in filteredLunas) {
+                    console.log(filteredLunas[a]);
                     var newRow = document.createElement("TR");
                     var newNo = document.createElement("TD");
                     var newItem = document.createElement("TD");
@@ -76,8 +77,8 @@
                     $(newItem).html("<span class=\"badge badge-info badge-custom-caption pull-right\">" + filteredLunas[a].invoice + "</span>" +
                         "<h6 style=\"padding-left: 20px;\">" + filteredLunas[a].item + " <br /><span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</span></h6><p>" + filteredLunas[a].keterangan + "</p>");
                     $(newJlh).html(filteredLunas[a].qty).addClass("number_style");
-                    $(newHarga).html(number_format(filteredTunggak[a].harga, 2, ".", ",")).addClass("number_style");
-                    $(newSub).html(number_format(filteredTunggak[a].subtotal, 2, ".", ",")).addClass("number_style");
+                    $(newHarga).html(number_format(filteredLunas[a].harga, 2, ".", ",")).addClass("number_style");
+                    $(newSub).html(number_format(filteredLunas[a].subtotal, 2, ".", ",")).addClass("number_style");
 
                     $(newRow).append(newNo);
                     $(newRow).append(newItem);

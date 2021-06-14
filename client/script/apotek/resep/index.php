@@ -19,8 +19,6 @@
                 },
                 type:"GET",
                 success:function(response) {
-                    console.clear();
-                    console.log(response);
                     var resepDataRaw = response.response_package.response_data;
                     for(var resepKey in resepDataRaw) {
                         if(
@@ -129,21 +127,24 @@
                 dataSrc:function(response) {
                     var resepDataRaw = response.response_package.response_data;
                     var parsedData = [];
+                    var IGD = [];
 
                     for(var resepKey in resepDataRaw) {
-                        if(
-                            resepDataRaw[resepKey].antrian.departemen != null
-                        ) {
-                            parsedData.push(resepDataRaw[resepKey]);
+                        if(resepDataRaw[resepKey].antrian.departemen === __POLI_IGD__) {
+                            IGD.push(resepDataRaw[resepKey]);
                         } else {
-                            resepDataRaw[resepKey].antrian.departemen = {
-                                uid: __POLI_INAP__,
-                                nama: "Rawat Inap"
-                            };
-                            parsedData.push(resepDataRaw[resepKey]);
+                            if(resepDataRaw[resepKey].antrian.departemen !== null) {
+                                parsedData.push(resepDataRaw[resepKey]);
+                            } else {
+                                resepDataRaw[resepKey].antrian.departemen = {
+                                    uid: __POLI_INAP__,
+                                    nama: "Rawat Inap"
+                                };
+                                parsedData.push(resepDataRaw[resepKey]);
+                            }
                         }
                     }
-                    return parsedData;
+                    return IGD.concat(parsedData);
                 }
             },
             autoWidth: false,
@@ -187,7 +188,7 @@
                     "data" : null, render: function(data, type, row, meta) {
                         //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                    "<a class=\"btn btn-info btn-sm btn-edit-mesin\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                                    "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
                                         "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
                                     "</a>" +
                                 "</div>";
