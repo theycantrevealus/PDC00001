@@ -143,6 +143,15 @@
             success:function(response) {
                 antrianData = response.response_package.response_data[0];
 
+                console.log(antrianData);
+                if(antrianData.waktu_keluar !== null) {
+                    /*$("#btnSelesai").remove();
+                    allowEdit = false;*/
+                    alert();
+
+                    //Todo: Set as Viewer Page
+                }
+
                 prioritas_antrian = antrianData.prioritas;
                 kunjungan = antrianData.kunjungan_detail;
 
@@ -3650,7 +3659,7 @@
                             push_socket(__ME__, "permintaan_laboratorium_baru", "*", "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
                         }
                     }*/
-                    //location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                    location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                 } else {
                     notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                 }
