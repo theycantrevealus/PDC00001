@@ -117,7 +117,7 @@
                 for(var poliSetKey in poliListRawList)
                 {
                     if(poliListRawList[poliSetKey].poli.response_data[0] !== undefined) {
-                        if(poliListRawList[poliSetKey].poli.response_data[0].uid == antrianData.departemen)
+                        if(poliListRawList[poliSetKey].poli.response_data[0].uid === antrianData.departemen)
                         {
                             poliListRaw.push(poliListRawList[poliSetKey].poli.response_data[0]);
                         }
@@ -125,6 +125,18 @@
                 }
 
                 poliList = poliListRaw;
+                for(var tindKey in poliList) {
+                    var currentTindakanKonsul = poliList[tindKey].tindakan_konsultasi;
+                    var parsedAllowTindakan = [];
+                    for(var tindFilt in poliList[tindKey].tindakan) {
+                        if(poliList[tindKey].tindakan[tindFilt].uid_tindakan !== currentTindakanKonsul) {
+                            parsedAllowTindakan.push(poliList[tindKey].tindakan[tindFilt]);
+                        }
+                    }
+
+                    poliList[tindKey].tindakan = parsedAllowTindakan;
+                }
+
                 
                 if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
                     $("#gigi_loader").show();
@@ -150,7 +162,7 @@
 
                 /*========================= CPPT ==========================*/
 
-                $("#cppt_pagination").pagination({
+                /*$("#cppt_pagination").pagination({
                     dataSource: __HOSTAPI__ + "/CPPT/semua/" + __PAGES__[3] + "/" + pasien_uid,
                     locator: 'response_package.response_data',
                     totalNumberLocator: function(response) {
@@ -176,7 +188,7 @@
 
                         $("#cppt_loader").html(dataHtml);
                     }
-                });
+                });*/
 
                 $(".nama_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
                 $(".jk_pasien").html(pasien_jenkel);
@@ -205,16 +217,20 @@
                             }
                         }
 
-                        if(response.response_package.response_data[0].asesmen_rawat != undefined) {
+                        if(response.response_package.response_data[0].asesmen_rawat !== undefined) {
                             //loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
                             loadPasien(UID);
                         }
+
+
 
                         if(response.response_package.response_data[0] === undefined) {
                             asesmen_detail = {};
                             tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
                         } else {
                             asesmen_detail = response.response_package.response_data[0];
+
+                            $("#txt_lingkar_lengan").val(asesmen_detail.lingkar_lengan_atas);
 
                             if(asesmen_detail.tindakan !== undefined) {
 
@@ -986,8 +1002,8 @@
                         tindakanMeta[poliList[key].uid_tindakan].nama = poliList[key].tindakan.nama;
                     }
 
-                    if(poliList[key].penjamin != undefined){
-                        if(antrianData.penjamin == poliList[key].uid_penjamin) {
+                    if(poliList[key].penjamin !== undefined){
+                        if(antrianData.penjamin === poliList[key].uid_penjamin) {
                             tindakanMeta[poliList[key].uid_tindakan].push({
                                 uid: poliList[key].uid_penjamin,
                                 nama: poliList[key].penjamin.nama
@@ -998,7 +1014,7 @@
             }
 
             for(var key in tindakanMeta) {
-                if(selected.indexOf(key) < 0 && tindakanMeta[key].nama != undefined && key != __UID_KONSULTASI__ && key != __UID_KARTU__) {
+                if(selected.indexOf(key) < 0 && tindakanMeta[key].nama !== undefined && key !== __UID_KONSULTASI__ && key !== __UID_KARTU__) {
                     $("#txt_tindakan").append(
                         "<option value=\"" + key + "\" kelas=\"" + tindakanMeta[key].kelas + "\">" + tindakanMeta[key].nama + "</option>"
                     );

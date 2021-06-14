@@ -333,6 +333,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.dokter_detail.nama + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         var detail = row.detail;
                         var parsedDetail = "<span class=\"text-danger\"><i class=\"fa fa-times-circle\"></i> Tidak ada resep</span>";
                         if(detail.length > 0) {

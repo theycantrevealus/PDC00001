@@ -97,7 +97,21 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.metode_bayar;
+					    var uniquePenjamin = {};
+					    var detailPenjamin = row.detail_item;
+					    for(var a in detailPenjamin) {
+                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                            }
+                        }
+
+					    var parsedPenjaminList = "";
+
+					    for(var b in uniquePenjamin) {
+					        parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                        }
+
+						return row.metode_bayar + "<br />" + parsedPenjaminList;
 					}
 				},
 				{
@@ -415,7 +429,21 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
+                        var uniquePenjamin = {};
+                        var detailPenjamin = row.invoice_detail;
+                        for(var a in detailPenjamin) {
+                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                            }
+                        }
+
+                        var parsedPenjaminList = "";
+
+                        for(var b in uniquePenjamin) {
+                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                        }
+
+						return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
 					}
 				},
                 {
@@ -580,7 +608,21 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
+                        var uniquePenjamin = {};
+                        var detailPenjamin = row.invoice_detail;
+                        for(var a in detailPenjamin) {
+                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                            }
+                        }
+
+                        var parsedPenjaminList = "";
+
+                        for(var b in uniquePenjamin) {
+                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                        }
+
+                        return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
                     }
                 },
                 {
@@ -718,7 +760,21 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span>";
+                        var uniquePenjamin = {};
+                        var detailPenjamin = row.invoice_detail;
+                        for(var a in detailPenjamin) {
+                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                            }
+                        }
+
+                        var parsedPenjaminList = "";
+
+                        for(var b in uniquePenjamin) {
+                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                        }
+
+                        return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
                     }
                 },
                 {

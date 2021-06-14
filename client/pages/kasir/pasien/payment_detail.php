@@ -46,12 +46,12 @@
 								</td>
 								<td id="total-faktur" class="text-right">0.00</td>
 							</tr>
-							<tr>
+							<!--tr>
 								<td class="text-right">Diskon</td>
 								<td id="diskon-faktur" class="text-right">
 									
 								</td>
-							</tr>
+							</tr-->
 							<tr>
 								<td class="text-right">
 									Grand Total

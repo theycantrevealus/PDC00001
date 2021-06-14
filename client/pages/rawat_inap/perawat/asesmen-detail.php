@@ -120,6 +120,7 @@
                                         <tr>
                                             <th class="wrap_content">No</th>
                                             <th class="wrap_content">Tgl</th>
+                                            <th>Dokter</th>
                                             <th>Resep</th>
                                             <th>Racikan</th>
                                             <th class="wrap_content">Aksi</th>
