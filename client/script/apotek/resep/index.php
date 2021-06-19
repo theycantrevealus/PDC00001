@@ -153,6 +153,13 @@
             "columnDefs":[
                 {"targets":0, "className":"dt-body-left"}
             ],
+            "rowCallback": function ( row, data, index ) {
+                if(data.antrian.departemen.uid === __POLI_IGD__) {
+                    $("td", row).addClass("bg-danger").css({
+                        "color": "#fff"
+                    });
+                }
+            },
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {

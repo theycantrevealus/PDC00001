@@ -334,7 +334,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.asesmen_detail.keluhan_utama.substr(0, 150) + "...";
+                        return (row.asesmen_detail !== undefined && row.asesmen_detail !== null) ? (row.asesmen_detail.keluhan_utama.substr(0, 150) + "...") : "Tidak ada subjective";
                     }
                 },
                 {

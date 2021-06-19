@@ -514,7 +514,11 @@
                 },
                 success:function(response) {
                     targettedDataResep = response.response_package.response_data[0];
+                    console.log(targettedDataResep);
                     $("#form-berikan-resep").modal("show");
+                    $("#resep_dokter").html(targettedDataResep.dokter.nama);
+                    $("#resep_tanggal").html(targettedDataResep.created_at_parsed);
+                    $("#resep_verifikator").html(targettedDataResep.detail[0].verifikator.nama);
 
                     $("#resep-nama-pasien").attr({
                         "set-penjamin": targettedDataResep.antrian.penjamin_data.uid
@@ -1507,24 +1511,20 @@
                             <div class="card card-body">
                                 <div class="d-flex flex-row">
                                     <div class="col-md-12">
-                                        <b>Detail Info</b>
-                                        <hr />
-                                        <table class="form-mode">
+                                        <table class="form-mode table largeDataType">
                                             <tr>
-                                                <td>Diresep tanggal</td>
-                                                <td class="wrap_content">:</td>
-                                                <td id="resep_tanggal"></td>
-                                                <td>Oleh</td>
-                                                <td class="wrap_content">:</td>
-                                                <td id="resep_dokter"></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Diverifikasi Oleh</td>
-                                                <td class="wrap_content">:</td>
-                                                <td id="resep_verifikator"></td>
-                                                <td>Nomor Mutasi</td>
-                                                <td class="wrap_content">:</td>
-                                                <td id="resep_mutasi"></td>
+                                                <td>
+                                                    Diresep tanggal<br />
+                                                    <b class="text-info" id="resep_tanggal"></b>
+                                                </td>
+                                                <td>
+                                                    Dokter<br />
+                                                    <b class="text-info" id="resep_dokter"></b>
+                                                </td>
+                                                <td>
+                                                    Diverifikasi Oleh<br />
+                                                    <b class="text-info" id="resep_verifikator"></b>
+                                                </td>
                                             </tr>
                                         </table>
                                     </div>
