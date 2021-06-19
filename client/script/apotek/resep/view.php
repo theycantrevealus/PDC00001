@@ -372,7 +372,6 @@
                     "id": "resep_obat_" + id
                 });
 
-                refreshBatch($(this).find("td:eq(1) select.resep-obat").val(), id);
 
                 $(this).find("td:eq(1) ol").attr({
                     "id": "batch_obat_" + id
@@ -402,6 +401,9 @@
                 $(this).find("td:eq(8) button").attr({
                     "id": "resep_delete_" + id
                 });
+
+                //Sini
+                refreshBatch($(this).find("td:eq(1) select.resep-obat").val(), id);
             });
         }
 

@@ -302,6 +302,7 @@ class Pegawai extends Utility {
                 $responseBuilder['response_result'] = $query->rowCount();
                 $responseBuilder['response_message'] = 'Login berhasil';
                 $responseBuilder['response_token'] = $jwt;
+                $responseBuilder['userData'] = $read[0];
 
                 $responseBuilder['response_access'] = array();
                 /*$Modul = new Modul(self::$pdo);
