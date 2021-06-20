@@ -49,7 +49,7 @@
                                 <th>Tanggal</th>
 								<th>Pemasok</th>
 								<th>Dibuat Oleh</th>
-								<th>Aksi</th>
+								<th class="wrap_content">Aksi</th>
 							</tr>
 						</thead>
 						<tbody></tbody>

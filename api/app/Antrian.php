@@ -224,8 +224,7 @@ class Antrian extends Utility
         $worker = '';
     }
 
-    private function tambah_kunjungan($table, $parameter)
-    {
+    private function tambah_kunjungan($table, $parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
@@ -290,9 +289,11 @@ class Antrian extends Utility
                     'pasien' => $parameter['dataObj']['currentPasien'],
                     'penjamin' => $parameter['dataObj']['penjamin'],
                     'billing_group' => 'tindakan',
-                    'keterangan' => 'Biaya konsultasi'
+                    'keterangan' => 'Biaya konsultasi',
+                    'departemen' => $parameter['dataObj']['departemen']
                 ));
                 //$antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
+
                 $updateNomorAntrian = self::$query->update('antrian_nomor', array(
                     'status' => 'K',
                     'prioritas' => $parameter['dataObj']['prioritas'],
@@ -368,7 +369,8 @@ class Antrian extends Utility
                     'pasien' => $parameter['dataObj']['currentPasien'],
                     'penjamin' => $parameter['dataObj']['penjamin'],
                     'billing_group' => 'tindakan',
-                    'keterangan' => 'Biaya konsultasi'
+                    'keterangan' => 'Biaya konsultasi',
+                    'departemen' => $parameter['dataObj']['departemen']
                 ));
 
                 unset($parameter['dataObj']['currentPasien']);
@@ -583,7 +585,7 @@ class Antrian extends Utility
                                 ->execute();
 
                             if (count($checkBiayaKartu['response_data']) <= 0) { //Biaya Kartu
-                                $Invoice = $SInvoice::append_invoice(array(
+                                $Invoice = $SInvoice->append_invoice(array(
                                     'invoice' => $InvoiceCheck['response_data'][0]['uid'],
                                     'item' => __UID_KARTU__,
                                     'item_origin' => 'master_tindakan',
@@ -595,11 +597,12 @@ class Antrian extends Utility
                                     'pasien' => $parameter['dataObj']['currentPasien'],
                                     'penjamin' => $parameter['dataObj']['penjamin'],
                                     'billing_group' => 'administrasi',
-                                    'keterangan' => 'Biaya kartu pasien baru'
+                                    'keterangan' => 'Biaya kartu pasien baru',
+                                    'departemen' => $parameter['dataObj']['departemen']
                                 ));
                             }
 
-                            $HargaTindakan = $SInvoice::get_harga_tindakan(array(
+                            $HargaTindakan = $SInvoice->get_harga_tindakan(array(
                                 'poli' => $parameter['dataObj']['departemen'],
                                 'kelas' => __UID_KELAS_GENERAL_RJ__,
                                 'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
@@ -608,7 +611,7 @@ class Antrian extends Utility
 
                             //print_r($HargaTindakan['response_data']);
 
-                            $Invoice = $SInvoice::append_invoice(array(
+                            $Invoice = $SInvoice->append_invoice(array(
                                 'invoice' => $InvoiceCheck['response_data'][0]['uid'],
                                 'item' => $PoliTindakanInfo['tindakan_konsultasi'],
                                 'item_origin' => 'master_tindakan',
@@ -620,10 +623,11 @@ class Antrian extends Utility
                                 'pasien' => $parameter['dataObj']['currentPasien'],
                                 'penjamin' => $parameter['dataObj']['penjamin'],
                                 'billing_group' => 'tindakan',
-                                'keterangan' => 'Biaya konsultasi'
+                                'keterangan' => 'Biaya konsultasi',
+                                'departemen' => $parameter['dataObj']['departemen']
                             ));
                         } else { //Belum ada invoice master umum
-                            $Invoice = $SInvoice::create_invoice(array(
+                            $Invoice = $SInvoice->create_invoice(array(
                                 'kunjungan' => $uid,
                                 'pasien' => $parameter['dataObj']['pasien'],
                                 'keterangan' => ''
@@ -657,7 +661,7 @@ class Antrian extends Utility
                                             'keterangan' => 'Biaya kartu pasien baru'
                                         ));
                                     }*/
-                                    $Invoice = $SInvoice::append_invoice(array(
+                                    $Invoice = $SInvoice->append_invoice(array(
                                         'invoice' => $NewInvoiceUID,
                                         'item' => __UID_KARTU__,
                                         'item_origin' => 'master_tindakan',
@@ -669,18 +673,19 @@ class Antrian extends Utility
                                         'pasien' => $parameter['dataObj']['currentPasien'],
                                         'penjamin' => $parameter['dataObj']['penjamin'],
                                         'billing_group' => 'administrasi',
-                                        'keterangan' => 'Biaya kartu pasien baru'
+                                        'keterangan' => 'Biaya kartu pasien baru',
+                                        'departemen' => $parameter['dataObj']['departemen']
                                     ));
                                 }
 
-                                $HargaTindakan = $SInvoice::get_harga_tindakan(array(
+                                $HargaTindakan = $SInvoice->get_harga_tindakan(array(
                                     'poli' => $parameter['dataObj']['departemen'],
                                     'kelas' => __UID_KELAS_GENERAL_RJ__,
                                     'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
                                     'penjamin' => $parameter['dataObj']['penjamin']
                                 ));
 
-                                $Invoice = $SInvoice::append_invoice(array(
+                                $Invoice = $SInvoice->append_invoice(array(
                                     'invoice' => $NewInvoiceUID,
                                     'item' => $PoliTindakanInfo['tindakan_konsultasi'],
                                     'item_origin' => 'master_tindakan',
@@ -692,7 +697,8 @@ class Antrian extends Utility
                                     'pasien' => $parameter['dataObj']['currentPasien'],
                                     'penjamin' => $parameter['dataObj']['penjamin'],
                                     'billing_group' => 'tindakan',
-                                    'keterangan' => 'Biaya konsultasi'
+                                    'keterangan' => 'Biaya konsultasi',
+                                    'departemen' => $parameter['dataObj']['departemen']
                                 ));
                             } else {
                                 //
@@ -784,7 +790,7 @@ class Antrian extends Utility
 
                     } else { //Belum ada Invoice Master
 
-                        $Invoice = $SInvoice::create_invoice(array(
+                        $Invoice = $SInvoice->create_invoice(array(
                             'kunjungan' => $uid,
                             'pasien' => $parameter['dataObj']['pasien'],
                             'keterangan' => 'Kunjungan Penjamin BPJS'
@@ -796,14 +802,14 @@ class Antrian extends Utility
 
                     //Simpan tagihan penjamin
 
-                    $HargaTindakan = $SInvoice::get_harga_tindakan(array(
+                    $HargaTindakan = $SInvoice->get_harga_tindakan(array(
                         'poli' => $parameter['dataObj']['departemen'],
                         'kelas' => __UID_KELAS_GENERAL_RJ__,
                         'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
                         'penjamin' => $parameter['dataObj']['penjamin']
                     ));
 
-                    $Invoice = $SInvoice::append_invoice(array(
+                    $Invoice = $SInvoice->append_invoice(array(
                         'invoice' => $InvoiceUID,
                         'item' => $PoliTindakanInfo['tindakan_konsultasi'],
                         'item_origin' => 'master_tindakan',
@@ -816,7 +822,8 @@ class Antrian extends Utility
                         'pasien' => $parameter['dataObj']['currentPasien'],
                         'penjamin' => $parameter['dataObj']['penjamin'],
                         'billing_group' => 'tindakan',
-                        'keterangan' => 'Biaya konsultasi'
+                        'keterangan' => 'Biaya konsultasi',
+                        'departemen' => $parameter['dataObj']['departemen']
                     ));
 
 
@@ -853,7 +860,7 @@ class Antrian extends Utility
                             ))
                             ->execute();
                         $Pasien = new Pasien(self::$pdo);
-                        $PasienDetail = $Pasien::get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
+                        $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
                         $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
 
                         if ($antrianKunjungan['response_result'] > 0) {
@@ -876,7 +883,7 @@ class Antrian extends Utility
 
 
                         //Dikenakan Biaya Kartu Jika Pasien Baru
-                        $Invoice = $SInvoice::append_invoice(array(
+                        $Invoice = $SInvoice->append_invoice(array(
                             'invoice' => $InvoiceUID,
                             'item' => __UID_KARTU__,
                             'item_origin' => 'master_tindakan',
@@ -888,7 +895,8 @@ class Antrian extends Utility
                             'pasien' => $parameter['dataObj']['currentPasien'],
                             'penjamin' => $parameter['dataObj']['penjamin'],
                             'billing_group' => 'administrasi',
-                            'keterangan' => 'Biaya kartu pasien baru'
+                            'keterangan' => 'Biaya kartu pasien baru',
+                            'departemen' => $parameter['dataObj']['departemen']
                         ));
 
 
@@ -912,7 +920,7 @@ class Antrian extends Utility
                             ->execute();
 
                         $Pasien = new Pasien(self::$pdo);
-                        $PasienDetail = $Pasien::get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
+                        $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
                         $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
                         $antrianKunjungan['response_data'][0]['response_invoice'] = 'asd';
                         $antrianKunjungan['response_notif'] = 'K';
@@ -932,8 +940,7 @@ class Antrian extends Utility
 
     /*=================== GET ANTRIAN ====================*/
 
-    public function tambah_antrian($table, $parameter, $uid_kunjungan)
-    {
+    public function tambah_antrian($table, $parameter, $uid_kunjungan) {
         /*dataObj Key
             kunjungan,
             poli,
@@ -998,17 +1005,17 @@ class Antrian extends Utility
                         'AND',
                         'antrian_nomor.poli' => '= ?',
                         'AND',
-                        'antrian_nomor.dokter' => '= ?',
-                        'AND',
+                        /*'antrian_nomor.dokter' => '= ?',
+                        'AND',*/
                         'antrian_nomor.penjamin' => '= ?',
                         'AND',
                         'antrian_nomor.status' => '= ?'
                     ), array(
                             $allData['pasien'],
                             $allData['departemen'],
-                            $allData['dokter'],
+                            //$allData['dokter'],
                             $allData['penjamin'],
-                            'N'
+                            'K' //Dulu N?
                         )
                     )
                     ->execute();
@@ -1102,6 +1109,12 @@ class Antrian extends Utility
             );
 
             $parameterValue = array();
+        } else if($condition === 'inap') {
+            $paramKey = array(
+                'antrian.deleted_at' => 'IS NULL'
+            );
+
+            $parameterValue = array();
         } else {
             $paramKey = array(
                 'antrian.waktu_keluar' => 'IS NULL',
@@ -1114,50 +1127,96 @@ class Antrian extends Utility
             $parameterValue = array($parameter);
         }
 
-        $data = self::$query->select('antrian', array(
-            'uid',
-            'pasien as uid_pasien',
-            'dokter as uid_dokter',
-            'departemen as uid_poli',
-            'penjamin as uid_penjamin',
-            'waktu_masuk',
-            'prioritas'
-        ))
-            ->join('pasien', array(
-                'nama as pasien',
-                'no_rm'
+
+
+        if($condition === 'inap') {
+            $data = self::$query->select('antrian', array(
+                'uid',
+                'pasien as uid_pasien',
+                'dokter as uid_dokter',
+                'departemen as uid_poli',
+                'penjamin as uid_penjamin',
+                'waktu_masuk',
+                'waktu_keluar',
+                'prioritas'
             ))
-            ->join('master_poli', array(
-                'nama as departemen'
+                ->join('pasien', array(
+                    'nama as pasien',
+                    'no_rm'
+                ))
+                ->join('pegawai', array(
+                    'nama as dokter'
+                ))
+                ->join('master_penjamin', array(
+                    'nama as penjamin'
+                ))
+                ->join('kunjungan', array(
+                    'uid as uid_kunjungan',
+                    'pegawai as uid_resepsionis'
+                ))
+                ->on(array(
+                    /*array('pasien.uid','=', 'antrian.pasien'),
+                    array('master_poli.uid','=', 'antrian.departemen'),
+                    array('pegawai.uid','=', 'antrian.dokter'),
+                    array('master_penjamin.uid','=', 'antrian.penjamin'),
+                    array('kunjungan.uid','=', 'antrian.kunjungan')*/
+                    array('antrian.pasien', '=', 'pasien.uid'),
+                    array('antrian.dokter', '=', 'pegawai.uid'),
+                    array('antrian.penjamin', '=', 'master_penjamin.uid'),
+                    array('antrian.kunjungan', '=', 'kunjungan.uid')
+                ))
+                ->where($paramKey, $parameterValue)
+                ->order(array(
+                    'antrian.prioritas' => 'DESC',
+                    'antrian.waktu_masuk' => 'DESC'
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('antrian', array(
+                'uid',
+                'pasien as uid_pasien',
+                'dokter as uid_dokter',
+                'departemen as uid_poli',
+                'penjamin as uid_penjamin',
+                'waktu_masuk',
+                'prioritas'
             ))
-            ->join('pegawai', array(
-                'nama as dokter'
-            ))
-            ->join('master_penjamin', array(
-                'nama as penjamin'
-            ))
-            ->join('kunjungan', array(
-                'uid as uid_kunjungan',
-                'pegawai as uid_resepsionis'
-            ))
-            ->on(array(
-                /*array('pasien.uid','=', 'antrian.pasien'),
-                array('master_poli.uid','=', 'antrian.departemen'),
-                array('pegawai.uid','=', 'antrian.dokter'),
-                array('master_penjamin.uid','=', 'antrian.penjamin'),
-                array('kunjungan.uid','=', 'antrian.kunjungan')*/
-                array('antrian.pasien', '=', 'pasien.uid'),
-                array('antrian.departemen', '=', 'master_poli.uid'),
-                array('antrian.dokter', '=', 'pegawai.uid'),
-                array('antrian.penjamin', '=', 'master_penjamin.uid'),
-                array('antrian.kunjungan', '=', 'kunjungan.uid')
-            ))
-            ->where($paramKey, $parameterValue)
-            ->order(array(
-                'antrian.prioritas' => 'DESC',
-                'antrian.waktu_masuk' => 'DESC'
-            ))
-            ->execute();
+                ->join('pasien', array(
+                    'nama as pasien',
+                    'no_rm'
+                ))
+                ->join('master_poli', array(
+                    'nama as departemen'
+                ))
+                ->join('pegawai', array(
+                    'nama as dokter'
+                ))
+                ->join('master_penjamin', array(
+                    'nama as penjamin'
+                ))
+                ->join('kunjungan', array(
+                    'uid as uid_kunjungan',
+                    'pegawai as uid_resepsionis'
+                ))
+                ->on(array(
+                    /*array('pasien.uid','=', 'antrian.pasien'),
+                    array('master_poli.uid','=', 'antrian.departemen'),
+                    array('pegawai.uid','=', 'antrian.dokter'),
+                    array('master_penjamin.uid','=', 'antrian.penjamin'),
+                    array('kunjungan.uid','=', 'antrian.kunjungan')*/
+                    array('antrian.pasien', '=', 'pasien.uid'),
+                    array('antrian.departemen', '=', 'master_poli.uid'),
+                    array('antrian.dokter', '=', 'pegawai.uid'),
+                    array('antrian.penjamin', '=', 'master_penjamin.uid'),
+                    array('antrian.kunjungan', '=', 'kunjungan.uid')
+                ))
+                ->where($paramKey, $parameterValue)
+                ->order(array(
+                    'antrian.prioritas' => 'DESC',
+                    'antrian.waktu_masuk' => 'DESC'
+                ))
+                ->execute();
+        }
 
         $autonum = 1;
         foreach ($data['response_data'] as $key => $value) {
@@ -1794,7 +1853,7 @@ class Antrian extends Utility
             $Kunjungan = self::$query->select('kunjungan', array(
                 'uid',
                 'waktu_masuk',
-                'waktu_masuk',
+                'waktu_keluar',
                 'pegawai',
                 'pj_pasien',
                 'info_didapat_dari'
@@ -1810,26 +1869,26 @@ class Antrian extends Utility
             $data['response_data'][$key]['kunjungan_detail'] = $Kunjungan['response_data'][0];
 
             $Pasien = new Pasien(self::$pdo);
-            $PasienData = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienData = $Pasien->get_pasien_detail('pasien', $value['pasien']);
 
             $Terminologi = new Terminologi(self::$pdo);
             $Penjamin = new Penjamin(self::$pdo);
 
             $Poli = new Poli(self::$pdo);
-            $PoliData = $Poli::get_poli_detail($value['departemen']);
+            $PoliData = $Poli->get_poli_detail($value['departemen']);
             $data['response_data'][$key]['poli_info'] = $PoliData['response_data'][0];
 
             $PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
 
             //Terminologi Jenis Kelamin
-            $TerminologiJenkel = $Terminologi::get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
+            $TerminologiJenkel = $Terminologi->get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
             $PasienData['response_data'][0]['jenkel_nama'] = $TerminologiJenkel['response_data'][0]['nama'];
 
             $data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
 
 
             //Penjamin
-            $data['response_data'][$key]['penjamin_data'] = $Penjamin::get_penjamin_detail($value['penjamin'])['response_data'][0];
+            $data['response_data'][$key]['penjamin_data'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
         }
         return $data;
     }
@@ -2026,12 +2085,17 @@ class Antrian extends Utility
             ->execute();
 
         $autonum = 1;
+        $pegawai = new Pegawai(self::$pdo);
+        $pasien = new Pasien(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
             $autonum++;
 
-            $pegawai = new Pegawai(self::$pdo);
+            $get_pasien = $pasien->get_pasien_detail('pasien', $value['uid_pasien']);
+            $data['response_data'][$key]['pasien_detail'] = $get_pasien['response_data'][0];
+
+
             $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
             $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
 

@@ -358,7 +358,31 @@
 		}
 	?>
 	<script type="text/javascript">
-        function push_socket(sender, protocols, receiver, parameter, type) {
+
+        function resend_socket(requestList, callback) {
+            var sendingStatus = 0;
+            for(var reqKey in requestList) {
+                push_socket(
+                    requestList[reqKey].sender,
+                    requestList[reqKey].protocol,
+                    requestList[reqKey].receiver,
+                    requestList[reqKey].message,
+                    requestList[reqKey].type
+                ).then(function() {
+                    //alert(reqKey);
+                    sendingStatus++;
+                });
+            }
+
+            /*if(sendingStatus === requestList.length) {
+
+            } else {
+                resend_socket(requestList, callback);
+            }*/
+
+            callback();
+        }
+        async function push_socket(sender, protocols, receiver, parameter, type) {
 
             if(Sync.readyState === WebSocket.CLOSED) {
                 Sync = SocketCheck(serverTarget, protocolLib, tm);
@@ -389,12 +413,9 @@
                 console.log("WebSocket Not Supported");
             }
 
-
-
-
-
-
-
+            $(".buttons-excel, .buttons-csv").css({
+                "margin": "0 5px"
+            }).removeClass("btn-secondary").addClass("btn-info").find("span").prepend("<i class=\"fa fa-dolly-flatbed\"></i>");
 
         });
 
@@ -404,6 +425,12 @@
             Sync.onopen = function() {
                 clearInterval(tm);
                 //console.log("connected");
+
+                /*setInterval(function() {
+                    //if (Sync.bufferedAmount == 0)
+
+                }, 2000);*/
+
                 $(".global-sync-container").fadeOut();
             }
 
@@ -425,7 +452,7 @@
                                     audio.audio.pause();
                                     audio.audio.currentTime = 0;
                                 } else {
-                                    alert();
+                                    //alert();
                                 }
                             }
                             audio = protocolLib[command](command, type, parameter, sender, receiver, time);

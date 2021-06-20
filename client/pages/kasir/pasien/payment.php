@@ -31,7 +31,7 @@
 								</td>
 								<td id="text-total" class="text-right">0.00</td>
 							</tr>
-							<tr>
+							<!--tr>
 								<td class="text-right">Diskon</td>
 								<td>
 									<select class="form-control" id="txt_diskon_type_all">
@@ -43,7 +43,7 @@
 								<td id="text-diskon">
 									<input id="txt_diskon_all" autocomplete="off" type="text" class="form-control" />
 								</td>
-							</tr>
+							</tr-->
 							<tr>
 								<td colspan="2" class="text-right">
 									Grand Total

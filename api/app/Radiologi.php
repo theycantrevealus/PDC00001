@@ -1035,9 +1035,10 @@ class Radiologi extends Utility
 
     private function verifikasi_hasil($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $update = self::$query->update('rad_order', array(
+            'petugas' => $UserData['data']->uid,
             'selesai' => 'true',
             'status' => 'D'
         ))
@@ -1091,13 +1092,17 @@ class Radiologi extends Utility
             'status' => 'V'
         ))
             ->where(array(
+                'rad_order.kunjungan' => '= ?',
+                'AND',
                 'rad_order.asesmen' => '= ?',
                 'AND',
                 'rad_order.selesai' => '= ?',
                 'AND',
                 'rad_order.deleted_at' => 'IS NULL'
             ), array(
+                $parameter['kunjungan'],
                 $parameter['asesmen'],
+
                 'false'
             ))
             ->execute();
@@ -1196,7 +1201,8 @@ class Radiologi extends Utility
                     'pasien' => $value['pasien'],
                     'penjamin' => $DValue['penjamin'],
                     'billing_group' => 'radiologi',
-                    'keterangan' => 'Biaya Radiologi'
+                    'keterangan' => 'Biaya Radiologi',
+                    'departemen' => $parameter['departemen']
                 ));
 
                 array_push($charge_result, $InvoiceDetail);
@@ -1208,7 +1214,7 @@ class Radiologi extends Utility
     private function tambah_jenis_tindakan($table, $parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $check = self::duplicate_check(array(
             'table' => $table,
@@ -1719,7 +1725,7 @@ class Radiologi extends Utility
                         $status_lunas = 'P';
                     }*/
 
-                    $status_lunas = 'V'; //Dulu V
+                    $status_lunas = 'N'; //Dulu V
 
                     $uidRadiologiOrder = parent::gen_uuid();
                     $radiologiOrder = self::$query

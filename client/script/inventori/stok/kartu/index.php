@@ -33,27 +33,25 @@
 
                     for(var dataKey in rawData)
                     {
-                        if(uniqueData[rawData[dataKey].barang] === undefined)
-                        {
-                            uniqueData[rawData[dataKey].barang] = {
-                                barang: rawData[dataKey].barang,
-                                stok_terkini: parseFloat(rawData[dataKey].stok_terkini),
-                                stok_batch: 0,
-                                detail : rawData[dataKey].detail,
-                                image: rawData[dataKey].image,
-                                kategori_obat: rawData[dataKey].kategori_obat,
-                                kode_barang: rawData[dataKey].kode_barang
-                            };
-                        }
+                        if(rawData[dataKey].gudang === __UNIT__.gudang && parseFloat(rawData[dataKey].stok_terkini) > 0) {
+                            if(uniqueData[rawData[dataKey].barang] === undefined) {
+                                uniqueData[rawData[dataKey].barang] = {
+                                    barang: rawData[dataKey].barang,
+                                    stok_terkini: parseFloat(rawData[dataKey].stok_terkini),
+                                    stok_batch: 0,
+                                    detail : rawData[dataKey].detail,
+                                    image: rawData[dataKey].image,
+                                    kategori_obat: rawData[dataKey].kategori_obat,
+                                    kode_barang: rawData[dataKey].kode_barang
+                                };
+                            }
 
-
-                        if(Array.isArray(rawData[dataKey].batch)) {
-                            var batchData = rawData[dataKey].batch;
-                            console.log(batchData);
-                            for(var bKey in batchData) {
-                                //uniqueData[rawData[dataKey].barang].stok_terkini += parseFloat(rawData[dataKey].stok_terkini);
-                                if(batchData[bKey].gudang.uid === response.response_package.gudang_saya) {
-                                    uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
+                            if(Array.isArray(rawData[dataKey].batch)) {
+                                var batchData = rawData[dataKey].batch;
+                                for(var bKey in batchData) {
+                                    if(batchData[bKey].gudang.uid === response.response_package.gudang_saya) {
+                                        uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
+                                    }
                                 }
                             }
                         }

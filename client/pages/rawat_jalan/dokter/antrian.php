@@ -155,8 +155,10 @@
                     <?php require 'info-pasien.php'; ?>
                     <?php require 'dokumen.php'; ?>
                 </div>
-                <?php require 'action-panel.php'; ?>
 			</div>
+            <div class="card card-footer custom-card-footer">
+                <?php require 'action-panel.php'; ?>
+            </div>
 		</div>
 	</div>
 </div>

@@ -52,7 +52,7 @@
                                         <table class="table table-bordered table-striped" id="table-pasien">
                                             <thead class="thead-dark">
                                                 <tr>
-                                                    <th style="width: 20px;">No</th>
+                                                    <th class="wrap_content">No</th>
                                                     <th>No RM</th>
                                                     <th>Nama Pasien</th>
                                                     <th>Tanggal Lahir</th>

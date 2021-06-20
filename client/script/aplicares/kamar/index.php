@@ -97,10 +97,10 @@
 										"<i class=\"fa fa-list\"></i> Detail" +
 									"</button>" +*/
 									"<button id=\"ruangan_edit_" + row['uid_ruangan'] + "\" class=\"btn btn-info btn-sm btn-edit-ruangan\" data-toggle='tooltip' title='Edit'>" +
-										"<i class=\"fa fa-edit\"></i>" +
+										"<span><i class=\"fa fa-edit\"></i>Edit</span>" +
 									"</button>" +
 									"<button id=\"ruangan_delete_" + row['uid_ruangan'] + "\" class=\"btn btn-danger btn-sm btn-delete-ruangan\" data-toggle='tooltip' title='Hapus'>" +
-										"<i class=\"fa fa-trash\"></i>" +
+										"<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}

@@ -77,7 +77,11 @@
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.bpjs_rujukan !== null) {
                             var rujukanData = row.bpjs_rujukan.response_data;
-                            return (rujukanData.length > 0) ? "<b kunjungan=\"" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? "1": "0") + "\" id=\"no_kunjungan_" + rujukanData[0].uid + "\">" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? rujukanData[0].no_kunjungan : rujukanData[0].no_rujukan) + "</b>" : "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
+                            if(rujukanData !== undefined && rujukanData !== null) {
+                                return (rujukanData.length > 0) ? "<b kunjungan=\"" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? "1": "0") + "\" id=\"no_kunjungan_" + rujukanData[0].uid + "\">" + ((rujukanData[0].no_rujukan === null || rujukanData[0].no_rujukan === undefined) ? rujukanData[0].no_kunjungan : rujukanData[0].no_rujukan) + "</b>" : "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
+                            } else {
+                                return "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
+                            }
                         } else {
                             return "<b class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum dibuat</b>";
                         }
@@ -88,23 +92,29 @@
                         var now = Date.parse(<?php echo json_encode(date('Y-m-d')); ?>);
                         var currentCheck = Date.parse(row.created_at_compare);
                         var rujukanData = row.bpjs_rujukan.response_data;
-                        if(rujukanData.length > 0) {
-                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<button id=\"bpjs_edit_rujukan_" + row.bpjs_rujukan.response_data[0].uid + "\" class=\"btn btn-info btn-sm bpjs_edit_rujukan\">" +
-                                "<i class=\"fa fa-pencil-alt\"></i> Edit <span class=\"badge badge-info\">BPJS</span>" +
-                                "</button>" +
-                                "<button id=\"bpjs_hapus_rujukan_" + row.bpjs_rujukan.response_data[0].uid + "\" class=\"btn btn-danger btn-sm bpjs_hapus_rujukan\">" +
-                                "<i class=\"fa fa-trash-alt\"></i> Hapus <span class=\"badge badge-danger\">BPJS</span>" +
-                                "</button>" +
-                                "</div>";
-                        } else {
-                            if(currentCheck >= now) {
+                        if(rujukanData !== null && rujukanData !== undefined) {
+                            if(rujukanData.length > 0) {
                                 return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                    "<button id=\"rujukan_" + row.uid + "\" class=\"btn btn-success btn-sm btnRujuk\" pasien=\"" + row.pasien.uid + "\" target=\"" + row.penjamin.uid + "\"><i class=\"fa fa-check\"></i> Proses <span class=\"badge badge-success\">BPJS</span></button>" +
+                                    "<button id=\"bpjs_edit_rujukan_" + row.bpjs_rujukan.response_data[0].uid + "\" class=\"btn btn-info btn-sm bpjs_edit_rujukan\">" +
+                                    "<i class=\"fa fa-pencil-alt\"></i> Edit <span class=\"badge badge-info\">BPJS</span>" +
+                                    "</button>" +
+                                    "<button id=\"bpjs_hapus_rujukan_" + row.bpjs_rujukan.response_data[0].uid + "\" class=\"btn btn-danger btn-sm bpjs_hapus_rujukan\">" +
+                                    "<i class=\"fa fa-trash-alt\"></i> Hapus <span class=\"badge badge-danger\">BPJS</span>" +
+                                    "</button>" +
                                     "</div>";
                             } else {
-                                return "<b class=\"text-danger\"><i class=\"fa fa-exclamation-triangle\"></i> Habis masa berlaku</b> <button class=\"btn btn-danger btn-sm pull-right hapus_rujukan_local\" id=\"hapus_rujukan_local_" + row.uid + "\"><i class=\"fa fa-trash-alt\"></i> Hapus</button>";
+                                if(currentCheck >= now) {
+                                    return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                        "<button id=\"rujukan_" + row.uid + "\" class=\"btn btn-success btn-sm btnRujuk\" pasien=\"" + row.pasien.uid + "\" target=\"" + row.penjamin.uid + "\"><i class=\"fa fa-check\"></i> Proses <span class=\"badge badge-success\">BPJS</span></button>" +
+                                        "</div>";
+                                } else {
+                                    return "<b class=\"text-danger\"><i class=\"fa fa-exclamation-triangle\"></i> Habis masa berlaku</b> <button class=\"btn btn-danger btn-sm pull-right hapus_rujukan_local\" id=\"hapus_rujukan_local_" + row.uid + "\"><i class=\"fa fa-trash-alt\"></i> Hapus</button>";
+                                }
                             }
+                        } else {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button id=\"rujukan_" + row.uid + "\" class=\"btn btn-success btn-sm btnRujuk\" pasien=\"" + row.pasien.uid + "\" target=\"" + row.penjamin.uid + "\"><i class=\"fa fa-check\"></i> Proses <span class=\"badge badge-success\">BPJS</span></button>" +
+                                "</div>";
                         }
                     }
                 }

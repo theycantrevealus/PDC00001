@@ -1,7 +1,9 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/js/rSlider.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <link href="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.css" type="text/css" rel="stylesheet" />
+
 <script type="text/javascript">
     $(function() {
 
@@ -14,6 +16,8 @@
             target: "#txt_nrs",
             values: [0,1,2,3,4,5,6,7,8,9,10]
         });
+
+
 
         var rangeDefiner = [
             {
@@ -33,22 +37,6 @@
                 merge: 1
             }
         ];
-
-        for(var pain in rangeDefiner) {
-            var scaleStepper = document.createElement("DIV");
-            $(scaleStepper).css({
-                "width": (10 * rangeDefiner[pain].merge) + "%"
-            }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
-            $("#scale-loader-define").append(scaleStepper)
-        }
-
-        for(var a = 1; a <= 10; a++) {
-            var scaleStepper = document.createElement("DIV");
-            $(scaleStepper).css({
-                "width": "10%"
-            }).addClass("scale-stepper");
-            $("#scale-loader").append(scaleStepper)
-        }
 
         //var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
         var poliListRaw = [];
@@ -155,6 +143,15 @@
             success:function(response) {
                 antrianData = response.response_package.response_data[0];
 
+                console.log(antrianData);
+                if(antrianData.waktu_keluar !== null) {
+                    /*$("#btnSelesai").remove();
+                    allowEdit = false;*/
+                    alert();
+
+                    //Todo: Set as Viewer Page
+                }
+
                 prioritas_antrian = antrianData.prioritas;
                 kunjungan = antrianData.kunjungan_detail;
 
@@ -168,7 +165,6 @@
                     }
                 }
 
-                console.log(poliListRaw);
                 poliList = poliListRaw;
 
                 if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
@@ -812,6 +808,7 @@
                             $("#igd_lokasi").val(asesmen_detail.lokasi);
 
                             mySlider.setValues(asesmen_detail.skala_rasa_sakit);
+                            renderScale($(".rs-tooltip").html());
 
                             if(asesmen_detail.status_alergi == "y") {
                                 $("#igd_status_alergi_text").removeAttr("disabled").val(asesmen_detail.status_alergi_text);
@@ -3662,7 +3659,7 @@
                             push_socket(__ME__, "permintaan_laboratorium_baru", "*", "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
                         }
                     }*/
-                    //location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                    location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                 } else {
                     notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                 }
@@ -4418,6 +4415,9 @@
 
         var selectedLabItemList = [];
 
+        $("#check_all_container").hide();
+        $("#check_all_lab").prop("checked", false);
+
         function setLabTindakan() {
             /*$("#tindakan_lab").empty();
             $("#tindakan_lab").append("<option disabled selected value=''>Pilih Tindakan Laboratorium</option>");
@@ -4529,6 +4529,7 @@
                         "tgl_sampel":""
                     });
                 }
+                $("#check_all_container").show();
             });
         }
 
@@ -4629,6 +4630,37 @@
         }
 
         setLabTindakan();
+
+        $("body").on("change", "#check_all_lab", function() {
+            if(listTindakanLabTerpilih[$("#tindakan_lab").val()] === undefined)
+            {
+                listTindakanLabTerpilih[$("#tindakan_lab").val()] = {
+                    "penjamin":"",
+                    "item":[],
+                    "tgl_sample": ""
+                };
+            }
+
+            if($(this).is(":checked")) {
+                $(".lab_order_item_detail").each(function() {
+                    $(this).prop("checked", true);
+
+
+                    listTindakanLabTerpilih[$("#tindakan_lab").val()].item.push({
+                        "id": $(this).val(),
+                        "nama": $("#label_item_" + $(this).val()).text(),
+                        "tgl_sampel":""
+
+                    });
+                });
+            } else {
+                $(".lab_order_item_detail").each(function() {
+                    $(this).prop("checked", false);
+                });
+
+                listTindakanLabTerpilih[$("#tindakan_lab").val()].item = [];
+            }
+        });
 
 
         $("body").on("change", ".lab_order_item_detail", function() {
@@ -4814,6 +4846,8 @@
                 $("#tindakan_lab option[value='"+ uidTindakanLab +"']").remove();
                 $("#lab_tindakan_notifier").html("");
                 setNomorUrut('table_tindakan_lab', 'no_urut_lab');
+                $("#check_all_container").hide();
+                $("#check_all_lab").prop("checked", false);
             }
             else {
                 console.log(listTindakanLabTerpilih[uidTindakanLab]);
@@ -6320,11 +6354,124 @@
                 digitsOptional: true
             });*/
         }
+
+
+
+
+
+        for(var pain in rangeDefiner) {
+            var scaleStepper = document.createElement("DIV");
+            $(scaleStepper).css({
+                "width": (10 * rangeDefiner[pain].merge) + "%"
+            }).addClass("scale-stepper").html("<small class=\"text-center\">" + rangeDefiner[pain].text.toUpperCase() + "</small>");
+            $("#scale-loader-define").append(scaleStepper)
+        }
+
+        for(var a = 1; a <= 10; a++) {
+            var scaleStepper = document.createElement("DIV");
+            $(scaleStepper).css({
+                "width": "10%"
+            }).addClass("scale-stepper");
+            $("#scale-loader").append(scaleStepper)
+        }
+
+        $("body").on("click", ".NRSItems", function() {
+            var currentIDNRS = $(this).attr("id").split("-");
+            currentIDNRS = currentIDNRS[currentIDNRS.length - 1];
+
+            //alert(currentIDNRS);
+
+            if(parseInt(currentIDNRS) === 0) {
+                mySlider.setValues(0);
+                mySlider.destroy();
+                mySlider = new rSlider({
+                    target: "#txt_nrs",
+                    values: [0,1,2,3,4,5,6,7,8,9,10]
+                });
+
+            } else {
+                mySlider.setValues(parseInt(currentIDNRS) * 2);
+            }
+
+        });
+
+        function renderScale(target) {
+            var NRScurrent = parseInt(target);
+
+            var NRSchildTarget = 0;
+
+
+            if(NRScurrent % 2 === 0) {
+                NRSchildTarget = (NRScurrent / 2);
+            } else {
+                NRSchildTarget = ((NRScurrent - 1) / 2);
+            }
+
+            var colorStyleNRS =  [
+                "linear-gradient(90deg, rgba(54, 198, 0, 1), rgba(102, 198, 0, 1))",
+                "linear-gradient(90deg, rgba(102, 198, 0, 1), rgba(126, 198, 0, 1))",
+                "linear-gradient(90deg, rgba(126, 198, 0, 1), rgba(192, 198, 12, 1))",
+                "linear-gradient(90deg, rgba(192, 198, 12, 1), rgba(238, 166, 1, 1))",
+                "linear-gradient(90deg, rgba(238, 166, 1, 1), rgba(238, 51, 1, 1))",
+                "linear-gradient(90deg, rgba(238, 51, 1, 1), rgba(255, 0, 0, 1))"
+            ];
+
+            $(".NRSItems").each(function() {
+                var currentIDNRS = $(this).attr("id").split("-");
+                currentIDNRS = currentIDNRS[currentIDNRS.length - 1];
+                if(currentIDNRS <= NRSchildTarget) {
+                    $(this).css({
+                        "opacity": "1",
+                        "background": colorStyleNRS[currentIDNRS]
+                    });
+                } else {
+                    $(this).css({
+                        "opacity": ".5",
+                        "background": "#ccc"
+                    });
+                }
+            });
+        }
+
+        $("body").on("DOMSubtreeModified", ".rs-tooltip", function() {
+            renderScale($(".rs-tooltip").html());
+        });
+
+
+        //INI LOHHHH
+        var imageCounter = 0;
+        $(".rs-scale span").each(function(e) {
+            $(this).css({
+                "position":"relative"
+            });
+
+            if(e % 2 == 0) {
+                var imagesScale = __HOSTNAME__ + "/template/assets/images/NRS-" + imageCounter + ".png";
+                var marginLeft = $(this).find("ins").offset().left - $(".rs-scale span").eq(0).offset().left - 30;
+                var imageViewer = document.createElement("IMG");
+                $(imageViewer).attr({
+                    "src": imagesScale,
+                    "id": "NRS-" + imageCounter
+                }).css({
+                    "position": "absolute",
+                    "top": "0",
+                    "left": marginLeft + "px",
+                    "width": "100px",
+                    "height": "100px",
+                    "border-radius": "100%"
+                }).addClass("NRSItems");
+                $("#scale-loader-image").append(imageViewer);
+                imageCounter++;
+            }
+        });
+
+
+
+
+
     });
 
 </script>
-<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
-
 
 <div id="form-editor-racikan" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-md" role="document">
@@ -6423,8 +6570,24 @@
                     <div class="offset-md-3 col-md-2" style="padding-top: 8px;" id="lab_tindakan_notifier"></div>
                 </div>
                 <div class="col-md-12">
-                    <div id="lab_nilai_order" class="row">
+                    <div class="row" id="check_all_container">
+                        <div class="col-md-2">
+                            <div class="flex">
+                                <label for="check_all_lab">Pilih Semua</label>
+                                <div class="custom-control custom-checkbox-toggle custom-control-inline mr-1 pull-right text-right">
+                                    <input type="checkbox" id="check_all_lab" class="custom-control-input pull-right" />
+                                    <label class="custom-control-label" for="check_all_lab">Ya</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12"><hr /></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="lab_nilai_order" class="row">
 
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-12 form-group" style="margin-top: 10px;">

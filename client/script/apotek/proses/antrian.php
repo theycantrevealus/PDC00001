@@ -11,7 +11,6 @@
             },
             type:"GET",
             success:function(response) {
-                console.log(response);
                 targettedData = response.response_package.response_data[0];
                 $("#nama-pasien").attr({
                     "set-penjamin": targettedData.antrian.penjamin_data.uid
@@ -86,31 +85,34 @@
                     var butuh_amprah = 0;
                     for(bKey in selectedBatchResep)
                     {
-                        if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
-                        {
-                            harga_tertinggi = parseFloat(selectedBatchResep[bKey].harga);
-                        }
-
-                        if(kebutuhan > 0)
-                        {
-
-                            if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
+                        if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang && parseFloat(selectedBatchResep[bKey].stok_terkini) > 0) {
+                            if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
                             {
-                                selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
+                                harga_tertinggi = parseFloat(selectedBatchResep[bKey].harga);
+                            }
+
+                            if(kebutuhan > 0)
+                            {
+
+                                if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
+                                {
+                                    selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
+                                } else {
+                                    selectedBatchResep[bKey].used = kebutuhan;
+                                }
+                                kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
+                                if(selectedBatchResep[bKey].used > 0)
+                                {
+                                    selectedBatchList.push(selectedBatchResep[bKey]);
+                                }
+                            }
+
+                            if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang) {
+                                jlh_sedia += selectedBatchResep[bKey].stok_terkini;
                             } else {
-                                selectedBatchResep[bKey].used = kebutuhan;
+                                butuh_amprah += selectedBatchResep[bKey].stok_terkini;
                             }
-                            kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
-                            if(selectedBatchResep[bKey].used > 0)
-                            {
-                                selectedBatchList.push(selectedBatchResep[bKey]);
-                            }
-                        }
 
-                        if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang) {
-                            jlh_sedia += selectedBatchResep[bKey].stok_terkini;
-                        } else {
-                            butuh_amprah += selectedBatchResep[bKey].stok_terkini;
                         }
                     }
 
@@ -286,7 +288,6 @@
                         } else {
                             butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
                         }
-
                     }
 
 
@@ -442,12 +443,12 @@
                         data:{
                             request: "proses_resep",
                             resep: resepUID,
-                            asesmen: targettedData.asesmen
+                            antrian: targettedData.antrian,
+                            asesmen: targettedData.asesmen,
+                            departemen: targettedData.antrian.departemen
                         },
                         type:"POST",
                         success:function(response) {
-                            console.clear();
-                            console.log(response);
                             if(response.response_package.stok_result > 0)
                             {
                                 push_socket(__ME__, "resep_selesai_proses", "*", "Resep pasien a/n. " + $("#nama-pasien").html() + " selesai diproses!", "info").then(function() {
@@ -466,7 +467,7 @@
                                     "success"
                                 ).then((result) => {
                                     location.href = __HOSTNAME__ + "/apotek/proses";
-                                });209
+                                });
                             }
                         },
                         error: function(response) {

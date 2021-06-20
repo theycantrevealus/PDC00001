@@ -1303,7 +1303,8 @@ class Laboratorium extends Utility {
                     'pasien' => $value['pasien'],
                     'penjamin' => $DValue['penjamin'],
                     'billing_group' => 'laboratorium',
-                    'keterangan' => 'Biaya Laboratorium'
+                    'keterangan' => 'Biaya Laboratorium',
+                    'departemen' => $parameter['departemen']
                 ));
 
                 array_push($charge_result, $InvoiceDetail);
@@ -2715,7 +2716,11 @@ class Laboratorium extends Utility {
                 $paramData = array(
                     'lab_order.deleted_at' => 'IS NULL',
                     'AND',
-                    'lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
                     'AND',
                     'lab_order.created_at' => 'BETWEEN ? AND ?',
                     'AND',
@@ -2727,7 +2732,11 @@ class Laboratorium extends Utility {
                 $paramData = array(
                     'lab_order.deleted_at' => 'IS NULL',
                     'AND',
-                    'lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
                     'AND',
                     'lab_order.status' => '= ?'
                 );

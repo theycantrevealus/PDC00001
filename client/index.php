@@ -25,6 +25,13 @@
 	var __MY_NAME__ = <?php echo json_encode($_SESSION['nama']); ?>;
 	var __MY_PRIVILEGES__ = <?php echo json_encode($_SESSION['jabatan']); ?>;
 	var __UNIT__ = <?php echo json_encode($_SESSION['unit']); ?>;
+    var __UNIT_MULTI__ = <?php echo json_encode($_SESSION['unit_multi']); ?>;
+    if(__UNIT__ === null) {
+        if(__UNIT_MULTI__ !== null) {
+            __UNIT__ = __UNIT_MULTI__[0]['response_data'][0];
+        }
+    }
+    var __NURSE_STATION__ = <?php echo json_encode($_SESSION['nurse_station']); ?>;
 
 	var __UIDPENJAMINUMUM__ = <?php echo json_encode(__UIDPENJAMINUMUM__); ?>;
 	var __UIDPENJAMINBPJS__ = <?php echo json_encode(__UIDPENJAMINBPJS__); ?>;
@@ -33,13 +40,12 @@
 
 
     var __UIDADMIN__ = <?php echo json_encode(__UIDADMIN__); ?>;
+    var __UIDDOKTER__ = <?php echo json_encode(__UIDDOKTER__); ?>;
     var __UIDFISIOTERAPI__ = <?php echo json_encode(__UIDFISIOTERAPI__); ?>;
     var __UIDPETUGASLAB__ = <?php echo json_encode(__UIDPETUGASLAB__); ?>;
     var __POLI_GIGI__ = <?php echo json_encode(__POLI_GIGI__); ?>;
     var __POLI_MATA__ = <?php echo json_encode(__POLI_MATA__); ?>;
-    var __POLI_ORTODONTIE__ = <?php echo json_encode(__POLI_ORTODONTIE__); ?>;
-    //alert(__POLI_ORTODONTIE__);
-	var __POLI_INAP__ = <?php echo json_encode(__POLI_INAP__); ?>;
+    var __POLI_INAP__ = <?php echo json_encode(__POLI_INAP__); ?>;
     var __POLI_IGD__ = <?php echo json_encode(__POLI_IGD__); ?>;
     var __POLI_LAB__ = <?php echo json_encode(__POLI_LAB__); ?>;
     var __POLI_ORTODONTIE__ = <?php echo json_encode(__POLI_ORTODONTIE__); ?>;

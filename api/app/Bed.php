@@ -41,6 +41,11 @@ class Bed extends Utility {
                 case 'bed-ruangan':
                     return self::get_bed_ruangan('master_unit_bed', $parameter[2]);
                     break;
+
+                case 'bed-ruangan-avail':
+                    return self::get_bed_available('master_unit_bed', $parameter[2]);
+                    break;
+
 				default:
 					# code...
 					break;
@@ -60,6 +65,10 @@ class Bed extends Utility {
 				return self::edit_bed('master_unit_bed', $parameter);
 				break;
 
+            case 'bed-ruangan':
+                return self::bed_ruangan_back_end($parameter);
+                break;
+
 			default:
 				# code...
 				break;
@@ -73,22 +82,22 @@ class Bed extends Utility {
 
 	/*====================== GET FUNCTION =====================*/
 	private function get_bed($table){
-		$data = self::$query
-					->select($table, 
-						array(
-							'uid',
-							'nama',
-							'uid_ruangan',
-							'uid_lantai',
-							'created_at',
-							'updated_at'
-						)
-					)
-					->where(array(
-							$table . '.deleted_at' => 'IS NULL'
-						)
-					)
-					->execute();
+		$data = self::$query->select($table, array(
+            'uid',
+            'nama',
+            'uid_ruangan',
+            'uid_lantai',
+            'tarif',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                $table . '.deleted_at' => 'IS NULL'
+            ))
+            ->order(array(
+                $table . '.created_at' => 'ASC'
+            ))
+            ->execute();
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
@@ -99,7 +108,7 @@ class Bed extends Utility {
 			$arr_lantai = ['','lantai-detail', $uid_lantai];
 
 			$lantai = new Lantai(self::$pdo);
-			$get_lantai = $lantai::__GET__($arr_lantai);
+			$get_lantai = $lantai->get_lantai_detail($uid_lantai);
 
 			$lantai_res = $get_lantai['response_data'][0];
 			$data['response_data'][$key]['lantai'] = $lantai_res['nama'];
@@ -108,7 +117,7 @@ class Bed extends Utility {
 			$arr_ruangan = ['','ruangan-detail', $uid_ruangan];
 
 			$ruangan = new Ruangan(self::$pdo);
-			$get_ruangan = $ruangan::__GET__($arr_ruangan);
+			$get_ruangan = $ruangan->get_ruangan_detail('master_unit_ruangan', $uid_ruangan);
 
 			$ruangan_res = $get_ruangan['response_data'][0];
 			$data['response_data'][$key]['ruangan'] = $ruangan_res['nama']; 
@@ -123,6 +132,7 @@ class Bed extends Utility {
 						array(
 							'uid',
 							'nama',
+							'tarif',
 							'uid_ruangan',
 							'uid_lantai',
 							'created_at',
@@ -146,6 +156,41 @@ class Bed extends Utility {
 
 		return $data;
 	}
+
+    private function get_bed_available($table, $parameter) {
+	    $used = array();
+	    $avail = array();
+	    $running = self::$query->select('rawat_inap', array(
+	        'uid', 'kamar', 'bed'
+        ))
+            ->where(array(
+                'rawat_inap.waktu_keluar' => 'IS NULL',
+                'AND',
+                'rawat_inap.jenis_pulang' => 'IS NULL',
+                'AND',
+                'rawat_inap.deleted_at' => 'IS NULL'
+            ), array())
+            ->execute();
+        foreach ($running['response_data'] as $key => $value) {
+            if(!in_array($value['bed'], $used)) {
+                array_push($used, $value['bed']);
+            }
+	    }
+
+	    $data = self::get_bed_ruangan($table, $parameter);
+	    foreach ($data['response_data'] as $key => $value) {
+	        if(!in_array($value['uid'], $used)) {
+	            array_push($avail, $value);
+            }
+        }
+
+	    $data['response_data'] = $avail;
+	    return $data;
+    }
+
+    private function bed_ruangan_back_end($parameter) {
+
+    }
 
 	private function get_bed_ruangan($table, $parameter){
 		$data = self::$query
@@ -183,7 +228,7 @@ class Bed extends Utility {
 	/*====================== CRUD ========================*/
 	private function tambah_bed($table, $parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$check = self::duplicate_check(array(
 			'table'=>$table,
@@ -211,6 +256,7 @@ class Bed extends Utility {
 							'nama'=>$parameter['nama'],
 							'uid_ruangan'=>$parameter['ruangan'],
 							'uid_lantai'=>$uid_lantai,
+							'tarif'=>$parameter['tarif'],
 							'created_at'=>parent::format_date(),
 							'updated_at'=>parent::format_date()
 							)
@@ -249,12 +295,12 @@ class Bed extends Utility {
 
 	private function edit_bed($table, $parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$old = self::get_bed_detail('master_unit_bed', $parameter['uid']);
 
 		$ruangan = new Ruangan(self::$pdo);
-		$get_ruangan = $ruangan::get_ruangan_detail('master_unit_ruangan', $parameter['ruangan']);
+		$get_ruangan = $ruangan->get_ruangan_detail('master_unit_ruangan', $parameter['ruangan']);
 
 		$ruangan_res = $get_ruangan['response_data'][0];
 		$uid_lantai = $ruangan_res['lantai'];
@@ -264,6 +310,7 @@ class Bed extends Utility {
 						'nama'=>$parameter['nama'],
 						'uid_ruangan'=>$parameter['ruangan'],
 						'uid_lantai'=>$parameter['lantai'],
+                        'tarif'=>$parameter['tarif'],
 						'updated_at'=>parent::format_date()
 					)
 				)

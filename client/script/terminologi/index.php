@@ -29,9 +29,9 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<a href=\"" + __HOSTNAME__ + "/terminologi/child/" + row["id"] + "\" class=\"btn btn-info btn-sm\" data-toggle='tooltip' title='Tampil Term Items'>" +
-										"<i class=\"fa fa-list\"></i>" +
+										"<span><i class=\"fa fa-list\"></i>Detail</span>" +
 									"</a>" +
 								"</div>";
 					}

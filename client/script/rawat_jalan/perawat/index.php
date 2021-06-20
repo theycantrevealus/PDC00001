@@ -49,7 +49,7 @@
 				},
 				dataSrc:function(response) {
 					antrian_count = response.response_package.length;
-					//console.log(response);
+					console.log(response);
 					return response.response_package;
 				}
 			},
@@ -185,6 +185,12 @@
                 protocolLib[command](command, type, parameter, sender, receiver, time);
             }
         }*/
+
+        setTimeout(function() {
+
+            tableAntrianPerawat.ajax.reload();
+
+        }, 5000);
 
 
 

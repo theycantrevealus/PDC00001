@@ -36,7 +36,7 @@
 
 		var params;
 
-		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
+		var tableAntrian = $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis",
 				type: "GET",
@@ -50,7 +50,10 @@
 				        if(data[key].uid_poli !== __POLI_INAP__ && data[key].uid_poli !== __POLI_IGD__) {
 				            parsedData.push(data[key]);
                         }
-                        myPoli.push(data[key].departemen);
+				        if(myPoli.indexOf(data[key].departemen) < 0) {
+                            myPoli.push(data[key].departemen);
+                        }
+
                     }
 
                     $("#current-poli").prepend(myPoli.join(", "));
@@ -243,6 +246,12 @@
 			$("#table-list-pencarian tbody").html("<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>");
 			$("#modal-cari").modal("show");
 		});
+
+        setTimeout(function() {
+
+            tableAntrian.ajax.reload();
+
+        }, 5000);
 	});
 
 </script>

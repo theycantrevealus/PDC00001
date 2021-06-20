@@ -84,7 +84,7 @@
 											<tr>
 												<th class="wrap_content">No</th>
 												<th style="width: 50%;">Nama Kelas</th>
-												<th style="width: 20%;">Aksi</th>
+												<th class="wrap_content">Aksi</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -117,7 +117,7 @@
 											<tr>
 												<th class="wrap_content">No</th>
 												<th style="width: 50%;">Nama Kelas</th>
-												<th style="width: 20%;">Aksi</th>
+												<th class="wrap_content">Aksi</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -150,7 +150,7 @@
 											<tr>
 												<th class="wrap_content">No</th>
 												<th style="width: 50%;">Nama Kelas</th>
-												<th style="width: 20%;">Aksi</th>
+												<th class="wrap_content">Aksi</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -183,7 +183,7 @@
 											<tr>
 												<th class="wrap_content">No</th>
 												<th style="width: 50%;">Nama Kelas</th>
-												<th style="width: 20%;">Aksi</th>
+												<th class="wrap_content">Aksi</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -216,7 +216,7 @@
 											<tr>
 												<th class="wrap_content">No</th>
 												<th style="width: 50%;">Nama Kelas</th>
-												<th style="width: 20%;">Aksi</th>
+												<th class="wrap_content">Aksi</th>
 											</tr>
 										</thead>
 										<tbody>

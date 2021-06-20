@@ -75,10 +75,10 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<a href=\"" + __HOSTNAME__ + "/master/laboratorium/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-lab\">" +
-										"<i class=\"fa fa-pencil\"></i> Edit" +
+										"<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
 									"</a>" +
 									"<button id=\"lab_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-lab\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}

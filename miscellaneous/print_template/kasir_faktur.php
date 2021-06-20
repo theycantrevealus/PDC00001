@@ -142,6 +142,7 @@
     <div>
         <?php echo($_POST['kwitansi_data']); ?>
     </div>
+    <span>Tanggal Cetak:<br /><b><?php echo date('d F Y, H:i'); ?></b></span>
 </div>
 </body>
 </html>

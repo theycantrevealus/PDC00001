@@ -54,10 +54,10 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-icd9\" id=\"icd9_edit_" + row["id"] + "\">" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+										"<span><i class=\"fa fa-edit\"></i> Edit</span>" +
 									"</button>" +
 									"<button id=\"icd9_delete_" + row['id'] + "\" class=\"btn btn-danger btn-sm btn-delete-icd9\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}

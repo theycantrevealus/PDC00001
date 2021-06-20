@@ -32,12 +32,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-									"<button class=\"btn btn-warning btn-sm btn-edit-jenis\" id=\"jenis_edit_" + row["uid"] + "\" data-toggle='tooltip' title='Edit'>" +
-										"<i class=\"fa fa-edit\"></i>" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+									"<button class=\"btn btn-info btn-sm btn-edit-jenis\" id=\"jenis_edit_" + row["uid"] + "\" data-toggle='tooltip' title='Edit'>" +
+										"<span><i class=\"fa fa-pencil-alt\"></i>Edit</span>" +
 									"</button>" +
 									"<button id=\"bed_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-jenis\" data-toggle='tooltip' title='Hapus'>" +
-										"<i class=\"fa fa-trash\"></i>" +
+										"<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}

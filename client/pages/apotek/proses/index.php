@@ -68,12 +68,13 @@
 						<table class="table table-bordered table-striped largeDataType" id="table-resep">
 							<thead class="thead-dark">
 								<tr>
-									<th width="2%">No</th>
-									<th>Poliklinik</th>
+									<th class="wrap_content">No</th>
+                                    <th>Tanggal</th>
+                                    <th>Poliklinik</th>
 									<th>Pasien</th>
 									<th>Dokter</th>
 									<th>Penjamin</th>
-									<th>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody></tbody>
@@ -84,6 +85,7 @@
                             <thead class="thead-dark">
                             <tr>
                                 <th width="2%">No</th>
+                                <th>Tanggal</th>
                                 <th>Poliklinik</th>
                                 <th>Pasien</th>
                                 <th>Dokter</th>

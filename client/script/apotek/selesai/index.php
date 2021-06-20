@@ -18,8 +18,6 @@
                 },
                 type:"GET",
                 success:function(response) {
-                    console.clear();
-                    console.log(response);
                     var resepDataRaw = response.response_package.response_data;
                     for(var resepKey in resepDataRaw) {
                         if(
@@ -135,16 +133,20 @@
                 },
                 dataSrc:function(response) {
                     var forReturn = [];
-                    console.log(response);
+
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
                         dataSet = [];
                     }
 
+
+
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen !== undefined) {
-                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
-                                forReturn.push(dataSet[dKey]);
+                        if(dataSet[dKey].antrian.departemen !== undefined) {
+                            if(dataSet[dKey].antrian.departemen !== null) {
+                                if(dataSet[dKey].antrian.departemen.uid !== __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid !== __POLI_INAP__) {
+                                    forReturn.push(dataSet[dKey]);
+                                }
                             }
                         }
                     }
@@ -153,7 +155,7 @@
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
 
-                    return dataSet;
+                    return forReturn;
                 }
             },
             autoWidth: false,
@@ -165,6 +167,11 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
                     }
                 },
                 {
@@ -194,13 +201,13 @@
                         if(row.status_resep === "D") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
-                                "<i class=\"fa fa-bullhorn\"></i> Panggil" +
+                                "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "P") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
-                                "<i class=\"fa fa-check\"></i> Terima" +
+                                "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "S") {
@@ -242,8 +249,13 @@
 
                     for(var dKey in dataSet) {
                         if(dataSet[dKey].antrian.departemen !== undefined) {
-                            if(dataSet[dKey].antrian.departemen.uid == __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid == __POLI_INAP__) {
-                                forReturn.push(dataSet[dKey]);
+                            if(
+                                dataSet[dKey].antrian.departemen !== undefined &&
+                                dataSet[dKey].antrian.departemen !== null
+                            ) {
+                                if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+                                    forReturn.push(dataSet[dKey]);
+                                }
                             }
                         }
                     }
@@ -270,7 +282,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.departemen.nama;
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return (row.antrian.departemen !== undefined) ? row.antrian.departemen.nama : "";
                     }
                 },
                 {
@@ -295,13 +312,13 @@
                         if(row.status_resep === "D") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
-                                "<i class=\"fa fa-bullhorn\"></i> Panggil" +
+                                "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "P") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
-                                "<i class=\"fa fa-check\"></i> Terima" +
+                                "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "S") {
@@ -332,31 +349,33 @@
                     var butuh_amprah = 0;
                     for(bKey in selectedBatchResep)
                     {
-                        if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
-                        {
-                            harga_tertinggi = parseFloat(selectedBatchResep[bKey].harga);
-                        }
-
-                        if(kebutuhan > 0)
-                        {
-
-                            if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
-                            {
-                                selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
-                            } else {
-                                selectedBatchResep[bKey].used = kebutuhan;
-                            }
-                            kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
-                            if(selectedBatchResep[bKey].used > 0)
-                            {
-                                selectedBatchList.push(selectedBatchResep[bKey]);
-                            }
-                        }
-
                         if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang) {
-                            jlh_sedia += selectedBatchResep[bKey].stok_terkini;
-                        } else {
-                            butuh_amprah += selectedBatchResep[bKey].stok_terkini;
+                            if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
+                            {
+                                harga_tertinggi = parseFloat(selectedBatchResep[bKey].harga);
+                            }
+
+                            if(kebutuhan > 0)
+                            {
+
+                                if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
+                                {
+                                    selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
+                                } else {
+                                    selectedBatchResep[bKey].used = kebutuhan;
+                                }
+                                kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
+                                if(selectedBatchResep[bKey].used > 0)
+                                {
+                                    selectedBatchList.push(selectedBatchResep[bKey]);
+                                }
+                            }
+
+                            if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang) {
+                                jlh_sedia += selectedBatchResep[bKey].stok_terkini;
+                            } else {
+                                butuh_amprah += selectedBatchResep[bKey].stok_terkini;
+                            }
                         }
                     }
 
@@ -398,6 +417,7 @@
                         $(newDetailCellObat).append("<span id=\"batch_resep_" + a + "\" class=\"selected_batch\"><ol></ol></span>");
                         for(var batchSelKey in selectedBatchList)
                         {
+                            console.log(selectedBatchList[batchSelKey]);
                             $(newDetailCellObat).find("span ol").append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ")</li>");
                         }
 
@@ -633,6 +653,7 @@
                         success:function(response) {
                             if(response.response_package.response_result > 0) {
                                 tableResep.ajax.reload();
+                                tableResep2.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
                             } else {
                                 console.log(response);
@@ -669,6 +690,7 @@
                         success:function(response) {
                             if(response.response_package.response_result > 0) {
                                 tableResep.ajax.reload();
+                                tableResep2.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
                             } else {
                                 console.log(response);

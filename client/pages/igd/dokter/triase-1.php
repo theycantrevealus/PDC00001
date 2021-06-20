@@ -294,9 +294,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row" style="margin-top: 50px; padding: 0px;">
+                        <div class="row" style="margin-top: 50px; padding: 0px 100px;">
+                            <div class="col-md-12 scale-loader-image" id="scale-loader-image"></div>
                             <div class="col-md-12" id="scale-loader-define"></div>
-                            <div class="col-md-12" id="scale-loader"></div>
+                            <div class="col-md-12 scale-loader" id="scale-loader"></div>
                             <div class="col-md-12">
                                 <input type="text" id="txt_nrs" class="slider">
                             </div>

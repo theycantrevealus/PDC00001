@@ -108,7 +108,7 @@
                         if(row.rad_order.length > 0) {
                             isRad = 1
                         }
-                        return 	"<button lab=\"" + isLab + "\" rad=\"" + isRad + "\" antrian=\"" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\" id=\"detail_" + row.uid + "\"><i class=\"fa fa-eye\"></i></button>";
+                        return 	"<button lab=\"" + isLab + "\" rad=\"" + isRad + "\" antrian=\"" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\" id=\"detail_" + row.uid + "\"><i class=\"fa fa-eye\"></i> Detail</button>";
                     }
                 }
             ]
@@ -120,6 +120,8 @@
 
             var selectionKey = dataSetSelector.indexOf(id);
             selectedData = dataSetAll[selectionKey];
+
+
 
             var antrian = $(this).attr("antrian");
             var lab = $(this).attr("lab");
@@ -256,7 +258,6 @@
                             }
 
                             var racikanApotekData = data.racikan_apotek;
-                            console.log(racikanApotekData);
                             $(".racikanApotekCPPT tbody tr").remove();
                             for(var racikanApotekKey in racikanApotekData) {
                                 var itemApotekRacikan = racikanApotekData[racikanApotekKey].item;
@@ -299,7 +300,8 @@
                         $(".lab_loader").html(LabBuild);
                     }
 
-                    //console.log(selectedData.rad_order);
+                    console.clear();
+                    console.log(selectedData.rad_order);
 
                     //Parse Radiologi
                     for(var radKey in selectedData.rad_order) {
@@ -419,6 +421,8 @@
         });
 
         function load_radiologi(data) {
+            /*console.clear();
+            console.log(data);*/
             var returnHTML = "";
             $.ajax({
                 url: __HOSTNAME__ + "/pages/pasien/dokter/rad-single.php",
@@ -439,6 +443,10 @@
         }
 
         function load_laboratorium(data) {
+
+            data.dr_penanggung_jawab = {
+                nama: data.detail[0].dpjp_detail.nama
+            };
             var listPetugas = [];
             for(petugasKey in data.petugas) {
                 if(data.petugas[petugasKey] !== null) {
@@ -458,6 +466,7 @@
                 },
                 type:"POST",
                 success:function(response_html) {
+
                     returnHTML = response_html;
                 },
                 error: function(response_html) {
@@ -483,7 +492,9 @@
                 <canvas style="width: 100%; border: solid 1px #ccc;" id="pdfViewer"></canvas>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times"></i> Tutup
+                </button>
             </div>
         </div>
     </div>
@@ -782,7 +793,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <i class="fa fa-times"></i> Tutup
+                </button>
             </div>
         </div>
     </div>

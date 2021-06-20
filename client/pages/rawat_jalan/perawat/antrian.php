@@ -27,9 +27,9 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12">
 			<div class="z-0">
-				<ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-perawat">
 					<li class="nav-item tab-biasa">
-						<a href="#tab-assesment-awal-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+						<a href="#tab-assesment-awal-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
                                 <i class="fa fa-address-book"></i>
 							</span>
@@ -52,12 +52,12 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
                             Terapis
                         </a>
                     </li>
-                    <li class="nav-item tab-igd">
-                        <a href="#tab-assesment-awal-igd-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false" aria-controls="tab-asesment-awal-igd-1">
+                    <!--li class="nav-item tab-igd">
+                        <a href="#tab-assesment-awal-igd-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="false" aria-controls="tab-asesment-awal-igd-1">
 							<span class="nav-link__count">
 								01
 							</span>
-                            Halaman
+                            Askep IGD
                         </a>
                     </li>
                     <li class="nav-item tab-igd">
@@ -65,7 +65,7 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
 							<span class="nav-link__count">
 								02
 							</span>
-                            Halaman
+                            Askep IGD
                         </a>
                     </li>
                     <li class="nav-item tab-igd">
@@ -73,7 +73,7 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
 							<span class="nav-link__count">
 								03
 							</span>
-                            Halaman
+                            Askep IGD
                         </a>
                     </li>
                     <li class="nav-item tab-igd">
@@ -81,9 +81,49 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
 							<span class="nav-link__count">
 								04
 							</span>
-                            Halaman
+                            Askep IGD
                         </a>
                     </li>
+                    <li class="nav-item tab-igd-bid">
+                        <a href="#tab-assesment-bidan-igd-1a" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								1a
+							</span>
+                            Askep [BIDAN]
+                        </a>
+                    </li>
+                    <li class="nav-item tab-igd-bid">
+                        <a href="#tab-assesment-bidan-igd-2a" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								2a
+							</span>
+                            Askep [BIDAN]
+                        </a>
+                    </li>
+                    <li class="nav-item tab-igd-bid">
+                        <a href="#tab-assesment-bidan-igd-3a" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								3a
+							</span>
+                            Askep [BIDAN]
+                        </a>
+                    </li>
+                    <li class="nav-item tab-igd-bid">
+                        <a href="#tab-assesment-bidan-igd-4a" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								4a
+							</span>
+                            Askep [BIDAN]
+                        </a>
+                    </li>
+                    <li class="nav-item tab-igd-bid">
+                        <a href="#tab-assesment-bidan-igd-5a" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								5a
+							</span>
+                            Askep [BIDAN]
+                        </a>
+                    </li-->
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
@@ -110,6 +150,21 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
                 </div>
                 <div class="tab-pane show fade tab-igd" id="tab-assesment-awal-igd-4">
                     <?php require 'igd_4.php'; ?>
+                </div>
+                <div class="tab-pane show fade tab-igd" id="tab-assesment-bidan-igd-1a">
+                    <?php require 'igd_1a.php'; ?>
+                </div>
+                <div class="tab-pane show fade tab-igd" id="tab-assesment-bidan-igd-2a">
+                    <?php require 'igd_2a.php'; ?>
+                </div>
+                <div class="tab-pane show fade tab-igd" id="tab-assesment-bidan-igd-3a">
+                    <?php require 'igd_3a.php'; ?>
+                </div>
+                <div class="tab-pane show fade tab-igd" id="tab-assesment-bidan-igd-4a">
+                    <?php require 'igd_4a.php'; ?>
+                </div>
+                <div class="tab-pane show fade tab-igd" id="tab-assesment-bidan-igd-5a">
+                    <?php require 'igd_5a.php'; ?>
                 </div>
 			</div>
 			<div class="card card-footer">

@@ -37,11 +37,13 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
-								"<button data-uid='" + row['uid'] + "' data-jenis='"+ row['uid_jenis'] +"' data-nama='"+ row['nama'] +"'class=\"btn btn-warning btn-sm btnEdit\" data-toggle='tooltip' title='Edit'><i class=\"fa fa-edit\"></i></button>" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+								"<button data-uid='" + row['uid'] + "' data-jenis='"+ row['uid_jenis'] +"' data-nama='"+ row['nama'] +"'class=\"btn btn-info btn-sm btnEdit\" data-toggle='tooltip' title='Edit'>" +
+                                "<span><i class=\"fa fa-pencil-alt\"></i>Edit</span>" +
+                                "</button>" +
 
 								"<button id=\"tindakan_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-tindakan\" data-toggle='tooltip' title='Hapus'>" +
-									"<i class=\"fa fa-trash\"></i>" +
+									"<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
 								"</button>" +
 							"</div>";
 					}

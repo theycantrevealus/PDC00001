@@ -71,19 +71,21 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<a href=\"" + __HOSTNAME__ + "/radiologi/antrian/" + row.uid + "\" class=\"btn btn-warning btn-sm\">" +
-										"<i class=\"fa fa-sign-out-alt\"></i>" +
+										"<span><i class=\"fa fa-sign-out-alt\"></i> Detail</span>" +
 									"</a>" +
 									"<button id=\"cetak_" + row.uid + "\" class=\"btn btn-primary btn-sm btnCetak\">" +
-										"<i class=\"fa fa-print\"></i>" +
+										"<span><i class=\"fa fa-print\"></i>Cetak</span>" +
 									"</button>" +
 									"<button id=\"rad_order_" + row.uid + "\" type='button' class=\"btn btn-success btn-sm btn-selesai-radiologi\" data-toggle='tooltip' title='Tandai selesai'>" +
-										"<i class=\"fa fa-check\"></i>" +
+										"<span><i class=\"fa fa-check\"></i>Selesai</span>" +
 									"</a>" +
 								"</div>";
 					}
 				}
 			]
 		});
+
+
 
 		$("body").on("click", ".btn-selesai-radiologi", function() {
 		    var uid = $(this).attr("id").split("_");
@@ -193,7 +195,7 @@
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                             "<button asesmen=\"" + row.uid_asesmen + "\" id=\"rad_order_" + row.uid + "\" type='button' penjamin=\"" + row.uid_penjamin + "\" class=\"btn btn-info btn-sm btn-verifikasi-radiologi\" data-toggle='tooltip' title=\"Verifikasi Radiologi\"'>" +
-                            "<i class=\"fa fa-check\"></i>" +
+                            "<span><i class=\"fa fa-check\"></i>Verifikasi</span>" +
                             "</a>" +
                             "</div>";
                     }
@@ -205,6 +207,8 @@
         $("body").on("click", ".btn-verifikasi-radiologi", function() {
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
+
+            var penjamin = $(this).attr("penjamin");
 
             var asesmen = $(this).attr("asesmen");
             currentPenjamin = $(this).attr("penjamin");
@@ -258,10 +262,25 @@
                         var asesmen = $(this).attr("asesmen");
                         var target = $(this).attr("target");
 
-                        loadMitra(id, tindakan);
+                        /*loadMitra(id, tindakan);
 
                         $("#" + id).select2({
                             dropdownParent: $("#modal-verif-radio")
+                        });*/
+
+                        $("#" + id).select2({
+                            dropdownParent: $("#modal-verif-radio"),
+                            data: loadMitra2("penyedia_order_" + tindakan, tindakan, penjamin),
+                            selectOnClose: true,
+                            escapeMarkup: function(markup) {
+                                return markup;
+                            },
+                            templateResult: function(data) {
+                                return data.html;
+                            },
+                            templateSelection: function(data) {
+                                return data.text;
+                            }
                         });
 
                         loadHarga($("#" + id).val(), asesmen, tindakan, target);
@@ -553,6 +572,59 @@
             })
         }
 
+
+
+        function loadMitra2(target_ui, itemLab, penjamin){
+            var MetaData = [];
+            var returnedData = [];
+            resetSelectBox(target_ui, "Mitra");
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Mitra/mitra_item/RAD/" + itemLab,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    MetaData = response.response_package.response_data;
+
+                    if (MetaData != "" && MetaData !== undefined && MetaData !== null){
+                        //$("#" + target_ui + " option").remove();
+                        for(i = 0; i < MetaData.length; i++){
+                            var target_harga = 0;
+                            for(var ai in MetaData[i].harga) {
+                                if(MetaData[i].harga[ai].penjamin === penjamin) {
+                                    target_harga = MetaData[i].harga[ai].harga;
+                                }
+                            }
+
+                            returnedData.push({
+                                id: MetaData[i].uid,
+                                text: "<div class=\"" + ((parseFloat(target_harga) > 0) ? "text-success" : "text-danger") + "\">" + MetaData[i].nama + "</div>",
+                                html: "<h6 class=\"" + ((parseFloat(target_harga) > 0) ? "text-success" : "text-danger") + "\">" + MetaData[i].nama + "<b style=\"position: absolute; right: 30px;\" class=\"pull-right\">" + number_format(target_harga, 2, ".", ",") + "</b></h6>",
+                                title: MetaData[i].nama
+                            });
+                            /*var selection = document.createElement("OPTION");
+
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama + " - <b>" + number_format(target_harga, 2, ".", ",") + "</b>");
+                            $("#" + target_ui).append(selection);*/
+                        }
+                    } else {
+                        returnedData = [];
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return returnedData;
+        }
+
+
+
+
+
         function resetSelectBox(selector, name) {
             $("#"+ selector +" option").remove();
             var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
@@ -575,6 +647,14 @@
                 console.log(command);
             }
         }*/
+
+        setTimeout(function() {
+
+            tableAntrianRadiologi.ajax.reload();
+            tableVerifikasiRadiologi.ajax.reload();
+
+        }, 5000);
+
 	});
 </script>
 

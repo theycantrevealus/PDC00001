@@ -79,11 +79,12 @@
                                             <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
                                             <div class="row">
                                                 <div class="col-lg" style="margin-top: 25px">
-                                                    <table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien-rj" style="font-size: 0.9rem;">
+                                                    <table class="table table-padding table-striped largeDataType" id="table-biaya-pasien-rj" style="font-size: 0.9rem;">
                                                         <thead class="thead-dark">
                                                         <tr>
                                                             <th class="wrap_content">No</th>
                                                             <th class="wrap_content">No. Tagihan</th>
+                                                            <th class="wrap_content">Tanggal</th>
                                                             <th>Pasien</th>
                                                             <th>Poliklinik</th>
                                                             <th class="wrap_content">Staf Pendaftaran</th>
@@ -109,6 +110,7 @@
                                                         <tr>
                                                             <th class="wrap_content">No</th>
                                                             <th class="wrap_content">No. Tagihan</th>
+                                                            <th class="wrap_content">Tanggal</th>
                                                             <th>Pasien</th>
                                                             <th>Poliklinik</th>
                                                             <th class="wrap_content">Staf Pendaftaran</th>
@@ -134,6 +136,7 @@
                                                         <tr>
                                                             <th class="wrap_content">No</th>
                                                             <th class="wrap_content">No. Tagihan</th>
+                                                            <th class="wrap_content">Tanggal</th>
                                                             <th>Pasien</th>
                                                             <th>Poliklinik</th>
                                                             <th class="wrap_content">Staf Pendaftaran</th>

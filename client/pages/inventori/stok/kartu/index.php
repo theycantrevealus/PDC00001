@@ -7,7 +7,7 @@
                     <li class="breadcrumb-item active" aria-current="page">Gudang</li>
                 </ol>
             </nav>
-            <h4><span id="nama-departemen"></span>Master Inventori</h4>
+            <h4><span id="nama-departemen"></span>Kartu Stok</h4>
         </div>
         <!-- <a href="<?php echo __HOSTNAME__; ?>/master/inventori/gudang/tambah" class="btn btn-info btn-sm ml-3">
 			<i class="fa fa-plus"></i> Tambah Gudang

@@ -32,7 +32,7 @@
 							<th>Kelas</th>
 							<th>Kapasitas</th>
 							<th>Lantai</th>
-							<th>Aksi</th>
+							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>

@@ -30,12 +30,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group\" role=\"group\" aria-label=\"Basic example\">" +
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<button class=\"btn btn-info btn-sm btn-edit-lantai\" id=\"lantai_edit_" + row["uid"] + "\">" +
-										"<i class=\"fa fa-edit\"></i> Edit" +
+										"<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
 									"</button>" +
 									"<button id=\"lantai_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-lantai\">" +
-										"<i class=\"fa fa-trash\"></i> Hapus" +
+										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
 								"</div>";
 					}

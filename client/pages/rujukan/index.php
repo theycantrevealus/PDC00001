@@ -26,13 +26,14 @@
                             <thead class="thead-dark">
                             <tr>
                                 <th class="wrap_content">No</th>
+                                <th>Tanggal</th>
                                 <th>Penjamin</th>
                                 <th class="wrap_content">No. RM</th>
                                 <th>Pasien</th>
                                 <th>Poli</th>
                                 <th>Dokter</th>
                                 <th>No. SEP</th>
-                                <th>Aksi</th>
+                                <th class="wrap_content">Aksi</th>
                             </tr>
                             </thead>
                             <tbody></tbody>

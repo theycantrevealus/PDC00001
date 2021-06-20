@@ -28,7 +28,7 @@
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12">
 			<div class="z-0">
-				<ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-dokter">
 					<li class="nav-item">
 						<a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">

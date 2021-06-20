@@ -112,7 +112,6 @@
                 },
                 dataSrc:function(response) {
                     var forReturn = [];
-                    console.log(response);
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
                         dataSet = [];
@@ -146,6 +145,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         return row.antrian.departemen.nama;
                     }
                 },
@@ -174,7 +178,8 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">Proses</a>" +
+                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">" +
+                            "<span><i class=\"fa fa-check\"></i>Proses</span></a>" +
                             "</div>";
                     }
                 }
@@ -190,28 +195,44 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 15, -1], [20, 15, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d){
-                    d.request = "get_resep_lunas_backend";
+                    d.request = "get_resep_igd";
+                    d.request_type = "igd_inap";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+
+                    console.log(response);
                     var forReturn = [];
+                    var forReturnSelesai = [];
                     var dataSet = response.response_package.response_data;
-                    if(dataSet == undefined) {
+                    if(dataSet === undefined) {
                         dataSet = [];
                     }
 
+
+
+                    var autonum = 1;
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen !== undefined) {
-                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
-                                forReturn.push(dataSet[dKey]);
+                        if(
+                            dataSet[dKey].antrian.departemen !== undefined &&
+                            dataSet[dKey].antrian.departemen !== null
+                        ) {
+                            if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+                                dataSet[dKey].autonum = autonum;
+                                if(dataSet[dKey].status_resep === "D") {
+                                    forReturnSelesai.push(dataSet[dKey]);
+                                } else {
+                                    forReturn.push(dataSet[dKey]);
+                                }
+                                autonum++;
                             }
                         }
                     }
@@ -220,7 +241,7 @@
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
 
-                    return forReturn;
+                    return forReturn.concat(forReturnSelesai);
                 }
             },
             autoWidth: false,
@@ -236,7 +257,16 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.departemen.nama;
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.antrian.departemen.uid === __POLI_INAP__) {
+                            return row.antrian.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.antrian.ns_detail.kode_ns + "]</span>" + row.antrian.ns_detail.nama_ns;
+                        } else {
+                            return row.antrian.departemen.nama;
+                        }
                     }
                 },
                 {
@@ -263,9 +293,15 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">Proses</a>" +
-                            "</div>";
+                        if(row.status_resep !== "D") {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">" +
+                                "<span><i class=\"fa fa-check\"></i>Proses</span>" +
+                                "</a>" +
+                                "</div>";
+                        } else {
+                            return "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Selesai</span>";
+                        }
                     }
                 }
             ]
