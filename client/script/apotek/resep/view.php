@@ -48,39 +48,46 @@
                             });
                         }
 
-                        autoResep();
+                        //autoResep();
+                    } else {
+                        $("#table-resep tbody").append("<tr><td colspan=\"9\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada resep</td></tr>");
                     }
 
                     var racikan_detail = data.racikan;
-                    for(var racikanKey in racikan_detail) {
-                        autoRacikan({
-                            uid: racikan_detail[racikanKey].uid,
-                            nama: racikan_detail[racikanKey].kode,
-                            keterangan: racikan_detail[racikanKey].keterangan,
-                            signaKonsumsi: racikan_detail[racikanKey].signa_qty,
-                            signaTakar: racikan_detail[racikanKey].signa_pakai,
-                            signaHari: racikan_detail[racikanKey].qty,
-                            item:racikan_detail[racikanKey].item,
-                            aturan_pakai: racikan_detail[racikanKey].aturan_pakai
-                        });
-                        var itemKomposisi = racikan_detail[racikanKey].item;
-                        for(var komposisiKey in itemKomposisi) {
-                            var penjaminObatRacikanListUID = [];
-                            var penjaminObatRacikanList = itemKomposisi[komposisiKey].obat_detail.penjamin;
-                            for(var penjaminObatKey in penjaminObatRacikanList) {
-                                if(penjaminObatRacikanListUID.indexOf(penjaminObatRacikanList[penjaminObatKey].penjamin) < 0) {
-                                    penjaminObatRacikanListUID.push(penjaminObatRacikanList[penjaminObatKey].penjamin);
+                    if(racikan_detail.length === 0) {
+                        $("#table-resep-racikan tbody.racikan").append("<tr><td colspan=\"8\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada racikan</td></tr>");
+                    } else {
+                        for(var racikanKey in racikan_detail) {
+                            autoRacikan({
+                                uid: racikan_detail[racikanKey].uid,
+                                nama: racikan_detail[racikanKey].kode,
+                                keterangan: racikan_detail[racikanKey].keterangan,
+                                signaKonsumsi: racikan_detail[racikanKey].signa_qty,
+                                signaTakar: racikan_detail[racikanKey].signa_pakai,
+                                signaHari: racikan_detail[racikanKey].qty,
+                                item:racikan_detail[racikanKey].item,
+                                aturan_pakai: racikan_detail[racikanKey].aturan_pakai
+                            });
+                            var itemKomposisi = racikan_detail[racikanKey].item;
+                            for(var komposisiKey in itemKomposisi) {
+                                var penjaminObatRacikanListUID = [];
+                                var penjaminObatRacikanList = itemKomposisi[komposisiKey].obat_detail.penjamin;
+                                for(var penjaminObatKey in penjaminObatRacikanList) {
+                                    if(penjaminObatRacikanListUID.indexOf(penjaminObatRacikanList[penjaminObatKey].penjamin) < 0) {
+                                        penjaminObatRacikanListUID.push(penjaminObatRacikanList[penjaminObatKey].penjamin);
+                                    }
                                 }
+
+                                itemKomposisi[komposisiKey].satuan = "<b>" + itemKomposisi[komposisiKey].takar_bulat + "</b><sub nilaiExact=\"" + itemKomposisi[komposisiKey].ratio + "\">" + itemKomposisi[komposisiKey].takar_decimal + "</sub>";
+
+                                autoKomposisi((parseInt(racikanKey) + 1), itemKomposisi[komposisiKey], racikan_detail[racikanKey].qty);
                             }
-
-                            itemKomposisi[komposisiKey].satuan = "<b>" + itemKomposisi[komposisiKey].takar_bulat + "</b><sub nilaiExact=\"" + itemKomposisi[komposisiKey].ratio + "\">" + itemKomposisi[komposisiKey].takar_decimal + "</sub>";
-
-                            autoKomposisi((parseInt(racikanKey) + 1), itemKomposisi[komposisiKey], racikan_detail[racikanKey].qty);
                         }
                     }
 
+
                     if(racikan_detail.length > 0) {
-                        autoRacikan();
+                        //autoRacikan();
                     }
                 }
             },
@@ -365,7 +372,6 @@
                     "id": "resep_obat_" + id
                 });
 
-                refreshBatch($(this).find("td:eq(1) select.resep-obat").val(), id);
 
                 $(this).find("td:eq(1) ol").attr({
                     "id": "batch_obat_" + id
@@ -395,6 +401,9 @@
                 $(this).find("td:eq(8) button").attr({
                     "id": "resep_delete_" + id
                 });
+
+                //Sini
+                refreshBatch($(this).find("td:eq(1) select.resep-obat").val(), id);
             });
         }
 
@@ -1308,8 +1317,10 @@
         });
 
         function checkGenerateRacikan(id = 0) {
-            if($(".last-racikan").length == 0) {
-                autoRacikan();
+            if($(".last-racikan").length === 0) {
+                //autoRacikan();
+                //alert();
+                //alert();
             } else {
                 var obat = $("#racikan_nama_" + id).val();
                 var jlh_obat = $("#racikan_jumlah_" + id).inputmask("unmaskedvalue");
@@ -1323,6 +1334,7 @@
                     obat != null &&
                     $("#row_racikan_" + id).hasClass("last-racikan")
                 ) {
+
                     autoRacikan();
                 }
             }

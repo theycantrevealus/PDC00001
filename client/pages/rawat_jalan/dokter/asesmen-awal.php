@@ -161,7 +161,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 							<div class="form-group col-lg-8">
 								<label for="txt_lingkar_lengan">Lingkar Lengan Atas</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_lingkar_lengan" class="form-control form-control-appended" placeholder="Lingkar Lengan Atas" readonly />
+									<input type="text" value="0" id="txt_lingkar_lengan" class="form-control form-control-appended" placeholder="Lingkar Lengan Atas" />
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>cm</span>

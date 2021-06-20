@@ -241,6 +241,26 @@ class Invoice extends Utility
                 $payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
                 $payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
+
+                $Detail = self::$query->select('invoice_payment_detail', array(
+                    'penjamin'
+                ))
+                    ->join('master_penjamin', array(
+                        'nama as nama_penjamin'
+                    ))
+                    ->on(array(
+                        array('invoice_payment_detail.penjamin', '=', 'master_penjamin.uid')
+                    ))
+                    ->where(array(
+                        'invoice_payment_detail.invoice_payment' => '= ?',
+                        'AND',
+                        'invoice_payment_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+                $payment['response_data'][$key]['detail_item'] = $Detail['response_data'];
+
                 $payment['response_data'][$key]['autonum'] = $autonum;
                 $autonum++;
             }
@@ -644,8 +664,15 @@ class Invoice extends Utility
                     'status_bayar',
                     'subtotal',
                     'departemen',
-                    'billing_group'
+                    'billing_group',
+                    'penjamin'
                 ))
+                    ->join('master_penjamin', array(
+                        'nama as nama_penjamin'
+                    ))
+                    ->on(array(
+                        array('invoice_detail.penjamin', '=', 'master_penjamin.uid')
+                    ))
                     ->where(array(
                         'invoice_detail.invoice' => '= ?',
                         'AND',

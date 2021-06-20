@@ -97,7 +97,21 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.metode_bayar;
+					    var uniquePenjamin = {};
+					    var detailPenjamin = row.detail_item;
+					    for(var a in detailPenjamin) {
+                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                            }
+                        }
+
+					    var parsedPenjaminList = "";
+
+					    for(var b in uniquePenjamin) {
+					        parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                        }
+
+						return row.metode_bayar + "<br />" + parsedPenjaminList;
 					}
 				},
 				{
@@ -221,6 +235,9 @@
         });
 
 		$("body").on("click", ".btnDetailKwitansi", function() {
+		    var me = $(this);
+		    var oldCaption = me.html();
+		    me.html("<span><i class=\"fa fa-hourglass-half\"></i> Loading</span>").addClass("btn-warning").removeClass("btn-info");
 		    var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
@@ -232,7 +249,7 @@
 				url: __HOSTNAME__ + "/pages/kasir/pasien/payment_detail.php",
 				type: "POST",
 				success: function(response) {
-					$("#form-payment-detail").modal("show");
+
 					$("#payment-detail-loader").html(response);
 					$.ajax({
                         async: false,
@@ -242,6 +259,9 @@
 						},
 						type:"GET",
 						success:function(response_data) {
+
+                            $("#form-payment-detail").modal("show");
+                            me.html(oldCaption).addClass("btn-info").removeClass("btn-warning");
 
 							var pasienInfo = response_data.response_package.response_data[0].pasien;
 
@@ -269,16 +289,17 @@
                             }
 							$("#poli").html("Departemen/Poli :<br /><b>" + deptList.join(", ") + "</b>");
 							$("#keterangan-faktur").html(historyData.keterangan);
-							$("#total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
-							$("#diskon-faktur").html(0);
-							$("#grand-total-faktur").html(number_format(historyData.terbayar, 2, ".", ","));
+
 
 							var billing_group = {};
+
+							var minusBiaya = 0;
 
 							for(var historyKey in historyDetail) {
 							    if(billing_group[historyDetail[historyKey].billing_group] === undefined) {
                                     billing_group[historyDetail[historyKey].billing_group] = [];
                                 }
+
 
 
                                 billing_group[historyDetail[historyKey].billing_group].push({
@@ -290,6 +311,14 @@
                                     harga: historyDetail[historyKey].harga,
                                     subtotal: historyDetail[historyKey].subtotal
                                 });
+
+							    if(historyDetail[historyKey].allow_retur) {
+							        if(historyDetail[historyKey].status === "R") {
+							            minusBiaya += parseFloat(historyDetail[historyKey].subtotal);
+                                    }
+                                }
+
+
 
 								/*$("#invoice_detail_history tbody").append(
 									"<tr>" +
@@ -303,20 +332,25 @@
 								);*/
 							}
 
+                            $("#total-faktur").html(number_format(historyData.terbayar - minusBiaya, 2, ".", ","));
+                            $("#diskon-faktur").html(0);
+                            $("#grand-total-faktur").html(number_format(historyData.terbayar - minusBiaya, 2, ".", ","));
+
 							for(var groupKey in billing_group) {
                                 $("#invoice_detail_history tbody").append("<tr>" +
                                     "<td></td>" +
                                     "<td colspan=\"5\" class=\"bg-info\" style=\"color: #fff\">" + groupKey.toUpperCase() + "</td>" +
                                     "</tr>");
                                 for(var itemKey in billing_group[groupKey]) {
+                                    var returned = (billing_group[groupKey][itemKey].status == "R" && billing_group[groupKey][itemKey].allow_retur);
                                     $("#invoice_detail_history tbody").append(
                                         "<tr>" +
                                         "<td>" + ((billing_group[groupKey][itemKey].status == "P") ? ((billing_group[groupKey][itemKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + billing_group[groupKey][itemKey].uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
                                         "<td style=\"width: 50px !important;\">" + (parseInt(itemKey) + 1)+ "</td>" +
-                                        "<td>" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
-                                        "<td class=\"number_style\">" + billing_group[groupKey][itemKey].qty + "</td>" +
-                                        "<td class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
-                                        "<td class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\">" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style\">" + billing_group[groupKey][itemKey].qty + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
                                         "</tr>"
                                     );
                                 }
@@ -415,7 +449,21 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
+                        var uniquePenjamin = {};
+                        var detailPenjamin = row.invoice_detail;
+                        for(var a in detailPenjamin) {
+                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                            }
+                        }
+
+                        var parsedPenjaminList = "";
+
+                        for(var b in uniquePenjamin) {
+                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                        }
+
+						return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
 					}
 				},
                 {
@@ -580,7 +628,21 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span style=\"white-space: pre\">" + row.nomor_invoice + "</span>";
+                        var uniquePenjamin = {};
+                        var detailPenjamin = row.invoice_detail;
+                        for(var a in detailPenjamin) {
+                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                            }
+                        }
+
+                        var parsedPenjaminList = "";
+
+                        for(var b in uniquePenjamin) {
+                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                        }
+
+                        return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
                     }
                 },
                 {
@@ -718,7 +780,21 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span>";
+                        var uniquePenjamin = {};
+                        var detailPenjamin = row.invoice_detail;
+                        for(var a in detailPenjamin) {
+                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                            }
+                        }
+
+                        var parsedPenjaminList = "";
+
+                        for(var b in uniquePenjamin) {
+                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                        }
+
+                        return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
                     }
                 },
                 {

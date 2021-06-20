@@ -65,6 +65,7 @@
 
                 var autonum = 1;
                 for(var a in filteredLunas) {
+                    console.log(filteredLunas[a]);
                     var newRow = document.createElement("TR");
                     var newNo = document.createElement("TD");
                     var newItem = document.createElement("TD");
@@ -76,8 +77,8 @@
                     $(newItem).html("<span class=\"badge badge-info badge-custom-caption pull-right\">" + filteredLunas[a].invoice + "</span>" +
                         "<h6 style=\"padding-left: 20px;\">" + filteredLunas[a].item + " <br /><span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</span></h6><p>" + filteredLunas[a].keterangan + "</p>");
                     $(newJlh).html(filteredLunas[a].qty).addClass("number_style");
-                    $(newHarga).html(number_format(filteredTunggak[a].harga, 2, ".", ",")).addClass("number_style");
-                    $(newSub).html(number_format(filteredTunggak[a].subtotal, 2, ".", ",")).addClass("number_style");
+                    $(newHarga).html(number_format(filteredLunas[a].harga, 2, ".", ",")).addClass("number_style");
+                    $(newSub).html(number_format(filteredLunas[a].subtotal, 2, ".", ",")).addClass("number_style");
 
                     $(newRow).append(newNo);
                     $(newRow).append(newItem);
@@ -333,6 +334,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.dokter_detail.nama + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         var detail = row.detail;
                         var parsedDetail = "<span class=\"text-danger\"><i class=\"fa fa-times-circle\"></i> Tidak ada resep</span>";
                         if(detail.length > 0) {
@@ -508,7 +514,11 @@
                 },
                 success:function(response) {
                     targettedDataResep = response.response_package.response_data[0];
+                    console.log(targettedDataResep);
                     $("#form-berikan-resep").modal("show");
+                    $("#resep_dokter").html(targettedDataResep.dokter.nama);
+                    $("#resep_tanggal").html(targettedDataResep.created_at_parsed);
+                    $("#resep_verifikator").html(targettedDataResep.detail[0].verifikator.nama);
 
                     $("#resep-nama-pasien").attr({
                         "set-penjamin": targettedDataResep.antrian.penjamin_data.uid
@@ -565,13 +575,11 @@
                         var totalItem = 0;
                         var saranBatch = [];
                         for(var bbA in batchList) {
-                            console.log(batchList[bbA]);
-                            if(parseFloat(batchList[bbA].qty) > 0) {
-
+                            if(parseFloat(batchList[bbA].qty) > 0 && batchList[bbA].resep === targettedDataResep.uid) {
                                 totalItem += parseFloat(batchList[bbA].qty);
                                 if(kebutuhan > 0) {
+                                    saranBatch.push("<span class=\"badge badge-info badge-custom-caption\" qty=\"" + kebutuhan + "\" id=\"" + batchList[bbA].batch.uid + "\">" + batchList[bbA].batch.batch + " [" + batchList[bbA].batch.expired_date_parsed + "](" + kebutuhan + ")</span>");
                                     if(parseFloat(batchList[bbA].qty) > kebutuhan) {
-                                        saranBatch.push("<span class=\"badge badge-info badge-custom-caption\">" + batchList[bbA].batch.batch + " [" + batchList[bbA].batch.expired_date_parsed + "](" + kebutuhan + ")</span>");
                                         kebutuhan = 0;
                                     } else {
                                         kebutuhan -= parseFloat(batchList[bbA].qty);
@@ -616,7 +624,7 @@
 
 
 
-                        $(newResepItem).html("<span class=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-danger" : "") + "\" style=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-decoration: line-through" : "") + "\">" + targettedDataResep.detail[a].detail.nama + "</span><br />Sedia: " + /*totalItem*/ sisaStok + "<hr /><b>Saran Batch:</b><br />" + saranBatch.join(",") + "<hr />").attr({
+                        $(newResepItem).html("<span class=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-danger" : "") + "\" style=\"" + ((currentTotal < parseFloat(targettedDataResep.detail[a].signa_pakai)) ? "text-decoration: line-through" : "") + "\">" + targettedDataResep.detail[a].detail.nama + "</span><br />Sedia: " + totalItem + "<hr /><b>Saran Batch:</b><br />" + saranBatch.join(",") + "<hr />").attr({
                             "uid": targettedDataResep.detail[a].detail.uid
                         }).append(newResepRemark);
                     },
@@ -710,6 +718,15 @@
                 if(!$(this).hasClass("habis")) {
                     var row = $(this);
                     var obat = $(this).find("td:eq(1)").attr("uid");
+                    var batch = {};
+                    $(this).find("td:eq(1) .badge").each(function () {
+                        var currentBatch = $(this).attr("id");
+                        var currentBatchQty = $(this).attr("qty");
+                        if(batch[currentBatch] === undefined) {
+                            batch[currentBatch] = currentBatchQty;
+                        }
+
+                    });
                     var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
                     var keterangan = $(this).find("td:eq(1) textarea").val();
                     if(obat !== "" && qty > 0) {
@@ -717,6 +734,7 @@
                             resep: resep,
                             obat: obat,
                             qty: qty,
+                            batch: batch,
                             keterangan: keterangan,
                             charge_stock: row.hasClass("resep_item")
                         });
@@ -726,6 +744,7 @@
 
 
 
+            console.log(item);
             if(item.length > 0) {
                 Swal.fire({
                     title: "Riwayat Pemberian Obat",
@@ -745,9 +764,11 @@
                             data: {
                                 request: "tambah_riwayat_resep_inap",
                                 nurse_station: nurse_station,
+                                gudang: nurse_station_info.gudang,
                                 item: item
                             },
                             success:function(response) {
+                                console.log(response);
                                 $("#form-berikan-resep").modal("hide");
                                 $("#form-konfirmasi-berikan-resep").modal("hide");
                                 tableRiwayatObat.ajax.reload();
@@ -1490,24 +1511,20 @@
                             <div class="card card-body">
                                 <div class="d-flex flex-row">
                                     <div class="col-md-12">
-                                        <b>Detail Info</b>
-                                        <hr />
-                                        <table class="form-mode">
+                                        <table class="form-mode table largeDataType">
                                             <tr>
-                                                <td>Diresep tanggal</td>
-                                                <td class="wrap_content">:</td>
-                                                <td id="resep_tanggal"></td>
-                                                <td>Oleh</td>
-                                                <td class="wrap_content">:</td>
-                                                <td id="resep_dokter"></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Diverifikasi Oleh</td>
-                                                <td class="wrap_content">:</td>
-                                                <td id="resep_verifikator"></td>
-                                                <td>Nomor Mutasi</td>
-                                                <td class="wrap_content">:</td>
-                                                <td id="resep_mutasi"></td>
+                                                <td>
+                                                    Diresep tanggal<br />
+                                                    <b class="text-info" id="resep_tanggal"></b>
+                                                </td>
+                                                <td>
+                                                    Dokter<br />
+                                                    <b class="text-info" id="resep_dokter"></b>
+                                                </td>
+                                                <td>
+                                                    Diverifikasi Oleh<br />
+                                                    <b class="text-info" id="resep_verifikator"></b>
+                                                </td>
                                             </tr>
                                         </table>
                                     </div>

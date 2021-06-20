@@ -151,8 +151,6 @@
                         }
                     }
 
-                    console.log(forReturn);
-
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
@@ -351,31 +349,33 @@
                     var butuh_amprah = 0;
                     for(bKey in selectedBatchResep)
                     {
-                        if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
-                        {
-                            harga_tertinggi = parseFloat(selectedBatchResep[bKey].harga);
-                        }
-
-                        if(kebutuhan > 0)
-                        {
-
-                            if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
-                            {
-                                selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
-                            } else {
-                                selectedBatchResep[bKey].used = kebutuhan;
-                            }
-                            kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
-                            if(selectedBatchResep[bKey].used > 0)
-                            {
-                                selectedBatchList.push(selectedBatchResep[bKey]);
-                            }
-                        }
-
                         if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang) {
-                            jlh_sedia += selectedBatchResep[bKey].stok_terkini;
-                        } else {
-                            butuh_amprah += selectedBatchResep[bKey].stok_terkini;
+                            if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
+                            {
+                                harga_tertinggi = parseFloat(selectedBatchResep[bKey].harga);
+                            }
+
+                            if(kebutuhan > 0)
+                            {
+
+                                if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
+                                {
+                                    selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
+                                } else {
+                                    selectedBatchResep[bKey].used = kebutuhan;
+                                }
+                                kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
+                                if(selectedBatchResep[bKey].used > 0)
+                                {
+                                    selectedBatchList.push(selectedBatchResep[bKey]);
+                                }
+                            }
+
+                            if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang) {
+                                jlh_sedia += selectedBatchResep[bKey].stok_terkini;
+                            } else {
+                                butuh_amprah += selectedBatchResep[bKey].stok_terkini;
+                            }
                         }
                     }
 
@@ -417,6 +417,7 @@
                         $(newDetailCellObat).append("<span id=\"batch_resep_" + a + "\" class=\"selected_batch\"><ol></ol></span>");
                         for(var batchSelKey in selectedBatchList)
                         {
+                            console.log(selectedBatchList[batchSelKey]);
                             $(newDetailCellObat).find("span ol").append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ")</li>");
                         }
 

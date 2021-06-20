@@ -982,6 +982,7 @@ class Apotek extends Utility
             ->execute();
 
         foreach($resep_dokter['response_data'] as $key => $value) {
+            $resep_dokter['response_data'][$key]['created_at_parsed'] = date('d F Y, H:i', strtotime($value['created_at']));
             //Dokter Info
             $PegawaiInfo = $Pegawai->get_detail($value['dokter']);
             $resep_dokter['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
@@ -1010,6 +1011,7 @@ class Apotek extends Utility
 
             $resep_verifikator = self::$query->select('resep_change_log', array(
                 'item',
+                'verifikator',
                 'keterangan',
                 'qty',
                 'aturan_pakai',
@@ -1026,9 +1028,10 @@ class Apotek extends Utility
                 ))
                 ->execute();
             foreach ($resep_verifikator['response_data'] as $ResKey => $ResValue) {
+                $resep_verifikator['response_data'][$ResKey]['verifikator'] = $Pegawai->get_detail($ResValue['verifikator'])['response_data'][0];
                 //Check Ketersediaan Obat pada NS
                 $NSInap = self::$query->select('rawat_inap_batch', array(
-                    'qty'
+                    'qty', 'batch'
                 ))
                     ->where(array(
                         'rawat_inap_batch.gudang' => '= ?',
@@ -1651,10 +1654,14 @@ class Apotek extends Utility
         $autonum = intval($parameter['start']) + 1;
         $Inventori = new Inventori(self::$pdo);
         $Antrian = new Antrian(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
 
         foreach ($data['response_data'] as $key => $value) {
             $AntrianDetail = $Antrian->get_antrian_detail('antrian', $value['antrian']);
             $data['response_data'][$key]['antrian_detail'] = $AntrianDetail['response_data'][0];
+
+            $PegawaiDetail = $Pegawai->get_detail($value['dokter']);
+            $data['response_data'][$key]['dokter_detail'] = $PegawaiDetail['response_data'][0];
 
             //Get resep detail
             $resep_detail = self::$query->select('resep_detail', array(
@@ -1807,22 +1814,26 @@ class Apotek extends Utility
                 $paramData = array(
                     'resep.deleted_at' => 'IS NULL',
                     'AND',
-                    '(resep.status_resep' => '= ?',
+                    '((resep.status_resep' => '= ?',
                     'OR',
-                    'resep.status_resep' => '= ?)'
+                    'resep.status_resep' => '= ?)',
+                    'OR',
+                    '(resep.status_resep' => '= ?))'
                 );
 
-                $paramValue = array('V', 'K');
+                $paramValue = array('V', 'K', 'D');
             } else {
                 $paramData = array(
                     'resep.deleted_at' => 'IS NULL',
                     'AND',
-                    '(resep.status_resep' => '= ?',
+                    '((resep.status_resep' => '= ?',
                     'OR',
-                    'resep.status_resep' => '= ?)'
+                    'resep.status_resep' => '= ?)',
+                    'OR',
+                    '(resep.status_resep' => '= ?))'
                 );
 
-                $paramValue = array('V', 'K');
+                $paramValue = array('V', 'K', 'D');
             }
         } else {
             if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
@@ -1938,6 +1949,30 @@ class Apotek extends Utility
                     'uid' => __POLI_INAP__,
                     'nama' => 'Rawat Inap'
                 );
+
+                //NS Info
+                $NS = self::$query->select('rawat_inap', array(
+                    'nurse_station'
+                ))
+                    ->join('nurse_station', array(
+                        'kode as kode_ns', 'nama as nama_ns'
+                    ))
+                    ->on(array(
+                        array('rawat_inap.nurse_station', '=', 'nurse_station.uid')
+                    ))
+                    ->where(array(
+                        'rawat_inap.kunjungan' => '= ?',
+                        'AND',
+                        'rawat_inap.dokter' => '= ?',
+                        'AND',
+                        'rawat_inap.pasien' => '= ?'
+                    ), array(
+                        $AntrianInfo['response_data'][0]['kunjungan'],
+                        $value['dokter'],
+                        $value['pasien']
+                    ))
+                    ->execute();
+                $AntrianInfo['response_data'][0]['ns_detail'] = $NS['response_data'][0];
             } else {
                 $Poli = new Poli(self::$pdo);
                 $PoliInfo = $Poli->get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
@@ -2092,6 +2127,9 @@ class Apotek extends Utility
             //Get Antrian Detail
             $Antrian = new Antrian(self::$pdo);
             $AntrianInfo = $Antrian->get_antrian_detail('antrian', $value['antrian']);
+            if(!isset($AntrianInfo['response_data'][0]['departemen'])) {
+
+            }
 
             //Departemen Info
             $Poli = new Poli(self::$pdo);
