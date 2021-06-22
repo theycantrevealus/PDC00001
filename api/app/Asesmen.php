@@ -2812,7 +2812,16 @@ class Asesmen extends Utility {
 		$MasterUID = '';
 		//Prepare Poli
 		$Poli = new Poli(self::$pdo);
-		$PoliDetail = $Poli->get_poli_detail($parameter['dataAntrian']['departemen'])['response_data'][0];
+		if($parameter['dataAntrian']['departemen'] === __POLI_INAP__) {
+		    $PoliDetail = array(
+		        'uid' => __POLI_INAP__,
+		        'nama' => 'Rawat Inap',
+		        'poli_asesmen' => 'inap'
+            );
+        } else {
+            $PoliDetail = $Poli->get_poli_detail($parameter['dataAntrian']['departemen'])['response_data'][0];
+        }
+
         $DataPartus = $parameter['dataObj']['partus_list'];
 
         foreach ($parameter['dataObj'] as $dataKey => $dataValue) {
@@ -3089,8 +3098,15 @@ class Asesmen extends Utility {
 		$Pegawai = new Pegawai(self::$pdo);
         $Poli = new Poli(self::$pdo);
 		foreach ($antrian as $key => $value) {
-
-			$PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
+		    if($value['uid_poli'] === __POLI_INAP__) {
+		        $PoliDetail = array(
+		            'uid' => __POLI_INAP__,
+                    'nama' => 'Rawat Inap',
+                    'poli_asesmen' => 'inap'
+                );
+            } else {
+                $PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
+            }
 
 			$cek_asesment = self::cek_asesmen_rawat_detail($PoliDetail['poli_asesmen'], $value['uid']);
 			$antrian[$key]['status_asesmen'] = false;
