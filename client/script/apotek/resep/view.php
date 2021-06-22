@@ -22,7 +22,7 @@
                         };
                     }
                     $(".nama_pasien").html((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama);
-                    $(".jk_pasien").html(currentMetaData.pasien.jenkel_detail.nama);
+                    $(".jk_pasien").html((currentMetaData.pasien.jenkel_detail !== undefined && currentMetaData.pasien.jenkel_detail !== null) ? currentMetaData.pasien.jenkel_detail.nama : "");
                     $(".tanggal_lahir_pasien").html(currentMetaData.pasien.tanggal_lahir_parsed);
                     $(".penjamin_pasien").html(currentMetaData.penjamin.nama);
                     $(".poliklinik").html(currentMetaData.departemen.nama);
@@ -557,9 +557,9 @@
                                 kebutuhan = total_kebutuhan;
 
                                 if(kebutuhan <= 0) {
-                                    $("#jlh_komposisi_" + groupExplitor[0] + "_" + groupExplitor[1]).css({
+                                    /*$("#jlh_komposisi_" + groupExplitor[0] + "_" + groupExplitor[1]).css({
                                         "background": "red"
-                                    });
+                                    });*/
                                 }
 
 
@@ -1230,7 +1230,7 @@
             id = id[id.length - 1];
 
             if($(this).inputmask("unmaskedvalue") < 1) {
-                $(this).val(1);
+                //$(this).val(1);
             }
 
             refreshBatch($("#obat_komposisi_" + group + "_" + id + " h6").attr("uid-obat"), group + "_" + id, "racikan");
@@ -1335,7 +1335,7 @@
                     $("#row_racikan_" + id).hasClass("last-racikan")
                 ) {
 
-                    autoRacikan();
+                    //autoRacikan();
                 }
             }
         }
@@ -1400,6 +1400,11 @@
                                     "kekuatan": $(this).find("td:eq(3)").html(),
                                     "harga": parseFloat(hargaPerObatRacikan)
                                 });
+
+                                if($(this).find("td:eq(2) input").inputmask("unmaskedvalue") < 1) {
+                                    allowSave = false;
+                                    return  false;
+                                }
                             });
 
                             racikanItem.push({
@@ -1467,7 +1472,7 @@
                     } else {
                         Swal.fire(
                             "Verifikasi Gagal!",
-                            "Pastikan semua obat memiliki stok tersedia",
+                            "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong",
                             "warning"
                         ).then((result) => {
                             //location.href = __HOSTNAME__ + "/apotek/resep/";
