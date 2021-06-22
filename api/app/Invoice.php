@@ -228,10 +228,14 @@ class Invoice extends Utility
         $autonum = 1;
         $Pegawai = new Pegawai(self::$pdo);
         $Pasien = new Pasien(self::$pdo);
+
         foreach ($payment['response_data'] as $key => $value) {
             if (!isset($value['pasien']) || !isset($value['pegawai'])) {
                 unset($payment['response_data'][$key]);
             } else {
+
+                $PaymentStatus = self::get_payment($value['uid']);
+                $payment['response_data'][$key]['status'] = $PaymentStatus['response_data'][0];
 
                 $PegawaiInfo = $Pegawai->get_detail($value['pegawai']);
                 $payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
@@ -243,7 +247,7 @@ class Invoice extends Utility
                 $payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
 
                 $Detail = self::$query->select('invoice_payment_detail', array(
-                    'penjamin'
+                    'penjamin', 'status'
                 ))
                     ->join('master_penjamin', array(
                         'nama as nama_penjamin'

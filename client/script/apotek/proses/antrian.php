@@ -19,6 +19,7 @@
                 $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
                 //$("#verifikator").html(targettedData.verifikator.nama);
                 loadDetailResep(targettedData);
+                console.log(targettedData);
 
             },
             error: function(response) {
@@ -186,9 +187,9 @@
                         }*/
                         if(parseFloat(data.detail[a].qty) <= parseFloat(jlh_sedia))
                         {
-                            statusSedia = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia <br />" + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
+                            statusSedia = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         } else {
-                            statusSedia = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia <br />" + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
+                            statusSedia = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         }
 
                         if((parseFloat(data.detail[a].qty) - parseFloat(jlh_sedia)) > 0) {
@@ -259,7 +260,8 @@
                     var selectedBatchRacikan = refreshBatch(racikanDetail[racDetailKey].obat);
                     var selectedBatchListRacikan = [];
                     var harga_tertinggi_racikan = 0;
-                    var kebutuhan_racikan = parseFloat(data.racikan[b].qty);
+                    //var kebutuhan_racikan = parseFloat(data.racikan[b].qty);
+                    var kebutuhan_racikan = parseFloat(racikanDetail[racDetailKey].jumlah);
                     var jlh_sedia = 0;
                     var butuh_amprah = 0;
                     for(bKey in selectedBatchRacikan)
@@ -337,9 +339,9 @@
 
                         if(parseFloat(data.racikan[b].qty) <= parseFloat(jlh_sedia))
                         {
-                            statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia <br />" + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
+                            statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         } else {
-                            statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia <br />" + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
+                            statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         }
 
                         if((parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia)) > 0) {
@@ -371,7 +373,9 @@
                         $(newCellRacikanObat).append("<span id=\"racikan_batch_" + data.racikan[b].uid + "_" + racDetailKey + "\" class=\"selected_batch\"><ol></ol></span>");
                         for(var batchSelKey in selectedBatchListRacikan)
                         {
-                            $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ")</li>");
+                            if(parseFloat(selectedBatchListRacikan[batchSelKey].used) > 0) {
+                                $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ")</li>");
+                            }
                         }
 
                         $(newCellRacikanObat).attr({
@@ -426,6 +430,15 @@
         }
 
         $("#btnSelesai").click(function () {
+
+            var antrian = targettedData.antrian;
+            var asesmen = targettedData.asesmen;
+            var departemen = antrian.departemen;
+            var kunjungan = antrian.kunjungan;
+            var dokter = antrian.dokter;
+            var penjamin = antrian.penjamin;
+
+
             Swal.fire({
                 title: "Selesai Proses Resep?",
                 text: "Pastikan batch sudah sesuai. Setelah konfirmasi stok akan terpotong",
@@ -440,15 +453,20 @@
                         beforeSend: function(request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
-                        data:{
+                        data: {
                             request: "proses_resep",
                             resep: resepUID,
-                            antrian: targettedData.antrian,
-                            asesmen: targettedData.asesmen,
-                            departemen: targettedData.antrian.departemen
+                            //antrian: antrian,
+                            asesmen: asesmen,
+                            kunjungan: kunjungan,
+                            dokter: dokter,
+                            penjamin: penjamin,
+                            departemen: departemen
                         },
                         type:"POST",
                         success:function(response) {
+                            //console.clear();
+                            //console.log(response);
                             if(response.response_package.stok_result > 0)
                             {
                                 push_socket(__ME__, "resep_selesai_proses", "*", "Resep pasien a/n. " + $("#nama-pasien").html() + " selesai diproses!", "info").then(function() {
