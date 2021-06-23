@@ -538,7 +538,7 @@ class Apotek extends Utility
                         'AND',
                         'inventori_stok.barang' => '= ?',
                         'AND',
-                        'inventori_stok.batch' => '= ?',
+                        'inventori_stok.batch' => '= ?'
                     ), array(
                         $bValue['gudang'],
                         $bValue['barang'],
@@ -550,7 +550,7 @@ class Apotek extends Utility
                 //Potong Stok
                 if(
                     floatval($bValue['qty']) > 0 &&
-                    floatval($getStok['response_data'][0]['stok_terkini']) > floatval($bValue['qty'])
+                    floatval($getStok['response_data'][0]['stok_terkini']) >= floatval($bValue['qty'])
                 )
                 {
                     $updateStok = self::$query->update('inventori_stok', array(
