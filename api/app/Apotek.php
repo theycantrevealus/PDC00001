@@ -351,7 +351,7 @@ class Apotek extends Utility
                     {
                         if($kebutuhan >= $bValue['stok_terkini'])
                         {
-                            if($bValue['stok_terkini'] > 0) {
+                            if(floatval($bValue['stok_terkini']) > 0) {
                                 array_push($usedBatch, array(
                                     'batch' => $bValue['batch'],
                                     'barang' => $rIValue['obat'],
