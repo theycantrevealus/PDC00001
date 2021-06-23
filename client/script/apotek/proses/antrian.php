@@ -345,18 +345,27 @@
                         }
 
                         if((parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia)) > 0) {
-                            statusSediaRacikan += "<br /><b class=\"text-info\"><i class=\"fa fa-exclamation-circle\"> Stok : " + number_format(parseFloat(data.racikan[b].qty) -parseFloat(jlh_sedia), 2, ".", ",") + "</i></b>";
+                            statusSediaRacikan += "<br /><b class=\"text-info\"><i class=\"fa fa-exclamation-circle\"> Stok : " + number_format(parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia), 2, ".", ",") + "</i></b>";
                             $("#btnSelesai").attr({
                                 "disabled": "disabled"
                             }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
+                            console.log("Case A");
+                            console.log(parseFloat(data.racikan[b].qty));
+                            console.log(parseFloat(jlh_sedia));
                         } else {
                             var disabledStatus = $("#btnSelesai").attr('name');
                             if (typeof attr !== typeof undefined && attr !== false) {
                                 $("#btnSelesai").attr({
                                     "disabled": "disabled"
                                 }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
+                                console.log("Case B");
+                                console.log(parseFloat(data.racikan[b].qty));
+                                console.log(parseFloat(jlh_sedia));
                             } else {
                                 $("#btnSelesai").removeAttr("disabled").removeClass("btn-danger").addClass("btn-success").html("<i class=\"fa fa-check\"></i> Selesai");
+                                console.log("Case C");
+                                console.log(parseFloat(data.racikan[b].qty));
+                                console.log(parseFloat(jlh_sedia));
                             }
                         }
 

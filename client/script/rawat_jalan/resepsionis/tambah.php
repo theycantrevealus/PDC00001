@@ -61,6 +61,8 @@
                             },
                             type: "GET",
                             success: function (response) {
+
+                                (response);
                                 $("#modal-sep").modal("show");
                                 $("#btnProsesPasien").hide();
                                 $("#btnProsesSEP").hide();
@@ -90,9 +92,7 @@
 
 					} else {
 
-					    console.log(dataObj);
-
-						$.ajax({
+					    $.ajax({
 							async: false,
 							url: __HOSTAPI__ + "/Antrian",
 							data: {
