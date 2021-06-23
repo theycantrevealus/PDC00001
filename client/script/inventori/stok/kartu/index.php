@@ -59,7 +59,6 @@
                                         if(uniqueBatch[batchData[bKey].batch] === undefined && uniqueBatch[batchData[bKey].batch] === null) {
                                             uniqueBatch[batchData[bKey].batch] = 0;
                                         }
-
                                         uniqueBatch[batchData[bKey].batch] = parseFloat(batchData[bKey].stok_terkini);
                                     }
 
@@ -71,7 +70,7 @@
                                 }
 
                                 if(rawData[dataKey].barang === '5e417134-86dc-4bb8-acdf-1d770034a276') {
-                                    console.log(batchData[bKey].batch);
+                                    console.log(uniqueBatch);
                                 }
 
 
