@@ -344,6 +344,7 @@
                     var selectedBatchList = [];
 
                     var harga_tertinggi = 0;
+                    //console.log(data.detail[a]);
                     var kebutuhan = parseFloat(data.detail[a].qty);
                     var jlh_sedia = 0;
                     var butuh_amprah = 0;
@@ -417,7 +418,6 @@
                         $(newDetailCellObat).append("<span id=\"batch_resep_" + a + "\" class=\"selected_batch\"><ol></ol></span>");
                         for(var batchSelKey in selectedBatchList)
                         {
-                            console.log(selectedBatchList[batchSelKey]);
                             $(newDetailCellObat).find("span ol").append("<li batch=\"" + selectedBatchList[batchSelKey].batch + "\"><b>[" + selectedBatchList[batchSelKey].kode + "]</b> " + selectedBatchList[batchSelKey].expired + " (" + selectedBatchList[batchSelKey].used + ")</li>");
                         }
 
@@ -493,7 +493,7 @@
                     var selectedBatchRacikan = refreshBatch(racikanDetail[racDetailKey].obat);
                     var selectedBatchListRacikan = [];
                     var harga_tertinggi_racikan = 0;
-                    var kebutuhan_racikan = parseFloat(data.racikan[b].qty);
+                    var kebutuhan_racikan = parseFloat(racikanDetail[racDetailKey].jumlah);
                     var jlh_sedia = 0;
                     var butuh_amprah = 0;
                     for(bKey in selectedBatchRacikan)
@@ -579,7 +579,9 @@
                         $(newCellRacikanObat).append("<span id=\"racikan_batch_" + data.racikan[b].uid + "_" + racDetailKey + "\" class=\"selected_batch\"><ol></ol></span>");
                         for(var batchSelKey in selectedBatchListRacikan)
                         {
-                            $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ")</li>");
+                            if(parseFloat(selectedBatchListRacikan[batchSelKey].used) > 0) {
+                                $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ")</li>");
+                            }
                         }
 
                         $(newCellRacikanObat).attr({

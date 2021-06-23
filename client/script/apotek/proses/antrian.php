@@ -421,7 +421,7 @@
 
 
                         if(akumulasi < parseFloat(racikanDetail[racDetailKey].jumlah)) {
-                            
+
                             for(var batchSelKey in selectedBatchListRacikanAmprah) {
                                 if(akumulasi < parseFloat(racikanDetail[racDetailKey].jumlah)) {
                                     if(parseFloat(selectedBatchListRacikan[batchSelKey].used) > 0) {
