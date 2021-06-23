@@ -71,10 +71,6 @@
                                 }
 
                                 uniqueData[rawData[dataKey].barang].batch = uniqueBatch;
-
-                                if(rawData[dataKey].barang === '5e417134-86dc-4bb8-acdf-1d770034a276') {
-                                    console.log(uniqueBatch);
-                                }
                             }
                         }
                     }
