@@ -41,6 +41,7 @@
                                     barang: rawData[dataKey].barang,
                                     stok_terkini: parseFloat(rawData[dataKey].stok_terkini),
                                     stok_batch: 0,
+                                    batch: {},
                                     detail : rawData[dataKey].detail,
                                     image: rawData[dataKey].image,
                                     kategori_obat: rawData[dataKey].kategori_obat,
@@ -69,19 +70,22 @@
                                     }*/
                                 }
 
+                                uniqueData[rawData[dataKey].barang].batch = uniqueBatch;
+
                                 if(rawData[dataKey].barang === '5e417134-86dc-4bb8-acdf-1d770034a276') {
                                     console.log(uniqueBatch);
-                                }
-
-
-                                for(var bza in uniqueBatch) {
-                                    uniqueData[rawData[dataKey].barang].stok_batch += uniqueBatch[bza];
                                 }
                             }
                         }
                     }
+
                     var autonum = 1;
                     for(var pKey in uniqueData) {
+
+                        for(var bza in uniqueData[pKey].batch) {
+                            uniqueData[rawData[dataKey].barang].stok_batch += uniqueBatch[bza];
+                        }
+
                         returnedData.push({
                             autonum: autonum,
                             barang: pKey,
