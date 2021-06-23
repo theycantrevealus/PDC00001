@@ -19,7 +19,6 @@
                 $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
                 //$("#verifikator").html(targettedData.verifikator.nama);
                 loadDetailResep(targettedData);
-                console.log(targettedData);
 
             },
             error: function(response) {
@@ -253,12 +252,38 @@
 
 
             //==================================================================================== RACIKAN
+            //Checker
+            for(var b = 0; b < data.racikan.length; b++) {
+                var racikanDetail = data.racikan[b].detail;
+                for (var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
+                    var selectedBatchRacikan = refreshBatch(racikanDetail[racDetailKey].obat);
+                    var kebutuhan_racikan = parseFloat(racikanDetail[racDetailKey].jumlah);
+                    var jlh_sedia = 0;
+                    var butuh_amprah = 0;
+                    for(bKey in selectedBatchRacikan) {
+                        if(kebutuhan_racikan > 0) {
+                            if(selectedBatchRacikan[bKey].gudang.uid === __UNIT__.gudang) {
+                                jlh_sedia += selectedBatchRacikan[bKey].stok_terkini;
+                            } else {
+                                butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
+                            }
+                        }
+                        /*console.log(racikanDetail[racDetailKey]);
+
+                        console.log(jlh_sedia);
+                        console.log(butuh_amprah);*/
+                    }
+                }
+            }
+
+
             $("#load-detail-racikan tbody").html("");
             for(var b = 0; b < data.racikan.length; b++) {
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
                     var selectedBatchRacikan = refreshBatch(racikanDetail[racDetailKey].obat);
                     var selectedBatchListRacikan = [];
+                    var selectedBatchListRacikanAmprah = [];
                     var harga_tertinggi_racikan = 0;
                     //var kebutuhan_racikan = parseFloat(data.racikan[b].qty);
                     var kebutuhan_racikan = parseFloat(racikanDetail[racDetailKey].jumlah);
@@ -280,15 +305,17 @@
                             } else {
                                 selectedBatchRacikan[bKey].used = kebutuhan_racikan;
                             }
-                            kebutuhan_racikan -= selectedBatchRacikan[bKey].stok_terkini;
 
-                            selectedBatchListRacikan.push(selectedBatchRacikan[bKey]);
-                        }
 
-                        if(selectedBatchRacikan[bKey].gudang.uid === __UNIT__.gudang) {
-                            jlh_sedia += selectedBatchRacikan[bKey].stok_terkini;
-                        } else {
-                            butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
+
+                            if(selectedBatchRacikan[bKey].gudang.uid === __UNIT__.gudang) {
+                                kebutuhan_racikan -= selectedBatchRacikan[bKey].stok_terkini;
+                                jlh_sedia += selectedBatchRacikan[bKey].stok_terkini;
+                                selectedBatchListRacikan.push(selectedBatchRacikan[bKey]);
+                            } else {
+                                butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
+                                selectedBatchListRacikanAmprah.push(selectedBatchRacikan[bKey]);
+                            }
                         }
                     }
 
@@ -330,7 +357,7 @@
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
                         var newRacikanObat = document.createElement("SELECT");
                         var statusSediaRacikan = "";
-                        /*if(parseFloat(data.racikan[b].qty) <= parseFloat(racikanDetail[racDetailKey].sedia))
+                        /*if(parseFloat(racikanDetail[racDetailKey].jumlah) <= parseFloat(racikanDetail[racDetailKey].sedia))
                         {
                             statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + racikanDetail[racDetailKey].sedia + "</b>";
                         } else {
@@ -339,12 +366,12 @@
 
                         if(parseFloat(data.racikan[b].qty) <= parseFloat(jlh_sedia))
                         {
-                            statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
+                            //statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         } else {
-                            statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
+                            //statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         }
 
-                        if((parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia)) > 0) {
+                        /*if((parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia)) > 0) {
                             statusSediaRacikan += "<br /><b class=\"text-info\"><i class=\"fa fa-exclamation-circle\"> Stok : " + number_format(parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia), 2, ".", ",") + "</i></b>";
                             $("#btnSelesai").attr({
                                 "disabled": "disabled"
@@ -367,7 +394,7 @@
                                 console.log(parseFloat(data.racikan[b].qty));
                                 console.log(parseFloat(jlh_sedia));
                             }
-                        }
+                        }*/
 
                         $(newCellRacikanObat).append("<h5 class=\"text-info\">" + RacikanObatData.data[0].nama + " <b class=\"text-danger text-right\">[" + racikanDetail[racDetailKey].kekuatan + "]</b></h5>").append(statusSediaRacikan);
 
@@ -380,12 +407,31 @@
 
                         $(newCellRacikanObat).append("<b style=\"padding-top: 10px; display: block\">Batch Terpakai:</b>");
                         $(newCellRacikanObat).append("<span id=\"racikan_batch_" + data.racikan[b].uid + "_" + racDetailKey + "\" class=\"selected_batch\"><ol></ol></span>");
+
+                        var akumulasi = 0;
                         for(var batchSelKey in selectedBatchListRacikan)
                         {
-                            if(parseFloat(selectedBatchListRacikan[batchSelKey].used) > 0) {
-                                $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ")</li>");
+                            if(akumulasi < parseFloat(racikanDetail[racDetailKey].jumlah)) {
+                                if(parseFloat(selectedBatchListRacikan[batchSelKey].used) > 0) {
+                                    $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ") <b class=\"text-info\">[" + selectedBatchListRacikan[batchSelKey].gudang.nama + "]</b></li>");
+                                    akumulasi += parseFloat(selectedBatchListRacikan[batchSelKey].used);
+                                }
                             }
                         }
+
+
+                        if(akumulasi < parseFloat(racikanDetail[racDetailKey].jumlah)) {
+                            
+                            for(var batchSelKey in selectedBatchListRacikanAmprah) {
+                                if(akumulasi < parseFloat(racikanDetail[racDetailKey].jumlah)) {
+                                    if(parseFloat(selectedBatchListRacikan[batchSelKey].used) > 0) {
+                                        $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ") <b class=\"text-info\">[" + selectedBatchListRacikan[batchSelKey].gudang.nama + "]</b></li>");
+                                        akumulasi += parseFloat(selectedBatchListRacikan[batchSelKey].used);
+                                    }
+                                }
+                            }
+                        }
+
 
                         $(newCellRacikanObat).attr({
                             harga: harga_tertinggi_racikan
