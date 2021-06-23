@@ -44,6 +44,12 @@
                     response.recordsFiltered = response.response_package.recordsFiltered;*/
                     dataSetAll = dataSet
                     for(var key in dataSet) {
+                        if(dataSet[key].poli === null || dataSet[key].poli === undefined) {
+                            dataSet[key].poli = {
+                                uid: __POLI_INAP__,
+                                nama: "Rawat Inap"
+                            }
+                        }
                         dataSetSelector.push(dataSet[key].uid);
                     }
 

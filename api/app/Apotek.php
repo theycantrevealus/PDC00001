@@ -250,6 +250,7 @@ class Apotek extends Utility
                                     'gudang' => $bValue['gudang']['uid'],
                                     'qty' => $bValue['stok_terkini']
                                 ));
+                                $kebutuhan -= $bValue['stok_terkini'];
                             }
                         }
 
@@ -260,8 +261,9 @@ class Apotek extends Utility
                                 'gudang' => $bValue['gudang']['uid'],
                                 'qty' => $bValue['stok_terkini']
                             ));
+                            $kebutuhan -= $bValue['stok_terkini'];
                         }
-                        $kebutuhan -= $bValue['stok_terkini'];
+
 
                     } else {
                         if($parameter['departemen'] === __POLI_INAP__) {
@@ -273,6 +275,7 @@ class Apotek extends Utility
                                     'gudang' => $bValue['gudang']['uid'],
                                     'qty' => $kebutuhan
                                 ));
+                                $kebutuhan = 0;
                             }
 
                         }
@@ -284,9 +287,8 @@ class Apotek extends Utility
                                 'gudang' => $bValue['gudang']['uid'],
                                 'qty' => $kebutuhan
                             ));
+                            $kebutuhan = 0;
                         }
-
-                        $kebutuhan = 0;
                     }
                 }
             }
@@ -349,25 +351,24 @@ class Apotek extends Utility
                     {
                         if($kebutuhan > $bValue['stok_terkini'])
                         {
-                            $kebutuhan -= $bValue['stok_terkini'];
-                            if($bValue['stok_terkini'] > 0)
-                            {
+                            if($bValue['stok_terkini'] > 0) {
                                 array_push($usedBatch, array(
                                     'batch' => $bValue['batch'],
                                     'barang' => $rIValue['obat'],
                                     'gudang' => $bValue['gudang']['uid'],
                                     'qty' => $bValue['stok_terkini']
                                 ));
+                                $kebutuhan -= $bValue['stok_terkini'];
                             }
                         } else {
-                            if($kebutuhan > 0)
-                            {
+                            if($kebutuhan > 0) {
                                 array_push($usedBatch, array(
                                     'batch' => $bValue['batch'],
                                     'barang' => $rIValue['obat'],
                                     'gudang' => $bValue['gudang']['uid'],
                                     'qty' => $kebutuhan
                                 ));
+                                $kebutuhan = 0;
                             }
                         }
                     }
