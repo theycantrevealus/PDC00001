@@ -116,7 +116,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"number_style\">" + row.stok_batch + "</h5>";
+                        return "<h5 class=\"number_style\">" + row.stok_terkini + "</h5>";
                     }
                 },
                 {
