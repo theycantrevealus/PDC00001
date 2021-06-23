@@ -24,8 +24,11 @@
                     var returnedData = [];
                     var uniqueData = {};
 
+                    console.clear();
+                    console.log(response);
 
-                    if(response == undefined || response.response_package == undefined) {
+
+                    if(response === undefined || response.response_package === undefined) {
                         rawData = [];
                     } else {
                         rawData = response.response_package.response_data;
@@ -33,7 +36,7 @@
 
                     for(var dataKey in rawData)
                     {
-                        if(rawData[dataKey].gudang === __UNIT__.gudang && parseFloat(rawData[dataKey].stok_terkini) > 0) {
+                        if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
                             if(uniqueData[rawData[dataKey].barang] === undefined) {
                                 uniqueData[rawData[dataKey].barang] = {
                                     barang: rawData[dataKey].barang,
@@ -49,7 +52,7 @@
                             if(Array.isArray(rawData[dataKey].batch)) {
                                 var batchData = rawData[dataKey].batch;
                                 for(var bKey in batchData) {
-                                    if(batchData[bKey].gudang.uid === response.response_package.gudang_saya) {
+                                    if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
                                         uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
                                     }
                                 }
