@@ -55,11 +55,14 @@
 
 
                                 for(var bKey in batchData) {
-                                    if(uniqueBatch[batchData[bKey].batch] === undefined && uniqueBatch[batchData[bKey].batch] === null) {
-                                        uniqueBatch[batchData[bKey].batch] = 0;
+                                    if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
+                                        if(uniqueBatch[batchData[bKey].batch] === undefined && uniqueBatch[batchData[bKey].batch] === null) {
+                                            uniqueBatch[batchData[bKey].batch] = 0;
+                                        }
+
+                                        uniqueBatch[batchData[bKey].batch] = parseFloat(batchData[bKey].stok_terkini);
                                     }
 
-                                    uniqueBatch[batchData[bKey].batch] = parseFloat(batchData[bKey].stok_terkini);
 
 
                                     /*if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
@@ -67,9 +70,9 @@
                                     }*/
                                 }
 
-                                /*if(rawData[dataKey].barang === '5e417134-86dc-4bb8-acdf-1d770034a276') {
+                                if(rawData[dataKey].barang === '5e417134-86dc-4bb8-acdf-1d770034a276') {
                                     console.log(batchData[bKey].batch);
-                                }*/
+                                }
 
 
                                 for(var bza in uniqueBatch) {
