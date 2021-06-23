@@ -538,8 +538,6 @@ class Apotek extends Utility
                         'AND',
                         'inventori_stok.barang' => '= ?',
                         'AND',
-                        'inventori_stok.stok_terkini' => '> 0',
-                        'AND',
                         'inventori_stok.batch' => '= ?',
                     ), array(
                         $bValue['gudang'],
