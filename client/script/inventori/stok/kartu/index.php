@@ -51,17 +51,29 @@
 
                             if(Array.isArray(rawData[dataKey].batch)) {
                                 var batchData = rawData[dataKey].batch;
+                                var uniqueBatch = {};
+
                                 for(var bKey in batchData) {
-                                    if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
-                                        uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
+                                    if(uniqueBatch[batchData[bKey].uid] === undefined && uniqueBatch[batchData[bKey].uid] === null) {
+                                        uniqueBatch[batchData[bKey].uid] = 0;
                                     }
+
+                                    uniqueBatch[batchData[bKey].uid] = parseFloat(batchData[bKey].stok_terkini);
+
+
+                                    /*if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
+                                        uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
+                                    }*/
+                                }
+
+                                for(var bza in uniqueBatch) {
+                                    uniqueData[rawData[dataKey].barang].stok_batch += uniqueBatch[bza];
                                 }
                             }
                         }
                     }
                     var autonum = 1;
-                    for(var pKey in uniqueData)
-                    {
+                    for(var pKey in uniqueData) {
                         returnedData.push({
                             autonum: autonum,
                             barang: pKey,
@@ -116,7 +128,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"number_style\">" + row.stok_terkini + "</h5>";
+                        return "<h5 class=\"number_style\">" + row.stok_batch + "</h5>";
                     }
                 },
                 {
