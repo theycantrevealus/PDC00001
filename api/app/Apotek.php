@@ -239,7 +239,7 @@ class Apotek extends Utility
             {
                 if($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
                 {
-                    if($kebutuhan > $bValue['stok_terkini'])
+                    if($kebutuhan >= $bValue['stok_terkini'])
                     {
                         if($parameter['departemen'] === __POLI_INAP__) {
                             //Racikan tidak usah charge stok karena stok dianggap habis diproses
@@ -349,7 +349,7 @@ class Apotek extends Utility
                 {
                     if($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
                     {
-                        if($kebutuhan > $bValue['stok_terkini'])
+                        if($kebutuhan >= $bValue['stok_terkini'])
                         {
                             if($bValue['stok_terkini'] > 0) {
                                 array_push($usedBatch, array(
