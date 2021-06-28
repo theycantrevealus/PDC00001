@@ -169,7 +169,7 @@ class Anjungan extends Utility {
 
 	private function check_job($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$data = self::$query->select('antrian_nomor', array(
 			'id',
@@ -248,7 +248,7 @@ class Anjungan extends Utility {
 
 	private function tambah_antrian($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$detail_antrian_jenis = self::get_jenis_detail($parameter['jenis']);
 		$newUrut = self::$query->select('antrian_nomor', array(
 			'id'
@@ -294,7 +294,7 @@ class Anjungan extends Utility {
 
 	private function next_antrian($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$allowed_jenis = array();
 		$allowed_item = array(date('Y-m-d'), 'N');
 		//Loket Job
@@ -407,9 +407,12 @@ class Anjungan extends Utility {
 			'nomor_urut'
 		))
 		->where(array(
-			'antrian_nomor.status' => '= ?'
+			'antrian_nomor.status' => '= ?',
+            'AND',
+            'DATE(antrian_nomor.created_at)' => '= ?'
 		), array(
-			'N'
+			'N',
+            date('Y-m-d')
 		))
 		->execute();
 		$worker['response_standby'] = count($sisa['response_data']);

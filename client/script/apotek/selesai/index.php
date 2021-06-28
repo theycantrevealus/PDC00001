@@ -145,7 +145,9 @@
                         if(dataSet[dKey].antrian.departemen !== undefined) {
                             if(dataSet[dKey].antrian.departemen !== null) {
                                 if(dataSet[dKey].antrian.departemen.uid !== __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid !== __POLI_INAP__) {
-                                    forReturn.push(dataSet[dKey]);
+                                    if(dataSet[dKey].status_resep !== "S") {
+                                        forReturn.push(dataSet[dKey]);
+                                    }
                                 }
                             }
                         }
@@ -153,7 +155,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = forReturn.length;
 
                     return forReturn;
                 }
@@ -254,7 +256,9 @@
                                 dataSet[dKey].antrian.departemen !== null
                             ) {
                                 if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
-                                    forReturn.push(dataSet[dKey]);
+                                    if(dataSet[dKey].status_resep !== "S") {
+                                        forReturn.push(dataSet[dKey]);
+                                    }
                                 }
                             }
                         }
@@ -264,7 +268,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = forReturn.length;
 
                     return forReturn;
                 }
@@ -328,6 +332,124 @@
                 }
             ]
         });
+
+
+
+
+
+
+        var tableResep= $("#table-resep-history").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: function(d){
+                    d.request = "get_resep_selesai_backend";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var forReturn = [];
+
+                    var dataSet = response.response_package.response_data;
+                    if(dataSet == undefined) {
+                        dataSet = [];
+                    }
+
+
+
+                    for(var dKey in dataSet) {
+                        if(dataSet[dKey].antrian.departemen !== undefined) {
+                            if(dataSet[dKey].antrian.departemen !== null) {
+                                if(dataSet[dKey].status_resep === "S") {
+                                    forReturn.push(dataSet[dKey]);
+                                }
+                            }
+                        }
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = forReturn.length;
+
+                    return forReturn;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Pasien"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.antrian.departemen.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return ((row.antrian.pasien_info.panggilan_name !== undefined && row.antrian.pasien_info.panggilan_name !== null) ? row.antrian.pasien_info.panggilan_name.nama : "") + " " + row.antrian.pasien_info.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.antrian.penjamin_data.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
+
+                        if(row.status_resep === "D") {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
+                                "</button>" +
+                                "</div>";
+                        } else if(row.status_resep === "P") {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-check\"></i> Terima</span>" +
+                                "</button>" +
+                                "</div>";
+                        } else if(row.status_resep === "S") {
+                            return "<i class=\"fa fa-check text-success\"></i>";
+                        }
+                    }
+                }
+            ]
+        });
+
+
+
+
+
+
+
+
+
+
 
         var targettedData;
 
