@@ -39,6 +39,7 @@
                         <div class="col-md-12">
                             <b>Penjamin</b>
                             <h5 class="penjamin_pasien text-success"></h5>
+
                         </div>
                     </div>
                 </div>
@@ -46,13 +47,18 @@
                     <div class="d-flex flex-row">
                         <div class="col-md-12">
                             <h5 class="poliklinik text-info"></h5>
+                            <h6 class="dokter"></h6>
                         </div>
                     </div>
                 </div>
                 <div class="card card-body">
                     <div class="d-flex flex-row">
                         <div class="col-md-12">
-                            <h6 class="dokter"></h6>
+                            <h5>
+                                Total Biaya <br />
+                                <b class="text-danger" id="total_biaya_obat"></b>
+                            </h5>
+
                         </div>
                     </div>
                 </div>
@@ -84,6 +90,13 @@
                                     </thead>
                                     <tbody>
                                     </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="7" class="text-right">TOTAL</td>
+                                            <td id="total_resep_biasa" class="number_style"></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </div>
                             <div class="col-md-12" style="margin-top: 20px;">
@@ -107,6 +120,13 @@
                                     </tr>
                                     </thead>
                                     <tbody class="racikan"></tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="6" class="text-right">TOTAL</td>
+                                            <td id="total_resep_racikan" class="number_style"></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </div>
                             <div class="col-md-12" style="margin-top: 20px;">
