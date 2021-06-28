@@ -395,6 +395,7 @@
 					d.request = "biaya_pasien";
 					d.from = getDateRange("#range_invoice")[0];
 					d.to = getDateRange("#range_invoice")[1];
+					d.filter_poli = "rajal";
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -404,6 +405,8 @@
 					if(returnedData == undefined || returnedData.response_package == undefined) {
 						returnedData = [];
 					}
+
+					console.log(response);
 
 
 					for(var InvKeyData in response.response_package.response_data) {
@@ -584,6 +587,7 @@
                     d.request = "biaya_pasien";
                     d.from = getDateRange("#range_invoice")[0];
                     d.to = getDateRange("#range_invoice")[1];
+                    d.filter_poli = "ranap";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -742,6 +746,7 @@
                     d.request = "biaya_pasien";
                     d.from = getDateRange("#range_invoice")[0];
                     d.to = getDateRange("#range_invoice")[1];
+                    d.filter_poli = "IGD";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>

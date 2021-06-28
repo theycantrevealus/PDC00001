@@ -520,10 +520,9 @@
                         },
                         type:"POST",
                         success:function(response) {
-                            //console.clear();
-                            //console.log(response);
-                            if(response.response_package.stok_result > 0)
-                            {
+                            console.clear();
+                            console.log(response);
+                            if(response.response_package.stok_result > 0) {
                                 push_socket(__ME__, "resep_selesai_proses", "*", "Resep pasien a/n. " + $("#nama-pasien").html() + " selesai diproses!", "info").then(function() {
                                     Swal.fire(
                                         "Proses Berhasil!",

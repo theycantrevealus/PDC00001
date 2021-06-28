@@ -144,7 +144,14 @@
                             }
                         }
                     }
-                    return IGD.concat(parsedData);
+                    var autonum = 1;
+                    var finalData = IGD.concat(parsedData);
+                    for(var az in finalData) {
+                        finalData[az].autonum = autonum;
+                        autonum++;
+                    }
+
+                    return finalData
                 }
             },
             autoWidth: false,

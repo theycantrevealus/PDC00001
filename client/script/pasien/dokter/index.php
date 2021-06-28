@@ -306,8 +306,8 @@
                         $(".lab_loader").html(LabBuild);
                     }
 
-                    console.clear();
-                    console.log(selectedData.rad_order);
+                    /*console.clear();
+                    console.log(selectedData.rad_order);*/
 
                     //Parse Radiologi
                     for(var radKey in selectedData.rad_order) {
