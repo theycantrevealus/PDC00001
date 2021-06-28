@@ -278,8 +278,7 @@
 	            beforeSend: function(request) {
 	                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 	            },
-	            success: function(response){
-
+	            success: function(response) {
                     let html = "";
                     if (response.response_package.response_result > 0){
                         dataItem = response.response_package.response_data;
