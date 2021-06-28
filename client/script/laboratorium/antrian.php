@@ -280,9 +280,15 @@
 	            },
 	            success: function(response) {
                     let html = "";
-                    if (response.response_package.response_result > 0){
+                    if (response.response_package.response_result > 0) {
+                        var allow_save = [];
                         dataItem = response.response_package.response_data;
-                        $.each(dataItem, function(key, item){
+                        $.each(dataItem, function(key, item) {
+                            if(item.allow) {
+                                allow_save.push(1);
+                            } else {
+                                allow_save.push(0);
+                            }
 
                             html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
                                     "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
@@ -352,7 +358,20 @@
                             html += "</tbody></table></div></div></div>";
                             $("#hasil_pemeriksaan").append(html);
                         });
-                        
+
+                        if(allow_save.indexOf(1) < 0) {
+                            $("#btnSelesai").attr({
+                                "disabled": "disabled"
+                            });
+
+                            $("#btnSimpan").attr({
+                                "disabled": "disabled"
+                            });
+                        } else {
+                            $("#btnSelesai").removeAttr("disabled");
+
+                            $("#btnSimpan").removeAttr("disabled");
+                        }
                     }
 	            },
 	            error: function(response) {
