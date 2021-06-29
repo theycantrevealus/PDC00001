@@ -406,9 +406,6 @@
 						returnedData = [];
 					}
 
-					console.log(response);
-
-
 					for(var InvKeyData in response.response_package.response_data) {
 					    if(
                             response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
@@ -746,7 +743,7 @@
                     d.request = "biaya_pasien";
                     d.from = getDateRange("#range_invoice")[0];
                     d.to = getDateRange("#range_invoice")[1];
-                    d.filter_poli = "IGD";
+                    d.filter_poli = "igd";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -756,6 +753,8 @@
                     if(returnedData == undefined || returnedData.response_package == undefined) {
                         returnedData = [];
                     }
+
+                    console.log(response);
 
                     for(var InvKeyData in response.response_package.response_data) {
                         if(
@@ -769,6 +768,11 @@
                                 response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__
                             ) {
                                 if (!response.response_package.response_data[InvKeyData].lunas) {
+                                    if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                    }
+                                    returnedData.push(response.response_package.response_data[InvKeyData]);
+                                } else {
                                     if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
                                         response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
                                     }
