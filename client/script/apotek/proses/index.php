@@ -111,6 +111,7 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+                    console.log(response);
                     var forReturn = [];
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
@@ -127,7 +128,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
                     return dataSet;
                 }
@@ -207,10 +208,7 @@
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
-                dataSrc:function(response) {
-
-                    console.log(response);
-                    var forReturn = [];
+                dataSrc:function(response) {var forReturn = [];
                     var forReturnSelesai = [];
                     var dataSet = response.response_package.response_data;
                     if(dataSet === undefined) {
@@ -239,7 +237,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
                     return forReturn.concat(forReturnSelesai);
                 }
@@ -343,8 +341,6 @@
         });
 
         function loadDetailResep(data) {
-            console.clear();
-            console.log(data);
             $("#load-detail-resep tbody tr").remove();
 
             //==================================================================================== RESEP
@@ -817,7 +813,6 @@
         $("#btnProsesResep").click(function() {
             //console.clear();
             var conf = confirm("Pastikan resep sudah benar sekali lagi. Anda yakin?");
-            console.log(targettedData);
             if(conf) {
                 var UIDResep = targettedData.uid;
                 var detail = [];
@@ -944,7 +939,6 @@
                         racikan: racikan
                     },
                     success:function(response) {
-                        console.log(response);
                         if(response.response_package.response_result > 0) {
                             //tableResep.ajax.reload();
                             tableResep.clear();
