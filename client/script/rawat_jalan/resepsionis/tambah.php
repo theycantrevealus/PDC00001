@@ -50,8 +50,7 @@
 				dataObj.currentAntrianID = currentAntrianID;
 
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
-					if(dataObj.penjamin == __UIDPENJAMINBPJS__) {
-
+					if(dataObj.penjamin === __UIDPENJAMINBPJS__) {
 
 						//Get Nomor BPJS
                         $.ajax({
@@ -62,6 +61,8 @@
                             },
                             type: "GET",
                             success: function (response) {
+
+                                (response);
                                 $("#modal-sep").modal("show");
                                 $("#btnProsesPasien").hide();
                                 $("#btnProsesSEP").hide();
@@ -84,16 +85,14 @@
                                 }
                             },
                             error: function (response) {
-                                //
+                                console.log(response);
                             }
                         });
 
 
 					} else {
 
-					    console.log(dataObj);
-
-						$.ajax({
+					    $.ajax({
 							async: false,
 							url: __HOSTAPI__ + "/Antrian",
 							data: {
@@ -105,28 +104,38 @@
 							},
 							type: "POST",
 							success: function(response){
+							    console.clear();
                                 console.log(response);
                                 localStorage.getItem("currentPasien");
                                 localStorage.getItem("currentAntrianID");
 
                                 if(response.response_package.response_notif == 'K') {
-									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-                                    Swal.fire(
-                                        'Berhasil ditambahkan!',
-                                        'Silahkan arahkan pasien ke kasir',
-                                        'success'
-                                    ).then((result) => {
-                                        location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                        Swal.fire(
+                                            'Berhasil ditambahkan!',
+                                            'Silahkan arahkan pasien ke kasir',
+                                            'success'
+                                        ).then((result) => {
+                                            location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                        });
                                     });
+
 								} else if(response.response_package.response_notif == 'P') {
-									push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-                                    Swal.fire(
-                                        'Berhasil ditambahkan!',
-                                        'Silahkan arahkan pasien ke poli',
-                                        'success'
-                                    ).then((result) => {
-                                        location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
-                                    });
+									/*push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                        Swal.fire(
+                                            'Berhasil ditambahkan!',
+                                            'Silahkan arahkan pasien ke poli',
+                                            'success'
+                                        ).then((result) => {
+                                            location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                        });
+                                    });*/
+                                    if(dataObj.penjamin === __UIDPENJAMINUMUM__) {
+                                        push_socket(__ME__, "antrian_poli_baru", "*", "Antrian poli baru", "info").then(function() {
+                                            console.log("pushed!");
+                                        });
+                                    }
+
 								} else {
 									console.log("command not found");
 								}
@@ -141,7 +150,10 @@
 				} else {
 					alert("Data belum lengkap");
 				}
-			}
+			} else {
+			    console.log(currentAntrianID);
+                console.log(currentPasien);
+            }
 			return false;
 		});
 
@@ -203,22 +215,26 @@
 					},
 					type: "POST",
 					success: function(response){
-                        console.log(response);
                         localStorage.getItem("currentPasien");
                         localStorage.getItem("currentAntrianID");
 
 
-                        /*if(response.response_package.response_notif == 'K') {
-                            push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning");
-                            Swal.fire(
-                                'Berhasil ditambahkan!',
-                                'Silahkan arahkan pasien ke kasir',
-                                'success'
-                            ).then((result) => {
-                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                        if(response.response_package.response_notif == 'K') {
+                            push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                Swal.fire(
+                                    'Berhasil ditambahkan!',
+                                    'Silahkan arahkan pasien ke kasir',
+                                    'success'
+                                ).then((result) => {
+                                    location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                });
                             });
+
                         } else if(response.response_package.response_notif == 'P') {
-                            push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning");
+                            /*push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning").then(function () {
+
+                            });*/
+
                             Swal.fire(
                                 'Berhasil ditambahkan!',
                                 'Silahkan arahkan pasien ke poli',
@@ -226,9 +242,10 @@
                             ).then((result) => {
                                 location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
                             });
+
                         } else {
                             console.log(response);
-                        }*/
+                        }
 					},
 					error: function(response) {
 						console.log("Error : ");
@@ -270,53 +287,56 @@
             success: function(response){
                 var data = response.response_package.content;
 
+                console.log(data);
                 penjaminMetaData = data;
 
-                if(parseInt(data.metaData.code) === 200) {
+                if(data.metaData !== undefined) {
+                    if(parseInt(data.metaData.code) === 200) {
 
-                    $("#hasil_bpjs").fadeIn();
-                    var pasienData = data.response.peserta;
-                    if(pasienData.statusPeserta.keterangan === "AKTIF") {
-                        if(pasienData.nik != dataPasien.nik) { //Cek NIK
-                            $("#status_bpjs").addClass("text-danger").removeClass("text-success").html("NIK tidak sama");
+                        $("#hasil_bpjs").fadeIn();
+                        var pasienData = data.response.peserta;
+                        if(pasienData.statusPeserta.keterangan === "AKTIF") {
+                            if(pasienData.nik != dataPasien.nik) { //Cek NIK
+                                $("#status_bpjs").addClass("text-danger").removeClass("text-success").html("NIK tidak sama");
+                            } else {
+                                $("#status_bpjs").addClass("text-success").removeClass("text-danger").html(pasienData.statusPeserta.keterangan);
+                                $("#btnProsesPasien").show();
+                            }
                         } else {
-                            $("#status_bpjs").addClass("text-success").removeClass("text-danger").html(pasienData.statusPeserta.keterangan);
-                            $("#btnProsesPasien").show();
+                            $("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
                         }
+
+                        $("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
+                        $("#nama_pasien").html(pasienData.nama);
+                        $("#nik_pasien").html(pasienData.nik);
+                        $("#nomor_peserta").html(pasienData.noKartu);
+                        $("#tll_pasien").html(pasienData.tglLahir);
+                        //$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
+                        $("#faskes_pasien").html(pasienData.provUmum.nmProvider);
+                        $("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
+                        $("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
+
+                        $("#tanggal_kartu").html(pasienData.tglCetakKartu);
+
+                        //TAT Tanggal Akhir Kartu
+                        //TMT Tanggal Mulai Kartu
+
+
+                        $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
+                        $("#txt_bpjs_nik").val(pasienData.nik);
+                        $("#txt_bpjs_nama").val(pasienData.nama);
+                        $("#txt_bpjs_rm").val($("#no_rm").val());
+
+
                     } else {
-                        $("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
+                        Swal.fire(
+                            'BPJS',
+                            data.metaData.message,
+                            'warning'
+                        ).then((result) => {
+                            $("#txt_no_bpjs").focus();
+                        });
                     }
-
-                    $("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
-                    $("#nama_pasien").html(pasienData.nama);
-                    $("#nik_pasien").html(pasienData.nik);
-                    $("#nomor_peserta").html(pasienData.noKartu);
-                    $("#tll_pasien").html(pasienData.tglLahir);
-                    //$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
-                    $("#faskes_pasien").html(pasienData.provUmum.nmProvider);
-                    $("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
-                    $("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
-
-                    $("#tanggal_kartu").html(pasienData.tglCetakKartu);
-
-                    //TAT Tanggal Akhir Kartu
-                    //TMT Tanggal Mulai Kartu
-
-
-                    $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
-                    $("#txt_bpjs_nik").val(pasienData.nik);
-                    $("#txt_bpjs_nama").val(pasienData.nama);
-                    $("#txt_bpjs_rm").val($("#no_rm").val());
-
-
-                } else {
-                    Swal.fire(
-                        'BPJS',
-                        data.metaData.message,
-                        'warning'
-                    ).then((result) => {
-                        $("#txt_no_bpjs").focus();
-                    });
                 }
             },
             error: function(response) {

@@ -17,7 +17,7 @@
 <div class="container-fluid page__container">
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12">
-			<div class="card-group">
+			<!--div class="card-group">
 				<div class="card card-body">
 					<div class="d-flex flex-row">
 						<div class="col-md-2">
@@ -29,8 +29,8 @@
 							<span>Apotek</span>
 							<br />
 							<span>
-								<b class="text-warning">10 item</b> (hampir habis) <br />
-								<b class="text-danger">2 item</b> (habis)
+								<b class="text-warning" id="warning_hampir">0 item</b> (hampir habis) <br />
+								<b class="text-danger" id="warning_habis">0 item</b> (habis)
 							</span>
 							<h6 class="text-right">
 								<small><a href="<?php echo __HOSTNAME__; ?>/inventori/amprah/tambah"><i class="fa fa-cubes"></i> Amprah</a></small>
@@ -50,11 +50,11 @@
 				<div class="card card-body">
 					<div class="d-flex flex-row">
 						<div class="col-md-12">
-							<b>Perubahan Resep</b>
+							<b></b>
 						</div>
 					</div>
 				</div>
-			</div>
+			</div-->
 			<div class="card">
 				<div class="card-header card-header-large bg-white d-flex align-items-center">
 					<h5 class="card-header__title flex m-0">Apotek</h5>
@@ -65,6 +65,7 @@
 							<thead class="thead-dark">
 								<tr>
 									<th class="wrap_content">No</th>
+                                    <th>Tanggal</th>
 									<th>Poliklinik</th>
 									<th>Pasien</th>
 									<th>Dokter</th>

@@ -5,7 +5,10 @@
                 <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Pemeriksaan Mata</h5>
             </div>
             <div class="card-body">
-                <div class="row" id="mata-loader" style="margin-bottom: 100px; position: relative;">
+                <div class="row" id="mata-loaders" style="margin-bottom: 100px; position: relative;">
+                    <div class="col-md-12">
+                        <center><img src="<?php echo __HOSTNAME__; ?>/template/assets/images/mata.png" /></center>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
@@ -140,6 +143,45 @@
                                 </td>
                                 <td>
                                     <input type="text" class="form-control mata_input" id="ppg_fj" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ADD</td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_vs1" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_vc1" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_a1" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_pb1" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_vs2" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_vc2" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_a2" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_pb2" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_fv" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_cv" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_dv" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control mata_input" id="add_fj" />
                                 </td>
                             </tr>
                         </table>

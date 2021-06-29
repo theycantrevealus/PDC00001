@@ -19,8 +19,9 @@
 <div class="container-fluid page__container">
     <div class="row card-group-row">
         <div class="col-lg-12 col-md-12">
-            <div class="card-header bg-white">
-                <a href="<?php echo __HOSTNAME__; ?>/master/dokumen/tambah" class="btn btn-info ml-3">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0">Master Dokumen</h5>
+                <a href="<?php echo __HOSTNAME__; ?>/master/dokumen/tambah" class="btn btn-info pull-right">
                     <i class="fa fa-plus"></i> Tambah Dokumen
                 </a>
             </div>

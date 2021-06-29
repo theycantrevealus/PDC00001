@@ -201,6 +201,47 @@
 				$("#txt_set_perawat").select2();
 
 
+                $("#txt_bpjs_poli").select2({
+                    minimumInputLength: 2,
+                    "language": {
+                        "noResults": function(){
+                            return "Faskes tidak ditemukan";
+                        }
+                    },
+                    ajax: {
+                        dataType: "json",
+                        headers:{
+                            "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                            "Content-Type" : "application/json",
+                        },
+                        url:__HOSTAPI__ + "/BPJS/get_poli",
+                        type: "GET",
+                        data: function (term) {
+                            return {
+                                search:term.term
+                            };
+                        },
+                        cache: true,
+                        processResults: function (response) {
+                            var data = response.response_package.content.response.poli;
+                            return {
+                                results: $.map(data, function (item) {
+                                    return {
+                                        text: item.nama,
+                                        id: item.kode
+                                    }
+                                })
+                            };
+                        }
+                    }
+                }).addClass("form-control").on("select2:select", function(e) {
+                    //
+                });
+                if(metaData.kode_bpjs !== null || metaData.kode_bpjs !== undefined) {
+                    $("#txt_bpjs_poli").append($("<option selected='selected'></option>").val(metaData.kode_bpjs).text(metaData.kode_bpjs + " - " + metaData.nama_bpjs)).trigger("change");
+                }
+
+
 				load_tindakan("#tindakan_konsultasi", metaData.tindakan_konsultasi);
 				//load_dokter("#txt_set_dokter", metaData.tindakan_konsultasi);
 
@@ -557,7 +598,9 @@
 						request: "edit_poli",
 						uid: uid,
 						nama: nama,
-						tindakan_konsultasi: tindakan_konsultasi
+						tindakan_konsultasi: tindakan_konsultasi,
+                        integrasi_bpjs_poli_kode: $("#txt_bpjs_poli").val(),
+                        integrasi_bpjs_poli_nama: $("#txt_bpjs_poli option:selected").text()
 					},
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);

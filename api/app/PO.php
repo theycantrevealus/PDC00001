@@ -55,7 +55,7 @@ class PO extends Utility {
 		}
 	}
 
-	private function get_po() {
+	public function get_po() {
 		$data = self::$query->select('inventori_po', array(
 			'uid',
 			'nomor_po',
@@ -146,7 +146,7 @@ class PO extends Utility {
 		return $data;
 	}
 
-	public function get_po_item_price($parameter = array()){
+	public function get_po_item_price($parameter){
 		$data = self::$query
 			->select('inventori_po_detail', array(
 					'harga',
@@ -160,8 +160,8 @@ class PO extends Utility {
 					'AND',
 					'inventori_po_detail.barang' => '= ?'
 				), array(
-					$parameter[0],
-					$parameter[1]
+					$parameter['po'],
+					$parameter['barang']
 				)
 			)
 			->execute();
@@ -222,6 +222,8 @@ class PO extends Utility {
 		))
 		->execute();
 
+        $autonum = 1;
+
 		foreach ($po['response_data'] as $key => $value) {
 			$Pegawai = new Pegawai(self::$pdo);
 			$InfoPegawai = $Pegawai::get_detail($value['pegawai']);
@@ -233,15 +235,56 @@ class PO extends Utility {
 			$po['response_data'][$key]['tanggal_po'] = date("d F Y", strtotime($value['tanggal_po']));
 			$po['response_data'][$key]['pegawai'] = $InfoPegawai['response_data'][0];
 			$po['response_data'][$key]['supplier'] = $InfoSupplier;
+
+
+			$autonum++;
 		}
 			
 
 		if(count($po['response_data'])) {
 			$po_detail = self::get_po_detail($parameter);
 			foreach ($po_detail['response_data'] as $key => $value) {
+			    $po_detail['response_data'][$key]['qty'] = floatval($value['qty']);
 				$Inventori = new Inventori(self::$pdo);
 				$InventoriInfo = $Inventori::get_item_detail($value['uid_barang'])['response_data'][0];
 				$InventoriSatuan = $Inventori::get_satuan_detail($InventoriInfo['satuan_terkecil'])['response_data'][0];
+
+				$Accumulate = 0;
+                //Informasi barang sudah sampai
+                $DODetail = self::$query->select('inventori_do', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'inventori_do.po' => '= ?',
+                        'AND',
+                        'inventori_do.deleted_at' => 'IS NULL'
+                    ), array(
+                        $value['uid_po']
+                    ))
+                    ->execute();
+
+                foreach ($DODetail['response_data'] as $doKey => $doVal) {
+                    //get detail
+                    $doDetailItem = self::$query->select('inventori_do_detail', array(
+                        'qty'
+                    ))
+                        ->where(array(
+                            'inventori_do_detail.do_master' => '= ?',
+                            'AND',
+                            'inventori_do_detail.barang' => '= ?',
+                            'AND',
+                            'inventori_do_detail.deleted_at' => 'IS NULL'
+                        ), array(
+                            $doVal['uid'], $value['uid_barang']
+                        ))
+                        ->execute();
+                    foreach ($doDetailItem['response_data'] as $doDetailKey => $doDetailValue) {
+                        $Accumulate += floatval($doDetailValue['qty']);
+                    }
+                    $DODetail['response_data'][$doKey]['detail'] = $doDetailItem['response_data'];
+                }
+                $po_detail['response_data'][$key]['do'] = $DODetail['response_data'];
+                $po_detail['response_data'][$key]['sudah_sampai'] = $Accumulate;
 				$po_detail['response_data'][$key]['detail'] = $InventoriInfo;
 				$po_detail['response_data'][$key]['detail']['satuan_caption'] = $InventoriSatuan;
 

@@ -5,7 +5,7 @@
 				<ol class="breadcrumb mb-0">
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
 					<li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/inventori">Master Inventori</a></li>
-					<li class="breadcrumb-item active" aria-current="page">Gudang</li>
+					<li class="breadcrumb-item active" aria-current="page">Item</li>
 				</ol>
 			</nav>
 			<h4><span id="nama-departemen"></span>Master Inventori</h4>
@@ -36,7 +36,7 @@
                             </div>
                             <div class="card-body tab-content">
                                 <div class="tab-pane active show fade">
-                                    <table class="table table-bordered largeDataType" id="table-item">
+                                    <table class="table table-padding largeDataType" id="table-item">
                                         <thead class="thead-dark">
                                         <tr>
                                             <th class="wrap_content">No</th>

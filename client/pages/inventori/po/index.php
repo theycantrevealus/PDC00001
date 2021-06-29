@@ -27,12 +27,12 @@
             <table class="table table-bordered" id="table-po">
                 <thead class="thead-dark">
                 <tr>
-                    <th style="width: 20px;">No</th>
+                    <th class="wrap_content">No</th>
                     <th>Pemasok</th>
                     <th>Tanggal</th>
                     <th>Total Biaya</th>
                     <th>Oleh</th>
-                    <th>Aksi</th>
+                    <th class="wrap_content">Aksi</th>
                 </tr>
                 </thead>
                 <tbody></tbody>

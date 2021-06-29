@@ -1,5 +1,25 @@
 <script type="text/javascript">
     $(function() {
+        protocolLib = {
+            antrian_apotek_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", "<i class=\"fa fa-info\"></i> " + parameter, 3000, "request_resep");
+                tableResep.ajax.reload();
+            },
+            permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
+                console.clear();
+
+                listResep = load_resep();
+                requiredItem = populateObat(listResep);
+                for(var requiredItemKey in requiredItem) {
+                    $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase() + "</li>");
+                }
+
+                tableResep.clear();
+                tableResep.rows.add(load_resep());
+                tableResep.draw();
+                notification ("info", "<i class=\"fa fa-info\"></i> " + parameter, 3000, "request_resep");
+            }
+        };
         var selectedDokter = "";
         function load_resep() {
             var selected = [];
@@ -74,7 +94,7 @@
         }*/
 
         //get_resep_backend
-        var tableResep= $("#table-resep").DataTable({
+        var tableResep = $("#table-resep").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
@@ -91,10 +111,18 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
+                    var forReturn = [];
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
                         dataSet = [];
+                    }
+
+                    for(var dKey in dataSet) {
+                        if(dataSet[dKey].departemen !== undefined) {
+                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                                forReturn.push(dataSet[dKey]);
+                            }
+                        }
                     }
 
                     response.draw = parseInt(response.response_package.response_draw);
@@ -113,6 +141,11 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
                     }
                 },
                 {
@@ -145,12 +178,137 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">Proses</a>" +
+                            "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">" +
+                            "<span><i class=\"fa fa-check\"></i>Proses</span></a>" +
                             "</div>";
                     }
                 }
             ]
         });
+
+
+
+
+
+        var tableResep2 = $("#table-resep-2").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 15, -1], [20, 15, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: function(d){
+                    d.request = "get_resep_igd";
+                    d.request_type = "igd_inap";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+
+                    console.log(response);
+                    var forReturn = [];
+                    var forReturnSelesai = [];
+                    var dataSet = response.response_package.response_data;
+                    if(dataSet === undefined) {
+                        dataSet = [];
+                    }
+
+
+
+                    var autonum = 1;
+                    for(var dKey in dataSet) {
+                        if(
+                            dataSet[dKey].antrian.departemen !== undefined &&
+                            dataSet[dKey].antrian.departemen !== null
+                        ) {
+                            if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+                                dataSet[dKey].autonum = autonum;
+                                if(dataSet[dKey].status_resep === "D") {
+                                    forReturnSelesai.push(dataSet[dKey]);
+                                } else {
+                                    forReturn.push(dataSet[dKey]);
+                                }
+                                autonum++;
+                            }
+                        }
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return forReturn.concat(forReturnSelesai);
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Kode Amprah"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.antrian.departemen.uid === __POLI_INAP__) {
+                            return row.antrian.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.antrian.ns_detail.kode_ns + "]</span>" + row.antrian.ns_detail.nama_ns;
+                        } else {
+                            return row.antrian.departemen.nama;
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(
+                            row.antrian.pasien_info.panggilan_name !== undefined &&
+                            row.antrian.pasien_info.panggilan_name !== null
+                        ) {
+                            return row.antrian.pasien_info.panggilan_name.nama + " " + row.antrian.pasien_info.nama;
+                        } else {
+                            return row.antrian.pasien_info.nama;
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.antrian.penjamin_data.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.status_resep !== "D") {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">" +
+                                "<span><i class=\"fa fa-check\"></i>Proses</span>" +
+                                "</a>" +
+                                "</div>";
+                        } else {
+                            return "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Selesai</span>";
+                        }
+                    }
+                }
+            ]
+        });
+
+
+
 
         var targettedData = {};
 
@@ -830,7 +988,7 @@
 
 
         //SOCKET
-        Sync.onmessage = function(evt) {
+        /*Sync.onmessage = function(evt) {
             var signalData = JSON.parse(evt.data);
             var command = signalData.protocols;
             var type = signalData.type;
@@ -844,32 +1002,8 @@
                     protocolLib[command](command, type, parameter, sender, receiver, time);
                 }
             }
-        }
+        }*/
 
-
-
-        var protocolLib = {
-            userlist: function(protocols, type, parameter, sender, receiver, time) {
-                //
-            },
-            userlogin: function(protocols, type, parameter, sender, receiver, time) {
-                //
-            },
-            permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
-                console.clear();
-
-                listResep = load_resep();
-                requiredItem = populateObat(listResep);
-                for(var requiredItemKey in requiredItem) {
-                    $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase() + "</li>");
-                }
-
-                tableResep.clear();
-                tableResep.rows.add(load_resep());
-                tableResep.draw();
-                notification ("info", "<i class=\"fa fa-info\"></i> " + parameter, 3000, "request_resep");
-            }
-        };
     });
 </script>
 

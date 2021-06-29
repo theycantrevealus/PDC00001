@@ -126,12 +126,52 @@ class Mitra extends Utility {
                 $parameter[2]
             ))
             ->execute();
+	    foreach ($data['response_data'] as $key => $value) {
+	        $Harga = self::$query->select('master_tindakan_kelas_harga', array(
+	            'id',
+                'tindakan',
+                'kelas',
+                'harga',
+                'penjamin'
+            ))
+                ->where(array(
+                    'master_tindakan_kelas_harga.mitra' => '= ?',
+                    'AND',
+                    'master_tindakan_kelas_harga.tindakan' => '= ?',
+                    'AND',
+                    'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid'],
+                    $parameter[3]
+                ))
+                ->execute();
+	        $data['response_data'][$key]['harga'] = $Harga['response_data'];
+        }
+
 	    return $data;
     }
 
 	public function __DELETE__($parameter = array()) {
 		return self::delete($parameter);
 	}
+
+	public function get_mitra_provider($parameter) {
+	    $data = self::$query->select('master_tindakan_kelas_harga', array(
+	        'id',
+            'kelas',
+            'harga',
+            'mitra'
+        ))
+            ->where(array(
+                'master_tindakan_kelas_harga.tindakan' => '= ?',
+                'AND',
+                'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+	    return $data;
+    }
 
 	public function get_mitra() {
 		$data = self::$query->select('master_mitra', array(

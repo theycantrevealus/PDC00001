@@ -4,11 +4,11 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/inventori">Master Inventori</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Gudang</li>
+                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/inventori/stok/kartu">Kartu Stok</a></li>
+                    <li class="breadcrumb-item active" id="item_name" aria-current="page"></li>
                 </ol>
             </nav>
-            <h4><span id="nama-departemen"></span>Master Inventori</h4>
+            <h4><span id="nama-departemen"></span>Kartu Stok</h4>
         </div>
         <!-- <a href="<?php echo __HOSTNAME__; ?>/master/inventori/gudang/tambah" class="btn btn-info btn-sm ml-3">
 			<i class="fa fa-plus"></i> Tambah Gudang
@@ -30,12 +30,18 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <table class="table form-mode">
                                             <tr>
                                                 <td>Nama Barang</td>
-                                                <td>:</td>
+                                                <td class="wrap_content">:</td>
                                                 <td id="nama_barang"></td>
+
+                                                <td>Periode</td>
+                                                <td class="wrap_content">:</td>
+                                                <td style="width: 30%">
+                                                    <input id="range_stok" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td>Kemasan</td>
@@ -51,13 +57,13 @@
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-body">
-                                <div class="tab-pane active show fade">
-                                    <table class="table table-bordered largeDataType" id="table-item-log">
+                                <div class="tab-pane active show fade" id="loadResult">
+                                    <!--<table class="table largeDataType" id="table-item-log">
                                         <thead class="thead-dark">
                                         <tr>
                                             <th width="10%">Tanggal</th>
-                                            <th style="width: 10%;">Dokumen</th>
-                                            <th style="wrap_content">Uraian</th>
+                                            <th class="wrap_content">Dokumen</th>
+                                            <th style="wrap_content">Batch</th>
                                             <th class="wrap_content">Masuk</th>
                                             <th class="wrap_content">Keluar</th>
                                             <th class="wrap_content">Saldo</th>
@@ -65,7 +71,7 @@
                                         </tr>
                                         </thead>
                                         <tbody></tbody>
-                                    </table>
+                                    </table>-->
                                 </div>
                             </div>
                         </div>

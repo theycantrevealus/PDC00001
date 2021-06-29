@@ -24,6 +24,15 @@
 				//Init Data
 				$("#txt_kode_laboratorium").val(labData.kode);
 				$("#txt_nama_laboratorium").val(labData.nama);
+				if(labData.naratif === 'Y') {
+				    $("#txt_hasil_naratif").prop("checked", true);
+				    $("#nilai-lab tbody tr").each(function () {
+				        $(this).find("td:eq(4) input")
+                    });
+                } else {
+                    $("#txt_hasil_naratif").prop("checked", false);
+                }
+
 				if(labData.spesimen !== undefined && labData.spesimen !== null) {
                     load_spesimen("#txt_spesimen_laboratorium", labData.spesimen.uid);
                 }
@@ -54,16 +63,19 @@
 				}
 
 				autoLokasi(selectedLokasi);
-
 				for(var nil in labData.nilai) {
 					autoNilai({
 						"satuan": labData.nilai[nil].satuan,
 						"keterangan": labData.nilai[nil].keterangan,
 						"min": labData.nilai[nil].nilai_min,
-						"max": labData.nilai[nil].nilai_maks
+						"max": labData.nilai[nil].nilai_maks,
+                        "naratif": labData.naratif
 					});
 				}
-				autoNilai();
+
+				autoNilai({
+                    "naratif": labData.naratif
+                });
 
 
 				for(var pen in labData.penjamin) {
@@ -469,6 +481,7 @@
 			var max = ((setterNilai.max === undefined) ? 0 : setterNilai.max);
 			var satuan = ((setterNilai.satuan === undefined) ? "-" : setterNilai.satuan);
 			var keterangan = ((setterNilai.keterangan === undefined) ? "" : setterNilai.keterangan);
+			var naratif = ((setterNilai.naratif === undefined) ? "N" : setterNilai.naratif);
 
 			var newRowNilai = document.createElement("TR");
 			var newCellNilaiID = document.createElement("TD");
@@ -480,31 +493,42 @@
 
 			var newNilaiMin = document.createElement("INPUT");
 			$(newCellNilaiMin).append(newNilaiMin);
-			$(newNilaiMin).val(min).addClass("form-control nilai_min_selection").inputmask({
+			/*$(newNilaiMin).val(min).addClass("form-control nilai_min_selection").inputmask({
 				alias: 'decimal',
 				rightAlign: true,
 				placeholder: "0.00",
 				prefix: "",
 				autoGroup: false,
 				digitsOptional: true
-			});
+			});*/
 
 			var newNilaiMax = document.createElement("INPUT");
 			$(newCellNilaiMax).append(newNilaiMax);
-			$(newNilaiMax).val(max).addClass("form-control nilai_max_selection").inputmask({
+			/*$(newNilaiMax).val(max).addClass("form-control nilai_max_selection").inputmask({
 				alias: 'decimal',
 				rightAlign: true,
 				placeholder: "0.00",
 				prefix: "",
 				autoGroup: false,
 				digitsOptional: true
-			});
+			});*/
 			
 			var newNilaiSatuan = document.createElement("INPUT");
+			$(newNilaiSatuan).addClass("form-control");
 			$(newCellNilaiSatuan).append(newNilaiSatuan);
 			$(newNilaiSatuan).val(satuan).addClass("form-control nilai_satuan_selection");
 
-			var newNilaiKeterangan = document.createElement("INPUT");
+            var newNilaiKeterangan = document.createElement("INPUT");
+            /*if(naratif === 'Y') {
+                newNilaiKeterangan = document.createElement("TEXTAREA");
+            } else {
+                newNilaiKeterangan = document.createElement("INPUT");
+            }*/
+
+            $(newNilaiKeterangan).addClass("form-control").attr({
+                "placeholder": "Nama nilai pengujian"
+            });
+
 			$(newCellNilaiKeterangan).append(newNilaiKeterangan);
 			$(newNilaiKeterangan).val(keterangan).addClass("form-control nilai_keterangan_selection");
 
@@ -521,6 +545,33 @@
 			$("#nilai-lab tbody").append(newRowNilai);
 			rebaseNilai();
 		}
+
+		$("#txt_hasil_naratif").change(function () {
+            /*$("#nilai-lab tbody tr").each(function () {
+
+            });*/
+
+            var thisValue = ($(this).is(":checked")) ? "Y" : "N";
+            $.ajax({
+                url:__HOSTAPI__ + "/Laboratorium",
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"POST",
+                data: {
+                    request: "update_naratif",
+                    uid: UID,
+                    target_value: thisValue
+                },
+                success:function(response) {
+                    //
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        });
 
 		function rebaseNilai(){
 			$("#nilai-lab tbody tr").each(function(e) {
@@ -730,6 +781,8 @@
 			var nama = $("#txt_nama_laboratorium").val();
 			var spesimen = $("#txt_spesimen_laboratorium").val();
 			var keterangan = editorKeterangan.getData();
+            var naratif = $("#txt_hasil_naratif").is(":checked");
+
 
 			//Halaman 2
 			var kategori = [];
@@ -750,8 +803,10 @@
 
 			var nilai = [];
 			$("#nilai-lab tbody tr").each(function() {
-				var nilaiDataMin = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
-				var nilaiDataMax = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+                /*var nilaiDataMin = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
+                var nilaiDataMax = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");*/
+                var nilaiDataMin = $(this).find("td:eq(1) input").val();
+                var nilaiDataMax = $(this).find("td:eq(2) input").val();
 				var nilaiDataSatuan = $(this).find("td:eq(3) input").val();
 				var nilaiDataKeterangan = $(this).find("td:eq(4) input").val();
 
@@ -777,7 +832,9 @@
 				}
 			});*/
 
-			if(kode != "" && nama != "") {
+
+
+			if(nama != "") {
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Laboratorium",
@@ -788,6 +845,7 @@
 						nama: nama,
 						spesimen: spesimen,
 						keterangan: keterangan,
+                        naratif: ((naratif) ? "Y" : "N"),
 						kategori: kategori,
 						//lokasi: lokasi,
 						nilai: nilai,
@@ -798,7 +856,8 @@
 					},
 					type: "POST",
 					success: function(response){
-					    if(response.response_package[0].response_result > 0)
+                        console.log(response);
+					    if(response.response_package.response_result > 0)
                         {
                             Swal.fire(
                                 'Laboratorium',

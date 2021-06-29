@@ -1,5 +1,21 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function(){
+
+	    var currentPenjamin = "";
+
+        protocolLib = {
+            permintaan_radio_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "hasil_order_radio");
+                tableVerifikasiRadiologi.ajax.reload();
+                tableAntrianRadiologi.ajax.reload();
+            },
+            antrian_radiologi_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "hasil_order_radio");
+                tableVerifikasiRadiologi.ajax.reload();
+                tableAntrianRadiologi.ajax.reload();
+            }
+        };
 
 		var tableAntrianRadiologi = $("#table-antrian-radiologi").DataTable({
 			"ajax":{
@@ -55,19 +71,21 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
 									"<a href=\"" + __HOSTNAME__ + "/radiologi/antrian/" + row.uid + "\" class=\"btn btn-warning btn-sm\">" +
-										"<i class=\"fa fa-sign-out-alt\"></i>" +
+										"<span><i class=\"fa fa-sign-out-alt\"></i> Detail</span>" +
 									"</a>" +
-									"<a href=\"" + __HOSTNAME__ + "/radiologi/cetak/" + row.uid + "\" target='_blank' class=\"btn btn-primary btn-sm\">" +
-										"<i class=\"fa fa-print\"></i>" +
-									"</a>" +
+									"<button id=\"cetak_" + row.uid + "\" class=\"btn btn-primary btn-sm btnCetak\">" +
+										"<span><i class=\"fa fa-print\"></i>Cetak</span>" +
+									"</button>" +
 									"<button id=\"rad_order_" + row.uid + "\" type='button' class=\"btn btn-success btn-sm btn-selesai-radiologi\" data-toggle='tooltip' title='Tandai selesai'>" +
-										"<i class=\"fa fa-check\"></i>" +
+										"<span><i class=\"fa fa-check\"></i>Selesai</span>" +
 									"</a>" +
 								"</div>";
 					}
 				}
 			]
 		});
+
+
 
 		$("body").on("click", ".btn-selesai-radiologi", function() {
 		    var uid = $(this).attr("id").split("_");
@@ -176,8 +194,8 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button asesmen=\"" + row.uid_asesmen + "\" id=\"rad_order_" + row.uid + "\" type='button' class=\"btn btn-info btn-sm btn-verifikasi-radiologi\" data-toggle='tooltip' title=\"Verifikasi Radiologi\"'>" +
-                            "<i class=\"fa fa-check\"></i>" +
+                            "<button asesmen=\"" + row.uid_asesmen + "\" id=\"rad_order_" + row.uid + "\" type='button' penjamin=\"" + row.uid_penjamin + "\" class=\"btn btn-info btn-sm btn-verifikasi-radiologi\" data-toggle='tooltip' title=\"Verifikasi Radiologi\"'>" +
+                            "<span><i class=\"fa fa-check\"></i>Verifikasi</span>" +
                             "</a>" +
                             "</div>";
                     }
@@ -190,7 +208,10 @@
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
 
+            var penjamin = $(this).attr("penjamin");
+
             var asesmen = $(this).attr("asesmen");
+            currentPenjamin = $(this).attr("penjamin");
 
             $.ajax({
                 url: __HOSTAPI__ + "/Radiologi/get-order-detail/" + uid,
@@ -241,10 +262,25 @@
                         var asesmen = $(this).attr("asesmen");
                         var target = $(this).attr("target");
 
-                        loadMitra(id, tindakan);
+                        /*loadMitra(id, tindakan);
 
                         $("#" + id).select2({
                             dropdownParent: $("#modal-verif-radio")
+                        });*/
+
+                        $("#" + id).select2({
+                            dropdownParent: $("#modal-verif-radio"),
+                            data: loadMitra2("penyedia_order_" + tindakan, tindakan, penjamin),
+                            selectOnClose: true,
+                            escapeMarkup: function(markup) {
+                                return markup;
+                            },
+                            templateResult: function(data) {
+                                return data.html;
+                            },
+                            templateSelection: function(data) {
+                                return data.text;
+                            }
                         });
 
                         loadHarga($("#" + id).val(), asesmen, tindakan, target);
@@ -300,8 +336,20 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function (response) {
-                            $("#modal-verif-radio").modal("hide");
-                            tableVerifikasiRadiologi.ajax.reload();
+                            if(currentPenjamin === __UIDPENJAMINBPJS__) {
+                                push_socket(__ME__, "antrian_radiologi_baru", "*", "Permintaan radiologi", "info").then(function() {
+                                    $("#modal-verif-radio").modal("hide");
+                                    tableVerifikasiRadiologi.ajax.reload();
+                                    tableAntrianRadiologi.ajax.reload();
+                                });
+                            } else {
+                                push_socket(__ME__, "kasir_daftar_baru", "*", "Tagihan Radiologi Baru", "info").then(function() {
+                                    $("#modal-verif-radio").modal("hide");
+                                    tableVerifikasiRadiologi.ajax.reload();
+                                    tableAntrianRadiologi.ajax.reload();
+                                });
+                            }
+
                         },
                         error: function (response) {
                             //
@@ -309,8 +357,129 @@
                     });
                 }
             });
-
         });
+
+        $("body").on("click", ".btnCetak", function() {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+
+            var radItem = loadRadOrderDetail(uid);
+            var radLampiran = loadRadOrderLampiran(uid);
+            var radPasien = loadRadOrderPasien(uid);
+
+
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/rad_hasil.php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    rad_pasien: radPasien,
+                    rad_item: radItem,
+                    rad_lampiran: radLampiran
+                },
+                success: function (response) {
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).printThis({
+                        importCSS: true,
+                        base: false,
+                        pageTitle: "Laporan Radiologi " + radPasien.pasien.no_rm,
+                        afterPrint: function() {
+                            //
+                        }
+                    });
+                },
+                error: function (response) {
+                    //
+                }
+            });
+
+            return false;
+        });
+
+        function loadRadOrderDetail(uid){
+            var html;
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Radiologi/get-order-detail/" + uid,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    if (response.response_package.response_result > 0){
+                        console.clear();
+                        html = "<ol>";
+                        dataItem = response.response_package.response_data;
+                        $.each(dataItem, function(key, item){
+                            html += "<li style=\"border-bottom: dashed 1px #808080; padding: 10px 0;\">" +
+                                    "<div style=\"margin-left: 10px\">" +
+                                    "<h4>" + item.tindakan + "</h4>" +
+                                    "<b>Keterangan:</b><br />" + item.keterangan +
+                                    "<br />" +
+                                    "<b>Kesimpulan:</b><br />" + item.kesimpulan +
+                                    "</div>" +
+                                "</li>";
+                        });
+                        html += "</ol>";
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return html;
+        }
+
+        function loadRadOrderLampiran(uid) {
+            var MetaData;
+            var html = "";
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Radiologi/get-radiologi-lampiran/" + uid,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    MetaData = response.response_package.response_data;
+                    for(LampKey in MetaData) {
+                        html += "<div class=\"pagebreak\">" +
+                            "<embed type=\"application/pdf\" src=\"" + __HOST__ + "document/radiologi/" + MetaData[LampKey].radiologi_order + "/" + MetaData[LampKey].lampiran + "\" width=\"100%\" height=\"100%\" />" +
+                            "</div>";
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return html;
+        }
+
+        function loadRadOrderPasien(uid) {
+            var MetaData;
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Radiologi/get-data-pasien-antrian/" + uid,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    MetaData = response.response_package;
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return MetaData;
+        }
 
         function loadHarga(mitra, asesmen, tindakan, target) {
             $("#harga_" + target + "_" + tindakan).html("<b>0.00</b>").attr({
@@ -403,11 +572,89 @@
             })
         }
 
+
+
+        function loadMitra2(target_ui, itemLab, penjamin){
+            var MetaData = [];
+            var returnedData = [];
+            resetSelectBox(target_ui, "Mitra");
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Mitra/mitra_item/RAD/" + itemLab,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    MetaData = response.response_package.response_data;
+
+                    if (MetaData != "" && MetaData !== undefined && MetaData !== null){
+                        //$("#" + target_ui + " option").remove();
+                        for(i = 0; i < MetaData.length; i++){
+                            var target_harga = 0;
+                            for(var ai in MetaData[i].harga) {
+                                if(MetaData[i].harga[ai].penjamin === penjamin) {
+                                    target_harga = MetaData[i].harga[ai].harga;
+                                }
+                            }
+
+                            returnedData.push({
+                                id: MetaData[i].uid,
+                                text: "<div class=\"" + ((parseFloat(target_harga) > 0) ? "text-success" : "text-danger") + "\">" + MetaData[i].nama + "</div>",
+                                html: "<h6 class=\"" + ((parseFloat(target_harga) > 0) ? "text-success" : "text-danger") + "\">" + MetaData[i].nama + "<b style=\"position: absolute; right: 30px;\" class=\"pull-right\">" + number_format(target_harga, 2, ".", ",") + "</b></h6>",
+                                title: MetaData[i].nama
+                            });
+                            /*var selection = document.createElement("OPTION");
+
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama + " - <b>" + number_format(target_harga, 2, ".", ",") + "</b>");
+                            $("#" + target_ui).append(selection);*/
+                        }
+                    } else {
+                        returnedData = [];
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return returnedData;
+        }
+
+
+
+
+
         function resetSelectBox(selector, name) {
             $("#"+ selector +" option").remove();
             var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
             $("#" + selector).append(opti_null);
         }
+
+        /*Sync.onmessage = function(evt) {
+            var signalData = JSON.parse(evt.data);
+            var command = signalData.protocols;
+            var type = signalData.type;
+            var sender = signalData.sender;
+            var receiver = signalData.receiver;
+            var time = signalData.time;
+            var parameter = signalData.parameter;
+
+            console.log(signalData);
+            if(command !== undefined && command !== null && command !== "") {
+                protocolLib.command(command, type, parameter, sender, receiver, time);
+            } else {
+                console.log(command);
+            }
+        }*/
+
+        setTimeout(function() {
+
+            tableAntrianRadiologi.ajax.reload();
+            tableVerifikasiRadiologi.ajax.reload();
+
+        }, 5000);
+
 	});
 </script>
 

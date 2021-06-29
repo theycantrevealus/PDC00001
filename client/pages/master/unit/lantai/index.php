@@ -25,7 +25,7 @@
 						<tr>
 							<th class="wrap_content">No</th>
 							<th>Nama Lantai</th>
-							<th>Aksi</th>
+							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>
 					<tbody>

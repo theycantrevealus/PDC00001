@@ -114,7 +114,6 @@
             </td>
             <td style="width:45%;">
                 <span class="title"><b>PEMERINTAH KABUPATEN BINTAN</b></span>
-                <span class="title">DINAS KESEHATAN</span>
                 <span class="title"><?php echo __PC_CUSTOMER__;?></span>
                 <span class="alamat"><?php echo $_POST['alamat'];?></span>
                 <span class="telepon">Telp. <?php echo $_POST['no_telepon'];?></span>

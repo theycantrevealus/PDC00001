@@ -121,6 +121,8 @@
                         require 'asesmen-gigi.php';
                     } else if(in_array(__POLI_MATA__, $PoliList)) {
                         require 'asesmen-mata.php';
+                    } else if(in_array(__POLI_ORTODONTIE__, $PoliList)) {
+                        require 'asesmen-gigi.php';
                     }
                     require 'asesmen-awal.php';
                     ?>
@@ -153,8 +155,10 @@
                     <?php require 'info-pasien.php'; ?>
                     <?php require 'dokumen.php'; ?>
                 </div>
-                <?php require 'action-panel.php'; ?>
 			</div>
+            <div class="card card-footer custom-card-footer">
+                <?php require 'action-panel.php'; ?>
+            </div>
 		</div>
 	</div>
 </div>

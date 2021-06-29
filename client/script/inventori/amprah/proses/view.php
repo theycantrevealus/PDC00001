@@ -4,6 +4,78 @@
 		var unit_pengamprah = {};
 		var pegawai_pengamprah = "";
 		var selectedItem = "";
+		var targetJumlahAmprah = 0;
+
+		//Load Stok dari unit pengamprah
+        var tableStokPengamprah = $("#table-monitor-batch").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[10, 15, -1], [10, 15, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Inventori",
+                type: "POST",
+                data: function(d){
+                    d.request = "get_stok_batch_unit";
+                    d.gudang = unit_pengamprah.gudang;
+                    d.barang = selectedItem;
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var returnedData = [];
+                    var dataSet = response.response_package.response_data;
+                    if(dataSet == undefined) {
+                        dataSet = [];
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    for(var a in dataSet) {
+                        if(parseFloat(dataSet[a].stok_terkini) > 0) {
+                            returnedData.push(dataSet[a]);
+                        }
+                    }
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Batch"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.batch;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.expired_date;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<h6>" + number_format(row.stok_terkini, 2, ".", ",") + "</h6>";
+                    }
+                }
+            ]
+        });
+
+
+
 
 		$.ajax({
 			url:__HOSTAPI__ + "/Inventori/get_amprah_detail/" + __PAGES__[4],
@@ -48,7 +120,7 @@
 						"id": "barang_" + data.amprah_detail[key].id
 					});
 					$(col_satuan).html(data.amprah_detail[key].item.satuan_terkecil.nama);
-					$(col_permintaan).html(data.amprah_detail[key].jumlah).addClass("number_style").attr({
+					$(col_permintaan).html(number_format(data.amprah_detail[key].jumlah, 2, ".", ",")).addClass("number_style").attr({
 						"id": "request_qty_" + data.amprah_detail[key].item.uid
 					});
 
@@ -69,31 +141,44 @@
 					$(viewer_row).append(col_jumlah);
 					$(viewer_row).append(col_batch);
 
-
 					$("#table-verifikasi tbody").append(viewer_row);
 				}
 
 				$("#verif_keterangan").html(data.keterangan);
-
-
-				console.log(metaData);
 			},
 			error: function(response) {
 				console.log(response);
 			}
 		});
 
-		$("body").on("focus", ".qty", function() {
-			var id = $(this).attr("id").split("_");
+		function TotalAllQty() {
+            var totalAll = 0;
+            $("#table-batch tbody tr").each(function (e) {
+                var totalRow = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
+                totalAll += parseFloat(totalRow);
+            });
+
+            $("#total_dipenuhi").html(number_format(totalAll, 2, ".", ","));
+        }
+
+		$("body").on("keyup", ".batch_qty", function() {
+		    TotalAllQty();
+        });
+
+		$("body").on("click", ".qty", function() {
+		    var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
 
 			selectedItem = id;
+
+			tableStokPengamprah.ajax.reload();
 
 			$("#keterangan_per_item").val($("#keterangan_amprah_" + selectedItem).text());
 
 			if(metaData[id] != undefined) {
 				$("#table-batch tbody tr").remove();
-				$("#table-monitor-batch tbody tr").remove();
+				//$("#table-monitor-batch tbody tr").remove();
+                targetJumlahAmprah = parseFloat($("#request_qty_" + id).html().replaceAll(",",""));
 				$("#target_batch_amprah").html(metaData[id].nama);
 				$("#qty_batch_amprah").html($("#request_qty_" + id).html());
 				$("#unit_pengamprah").html(unit_pengamprah.nama);
@@ -113,11 +198,13 @@
 						$(batchKodeCont).html(metaData[id].batch[key].kode + "<br /><b>Exp : " + metaData[id].batch[key].expired + "</b>");
 
 						var batchStokCont = document.createElement("TD");
-						$(batchStokCont).html(metaData[id].batch[key].stok_terkini);
+						$(batchStokCont).html(number_format(metaData[id].batch[key].stok_terkini, 2, ".", ",")).addClass("number_style").attr({
+                            "jumlah": metaData[id].batch[key].stok_terkini
+                        });
 
 						var batchJumlahCont = document.createElement("TD");
 						var batchProsesJumlah = document.createElement("INPUT");
-						$(batchProsesJumlah).addClass("form-control").inputmask({
+						$(batchProsesJumlah).addClass("form-control batch_qty").inputmask({
 							alias: 'currency',
 							rightAlign: true,
 							placeholder: "0,00",
@@ -143,7 +230,12 @@
 						$("#table-batch tbody").append(batchRow);
 					}
 				}
-				
+                $("#table-batch tfoot").remove();
+                $("#table-batch").append("<tfoot><tr>" +
+                    "<td colspan=\"3\" class=\"text-right\"><b>TOTAL</b></td>" +
+                    "<td class=\"number_style\" id=\"total_dipenuhi\">0.00</td>" +
+                    "</tr></tfoot>");
+                TotalAllQty();
 				$("#form-batch-barang").modal("show");
 			}
 		});
@@ -172,7 +264,7 @@
 				}
 			});
 
-			if(totalRequest != parseFloat(qty_batch_amprah)) {
+			if(totalRequest != parseFloat(targetJumlahAmprah)) {
 				if($("#keterangan_per_item").val() != "") {
 					$("ol#item_batch_" + selectedItem + " li").remove();
 					for(var bKey in metaData[selectedItem].batch) {
@@ -192,11 +284,45 @@
 					$("#keterangan_per_item").focus();
 					notification ("danger", "Jumlah tidak memenuhi permintaan. Wajib isi keterangan", 3000, "proceed_amprah");
 				}
-			}
+			} else {
+                $("ol#item_batch_" + selectedItem + " li").remove();
+                for(var bKey in metaData[selectedItem].batch) {
+                    var newListBatch = document.createElement("LI");
+
+                    if(metaData[selectedItem].batch[bKey].disetujui > 0) {
+                        $(newListBatch).html(metaData[selectedItem].batch[bKey].kode + " - [<b>" + metaData[selectedItem].batch[bKey].expired + "</b>] <b style=\"padding-right: 120px; float: right\" class=\"text-info\">(" + metaData[selectedItem].batch[bKey].disetujui + ")</b>");
+                        $("ol#item_batch_" + selectedItem).append(newListBatch);
+                    }
+                }
+                $("p#keterangan_amprah_" + selectedItem).html($("#keterangan_per_item").val());
+                metaData[selectedItem].totalRequest = totalRequest;
+                metaData[selectedItem].keterangan = $("#keterangan_per_item").val();
+                $("#qty_disetujui_" + selectedItem).html(totalRequest);
+                $("#form-batch-barang").modal("hide");
+            }
 		});
 
+		$("#btn_penuhi").click(function () {
+		    var totalTerpenuhi = 0;
+		    var sisaTerpenuhi = targetJumlahAmprah;
+            $("#table-batch tbody tr").each(function (e) {
+                var totalRow = $(this).find("td:eq(2)").attr("jumlah");
+                if(sisaTerpenuhi <= totalRow) {
+                    totalTerpenuhi += sisaTerpenuhi;
+                    $(this).find("td:eq(3) input").val(sisaTerpenuhi);
+                    return false;
+                } else {
+                    $(this).find("td:eq(3) input").val(totalRow);
+                    sisaTerpenuhi -= totalRow;
+                }
+
+                totalTerpenuhi += parseFloat(totalRow);
+            });
+
+            $("#total_dipenuhi").html(number_format(totalTerpenuhi, 2, ".", ","));
+        });
+
 		$("#btnSubmitProsesAmprah").click(function() {
-			console.log(metaData)
 			var conf = confirm("Proses Amprah?");
 			if(conf) {
 				$("#btnSubmitProsesAmprah").attr({
@@ -220,8 +346,7 @@
 						if(response.response_package.response_result > 0) {
 							location.href = __HOSTNAME__ + "/inventori/amprah/proses";
 						} else {
-							console.log(response);
-							$("#btnSubmitProsesAmprah").removeAttr("disabled");	
+							$("#btnSubmitProsesAmprah").removeAttr("disabled");
 						}
 					},
 					error: function(response) {
@@ -253,14 +378,14 @@
 						<table class="table form-mode">
 							<tr>
 								<td>Nama Barang</td>
-								<td>:</td>
+								<td class="wrap_content">:</td>
 								<td>
 									<b id="target_batch_amprah"></b>
 								</td>
 							</tr>
 							<tr>
 								<td>Jumlah Permintaan</td>
-								<td>:</td>
+								<td class="wrap_content">:</td>
 								<td>
 									<b id="qty_batch_amprah"></b>
 								</td>
@@ -276,12 +401,15 @@
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Batch</th>
-									<th>Tersedia</th>
+                                    <th>Tersedia</th>
 									<th>Jumlah</th>
 								</tr>
 							</thead>
 							<tbody></tbody>
 						</table>
+                        <button class="btn btn-info pull-right" id="btn_penuhi">
+                            <i class="fa fa-check-circle"></i> Penuhi Permintaan
+                        </button>
 					</div>
 					<div class="col-6">
 						<h5 class="uppercase">Monitor Sisa Stok Unit <b id="unit_pengamprah"></b></h5>
@@ -290,6 +418,7 @@
 								<tr>
 									<th class="wrap_content">No</th>
 									<th>Batch</th>
+                                    <th>Expired</th>
 									<th>Tersedia</th>
 								</tr>
 							</thead>
@@ -297,6 +426,7 @@
 						</table>
 					</div>
 					<div class="col-12">
+                        <br /><br />
 						<b>Keterangan:</b>
 						<textarea class="form-control" id="keterangan_per_item"></textarea>
 					</div>

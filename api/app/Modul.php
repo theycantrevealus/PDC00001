@@ -82,6 +82,9 @@ class Modul extends Utility {
 			case 'edit_modul':
 				return self::edit_modul($parameter);
 				break;
+            case 'rebase_modul':
+                return self::rebaseModulLevel($parameter['parent'], $parameter['level']);
+                break;
 			default:
 				return array(
 					'response_message' => 'Unknown Request'
@@ -178,31 +181,101 @@ class Modul extends Utility {
 
 				->execute();
 		}
+
+        //Update Level
+        $LevelCount = 0;
+        $ParentLevel = self::$query->select('modul', array(
+            'level'
+        ))
+            ->where(array(
+                'modul.deleted_at' => 'IS NULL',
+                'AND',
+                'modul.id' => '= ?'
+            ), array(
+                $parameter['parent']
+            ))
+            ->execute();
+        if(count($ParentLevel['response_data']) > 0) {
+            $LevelCount = intval($ParentLevel['response_data'][0]['level']);
+        }
+
+
+		$process = self::$query->update('modul', array(
+            'nama' => $parameter['nama'],
+            'identifier' => $parameter['identifier'],
+            'keterangan' => $parameter['keterangan'],
+            'updated_at' => parent::format_date(),
+            'parent' => $parameter['parent'],
+            'icon' => $parameter['icon'],
+            'show_on_menu' => $parameter['show_on_menu'],
+            'show_order' => $parameter['show_order'],
+            'menu_group' => $parameter['menu_group'],
+            'level' => intval($LevelCount) + 1
+        ))
+
+        ->where(array(
+            'modul.deleted_at' => 'IS NULL',
+            'AND',
+            'modul.id' => '= ?'
+        ), array(
+            $parameter['id']
+        ))
+
+        ->execute();
+
+
 		
-		return
-			self::$query
-				->update('modul', array(
-					'nama' => $parameter['nama'],
-					'identifier' => $parameter['identifier'],
-					'keterangan' => $parameter['keterangan'],
-					'updated_at' => parent::format_date(),
-					'parent' => $parameter['parent'],
-					'icon' => $parameter['icon'],
-					'show_on_menu' => $parameter['show_on_menu'],
-					'show_order' => $parameter['show_order'],
-					'menu_group' => $parameter['menu_group']	
-				))
-
-				->where(array(
-					'modul.deleted_at' => 'IS NULL',
-					'AND',
-					'modul.id' => '= ?'
-				), array(
-					$parameter['id']
-				))
-
-				->execute();
+		return $process;
 	}
+
+	private function rebaseModulLevel($parent, $level) {
+	    $modul = self::$query->select('modul', array(
+	        'id',
+	        'parent',
+            'level'
+        ))
+            ->where(array(
+                'modul.deleted_at' => 'IS NULL',
+                'AND',
+                'modul.parent' => '= ?'
+            ), array(
+                $parent
+            ))
+            ->execute();
+	    foreach ($modul['response_data'] as $key => $value) {
+	        $UpdateLevel = self::$query->update('modul', array(
+	            'level' => intval($level) + 1
+            ))
+                ->where(array(
+                    'modul.deleted_at' => 'IS NULL',
+                    'AND',
+                    'modul.id' => '= ?'
+                ), array(
+                    $value['id']
+                ))
+                ->execute();
+
+	        //Get Child
+            $Child = self::$query->select('modul', array(
+                'parent',
+                'level'
+            ))
+                ->where(array(
+                    'modul.deleted_at' => 'IS NULL',
+                    'AND',
+                    'modul.parent' => '= ?'
+                ), array(
+                    $value['id']
+                ))
+                ->execute();
+            if(count($Child['response_data']) > 0) {
+                $UpdateChild = self::rebaseModulLevel($value['id'], ($level + 1));
+            }
+
+            $modul['response_data'][$key]['child'] = (count($Child['response_data']) > 0) ? $Child['response_data'] : array();
+        }
+	    return $modul;
+    }
 
 	private function get_child($parameter) {
 		$child_list = array();
@@ -237,10 +310,20 @@ class Modul extends Utility {
 	}
 	
 	public function get_all() {
-		$query = self::$pdo->prepare('SELECT * FROM "public"."modul" WHERE deleted_at IS NULL');
-		$query->execute();
-		$read = $query->fetchAll(\PDO::FETCH_ASSOC);
-		return $read;
+		//$query = self::$pdo->prepare('SELECT * FROM "public"."modul" WHERE deleted_at IS NULL');
+        $query = self::$query->select('modul', array(
+            'id', 'level', 'nama', 'identifier', 'keterangan', 'created_at', 'updated_at', 'deleted_at', 'parent', 'icon', 'show_on_menu', 'show_order', 'menu_group'
+        ))
+            ->order(array(
+                'parent' => 'asc'
+            ))
+            ->where(array(
+                'modul.deleted_at' => 'IS NULL'
+            ))
+            ->execute();
+		//$query->execute();
+		//$read = $query->fetchAll(\PDO::FETCH_ASSOC);
+		return $query['response_data'];
 	}
 
 	private function reload_methods() {
@@ -428,7 +511,7 @@ class Modul extends Utility {
 
 	public function get_tree($parent) {
 		$arrayData = array();
-		$query = self::$pdo->prepare('SELECT * FROM modul WHERE parent = ? AND deleted_at IS NULL ORDER BY menu_group ASC');
+		$query = self::$pdo->prepare('SELECT * FROM modul WHERE parent = ? AND deleted_at IS NULL ORDER BY show_order ASC');
 		$query->execute(array($parent));
 		$read = $query->fetchAll(\PDO::FETCH_ASSOC);
 		foreach ($read as $key => $value) {

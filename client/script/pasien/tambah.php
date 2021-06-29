@@ -9,7 +9,7 @@
 		loadTermSelectBox('pendidikan', 8);
 		loadTermSelectBox('pekerjaan', 9);
 		loadTermSelectBox('status_suami_istri', 10);
-		loadTermSelectBox('alamat_kecamatan', 12);
+		//loadTermSelectBox('alamat_kecamatan', 12);
 		loadTermSelectBox('goldar', 4);
 		loadTermSelectBox('agama', 5);
 		loadTermSelectBox('warganegara', 7);
@@ -148,7 +148,11 @@
 								location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + response.response_package.response_unique;
 							}
 						} else {
-							location.href = __HOSTNAME__ + "/pasien";
+						    if(response.response_package.response_result > 0) {
+                                location.href = __HOSTNAME__ + "/pasien";
+                            } else {
+						        console.log(response);
+                            }
 						}
 					},
 					error: function(response) {

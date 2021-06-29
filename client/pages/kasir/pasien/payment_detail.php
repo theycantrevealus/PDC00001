@@ -1,16 +1,22 @@
 <div class="row">
 	<div class="col-lg">
 		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
+			<div class="card-header card-header-large bg-white align-items-center">
                 <div class="row info-kwitansi">
-                    <div class="col-4">
-                        <h5 class="card-header__title flex m-0" id="nama-pasien-faktur"></h5>
+                    <div class="col-6">
+                        <span class="card-header__title" id="nama-pasien-faktur"></span>
                     </div>
-                    <div class="col-4">
-                        <h5 class="card-header__title flex m-0 text-right" id="pegawai-faktur"></h5>
+                    <div class="col-6">
+                        <span class="card-header__title" id="pegawai-faktur"></span>
                     </div>
-                    <div class="col-4">
-                        <h5 class="card-header__title flex m-0 text-right" id="tanggal-faktur"></h5>
+                </div>
+                <br />
+                <div class="row info-kwitansi">
+                    <div class="col-6">
+                        <span class="card-header__title" id="tanggal-faktur"></span>
+                    </div>
+                    <div class="col-6">
+                        <span class="card-header__title" id="poli"></span>
                     </div>
                 </div>
 			</div>
@@ -26,8 +32,8 @@
 								<th class="wrap_content">No</th>
 								<th>Item</th>
 								<th class="wrap_content">Jlh</th>
-								<th style="max-width: 200px; width: 200px">Harga</th>
-								<th style="max-width: 200px; width: 200px">Subtotal</th>
+								<th class="number_style" style="max-width: 200px; width: 200px">Harga</th>
+								<th class="number_style" style="max-width: 200px; width: 200px">Subtotal</th>
 							</tr>
 						</thead>
 						<tbody></tbody>
@@ -40,12 +46,12 @@
 								</td>
 								<td id="total-faktur" class="text-right">0.00</td>
 							</tr>
-							<tr>
+							<!--tr>
 								<td class="text-right">Diskon</td>
 								<td id="diskon-faktur" class="text-right">
 									
 								</td>
-							</tr>
+							</tr-->
 							<tr>
 								<td class="text-right">
 									Grand Total

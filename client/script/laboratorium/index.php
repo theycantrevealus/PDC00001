@@ -2,6 +2,9 @@
 <script type="text/javascript">
 	$(function() {
 
+	    var currentPenjamin = '';
+	    var printMode = false;
+
 	    var tableServiceLabor = $("#service_labor").DataTable({
             processing: true,
             serverSide: true,
@@ -237,7 +240,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["waktu_order"];
+                        return "<span id=\"tanggal_labor_" + row.uid + "\">" + row["waktu_order"] + "</span>";
 					}
 				},
 				{
@@ -264,13 +267,13 @@
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
-                                    "<i class=\"fa fa-sign-out-alt\"></i>" +
+                                    "<span><i class=\"fa fa-sign-out-alt\"></i> Proses</span>" +
                                 "</a>" +
-                                "<a href=\"" + __HOSTNAME__ + "/laboratorium/cetak/" + row['uid'] + "\" target='_blank' class=\"btn btn-primary btn-sm\">" +
-                                    "<i class=\"fa fa-print\"></i>" +
-                                "</a>" +
+                                "<button class=\"btn btn-info btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
+                                    "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                "</button>" +
                                 "<button type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-success btn-sm btn-selesai\" data-toggle='tooltip' title='Tandai selesai'>" +
-                                    "<i class=\"fa fa-check\"></i>" +
+                                    "<span><i class=\"fa fa-check\"></i> Selesai</span>" +
                                 "</a>" +
                             "</div>";
 					}
@@ -308,6 +311,7 @@
                                     "success"
                                 ).then((result) => {
                                     tableAntrianLabor.ajax.reload();
+                                    tableServiceLabor.ajax.reload();
                                 });
                             } else {
                                 Swal.fire(
@@ -390,7 +394,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["waktu_order"];
+                        return "<span id=\"tanggal_labor_" + row.uid + "\">" + row["waktu_order"] + "</span>";
                     }
                 },
                 {
@@ -429,6 +433,8 @@
         });
 
 
+
+
         $("body").on("click", ".btnCetak", function() {
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
@@ -438,7 +444,6 @@
             var labLampiran = loadLampiran(uid);
 
             //console.log(labItem);
-
             $.ajax({
                 async: false,
                 url: __HOST__ + "miscellaneous/print_template/lab_hasil.php",
@@ -447,23 +452,39 @@
                 },
                 type: "POST",
                 data: {
+                    __HOSTNAME__ : __HOSTNAME__,
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     lab_pasien: labPasien,
                     lab_item: labItem,
-                    lab_lampiran: labLampiran
+                    lab_lampiran: labLampiran,
+                    tanggal: $("#tanggal_labor_" + uid).html()
                 },
                 success: function (response) {
-                    var containerItem = document.createElement("DIV");
-                    $(containerItem).html(response);
-                    $(containerItem).printThis({
+                    /*var win = window.open("", "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=1280,height=800,top="+(screen.height-400)+",left="+(screen.width-840));
+                    win.document.body.innerHTML = response;*/
+
+                    printMode = true;
+                    $(response).printThis({
+                        printDelay: 1000,
                         importCSS: true,
-                        base: false,
+                        base: __HOSTNAME__,
+                        canvas: true,
                         pageTitle: "Laporan Laboratorium " + labPasien.pasien.no_rm,
                         afterPrint: function() {
                             //
                         }
+                    });
+
+                    var containerItem = document.createElement("DIV");
+                    $(containerItem).html(response);
+                    $(containerItem).on("load", function () {
+
+                        /*if(printMode) {
+                            printMode = false;
+
+                        }*/
                     });
                 },
                 error: function (response) {
@@ -480,6 +501,10 @@
         $("body").on("click", ".btn-detail-verif", function() {
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
+
+            var penjamin = $(this).attr("penjamin");
+
+            currentPenjamin = penjamin;
 
             //Get Detail
             $.ajax({
@@ -500,12 +525,23 @@
                         var thisTindakan = $(this).attr("id").split("_");
                         thisTindakan = thisTindakan[thisTindakan.length - 1];
 
-                        loadMitra("penyedia_order_" + thisTindakan, "");
+
 
 
 
                         $(this).select2({
-                            dropdownParent: $("#modal-detail-labor")
+                            dropdownParent: $("#modal-detail-labor"),
+                            data: loadMitra("penyedia_order_" + thisTindakan, thisTindakan, penjamin),
+                            selectOnClose: true,
+                            escapeMarkup: function(markup) {
+                                return markup;
+                            },
+                            templateResult: function(data) {
+                                return data.html;
+                            },
+                            templateSelection: function(data) {
+                                return data.text;
+                            }
                         });
 
 
@@ -646,14 +682,198 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail-verif\" data-toggle='tooltip' title='Detail'>" +
-                            "<i class=\"fa fa-search\"></i>" +
+                            "<button penjamin=\"" + row.uid_penjamin + "\" type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail-verif\" data-toggle='tooltip' title='Detail'>" +
+                            "<span><i class=\"fa fa-search\"></i> Detail</span>" +
                             "</a>" +
                             "</div>";
                     }
                 }
             ]
         });
+
+
+
+        var targettedReagenLab;
+
+        var tableLab = $("#table-lab").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Laboratorium",
+                type: "POST",
+                data: function(d) {
+                    d.request = "get_lab_backend";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    return response.response_package.response_data;
+                }
+            },
+            autoWidth: false,
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Laboratorium"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["autonum"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"kode_" + row["uid"] + "\">" + row["kode"].toUpperCase() + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.spesimen !== undefined && row.spesimen !== null) {
+                            return row.spesimen.nama;
+                        } else {
+                            return "-";
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<button id=\"lab_detail_" + row['uid'] + "\" class=\"btn btn-info btn-sm btn-detail-lab\">" +
+                            "<i class=\"fa fa-eye\"></i>" +
+                            "</button>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+
+
+
+        $("body").on("click", ".btn-detail-lab", function() {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+            targettedReagenLab = uid;
+
+
+            //Load Nilai
+            $.ajax({
+                url:__HOSTAPI__ + "/Laboratorium/lab_detail/" + uid,
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    labData = response.response_package.response_data[0];
+                    console.clear();
+                    console.log(response);
+                    for(var nil in labData.nilai) {
+                        autoNilai({
+                            "satuan": labData.nilai[nil].satuan,
+                            "keterangan": labData.nilai[nil].keterangan,
+                            "min": labData.nilai[nil].nilai_min,
+                            "max": labData.nilai[nil].nilai_maks,
+                            "naratif": labData.naratif
+                        });
+                    }
+                    $("#modal-detail-labor-reagen").modal("show");
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return false;
+        });
+
+
+        function autoNilai(setterNilai = {}) {
+            var min = ((setterNilai.min === undefined) ? 0 : setterNilai.min);
+            var max = ((setterNilai.max === undefined) ? 0 : setterNilai.max);
+            var satuan = ((setterNilai.satuan === undefined) ? "-" : setterNilai.satuan);
+            var keterangan = ((setterNilai.keterangan === undefined) ? "" : setterNilai.keterangan);
+            var naratif = ((setterNilai.naratif === undefined) ? "N" : setterNilai.naratif);
+
+            var newRowNilai = document.createElement("TR");
+            var newCellNilaiID = document.createElement("TD");
+            var newCellNilaiKeterangan = document.createElement("TD");
+            var newCellNilaiAksi = document.createElement("TD");
+
+            var newNilaiKeterangan = document.createElement("INPUT");
+
+            $(newNilaiKeterangan).addClass("form-control").attr({
+                "placeholder": "Nama nilai pengujian"
+            });
+
+            $(newCellNilaiKeterangan).html(keterangan);
+
+            var newNilaiCheck = document.createElement("INPUT");
+            $(newCellNilaiAksi).append("<ol type=\"1\" class=\"form-list-item\" style=\"list-style-type: none\">" +
+            "<li class=\"wrapped\"><div class=\"row\">" +
+                "<div class=\"col-md-12\">" +
+                "<div class=\"form-check\">" +
+                "<input type=\"checkbox\" name=\"riwayat_merokok_option\" value=\"A\" />" +
+                "<label class=\"form-check-label\">Ya </label>" +
+                "</div>" +
+                "</div>" +
+                "</div></li></ol>");
+
+            $(newRowNilai).append(newCellNilaiID);
+            $(newRowNilai).append(newCellNilaiKeterangan);
+            $(newRowNilai).append(newCellNilaiAksi);
+            $("#nilai-lab tbody").append(newRowNilai);
+            rebaseNilai();
+        }
+
+
+
+        function rebaseNilai(){
+            $("#nilai-lab tbody tr").each(function(e) {
+                var id = (e + 1);
+
+                $(this).attr({
+                    "id": "row_nilai_lab_" + id
+                }).removeClass("last-nilai");
+
+                $(this).find("td:eq(0)").html(id);
+                $(this).find("td:eq(1) input").attr({
+                    "id": "nilai_min_lab_" + id
+                });
+                $(this).find("td:eq(2) input").attr({
+                    "id": "nilai_max_lab_" + id
+                });
+                $(this).find("td:eq(3) input").attr({
+                    "id": "nilai_satuan_lab_" + id
+                });
+                $(this).find("td:eq(4) input").attr({
+                    "id": "nilai_keterangan_lab_" + id
+                });
+                $(this).find("td:eq(5) button").attr({
+                    "id": "delete_nilai_lab_" + id
+                });
+            });
+            $("#nilai-lab tbody tr:last-child").addClass("last-nilai");
+        }
+
+
 
 
         $("body").on("change", ".penyedia_order_lab", function() {
@@ -717,9 +937,10 @@
             });
         }
 
-        function loadMitra(target_ui, itemLab, selected = ""){
-            resetSelectBox(target_ui);
-
+        function loadMitra(target_ui, itemLab, penjamin){
+            var MetaData = [];
+            var returnedData = [];
+            resetSelectBox(target_ui, "Mitra");
             $.ajax({
                 async: false,
                 url:__HOSTAPI__ + "/Mitra/mitra_item/LAB/" + itemLab,
@@ -728,22 +949,39 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
+                    MetaData = response.response_package.response_data;
 
-                    var MetaData = response.response_package.response_data;
-                    if (MetaData != ""){
-                        $("#" + target_ui + " option").remove();
+                    if (MetaData != "" && MetaData !== undefined && MetaData !== null){
+                        //$("#" + target_ui + " option").remove();
                         for(i = 0; i < MetaData.length; i++){
-                            var selection = document.createElement("OPTION");
+                            var target_harga = 0;
+                            for(var ai in MetaData[i].harga) {
+                                if(MetaData[i].harga[ai].penjamin === penjamin) {
+                                    target_harga = MetaData[i].harga[ai].harga;
+                                }
+                            }
 
-                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
-                            $("#" + target_ui).append(selection);
+                            returnedData.push({
+                                id: MetaData[i].uid,
+                                text: "<div class=\"" + ((parseFloat(target_harga) > 0) ? "text-success" : "text-danger") + "\">" + MetaData[i].nama + "</div>",
+                                html: "<h6 class=\"" + ((parseFloat(target_harga) > 0) ? "text-success" : "text-danger") + "\">" + MetaData[i].nama + "<b style=\"position: absolute; right: 30px;\" class=\"pull-right\">" + number_format(target_harga, 2, ".", ",") + "</b></h6>",
+                                title: MetaData[i].nama
+                            });
+                            /*var selection = document.createElement("OPTION");
+
+
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama + " - <b>" + number_format(target_harga, 2, ".", ",") + "</b>");
+                            $("#" + target_ui).append(selection);*/
                         }
+                    } else {
+                        returnedData = [];
                     }
                 },
                 error: function(response) {
                     console.log(response);
                 }
-            })
+            });
+            return returnedData;
         }
 
 
@@ -815,6 +1053,10 @@
             antrian_laboratorium_selesai: function(protocols, type, parameter, sender, receiver, time) {
                 tableAntrianLabor.ajax.reload();
                 tableHistoryLabor.ajax.reload();
+            },
+            permintaan_laboratorium_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "hasil_order_labor");
+                tableVerifikasiLabor.ajax.reload();
             }
         };
 
@@ -858,7 +1100,19 @@
                                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                                 },
                                 success: function(response){
-
+                                    tableVerifikasiLabor.ajax.reload();
+                                    tableServiceLabor.ajax.reload();
+                                    tableAntrianLabor.ajax.reload();
+                                    if(currentPenjamin === __UIDPENJAMINUMUM__) {
+                                        push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya laboratorium baru", "warning").then(function() {
+                                            //location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    } else {
+                                        push_socket(__ME__, "antrian_laboratorium_baru", "*", "Permintaan laboratorium baru", "warning").then(function() {
+                                            //location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    }
+                                    $("#modal-detail-labor").modal("hide");
                                     /*$("#verifikasi_lab_container_" + uid + "_" + tindakan).fadeOut(function() {
                                         $("#verifikasi_lab_container_" + uid + "_" + tindakan).remove();
                                         if($(".group_" + uid).length === 0) {
@@ -875,8 +1129,10 @@
                         }
                     });
 
-                    $("#modal-detail-labor").modal("hide");
-                    tableVerifikasiLabor.ajax.reload();
+
+                    /*tableVerifikasiLabor.ajax.reload();
+                    tableServiceLabor.ajax.reload();
+                    tableAntrianLabor.ajax.reload();*/
                 }
             });
 
@@ -932,6 +1188,7 @@
                                     if($(".group_" + uid).length === 0) {
                                         $("#modal-detail-labor").modal("hide");
                                         tableVerifikasiLabor.ajax.reload();
+                                        tableServiceLabor.ajax.reload();
                                     }
                                 });
 
@@ -1307,6 +1564,18 @@
             });
             return returnHTML;
         }
+
+
+        setTimeout(function() {
+
+            tableServiceLabor.ajax.reload();
+            tableAntrianLabor.ajax.reload();
+            tableHistoryLabor.ajax.reload();
+            tableVerifikasiLabor.ajax.reload();
+            tableLab.ajax.reload();
+
+        }, 5000);
+
 	});
 </script>
 
@@ -1333,6 +1602,37 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="btn_verif_all">Verifikasi</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="modal-detail-labor-reagen" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Ketersediaan BHP Terhadap Nilai Pengujian Laboratorium</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered largeDataType" id="nilai-lab">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th class="wrap_content">No</th>
+                        <th>Nilai Uji</th>
+                        <th style="width: 20%;">Tersedia</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info" id="btn_simpan_reagen"><i class="fa fa-save"></i> Simpan</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Tutup</button>
             </div>
         </div>
     </div>

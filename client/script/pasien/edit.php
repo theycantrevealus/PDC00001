@@ -10,7 +10,7 @@
 		loadTermSelectBox('pendidikan', 8);
 		loadTermSelectBox('pekerjaan', 9);
 		//loadTermSelectBox('status_suami_istri', 10);
-		loadTermSelectBox('alamat_kecamatan', 12);
+		//loadTermSelectBox('alamat_kecamatan', 12);
 		loadTermSelectBox('goldar', 4);
 		loadTermSelectBox('agama', 5);
 		loadTermSelectBox('warganegara', 7);

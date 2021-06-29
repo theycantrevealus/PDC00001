@@ -4,11 +4,10 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/master/inventori">Master Inventori</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Gudang</li>
                 </ol>
             </nav>
-            <h4><span id="nama-departemen"></span>Master Inventori</h4>
+            <h4><span id="nama-departemen"></span>Kartu Stok</h4>
         </div>
         <!-- <a href="<?php echo __HOSTNAME__; ?>/master/inventori/gudang/tambah" class="btn btn-info btn-sm ml-3">
 			<i class="fa fa-plus"></i> Tambah Gudang

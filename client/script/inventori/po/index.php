@@ -59,7 +59,10 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<a href=\"" + __HOSTNAME__ + "/inventori/po/detail/" + row["uid"] + "\" class=\"btn btn-info btn-sm\"><i class=\"fa fa-eye\"></i></a>";
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/inventori/po/detail/" + row["uid"] + "\" class=\"btn btn-info btn-sm\">" +
+                            "<span><i class=\"fa fa-eye\"></i>Detail<span>" +
+                            "</a></div>";
 					}
 				}
 			]

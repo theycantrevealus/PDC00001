@@ -24,7 +24,10 @@
                     var returnedData = [];
                     var uniqueData = {};
 
-                    if(response == undefined || response.response_package == undefined) {
+                    console.clear();
+
+
+                    if(response === undefined || response.response_package === undefined) {
                         rawData = [];
                     } else {
                         rawData = response.response_package.response_data;
@@ -32,23 +35,53 @@
 
                     for(var dataKey in rawData)
                     {
-                        if(uniqueData[rawData[dataKey].barang] === undefined)
-                        {
-                            uniqueData[rawData[dataKey].barang] = {
-                                barang: rawData[dataKey].barang,
-                                stok_terkini: parseFloat(rawData[dataKey].stok_terkini),
-                                detail : rawData[dataKey].detail,
-                                image: rawData[dataKey].image,
-                                kategori_obat: rawData[dataKey].kategori_obat,
-                                kode_barang: rawData[dataKey].kode_barang
-                            };
-                        } else {
-                            uniqueData[rawData[dataKey].barang].stok_terkini += parseFloat(rawData[dataKey].stok_terkini);
+                        if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
+                            if(uniqueData[rawData[dataKey].barang] === undefined) {
+                                uniqueData[rawData[dataKey].barang] = {
+                                    barang: rawData[dataKey].barang,
+                                    stok_terkini: parseFloat(rawData[dataKey].stok_terkini),
+                                    stok_batch: 0,
+                                    batch: {},
+                                    detail : rawData[dataKey].detail,
+                                    image: rawData[dataKey].image,
+                                    kategori_obat: rawData[dataKey].kategori_obat,
+                                    kode_barang: rawData[dataKey].kode_barang
+                                };
+                            }
+
+
+                            var uniqueBatch = {};
+                            if(Array.isArray(rawData[dataKey].batch)) {
+                                var batchData = rawData[dataKey].batch;
+
+
+                                for(var bKey in batchData) {
+                                    if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
+                                        if(uniqueBatch[batchData[bKey].batch] === undefined && uniqueBatch[batchData[bKey].batch] === null) {
+                                            uniqueBatch[batchData[bKey].batch] = 0;
+                                        }
+                                        uniqueBatch[batchData[bKey].batch] = parseFloat(batchData[bKey].stok_terkini);
+                                    }
+
+
+
+                                    /*if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
+                                        uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
+                                    }*/
+                                }
+
+                                uniqueData[rawData[dataKey].barang].batch = uniqueBatch;
+                            }
                         }
                     }
+
                     var autonum = 1;
-                    for(var pKey in uniqueData)
-                    {
+                    for(var pKey in uniqueData) {
+
+                        for(var bza in uniqueData[pKey].batch) {
+                            uniqueData[rawData[dataKey].barang].stok_batch += uniqueBatch[bza];
+                        }
+
                         returnedData.push({
                             autonum: autonum,
                             barang: pKey,
@@ -56,7 +89,8 @@
                             stok_terkini: uniqueData[pKey].stok_terkini,
                             image: uniqueData[pKey].image,
                             kategori_obat: rawData[dataKey].kategori_obat,
-                            kode_barang: rawData[dataKey].kode_barang
+                            kode_barang: rawData[dataKey].kode_barang,
+                            stok_batch: uniqueData[pKey].stok_batch
                         });
                         autonum++;
                     }
@@ -94,7 +128,7 @@
                             "</div>" +
                             "<div class=\"col-md-10\">" +
                             "<b><i>" + ((row.kode_barang == undefined) ? "[KODE_BARANG]" : row.kode_barang.toUpperCase()) + "</i></b><br />" +
-                            "<h5>" + row.detail.nama.toUpperCase() + "</h5>" +
+                            "<h5>" + ((row.detail !== null) ? row.detail.nama.toUpperCase() : "") + "</h5>" +
                             kategoriObat +
                             "</div>" +
                             "</div>";
@@ -102,7 +136,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"number_style\">" + row.stok_terkini + "</h5>";
+                        return "<h5 class=\"number_style\">" + row.stok_batch + "</h5>";
                     }
                 },
                 {

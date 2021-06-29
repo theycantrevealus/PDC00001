@@ -1,5 +1,13 @@
 <script type="text/javascript">
     $(function() {
+
+        protocolLib = {
+            permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", parameter, 3000, "notif_pasien_baru");
+                tableResep.ajax.reload();
+            }
+        };
+
         function load_resep() {
             var selected = [];
             var resepData = [];
@@ -11,8 +19,6 @@
                 },
                 type:"GET",
                 success:function(response) {
-                    console.clear();
-                    console.log(response);
                     var resepDataRaw = response.response_package.response_data;
                     for(var resepKey in resepDataRaw) {
                         if(
@@ -110,18 +116,66 @@
             $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase()/* + " <b class=\"text-danger\">" + requiredItem[requiredItemKey].counter + " <i class=\"fa fa-receipt\"></i></b>"*/ + "</li>");
         }
 
-        var tableResep= $("#table-resep").DataTable({
-            "data": load_resep(),
+        var tableResep = $("#table-resep").DataTable({
+            //"data": load_resep(),
+            "ajax":{
+                url:__HOSTAPI__ + "/Apotek",
+                type: "GET",
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var resepDataRaw = response.response_package.response_data;
+                    var parsedData = [];
+                    var IGD = [];
+
+                    for(var resepKey in resepDataRaw) {
+                        if(resepDataRaw[resepKey].antrian.departemen === __POLI_IGD__) {
+                            IGD.push(resepDataRaw[resepKey]);
+                        } else {
+                            if(resepDataRaw[resepKey].antrian.departemen !== null) {
+                                parsedData.push(resepDataRaw[resepKey]);
+                            } else {
+                                resepDataRaw[resepKey].antrian.departemen = {
+                                    uid: __POLI_INAP__,
+                                    nama: "Rawat Inap"
+                                };
+                                parsedData.push(resepDataRaw[resepKey]);
+                            }
+                        }
+                    }
+                    var autonum = 1;
+                    var finalData = IGD.concat(parsedData);
+                    for(var az in finalData) {
+                        finalData[az].autonum = autonum;
+                        autonum++;
+                    }
+
+                    return finalData
+                }
+            },
             autoWidth: false,
             "bInfo" : false,
             aaSorting: [[0, "asc"]],
             "columnDefs":[
                 {"targets":0, "className":"dt-body-left"}
             ],
+            "rowCallback": function ( row, data, index ) {
+                if(data.antrian.departemen.uid === __POLI_IGD__) {
+                    $("td", row).addClass("bg-danger").css({
+                        "color": "#fff"
+                    });
+                }
+            },
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
                     }
                 },
                 {
@@ -148,10 +202,10 @@
                     "data" : null, render: function(data, type, row, meta) {
                         //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<a class=\"btn btn-info btn-sm btn-edit-mesin\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
-                                "<i class=\"fa fa-check-double\"></i> Verifikasi" +
-                                "</a>" +
-                            "</div>";
+                                    "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                                        "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
+                                    "</a>" +
+                                "</div>";
                     }
                 }
             ]
@@ -903,6 +957,7 @@
         }
     });
 </script>
+
 <div id="modal-verifikasi" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">

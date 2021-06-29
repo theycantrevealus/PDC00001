@@ -2,6 +2,7 @@
     $(function () {
         var resepUID = __PAGES__[3];
         var targettedData = {};
+        var allowProcess = false;
         $.ajax({
             url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + resepUID,
             async:false,
@@ -80,27 +81,38 @@
 
                     var harga_tertinggi = 0;
                     var kebutuhan = parseFloat(data.detail[a].qty);
+                    var jlh_sedia = 0;
+                    var butuh_amprah = 0;
                     for(bKey in selectedBatchResep)
                     {
-                        if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
-                        {
-                            harga_tertinggi = selectedBatchResep[bKey].harga;
-                        }
-
-                        if(kebutuhan > 0)
-                        {
-
-                            if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
+                        if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang && parseFloat(selectedBatchResep[bKey].stok_terkini) > 0) {
+                            if(selectedBatchResep[bKey].harga > harga_tertinggi)    //Selalu ambil harga tertinggi
                             {
-                                selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
+                                harga_tertinggi = parseFloat(selectedBatchResep[bKey].harga);
+                            }
+
+                            if(kebutuhan > 0)
+                            {
+
+                                if(kebutuhan > selectedBatchResep[bKey].stok_terkini)
+                                {
+                                    selectedBatchResep[bKey].used = selectedBatchResep[bKey].stok_terkini;
+                                } else {
+                                    selectedBatchResep[bKey].used = kebutuhan;
+                                }
+                                kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
+                                if(selectedBatchResep[bKey].used > 0)
+                                {
+                                    selectedBatchList.push(selectedBatchResep[bKey]);
+                                }
+                            }
+
+                            if(selectedBatchResep[bKey].gudang.uid === __UNIT__.gudang) {
+                                jlh_sedia += selectedBatchResep[bKey].stok_terkini;
                             } else {
-                                selectedBatchResep[bKey].used = kebutuhan;
+                                butuh_amprah += selectedBatchResep[bKey].stok_terkini;
                             }
-                            kebutuhan = kebutuhan - selectedBatchResep[bKey].stok_terkini;
-                            if(selectedBatchResep[bKey].used > 0)
-                            {
-                                selectedBatchList.push(selectedBatchResep[bKey]);
-                            }
+
                         }
                     }
 
@@ -165,12 +177,34 @@
                         var newDetailCellQty = document.createElement("TD");
                         var newQty = document.createElement("INPUT");
                         var statusSedia = "";
-                        if(data.detail[a].qty <= data.detail[a].sedia)
+
+                        /*if(parseFloat(data.detail[a].qty) <= parseFloat(data.detail[a].sedia))
                         {
-                            statusSedia = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + data.detail[a].sedia + "</b>";
+                                statusSedia = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + data.detail[a].sedia + "</b>";
+                            } else {
+                            statusSedia = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + data.detail[a].sedia + "</b>";
+                        }*/
+                        if(parseFloat(data.detail[a].qty) <= parseFloat(jlh_sedia))
+                        {
+                            statusSedia = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         } else {
-                            statusSedia = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia" + data.detail[a].sedia + "</b>";
+                            statusSedia = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         }
+
+                        if((parseFloat(data.detail[a].qty) - parseFloat(jlh_sedia)) > 0) {
+                            statusSedia += "<br /><b class=\"text-warning\"><i class=\"fa fa-exclamation-circle\"></i>Butuh Amprah : " + number_format(parseFloat(data.detail[a].qty) - parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
+                            $("#btnSelesai").attr({
+                                "disabled": "disabled"
+                            }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
+                        } else {
+                            var disabledStatus = $("#btnSelesai").attr('name');
+                            if (typeof attr !== typeof undefined && attr !== false) {
+                                // ...
+                            } else {
+                                $("#btnSelesai").removeAttr("disabled").removeClass("btn-danger").addClass("btn-success").html("<i class=\"fa fa-check\"></i> Selesai");
+                            }
+                        }
+
                         $(newDetailCellQty).addClass("text_center").append("<h5 class=\"text_center\">" + parseFloat(data.detail[a].qty) + "</h5>").append(statusSedia);
                         /*$(newQty).inputmask({
                             alias: "decimal",
@@ -218,14 +252,43 @@
 
 
             //==================================================================================== RACIKAN
+            //Checker
+            for(var b = 0; b < data.racikan.length; b++) {
+                var racikanDetail = data.racikan[b].detail;
+                for (var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
+                    var selectedBatchRacikan = refreshBatch(racikanDetail[racDetailKey].obat);
+                    var kebutuhan_racikan = parseFloat(racikanDetail[racDetailKey].jumlah);
+                    var jlh_sedia = 0;
+                    var butuh_amprah = 0;
+                    for(bKey in selectedBatchRacikan) {
+                        if(kebutuhan_racikan > 0) {
+                            if(selectedBatchRacikan[bKey].gudang.uid === __UNIT__.gudang) {
+                                jlh_sedia += selectedBatchRacikan[bKey].stok_terkini;
+                            } else {
+                                butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
+                            }
+                        }
+                        /*console.log(racikanDetail[racDetailKey]);
+
+                        console.log(jlh_sedia);
+                        console.log(butuh_amprah);*/
+                    }
+                }
+            }
+
+
             $("#load-detail-racikan tbody").html("");
             for(var b = 0; b < data.racikan.length; b++) {
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
                     var selectedBatchRacikan = refreshBatch(racikanDetail[racDetailKey].obat);
                     var selectedBatchListRacikan = [];
+                    var selectedBatchListRacikanAmprah = [];
                     var harga_tertinggi_racikan = 0;
-                    var kebutuhan_racikan = parseFloat(data.racikan[b].qty);
+                    //var kebutuhan_racikan = parseFloat(data.racikan[b].qty);
+                    var kebutuhan_racikan = parseFloat(racikanDetail[racDetailKey].jumlah);
+                    var jlh_sedia = 0;
+                    var butuh_amprah = 0;
                     for(bKey in selectedBatchRacikan)
                     {
                         if(selectedBatchRacikan[bKey].harga > harga_tertinggi_racikan)    //Selalu ambil harga tertinggi
@@ -242,9 +305,17 @@
                             } else {
                                 selectedBatchRacikan[bKey].used = kebutuhan_racikan;
                             }
-                            kebutuhan_racikan -= selectedBatchRacikan[bKey].stok_terkini;
 
-                            selectedBatchListRacikan.push(selectedBatchRacikan[bKey]);
+
+
+                            if(selectedBatchRacikan[bKey].gudang.uid === __UNIT__.gudang) {
+                                kebutuhan_racikan -= selectedBatchRacikan[bKey].stok_terkini;
+                                jlh_sedia += selectedBatchRacikan[bKey].stok_terkini;
+                                selectedBatchListRacikan.push(selectedBatchRacikan[bKey]);
+                            } else {
+                                butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
+                                selectedBatchListRacikanAmprah.push(selectedBatchRacikan[bKey]);
+                            }
                         }
                     }
 
@@ -286,12 +357,44 @@
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
                         var newRacikanObat = document.createElement("SELECT");
                         var statusSediaRacikan = "";
-                        if(data.racikan[b].qty >= racikanDetail[racDetailKey].sedia)
+                        /*if(parseFloat(racikanDetail[racDetailKey].jumlah) <= parseFloat(racikanDetail[racDetailKey].sedia))
                         {
                             statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + racikanDetail[racDetailKey].sedia + "</b>";
                         } else {
-                            statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia" + racikanDetail[racDetailKey].sedia + "</b>";
+                            statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + racikanDetail[racDetailKey].sedia + "</b>";
+                        }*/
+
+                        if(parseFloat(data.racikan[b].qty) <= parseFloat(jlh_sedia))
+                        {
+                            //statusSediaRacikan = "<b class=\"text-success text-right\"><i class=\"fa fa-check-circle\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
+                        } else {
+                            //statusSediaRacikan = "<b class=\"text-danger\"><i class=\"fa fa-ban\"></i> Tersedia " + number_format(parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
                         }
+
+                        /*if((parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia)) > 0) {
+                            statusSediaRacikan += "<br /><b class=\"text-info\"><i class=\"fa fa-exclamation-circle\"> Stok : " + number_format(parseFloat(data.racikan[b].qty) - parseFloat(jlh_sedia), 2, ".", ",") + "</i></b>";
+                            $("#btnSelesai").attr({
+                                "disabled": "disabled"
+                            }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
+                            console.log("Case A");
+                            console.log(parseFloat(data.racikan[b].qty));
+                            console.log(parseFloat(jlh_sedia));
+                        } else {
+                            var disabledStatus = $("#btnSelesai").attr('name');
+                            if (typeof attr !== typeof undefined && attr !== false) {
+                                $("#btnSelesai").attr({
+                                    "disabled": "disabled"
+                                }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
+                                console.log("Case B");
+                                console.log(parseFloat(data.racikan[b].qty));
+                                console.log(parseFloat(jlh_sedia));
+                            } else {
+                                $("#btnSelesai").removeAttr("disabled").removeClass("btn-danger").addClass("btn-success").html("<i class=\"fa fa-check\"></i> Selesai");
+                                console.log("Case C");
+                                console.log(parseFloat(data.racikan[b].qty));
+                                console.log(parseFloat(jlh_sedia));
+                            }
+                        }*/
 
                         $(newCellRacikanObat).append("<h5 class=\"text-info\">" + RacikanObatData.data[0].nama + " <b class=\"text-danger text-right\">[" + racikanDetail[racDetailKey].kekuatan + "]</b></h5>").append(statusSediaRacikan);
 
@@ -304,10 +407,31 @@
 
                         $(newCellRacikanObat).append("<b style=\"padding-top: 10px; display: block\">Batch Terpakai:</b>");
                         $(newCellRacikanObat).append("<span id=\"racikan_batch_" + data.racikan[b].uid + "_" + racDetailKey + "\" class=\"selected_batch\"><ol></ol></span>");
+
+                        var akumulasi = 0;
                         for(var batchSelKey in selectedBatchListRacikan)
                         {
-                            $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ")</li>");
+                            if(akumulasi < parseFloat(racikanDetail[racDetailKey].jumlah)) {
+                                if(parseFloat(selectedBatchListRacikan[batchSelKey].used) > 0) {
+                                    $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ") <b class=\"text-info\">[" + selectedBatchListRacikan[batchSelKey].gudang.nama + "]</b></li>");
+                                    akumulasi += parseFloat(selectedBatchListRacikan[batchSelKey].used);
+                                }
+                            }
                         }
+
+
+                        if(akumulasi < parseFloat(racikanDetail[racDetailKey].jumlah)) {
+
+                            for(var batchSelKey in selectedBatchListRacikanAmprah) {
+                                if(akumulasi < parseFloat(racikanDetail[racDetailKey].jumlah)) {
+                                    if(parseFloat(selectedBatchListRacikan[batchSelKey].used) > 0) {
+                                        $(newCellRacikanObat).find("span ol").append("<li batch=\"" + selectedBatchListRacikan[batchSelKey].batch + "\"><b>[" + selectedBatchListRacikan[batchSelKey].kode + "]</b> " + selectedBatchListRacikan[batchSelKey].expired + " (" + selectedBatchListRacikan[batchSelKey].used + ") <b class=\"text-info\">[" + selectedBatchListRacikan[batchSelKey].gudang.nama + "]</b></li>");
+                                        akumulasi += parseFloat(selectedBatchListRacikan[batchSelKey].used);
+                                    }
+                                }
+                            }
+                        }
+
 
                         $(newCellRacikanObat).attr({
                             harga: harga_tertinggi_racikan
@@ -361,6 +485,15 @@
         }
 
         $("#btnSelesai").click(function () {
+
+            var antrian = targettedData.antrian;
+            var asesmen = targettedData.asesmen;
+            var departemen = antrian.departemen;
+            var kunjungan = antrian.kunjungan;
+            var dokter = antrian.dokter;
+            var penjamin = antrian.penjamin;
+
+
             Swal.fire({
                 title: "Selesai Proses Resep?",
                 text: "Pastikan batch sudah sesuai. Setelah konfirmasi stok akan terpotong",
@@ -375,23 +508,29 @@
                         beforeSend: function(request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
-                        data:{
+                        data: {
                             request: "proses_resep",
                             resep: resepUID,
-                            asesmen: targettedData.asesmen
+                            //antrian: antrian,
+                            asesmen: asesmen,
+                            kunjungan: kunjungan,
+                            dokter: dokter,
+                            penjamin: penjamin,
+                            departemen: departemen
                         },
                         type:"POST",
                         success:function(response) {
                             console.clear();
                             console.log(response);
-                            if(response.response_package.stok_result > 0)
-                            {
-                                Swal.fire(
-                                    "Proses Berhasil!",
-                                    "Resep berhasil diproses",
-                                    "success"
-                                ).then((result) => {
-                                    location.href = __HOSTNAME__ + "/apotek/proses";
+                            if(response.response_package.stok_result > 0) {
+                                push_socket(__ME__, "resep_selesai_proses", "*", "Resep pasien a/n. " + $("#nama-pasien").html() + " selesai diproses!", "info").then(function() {
+                                    Swal.fire(
+                                        "Proses Berhasil!",
+                                        "Resep berhasil diproses",
+                                        "success"
+                                    ).then((result) => {
+                                        location.href = __HOSTNAME__ + "/apotek/proses";
+                                    });
                                 });
                             } else {
                                 Swal.fire(
@@ -400,8 +539,7 @@
                                     "success"
                                 ).then((result) => {
                                     location.href = __HOSTNAME__ + "/apotek/proses";
-                                });209
-
+                                });
                             }
                         },
                         error: function(response) {

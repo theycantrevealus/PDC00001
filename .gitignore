@@ -9,6 +9,8 @@ composer.lock
 composer.json
 vendor
 node_modules/
+testSSP/
+images/
 images/produk/
 images/pegawai/
 images/igd/
@@ -33,8 +35,6 @@ api/*.key
 api/*.req
 api/*.crt
 api/*.sql
-
-config.php
 *.txt
 *.pem
 *.pub
@@ -44,3 +44,4 @@ config.php
 *.sql
 *.png
 *.zip
+head.php

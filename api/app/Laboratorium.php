@@ -84,6 +84,10 @@ class Laboratorium extends Utility {
                     return self::get_lab_order_pack($parameter[2]);
                     break;
 
+                case 'get_lab_nilai_detail':
+                    return self::get_lab_nilai_detail($parameter);
+                    break;
+
 				default:
 					return self::get_lab();
 			}
@@ -94,7 +98,6 @@ class Laboratorium extends Utility {
 
 	public function __POST__($parameter = array()) {
 		try {
-
 			switch($parameter['request']) {
 				case 'add_kategori':
 					return self::add_kategori($parameter);
@@ -120,7 +123,9 @@ class Laboratorium extends Utility {
 				case 'edit_lab':
 					return self::edit_lab($parameter);
 					break;
-
+                case 'get_lab_backend':
+                    return self::get_lab_backend($parameter);
+                    break;
 				case 'new-order-lab':
 					return self::new_order_lab($parameter);
 					break;
@@ -172,15 +177,147 @@ class Laboratorium extends Utility {
                 case 'verifikasi_item_lab':
                     return self::verifikasi_item_lab($parameter);
                     break;
+
+                case 'update_naratif':
+                    return self::update_naratif($parameter);
+                    break;
+
+                case 'orphaned_nilai_get_item':
+                    return self::orphaned_nilai_get_item($parameter);
+                    break;
 			}	
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
 		}
 	}
 
+	private function orphaned_nilai_get_item($parameter) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'master_lab.deleted_at' => 'IS NULL',
+                'AND',
+                '(master_lab.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'master_lab.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'master_lab.deleted_at' => 'IS NULL'
+            );
+            $paramValue = array();
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('master_lab', array(
+                'uid',
+                'kode',
+                'nama',
+                'spesimen',
+                'keterangan'
+            ))
+                ->where($paramData, $paramValue)
+                ->order(array(
+                    'kode' => 'ASC'
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('master_lab', array(
+                'uid',
+                'kode',
+                'nama',
+                'spesimen',
+                'keterangan'
+            ))
+                ->where($paramData, $paramValue)
+                ->order(array(
+                    'kode' => 'ASC'
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        $data_returned = array();
+        foreach ($data['response_data'] as $key => $value) {
+            //Detail Layanan
+            $detail = self::$query->select('master_lab_nilai', array(
+                'id',
+                'satuan',
+                'nilai_maks',
+                'nilai_min',
+                'status',
+                'keterangan'
+            ))
+                ->where(array(
+                    'master_lab_nilai.lab' => '= ?',
+                    'AND',
+                    'master_lab_nilai.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->order(array(
+                    'id' => 'ASC'
+                ))
+                ->execute();
+            $data['response_data'][$key]['detail'] = $detail['response_data'];
+            if(count($detail['response_data']) == 0) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+                array_push($data_returned, $data['response_data'][$key]);
+                $autonum++;
+            }
+        }
+
+        $itemTotal = count($data['response_data']);
+
+        $data['recordsTotal'] = count($itemTotal);
+        $data['response_data'] = $data_returned;
+        $data['recordsFiltered'] = count($itemTotal);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
+	private function update_naratif($parameter) {
+	    $update = self::$query->update('master_lab', array(
+	        'naratif' => $parameter['target_value']
+        ))
+            ->where(array(
+                'master_lab.deleted_at' => 'IS NULL',
+                'AND',
+                'master_lab.uid' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+	    return $update;
+    }
+
+	private function get_lab_nilai_detail($parameter) {
+	    $data = self::$query->select('master_lab_nilai', array(
+	        'id',
+            'keterangan',
+            'nilai_min',
+            'nilai_maks',
+            'satuan'
+        ))
+            ->where(array(
+                'master_lab_nilai.id' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+	    return $data;
+    }
+
 	private function verifikasi_item_lab($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $worker = self::$query->update('lab_order_detail', array(
             'mitra' => $parameter['mitra'],
@@ -221,6 +358,9 @@ class Laboratorium extends Utility {
             ->execute();
 
         $AntrianDetail = $AsesmenInfo['response_data'][0];
+        $Antrian = new Antrian(self::$pdo);
+        $AntrianData = $Antrian->get_antrian_detail('antrian', $AntrianDetail['antrian'])['response_data'][0];
+
 
 
         //Check Item Lab
@@ -241,7 +381,7 @@ class Laboratorium extends Utility {
 
             //Update master to P
             $master_order = self::$query->update('lab_order', array(
-                'status' => 'P',
+                'status' => ($AntrianData['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P',
                 'updated_at' => parent::format_date()
             ))
                 ->where(array(
@@ -256,7 +396,7 @@ class Laboratorium extends Utility {
 
 
             $antrian_nomor = self::$query->update('antrian_nomor', array(
-                'status' => 'K'
+                'status' => ($AntrianData['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'L'
             ))
                 ->where(array(
                     'antrian_nomor.poli' => '= ?',
@@ -307,6 +447,8 @@ class Laboratorium extends Utility {
                 $parameter['tindakan']
             ))
             ->execute();
+
+        return $worker;
     }
 
 
@@ -898,7 +1040,7 @@ class Laboratorium extends Utility {
 
 	private function get_laboratorium_backend($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -1049,6 +1191,23 @@ class Laboratorium extends Utility {
 
 	public function charge_invoice_item($parameter) {
 	    $charge_result = array();
+
+	    //Update Status menjadi V
+        $proceedLab = self::$query->update('lab_order', array(
+            'status' => 'V'
+        ))
+            ->where(array(
+                'lab_order.asesmen' => '= ?',
+                'AND',
+                'lab_order.selesai' => '= ?',
+                'AND',
+                'lab_order.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['asesmen'],
+                'false'
+            ))
+            ->execute();;
+
 	    //Ambil semua item untuk asesmen sekarang
         $LabOrder = self::$query->select('lab_order', array(
             'uid',
@@ -1088,7 +1247,7 @@ class Laboratorium extends Utility {
                 'pasien' => $parameter['pasien'],
                 'keterangan' => 'Tagihan laboratorium'
             );
-            $NewInvoice = $Invoice::create_invoice($InvMasterParam);
+            $NewInvoice = $Invoice->create_invoice($InvMasterParam);
             $TargetInvoice = $NewInvoice['response_unique'];
         }
 
@@ -1130,7 +1289,7 @@ class Laboratorium extends Utility {
                     ->execute();
                 $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
 
-                $InvoiceDetail = $Invoice::append_invoice(array(
+                $InvoiceDetail = $Invoice->append_invoice(array(
                     'invoice' => $TargetInvoice,
                     'item' => $DValue['tindakan'],
                     'item_origin' => 'master_tindakan',
@@ -1143,7 +1302,9 @@ class Laboratorium extends Utility {
                     'discount_type' => 'N',
                     'pasien' => $value['pasien'],
                     'penjamin' => $DValue['penjamin'],
-                    'keterangan' => 'Biaya Laboratorium'
+                    'billing_group' => 'laboratorium',
+                    'keterangan' => 'Biaya Laboratorium',
+                    'departemen' => $parameter['departemen']
                 ));
 
                 array_push($charge_result, $InvoiceDetail);
@@ -1278,6 +1439,105 @@ class Laboratorium extends Utility {
 		return $data;
 	}
 
+	private function get_lab_backend($parameter) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'master_lab.deleted_at' => 'IS NULL',
+                'AND',
+                'master_lab.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'master_lab.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('master_lab', array(
+                'uid',
+                'kode',
+                'nama',
+                'spesimen',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('master_lab', array(
+                'uid',
+                'kode',
+                'nama',
+                'spesimen',
+                'created_at',
+                'updated_at'
+            ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        $mitra_list = new Mitra(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+
+            $mitra_all_raw = $mitra_list->get_mitra()['response_data'];
+            $mitra_all_parse = array();
+            foreach($mitra_all_raw as $MAK => $MAV) {
+                if($MAV['jenis'] === 'LAB') {
+                    array_push($mitra_all_parse, $MAV['nama']);
+                }
+            }
+
+            $data['response_data'][$key]['mitra_all'] = $mitra_all_parse;
+
+            $mitra_data = $mitra_list->get_mitra_provider($value['uid']);
+            $mitra_data_parse = $mitra_data['response_data'];
+            $mitraInfo = array();
+            $mitra_unik = array();
+            $mitra_unik_nama = array();
+            foreach ($mitra_data_parse as $MKey => $MValue) {
+                $Mitra_detail = $mitra_list->get_mitra_detail($MValue['mitra']);
+                if($Mitra_detail['response_data'][0]['jenis'] === 'LAB') {
+                    $mitra_data_parse[$MKey]['mitra'] = $Mitra_detail['response_data'][0];
+                    array_push($mitraInfo, $MValue);
+
+                    if(!in_array($MValue['mitra'], $mitra_unik)) {
+                        array_push($mitra_unik, $MValue['mitra']);
+                        array_push($mitra_unik_nama, $Mitra_detail['response_data'][0]['nama']);
+                    }
+                }
+            }
+            $data['response_data'][$key]['mitra'] = $mitraInfo;
+            $data['response_data'][$key]['mitra_nama'] = $mitra_unik_nama;
+            $data['response_data'][$key]['spesimen'] = self::get_spesimen_detail($value['spesimen'])['response_data'][0];
+
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('master_lab', array(
+            'uid'
+        ))
+            ->where(array(
+                'master_lab.deleted_at' => 'IS NULL'
+            ))
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
 	private function get_lab(){
 		$data = self::$query->select('master_lab', array(
 			'uid',
@@ -1292,8 +1552,19 @@ class Laboratorium extends Utility {
 		))
 		->execute();
 		$autonum = 1;
+        $mitra_list = new Mitra(self::$pdo);
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
+
+			$mitra_data = $mitra_list->get_mitra_provider($value['uid']);
+			$mitra_data_parse = $mitra_data['response_data'];
+			$mitraInfo = array();
+			foreach ($mitra_data_parse as $MKey => $MValue) {
+			    $Mitra_detail = $mitra_list->get_mitra_detail($MValue['mitra']);
+			    $mitra_data_parse[$MKey]['mitra'] = $Mitra_detail['response_data'][0];
+			    array_push($mitraInfo, $MValue);
+            }
+            $data['response_data'][$key]['mitra'] = $mitraInfo;
 			$data['response_data'][$key]['spesimen'] = self::get_spesimen_detail($value['spesimen'])['response_data'][0];
 			$autonum++;
 		}
@@ -1305,6 +1576,7 @@ class Laboratorium extends Utility {
 			'uid',
 			'kode',
 			'nama',
+			'naratif',
 			'keterangan',
 			'spesimen',
 			'created_at',
@@ -1723,16 +1995,31 @@ class Laboratorium extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
-		$worker = self::$query->insert('master_lab', array(
-			'uid' => $uid,
-			'kode' => $parameter['kode'],
-			'nama' => $parameter['nama'],
-			'keterangan' => $parameter['keterangan'],
-			'spesimen' => $parameter['spesimen'],
-			'created_at' => parent::format_date(),
-			'updated_at' => parent::format_date()
-		))
-		->execute();
+        if(isset($parameter['spesimen']) && !empty($parameter['spesimen'])) {
+            $worker = self::$query->insert('master_lab', array(
+                'uid' => $uid,
+                'kode' => $parameter['kode'],
+                'nama' => $parameter['nama'],
+                'naratif' => $parameter['naratif'],
+                'keterangan' => $parameter['keterangan'],
+                'spesimen' => $parameter['spesimen'],
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+        } else {
+            $worker = self::$query->insert('master_lab', array(
+                'uid' => $uid,
+                'kode' => $parameter['kode'],
+                'nama' => $parameter['nama'],
+                'naratif' => $parameter['naratif'],
+                'keterangan' => $parameter['keterangan'],
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+        }
+
 
 		if($worker['response_result'] > 0) {
 			$log = parent::log(array(
@@ -1887,6 +2174,8 @@ class Laboratorium extends Utility {
 				}
 			}*/
 		}
+
+		return $worker;
 	}
 
 	private function edit_lab($parameter) {
@@ -1894,21 +2183,41 @@ class Laboratorium extends Utility {
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 		$uid = $parameter['uid'];
 		$old_value = self::get_lab_detail($uid);
-		$worker = self::$query->update('master_lab', array(
-			'kode' => $parameter['kode'],
-			'nama' => $parameter['nama'],
-			'keterangan' => $parameter['keterangan'],
-			'spesimen' => $parameter['spesimen'],
-			'updated_at' => parent::format_date()
-		))
-		->where(array(
-			'master_lab.uid' => '= ?',
-			'AND',
-			'master_lab.deleted_at' => 'IS NULL'
-		), array(
-			$uid
-		))
-		->execute();
+		if(isset($parameter['spesimen']) && !empty($parameter['spesimen'])) {
+            $worker = self::$query->update('master_lab', array(
+                'kode' => $parameter['kode'],
+                'nama' => $parameter['nama'],
+                'naratif' => $parameter['naratif'],
+                'keterangan' => $parameter['keterangan'],
+                'spesimen' => $parameter['spesimen'],
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'master_lab.uid' => '= ?',
+                    'AND',
+                    'master_lab.deleted_at' => 'IS NULL'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+        } else {
+            $worker = self::$query->update('master_lab', array(
+                'kode' => $parameter['kode'],
+                'nama' => $parameter['nama'],
+                'naratif' => $parameter['naratif'],
+                'keterangan' => $parameter['keterangan'],
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'master_lab.uid' => '= ?',
+                    'AND',
+                    'master_lab.deleted_at' => 'IS NULL'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+        }
+
 
 		if($worker['response_result'] > 0) {
 			$log = parent::log(array(
@@ -2175,7 +2484,7 @@ class Laboratorium extends Utility {
 				}
 			}*/
 		}
-		return $queryList;
+		return $worker;
 	}
 
 
@@ -2378,9 +2687,9 @@ class Laboratorium extends Utility {
     private function get_antrian_backend($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+        if (!isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             if($parameter['mode'] == 'history')
             {
                 $paramData = array(
@@ -2407,7 +2716,11 @@ class Laboratorium extends Utility {
                 $paramData = array(
                     'lab_order.deleted_at' => 'IS NULL',
                     'AND',
-                    'lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
                     'AND',
                     'lab_order.created_at' => 'BETWEEN ? AND ?',
                     'AND',
@@ -2419,7 +2732,11 @@ class Laboratorium extends Utility {
                 $paramData = array(
                     'lab_order.deleted_at' => 'IS NULL',
                     'AND',
-                    'lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
                     'AND',
                     'lab_order.status' => '= ?'
                 );
@@ -2555,6 +2872,7 @@ class Laboratorium extends Utility {
         $autonum = intval($parameter['start']) + 1;
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+            //$data['response_data'][$key]['tgl_ambil_sample_parse'] = date('d F Y', strtotime($value['tgl_ambil_sample']));
             $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order'])) . ' - [' . date('H:i', strtotime($value['waktu_order'])) . ']';
 
             //Check Detail
@@ -2618,6 +2936,7 @@ class Laboratorium extends Utility {
 					'id',
 					'lab_order',
 					'request_item',
+					'tgl_ambil_sample',
 					'tindakan'
 				)
 			)
@@ -2635,6 +2954,9 @@ class Laboratorium extends Utility {
 			$data_lab = self::get_lab_detail_data_only($value['tindakan']);
 			$data['response_data'][$key]['kode'] = $data_lab['response_data'][0]['kode'];
 			$data['response_data'][$key]['nama'] = $data_lab['response_data'][0]['nama'];
+            $data['response_data'][$key]['naratif'] = $data_lab['response_data'][0]['naratif'];
+			$data['response_data'][$key]['tgl_ambil_sample_parse'] = date('d F Y', strtotime($value['tgl_ambil_sample']));
+            $data['response_data'][$key]['allow'] = ($value['tgl_ambil_sample'] <= date('Y-m-d')) ? true : false;
 			
 			$data['response_data'][$key]['nilai_item'] = [];
 			$data_nilai = self::get_laboratorium_order_nilai_item($value['tindakan'], $value['lab_order']);
@@ -2650,7 +2972,8 @@ class Laboratorium extends Utility {
 			->select('master_lab', array(
 					'uid',
 					'kode',
-					'nama'
+					'nama',
+                    'naratif'
 				)
 			)
 			->where(
@@ -3220,7 +3543,7 @@ class Laboratorium extends Utility {
 							//'dr_penanggung_jawab'	=>	$parameter['dokterPJ'],
 							'no_order'				=>	'LO/' . date('Y/m') . '/' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT),
 							//'status'				=>	'P', Revisi Verifikator
-                            'status'				=>	'V',
+                            'status'				=>	'N', // Dulu V
 							'pasien'				=>	$data_antrian['pasien'],
 							'kunjungan'				=>	$data_antrian['kunjungan'],
 							'created_at'			=>	parent::format_date(),
@@ -3294,9 +3617,10 @@ class Laboratorium extends Utility {
 										'lab_order'		=>	$uidLabOrder,
 										'tindakan'		=>	$keyTindakan,
 										'request_item'  =>  implode(',',$orderItemID),
+										'tgl_ambil_sample' => (($valueTindakan['tgl_sample'] === '') ? parent::format_date() : $valueTindakan['tgl_sample']),
 										'penjamin'		=>	$valueTindakan['penjamin'],
 										'created_at'	=>	parent::format_date(),
-										'updated_at'	=>	parent::format_date()	
+										'updated_at'	=>	parent::format_date()
 									)
 								)
 								->execute();
@@ -3366,6 +3690,7 @@ class Laboratorium extends Utility {
                                         'discount_type' => 'N',
                                         'pasien' => $data_antrian['pasien'],
                                         'penjamin' => $valueTindakan['penjamin'],
+                                        'billing_group' => 'laboratorium',
                                         'keterangan' => 'Biaya Laboratorium'
                                     ));
                                 }
@@ -3455,7 +3780,7 @@ class Laboratorium extends Utility {
 					$updateStatusOrder = self::$query
 						->update('lab_order', array(
 								//'status'	=>	$status_lunas
-                                'status'	=>	'V'
+                                'status'	=>	'N' // Dulu V
 							)
 						)
 						->where(
@@ -3591,7 +3916,7 @@ class Laboratorium extends Utility {
 						), array(
 							$uidLabOrder,
 							$keyTindakan,
-							$valueTindakan
+							$valueTindakan['penjamin']
 						)
 					)
 					->execute();
@@ -3613,7 +3938,7 @@ class Laboratorium extends Utility {
 							), array(
 								$uidLabOrder,
 								$keyTindakan,
-								$valueTindakan
+								$valueTindakan['penjamin']
 							)
 						)
 						->execute();
@@ -3644,7 +3969,8 @@ class Laboratorium extends Utility {
 							array(
 								'lab_order'		=>	$uidLabOrder,
 								'tindakan'		=>	$keyTindakan,
-								'penjamin'		=>	$valueTindakan,
+								'penjamin'		=>	$valueTindakan['penjamin'],
+                                'tgl_ambil_sample' => (($valueTindakan['tgl_sample'] === '') ? parent::format_date() : $valueTindakan['tgl_sample']),
 								'created_at'	=>	parent::format_date(),
 								'updated_at'	=>	parent::format_date()	
 							)
@@ -4283,6 +4609,8 @@ class Laboratorium extends Utility {
 			->select('lab_order_detail', array(
 					'id',
 					'lab_order as uid_lab_order',
+					'tgl_ambil_sample',
+					'request_item',
 					'tindakan as uid_tindakan',
 					'penjamin as uid_penjamin'
 				)
@@ -4301,6 +4629,17 @@ class Laboratorium extends Utility {
 
 			$penjamin = new Penjamin(self::$pdo);
 			$data['response_data'][$key]['penjamin'] = $penjamin->get_penjamin_detail($value['uid_penjamin'])['response_data'][0]['nama'];
+
+			$data['response_data'][$key]['tgl_ambil_sample'] = date('d F Y', strtotime($value['tgl_ambil_sample']));
+
+            $nilaiLab = array();
+            $dataSplitNilai = explode(',', $value['request_item']);
+            foreach ($dataSplitNilai as $dNLK => $dNLV) {
+                $data_nilai = self::get_lab_nilai_detail($dNLV);
+                array_push($nilaiLab, $data_nilai['response_data'][0]);
+            }
+
+            $data['response_data'][$key]['nilai_item'] = $nilaiLab;
 		}
 		
 		return $data;

@@ -218,7 +218,7 @@ class Kasir extends Utility
     private function proses_ke_antrian($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $proses = self::$query
             ->update('antrian_nomor', array('status' => 'P'))
