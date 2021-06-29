@@ -5238,8 +5238,8 @@
 
 
         if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
-            if(dataOdontogram === undefined)
-            {
+
+            if(dataOdontogram === undefined || dataOdontogram === "{}") {
                 $(".ordo-top").each(function() {
                     var id = $(this).attr("id").split("_");
                     id = id[id.length - 1];
@@ -5279,6 +5279,7 @@
                     }
                 });
             } else {
+
                 metaSelOrdo = JSON.parse(dataOdontogram);
                 // ParseView
 
@@ -5503,8 +5504,8 @@
             //Render currentOrdoMeta
             $(".single_gigi .side").each(function() {
                 var settedPiece = $(this).attr("class").split(" ");
-                if(currentOrdonMeta[settedPiece[0]].tambal !== "")
-                {
+
+                if(currentOrdonMeta[settedPiece[0]].tambal !== undefined && currentOrdonMeta[settedPiece[0]].tambal !== "" && currentOrdonMeta[settedPiece[0]].tambal !== null) {
                     if($(this).hasClass(settedPiece[0])) {
                         var getModeSet = currentOrdonMeta[settedPiece[0]].tambal.split("_");
                         //$(".set_gigi tr#tambal_" + getModeSet[getModeSet.length - 1]).addClass("selected_ordon");
