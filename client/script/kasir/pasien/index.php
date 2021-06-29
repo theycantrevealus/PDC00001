@@ -772,11 +772,6 @@
                                         response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
                                     }
                                     returnedData.push(response.response_package.response_data[InvKeyData]);
-                                } else {
-                                    if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
-                                    }
-                                    returnedData.push(response.response_package.response_data[InvKeyData]);
                                 }
                             } else {
                                 //
