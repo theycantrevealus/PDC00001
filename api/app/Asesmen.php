@@ -1610,7 +1610,7 @@ class Asesmen extends Utility {
 
 
 		//Tindakan Management
-		$returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter, $MasterUID);
+		//$returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter, $MasterUID);
 
 		//Resep dan Racikan
 		$returnResponse['resep_response'] = self::set_resep_asesment($parameter, $MasterUID);
@@ -1633,7 +1633,8 @@ class Asesmen extends Utility {
                         ->execute();
                 }
 
-                $Laboratorium = new Laboratorium(self::$pdo);
+                //Charge Invoice Tindakan Penunjang
+                /*$Laboratorium = new Laboratorium(self::$pdo);
                 $ChargeLab = $Laboratorium->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
@@ -1648,7 +1649,7 @@ class Asesmen extends Utility {
                     'kunjungan' => $parameter['kunjungan'],
                     'pasien' => $parameter['pasien'],
                     'departemen' => $parameter['poli']
-                ));
+                ));*/
 
                 if($parameter['penjamin'] === __UIDPENJAMINUMUM__) {
                     $antrian_nomor = self::$query->update('antrian_nomor', array(

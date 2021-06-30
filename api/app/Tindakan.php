@@ -966,6 +966,7 @@ class Tindakan extends Utility {
 				->select('master_tindakan', array(
 						'uid',
 						'nama',
+						'kelompok',
 						'created_at',
 						'updated_at'
 					)
@@ -981,6 +982,34 @@ class Tindakan extends Utility {
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
+
+		    /*if($value['kelompok'] === 'LAB') {
+
+            } else if($value['kelompok'] === 'RAD') {
+
+            } else {
+
+            }*/
+
+            $harga = self::$query->select('master_tindakan_kelas_harga', array(
+                'harga'
+            ))
+                ->where(array(
+                    'master_tindakan_kelas_harga.tindakan' => '= ?',
+                    'AND',
+                    'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $harga_list = array();
+            foreach ($harga['response_data'] as $HKey => $HValue) {
+                array_push($harga_list, $HValue['harga']);
+            }
+            sort($harga_list);
+            $data['response_data'][$key]['harga_minimum'] = floatval($harga_list[0]);
+            $data['response_data'][$key]['harga_maksimum'] = floatval($harga_list[count($harga_list) - 1]);
+
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 		}
