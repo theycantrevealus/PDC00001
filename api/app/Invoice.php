@@ -293,8 +293,7 @@ class Invoice extends Utility
         return $payment;
     }
 
-    private function get_biaya_pasien_back_end($parameter)
-    {
+    private function get_biaya_pasien_back_end($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
@@ -456,7 +455,7 @@ class Invoice extends Utility
                 ->limit(intval($parameter['length']))
                 ->where($paramData, $paramValue)
                 ->join('antrian_nomor', array(
-                    'id', 'poli'
+                    'id', 'poli', 'penjamin'
                 ))
                 ->join('pasien', array(
                     'nama'
@@ -740,58 +739,62 @@ class Invoice extends Utility
                     'K', 'V'
                 ))
                 ->execute();
-            if (count($AntrianKunjungan['response_data']) > 0) {
-                $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
-                $value['pasien'] = $PasienInfo['response_data'][0];
+
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            $value['pasien'] = $PasienInfo['response_data'][0];
+
+            $value['created_at_parse'] = date('d F Y', strtotime($value['created_at']));
+
+            $statusLunas = false;
+            $departemen_terkait = array();
 
 
-                $statusLunas = false;
-                $departemen_terkait = array();
-
-
-                //Detail Pembayaran
-                $InvoiceDetail = self::$query->select('invoice_detail', array(
-                    'status_bayar',
-                    'subtotal',
-                    'departemen',
-                    'billing_group',
-                    'penjamin'
+            //Detail Pembayaran
+            $InvoiceDetail = self::$query->select('invoice_detail', array(
+                'status_bayar',
+                'subtotal',
+                'departemen',
+                'billing_group',
+                'penjamin'
+            ))
+                ->join('master_penjamin', array(
+                    'nama as nama_penjamin'
                 ))
-                    ->join('master_penjamin', array(
-                        'nama as nama_penjamin'
-                    ))
-                    ->on(array(
-                        array('invoice_detail.penjamin', '=', 'master_penjamin.uid')
-                    ))
-                    ->where(array(
-                        'invoice_detail.invoice' => '= ?',
-                        'AND',
-                        'invoice_detail.deleted_at' => 'IS NULL'
-                    ), array(
-                        $value['uid']
-                    ))
-                    ->execute();
-                $IDautonum = 1;
-                foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
-                    if ($IDValue['status_bayar'] == 'Y') {
-                        $statusLunas = true;
-                    } else {
-                        $statusLunas = false;
-                        break;
-                    }
+                ->on(array(
+                    array('invoice_detail.penjamin', '=', 'master_penjamin.uid')
+                ))
+                ->where(array(
+                    'invoice_detail.invoice' => '= ?',
+                    'AND',
+                    'invoice_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $IDautonum = 1;
+            foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
+                if ($IDValue['status_bayar'] == 'Y') {
+                    $statusLunas = true;
+                } else {
+                    $statusLunas = false;
+                    break;
                 }
+            }
 
-                foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
-                    if(!in_array($IDValue['departemen'], $departemen_terkait)) {
-                        array_push($departemen_terkait, $IDValue['departemen']);
-                    }
+            foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
+                if(!in_array($IDValue['departemen'], $departemen_terkait)) {
+                    array_push($departemen_terkait, $IDValue['departemen']);
                 }
+            }
 
-                $value['lunas'] = $statusLunas;
-                $value['departemen_terkait'] = $departemen_terkait;
-                $value['invoice_detail'] = $InvoiceDetail['response_data'];
+            $value['lunas'] = $statusLunas;
+            $value['departemen_terkait'] = $departemen_terkait;
+            $value['invoice_detail'] = $InvoiceDetail['response_data'];
 
+            $value['autonum'] = $autonum;
+            $autonum++;
 
+            if (count($AntrianKunjungan['response_data']) > 0) {
                 foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                     //Info Poliklinik
                     $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
@@ -833,11 +836,18 @@ class Invoice extends Utility
                 }
                 $value['antrian_kunjungan'] = $AntrianKunjungan['response_data'][0];
                 //$value['poli_list'] = $PoliList;
-                $value['autonum'] = $autonum;
-                $autonum++;
 
-                $value['created_at_parse'] = date('d F Y', strtotime($value['created_at']));
                 array_push($dataResult, $value);
+            } else {
+                if($value['poli'] === __POLI_IGD__) {
+
+                    $value['antrian_kunjungan'] = array(
+                        'poli' => $Poli->get_poli_detail(__POLI_IGD__)['response_data'][0],
+                        'pegawai' => $Pegawai->get_detail($UserData['data']->uid)['response_data'][0],
+                        'penjamin' => $value['penjamin']
+                    );
+                    array_push($dataResult, $value);
+                }
             }
         }
 
