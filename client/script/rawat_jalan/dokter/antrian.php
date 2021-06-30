@@ -4173,8 +4173,6 @@
                 cache: true,
                 processResults: function (response) {
                     var data = response.response_package.response_data;
-                    console.clear();
-                    console.log(data);
                     return {
                         results: $.map(data, function (item) {
                             return {
@@ -4535,7 +4533,6 @@
         });
 
         $("#btnSubmitOrderRad").click(function() {
-            console.log(listTindakanRadiologiTerpilih);
             orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, "Y");
             listTindakanRadiologiTerpilih = {};
             listTindakanRadiologiDihapus = [];

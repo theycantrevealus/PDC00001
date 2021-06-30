@@ -41,7 +41,8 @@
                 </div>
             </div>
             <div class="card card-body">
-                <table class="table table-bordered table-striped" id="table-verifikasi-labor" style="font-size: 0.9rem;">
+                <input id="range_history" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                <table class="table table-bordered table-striped" id="table-history-labor" style="font-size: 0.9rem;">
                     <thead class="thead-dark">
                     <tr>
                         <th class="wrap_content">No</th>

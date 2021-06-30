@@ -41,7 +41,7 @@
                 </div>
             </div>
             <div class="card card-body">
-                <table class="table table-bordered table-striped" id="table-verifikasi-labor" style="font-size: 0.9rem;">
+                <table class="table table-bordered table-striped" id="table-antrian-labor" style="font-size: 0.9rem;">
                     <thead class="thead-dark">
                     <tr>
                         <th class="wrap_content">No</th>

@@ -2381,7 +2381,7 @@ class Apotek extends Utility
                     'qty' => floatval($KValue['jumlah']),
                     'harga' => floatval($KValue['harga']),
                     'status_bayar' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'N' : 'Y',
-                    'subtotal' => floatval($KValue['harga']) * floatval($value['jumlah']),
+                    'subtotal' => floatval($KValue['harga']) * floatval($KValue['jumlah']),
                     'discount' => 0,
                     'discount_type' => 'N',
                     'pasien' => $parameter['pasien'],

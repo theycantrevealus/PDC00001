@@ -41,21 +41,17 @@
                 </div>
             </div>
             <div class="card card-body">
-                <table class="table table-bordered table-striped" id="table-verifikasi-labor" style="font-size: 0.9rem;">
+                <table class="table table-bordered largeDataType" id="table-lab">
                     <thead class="thead-dark">
                     <tr>
                         <th class="wrap_content">No</th>
-                        <th>Waktu Order</th>
-                        <th>No. RM</th>
-                        <th>Pasien</th>
-                        <th>Poliklinik</th>
-                        <th>Dokter</th>
+                        <th class="wrap_content">Kode</th>
+                        <th>Nama</th>
+                        <th>Spesimen</th>
                         <th class="wrap_content">Aksi</th>
                     </tr>
                     </thead>
-                    <tbody>
-
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>

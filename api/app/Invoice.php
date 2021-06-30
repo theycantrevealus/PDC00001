@@ -483,6 +483,17 @@ class Invoice extends Utility
         $TunggakanRanap = array();
         $RekapBiayaKamar = array();
 
+
+
+
+
+
+
+
+
+
+
+
         $Ranap = self::$query->select('rawat_inap', array(
             'uid',
             'bed',
@@ -710,6 +721,19 @@ class Invoice extends Utility
                     ->execute();
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         foreach ($data['response_data'] as $key => $value) {//Antrian Info
@@ -1759,6 +1783,7 @@ class Invoice extends Utility
 
     private function get_biaya_pasien()
     {
+        $Pegawai = new Pegawai(self::$pdo);
         $data = self::$query->select('invoice', array(
             'uid',
             'nomor_invoice',
@@ -1781,7 +1806,7 @@ class Invoice extends Utility
         foreach ($data['response_data'] as $key => $value) {
 
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
 
@@ -1838,12 +1863,12 @@ class Invoice extends Utility
             foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                 //Info Poliklinik
                 $Poli = new Poli(self::$pdo);
-                $PoliInfo = $Poli::get_poli_detail($AKValue['poli']);
+                $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
                 $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                 //Info Pegawai
-                $Pegawai = new Pegawai(self::$pdo);
-                $PegawaiInfo = $Pegawai::get_detail($AKValue['pegawai']);
+
+                $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
                 $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                 //Info Loket

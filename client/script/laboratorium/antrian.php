@@ -148,7 +148,7 @@
                                 response.response_package.response_message,
                                 'success'
                             ).then((result) => {
-                                location.href = __HOSTNAME__ + "/laboratorium";
+                                location.href = __HOSTNAME__ + "/laboratorium/proses";
                             });
                         });
                     } else {
