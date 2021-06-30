@@ -3907,6 +3907,7 @@
                 },
                 type: "POST",
                 success: function(response) {
+                    console.log(response);
                     // if(response.response_package.response_result > 0) {
                     // 	notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                     // } else {

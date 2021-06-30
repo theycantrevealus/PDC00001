@@ -1048,21 +1048,34 @@ class Radiologi extends Utility
 
             }
 
-            $invoice_master = self::$query->select('invoice', array(
+            $Invoice = new Invoice(self::$pdo);
+
+            $InvoiceCheck = self::$query->select('invoice', array(
                 'uid',
                 'total_after_discount'
             ))
                 ->where(array(
                     'invoice.kunjungan' => '= ?',
                     'AND',
-                    'invoice.pasien' => '= ?'
+                    'invoice.deleted_at' => 'IS NULL'
                 ), array(
-                    $AntrianDetail['kunjungan'],
-                    $AntrianDetail['pasien']
+                    $AntrianDetail['kunjungan']
                 ))
                 ->execute();
 
-            $totalInvoice = $invoice_master['response_data'][0]['total_after_discount'];
+            if (count($InvoiceCheck['response_data']) > 0) {
+                $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+                $totalInvoice = $InvoiceCheck['response_data'][0]['total_after_discount'];
+            } else {
+                $InvMasterParam = array(
+                    'kunjungan' => $AntrianDetail['kunjungan'],
+                    'pasien' => $AntrianDetail['pasien'],
+                    'keterangan' => 'Tagihan radiologi'
+                );
+                $NewInvoice = $Invoice->create_invoice($InvMasterParam);
+                $TargetInvoice = $NewInvoice['response_unique'];
+                $totalInvoice = 0;
+            }
 
             $invoice_detail = self::$query->update('invoice_detail', array(
                 'status_bayar' => 'N',
@@ -1077,7 +1090,7 @@ class Radiologi extends Utility
                     'AND',
                     'invoice_detail.deleted_at' => 'IS NULL'
                 ), array(
-                    $invoice_master['response_data'][0]['uid'],
+                    $TargetInvoice,
                     $value['tindakan']
                 ))
                 ->execute();
@@ -1092,7 +1105,7 @@ class Radiologi extends Utility
                     'AND',
                     'invoice.deleted_at' => 'IS NULL'
                 ), array(
-                    $invoice_master['response_data'][0]['uid']
+                    $TargetInvoice
                 ))
                 ->execute();
 
@@ -1722,6 +1735,8 @@ class Radiologi extends Utility
 
 
         if($data['response_result'] > 0) {
+            $Invoice = new Invoice(self::$pdo);
+            $invoice_charge = array();
             foreach ($parameter['listTindakan'] as $keyTindakan => $valueTindakan) {
                 $checkDetailRadiologi = self::$query
                     ->select('rad_order_detail', array('id'))
@@ -1758,7 +1773,7 @@ class Radiologi extends Utility
 
 
                         //Check Invoice
-                        $Invoice = new Invoice(self::$pdo);
+
                         $InvoiceCheck = self::$query->select('invoice', array(
                             'uid'
                         ))
@@ -1807,23 +1822,24 @@ class Radiologi extends Utility
                             ->execute();
                         $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
 
-                        if($parameter['charge_invoice'] === 'Y') {
-                            $InvoiceDetail = $Invoice->append_invoice(array(
-                                'invoice' => $TargetInvoice,
-                                'item' => $keyTindakan,
-                                'item_origin' => 'master_tindakan',
-                                'qty' => 1,
-                                'harga' => $HargaFinal,
-                                'status_bayar' => ($valueTindakan == __UIDPENJAMINUMUM__) ? 'V' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
-                                'subtotal' => $HargaFinal,
-                                'discount' => 0,
-                                'discount_type' => 'N',
-                                'pasien' => $data_antrian['pasien'],
-                                'penjamin' => $valueTindakan,
-                                'billing_group' => 'radiologi',
-                                'keterangan' => 'Biaya Radiologi'
-                            ));
-                        }
+                        $InvoiceDetail = $Invoice->append_invoice(array(
+                            'invoice' => $TargetInvoice,
+                            'item' => $keyTindakan,
+                            'item_origin' => 'master_tindakan',
+                            'qty' => 1,
+                            'harga' => $HargaFinal,
+                            'status_bayar' => ($valueTindakan === __UIDPENJAMINUMUM__) ? 'V' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                            'subtotal' => $HargaFinal,
+                            'discount' => 0,
+                            'discount_type' => 'N',
+                            'pasien' => $data_antrian['pasien'],
+                            'penjamin' => $valueTindakan,
+                            'billing_group' => 'radiologi',
+                            'keterangan' => 'Biaya Radiologi',
+                            'departemen' => $data_antrian['departemen']
+                        ));
+
+                        array_push($invoice_charge, $InvoiceDetail);
 
                         $log = parent::log(array(
                             'type' => 'activity',
@@ -1851,6 +1867,7 @@ class Radiologi extends Utility
                 }
             }
         }
+        $data['charge'] = $invoice_charge;
         return $data;
     }
 
