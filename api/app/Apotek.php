@@ -1503,19 +1503,22 @@ class Apotek extends Utility
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
-
+        $Pegawai = new Pegawai(self::$pdo);
+        $Antrian = new Antrian(self::$pdo);
+        $Poli = new Poli(self::$pdo);
+        $Inventori = new Inventori(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             //Dokter Info
-            $Pegawai = new Pegawai(self::$pdo);
+
             $PegawaiInfo = $Pegawai->get_detail($value['dokter']);
             $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
 
             //Get Antrian Detail
-            $Antrian = new Antrian(self::$pdo);
+
             $AntrianInfo = $Antrian->get_antrian_detail('antrian', $value['antrian']);
 
             //Departemen Info
-            $Poli = new Poli(self::$pdo);
+
             $PoliInfo = $Poli->get_poli_detail($AntrianInfo['response_data'][0]['departemen']);
             $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
             $data['response_data'][$key]['antrian'] = $AntrianInfo['response_data'][0];
@@ -1543,12 +1546,11 @@ class Apotek extends Utility
                 ->execute();
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 //Batch Info
-                $Inventori = new Inventori(self::$pdo);
-                $InventoriBatch = $Inventori::get_item_batch($ResValue['obat']);
+
+                $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
 
-                $Inventori = new Inventori(self::$pdo);
-                $InventoriInfo = $Inventori::get_item_detail($ResValue['obat']);
+                $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
             }
             $data['response_data'][$key]['detail'] = $resep_detail['response_data'];
@@ -1607,8 +1609,7 @@ class Apotek extends Utility
                     ))
                     ->execute();
                 foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
-                    $Inventori = new Inventori(self::$pdo);
-                    $InventoriInfo = $Inventori::get_item_detail($RDIValue['obat']);
+                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
 
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }

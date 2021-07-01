@@ -201,7 +201,7 @@
                 dataObj.valid_end = penjaminMetaData.response.peserta.tglTAT;
                 dataObj.penjaminMeta = JSON.stringify(penjaminMetaData);
             }
-			console.log(dataObj);
+
 			if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 			    $.ajax({
 					async: false,
@@ -284,7 +284,7 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             type: "POST",
-            success: function(response){
+            success: function(response) {
                 var data = response.response_package.content;
 
                 console.log(data);

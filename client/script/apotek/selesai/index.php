@@ -7,6 +7,7 @@
             }
         };
         var targettedUID;
+
         function load_resep() {
             var selected = [];
             var resepData = [];
@@ -109,11 +110,11 @@
             return obatList;
         }
 
-        var listResep = load_resep();
+        /*var listResep = load_resep();
         var requiredItem = populateObat(listResep);
         for(var requiredItemKey in requiredItem) {
-            $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase()/* + " <b class=\"text-danger\">" + requiredItem[requiredItemKey].counter + " <i class=\"fa fa-receipt\"></i></b>"*/ + "</li>");
-        }
+            $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase()/!* + " <b class=\"text-danger\">" + requiredItem[requiredItemKey].counter + " <i class=\"fa fa-receipt\"></i></b>"*!/ + "</li>");
+        }*/
 
         var tableResep= $("#table-resep").DataTable({
             processing: true,
