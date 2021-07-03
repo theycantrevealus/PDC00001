@@ -128,6 +128,7 @@
                 type: "POST",
                 data: function(d){
                     d.request = "get_resep_selesai_backend";
+                    d.filter_poli = "rajal";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>

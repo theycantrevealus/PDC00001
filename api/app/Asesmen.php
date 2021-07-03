@@ -3147,6 +3147,9 @@ class Asesmen extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
+        $Pasien = new Pasien(self::$pdo);
+        $Poli = new Poli(self::$pdo);
+
 		$antrianClass = new Antrian(self::$pdo);
 		$antrian = $antrianClass->get_antrian_by_dokter($UserData['data']->uid, $parameter[2]);
 
@@ -3155,7 +3158,6 @@ class Asesmen extends Utility {
 		$autonum = 1;
 		$returnData = array();
 		foreach ($antrian['response_data'] as $key => $value) {
-            $Poli = new Poli(self::$pdo);
             if($value['uid_poli'] === __POLI_INAP__) {
                 $PoliDetail = array(
                     'poli_asesmen' => 'inap'
@@ -3177,7 +3179,6 @@ class Asesmen extends Utility {
             }
 
             //Pasien Detail
-            $Pasien = new Pasien(self::$pdo);
             $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['uid_pasien']);
             $antrian['response_data'][$key]['pasien_detail'] = $PasienDetail['response_data'][0];
 

@@ -13,6 +13,14 @@
 		loadLampiran(uid_order);
         var form_data = new FormData();
 
+        if(__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) {
+            $(".tab-dokter").show();
+            $("#btnSelesai").show();
+        } else {
+            $(".tab-dokter").hide();
+            $("#btnSelesai").hide();
+        }
+
         var mode_selesai = "N";
 
 		$("#btnSelesai").click(function (e) {

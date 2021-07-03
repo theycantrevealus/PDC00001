@@ -1,8 +1,55 @@
 <script type="text/javascript">
     $(function () {
-        var currentMetaData;
+        var currentMetaData, currentAsesmen;
         var totalResep = 0;
         var totalRacikan = 0;
+
+
+        $("input[type=\"radio\"][name=\"kajian_all\"][value=\"y\"]").change(function() {
+            $(this).parent().parent().addClass("active");
+            $(".kajian_sel[value=\"y\"]").prop("checked", true);
+            $(".kajian_sel[value=\"y\"]").parent().addClass("active");
+            $(".kajian_sel[value=\"n\"]").prop("checked", false).removeAttr("checked");
+            $(".kajian_sel[value=\"n\"]").parent().removeClass("active");
+            return false;
+        });
+
+        $("input[type=\"radio\"][name=\"kajian_all\"][value=\"n\"]").change(function() {
+            $(this).parent().parent().addClass("active");
+            $(".kajian_sel[value=\"n\"]").prop("checked", true);
+            $(".kajian_sel[value=\"n\"]").parent().addClass("active");
+            $(".kajian_sel[value=\"y\"]").prop("checked", false).removeAttr("checked");
+            $(".kajian_sel[value=\"y\"]").parent().removeClass("active");
+            return false;
+        });
+
+        $(".kajian_sel").change(function() {
+            if($(this).val() === "n") {
+                $("input[type=\"radio\"][name=\"kajian_all\"][value=\"y\"]").prop("checked", false);
+                $("input[type=\"radio\"][name=\"kajian_all\"][value=\"y\"]").removeAttr("checked");
+                $("input[type=\"radio\"][name=\"kajian_all\"][value=\"y\"]").parent().removeClass("active");
+            } else {
+                $("input[type=\"radio\"][name=\"kajian_all\"][value=\"n\"]").prop("checked", false);
+                $("input[type=\"radio\"][name=\"kajian_all\"][value=\"n\"]").removeAttr("checked");
+                $("input[type=\"radio\"][name=\"kajian_all\"][value=\"n\"]").parent().removeClass("active");
+            }
+        });
+
+        function populateAllKajian() {
+            var populateData = {};
+            $(".kajian_sel").each(function () {
+                var currentName = $(this).attr("name");
+                if(populateData[currentName] === undefined) {
+                    populateData[currentName] = "n";
+                }
+                if($(this).is(':checked')) {
+                    populateData[currentName] = $(this).val();
+                }
+            });
+
+            return populateData;
+        }
+
         $.ajax({
             url:__HOSTAPI__ + "/Apotek/detail_resep_2/" + __PAGES__[3],
             async:false,
@@ -12,8 +59,44 @@
             type:"GET",
             success:function(response) {
                 var data = response.response_package[0];
+                console.log(data);
+                currentAsesmen = data.asesmen.uid;
+
+
+                $("#diagnosa_utama").html(data.asesmen.diagnosa_kerja);
+                $("#diagnosa_banding").html(data.asesmen.diagnosa_banding);
+                $("#txt_keterangan_resep").html(data.keterangan);
+                $("#txt_keterangan_resep_racikan").html(data.keterangan_racikan);
+
+                var icd_kerja = data.asesmen.icd_kerja;
+                if(icd_kerja !== undefined && icd_kerja !== null) {
+                    for(var icdA in icd_kerja) {
+                        if(icd_kerja[icdA] !== undefined && icd_kerja[icdA] !== null) {
+                            $("#icd_utama").append("<li>" +
+                                "<b><span class=\"text-info\">" + icd_kerja[icdA].kode + "</span> - " + icd_kerja[icdA].nama + "</b>" +
+                                "</li>");
+                        }
+                    }
+                }
+
+
+
+                var icd_banding = data.asesmen.icd_banding;
+                if(icd_banding !== undefined && icd_banding !== null) {
+                    for(var icdB in icd_banding) {
+                        if(icd_banding[icdB] !== undefined && icd_banding[icdB] !== null) {
+                            $("#icd_banding").append("<li>" +
+                                "<b><span class=\"text-info\">" + icd_kerja[icdB].kode + "</span> - " + icd_kerja[icdB].nama + "</b>" +
+                                "</li>");
+                        }
+                    }
+                }
+
+
                 if(data.resep !== undefined) {
                     currentMetaData = data.detail;
+
+
                     if(
                         currentMetaData.departemen === undefined ||
                         currentMetaData.departemen === null
@@ -1519,6 +1602,7 @@
                     });
 
                     if(allowSave) {
+                        var kajian = populateAllKajian();
                         $.ajax({
                             url:__HOSTAPI__ + "/Apotek",
                             async:false,
@@ -1529,15 +1613,19 @@
                             data:{
                                 request: "verifikasi_resep_2",
                                 uid: __PAGES__[3],
+                                asesmen:currentAsesmen,
                                 kunjungan: currentMetaData.kunjungan,
                                 antrian:currentMetaData.uid,
                                 pasien:currentMetaData.pasien.uid,
                                 penjamin: currentMetaData.penjamin.uid,
                                 resep: resepItem,
                                 racikan: racikanItem,
-                                departemen: currentMetaData.departemen.uid
+                                departemen: currentMetaData.departemen.uid,
+                                kajian: kajian
                             },
                             success:function(response) {
+                                /*console.clear();
+                                console.log(response);*/
                                 if(response.response_package.antrian.response_result > 0) {
                                     if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
                                         Swal.fire(

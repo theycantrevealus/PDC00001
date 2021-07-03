@@ -110,13 +110,133 @@
             return obatList;
         }
 
-        var listResep = load_resep();
+        /*var listResep = load_resep();
         var requiredItem = populateObat(listResep);
         for(var requiredItemKey in requiredItem) {
-            $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase()/* + " <b class=\"text-danger\">" + requiredItem[requiredItemKey].counter + " <i class=\"fa fa-receipt\"></i></b>"*/ + "</li>");
-        }
+            $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase()/!* + " <b class=\"text-danger\">" + requiredItem[requiredItemKey].counter + " <i class=\"fa fa-receipt\"></i></b>"*!/ + "</li>");
+        }*/
+
 
         var tableResep = $("#table-resep").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: function(d) {
+                    d.request = "get_resep_backend_v2";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var resepDataRaw = response.response_package.response_data;
+                    var parsedData = [];
+                    var IGD = [];
+
+                    for(var resepKey in resepDataRaw) {
+                        if(resepDataRaw[resepKey].antrian.departemen !== undefined && resepDataRaw[resepKey].antrian.departemen !== null) {
+                            if(resepDataRaw[resepKey].antrian.departemen.uid === __POLI_IGD__) {
+                                IGD.push(resepDataRaw[resepKey]);
+                            } else {
+                                /*if(resepDataRaw[resepKey].antrian.departemen !== null) {
+                                    parsedData.push(resepDataRaw[resepKey]);
+                                } else {
+                                    resepDataRaw[resepKey].antrian.departemen = {
+                                        uid: __POLI_INAP__,
+                                        nama: "Rawat Inap"
+                                    };
+                                    parsedData.push(resepDataRaw[resepKey]);
+                                }*/
+                                parsedData.push(resepDataRaw[resepKey]);
+                            }
+                        }
+                    }
+                    var autonum = 1;
+                    var finalData = IGD.concat(parsedData);
+                    for(var az in finalData) {
+                        finalData[az].autonum = autonum;
+                        autonum++;
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsTotal;
+
+                    return finalData;
+                }
+            },
+            language: {
+                search: "",
+                searchPlaceholder: "No.RM/Nama Pasien"
+            },
+            autoWidth: false,
+            "bInfo" : false,
+            aaSorting: [[2, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "rowCallback": function ( row, data, index ) {
+                if(data.antrian.departemen.uid === __POLI_IGD__) {
+                    $("td", row).addClass("bg-danger").css({
+                        "color": "#fff"
+                    });
+                }
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.antrian.departemen !== undefined && row.antrian.departemen !== null) {
+                            return row.antrian.departemen.nama;
+                        } else {
+                            return "";
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.antrian.nama_penjamin;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                            "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
+                            "</a>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+
+        /*var tableResep = $("#table-resep").DataTable({
             //"data": load_resep(),
             "ajax":{
                 url:__HOSTAPI__ + "/Apotek",
@@ -209,7 +329,7 @@
                     }
                 }
             ]
-        });
+        });*/
 
         var targettedData;
 
