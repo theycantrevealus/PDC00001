@@ -86,7 +86,7 @@ class Apotek extends Utility
                     break;
                 case 'get_resep_lunas_backend':
                     $parameter['status'] = 'L';
-                    return self::get_resep_backend($parameter);
+                    return self::get_resep_backend_v2($parameter);
                     break;
                 case 'resep_inap':
                     return self::resep_inap($parameter);
@@ -118,12 +118,14 @@ class Apotek extends Utility
 
 
 
-                    return self::get_resep_serah_backend($parameter);
+                    //return self::get_resep_serah_backend($parameter);
+                    $parameter['status'] = 'D';
+                    return self::get_resep_backend_v2($parameter);
 
                     break;
                 case 'get_resep_igd':
                     $parameter['status'] = 'L';
-                    return self::get_resep_backend($parameter);
+                    return self::get_resep_backend_v2($parameter);
                     break;
                 case 'proses_resep':
                     return self::proses_resep($parameter);
@@ -1933,10 +1935,14 @@ class Apotek extends Utility
                     'OR',
                     'resep.status_resep' => '= ?)',
                     'OR',
-                    '(resep.status_resep' => '= ?))'
+                    '(resep.status_resep' => '= ?))',
+                    'AND',
+                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
                 );
 
-                $paramValue = array('V', 'K', 'D');
+                $paramValue = array('D', 'P', 'S');
             } else {
                 $paramData = array(
                     'resep.deleted_at' => 'IS NULL',
@@ -1948,14 +1954,18 @@ class Apotek extends Utility
                     '(resep.status_resep' => '= ?))'
                 );
 
-                $paramValue = array('V', 'K', 'D');
+                $paramValue = array('D', 'P', 'S');
             }
         } else {
             if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
                 $paramData = array(
                     'resep.deleted_at' => 'IS NULL',
                     'AND',
-                    'resep.status_resep' => '= ?'
+                    'resep.status_resep' => '= ?',
+                    'AND',
+                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
                 );
 
                 $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
@@ -1986,6 +1996,13 @@ class Apotek extends Utility
                     'created_at',
                     'updated_at'
                 ))
+                    ->join('pasien', array(
+                        'nama as nama_pasien',
+                        'no_rm'
+                    ))
+                    ->on(array(
+                        array('resep.pasien', '=', 'pasien.uid')
+                    ))
                     ->where($paramData, $paramValue)
                     ->execute();
             } else {
@@ -2001,6 +2018,13 @@ class Apotek extends Utility
                     'created_at',
                     'updated_at'
                 ))
+                    ->join('pasien', array(
+                        'nama as nama_pasien',
+                        'no_rm'
+                    ))
+                    ->on(array(
+                        array('resep.pasien', '=', 'pasien.uid')
+                    ))
                     ->where($paramData, $paramValue)
                     ->offset(intval($parameter['start']))
                     ->limit(intval($parameter['length']))
@@ -2020,6 +2044,13 @@ class Apotek extends Utility
                     'created_at',
                     'updated_at'
                 ))
+                    ->join('pasien', array(
+                        'nama as nama_pasien',
+                        'no_rm'
+                    ))
+                    ->on(array(
+                        array('resep.pasien', '=', 'pasien.uid')
+                    ))
                     ->where($paramData, $paramValue)
                     ->execute();
             } else {
@@ -2035,6 +2066,13 @@ class Apotek extends Utility
                     'created_at',
                     'updated_at'
                 ))
+                    ->join('pasien', array(
+                        'nama as nama_pasien',
+                        'no_rm'
+                    ))
+                    ->on(array(
+                        array('resep.pasien', '=', 'pasien.uid')
+                    ))
                     ->where($paramData, $paramValue)
                     ->offset(intval($parameter['start']))
                     ->limit(intval($parameter['length']))
@@ -2057,27 +2095,52 @@ class Apotek extends Utility
 
         $dataIGD = array();
         $dataBiasa = array();
-
-        $dataIGDRaw = self::$query->select('resep', array(
-            'uid',
-            'kunjungan',
-            'antrian',
-            'asesmen',
-            'dokter',
-            'pasien',
-            'total',
-            'status_resep',
-            'created_at',
-            'updated_at'
-        ))
-            ->where(array(
-                'resep.deleted_at' => 'IS NULL',
-                'AND',
-                'resep.status_resep' => '= ?'
-            ), array(
-                'N'
+        if(isset($parameter['request_type'])) {
+            $dataIGDRaw = self::$query->select('resep', array(
+                'uid',
+                'kunjungan',
+                'antrian',
+                'asesmen',
+                'dokter',
+                'pasien',
+                'total',
+                'status_resep',
+                'created_at',
+                'updated_at'
             ))
-            ->execute();
+                ->where(array(
+                    'resep.deleted_at' => 'IS NULL',
+                    'AND',
+                    '((resep.status_resep' => '= ?',
+                    'OR',
+                    'resep.status_resep' => '= ?)',
+                    'OR',
+                    '(resep.status_resep' => '= ?))'
+                ), array('D', 'P', 'S'))
+                ->execute();
+        } else {
+            $dataIGDRaw = self::$query->select('resep', array(
+                'uid',
+                'kunjungan',
+                'antrian',
+                'asesmen',
+                'dokter',
+                'pasien',
+                'total',
+                'status_resep',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'resep.deleted_at' => 'IS NULL',
+                    'AND',
+                    'resep.status_resep' => '= ?'
+                ), array(
+                    (isset($parameter['status']) ? $parameter['status'] : 'N')
+                ))
+                ->execute();
+        }
+
         foreach ($dataIGDRaw['response_data'] as $key => $value) {
             $PegawaiInfo = $Pegawai->get_detail($value['dokter']);
             $dataIGDRaw['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
@@ -2769,7 +2832,7 @@ class Apotek extends Utility
         $kajian_data = array();
 
         $UpdateStatusResep = self::$query->update('resep', array(
-            'status_resep' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'L'
+            'status_resep' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? (($parameter['departemen'] === __POLI_IGD__) ? 'L' : 'K') : 'L'
         ))
             ->where(array(
                 'resep.uid' => '= ?',

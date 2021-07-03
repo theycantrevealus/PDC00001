@@ -111,7 +111,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var forReturn = [];
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
@@ -119,10 +118,14 @@
                     }
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen !== undefined) {
-                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                        if(dataSet[dKey].antrian.departemen !== undefined) {
+                            if(dataSet[dKey].antrian.departemen.uid !== __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid !== __POLI_INAP__) {
                                 forReturn.push(dataSet[dKey]);
+                            } else {
+                                //console.log(dataSet[dKey]);
                             }
+                        } else {
+                            //console.log(dataSet[dKey]);
                         }
                     }
 
@@ -130,7 +133,7 @@
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsTotal;
 
-                    return dataSet;
+                    return forReturn;
                 }
             },
             autoWidth: false,
@@ -157,12 +160,12 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(
-                            row.antrian.pasien_info.panggilan_name !== undefined &&
-                            row.antrian.pasien_info.panggilan_name !== null
+                            row.pasien_info.panggilan_name !== undefined &&
+                            row.pasien_info.panggilan_name !== null
                         ) {
-                            return row.antrian.pasien_info.panggilan_name.nama + " " + row.antrian.pasien_info.nama;
+                            return row.pasien_info.panggilan_name.nama + " " + row.pasien_info.nama;
                         } else {
-                            return row.antrian.pasien_info.nama;
+                            return row.pasien_info.nama;
                         }
                     }
                 },
@@ -173,7 +176,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.penjamin_data.nama;
+                        return row.antrian.nama_penjamin;
                     }
                 },
                 {
@@ -203,12 +206,14 @@
                 type: "POST",
                 data: function(d){
                     d.request = "get_resep_igd";
-                    d.request_type = "igd_inap";
+                    //d.request_type = "igd_inap";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
-                dataSrc:function(response) {var forReturn = [];
+                dataSrc:function(response) {
+                    console.log(response);
+                    var forReturn = [];
                     var forReturnSelesai = [];
                     var dataSet = response.response_package.response_data;
                     if(dataSet === undefined) {
@@ -218,12 +223,14 @@
 
 
                     var autonum = 1;
+
                     for(var dKey in dataSet) {
                         if(
                             dataSet[dKey].antrian.departemen !== undefined &&
                             dataSet[dKey].antrian.departemen !== null
                         ) {
                             if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+
                                 dataSet[dKey].autonum = autonum;
                                 if(dataSet[dKey].status_resep === "D") {
                                     forReturnSelesai.push(dataSet[dKey]);
@@ -270,12 +277,12 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(
-                            row.antrian.pasien_info.panggilan_name !== undefined &&
-                            row.antrian.pasien_info.panggilan_name !== null
+                            row.pasien_info.panggilan_name !== undefined &&
+                            row.pasien_info.panggilan_name !== null
                         ) {
-                            return row.antrian.pasien_info.panggilan_name.nama + " " + row.antrian.pasien_info.nama;
+                            return row.pasien_info.panggilan_name.nama + " " + row.pasien_info.nama;
                         } else {
-                            return row.antrian.pasien_info.nama;
+                            return row.pasien_info.nama;
                         }
                     }
                 },
@@ -286,7 +293,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.penjamin_data.nama;
+                        return row.antrian.nama_penjamin;
                     }
                 },
                 {

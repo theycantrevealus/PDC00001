@@ -201,7 +201,12 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.antrian.departemen !== undefined && row.antrian.departemen !== null) {
-                            return row.antrian.departemen.nama;
+                            if(row.antrian.departemen.uid === __POLI_INAP__) {
+                                return row.antrian.departemen.nama + "<br />" +
+                                    "<span class=\"text-info\">" + row.antrian.ns_detail.kode_ns + "</span> - " + row.antrian.ns_detail.nama_ns;
+                            } else {
+                                return row.antrian.departemen.nama;
+                            }
                         } else {
                             return "";
                         }
