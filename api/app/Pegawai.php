@@ -357,6 +357,36 @@ class Pegawai extends Utility {
     }
 
     //DETAIL PEGAWAI
+    public function get_info($parameter) {
+        $data = self::$query
+            ->select('pegawai', array(
+                'uid',
+                'email',
+                'jabatan',
+                'nama',
+                'unit',
+                'password',
+                'created_at',
+                'updated_at'
+            ))
+            ->where(array(
+                'pegawai.deleted_at' => 'IS NULL',
+                'AND',
+                'pegawai.uid' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+
+        if(file_exists('../images/pegawai/' . $data['response_data'][0]['uid'] . '.png')) {
+            $profile_pic = '/images/pegawai/' . $data['response_data'][0]['uid'] . '.png';
+        } else {
+            $profile_pic = '/client/template/assets/images/avatar/demi.png';
+        }
+        $data['response_data'][0]['profile_pic'] = $profile_pic;
+        return $data;
+    }
+
     public function get_detail($parameter) {
         $data = self::$query
             ->select('pegawai', array(

@@ -55,12 +55,19 @@
                                     <div class="tab-pane active show fade" id="resep-biasa">
                                         <div class="row">
                                             <div class="col-md-12">
+                                                <div class="alert alert-soft-info card-margin" role="alert">
+                                                    <h6>
+                                                        <i class="fa fa-paperclip"></i> Keterangan Resep
+                                                    </h6>
+                                                    <br />
+                                                    <div id="txt_keterangan_resep" style="color: #000 !important;"></div>
+                                                </div>
                                                 <table id="load-detail-resep" class="table table-bordered largeDataType">
                                                     <thead class="thead-dark">
                                                     <tr>
                                                         <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
                                                         <th style="width: 40%;">Obat</th>
-                                                        <th width="15%">Signa</th>
+                                                        <th class="wrap_content">Signa</th>
                                                         <th width="15%">Jumlah</th>
                                                         <th>Keterangan</th>
                                                     </tr>
@@ -82,12 +89,19 @@
                                     <div class="tab-pane active show fade" id="resep-racikan">
                                         <div class="row">
                                             <div class="col-md-12">
+                                                <div class="alert alert-soft-info card-margin" role="alert">
+                                                    <h6>
+                                                        <i class="fa fa-paperclip"></i> Keterangan Racikan
+                                                    </h6>
+                                                    <br />
+                                                    <div id="txt_keterangan_racikan" style="color: #000 !important;"></div>
+                                                </div>
                                                 <table id="load-detail-racikan" class="table table-bordered largeDataType">
                                                     <thead class="thead-dark">
                                                     <tr>
                                                         <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
                                                         <th width="20%;">Racikan</th>
-                                                        <th style="width: 15%;">Signa</th>
+                                                        <th class="wrap_content">Signa</th>
                                                         <th class="wrap_content">Jumlah</th>
                                                         <th width="30%;">Obat</th>
                                                         <th>Keterangan</th>

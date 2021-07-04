@@ -1,9 +1,11 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
     $(function() {
         protocolLib = {
             resep_selesai_proses: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", parameter, 3000, "notif_pasien_baru");
                 tableResep.ajax.reload();
+                tableResep2.ajax.reload();
             }
         };
         var targettedUID;
@@ -208,11 +210,17 @@
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "P") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
+                                "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "S") {
@@ -322,11 +330,17 @@
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "P") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
+                                "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "S") {
@@ -342,7 +356,7 @@
 
 
 
-        var tableResep= $("#table-resep-history").DataTable({
+        var tableResepRiwayat = $("#table-resep-history").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
@@ -431,15 +445,25 @@
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "P") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "S") {
-                            return "<i class=\"fa fa-check text-success\"></i>";
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                "</button>" +
+                                "</div>";
                         }
                     }
                 }
@@ -457,6 +481,139 @@
 
 
         var targettedData;
+
+        $("body").on("click", ".btn-apotek-cetak", function () {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+            targettedUID = uid;
+
+            //Load Resep Detail
+            $.ajax({
+                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + uid,
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    targettedData = response.response_package.response_data[0];
+
+                    var detail_dokter = targettedData.detail_dokter;
+                    var resep_dokter = [];
+                    for(var a in detail_dokter) {
+                        resep_dokter.push({
+                            obat: "<b>R\/</b> " + detail_dokter[a].detail.nama,
+                            satuan: detail_dokter[a].detail.satuan_terkecil_info.nama,
+                            kuantitas: detail_dokter[a].qty,
+                            signa: detail_dokter[a].signa_qty + " &times; " + detail_dokter[a].signa_pakai,
+                            keterangan: detail_dokter[a].keterangan
+                        });
+                    }
+
+                    var detail_racikan_dokter = targettedData.racikan;
+                    var racikan_dokter = [];
+                    for(var b in detail_racikan_dokter) {
+                        racikan_dokter.push({
+                            racikan: "<b>R\/</b> " + detail_racikan_dokter[b].kode,
+                            kuantitas: detail_racikan_dokter[b].qty,
+                            signa: detail_racikan_dokter[b].signa_qty + " &times; " + detail_racikan_dokter[b].signa_pakai,
+                            keterangan: detail_racikan_dokter[b].keterangan
+                        });
+                    }
+
+                    var totalAll = 0;
+                    var detail_apotek = targettedData.detail;
+                    var resep_apotek = [];
+                    for(var a in detail_apotek) {
+                        resep_apotek.push({
+                            obat: "<b>R\/</b> " + detail_apotek[a].detail.nama,
+                            satuan: detail_apotek[a].detail.satuan_terkecil_info.nama,
+                            kuantitas: detail_apotek[a].qty,
+                            signa: detail_apotek[a].signa_qty + " &times; " + detail_apotek[a].signa_pakai,
+                            keterangan: detail_apotek[a].keterangan,
+                            harga: "<h6 class=\"number_style\">" + number_format(parseFloat(detail_apotek[a].pay[0].harga), 2, ".", ",") + "</h6>",
+                            subtotal: "<h6 class=\"number_style\">" + number_format(parseFloat(detail_apotek[a].pay[0].subtotal), 2, ".", ",") + "</h6>",
+                        });
+                        totalAll += parseFloat(detail_apotek[a].pay[0].subtotal);
+                    }
+
+
+                    var detail_racikan_apotek = targettedData.racikan;
+                    var racikan_apotek = [];
+                    for(var b in detail_racikan_apotek) {
+                        var detailRacikanApotek = detail_racikan_apotek[b].detail;
+                        for(var c in detailRacikanApotek) {
+                            racikan_apotek.push({
+                                obat: "<b>R\/</b> " + detailRacikanApotek[c].detail.nama,
+                                kuantitas: detailRacikanApotek[c].pay[0].qty,
+                                signa: detail_racikan_apotek[b].signa_qty + " &times; " + detail_racikan_apotek[b].signa_pakai,
+                                keterangan: detail_racikan_apotek[b].keterangan,
+                                harga: "<h6 class=\"number_style\">" + number_format(parseFloat(detailRacikanApotek[c].pay[0].harga), 2, ".", ",") + "</h6>",
+                                subtotal: "<h6 class=\"number_style\">" + number_format(parseFloat(detailRacikanApotek[c].pay[0].subtotal), 2, ".", ",") + "</h6>",
+                            });
+                            totalAll += parseFloat(detailRacikanApotek[c].pay[0].subtotal);
+                        }
+                    }
+
+                    $.ajax({
+                        async: false,
+                        url: __HOST__ + "miscellaneous/print_template/resep.php",
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "POST",
+                        data: {
+                            __PC_CUSTOMER__: __PC_CUSTOMER__,
+                            __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                            __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                            kode: targettedData.kode,
+                            tanggal_resep: targettedData.created_at_parsed,
+                            no_mr: targettedData.pasien.no_rm,
+                            jenis_pasien: "",
+                            nama_pasien: targettedData.pasien.nama,
+                            departemen: targettedData.antrian.poli_info.nama,
+                            tanggal_lahir: targettedData.pasien.tanggal_lahir_parsed,
+                            dokter: targettedData.dokter.nama,
+                            jenis_kelamin: targettedData.pasien.jenkel_detail.nama,
+                            penjamin: targettedData.antrian.penjamin_data.nama,
+                            alergi: "-",
+                            sep: (targettedData.antrian.penjamin === __UIDPENJAMINUMUM__) ? "-" : targettedData.bpjs.sep,
+                            resep_dokter: resep_dokter,
+                            racikan_dokter: racikan_dokter,
+                            resep_apotek: resep_apotek,
+                            racikan_apotek: racikan_apotek,
+                            total_bayar: "<h6 class=\"number_style\">Rp. " + number_format(totalAll, 2, ".", ",") + "</h6>",
+                            terbilang: titleCase(targettedData.terbilang)
+                        },
+                        success: function (response) {
+                            $("#modal-cetak").modal("show");
+                            $("#cetak").html(response);
+                        },
+                        error: function () {
+                            //
+                        }
+                    });
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        });
+
+        $("#btnCetakResep").click(function () {
+            $("#cetak").printThis({
+                loadCSS: "template/assets/css/app.css",
+                /*importCSS: true,
+                base: true,
+                importStyle: true,*/
+                header: null,
+                footer: null,
+                pageTitle: "Cetak Resep",
+                afterPrint: function() {
+                    $("#form-payment-detail").modal("hide");
+                }
+            });
+        });
 
 
 
@@ -783,6 +940,7 @@
                             if(response.response_package.response_result > 0) {
                                 tableResep.ajax.reload();
                                 tableResep2.ajax.reload();
+                                tableResepRiwayat.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
                             } else {
                                 console.log(response);
@@ -820,6 +978,7 @@
                             if(response.response_package.response_result > 0) {
                                 tableResep.ajax.reload();
                                 tableResep2.ajax.reload();
+                                tableResepRiwayat.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
                             } else {
                                 console.log(response);
@@ -1699,6 +1858,73 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="btnPanggilResep"><i class="fa fa-check"></i> Panggil</button>
                 <button type="button" class="btn btn-success" id="btnTerimaResep"><i class="fa fa-check"></i> Sudah Terima</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<div id="modal-cetak" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Check Obat</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg">
+                    <div class="card">
+                        <div class="card-header card-header-large bg-white">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <h5 class="card-header__title flex m-0">Cetak Resep</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="cetak">
+
+                            </div>
+                            <!--<table id="load-detail-resep" class="table table-bordered table-striped largeDataType">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
+                                    <th style="width: 40%;">Obat</th>
+                                    <th width="15%">Signa</th>
+                                    <th width="15%">Jumlah</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <table id="load-detail-racikan" class="table table-bordered largeDataType">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
+                                    <th style="width: 15%;">Racikan</th>
+                                    <th style="width: 15%;">Signa</th>
+                                    <th style="width: 15%;">Jumlah</th>
+                                    <th>Obat</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-purple" id="btnCetakResep"><i class="fa fa-print"></i> Cetak</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
             </div>
         </div>

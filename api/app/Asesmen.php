@@ -3163,7 +3163,7 @@ class Asesmen extends Utility {
                     'poli_asesmen' => 'inap'
                 );
             } else {
-                $PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
+                $PoliDetail = $Poli->get_poli_info($value['uid_poli'])['response_data'][0];
             }
 
 

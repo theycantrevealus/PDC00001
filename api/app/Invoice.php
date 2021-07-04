@@ -821,7 +821,7 @@ class Invoice extends Utility
             if (count($AntrianKunjungan['response_data']) > 0) {
                 foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                     //Info Poliklinik
-                    $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
+                    $PoliInfo = $Poli->get_poli_info($AKValue['poli']);
 
 
                     //Antrian Poli Populator
@@ -839,14 +839,14 @@ class Invoice extends Utility
                         ->execute();
                     foreach ($PoliPopulator['response_data'] as $PoliPopKey => $PoliPopValue) {
                         $PoliPopulator['response_data'][$PoliPopKey]['dokter'] = $Pegawai->get_detail($PoliPopValue['dokter'])['response_data'][0];
-                        $PoliPopulator['response_data'][$PoliPopKey]['poli'] = $Poli->get_poli_detail($PoliPopValue['departemen'])['response_data'][0];
+                        $PoliPopulator['response_data'][$PoliPopKey]['poli'] = $Poli->get_poli_info($PoliPopValue['departemen'])['response_data'][0];
                     }
                     $AntrianKunjungan['response_data'][$AKKey]['poli_list'] = $PoliPopulator['response_data'];
 
                     $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                     //Info Pegawai
-                    $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
+                    $PegawaiInfo = $Pegawai->get_info($AKValue['pegawai']);
                     $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                     //Info Loket
@@ -861,8 +861,8 @@ class Invoice extends Utility
                 if($value['poli'] === __POLI_IGD__) {
 
                     $value['antrian_kunjungan'] = array(
-                        'poli' => $Poli->get_poli_detail(__POLI_IGD__)['response_data'][0],
-                        'pegawai' => $Pegawai->get_detail($UserData['data']->uid)['response_data'][0],
+                        'poli' => $Poli->get_poli_info(__POLI_IGD__)['response_data'][0],
+                        'pegawai' => $Pegawai->get_info($UserData['data']->uid)['response_data'][0],
                         'penjamin' => $value['penjamin']
                     );
                     array_push($dataResult, $value);
