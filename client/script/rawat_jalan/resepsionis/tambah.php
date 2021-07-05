@@ -391,8 +391,8 @@
             success: function(response){
                 var MetaData = response.response_package.response_data;
 
-                if (MetaData != ""){ 
-                	for(i = 0; i < MetaData.length; i++){
+                if (MetaData !== undefined && MetaData !== null){
+                	for(var i in MetaData){
 	                    var selection = document.createElement("OPTION");
 
 	                    $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
