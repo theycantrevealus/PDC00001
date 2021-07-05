@@ -183,9 +183,10 @@ class Pasien extends Utility
             ->execute();
 
         $autonum = 1;
+        $Terminologi = new Terminologi(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             //Panggilan
-            $Terminologi = new Terminologi(self::$pdo);
             $TerminologiInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['panggilan']);
             $data['response_data'][$key]['panggilan_name'] = $TerminologiInfo['response_data'][0];
 
@@ -222,7 +223,6 @@ class Pasien extends Utility
             foreach ($Detail['response_data'] as $DKey => $DValue)
             {
                 //Detail Penjamin
-                $Penjamin = new Penjamin(self::$pdo);
                 $PenjaminDetail = $Penjamin->get_penjamin_detail($DValue['penjamin']);
                 $Detail['response_data'][$DKey]['penjamin_detail'] = $PenjaminDetail['response_data'][0];
 

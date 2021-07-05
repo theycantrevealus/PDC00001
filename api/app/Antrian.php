@@ -1849,6 +1849,10 @@ class Antrian extends Utility
             )
             ->execute();
         //More Info
+        $Pasien = new Pasien(self::$pdo);
+        $Terminologi = new Terminologi(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        $Poli = new Poli(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $Kunjungan = self::$query->select('kunjungan', array(
                 'uid',
@@ -1868,13 +1872,8 @@ class Antrian extends Utility
                 ->execute();
             $data['response_data'][$key]['kunjungan_detail'] = $Kunjungan['response_data'][0];
 
-            $Pasien = new Pasien(self::$pdo);
+
             $PasienData = $Pasien->get_pasien_detail('pasien', $value['pasien']);
-
-            $Terminologi = new Terminologi(self::$pdo);
-            $Penjamin = new Penjamin(self::$pdo);
-
-            $Poli = new Poli(self::$pdo);
             $PoliData = $Poli->get_poli_detail($value['departemen']);
             $data['response_data'][$key]['poli_info'] = $PoliData['response_data'][0];
 

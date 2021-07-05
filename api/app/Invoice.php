@@ -293,8 +293,7 @@ class Invoice extends Utility
         return $payment;
     }
 
-    private function get_biaya_pasien_back_end($parameter)
-    {
+    private function get_biaya_pasien_back_end($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
@@ -456,7 +455,7 @@ class Invoice extends Utility
                 ->limit(intval($parameter['length']))
                 ->where($paramData, $paramValue)
                 ->join('antrian_nomor', array(
-                    'id', 'poli'
+                    'id', 'poli', 'penjamin'
                 ))
                 ->join('pasien', array(
                     'nama'
@@ -484,7 +483,18 @@ class Invoice extends Utility
         $TunggakanRanap = array();
         $RekapBiayaKamar = array();
 
-        $Ranap = self::$query->select('rawat_inap', array(
+
+
+
+
+
+
+
+
+
+
+
+        /*$Ranap = self::$query->select('rawat_inap', array(
             'uid',
             'bed',
             'petugas',
@@ -710,7 +720,20 @@ class Invoice extends Utility
                 ))
                     ->execute();
             }
-        }
+        }*/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         foreach ($data['response_data'] as $key => $value) {//Antrian Info
@@ -740,61 +763,65 @@ class Invoice extends Utility
                     'K', 'V'
                 ))
                 ->execute();
-            if (count($AntrianKunjungan['response_data']) > 0) {
-                $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
-                $value['pasien'] = $PasienInfo['response_data'][0];
+
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            $value['pasien'] = $PasienInfo['response_data'][0];
+
+            $value['created_at_parse'] = date('d F Y', strtotime($value['created_at']));
+
+            $statusLunas = false;
+            $departemen_terkait = array();
 
 
-                $statusLunas = false;
-                $departemen_terkait = array();
-
-
-                //Detail Pembayaran
-                $InvoiceDetail = self::$query->select('invoice_detail', array(
-                    'status_bayar',
-                    'subtotal',
-                    'departemen',
-                    'billing_group',
-                    'penjamin'
+            //Detail Pembayaran
+            $InvoiceDetail = self::$query->select('invoice_detail', array(
+                'status_bayar',
+                'subtotal',
+                'departemen',
+                'billing_group',
+                'penjamin'
+            ))
+                ->join('master_penjamin', array(
+                    'nama as nama_penjamin'
                 ))
-                    ->join('master_penjamin', array(
-                        'nama as nama_penjamin'
-                    ))
-                    ->on(array(
-                        array('invoice_detail.penjamin', '=', 'master_penjamin.uid')
-                    ))
-                    ->where(array(
-                        'invoice_detail.invoice' => '= ?',
-                        'AND',
-                        'invoice_detail.deleted_at' => 'IS NULL'
-                    ), array(
-                        $value['uid']
-                    ))
-                    ->execute();
-                $IDautonum = 1;
-                foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
-                    if ($IDValue['status_bayar'] == 'Y') {
-                        $statusLunas = true;
-                    } else {
-                        $statusLunas = false;
-                        break;
-                    }
+                ->on(array(
+                    array('invoice_detail.penjamin', '=', 'master_penjamin.uid')
+                ))
+                ->where(array(
+                    'invoice_detail.invoice' => '= ?',
+                    'AND',
+                    'invoice_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $IDautonum = 1;
+            foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
+                if ($IDValue['status_bayar'] == 'Y') {
+                    $statusLunas = true;
+                } else {
+                    $statusLunas = false;
+                    break;
                 }
+            }
 
-                foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
-                    if(!in_array($IDValue['departemen'], $departemen_terkait)) {
-                        array_push($departemen_terkait, $IDValue['departemen']);
-                    }
+            foreach ($InvoiceDetail['response_data'] as $IDKey => $IDValue) {
+                if(!in_array($IDValue['departemen'], $departemen_terkait)) {
+                    array_push($departemen_terkait, $IDValue['departemen']);
                 }
+            }
 
-                $value['lunas'] = $statusLunas;
-                $value['departemen_terkait'] = $departemen_terkait;
-                $value['invoice_detail'] = $InvoiceDetail['response_data'];
+            $value['lunas'] = $statusLunas;
+            $value['departemen_terkait'] = $departemen_terkait;
+            $value['invoice_detail'] = $InvoiceDetail['response_data'];
 
+            $value['autonum'] = $autonum;
+            $autonum++;
 
+            if (count($AntrianKunjungan['response_data']) > 0) {
                 foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                     //Info Poliklinik
-                    $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
+                    $PoliInfo = $Poli->get_poli_info($AKValue['poli']);
 
 
                     //Antrian Poli Populator
@@ -812,19 +839,14 @@ class Invoice extends Utility
                         ->execute();
                     foreach ($PoliPopulator['response_data'] as $PoliPopKey => $PoliPopValue) {
                         $PoliPopulator['response_data'][$PoliPopKey]['dokter'] = $Pegawai->get_detail($PoliPopValue['dokter'])['response_data'][0];
-                        $PoliPopulator['response_data'][$PoliPopKey]['poli'] = $Poli->get_poli_detail($PoliPopValue['departemen'])['response_data'][0];
+                        $PoliPopulator['response_data'][$PoliPopKey]['poli'] = $Poli->get_poli_info($PoliPopValue['departemen'])['response_data'][0];
                     }
                     $AntrianKunjungan['response_data'][$AKKey]['poli_list'] = $PoliPopulator['response_data'];
 
-
-                    /*if(!in_array($AKValue['poli'], $PoliListIdentifier)) {
-                        array_push($PoliListIdentifier, $AKValue['poli']);
-                        array_push($PoliList, $PoliInfo)['response_data'][0];
-                    }*/
                     $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                     //Info Pegawai
-                    $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
+                    $PegawaiInfo = $Pegawai->get_info($AKValue['pegawai']);
                     $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                     //Info Loket
@@ -833,11 +855,18 @@ class Invoice extends Utility
                 }
                 $value['antrian_kunjungan'] = $AntrianKunjungan['response_data'][0];
                 //$value['poli_list'] = $PoliList;
-                $value['autonum'] = $autonum;
-                $autonum++;
 
-                $value['created_at_parse'] = date('d F Y', strtotime($value['created_at']));
                 array_push($dataResult, $value);
+            } else {
+                if($value['poli'] === __POLI_IGD__) {
+
+                    $value['antrian_kunjungan'] = array(
+                        'poli' => $Poli->get_poli_info(__POLI_IGD__)['response_data'][0],
+                        'pegawai' => $Pegawai->get_info($UserData['data']->uid)['response_data'][0],
+                        'penjamin' => $value['penjamin']
+                    );
+                    array_push($dataResult, $value);
+                }
             }
         }
 
@@ -851,9 +880,9 @@ class Invoice extends Utility
         $data['recordsFiltered'] = count($dataResult);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
-        $data['ranap'] = $Ranap;
-        $data['tunggakan'] = $TunggakanRanap;
-        $data['log_ranap'] = $InvDetailRanap;
+        //$data['ranap'] = $Ranap;
+        //$data['tunggakan'] = $TunggakanRanap;
+        //$data['log_ranap'] = $InvDetailRanap;
         return $data;
     }
 
@@ -1194,8 +1223,10 @@ class Invoice extends Utility
                         $TindakanInfo['response_data'][0]['kelompok'] === 'LAB' ||
                         $TindakanInfo['response_data'][0]['kelompok'] === 'RAD'
                     ) {
-                        $updateTindakan = self::$query->update(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order', array(
-                            'status' => 'P'
+                        $chargedItemTindakan = array();
+                        //Check Terbayar
+                        $checkTindakan = self::$query->select(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order', array(
+                            'uid'
                         ))
                             ->where(array(
                                 strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.kunjungan' => '= ?',
@@ -1208,6 +1239,48 @@ class Invoice extends Utility
                                 $parameter['pasien'],
                             ))
                             ->execute();
+                        foreach ($checkTindakan['response_data'] as $chTKey => $chTValue) {
+                            $getDetailTindakan = self::$query->select(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail', array(
+                                'tindakan'
+                            ))
+                                ->where(array(
+                                    (($TindakanInfo['response_data'][0]['kelompok'] === 'LAB') ? strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.lab_order' : strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.radiologi_order') => '= ?',
+                                    'AND',
+                                    strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.tindakan' => '= ?',
+                                    'AND',
+                                    strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.deleted_at' => 'IS NULL'
+                                ), array(
+                                    $chTValue['uid'],
+                                    $getPaymentDetail['response_data'][0]['item']
+                                ))
+                                ->execute();
+
+                            if(count($getDetailTindakan['response_data']) > 0) {
+                                if(!in_array($chTValue['uid'], $chargedItemTindakan)) {
+                                    array_push($chargedItemTindakan, $chTValue['uid']);
+                                }
+
+
+                                $updateTindakan = self::$query->update(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order', array(
+                                    'status' => 'P'
+                                ))
+                                    ->where(array(
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.kunjungan' => '= ?',
+                                        'AND',
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.pasien' => '= ?',
+                                        'AND',
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.deleted_at' => 'IS NULL',
+                                        'AND',
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.uid' => '= ?',
+                                    ), array(
+                                        $parameter['kunjungan'],
+                                        $parameter['pasien'],
+                                        $chTValue['uid']
+                                    ))
+                                    ->execute();
+                            }
+                        }
+
                         if($TindakanInfo['response_data'][0]['kelompok'] === 'LAB') {
                             $goto_lab = true;
                         }
@@ -1749,6 +1822,7 @@ class Invoice extends Utility
 
     private function get_biaya_pasien()
     {
+        $Pegawai = new Pegawai(self::$pdo);
         $data = self::$query->select('invoice', array(
             'uid',
             'nomor_invoice',
@@ -1771,7 +1845,7 @@ class Invoice extends Utility
         foreach ($data['response_data'] as $key => $value) {
 
             $Pasien = new Pasien(self::$pdo);
-            $PasienInfo = $Pasien::get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
 
@@ -1828,12 +1902,12 @@ class Invoice extends Utility
             foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                 //Info Poliklinik
                 $Poli = new Poli(self::$pdo);
-                $PoliInfo = $Poli::get_poli_detail($AKValue['poli']);
+                $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
                 $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                 //Info Pegawai
-                $Pegawai = new Pegawai(self::$pdo);
-                $PegawaiInfo = $Pegawai::get_detail($AKValue['pegawai']);
+
+                $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
                 $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                 //Info Loket

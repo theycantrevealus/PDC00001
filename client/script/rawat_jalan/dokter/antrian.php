@@ -3270,8 +3270,8 @@
                 }
             });
 
-            orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, charge_invoice);
-            listTindakanRadiologiDihapus = [];		//set back to empty
+            //orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, charge_invoice);
+            //listTindakanRadiologiDihapus = [];		//set back to empty
             return savingResult;
         }
 
@@ -3782,7 +3782,10 @@
         //var listRadiologiTindakan = loadRadiologiTindakan();
 
         //variable for collect selected Tindakan
-        var listTindakanRadiologiTerpilih = loadRadiologiOrder(UID);
+        //var listTindakanRadiologiTerpilih = loadRadiologiOrder(UID);
+        //console.log(listTindakanRadiologiTerpilih);
+        var listTindakanRadiologiTerpilih = {};
+        //var listTindakanRadiologiTerpilih = {};
 
         //variable for collect deleted Tindakan
         var listTindakanRadiologiDihapus = [];
@@ -3835,12 +3838,12 @@
 
         $("#btnTambahTindakanRadiologi").click(function(){
             let uidTindakanRad = $("#tindakan_radiologi").val();
-            if(uidTindakanRad !== null) {
+            if(uidTindakanRad !== null && listTindakanRadiologiTerpilih[uidTindakanRad] === undefined) {
                 let dataTindakan = $("#tindakan_radiologi").select2('data');
                 let namaPenjamin;
 
                 $.each(listPenjamin, function(key, item){
-                    if (item.uid == uid_penjamin_tindakan_rad){
+                    if (item.uid === uid_penjamin_tindakan_rad){
                         namaPenjamin = item.nama;
                         return false;
                     }
@@ -3861,6 +3864,14 @@
 
                 setNomorUrut('table_tindakan_radiologi', 'no_urut_rad');
 
+            } else {
+                Swal.fire(
+                    "Order Radiologi",
+                    "Pemeriksaan sudah ada. Hindari pemeriksaan duplikat",
+                    "error"
+                ).then((result) => {
+                    console.log(listTindakanRadiologiTerpilih[uidTindakanRad]);
+                });
             }
         });
 
@@ -3873,7 +3884,7 @@
             $(this).parent().parent().remove();
 
             //set back to list
-            $("#tindakan_radiologi").append("<option value='"+ uid_tindakan +"'>"+ nama_tindakan +"</option>");
+            //$("#tindakan_radiologi").append("<option value='"+ uid_tindakan +"'>"+ nama_tindakan +"</option>");
 
             setNomorUrut('table_tindakan_radiologi', 'no_urut_rad');
         });
@@ -3896,6 +3907,7 @@
                 },
                 type: "POST",
                 success: function(response) {
+                    console.log(response);
                     // if(response.response_package.response_result > 0) {
                     // 	notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                     // } else {
@@ -4007,6 +4019,61 @@
 
         }
 
+
+
+        var dataTableRadOrder = $("#table_order_rad").DataTable({
+            autoWidth: false,
+            "ajax":{
+                "url" : __HOSTAPI__ + "/Radiologi/get-radiologi-order-dokter/" + UID,
+                "async" : false,
+                "beforeSend" : function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                "type" : "GET",
+                "dataSrc": function(response){
+                    if (response.response_package != null){
+                        return response.response_package;
+                    } else {
+                        return [];
+                    }
+                }
+            },
+            "columnDefs":[
+                {"targets": [0], "className":"dt-body-left"}
+            ],
+            "columns" : [
+                {
+                    "data": null, "sortable": false, render: function (data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.no_order;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.waktu_order;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        var detailOrder = row.detail;
+                        var parseDetail = "";
+                        for(var dK in detailOrder) {
+                            if(detailOrder[dK].tindakan.harga_minimum === detailOrder[dK].tindakan.harga_maksimum) {
+                                parseDetail += "<li>" + detailOrder[dK].tindakan.nama + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span></li>";
+                            } else {
+                                parseDetail += "<li>" + detailOrder[dK].tindakan.nama + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan.harga_minimum, 2, ".", ",") + " - Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span></li>";
+                            }
+                        }
+                        return parseDetail;
+                    }
+                }
+            ]
+        });
+
         var dataTableLabOrder = $("#table_order_lab").DataTable({
             autoWidth: false,
             "ajax":{
@@ -4016,7 +4083,7 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 "type" : "GET",
-                "dataSrc": function(response){
+                "dataSrc": function(response) {
                     if (response.response_package != null){
                         return response.response_package.response_data;
                     } else {
@@ -4045,9 +4112,18 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["nama_dr_penanggung_jawab"];
+                        var detailOrder = row.detail;
+                        var parseDetail = "";
+                        for(var dK in detailOrder) {
+                            if(detailOrder[dK].tindakan_detail.harga_minimum === detailOrder[dK].tindakan_detail.harga_maksimum) {
+                                parseDetail += "<li>" + detailOrder[dK].tindakan + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span></li>";
+                            } else {
+                                parseDetail += "<li>" + detailOrder[dK].tindakan + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_minimum, 2, ".", ",") + " - Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span></li>";
+                            }
+                        }
+                        return parseDetail;
                     }
-                },
+                }/*,
                 {
                     "data" : null, render: function(data, type, row, meta) {
 
@@ -4069,7 +4145,7 @@
 
                         return button;
                     }
-                }
+                }*/
             ]
         });
 
@@ -4098,8 +4174,6 @@
                 cache: true,
                 processResults: function (response) {
                     var data = response.response_package.response_data;
-                    console.clear();
-                    console.log(data);
                     return {
                         results: $.map(data, function (item) {
                             return {
@@ -4453,6 +4527,24 @@
                     }
                 }
             }
+        });
+
+        $("#btnTambahOrderRad").click(function() {
+            $("#form-tambah-order-rad").modal("show");
+        });
+
+        $("#btnSubmitOrderRad").click(function() {
+            orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, "Y");
+            listTindakanRadiologiTerpilih = {};
+            listTindakanRadiologiDihapus = [];
+            $("#table_tindakan_radiologi tbody tr").remove();
+
+            dataTableRadOrder.ajax.reload();
+
+            //Refresh Table
+
+            $("#form-tambah-order-rad").modal("hide");
+            //Todo: Tampilkan kisaran harga terendah sampai tertinggi permitra dan penjamin pada radio dan labor
         });
 
         $("#btnTambahOrderLab").click(function(){
@@ -5238,18 +5330,16 @@
 
 
         if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
-            if(dataOdontogram === undefined)
-            {
+
+            if(dataOdontogram === undefined || dataOdontogram === "{}") {
                 $(".ordo-top").each(function() {
                     var id = $(this).attr("id").split("_");
                     id = id[id.length - 1];
-                    if(metaSelOrdo[id] === undefined)
-                    {
+                    if(metaSelOrdo[id] === undefined) {
                         metaSelOrdo[id] = {
                             "top" : {
                                 "tambal": "",
-                                "caries": false
-                            },
+                                "caries": false                            },
                             "left" : {
                                 "tambal": "",
                                 "caries": false
@@ -5279,6 +5369,7 @@
                     }
                 });
             } else {
+
                 metaSelOrdo = JSON.parse(dataOdontogram);
                 // ParseView
 
@@ -5503,8 +5594,8 @@
             //Render currentOrdoMeta
             $(".single_gigi .side").each(function() {
                 var settedPiece = $(this).attr("class").split(" ");
-                if(currentOrdonMeta[settedPiece[0]].tambal !== "")
-                {
+
+                if(currentOrdonMeta[settedPiece[0]].tambal !== undefined && currentOrdonMeta[settedPiece[0]].tambal !== "" && currentOrdonMeta[settedPiece[0]].tambal !== null) {
                     if($(this).hasClass(settedPiece[0])) {
                         var getModeSet = currentOrdonMeta[settedPiece[0]].tambal.split("_");
                         //$(".set_gigi tr#tambal_" + getModeSet[getModeSet.length - 1]).addClass("selected_ordon");
@@ -6205,6 +6296,50 @@
 			</div>
 		</div>
 	</div>
+</div>
+
+
+<div id="form-tambah-order-rad" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Order Radiologi</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <select class="form-control" id="tindakan_radiologi">
+
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-info" id="btnTambahTindakanRadiologi">
+                            <i class="fa fa-plus"></i> Tambah Tindakan Radiologi
+                        </button>
+                    </div>
+                    <div class="col-md-2" style="padding-top: 8px;" id="radiologi_tindakan_notifier"></div>
+                    <div class="col-md-12" style="margin-top: 10px;">
+                        <table class="table table-bordered" id="table_tindakan_radiologi">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th width='25%'>Tindakan Radiologi</th>
+                                <th width='25%'>Penjamin</th>
+                                <th class="wrap_content">Aksi</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+                <button type="button" class="btn btn-primary" id="btnSubmitOrderRad">Order</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 

@@ -1610,7 +1610,7 @@ class Asesmen extends Utility {
 
 
 		//Tindakan Management
-		$returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter, $MasterUID);
+		//$returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter, $MasterUID);
 
 		//Resep dan Racikan
 		$returnResponse['resep_response'] = self::set_resep_asesment($parameter, $MasterUID);
@@ -1633,7 +1633,8 @@ class Asesmen extends Utility {
                         ->execute();
                 }
 
-                $Laboratorium = new Laboratorium(self::$pdo);
+                //Charge Invoice Tindakan Penunjang
+                /*$Laboratorium = new Laboratorium(self::$pdo);
                 $ChargeLab = $Laboratorium->charge_invoice_item(array(
                     'asesmen' => $MasterUID,
                     'kunjungan' => $parameter['kunjungan'],
@@ -1648,7 +1649,7 @@ class Asesmen extends Utility {
                     'kunjungan' => $parameter['kunjungan'],
                     'pasien' => $parameter['pasien'],
                     'departemen' => $parameter['poli']
-                ));
+                ));*/
 
                 if($parameter['penjamin'] === __UIDPENJAMINUMUM__) {
                     $antrian_nomor = self::$query->update('antrian_nomor', array(
@@ -3146,6 +3147,9 @@ class Asesmen extends Utility {
 		$Authorization = new Authorization();
 		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
+        $Pasien = new Pasien(self::$pdo);
+        $Poli = new Poli(self::$pdo);
+
 		$antrianClass = new Antrian(self::$pdo);
 		$antrian = $antrianClass->get_antrian_by_dokter($UserData['data']->uid, $parameter[2]);
 
@@ -3154,13 +3158,12 @@ class Asesmen extends Utility {
 		$autonum = 1;
 		$returnData = array();
 		foreach ($antrian['response_data'] as $key => $value) {
-            $Poli = new Poli(self::$pdo);
             if($value['uid_poli'] === __POLI_INAP__) {
                 $PoliDetail = array(
                     'poli_asesmen' => 'inap'
                 );
             } else {
-                $PoliDetail = $Poli->get_poli_detail($value['uid_poli'])['response_data'][0];
+                $PoliDetail = $Poli->get_poli_info($value['uid_poli'])['response_data'][0];
             }
 
 
@@ -3176,7 +3179,6 @@ class Asesmen extends Utility {
             }
 
             //Pasien Detail
-            $Pasien = new Pasien(self::$pdo);
             $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['uid_pasien']);
             $antrian['response_data'][$key]['pasien_detail'] = $PasienDetail['response_data'][0];
 

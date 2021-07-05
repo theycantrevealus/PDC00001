@@ -183,7 +183,7 @@
                     if(order_detail > 0) {
                         notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
                         if(id === "btnSimpan") {
-                            location.href = __HOSTNAME__ + "/radiologi";
+                            location.href = __HOSTNAME__ + "/radiologi/proses";
                         } else {
                             var uid = uid_order;
 
@@ -212,7 +212,7 @@
                                                     "Pemeriksaan berhasil terkirim",
                                                     "success"
                                                 ).then((result) => {
-                                                    location.href = __HOSTNAME__ + "/radiologi";
+                                                    location.href = __HOSTNAME__ + "/radiologi/proses";
                                                 });
                                             } else {
                                                 Swal.fire(

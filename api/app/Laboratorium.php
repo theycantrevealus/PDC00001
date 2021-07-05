@@ -1197,12 +1197,15 @@ class Laboratorium extends Utility {
             'status' => 'V'
         ))
             ->where(array(
+                'lab_order.uid' => '= ?',
+                'AND',
                 'lab_order.asesmen' => '= ?',
                 'AND',
                 'lab_order.selesai' => '= ?',
                 'AND',
                 'lab_order.deleted_at' => 'IS NULL'
             ), array(
+                $parameter['uid'],
                 $parameter['asesmen'],
                 'false'
             ))
@@ -1214,12 +1217,15 @@ class Laboratorium extends Utility {
             'pasien'
         ))
             ->where(array(
+                'lab_order.uid' => '= ?',
+                'AND',
                 'lab_order.asesmen' => '= ?',
                 'AND',
                 'lab_order.selesai' => '= ?',
                 'AND',
                 'lab_order.deleted_at' => 'IS NULL'
             ), array(
+                $parameter['uid'],
                 $parameter['asesmen'],
                 'false'
             ))
@@ -3440,7 +3446,7 @@ class Laboratorium extends Utility {
 		
 		$result = [];
 		$result['response_result'] = 0;
-		if ($antrian['response_result'] > 0){
+		if ($antrian['response_result'] > 0) {
 
 			$data_antrian = $antrian['response_data'][0];		//get antrian data
 
@@ -3812,10 +3818,21 @@ class Laboratorium extends Utility {
                             $data_antrian['pasien']
                         ))
                         ->execute();
-				}
 
+
+
+
+
+                    //Charge Biaya Lab
+                    $ChargeLab = self::charge_invoice_item(array(
+                        'uid' => $uidLabOrder,
+                        'asesmen' => $uidAsesmen,
+                        'kunjungan' => $data_antrian['kunjungan'],
+                        'pasien' => $data_antrian['pasien'],
+                        'departemen' => $data_antrian['departemen']
+                    ));
+				}
 			}
-			
 		}
 
 		return $result;
@@ -4575,7 +4592,9 @@ class Laboratorium extends Utility {
 
 					$dataOrder['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order']));
 
-					$get_valueable_nilai = self::$query
+                    $dataOrder['response_data'][$key]['detail'] = self::get_laboratorium_order_detail($value['uid'])['response_data'];
+
+					/*$get_valueable_nilai = self::$query
 						->select('lab_order_nilai', array('id','nilai'))
 						->where(
 							array('lab_order_nilai.nilai' => 'IS NOT NULL',
@@ -4591,7 +4610,7 @@ class Laboratorium extends Utility {
 						$dataOrder['response_data'][$key]['editable'] = 'false';
 					} else {
 						$dataOrder['response_data'][$key]['editable'] = 'true';
-					}
+					}*/
 					$autonum ++;
 				}
 
@@ -4604,7 +4623,8 @@ class Laboratorium extends Utility {
         }
 	}
 
-	private static function get_laboratorium_order_detail($parameter){
+	private static function get_laboratorium_order_detail($parameter) {
+	    $Tindakan = new Tindakan(self::$pdo);
 		$data = self::$query
 			->select('lab_order_detail', array(
 					'id',
@@ -4625,7 +4645,10 @@ class Laboratorium extends Utility {
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
-			$data['response_data'][$key]['tindakan'] = self::get_tindakan_detail($value['uid_tindakan'])['response_data'][0]['nama'];
+		    $TindakanDetail = $Tindakan->get_tindakan_detail($value['uid_tindakan'])['response_data'][0];
+			//$data['response_data'][$key]['tindakan'] = self::get_tindakan_detail($value['uid_tindakan'])['response_data'][0]['nama'];
+            $data['response_data'][$key]['tindakan'] = $TindakanDetail['nama'];
+            $data['response_data'][$key]['tindakan_detail'] = $TindakanDetail;
 
 			$penjamin = new Penjamin(self::$pdo);
 			$data['response_data'][$key]['penjamin'] = $penjamin->get_penjamin_detail($value['uid_penjamin'])['response_data'][0]['nama'];
