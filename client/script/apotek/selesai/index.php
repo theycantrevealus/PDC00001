@@ -210,7 +210,7 @@
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"Rawat Jalan\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -219,7 +219,7 @@
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"Rawat Jalan\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -330,7 +330,7 @@
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -339,7 +339,7 @@
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -445,7 +445,7 @@
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : (row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -454,7 +454,7 @@
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : (row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -486,6 +486,8 @@
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
             targettedUID = uid;
+
+            var jenis_pasien = $(this).attr("jenis");
 
             //Load Resep Detail
             $.ajax({
@@ -569,14 +571,14 @@
                             kode: targettedData.kode,
                             tanggal_resep: targettedData.created_at_parsed,
                             no_mr: targettedData.pasien.no_rm,
-                            jenis_pasien: "",
+                            jenis_pasien: jenis_pasien,
                             nama_pasien: targettedData.pasien.nama,
                             departemen: targettedData.antrian.poli_info.nama,
                             tanggal_lahir: targettedData.pasien.tanggal_lahir_parsed,
                             dokter: targettedData.dokter.nama,
                             jenis_kelamin: targettedData.pasien.jenkel_detail.nama,
                             penjamin: targettedData.antrian.penjamin_data.nama,
-                            alergi: "-",
+                            alergi: targettedData.alergi_obat,
                             sep: (targettedData.antrian.penjamin === __UIDPENJAMINUMUM__) ? "-" : targettedData.bpjs.sep,
                             resep_dokter: resep_dokter,
                             racikan_dokter: racikan_dokter,

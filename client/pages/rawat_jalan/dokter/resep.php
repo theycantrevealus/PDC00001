@@ -1,6 +1,14 @@
 <div class="row">
 	<div class="col-lg">
-		<div class="card">
+        <div class="card">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0">Alergi Obat</h5>
+            </div>
+            <div class="card-body">
+                <textarea placeholder="Keterangan Alergi Obat" id="alergi_obat" class="form-control"></textarea>
+            </div>
+        </div>
+        <div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
 				<h5 class="card-header__title flex m-0">Resep</h5>
 			</div>

@@ -460,7 +460,6 @@
             var labItem = loadLabOrderItem(uid);
             var labLampiran = loadLampiran(uid);
 
-            //console.log(labItem);
             $.ajax({
                 async: false,
                 url: __HOST__ + "miscellaneous/print_template/lab_hasil.php",
@@ -651,7 +650,6 @@
                         returnedData = response.response_package.response_data;
                     }
 
-                    console.log(returnedData);
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
@@ -800,8 +798,6 @@
                 type:"GET",
                 success:function(response) {
                     labData = response.response_package.response_data[0];
-                    console.clear();
-                    console.log(response);
                     for(var nil in labData.nilai) {
                         autoNilai({
                             "satuan": labData.nilai[nil].satuan,

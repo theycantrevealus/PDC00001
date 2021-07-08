@@ -12,7 +12,9 @@
         var allICD9 = [];
         var selectedICD10Kerja = [], selectedICD10Banding = [], selectedICD9 = [];
 
-        var dataOdontogram = "";
+
+
+         var dataOdontogram = "";
         var dataMukaSimetris = "";
         var dataTMJ = "";
         var dataBibir = "";
@@ -762,7 +764,27 @@
 
 
                 //Auto Simpan Pertama (Agar tidak bisa retur lagi di kasir)
-                simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit);
+                var alergiObat = $("#alergi_obat").val();
+                simpanAsesmen(
+                    antrianData,
+                    UID,
+                    metaSwitchEdit.txt_keluhan_utama.editor,
+                    metaSwitchEdit.txt_keluhan_tambahan.editor,
+                    metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                    editorTerapisAnamnesa,
+                    editorTerapisTataLaksana,
+                    editorTerapisEvaluasi,
+                    editorTerapisHasil,
+                    editorTerapisKesimpulan,
+                    editorTerapisRekomendasi,
+                    metaSwitchEdit.txt_diagnosa_kerja.editor,
+                    metaSwitchEdit.txt_diagnosa_banding.editor,
+                    metaSwitchEdit.txt_planning.editor,
+                    alergiObat,
+                    metaSwitchEdit.txt_keterangan_resep.editor,
+                    metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                    metaSwitchEdit
+                );
             },
             error: function(response) {
                 console.log(response);
@@ -2877,7 +2899,7 @@
 
         function simpanAsesmen(
             antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi,
-            editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan,
+            editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorAlergiObat, editorKeteranganResep, editorKeteranganResepRacikan,
             metaSwitchEdit,
             charge_invoice = "N"
         ) {
@@ -3070,7 +3092,8 @@
                     resep: resep,
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
-                    racikan: racikan
+                    racikan: racikan,
+                    editorAlergiObat: editorAlergiObat
                 };
             } else if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
                 var simetris = $("input[name=\"simetris\"]:checked").val();
@@ -3130,6 +3153,7 @@
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan,
+                    editorAlergiObat: editorAlergiObat,
 
                     simetris: simetris,
                     sendi: sendi,
@@ -3201,6 +3225,7 @@
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan,
+                    editorAlergiObat: editorAlergiObat,
 
                     mata_data: JSON.stringify(mataDataList),
                     tujuan_resep: tujuan_resep.join(",")
@@ -3247,7 +3272,8 @@
                     resep: resep,
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
-                    racikan: racikan
+                    racikan: racikan,
+                    editorAlergiObat: editorAlergiObat
                 };
             }
 
@@ -3277,6 +3303,7 @@
 
 
         $("#tab-asesmen-dokter .nav-link").click(function() {
+            var alergiObat = $("#alergi_obat").val();
             const simpanDataProcess = new Promise(function(resolve, reject) {
                 resolve(simpanAsesmen(
                     antrianData,
@@ -3293,6 +3320,7 @@
                     metaSwitchEdit.txt_diagnosa_kerja.editor,
                     metaSwitchEdit.txt_diagnosa_banding.editor,
                     metaSwitchEdit.txt_planning.editor,
+                    alergiObat,
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     metaSwitchEdit));
@@ -3308,8 +3336,27 @@
 
 
         $("body").on("click", "#btnSimpan", function() {
+            var alergiObat = $("#alergi_obat").val();
             const simpanDataProcess = new Promise(function(resolve, reject) {
-                resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+                resolve(simpanAsesmen(
+                    antrianData,
+                    UID,
+                    metaSwitchEdit.txt_keluhan_utama.editor,
+                    metaSwitchEdit.txt_keluhan_tambahan.editor,
+                    metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                    editorTerapisAnamnesa,
+                    editorTerapisTataLaksana,
+                    editorTerapisEvaluasi,
+                    editorTerapisHasil,
+                    editorTerapisKesimpulan,
+                    editorTerapisRekomendasi,
+                    metaSwitchEdit.txt_diagnosa_kerja.editor,
+                    metaSwitchEdit.txt_diagnosa_banding.editor,
+                    metaSwitchEdit.txt_planning.editor,
+                    alergiObat,
+                    metaSwitchEdit.txt_keterangan_resep.editor,
+                    metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                    metaSwitchEdit));
             }).then(function(result) {
                 if(result.response_package.response_result > 0) {
                     notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
@@ -3339,7 +3386,26 @@
 
 
         $("body").on("click", "#btnSelesai", function() {
-            simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit);
+            var alergiObat = $("#alergi_obat").val();
+            simpanAsesmen(
+                antrianData,
+                UID,
+                metaSwitchEdit.txt_keluhan_utama.editor,
+                metaSwitchEdit.txt_keluhan_tambahan.editor,
+                metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                editorTerapisAnamnesa,
+                editorTerapisTataLaksana,
+                editorTerapisEvaluasi,
+                editorTerapisHasil,
+                editorTerapisKesimpulan,
+                editorTerapisRekomendasi,
+                metaSwitchEdit.txt_diagnosa_kerja.editor,
+                metaSwitchEdit.txt_diagnosa_banding.editor,
+                metaSwitchEdit.txt_planning.editor,
+                alergiObat,
+                metaSwitchEdit.txt_keterangan_resep.editor,
+                metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                metaSwitchEdit);
             Swal.fire({
                 title: 'Selesai isi asesmen rawat?',
                 text: 'Jika sudah selesai maka asesmen akan hilang dari antrian dan biaya tindakan serta obat akan langsung ditagihkan pada pasien.',
@@ -3349,9 +3415,28 @@
                 denyButtonText: `Belum`,
             }).then((result) => {
                 if (result.isConfirmed) {
-
+                    var alergiObat = $("#alergi_obat").val();
                     const simpanDataProcess = new Promise(function(resolve, reject) {
-                        resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
+                        resolve(simpanAsesmen(
+                            antrianData,
+                            UID,
+                            metaSwitchEdit.txt_keluhan_utama.editor,
+                            metaSwitchEdit.txt_keluhan_tambahan.editor,
+                            metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                            editorTerapisAnamnesa,
+                            editorTerapisTataLaksana,
+                            editorTerapisEvaluasi,
+                            editorTerapisHasil,
+                            editorTerapisKesimpulan,
+                            editorTerapisRekomendasi,
+                            metaSwitchEdit.txt_diagnosa_kerja.editor,
+                            metaSwitchEdit.txt_diagnosa_banding.editor,
+                            metaSwitchEdit.txt_planning.editor,
+                            alergiObat,
+                            metaSwitchEdit.txt_keterangan_resep.editor,
+                            metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                            metaSwitchEdit,
+                            "Y"));
                     }).then(function(result) {
                         if(result.response_package.response_result > 0) {
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
@@ -4901,8 +4986,28 @@
         }
 
         $("#btnKonsul").click(function() {
+            var alergiObat = $("#alergi_obat").val();
             const simpanDataProcess = new Promise(function(resolve, rejector) {
-                resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+                resolve(simpanAsesmen(
+                    antrianData,
+                    UID,
+                    metaSwitchEdit.txt_keluhan_utama.editor,
+                    metaSwitchEdit.txt_keluhan_tambahan.editor,
+                    metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                    editorTerapisAnamnesa,
+                    editorTerapisTataLaksana,
+                    editorTerapisEvaluasi,
+                    editorTerapisHasil,
+                    editorTerapisKesimpulan,
+                    editorTerapisRekomendasi,
+                    metaSwitchEdit.txt_diagnosa_kerja.editor,
+                    metaSwitchEdit.txt_diagnosa_banding.editor,
+                    metaSwitchEdit.txt_planning.editor,
+                    alergiObat,
+                    metaSwitchEdit.txt_keterangan_resep.editor,
+                    metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                    metaSwitchEdit
+                ));
             }).then(function(result) {
                 if (result.response_package.response_result > 0) {
                     $("#form-konsul").modal("show");
@@ -4957,8 +5062,28 @@
                         },
                         success: function(response){
                             if(response.response_package.response_result > 0) {
+                                var alergiObat = $("#alergi_obat").val();
                                 const simpanDataProcess = new Promise(function(resolve, rejector) {
-                                    resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
+                                    resolve(simpanAsesmen(
+                                        antrianData,
+                                        UID,
+                                        metaSwitchEdit.txt_keluhan_utama.editor,
+                                        metaSwitchEdit.txt_keluhan_tambahan.editor,
+                                        metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                                        editorTerapisAnamnesa,
+                                        editorTerapisTataLaksana,
+                                        editorTerapisEvaluasi,
+                                        editorTerapisHasil,
+                                        editorTerapisKesimpulan,
+                                        editorTerapisRekomendasi,
+                                        metaSwitchEdit.txt_diagnosa_kerja.editor,
+                                        metaSwitchEdit.txt_diagnosa_banding.editor,
+                                        metaSwitchEdit.txt_planning.editor,
+                                        alergiObat,
+                                        metaSwitchEdit.txt_keterangan_resep.editor,
+                                        metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                                        metaSwitchEdit,
+                                        "Y"));
                                 }).then(function(AssesmenResult) {
                                     if(AssesmenResult.response_package.response_result > 0) {
                                         Swal.fire(
@@ -5161,8 +5286,28 @@
                 dataObj.pj_pasien = kunjungan.pj_pasien;
                 dataObj.info_didapat_dari = kunjungan.info_didapat_dari;
 
+                var alergiObat = $("#alergi_obat").val();
                 const simpanDataProcess = new Promise(function(resolve, rejector) {
-                    resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+                    resolve(simpanAsesmen(
+                        antrianData,
+                        UID,
+                        metaSwitchEdit.txt_keluhan_utama.editor,
+                        metaSwitchEdit.txt_keluhan_tambahan.editor,
+                        metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                        editorTerapisAnamnesa,
+                        editorTerapisTataLaksana,
+                        editorTerapisEvaluasi,
+                        editorTerapisHasil,
+                        editorTerapisKesimpulan,
+                        editorTerapisRekomendasi,
+                        metaSwitchEdit.txt_diagnosa_kerja.editor,
+                        metaSwitchEdit.txt_diagnosa_banding.editor,
+                        metaSwitchEdit.txt_planning.editor,
+                        alergiObat,
+                        metaSwitchEdit.txt_keterangan_resep.editor,
+                        metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                        metaSwitchEdit
+                    ));
                 }).then(function(result) {
                     if(result.response_package.response_result > 0) {
                         Swal.fire({
@@ -5172,7 +5317,28 @@
                             denyButtonText: `Belum`,
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y");
+                                var alergiObat = $("#alergi_obat").val();
+                                simpanAsesmen(
+                                    antrianData,
+                                    UID,
+                                    metaSwitchEdit.txt_keluhan_utama.editor,
+                                    metaSwitchEdit.txt_keluhan_tambahan.editor,
+                                    metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                                    editorTerapisAnamnesa,
+                                    editorTerapisTataLaksana,
+                                    editorTerapisEvaluasi,
+                                    editorTerapisHasil,
+                                    editorTerapisKesimpulan,
+                                    editorTerapisRekomendasi,
+                                    metaSwitchEdit.txt_diagnosa_kerja.editor,
+                                    metaSwitchEdit.txt_diagnosa_banding.editor,
+                                    metaSwitchEdit.txt_planning.editor,
+                                    alergiObat,
+                                    metaSwitchEdit.txt_keterangan_resep.editor,
+                                    metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                                    metaSwitchEdit,
+                                    "Y"
+                                );
                                 $.ajax({
                                     async: false,
                                     url: __HOSTAPI__ + "/Antrian",

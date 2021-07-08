@@ -1804,6 +1804,7 @@ class Asesmen extends Utility {
 
 			//Update resep master
 			$resepUpdate = self::$query->update('resep', array(
+			    'alergi_obat' => $parameter['editorAlergiObat'],
                 'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
 				'keterangan' => $parameter['keteranganResep'],
 				'keterangan_racikan' => $parameter['keteranganRacikan']
@@ -2129,6 +2130,7 @@ class Asesmen extends Utility {
                     'asesmen' => $MasterAsesmen,
                     'dokter' => $UserData['data']->uid,
                     'pasien' => $parameter['pasien'],
+                    'alergi_obat' => $parameter['editorAlergiObat'],
                     'total' => 0,
                     'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
                     'created_at' => parent::format_date(),

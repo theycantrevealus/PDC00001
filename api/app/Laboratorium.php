@@ -319,6 +319,18 @@ class Laboratorium extends Utility {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
+        $parent = self::$query->update('lab_order', array(
+            'dr_penanggung_jawab' => $parameter['dpjp']
+        ))
+            ->where(array(
+                'lab_order.uid' => '= ?',
+                'AND',
+                'lab_order.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
         $worker = self::$query->update('lab_order_detail', array(
             'mitra' => $parameter['mitra'],
             'dpjp' => $parameter['dpjp'],
@@ -2696,58 +2708,123 @@ class Laboratorium extends Utility {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        if (!isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-            if($parameter['mode'] == 'history')
-            {
-                $paramData = array(
-                    'lab_order.deleted_at' => 'IS NULL',
-                    'AND',
-                    'lab_order.created_at' => 'BETWEEN ? AND ?',
-                    'AND',
-                    'lab_order.status' => '= ?'
-                );
-                $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
+        if($UserData['data']->jabatan === __UIDDOKTER__) {
+            if (!isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                if($parameter['mode'] == 'history')
+                {
+                    $paramData = array(
+                        'lab_order.dr_penanggung_jawab' => '= ?',
+                        'AND',
+                        'lab_order.deleted_at' => 'IS NULL',
+                        'AND',
+                        'lab_order.created_at' => 'BETWEEN ? AND ?',
+                        'AND',
+                        'lab_order.status' => '= ?'
+                    );
+                    $paramValue = array($UserData['data']->uid, $parameter['from'], $parameter['to'], $parameter['status']);
+                }
+                else
+                {
+                    $paramData = array(
+                        'lab_order.dr_penanggung_jawab' => '= ?',
+                        'AND',
+                        'lab_order.deleted_at' => 'IS NULL',
+                        'AND',
+                        'lab_order.status' => '= ?'
+                    );
+                    $paramValue = array($UserData['data']->uid, $parameter['status']);
+                }
+            } else {
+                if($parameter['mode'] == 'history')
+                {
+                    $paramData = array(
+                        'lab_order.dr_penanggung_jawab' => '= ?',
+                        'AND',
+                        'lab_order.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'lab_order.created_at' => 'BETWEEN ? AND ?',
+                        'AND',
+                        'lab_order.status' => '= ?'
+                    );
+                    $paramValue = array($UserData['data']->uid, $parameter['from'], $parameter['to'], $parameter['status']);
+                }
+                else {
+                    $paramData = array(
+                        'lab_order.dr_penanggung_jawab' => '= ?',
+                        'AND',
+                        'lab_order.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'lab_order.status' => '= ?'
+                    );
+                    $paramValue = array($UserData['data']->uid, $parameter['status']);
+                }
             }
-            else
-            {
-                $paramData = array(
-                    'lab_order.deleted_at' => 'IS NULL',
-                    'AND',
-                    'lab_order.status' => '= ?'
-                );
-                $paramValue = array($parameter['status']);
-            }
-        } else {
-            if($parameter['mode'] == 'history')
-            {
-                $paramData = array(
-                    'lab_order.deleted_at' => 'IS NULL',
-                    'AND',
-                    '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                    'OR',
-                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                    'OR',
-                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
-                    'AND',
-                    'lab_order.created_at' => 'BETWEEN ? AND ?',
-                    'AND',
-                    'lab_order.status' => '= ?'
-                );
-                $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
-            }
-            else {
-                $paramData = array(
-                    'lab_order.deleted_at' => 'IS NULL',
-                    'AND',
-                    '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                    'OR',
-                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                    'OR',
-                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
-                    'AND',
-                    'lab_order.status' => '= ?'
-                );
-                $paramValue = array($parameter['status']);
+        } else { //Jika Bukan Dokter
+            if (!isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                if($parameter['mode'] == 'history')
+                {
+                    $paramData = array(
+                        'lab_order.deleted_at' => 'IS NULL',
+                        'AND',
+                        'lab_order.created_at' => 'BETWEEN ? AND ?',
+                        'AND',
+                        'lab_order.status' => '= ?'
+                    );
+                    $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
+                }
+                else
+                {
+                    $paramData = array(
+                        'lab_order.deleted_at' => 'IS NULL',
+                        'AND',
+                        'lab_order.status' => '= ?'
+                    );
+                    $paramValue = array($parameter['status']);
+                }
+            } else {
+                if($parameter['mode'] == 'history')
+                {
+                    $paramData = array(
+                        'lab_order.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'lab_order.created_at' => 'BETWEEN ? AND ?',
+                        'AND',
+                        'lab_order.status' => '= ?'
+                    );
+                    $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
+                }
+                else {
+                    $paramData = array(
+                        'lab_order.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'lab_order.status' => '= ?'
+                    );
+                    $paramValue = array($parameter['status']);
+                }
             }
         }
 
@@ -2918,7 +2995,6 @@ class Laboratorium extends Utility {
         $data['recordsFiltered'] = count($itemTotal['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
-
         return $data;
     }
 

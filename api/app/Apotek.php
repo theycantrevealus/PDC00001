@@ -1285,6 +1285,7 @@ class Apotek extends Utility
             'dokter',
             'pasien',
             'total',
+            'alergi_obat',
             'status_resep',
             'keterangan',
             'keterangan_racikan',
