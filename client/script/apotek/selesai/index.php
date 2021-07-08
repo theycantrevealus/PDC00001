@@ -445,7 +445,7 @@
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : (row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : ((row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap")) + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -454,13 +454,13 @@
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : (row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : ((row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap")) + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "S") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : ((row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap")) + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -533,10 +533,10 @@
                             kuantitas: detail_apotek[a].qty,
                             signa: detail_apotek[a].signa_qty + " &times; " + detail_apotek[a].signa_pakai,
                             keterangan: detail_apotek[a].keterangan,
-                            harga: "<h6 class=\"number_style\">" + number_format(parseFloat(detail_apotek[a].pay[0].harga), 2, ".", ",") + "</h6>",
-                            subtotal: "<h6 class=\"number_style\">" + number_format(parseFloat(detail_apotek[a].pay[0].subtotal), 2, ".", ",") + "</h6>",
+                            harga: "<h6 class=\"number_style\">" + ((detail_apotek[a].pay[0] !== undefined) ? number_format(parseFloat(detail_apotek[a].pay[0].harga), 2, ".", ",") : number_format(parseFloat(0), 2, ".", ",")) + "</h6>",
+                            subtotal: "<h6 class=\"number_style\">" + ((detail_apotek[a].pay[0] !== undefined) ? number_format(parseFloat(detail_apotek[a].pay[0].subtotal), 2, ".", ",") : number_format(parseFloat(0), 2, ".", ",")) + "</h6>",
                         });
-                        totalAll += parseFloat(detail_apotek[a].pay[0].subtotal);
+                        totalAll += ((detail_apotek[a].pay[0] !== undefined) ? parseFloat(detail_apotek[a].pay[0].subtotal) : 0);
                     }
 
 
@@ -547,13 +547,13 @@
                         for(var c in detailRacikanApotek) {
                             racikan_apotek.push({
                                 obat: "<b>R\/</b> " + detailRacikanApotek[c].detail.nama,
-                                kuantitas: detailRacikanApotek[c].pay[0].qty,
+                                kuantitas: ((detailRacikanApotek[c].pay[0] !== undefined) ? detailRacikanApotek[c].pay[0].qty : 0),
                                 signa: detail_racikan_apotek[b].signa_qty + " &times; " + detail_racikan_apotek[b].signa_pakai,
                                 keterangan: detail_racikan_apotek[b].keterangan,
-                                harga: "<h6 class=\"number_style\">" + number_format(parseFloat(detailRacikanApotek[c].pay[0].harga), 2, ".", ",") + "</h6>",
-                                subtotal: "<h6 class=\"number_style\">" + number_format(parseFloat(detailRacikanApotek[c].pay[0].subtotal), 2, ".", ",") + "</h6>",
+                                harga: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].harga), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",
+                                subtotal: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].subtotal), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",
                             });
-                            totalAll += parseFloat(detailRacikanApotek[c].pay[0].subtotal);
+                            totalAll += ((detailRacikanApotek[c].pay[0] !== undefined) ? parseFloat(detailRacikanApotek[c].pay[0].subtotal) : 0);
                         }
                     }
 

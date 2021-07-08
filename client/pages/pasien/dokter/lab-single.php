@@ -28,7 +28,7 @@
                                 <div class="card-body">
                                     <table class="table form-mode">
                                         <tr>
-                                            <td class="wrap_content">Kode</td>
+                                            <td style="width: 20%" class="wrap_content">Kode</td>
                                             <td>:</td>
                                             <td>
                                                 <b class="lab_kode"><?php echo $value['tindakan']['kode']; ?> - <?php echo $value['tindakan']['nama']; ?></b>
@@ -51,6 +51,13 @@
                                             <td>:</td>
                                             <td>
                                                 <b class="lab_petugas"><?php echo $_POST['petugas_parse']; ?></b>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jam Sampling</td>
+                                            <td>:</td>
+                                            <td>
+                                                <b class="lab_sampling"><?php echo $_POST['sampling']; ?></b>
                                             </td>
                                         </tr>
                                     </table>

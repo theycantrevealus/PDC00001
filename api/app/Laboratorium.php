@@ -3003,6 +3003,8 @@ class Laboratorium extends Utility {
 		$get_uid_asesmen = self::$query
 			->select('lab_order', array(
 					'asesmen',
+                    'kesan',
+                    'anjuran',
                     'tanggal_sampling'
 				)
 			)
@@ -4229,95 +4231,98 @@ class Laboratorium extends Utility {
                             ->execute();
                         if(count($checkData['response_data']))
                         {
-                            $workerData = self::$query->update('lab_order_nilai', array(
-                                'nilai' =>	$value_nilai,
-                                'petugas' => $UserData['data']->uid,
-                                'updated_at' =>	parent::format_date()
-                            ))
-                                ->where(array(
-                                    'lab_order_nilai.lab_order' 	=> '= ?',
-                                    'AND',
-                                    'lab_order_nilai.tindakan' 		=> '= ?',
-                                    'AND',
-                                    'lab_order_nilai.id_lab_nilai'	=> '= ?',
-                                    'AND',
-                                    'lab_order_nilai.deleted_at'	=> 'IS NULL'
-                                ), array(
-                                    $parameter['uid_order'],
-                                    $key_tindakan,
-                                    $key_nilai
+                            if(($UserData['data']->uid !== __UIDDOKTER__)) {
+                                $workerData = self::$query->update('lab_order_nilai', array(
+                                    'nilai' =>	$value_nilai,
+                                    'petugas' => $UserData['data']->uid,
+                                    'updated_at' =>	parent::format_date()
                                 ))
-                                ->execute();
+                                    ->where(array(
+                                        'lab_order_nilai.lab_order' 	=> '= ?',
+                                        'AND',
+                                        'lab_order_nilai.tindakan' 		=> '= ?',
+                                        'AND',
+                                        'lab_order_nilai.id_lab_nilai'	=> '= ?',
+                                        'AND',
+                                        'lab_order_nilai.deleted_at'	=> 'IS NULL'
+                                    ), array(
+                                        $parameter['uid_order'],
+                                        $key_tindakan,
+                                        $key_nilai
+                                    ))
+                                    ->execute();
 
-                            if ($workerData['response_result'] > 0){
-                                $log = parent::log(
-                                    array(
-                                        'type'=>'activity',
-                                        'column'=>array(
-                                            'unique_target',
-                                            'user_uid',
-                                            'table_name',
-                                            'action',
-                                            'old_value',
-                                            'new_value',
-                                            'logged_at',
-                                            'status',
-                                            'login_id'
-                                        ),
-                                        'value'=>array(
-                                            $checkData['response_data'][0]['id'],
-                                            $UserData['data']->uid,
-                                            'lab_order_nilai',
-                                            'U',
-                                            json_encode($old),
-                                            json_encode($value_tindakan),
-                                            parent::format_date(),
-                                            'N',
-                                            $UserData['data']->log_id
-                                        ),
-                                        'class'=>__CLASS__
-                                    )
-                                );
+                                if ($workerData['response_result'] > 0){
+                                    $log = parent::log(
+                                        array(
+                                            'type'=>'activity',
+                                            'column'=>array(
+                                                'unique_target',
+                                                'user_uid',
+                                                'table_name',
+                                                'action',
+                                                'old_value',
+                                                'new_value',
+                                                'logged_at',
+                                                'status',
+                                                'login_id'
+                                            ),
+                                            'value'=>array(
+                                                $checkData['response_data'][0]['id'],
+                                                $UserData['data']->uid,
+                                                'lab_order_nilai',
+                                                'U',
+                                                json_encode($old),
+                                                json_encode($value_tindakan),
+                                                parent::format_date(),
+                                                'N',
+                                                $UserData['data']->log_id
+                                            ),
+                                            'class'=>__CLASS__
+                                        )
+                                    );
+                                }
                             }
-                        } else
-                        {
-                            $workerData = self::$query->insert('lab_order_nilai', array(
-                                'lab_order' => $parameter['uid_order'],
-                                'nilai' => $value_nilai,
-                                'tindakan' => $key_tindakan,
-                                'id_lab_nilai' => $key_nilai,
-                                'petugas' => $UserData['data']->uid,
-                                'created_at' => parent::format_date(),
-                                'updated_at' =>	parent::format_date()
-                            ))
-                                ->returning('id')
-                                ->execute();
+                        } else {
+                            if(($UserData['data']->uid !== __UIDDOKTER__)) {
+                                $workerData = self::$query->insert('lab_order_nilai', array(
+                                    'lab_order' => $parameter['uid_order'],
+                                    'nilai' => $value_nilai,
+                                    'tindakan' => $key_tindakan,
+                                    'id_lab_nilai' => $key_nilai,
+                                    'petugas' => $UserData['data']->uid,
+                                    'created_at' => parent::format_date(),
+                                    'updated_at' =>	parent::format_date()
+                                ))
+                                    ->returning('id')
+                                    ->execute();
 
-                            if ($workerData['response_result'] > 0){
-                                $log = parent::log(
-                                    array(
-                                        'type'=>'activity',
-                                        'column'=>array(
-                                            'unique_target',
-                                            'user_uid',
-                                            'table_name',
-                                            'action',
-                                            'logged_at',
-                                            'status',
-                                            'login_id'
-                                        ),
-                                        'value'=>array(
-                                            $workerData['response_unique'],
-                                            $UserData['data']->uid,
-                                            'lab_order_nilai',
-                                            'I',
-                                            parent::format_date(),
-                                            'N',
-                                            $UserData['data']->log_id
-                                        ),
-                                        'class'=>__CLASS__
-                                    )
-                                );
+                                if ($workerData['response_result'] > 0){
+                                    $log = parent::log(
+                                        array(
+                                            'type'=>'activity',
+                                            'column'=>array(
+                                                'unique_target',
+                                                'user_uid',
+                                                'table_name',
+                                                'action',
+                                                'logged_at',
+                                                'status',
+                                                'login_id'
+                                            ),
+                                            'value'=>array(
+                                                $workerData['response_unique'],
+                                                $UserData['data']->uid,
+                                                'lab_order_nilai',
+                                                'I',
+                                                parent::format_date(),
+                                                'N',
+                                                $UserData['data']->log_id
+                                            ),
+                                            'class'=>__CLASS__
+                                        )
+                                    );
+                                }
                             }
                         }
 

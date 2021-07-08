@@ -268,16 +268,16 @@ class Asesmen extends Utility {
         }
 
         $data['response_draw'] = intval($parameter['draw']);
+        $Pasien = new Pasien(self::$pdo);
+        $Poli = new Poli(self::$pdo);
         $autonum = intval($parameter['start']) + 1;
         foreach ($data['response_data'] as $key => $value) {
 
             //Pasien
-            $Pasien = new Pasien(self::$pdo);
             $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
             //Poli
-            $Poli = new Poli(self::$pdo);
             $PoliInfo = $Poli->get_poli_detail($value['poli']);
             $data['response_data'][$key]['poli'] = $PoliInfo['response_data'][0];
 
@@ -285,6 +285,7 @@ class Asesmen extends Utility {
             $lab = self::$query->select('lab_order', array(
                 'uid',
                 'dr_penanggung_jawab',
+                'tanggal_sampling',
                 'no_order',
                 'status',
                 'kesan',

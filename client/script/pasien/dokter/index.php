@@ -155,6 +155,7 @@
                 type:"GET",
                 success:function(response) {
                     var data = response.response_package.response_data[0];
+                    console.log(data);
 
                     var icd10Kerja = "<ol type=\"1\">";
                     var icd10Banding = "<ol type=\"1\">";
@@ -277,11 +278,11 @@
                                 var racikanApotekJlh = document.createElement("TD");
 
                                 $(racikanApotekID).html((parseInt(racikanApotekKey) + 1));
-                                $(racikanApotekNama).html(racikanApotekData[racikanApotekKey].kode);
+                                $(racikanApotekNama).html(racikanData[racikanApotekKey].kode);
 
                                 var komposisiApotek = "<ol type=\"1\">";
                                 for(var itemApotekKey in itemApotekRacikan) {
-                                    komposisiApotek += "<li>" + itemApotekRacikan[itemApotekKey].obat_detail.nama + " <b class=\"text-info\">" + itemApotekRacikan[itemApotekKey].kekuatan  + "</b></li>";
+                                    komposisiApotek += "<li>" + itemApotekRacikan[itemApotekKey].obat_detail.nama + " (" + itemApotekRacikan[itemApotekKey].jumlah + ") <b class=\"text-info\">" + itemApotekRacikan[itemApotekKey].kekuatan  + "</b></li>";
                                 }
                                 komposisiApotek += "</ol>";
                                 $(racikanApotekKomposisi).html(komposisiApotek);
@@ -449,6 +450,8 @@
         }
 
         function load_laboratorium(data) {
+
+            data.sampling = data.tanggal_sampling;
 
             data.dr_penanggung_jawab = {
                 nama: data.detail[0].dpjp_detail.nama
