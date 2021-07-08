@@ -1111,7 +1111,8 @@
 						},
 						success: function(response){
 							var MetaData = dataTindakan = response.response_package.response_data;
-
+							console.clear();
+							console.log(MetaData);
 							var html = "";
 							if (MetaData != ""){
 								$.each(MetaData, function(key, item){

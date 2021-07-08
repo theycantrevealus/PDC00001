@@ -1926,14 +1926,12 @@ class Antrian extends Utility
             ->execute();
 
         $autonum = 1;
+        $term = new Terminologi(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
 
             $data['response_data'][$key]['berobat'] = self::cekStatusAntrian($value['uid']);
-
-            $term = new Terminologi(self::$pdo);
-
             $param = ['', 'terminologi-items-detail', $value['id_panggilan']];
             $get_panggilan = $term->__GET__($param);
             $data['response_data'][$key]['panggilan'] = $get_panggilan['response_data'][0]['nama'];
@@ -1975,7 +1973,8 @@ class Antrian extends Utility
             ->select('antrian', array(
                     'uid',
                     'pasien',
-                    'waktu_keluar'
+                    'waktu_keluar',
+                    'waktu_masuk'
                 )
             )
             ->where(array(
@@ -1990,7 +1989,13 @@ class Antrian extends Utility
             ->execute();
 
         if (count($data['response_data']) > 0) {
-            $status_berobat = true;
+            $d1 = new \DateTime(date('Y-m-d', strtotime($data['response_data'][0]['waktu_masuk'])));
+            $d2 = new \DateTime(date('Y-m-d'));
+            if($d1 < $d2) {
+                $status_berobat = false;
+            } else {
+                $status_berobat = true;
+            }
         }
 
         return $status_berobat;
