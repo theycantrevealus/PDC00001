@@ -2,6 +2,8 @@
 <script type="text/javascript">
     $(function() {
 
+
+
         var currentPenjamin = '';
         var printMode = false;
 
@@ -266,17 +268,21 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) {
-                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
-                                "<span><i class=\"fa fa-sign-out-alt\"></i> Proses</span>" +
-                                "</a>" +
-                                "<button class=\"btn btn-info btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
-                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
-                                "</button>" +
-                                "<button type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-success btn-sm btn-selesai\" data-toggle='tooltip' title='Tandai selesai'>" +
-                                "<span><i class=\"fa fa-check\"></i> Selesai</span>" +
-                                "</button>" +
-                                "</div>";
+                            if(row.has_nilai) {
+                                return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                    "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
+                                    "<span><i class=\"fa fa-sign-out-alt\"></i> Proses</span>" +
+                                    "</a>" +
+                                    "<button class=\"btn btn-info btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
+                                    "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                    "</button>" +
+                                    "<button type=\"button\" id=\"order_lab_" + row.uid + "\" class=\"btn btn-success btn-sm btn-selesai\" data-toggle='tooltip' title='Tandai selesai'>" +
+                                    "<span><i class=\"fa fa-check\"></i> Selesai</span>" +
+                                    "</button>" +
+                                    "</div>";
+                            } else {
+                                return "<span class=\"text-danger wrap_content\"><i class=\"fa fa-ban\"></i> Belum ada nilai</span>";
+                            }
                         } else {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +

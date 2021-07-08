@@ -9,6 +9,11 @@
 		var file;					//for upload file
 
         loadPasien(uid_order);
+        if(__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) {
+            $("#tanggal_sampling").attr("disabled", "disabled");
+        } else {
+            $("#tanggal_sampling").removeAttr("disabled");
+        }
         loadLabOrderItem(uid_order);
 		loadLampiran(uid_order);
         var form_data = new FormData();
@@ -86,6 +91,7 @@
             form_data.append("kesan", $("#kesan").val());
             form_data.append("anjuran", $("#anjuran").val());
             form_data.append('data_nilai', JSON.stringify(nilaiItemTindakan));
+            form_data.append("tanggal_sampling", $("#tanggal_sampling").val());
 
 
             for(var i = 0; i < fileList.length; i++) {
@@ -257,9 +263,9 @@
 	            },
 	            success: function(response){
                     var MetaData = response.response_package;
-                    
-	                if (Object.size(MetaData) > 0){
-	                	if (MetaData.pasien != ""){
+                    if (Object.size(MetaData) > 0){
+	                	if (MetaData.pasien !== ""){
+	                	    $("#tanggal_sampling").val(MetaData.laboratorium.tanggal_sampling);
 	                		$("#no_rm").html(MetaData.pasien.no_rm);
 	                		$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir);
 	                		$("#panggilan").html(MetaData.pasien.panggilan);
@@ -334,10 +340,11 @@
                                     }
 
                                     var naratifMode =  "";
+
                                     if(item.naratif === 'N' || item.naratif === undefined || item.naratif === null) {
-                                        naratifMode = "<input " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" />";
+                                        naratifMode = "<input " + ((!item.allow) ? "disabled=\"disabled\"" : ((__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) ? "disabled=\"disabled\"" : "")) + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" />";
                                     } else {
-                                        naratifMode = "<textarea " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" class=\"form-control inputItemTindakan\">" + nilai + "</textarea>";
+                                        naratifMode = "<textarea " + ((!item.allow) ? "disabled=\"disabled\"" : ((__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) ? "disabled=\"disabled\"" : "")) + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" class=\"form-control inputItemTindakan\">" + nilai + "</textarea>";
                                     }
                                     // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
                                     if(requestedItem.indexOf(items.id_lab_nilai) < 0) {

@@ -1118,6 +1118,7 @@ class Laboratorium extends Utility {
                     'id' => 'ASC'
                 ))
                 ->execute();
+
             $data['response_data'][$key]['detail'] = $detail['response_data'];
             $autonum++;
         }
@@ -1138,7 +1139,7 @@ class Laboratorium extends Utility {
 
 	private function verifikasi_hasil($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $update = self::$query->update('lab_order', array(
             'status' => 'D'
@@ -2877,7 +2878,28 @@ class Laboratorium extends Utility {
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
         foreach ($data['response_data'] as $key => $value) {
+            $hasNilai = false;
+            //Check Nilai
+            $checkNilai = self::$query->select('lab_order_nilai', array(
+                'id', 'nilai'
+            ))
+                ->where(array(
+                    'lab_order_nilai.lab_order' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($checkNilai['response_data'] as $NKey => $NValue) {
+                if(!is_null($NValue['nilai'])) {
+                    $hasNilai = true;
+                } else {
+                    if(!$hasNilai) {
+                        $hasNilai = false;
+                    }
+                }
+            }
             $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['has_nilai'] = $hasNilai;
             //$data['response_data'][$key]['tgl_ambil_sample_parse'] = date('d F Y', strtotime($value['tgl_ambil_sample']));
             $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order'])) . ' - [' . date('H:i', strtotime($value['waktu_order'])) . ']';
 
@@ -2904,7 +2926,8 @@ class Laboratorium extends Utility {
 	private function get_data_pasien_antrian($parameter){
 		$get_uid_asesmen = self::$query
 			->select('lab_order', array(
-					'asesmen'
+					'asesmen',
+                    'tanggal_sampling'
 				)
 			)
 			->where(
@@ -2930,7 +2953,7 @@ class Laboratorium extends Utility {
 																			//pasien in class antrian
 
 		}
-		
+		$result['laboratorium'] = $get_uid_asesmen['response_data'][0];
 		return $result;
 	}
 
@@ -4249,18 +4272,32 @@ class Laboratorium extends Utility {
             }
 
 		    //Update Kesan dan Anjurang
-            $selesai = self::$query->update('lab_order', array(
-                'kesan' => $parameter['kesan'],
-                'anjuran' => $parameter['anjuran']
-            ))
-                ->where(array(
-                    'lab_order.uid' => '= ?',
-                    'AND',
-                    'lab_order.deleted_at' => 'IS NULL'
-                ), array(
-                    $parameter['uid_order']
+            if($UserData['data']->jabatan === __UIDDOKTER__) {
+                $selesai = self::$query->update('lab_order', array(
+                    'kesan' => $parameter['kesan'],
+                    'anjuran' => $parameter['anjuran']
                 ))
-                ->execute();
+                    ->where(array(
+                        'lab_order.uid' => '= ?',
+                        'AND',
+                        'lab_order.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['uid_order']
+                    ))
+                    ->execute();
+            } else {
+                $selesai = self::$query->update('lab_order', array(
+                    'tanggal_sampling' => $parameter['tanggal_sampling']
+                ))
+                    ->where(array(
+                        'lab_order.uid' => '= ?',
+                        'AND',
+                        'lab_order.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['uid_order']
+                    ))
+                    ->execute();
+            }
 		}
 
 		//create new 

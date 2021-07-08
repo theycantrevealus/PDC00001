@@ -24,6 +24,13 @@
                                 <td class="wrap_content"> : </td>
 								<td><b><span id="jenkel"></span></b></td>
 							</tr>
+                            <tr>
+                                <td>Tanggal Sampling</td>
+                                <td class="wrap_content"> : </td>
+                                <td>
+                                    <input id="tanggal_sampling" type="time" class="form-control" />
+                                </td>
+                            </tr>
 						</tbody>
 					</table>
 				</div>
