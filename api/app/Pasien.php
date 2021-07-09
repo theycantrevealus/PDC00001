@@ -135,6 +135,83 @@ class Pasien extends Utility
         return $data;
     }
 
+    public function get_pasien_info($table, $parameter)
+    {
+        $data = self::$query
+            ->select($table, array(
+                    'uid',
+                    'no_rm',
+                    'nik',
+                    'nama',
+                    'panggilan',
+                    'tanggal_lahir',
+                    'tempat_lahir',
+                    'jenkel',
+                    'agama',
+                    'suku',
+                    'pendidikan',
+                    'goldar',
+                    'pekerjaan',
+                    'nama_ayah',
+                    'nama_ibu',
+                    'status_pernikahan',
+                    'nama_suami_istri',
+                    //'status_suami_istri',
+                    'alamat',
+                    'alamat_rt',
+                    'alamat_rw',
+                    'alamat_provinsi',
+                    'alamat_kabupaten',
+                    'alamat_kecamatan',
+                    'alamat_kelurahan',
+                    'warganegara',
+                    'no_telp',
+                    'email',
+                    'created_at',
+                    'updated_at'
+                )
+            )
+            ->where(array(
+                $table . '.deleted_at' => 'IS NULL',
+                'AND',
+                $table . '.uid' => '= ?'
+            ),
+                array(
+                    $parameter
+                )
+            )
+            ->execute();
+
+        $autonum = 1;
+        $Terminologi = new Terminologi(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            //Panggilan
+            $TerminologiInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['panggilan']);
+            $data['response_data'][$key]['panggilan_name'] = $TerminologiInfo['response_data'][0];
+
+
+            //Jenkel
+            $JenkelInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['jenkel']);
+            $data['response_data'][$key]['jenkel_detail'] = $JenkelInfo['response_data'][0];
+
+            //Agama
+            $AgamaInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['agama']);
+            $data['response_data'][$key]['agama_detail'] = $AgamaInfo['response_data'][0];
+
+            $data['response_data'][$key]['tanggal_lahir_parsed'] = date('d F Y', strtotime($value['tanggal_lahir']));
+
+            $data['response_data'][$key]['usia'] = date("Y") - date("Y", strtotime($value['tanggal_lahir']));
+            $data['response_data'][$key]['periode'] = date('m/y', strtotime($value['created_at']));
+
+
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        return $data;
+    }
+
     public function get_pasien_detail($table, $parameter)
     {
         $data = self::$query

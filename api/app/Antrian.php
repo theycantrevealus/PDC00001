@@ -1850,7 +1850,7 @@ class Antrian extends Utility
             ->execute();
         //More Info
         $Pasien = new Pasien(self::$pdo);
-        $Terminologi = new Terminologi(self::$pdo);
+        //$Terminologi = new Terminologi(self::$pdo);
         $Penjamin = new Penjamin(self::$pdo);
         $Poli = new Poli(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
@@ -1873,15 +1873,15 @@ class Antrian extends Utility
             $data['response_data'][$key]['kunjungan_detail'] = $Kunjungan['response_data'][0];
 
 
-            $PasienData = $Pasien->get_pasien_detail('pasien', $value['pasien']);
-            $PoliData = $Poli->get_poli_detail($value['departemen']);
+            $PasienData = $Pasien->get_pasien_info('pasien', $value['pasien']);
+            $PoliData = $Poli->get_poli_info($value['departemen']);
             $data['response_data'][$key]['poli_info'] = $PoliData['response_data'][0];
 
-            $PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
+            //$PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
 
             //Terminologi Jenis Kelamin
-            $TerminologiJenkel = $Terminologi->get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
-            $PasienData['response_data'][0]['jenkel_nama'] = $TerminologiJenkel['response_data'][0]['nama'];
+            /*$TerminologiJenkel = $Terminologi->get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
+            $PasienData['response_data'][0]['jenkel_nama'] = $TerminologiJenkel['response_data'][0]['nama'];*/
 
             $data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
 

@@ -12,6 +12,15 @@
         var allICD9 = [];
         var selectedICD10Kerja = [], selectedICD10Banding = [], selectedICD9 = [];
 
+        var allowLoadPerawat = false;
+        var allowLoadRad = true;
+        var allowLoadLab = true;
+        var allowLoadDokumen = true;
+
+        var dataTableRadOrder;
+        var dataTableLabOrder;
+        var tableDokumen;
+
 
 
          var dataOdontogram = "";
@@ -157,7 +166,7 @@
                 pasien_kontak = antrianData.pasien_info.no_telp;
                 pasien_jenkel = antrianData.pasien_info.jenkel_nama;
                 pasien_alamat = antrianData.pasien_info.alamat;
-                pasien_tanggal_lahir = antrianData.pasien_info.tanggal_lahir;
+                pasien_tanggal_lahir = antrianData.pasien_info.tanggal_lahir_parsed;
                 pasien_tempat_lahir = antrianData.pasien_info.tempat_lahir;
                 pasien_penjamin = antrianData.penjamin_data.nama;
                 pasien_penjamin_uid = antrianData.penjamin_data.uid;
@@ -221,7 +230,8 @@
 
                         if(response.response_package.response_data[0].asesmen_rawat !== undefined) {
                             //loadAssesmen(response.response_package.response_data[0].asesmen_rawat);
-                            loadPasien(UID);
+                            allowLoadPerawat = true;
+                            //loadPasien(UID);
                         }
 
 
@@ -237,10 +247,11 @@
                             if(asesmen_detail.tindakan !== undefined) {
 
                                 if(asesmen_detail.tindakan.length > 0) {
+                                    tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
                                     for(var tindakanKey in asesmen_detail.tindakan) {
                                         if(usedTindakan.indexOf(asesmen_detail.tindakan[tindakanKey].uid) < 0) {
                                             usedTindakan.push(asesmen_detail.tindakan[tindakanKey].uid);
-                                            tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
+                                            //tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
                                             var hargaTindakan = generateTindakan2(asesmen_detail.tindakan[tindakanKey].uid, pasien_penjamin_uid);
                                             autoTindakan(tindakanMeta, {
                                                 uid: asesmen_detail.tindakan[tindakanKey].uid,
@@ -2644,64 +2655,7 @@
 
 
         //DOKUMEN
-        var tableDokumen = $("#table-dokumen").DataTable({
-            processing: true,
-            serverSide: true,
-            sPaginationType: "full_numbers",
-            bPaginate: true,
-            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
-            serverMethod: "POST",
-            "ajax":{
-                url: __HOSTAPI__ + "/Dokumen",
-                type: "POST",
-                data: function(d) {
-                    d.request = "get_dokumen_back_end";
-                },
-                headers:{
-                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
-                },
-                dataSrc:function(response) {
-                    var returnedData = [];
-                    if(response == undefined || response.response_package == undefined) {
-                        returnedData = [];
-                    } else {
-                        returnedData = response.response_package.response_data;
-                    }
 
-                    response.draw = parseInt(response.response_package.response_draw);
-                    response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
-
-                    return returnedData;
-                }
-            },
-            autoWidth: false,
-            language: {
-                search: "",
-                searchPlaceholder: "Cari Nama Barang"
-            },
-            "columns" : [
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"nama_surat_" + row.uid + "\">" + row.nama + "</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button id=\"dokumen_create_" + row.uid + "\" class=\"btn btn-info btn-sm btn-create-dokumen\">" +
-                            "<i class=\"fa fa-pencil-alt\"></i> Buat" +
-                            "</button>" +
-                            "</div>";
-                    }
-                }
-            ]
-        });
 
         var targettedDokumen = "";
         var targettedTemplate = "";
@@ -3304,6 +3258,190 @@
 
         $("#tab-asesmen-dokter .nav-link").click(function() {
             var alergiObat = $("#alergi_obat").val();
+
+            var targetID = $(this).attr("href");
+            console.log(targetID);
+            if(targetID === "#tab-poli-1") {
+                if (allowLoadPerawat) {
+                    loadPasien(UID);
+                    allowLoadPerawat = false;
+                }
+            } else if(targetID === "#tab-poli-8") {
+                if(allowLoadDokumen) {
+                    tableDokumen = $("#table-dokumen").DataTable({
+                        processing: true,
+                        serverSide: true,
+                        sPaginationType: "full_numbers",
+                        bPaginate: true,
+                        lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+                        serverMethod: "POST",
+                        "ajax":{
+                            url: __HOSTAPI__ + "/Dokumen",
+                            type: "POST",
+                            data: function(d) {
+                                d.request = "get_dokumen_back_end";
+                            },
+                            headers:{
+                                Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                            },
+                            dataSrc:function(response) {
+                                var returnedData = [];
+                                if(response == undefined || response.response_package == undefined) {
+                                    returnedData = [];
+                                } else {
+                                    returnedData = response.response_package.response_data;
+                                }
+
+                                response.draw = parseInt(response.response_package.response_draw);
+                                response.recordsTotal = response.response_package.recordsTotal;
+                                response.recordsFiltered = response.response_package.recordsFiltered;
+
+                                return returnedData;
+                            }
+                        },
+                        autoWidth: false,
+                        language: {
+                            search: "",
+                            searchPlaceholder: "Cari Nama Barang"
+                        },
+                        "columns" : [
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return row.autonum;
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return "<span id=\"nama_surat_" + row.uid + "\">" + row.nama + "</span>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                        "<button id=\"dokumen_create_" + row.uid + "\" class=\"btn btn-info btn-sm btn-create-dokumen\">" +
+                                        "<i class=\"fa fa-pencil-alt\"></i> Buat" +
+                                        "</button>" +
+                                        "</div>";
+                                }
+                            }
+                        ]
+                    });
+                    allowLoadDokumen = false;
+                }
+            } else if (targetID === "#tab-poli-6") {
+                if(allowLoadRad) {
+                    dataTableRadOrder = $("#table_order_rad").DataTable({
+                        autoWidth: false,
+                        "ajax":{
+                            "url" : __HOSTAPI__ + "/Radiologi/get-radiologi-order-dokter/" + UID,
+                            "async" : false,
+                            "beforeSend" : function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            "type" : "GET",
+                            "dataSrc": function(response){
+                                if (response.response_package != null){
+                                    return response.response_package;
+                                } else {
+                                    return [];
+                                }
+                            }
+                        },
+                        "columnDefs":[
+                            {"targets": [0], "className":"dt-body-left"}
+                        ],
+                        "columns" : [
+                            {
+                                "data": null, "sortable": false, render: function (data, type, row, meta) {
+                                    return row.autonum;
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return row.no_order;
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return row.waktu_order;
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    var detailOrder = row.detail;
+                                    var parseDetail = "";
+                                    for(var dK in detailOrder) {
+                                        if(detailOrder[dK].tindakan.harga_minimum === detailOrder[dK].tindakan.harga_maksimum) {
+                                            parseDetail += "<li style=\"padding-bottom: 10px\">" + detailOrder[dK].tindakan.nama + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span></li>";
+                                        } else {
+                                            parseDetail += "<li style=\"padding-bottom: 10px\">" + detailOrder[dK].tindakan.nama + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan.harga_minimum, 2, ".", ",") + " - Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span></li>";
+                                        }
+                                    }
+                                    return parseDetail;
+                                }
+                            }
+                        ]
+                    });
+                    allowLoadRad = false;
+                }
+            } else if(targetID === "#tab-poli-5") {
+                if(allowLoadLab) {
+                    dataTableLabOrder = $("#table_order_lab").DataTable({
+                        autoWidth: false,
+                        "ajax":{
+                            "url" : __HOSTAPI__ + "/Laboratorium/get-laboratorium-order/" + UID,
+                            "async" : false,
+                            "beforeSend" : function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            "type" : "GET",
+                            "dataSrc": function(response) {
+                                if (response.response_package != null){
+                                    return response.response_package.response_data;
+                                } else {
+                                    return [];
+                                }
+                            }
+                        },
+                        "columnDefs":[
+                            {"targets": [0], "className":"dt-body-left"}
+                        ],
+                        "columns" : [
+                            {
+                                "data": null, "sortable": false, render: function (data, type, row, meta) {
+                                    return row.autonum;
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return row["no_order"];
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return row["waktu_order"];
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    var detailOrder = row.detail;
+                                    var parseDetail = "";
+                                    for(var dK in detailOrder) {
+                                        if(detailOrder[dK].tindakan_detail.harga_minimum === detailOrder[dK].tindakan_detail.harga_maksimum) {
+                                            parseDetail += "<li>" + detailOrder[dK].tindakan + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span></li>";
+                                        } else {
+                                            parseDetail += "<li>" + detailOrder[dK].tindakan + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_minimum, 2, ".", ",") + " - Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span></li>";
+                                        }
+                                    }
+                                    return parseDetail;
+                                }
+                            }
+                        ]
+                    });
+                    allowLoadLab = false;
+                }
+            }
+
             const simpanDataProcess = new Promise(function(resolve, reject) {
                 resolve(simpanAsesmen(
                     antrianData,
@@ -4106,133 +4244,7 @@
 
 
 
-        var dataTableRadOrder = $("#table_order_rad").DataTable({
-            autoWidth: false,
-            "ajax":{
-                "url" : __HOSTAPI__ + "/Radiologi/get-radiologi-order-dokter/" + UID,
-                "async" : false,
-                "beforeSend" : function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                "type" : "GET",
-                "dataSrc": function(response){
-                    if (response.response_package != null){
-                        return response.response_package;
-                    } else {
-                        return [];
-                    }
-                }
-            },
-            "columnDefs":[
-                {"targets": [0], "className":"dt-body-left"}
-            ],
-            "columns" : [
-                {
-                    "data": null, "sortable": false, render: function (data, type, row, meta) {
-                        return row.autonum;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row.no_order;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_order;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        var detailOrder = row.detail;
-                        var parseDetail = "";
-                        for(var dK in detailOrder) {
-                            if(detailOrder[dK].tindakan.harga_minimum === detailOrder[dK].tindakan.harga_maksimum) {
-                                parseDetail += "<li>" + detailOrder[dK].tindakan.nama + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span></li>";
-                            } else {
-                                parseDetail += "<li>" + detailOrder[dK].tindakan.nama + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan.harga_minimum, 2, ".", ",") + " - Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span></li>";
-                            }
-                        }
-                        return parseDetail;
-                    }
-                }
-            ]
-        });
 
-        var dataTableLabOrder = $("#table_order_lab").DataTable({
-            autoWidth: false,
-            "ajax":{
-                "url" : __HOSTAPI__ + "/Laboratorium/get-laboratorium-order/" + UID,
-                "async" : false,
-                "beforeSend" : function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                "type" : "GET",
-                "dataSrc": function(response) {
-                    if (response.response_package != null){
-                        return response.response_package.response_data;
-                    } else {
-                        return [];
-                    }
-                }
-            },
-            "columnDefs":[
-                {"targets": [0], "className":"dt-body-left"}
-            ],
-            "columns" : [
-                {
-                    "data": null, "sortable": false, render: function (data, type, row, meta) {
-                        return row.autonum;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row["no_order"];
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row["waktu_order"];
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        var detailOrder = row.detail;
-                        var parseDetail = "";
-                        for(var dK in detailOrder) {
-                            if(detailOrder[dK].tindakan_detail.harga_minimum === detailOrder[dK].tindakan_detail.harga_maksimum) {
-                                parseDetail += "<li>" + detailOrder[dK].tindakan + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span></li>";
-                            } else {
-                                parseDetail += "<li>" + detailOrder[dK].tindakan + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_minimum, 2, ".", ",") + " - Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span></li>";
-                            }
-                        }
-                        return parseDetail;
-                    }
-                }/*,
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-
-                        let button = "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">";
-
-                        if (row['editable'] == 'true') {
-                            button += "<button class='btn btn-warning btn-sm btnViewDetailOrder' data-uid='"
-                                + row['uid'] +"' data-dokterpj='"+ row['uid_dr_penanggung_jawab'] +"' data-editable='" + row['editable'] + "'  >\
-										<i class='fa fa-list'></i></button>" +
-
-                                "<button class='btn btn-danger btn-sm btnHapusOrderLab' 					data-uid='"+ row['uid'] +"' data-order='" + row['no_order'] + "' " + ">\
-										<i class='fa fa-trash'></i></button>";
-
-                        } else if (row['editable'] == 'false') {
-                            button += "<button class=\"btn btn-info btn-sm btnViewHasilOrder\" data-uid=\"" + row.uid +"\" data-dokterpj=\""+ row.nama_dr_penanggung_jawab +"\" data-editable=\"" + row.editable + "\"><i class=\"fa fa-eye\"></i></button>";
-                        }
-
-                        button += "</div>";
-
-                        return button;
-                    }
-                }*/
-            ]
-        });
 
         $("#inap_dokter").select2({
             minimumInputLength: 2,
@@ -4347,7 +4359,7 @@
             }*/
 
 
-            var listPenjamin = loadDataPenjamin();
+            //var listPenjamin = loadDataPenjamin();
             var LabMode;
             var uid_lab_order;
             var uid_penjamin_tindakan_lab = __UIDPENJAMINUMUM__;

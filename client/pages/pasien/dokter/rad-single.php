@@ -46,6 +46,11 @@
                                             <td>
                                                 <b class="lab_tanggal"><?php echo $_POST['created_at']; ?></b>
                                             </td>
+                                            <td class="wrap_content">Dokter Radiologi</td>
+                                            <td>:</td>
+                                            <td>
+                                                <b class="lab_dokter"><?php echo $_POST['dokter_radio']['nama']; ?></b>
+                                            </td>
                                         </tr>
                                     </table>
                                     <table class="table form-mode">

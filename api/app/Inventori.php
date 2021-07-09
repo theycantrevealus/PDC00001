@@ -3140,7 +3140,7 @@ class Inventori extends Utility
     private function get_amprah_request($parameter, $status = 'P')
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             if ($UserData['data']->unit == __UNIT_GUDANG__) {
@@ -3830,7 +3830,7 @@ class Inventori extends Utility
 
     private function get_stok_log_backend($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(

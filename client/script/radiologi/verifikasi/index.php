@@ -3,6 +3,7 @@
     $(function(){
 
         var currentPenjamin = "";
+        var selectedUID = "";
 
         protocolLib = {
             permintaan_radio_baru: function(protocols, type, parameter, sender, receiver, time) {
@@ -204,9 +205,12 @@
         });
 
 
+
         $("body").on("click", ".btn-verifikasi-radiologi", function() {
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
+
+            selectedUID = uid;
 
             var penjamin = $(this).attr("penjamin");
 
@@ -330,7 +334,8 @@
                         type: "POST",
                         data: {
                             request: "verifikasi_item_rad",
-                            data_set: forSave
+                            data_set: forSave,
+                            uid: selectedUID
                         },
                         beforeSend: function (request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);

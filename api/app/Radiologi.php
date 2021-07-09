@@ -935,25 +935,168 @@ class Radiologi extends Utility
             case 'verifikasi_item_rad':
                 return self::verifikasi_item_rad($parameter);
                 break;
+            case 'riwayat_radiologi':
+                return self::riwayat_radiologi($parameter);
+                break;
             default:
                 # code...
                 break;
         }
     }
 
+    private function riwayat_radiologi($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'rad_order.deleted_at' => 'IS NULL',
+                'AND',
+                'rad_order.waktu_order' => 'BETWEEN ? AND ?',
+                'AND',
+                'rad_order.status' => '= ?',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+
+            $paramValue = array(
+                $parameter['from'], $parameter['to'], 'D'
+            );
+        } else {
+            $paramData = array(
+                'rad_order.deleted_at' => 'IS NULL',
+                'AND',
+                'rad_order.waktu_order' => 'BETWEEN ? AND ?',
+                'AND',
+                'rad_order.status' => '= ?'
+            );
+
+            $paramValue = array(
+                $parameter['from'], $parameter['to'], 'D'
+            );
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('rad_order', array(
+                'uid',
+                'asesmen',
+                'waktu_order',
+                'petugas',
+                'dokter_radio',
+                'pasien',
+                'status',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->join('pasien', array(
+                    'nama as nama_pasien', 'no_rm'
+                ))
+                ->on(array(
+                    array('rad_order.pasien', '=', 'pasien.uid')
+                ))
+                ->execute();
+        } else {
+
+            $data = self::$query->select('rad_order', array(
+                'uid',
+                'asesmen',
+                'waktu_order',
+                'petugas',
+                'dokter_radio',
+                'pasien',
+                'status',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->join('pasien', array(
+                    'nama as nama_pasien', 'no_rm'
+                ))
+                ->on(array(
+                    array('rad_order.pasien', '=', 'pasien.uid')
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        $Pegawai = new Pegawai(self::$pdo);
+        $Poli = new Poli(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['tanggal'] = date('d F Y', strtotime($value['waktu_order']));
+            $AsesmenInfo = self::$query->select('asesmen', array(
+                'kunjungan',
+                'antrian',
+                'pasien',
+                'poli',
+                'dokter'
+            ))
+                ->where(array(
+                    'asesmen.uid' => '= ?',
+                    'AND',
+                    'asesmen.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['asesmen']
+                ))
+                ->execute();
+            foreach ($AsesmenInfo['response_data'] as $AsKey => $AsValue) {
+                $AsesmenInfo['response_data'][$AsKey]['poli'] = $Poli->get_poli_info($AsValue['poli'])['response_data'][0];
+                $AsesmenInfo['response_data'][$AsKey]['dokter'] = $Pegawai->get_info($AsValue['dokter'])['response_data'][0];
+            }
+
+            $data['response_data'][$key]['asesmen'] = $AsesmenInfo['response_data'][0];
+            $data['response_data'][$key]['petugas'] = $Pegawai->get_info($value['petugas'])['response_data'][0];
+            $data['response_data'][$key]['dokter_radio'] = $Pegawai->get_info($value['dokter_radio'])['response_data'][0];
+
+            $autonum++;
+        }
+
+        $dataTotal = self::$query->select('rad_order', array(
+            'uid',
+        ))
+            ->where($paramData, $paramValue)
+            ->join('pasien', array(
+                'nama', 'no_rm'
+            ))
+            ->on(array(
+                array('rad_order.pasien', '=', 'pasien.uid')
+            ))
+            ->execute();
+
+        $data['recordsTotal'] = count($dataTotal['response_data']);
+        $data['recordsFiltered'] = count($dataTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
     private function verifikasi_item_rad($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $processResult = array();
+
+        //Simpan petugas
+        $UpdateRadio = self::$query->update('rad_order', array(
+            'petugas' => $UserData['data']->uid
+        ))
+            ->where(array(
+                'rad_order.uid' => '= ?',
+                'AND',
+                'rad_order.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
         foreach ($parameter['data_set'] as $key => $value) {
-
-
-
-
-
-
-
-
             $worker = self::$query->update('rad_order_detail', array(
                 'mitra' => $value['mitra'],
                 'verifikator' => $UserData['data']->uid
@@ -1126,7 +1269,8 @@ class Radiologi extends Utility
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $update = self::$query->update('rad_order', array(
-            'petugas' => $UserData['data']->uid,
+            //'petugas' => $UserData['data']->uid,
+            'dokter_radio' => $UserData['data']->uid,
             'selesai' => 'true',
             'status' => 'D'
         ))

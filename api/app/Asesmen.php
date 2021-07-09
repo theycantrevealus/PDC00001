@@ -185,7 +185,10 @@ class Asesmen extends Utility {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $Laboratorium = new Laboratorium(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
         $Pegawai = new Pegawai(self::$pdo);
+        $Poli = new Poli(self::$pdo);
+        $Tindakan = new Tindakan(self::$pdo);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -268,17 +271,16 @@ class Asesmen extends Utility {
         }
 
         $data['response_draw'] = intval($parameter['draw']);
-        $Pasien = new Pasien(self::$pdo);
-        $Poli = new Poli(self::$pdo);
+
         $autonum = intval($parameter['start']) + 1;
         foreach ($data['response_data'] as $key => $value) {
 
             //Pasien
-            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_info('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
             //Poli
-            $PoliInfo = $Poli->get_poli_detail($value['poli']);
+            $PoliInfo = $Poli->get_poli_info($value['poli']);
             $data['response_data'][$key]['poli'] = $PoliInfo['response_data'][0];
 
             //Lab Order
@@ -399,6 +401,7 @@ class Asesmen extends Utility {
             $rad = self::$query->select('rad_order', array(
                 'uid',
                 'petugas',
+                'dokter_radio',
                 'no_order',
                 'selesai',
                 'created_at'
@@ -414,8 +417,9 @@ class Asesmen extends Utility {
 
 
             foreach($rad['response_data'] as $RadKey => $RadValue) {
-                $PetugasRad = new Pegawai(self::$pdo);
-                $rad['response_data'][$RadKey]['petugas'] = $PetugasRad->get_detail_pegawai($RadValue['petugas'])['response_data'][0];
+
+                $rad['response_data'][$RadKey]['petugas'] = $Pegawai->get_detail_pegawai($RadValue['petugas'])['response_data'][0];
+                $rad['response_data'][$RadKey]['dokter_radio'] = $Pegawai->get_detail_pegawai($RadValue['dokter_radio'])['response_data'][0];
                 $detailRadOrder = self::$query->select('rad_order_detail', array(
                     'tindakan',
                     'keterangan',
@@ -430,8 +434,7 @@ class Asesmen extends Utility {
                     ))
                     ->execute();
                 foreach ($detailRadOrder['response_data'] as $radItemKey => $radItemValue) {
-                    $Tindakan = new Tindakan(self::$pdo);
-                    $detailRadOrder['response_data'][$radItemKey]['tindakan'] = $Tindakan->get_tindakan_detail($radItemValue['tindakan'])['response_data'][0];
+                    $detailRadOrder['response_data'][$radItemKey]['tindakan'] = $Tindakan->get_tindakan_info($radItemValue['tindakan'])['response_data'][0];
                 }
                 $rad['response_data'][$RadKey]['detail'] = $detailRadOrder['response_data'];
 
@@ -823,6 +826,12 @@ class Asesmen extends Utility {
 
 
 
+            $ICD10 = new Icd(self::$pdo);
+            $ICD9 = new Icd(self::$pdo);
+            $Tindakan = new Tindakan(self::$pdo);
+            $Inventori = new Inventori(self::$pdo);
+            $Pasien = new Pasien(self::$pdo);
+
 			if(count($data['response_data']) > 0) {
 
 				//Parse ICDData
@@ -830,7 +839,7 @@ class Asesmen extends Utility {
 					$ICD10KerjaRaw = explode(',', $ICD10Value['icd10_kerja']);
 					$ICD10KerjaJoined = array();
 					foreach ($ICD10KerjaRaw as $ICD10KRKey => $ICD10KRValue) {
-						$ICD10 = new Icd(self::$pdo);
+
 						$parseICD10 = $ICD10->get_icd_detail('master_icd_10', $ICD10KRValue);
 						if(count($parseICD10['response_data']) > 0) {
 							array_push($ICD10KerjaJoined, array(
@@ -845,7 +854,6 @@ class Asesmen extends Utility {
 					$ICD10BandingRaw = explode(',', $ICD10Value['icd10_banding']);
 					$ICD10BandingJoined = array();
 					foreach ($ICD10BandingRaw as $ICD10BRKey => $ICD10BRValue) {
-						$ICD10 = new Icd(self::$pdo);
 						$parseICD10 = $ICD10->get_icd_detail('master_icd_10', $ICD10BRValue);
 						if(count($parseICD10['response_data']) > 0) {
 							array_push($ICD10BandingJoined, array(
@@ -861,7 +869,7 @@ class Asesmen extends Utility {
                         $ICD9Raw = explode(',', $ICD10Value['icd9']);
                         $ICD9Joined = array();
                         foreach ($ICD9Raw as $ICD9Key => $ICD9Value) {
-                            $ICD9 = new Icd(self::$pdo);
+
                             $parseICD9 = $ICD9->get_icd_detail('master_icd_9', $ICD9Value);
                             if(count($parseICD9['response_data']) > 0) {
                                 array_push($ICD9Joined, array(
@@ -898,7 +906,7 @@ class Asesmen extends Utility {
 				->execute();
 
 				foreach ($tindakan['response_data'] as $key => $value) {
-					$Tindakan = new Tindakan(self::$pdo);
+
 					$tindakan['response_data'][$key] = $Tindakan->get_tindakan_detail($value['tindakan'])['response_data'][0];
 				}
 
@@ -1007,8 +1015,7 @@ class Asesmen extends Utility {
 					))
 					->execute();
 					foreach ($resepDetail['response_data'] as $RDKey => $RDValue) {
-					    $Inventori = new Inventori(self::$pdo);
-                        $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori->get_item_detail($RDValue['obat'])['response_data'][0];
+					    $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori->get_item_detail($RDValue['obat'])['response_data'][0];
                     }
 					$resep['response_data'][$key]['resep_detail'] = $resepDetail['response_data'];
 
@@ -1069,7 +1076,6 @@ class Asesmen extends Utility {
 						->execute();
 
 						foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
-							$InventoriObat = new Inventori(self::$pdo);
 							$RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat->get_item_detail($RVIValue['obat'])['response_data'][0];
 						}
 
@@ -1179,7 +1185,6 @@ class Asesmen extends Utility {
                 $data['response_data'][0]['status_asesmen'] = $AsesmenMaster['response_data'][0];
                 $data['response_data'][0]['tanggal_parsed'] = date('d F Y', strtotime($AsesmenMaster['response_data'][0]['created_at']));
 
-                $Pasien = new Pasien(self::$pdo);
                 $PasienDetail = $Pasien->get_pasien_detail('pasien', $data['response_data'][0]['pasien']);
                 $data['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
 				return $data;

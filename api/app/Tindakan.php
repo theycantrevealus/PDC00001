@@ -875,51 +875,82 @@ class Tindakan extends Utility {
 			'created_at',
 			'updated_at'
 		))
-		->where(array(
-			'master_tindakan_kelas.jenis' => '= ?',
-			'AND',
-			'master_tindakan_kelas.deleted_at' => 'IS NULL'
-		), array(
-			$parameter[2]
-		))
-		->order(array(
-			'master_tindakan_kelas.created_at' => 'ASC'
-		))
-		->execute();
+            ->join('master_tindakan_kelas_harga', array(
+                'id',
+                'tindakan',
+                'kelas',
+                'penjamin',
+                'mitra',
+                'harga'
+            ))
+            ->on(array(
+                array('master_tindakan_kelas_harga.kelas', '=', 'master_tindakan_kelas.uid')
+            ))
+            ->where(array(
+                'master_tindakan_kelas.jenis' => '= ?',
+                'AND',
+                'master_tindakan_kelas.deleted_at' => 'IS NULL',
+                'AND',
+                'master_tindakan_kelas_harga.penjamin' => '= ?'
+            ), array(
+                $parameter[2], $parameter[3]
+            ))
+            ->order(array(
+                'master_tindakan_kelas.created_at' => 'ASC'
+            ))
+            ->execute();
 
 		$returnData = array();
 		$autonum = 1;
 		foreach ($kelas['response_data'] as $key => $value) {
-			
-			$data = self::$query->select('master_tindakan_kelas_harga', array(
-				'id',
-				'tindakan',
-				'kelas',
-				'penjamin',
-				'mitra',
-				'harga',
-				'created_at',
-				'updated_at'
-			))
-			->where(array(
-				'master_tindakan_kelas_harga.deleted_at' => 'IS NULL',
-				'AND',
-				'master_tindakan_kelas_harga.kelas' => '= ?',
-				'AND',
-				'master_tindakan_kelas_harga.penjamin' => '= ?'
-			), array(
-				$value['uid'],
-				$parameter[3]
-			))
-			->order(array(
-				'master_tindakan_kelas_harga.created_at' => 'ASC'
-			))
-			->execute();
-			//array_push($returnData, count($data['response_data']));
-			if(count($data['response_data']) > 0) {
-				foreach ($data['response_data'] as $TKKey => $TKValue) {
-					$TKValue['autonum'] = $autonum;
-					
+
+            $TKValue['autonum'] = $autonum;
+
+            $Tindakan = self::get_tindakan_info($value['tindakan']);
+            $TKValue['tindakan_detail'] = $Tindakan['response_data'][0];
+
+            //Kelas Detail
+            $KelasDetail = self::get_kelas_tindakan_detail($value['kelas']);
+            $TKValue['kelas'] = $KelasDetail['response_data'][0];
+
+
+            $TKValue['harga'] = floatval($value['harga']);
+            if(count($Tindakan['response_data']) > 0) {
+                array_push($returnData, $value);
+            } else {
+                array_push($returnData, $value);
+            }
+
+            $autonum++;
+            /*$data = self::$query->select('master_tindakan_kelas_harga', array(
+                'id',
+                'tindakan',
+                'kelas',
+                'penjamin',
+                'mitra',
+                'harga',
+                'created_at',
+                'updated_at'
+            ))
+            ->where(array(
+                'master_tindakan_kelas_harga.deleted_at' => 'IS NULL',
+                'AND',
+                'master_tindakan_kelas_harga.kelas' => '= ?',
+                'AND',
+                'master_tindakan_kelas_harga.penjamin' => '= ?'
+            ), array(
+                $value['uid'],
+                $parameter[3]
+            ))
+            ->order(array(
+                'master_tindakan_kelas_harga.created_at' => 'ASC'
+            ))
+            ->execute();
+            //array_push($returnData, count($data['response_data']));
+            if(count($data['response_data']) > 0) {
+                foreach ($data['response_data'] as $TKKey => $TKValue) {
+                    $TKValue['autonum'] = $autonum;
+
 					$Tindakan = self::get_tindakan_detail($TKValue['tindakan']);
 					$TKValue['tindakan_detail'] = $Tindakan['response_data'][0];
 
@@ -927,39 +958,51 @@ class Tindakan extends Utility {
 					$KelasDetail = self::get_kelas_tindakan_detail($TKValue['kelas']);
 					$TKValue['kelas'] = $KelasDetail['response_data'][0];
 
-					//Poli
-                    /*$Poli = self::$query->select('master_poli_tindakan', array(
-                        'uid_poli'
-                    ))
-                        ->where(array(
-                            'master_poli_tindakan.uid_tindakan' => '= ?',
-                            'AND',
-                            'master_poli_tindakan.deleted_at' => 'IS NULL'
-                        ), array(
-                            $TKValue['tindakan']
-                        ))
-                        ->execute();
-                    foreach($Poli['response_data'] as $PKey => $PValue) {
-                        $PoliParse = new Poli(self::$pdo);
-                        $Poli['response_data'][$PKey]['detail'] = $PoliParse::get_poli_detail($PValue['uid_poli'])['response_data'][0];
-                    }
-                    $TKValue['poli'] = $Poli['response_data'];*/
-
 
 					$TKValue['harga'] = floatval($TKValue['harga']);
 					if(count($Tindakan['response_data']) > 0) {
-						array_push($returnData, $TKValue);	
+						array_push($returnData, $TKValue);
 					} else {
                         array_push($returnData, $TKValue);
                     }
-					
-					$autonum++;	
-				}
-			}
+
+					$autonum++;
+                }
+            }*/
 		}
 
 		return $returnData;
 	}
+
+
+    public function get_tindakan_info($parameter){
+        $data = self::$query
+            ->select('master_tindakan', array(
+                    'uid',
+                    'nama',
+                    'kelompok',
+                    'created_at',
+                    'updated_at'
+                )
+            )
+            ->where(array(
+                'master_tindakan.deleted_at' => 'IS NULL',
+                'AND',
+                'master_tindakan.uid' => '= ?'
+            ),
+                array($parameter)
+            )
+            ->execute();
+
+        $autonum = 1;
+        foreach ($data['response_data'] as $key => $value) {
+
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        return $data;
+    }
 
 	public function get_tindakan_detail($parameter){
 		$data = self::$query

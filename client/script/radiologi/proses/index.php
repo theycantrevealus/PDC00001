@@ -78,7 +78,7 @@
                             "</button>" +
                             "<button id=\"rad_order_" + row.uid + "\" type='button' class=\"btn btn-success btn-sm btn-selesai-radiologi\" data-toggle='tooltip' title='Tandai selesai'>" +
                             "<span><i class=\"fa fa-check\"></i>Selesai</span>" +
-                            "</a>" +
+                            "</button>" +
                             "</div>";
                     }
                 }
