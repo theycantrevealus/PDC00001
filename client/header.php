@@ -57,7 +57,7 @@
 								<div><?php echo $_SESSION['email']; ?></div>
 							</div>
 							<div class="dropdown-divider"></div>
-							<a class="dropdown-item active" href="<?php echo __HOSTNAME__; ?>/template/index.html">Dashboard</a>
+							<a class="dropdown-item active" href="<?php echo __HOSTNAME__; ?>">Dashboard</a>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/profile">My profile</a>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/logout">Logout</a>
