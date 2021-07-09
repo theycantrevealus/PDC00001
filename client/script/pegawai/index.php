@@ -50,6 +50,9 @@
 									"<a href=\"" + __HOSTNAME__ + "/pegawai/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm\">" +
 										"<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
 									"</a>" +
+                                    "<button id=\"reset_" + row['uid'] + "\" class=\"btn btn-success btn-sm btn-reset-password\">" +
+                                        "<span><i class=\"fa fa-sync\"></i> Reset</span>" +
+                                    "</button>" +
 									"<button id=\"delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-pegawai\">" +
 										"<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
 									"</button>" +
@@ -78,11 +81,55 @@
 			}
 		});
 
+		$("body").on("click", ".btn-reset-password", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
 
-
-
-
-
+            Swal.fire({
+                title: 'Ubah Password?',
+                text: 'Password baru akan diaplikasi pada login selanjutnya. Semua client yang login dengan akun ini akan logout secara otomatis',
+                showDenyButton: true,
+                confirmButtonText: `Ya`,
+                denyButtonText: `Batal`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: __HOSTAPI__ + "/Pegawai",
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "POST",
+                        data: {
+                            request: "reset_password",
+                            uid: id
+                        },
+                        success:function(response) {
+                            var parser = response.response_package.response_result;
+                            if(parser > 0) {
+                                Swal.fire(
+                                    "Ubah Password",
+                                    response.response_package.response_message,
+                                    "success"
+                                ).then((result) => {
+                                    push_socket(__ME__, "reset_password", id, "Akun ini telah di reset", "warning");
+                                });
+                            } else {
+                                Swal.fire(
+                                    "Ubah Password",
+                                    response.response_package.response_message,
+                                    "error"
+                                ).then((result) => {
+                                    //
+                                });
+                            }
+                        },
+                        error: function (response) {
+                            //
+                        }
+                    });
+                }
+            });
+        });
 
         var generated_data = [];
 

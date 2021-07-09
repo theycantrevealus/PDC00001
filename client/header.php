@@ -59,7 +59,6 @@
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item active" href="<?php echo __HOSTNAME__; ?>/template/index.html">Dashboard</a>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/profile">My profile</a>
-							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/template/edit-account.html">Edit account</a>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/logout">Logout</a>
 						</div>

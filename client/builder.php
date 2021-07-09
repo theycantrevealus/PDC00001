@@ -330,6 +330,9 @@
                     //
                 }
             },
+            reset_password: function(protocols, type, parameter, sender, receiver, time) {
+                location.href = __HOSTNAME__ + "/system/logout";
+            },
             refresh: function(protocols, type, parameter, sender, receiver, time) {
                 location.reload();
             }
@@ -447,8 +450,8 @@
 
                     if(protocolLib[command] !== undefined) {
                         if(command === "anjungan_kunjungan_panggil") {
-                            if(audio !== undefined && audio.audio !== undefined) {
-                                if(!audio.paused) {
+                            if (audio !== undefined && audio.audio !== undefined) {
+                                if (!audio.paused) {
                                     audio.audio.pause();
                                     audio.audio.currentTime = 0;
                                 } else {
@@ -456,8 +459,12 @@
                                 }
                             }
                             audio = protocolLib[command](command, type, parameter, sender, receiver, time);
+                        } else if(command === "reset_password") {
+                            if(receiver === __ME__) {
+                                protocolLib[command](command, type, parameter, sender, receiver, time);
+                            }
                         } else {
-                            if(receiver == __ME__ || sender == __ME__ || receiver == "*" || receiver == __MY_PRIVILEGES__.response_data[0]["uid"]) {
+                            if(receiver === __ME__ || sender === __ME__ || receiver === "*" || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
                                 //console.log(__MY_PRIVILEGES__);
                             } else {

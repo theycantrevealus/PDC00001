@@ -94,6 +94,12 @@ class Pegawai extends Utility {
             case 'master_pegawai_import_fetch':
                 return self::master_pegawai_import_fetch($parameter);
                 break;
+            case 'edit_password':
+                return self::edit_password($parameter);
+                break;
+            case 'reset_password':
+                return self::reset_password($parameter);
+                break;
             default:
                 return array();
                 break;
@@ -198,6 +204,7 @@ class Pegawai extends Utility {
                         'unit_name' => $Unit_Info['response_data'][0]['nama'],
                         'unit_kode' => $Unit_Info['response_data'][0]['kode'],
                         'gudang' => $Unit_Info['response_data'][0]['gudang'],
+                        'password' => $read[0]['password'],
                         'jabatan' => $read[0]['jabatan'],
                         'email' => $read[0]['email'],
                         'nama' => $read[0]['nama'],
@@ -249,6 +256,7 @@ class Pegawai extends Utility {
                         'unit_name' => $Unit_Info['nama'],
                         'unit_kode' => $Unit_Info['kode'],
                         'gudang' => $Unit_Info['gudang'],
+                        'password' => $read[0]['password'],
                         'nurse_station' => $NurseStation['response_data'],
                         'jabatan' => $read[0]['jabatan'],
                         'email' => $read[0]['email'],
@@ -264,6 +272,7 @@ class Pegawai extends Utility {
                         'unit_name' => $Unit_Info['response_data'][0]['nama'],
                         'unit_kode' => $Unit_Info['response_data'][0]['kode'],
                         'gudang' => $Unit_Info['response_data'][0]['gudang'],
+                        'password' => $read[0]['password'],
                         'jabatan' => $read[0]['jabatan'],
                         'email' => $read[0]['email'],
                         'nama' => $read[0]['nama'],
@@ -328,6 +337,116 @@ class Pegawai extends Utility {
         } else {
             $responseBuilder['response_result'] = $query->rowCount();
             $responseBuilder['response_message'] = 'Email / password salah';
+        }
+
+        return $responseBuilder;
+    }
+
+    private function reset_password($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $responseBuilder = array();
+        $data = self::$query->update('pegawai', array(
+            'password' => password_hash('123456', PASSWORD_DEFAULT)
+        ))
+            ->where(array(
+                'pegawai.uid' => '= ?',
+                'AND',
+                'pegawai.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+        $responseBuilder['response_result'] = $data['response_result'];
+        if($data['response_result'] > 0) {
+            $log = parent::log(array(
+                'type' => 'activity',
+                'column' => array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'old_value',
+                    'new_value',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value' => array(
+                    $parameter['uid'],
+                    $UserData['data']->uid,
+                    'pegawai',
+                    'U',
+                    json_encode($UserData['data']->password),
+                    json_encode(password_hash('123456', PASSWORD_DEFAULT)),
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class' => __CLASS__
+            ));
+
+            $responseBuilder['response_message'] = 'Password Berhasil diubah! 123456';
+            session_destroy();
+        } else {
+            $responseBuilder['response_message'] = 'Password Gagal diubah';
+        }
+        return $responseBuilder;
+    }
+
+    private function edit_password($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $responseBuilder = array();
+        if(password_verify($parameter['old'], $UserData['data']->password)) {
+            $data = self::$query->update('pegawai', array(
+                'password' => password_hash($parameter['new'], PASSWORD_DEFAULT)
+            ))
+                ->where(array(
+                    'pegawai.uid' => '= ?',
+                    'AND',
+                    'pegawai.deleted_at' => 'IS NULL'
+                ), array(
+                    $UserData['data']->uid
+                ))
+                ->execute();
+            $responseBuilder['response_result'] = $data['response_result'];
+            if($data['response_result'] > 0) {
+                $log = parent::log(array(
+                    'type' => 'activity',
+                    'column' => array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'old_value',
+                        'new_value',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value' => array(
+                        $UserData['data']->uid,
+                        $UserData['data']->uid,
+                        'pegawai',
+                        'U',
+                        json_encode($UserData['data']->password),
+                        json_encode(password_hash($parameter['new'], PASSWORD_DEFAULT)),
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class' => __CLASS__
+                ));
+
+                $responseBuilder['response_message'] = 'Password Berhasil diubah! Harap login ulang menggunakan password baru demi keamanan akun Anda.';
+                session_destroy();
+            } else {
+                $responseBuilder['response_message'] = 'Password Gagal diubah';
+            }
+        } else {
+            $responseBuilder['response_result'] = 0;
+            $responseBuilder['response_message'] = 'Otentikasi Salah.';
         }
 
         return $responseBuilder;
@@ -471,7 +590,7 @@ class Pegawai extends Utility {
     //JABATAN TAMBAH
     private function tambah_jabatan($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $check = self::duplicate_check(array(
             'table' => 'master_inv_kategori',
