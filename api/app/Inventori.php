@@ -2335,7 +2335,7 @@ class Inventori extends Utility
     private function edit_item($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $error_count = 0;
         $uid = $parameter['uid'];
         $old = self::get_item_detail($uid);
@@ -3669,14 +3669,14 @@ class Inventori extends Utility
             ))
             ->execute();
 
-        $Inventori = new Inventori(self::$pdo);
+        //$Inventori = new Inventori(self::$pdo);
         $Pegawai = new Pegawai(self::$pdo);
 
         foreach ($data['response_data'] as $key => $value) {
             $amprah_detail = self::get_amprah_detail($value['amprah']);
             $data['response_data'][$key]['amprah'] = $amprah_detail['response_data'][0];
             $data['response_data'][$key]['tanggal'] = date('d F Y [H:i]', strtotime($value['created_at']));
-            $PegawaiDetail = $Pegawai::get_detail($value['pegawai']);
+            $PegawaiDetail = $Pegawai->get_detail($value['pegawai']);
             $data['response_data'][$key]['pegawai'] = $PegawaiDetail['response_data'][0];
             $detail_proses = self::$query->select('inventori_amprah_proses_detail', array(
                 'id',
@@ -3695,8 +3695,8 @@ class Inventori extends Utility
                 ->execute();
             $autonum = 1;
             foreach ($detail_proses['response_data'] as $DKey => $DValue) {
-                $detail_proses['response_data'][$DKey]['item'] = $Inventori->get_item_detail($DValue['item'])['response_data'][0];
-                $detail_proses['response_data'][$DKey]['batch'] = $Inventori->get_batch_detail($DValue['batch'])['response_data'][0];
+                $detail_proses['response_data'][$DKey]['item'] = self::get_item_detail($DValue['item'])['response_data'][0];
+                $detail_proses['response_data'][$DKey]['batch'] = self::get_batch_detail($DValue['batch'])['response_data'][0];
                 $detail_proses['response_data'][$DKey]['autonum'] = $autonum;
                 $autonum++;
             }

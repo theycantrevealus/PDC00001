@@ -487,6 +487,12 @@ class Asesmen extends Utility {
     }
 
 	public function get_asesmen_medis($parameter, $isCPPT = false) { //uid antrian
+        $ICD10 = new Icd(self::$pdo);
+        $ICD9 = new Icd(self::$pdo);
+        $Tindakan = new Tindakan(self::$pdo);
+        $Inventori = new Inventori(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
+        $Poli = new Poli(self::$pdo);
 		//prepare antrian
 		$antrian = self::$query->select('antrian', array(
 			'uid',
@@ -533,7 +539,6 @@ class Asesmen extends Utility {
 
 
 			//Poli Info
-			$Poli = new Poli(self::$pdo);
 			if($antrian['response_data'][0]['departemen'] === __POLI_INAP__) {
                 $PoliDetail = array(
                     'uid' => __POLI_INAP__,
@@ -822,15 +827,6 @@ class Asesmen extends Utility {
                     ))
                     ->execute();
             }
-
-
-
-
-            $ICD10 = new Icd(self::$pdo);
-            $ICD9 = new Icd(self::$pdo);
-            $Tindakan = new Tindakan(self::$pdo);
-            $Inventori = new Inventori(self::$pdo);
-            $Pasien = new Pasien(self::$pdo);
 
 			if(count($data['response_data']) > 0) {
 

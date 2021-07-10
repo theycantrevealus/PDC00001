@@ -266,7 +266,7 @@
 				i = 0;
 				console.log("Finished");
 			} else {
-                console.log("Palying : " + playlist[i]);
+                console.log("Playing : " + playlist[i]);
 				audio.src = playlist[i];
 				audio.play();
 			}

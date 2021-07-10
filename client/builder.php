@@ -465,6 +465,37 @@
                             }
                         } else {
                             if(receiver === __ME__ || sender === __ME__ || receiver === "*" || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
+                                if(receiver === __ME__ || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
+                                    var audio = new Audio(), i = 0;
+                                    audio.volume = 0.5;
+                                    audio.playbackRate = 0.1;
+                                    audio.loop = false;
+                                    var playlist = [
+                                        __HOST__ + "/audio/notif.mp3"
+                                    ];
+                                    var currentLength = 0;
+
+                                    audio.addEventListener('ended', function () {
+                                        i++;
+                                        if(i == playlist.length) {
+                                            audio.pause();
+                                            audio.currentTime = 0;
+                                            i = 0;
+                                            console.log("Finished");
+                                        } else {
+                                            console.log("Playing : " + playlist[i]);
+                                            audio.src = playlist[i];
+                                            audio.play();
+                                        }
+                                    });
+
+                                    audio.src = playlist[0];
+                                    audio.currentTime = 0;
+                                    audio.volume = 0.5;
+                                    audio.playbackRate = 1;
+                                    audio.loop = false;
+                                    audio.play();
+                                }
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
                                 //console.log(__MY_PRIVILEGES__);
                             } else {
