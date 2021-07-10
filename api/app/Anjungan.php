@@ -46,6 +46,9 @@ class Anjungan extends Utility {
 				case 'get_anjungan_detail':
 					return self::get_anjungan_detail($parameter[2]);
 					break;
+                case 'terlewat':
+                    return self::get_terlewat($parameter);
+                    break;
 				default:
 					return self::get_anjungan();
 			}
@@ -682,6 +685,44 @@ class Anjungan extends Utility {
 		return $worker;
 	}
 
+	private function get_terlewat($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $data = self::$query->select('antrian_nomor', array(
+            'id',
+            'nomor_urut',
+            'loket',
+            'jenis_antrian'
+        ))
+            ->where(array(
+                'antrian_nomor.status' => '= ?',
+                'AND',
+                'antrian_nomor.pegawai' => '= ?',
+                'AND',
+                'DATE(antrian_nomor.created_at)' => '= ?'
+            ), array(
+                'C',
+                $UserData['data']->uid,
+                date('Y-m-d')
+            ))
+            ->order(array(
+                'created_at' => 'DESC'
+            ))
+            ->execute();
+        if(count($data['response_data']) > 0) {
+            //Get Kode Anjungan
+            foreach ($data['response_data'] as $key => $value) {
+                $AnjunganKode = self::get_jenis_detail($value['jenis_antrian']);
+                $data['response_data'][$key]['response_queue'] = (empty($AnjunganKode[0]['kode'])) ? "0" : $AnjunganKode[0]['kode'] . '-' . $value['nomor_urut'];
+                $data['response_data'][$key]['response_queue_id'] = $value['id'];
+
+                $data['response_data'][$key]['loket'] = self::get_loket_detail($value['loket'])['response_data'][0];
+            }
+        }
+
+        return $data;
+    }
+
 	public function get_anjungan_detail($parameter) {
 		$data = self::$query->select('master_anjungan', array(
 			'uid',
@@ -700,7 +741,7 @@ class Anjungan extends Utility {
 
 	private function master_tambah_mesin_anjungan($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$uid = parent::gen_uuid();
 		$worker = self::$query->insert('master_anjungan', array(

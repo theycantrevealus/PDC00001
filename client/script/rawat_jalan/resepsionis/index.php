@@ -1111,8 +1111,6 @@
 						},
 						success: function(response){
 							var MetaData = dataTindakan = response.response_package.response_data;
-							console.clear();
-							console.log(MetaData);
 							var html = "";
 							if (MetaData != ""){
 								$.each(MetaData, function(key, item){
@@ -1540,8 +1538,7 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
-				    console.log(response);
-					if(response.response_package !== undefined && response.response_package !== null) {
+				    if(response.response_package !== undefined && response.response_package !== null) {
 						currentQueue = response.response_package;
 						$("#sisa_antrian").html(currentQueue.response_standby);
 						if((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null || currentQueue.response_queue == 0)) {
@@ -1643,6 +1640,7 @@
 
 		$("#btnNext").click(function() {
 			reloadPanggilan($("#txt_loket").val(), $("#txt_current_antrian").attr("current_queue"));
+            loadTerlewat($("#txt_loket").val());
 		});
 
 		$("#btnPanggil").click(function() {
@@ -1651,6 +1649,35 @@
 				nomor: $("#txt_current_antrian").html()
 			}, "info");
 		});
+
+		loadTerlewat($("#txt_loket").val());
+        $("#antrian_terlewat").select2();
+		function loadTerlewat(loket) {
+		    $("#antrian_terlewat option").remove();
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Anjungan/terlewat/" + loket,
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "GET",
+                success: function (response) {
+                    var data = response.response_package.response_data;
+                    for(var a in data) {
+                        if(data[a].response_queue !== $("#txt_current_antrian").html()) {
+                            $("#antrian_terlewat").append("<option value=\"" + data[a].response_queue + "\">" + data[a].response_queue + "</option>");
+                        }
+                    }
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        }
+
+        $("#btnSetLewat").click(function () {
+            $("#txt_current_antrian").html($("#antrian_terlewat").val());
+        });
 
 
         $("#btnCetakSEP").click(function() {
