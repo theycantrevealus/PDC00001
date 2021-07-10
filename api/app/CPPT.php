@@ -38,9 +38,131 @@ class CPPT extends Utility {
 		}
 	}
 
+    public function __POST__($parameter = array()) {
+        try {
+
+            switch($parameter['request']) {
+                case 'group_tanggal':
+                    return self::group_tanggal($parameter);
+                    break;
+                default:
+                    return self::get_cppt($parameter);
+            }
+        } catch (QueryException $e) {
+            return 'Error => ' . $e;
+        }
+    }
+
+
+
 
 	public function get_cppt_single($parameter) {
 	    //
+    }
+
+    public function group_tanggal($parameter) {
+	    $GroupTanggal = array();
+	    $Antrian = self::$query->select('antrian', array(
+	        'uid',
+	        'kunjungan',
+	        'departemen',
+            'dokter',
+            'waktu_masuk'
+        ))
+            ->where(array(
+                'antrian.waktu_keluar' => 'IS NOT NULL',
+                'AND',
+                'antrian.deleted_at' => 'IS NULL',
+                'AND',
+                'antrian.pasien' => '= ?',
+                'AND',
+                'antrian.waktu_masuk' => 'BETWEEN ? AND ?'
+            ), array(
+                $parameter['pasien'], $parameter['from'], $parameter['to']
+            ))
+            ->order(array(
+                'created_at' => 'DESC'
+            ))
+            ->execute();
+	    $Poli = new Poli(self::$pdo);
+	    $Pegawai = new Pegawai(self::$pdo);
+	    $ICD10 = new Icd(self::$pdo);
+	    foreach ($Antrian['response_data'] as $key => $value) {
+	        if($value['uid'] !== $parameter['current']) {
+                $GrouperName = date('Y-m-d', strtotime($value['waktu_masuk']));
+                $GrouperChild = date('H:i:s', strtotime($value['waktu_masuk']));
+                if(!isset($GroupTanggal[$GrouperName])) {
+                    $GroupTanggal[$GrouperName] = array(
+                        'data' => array(),
+                        'parsed' => parent::dateToIndo(date('Y-m-d', strtotime($value['waktu_masuk'])))
+                    );
+                }
+
+                if(!isset($GroupTanggal[$GrouperName]['data'][$GrouperChild])) {
+                    $GroupTanggal[$GrouperName]['data'][$GrouperChild] = array(
+                        'data' => array(),
+                        'parsed' => date('H:i', strtotime($value['waktu_masuk']))
+                    );
+                }
+
+
+                //Prepare Data
+                $Departemen = $Poli->get_poli_info($value['departemen'])['response_data'][0];
+                $Antrian['response_data'][$key]['departemen'] = $Departemen;
+
+                $Dokter = $Pegawai->get_detail($value['dokter'])['response_data'][0];
+                $Antrian['response_data'][$key]['dokter'] = $Dokter;
+
+                $Asesmen = self::$query->select('asesmen', array(
+                    'uid'
+                ))
+                    ->join('asesmen_medis_' . $Departemen['poli_asesmen'], array(
+                        'keluhan_utama',
+                        'keluhan_tambahan',
+                        'pemeriksaan_fisik',
+                        'diagnosa_kerja',
+                        'diagnosa_banding',
+                        'icd10_kerja',
+                        'icd10_banding',
+                        'planning'
+                    ))
+                    ->on(array(
+                        array('asesmen_medis_' . $Departemen['poli_asesmen'] . '.asesmen', '=', 'asesmen.uid')
+                    ))
+                    ->where(array(
+                        'asesmen.antrian' => '= ?',
+                        'AND',
+                        'asesmen.kunjungan' => '= ?',
+                        'AND',
+                        'asesmen.deleted_at' => 'IS NULL'
+                    ), array(
+                        $value['uid'], $value['kunjungan']
+                    ))
+                    ->execute();
+
+                $parseICD10Kerja = array();
+                $ICD10Kerja = explode(',', $Asesmen['response_data'][0]['icd10_kerja']);
+                foreach ($ICD10Kerja as $ICD10KerjaKey => $ICD10KerjaValue) {
+                    array_push($parseICD10Kerja, $ICD10->get_icd_detail('master_icd_10', $ICD10KerjaValue)['response_data'][0]);
+                }
+                $Asesmen['response_data'][0]['icd10_kerja'] = $parseICD10Kerja;
+
+
+                $parseICD10Banding = array();
+                $ICD10Banding = explode(',', $Asesmen['response_data'][0]['icd10_banding']);
+                foreach ($ICD10Banding as $ICD10BandingKey => $ICD10BandingValue) {
+                    array_push($parseICD10Banding, $ICD10->get_icd_detail('master_icd_10', $ICD10BandingValue)['response_data'][0]);
+                }
+                $Asesmen['response_data'][0]['icd10_banding'] = $parseICD10Banding;
+
+
+                $Antrian['response_data'][$key]['asesmen'] = $Asesmen['response_data'][0];
+
+                array_push($GroupTanggal[$GrouperName]['data'][$GrouperChild]['data'], $Antrian['response_data'][$key]);
+            }
+        }
+
+	    return $GroupTanggal;
     }
 
 

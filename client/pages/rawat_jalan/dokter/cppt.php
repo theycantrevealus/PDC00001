@@ -26,71 +26,17 @@
 
 
                             <div id="cppt_pagination">
+
                             </div>
                             <div id="cppt_loader">
+
 							</div>
 
 
 							<div class="mt-4">
-
                                 <ul class="pagination justify-content-center" id="pagin">
-
+                                    awdawd
                                 </ul>
-
-								<!--<ul class="pagination justify-content-center">
-
-									<li class="page-item disabled">
-										<a class="page-link" href="#" aria-label="Previous">
-											<span aria-hidden="true" class="material-icons">first_page</span>
-											<span class="sr-only">First</span>
-										</a>
-									</li>
-
-									<li class="page-item disabled">
-										<a class="page-link" href="#" aria-label="Previous">
-											<span aria-hidden="true" class="material-icons">chevron_left</span>
-											<span class="sr-only">Prev</span>
-										</a>
-									</li>
-
-									<li class="page-item active">
-										<a class="page-link" href="#" aria-label="1">
-											<span>1</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="2">
-											<span>2</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="3">
-											<span>3</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="4">
-											<span>4</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="Next">
-											<span class="sr-only">Next</span>
-											<span aria-hidden="true" class="material-icons">chevron_right</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="Next">
-											<span class="sr-only">Last</span>
-											<span aria-hidden="true" class="material-icons">last_page</span>
-										</a>
-									</li>
-								</ul>-->
 							</div>
 						</div>
 					</div>
