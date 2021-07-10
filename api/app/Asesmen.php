@@ -1072,7 +1072,7 @@ class Asesmen extends Utility {
 						->execute();
 
 						foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
-							$RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat->get_item_detail($RVIValue['obat'])['response_data'][0];
+							$RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $Inventori->get_item_detail($RVIValue['obat'])['response_data'][0];
 						}
 
 						$RacikanValue['item'] = $RacikanDetailData['response_data'];
@@ -1673,7 +1673,7 @@ class Asesmen extends Utility {
                         ->execute();
                 }
 
-                $returnResponse['rad_response'] = $ChargeRad;
+                //$returnResponse['rad_response'] = $ChargeRad;
             }
         } else {
 		    //Todo: INAP SEGMENT
