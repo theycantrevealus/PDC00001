@@ -4229,9 +4229,9 @@ class Laboratorium extends Utility {
                                 $key_nilai
                             ))
                             ->execute();
-                        if(count($checkData['response_data']))
+                        if(count($checkData['response_data']) > 0)
                         {
-                            if(($UserData['data']->uid !== __UIDDOKTER__)) {
+                            if(($UserData['data']->jabatan !== __UIDDOKTER__)) {
                                 $workerData = self::$query->update('lab_order_nilai', array(
                                     'nilai' =>	$value_nilai,
                                     'petugas' => $UserData['data']->uid,
@@ -4282,9 +4282,27 @@ class Laboratorium extends Utility {
                                         )
                                     );
                                 }
+                            } else {
+                                $workerData = self::$query->update('lab_order_nilai', array(
+                                    'updated_at' =>	parent::format_date()
+                                ))
+                                    ->where(array(
+                                        'lab_order_nilai.lab_order' 	=> '= ?',
+                                        'AND',
+                                        'lab_order_nilai.tindakan' 		=> '= ?',
+                                        'AND',
+                                        'lab_order_nilai.id_lab_nilai'	=> '= ?',
+                                        'AND',
+                                        'lab_order_nilai.deleted_at'	=> 'IS NULL'
+                                    ), array(
+                                        $parameter['uid_order'],
+                                        $key_tindakan,
+                                        $key_nilai
+                                    ))
+                                    ->execute();
                             }
                         } else {
-                            if(($UserData['data']->uid !== __UIDDOKTER__)) {
+                            if(($UserData['data']->jabatan !== __UIDDOKTER__)) {
                                 $workerData = self::$query->insert('lab_order_nilai', array(
                                     'lab_order' => $parameter['uid_order'],
                                     'nilai' => $value_nilai,

@@ -450,6 +450,7 @@
         }
 
         function load_laboratorium(data) {
+            console.log(data);
 
             data.sampling = data.tanggal_sampling;
 
