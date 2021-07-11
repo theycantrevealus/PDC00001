@@ -298,7 +298,7 @@ class Laboratorium extends Utility {
 	    return $update;
     }
 
-	private function get_lab_nilai_detail($parameter) {
+	public function get_lab_nilai_detail($parameter) {
 	    $data = self::$query->select('master_lab_nilai', array(
 	        'id',
             'keterangan',

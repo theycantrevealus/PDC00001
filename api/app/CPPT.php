@@ -89,8 +89,9 @@ class CPPT extends Utility {
 	    $ICD10 = new Icd(self::$pdo);
         $Inventori = new Inventori(self::$pdo);
         $Tindakan = new Tindakan(self::$pdo);
+        $Laboratorium = new Laboratorium(self::$pdo);
 	    foreach ($Antrian['response_data'] as $key => $value) {
-	        if($value['uid'] !== $parameter['current']) {
+	        //if($value['uid'] !== $parameter['current']) {
                 $GrouperName = date('Y-m-d', strtotime($value['waktu_masuk']));
                 $GrouperChild = date('H:i:s', strtotime($value['waktu_masuk']));
                 if(!isset($GroupTanggal[$GrouperName])) {
@@ -326,11 +327,88 @@ class CPPT extends Utility {
 
 
 
+                //Laboratorium
+                $LaboratoriumItem = self::$query->select('lab_order', array(
+                    'uid',
+                    'no_order',
+                    'tanggal_sampling',
+                    'dr_penanggung_jawab',
+                    'kesan',
+                    'anjuran',
+                    'status'
+                ))
+                    ->where(array(
+                        'lab_order.asesmen' => '= ?',
+                        'AND',
+                        'lab_order.deleted_at' => 'IS NULL'
+                    ), array(
+                        $Asesmen['response_data'][0]['uid']
+                    ))
+                    ->execute();
+                foreach ($LaboratoriumItem['response_data'] as $LabKey => $LabValue) {
+                    if($LabValue['status'] === 'D') {
+                        $ItemLab = self::$query->select('lab_order_detail', array(
+                            'tindakan'
+                        ))
+                            ->where(array(
+                                'lab_order_detail.lab_order' => '= ?',
+                                'AND',
+                                'lab_order_detail.deleted_at' => 'IS NULL'
+                            ), array(
+                                $LabValue['uid']
+                            ))
+                            ->execute();
+                        foreach ($ItemLab['response_data'] as $LabItemKey => $ItemItemValue) {
+                            $DetailLabor = self::$query->select('lab_order_nilai', array(
+                                'id_lab_nilai', 'nilai', 'petugas'
+                            ))
+                                ->where(array(
+                                    'lab_order_nilai.lab_order' => '= ?',
+                                    'AND',
+                                    'lab_order_nilai.tindakan' => '= ?',
+                                    'AND',
+                                    'lab_order_nilai.deleted_at' => 'IS NULL'
+                                ), array(
+                                    $LabValue['uid'], $ItemItemValue['tindakan']
+                                ))
+                                ->execute();
+                            foreach ($DetailLabor['response_data'] as $DLabKey => $DLabValue) {
+                                $DetailLabor['response_data'][$DLabKey]['item_lab'] = $Laboratorium->get_lab_nilai_detail($DLabValue['id_lab_nilai'])['response_data'][0];
+                            }
+                            $ItemLab['response_data'][$LabItemKey]['nilai'] = $DetailLabor['response_data'];
+
+                            $ItemLab['response_data'][$LabItemKey]['tindakan'] = $Tindakan->get_tindakan_info($ItemItemValue['tindakan'])['response_data'][0];
+                        }
+
+
+                        $LaboratoriumItem['response_data'][$LabKey]['detail'] = $ItemLab['response_data'];
+
+
+                        $DokumenLabor = self::$query->select('lab_order_document', array(
+                            'lampiran'
+                        ))
+                            ->where(array(
+                                'lab_order_document.lab_order' => '= ?',
+                                'AND',
+                                'lab_order_document.deleted_at' => 'IS NULL'
+                            ), array(
+                                $LabValue['uid']
+                            ))
+                            ->execute();
+                        $LaboratoriumItem['response_data'][$LabKey]['dokumen'] = $DokumenLabor['response_data'];
+                    }
+                }
+                $Asesmen['response_data'][0]['laboratorium'] = $LaboratoriumItem['response_data'];
+
+
+
+                //Radiologi
+
                 $Antrian['response_data'][$key]['asesmen'] = $Asesmen['response_data'][0];
 
                 array_push($GroupTanggal[$GrouperName]['data'][$GrouperChild]['data'], $Antrian['response_data'][$key]);
 
-            }
+            //}
         }
 
 	    return $GroupTanggal;

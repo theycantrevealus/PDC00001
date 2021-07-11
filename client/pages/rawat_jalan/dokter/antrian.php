@@ -38,7 +38,7 @@
 						</a>
 					</li>
 					<li class="nav-item">
-						<a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+						<a href="#tab-poli-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								<i class="fa fa-briefcase-medical"></i>
 							</span>
@@ -100,7 +100,7 @@
 						</a>
 					</li>
                     <li class="nav-item ml-auto">
-                        <a href="#tab-poli-7" class="nav-link active" data-toggle="tab" role="tab" aria-selected="false">
+                        <a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-tasks"></i>
 							</span>
@@ -114,7 +114,7 @@
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'perawat/form.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-poli-2">
+				<div class="tab-pane show fade active" id="tab-poli-2">
 					<?php require 'info-pasien.php'; ?>
                     <?php
                     if(in_array(__POLI_GIGI__, $PoliList)) {
@@ -147,7 +147,7 @@
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'radiologi.php'; ?>
 				</div>
-				<div class="tab-pane show fade active" id="tab-poli-7">
+				<div class="tab-pane show fade" id="tab-poli-7">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'cppt.php'; ?>
 				</div>

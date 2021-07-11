@@ -390,7 +390,127 @@
                                 ?>
                             </div>
                             <div class="tab-pane show fade" id="laboratorium_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
-
+                                <div class="col-lg">
+                                    <div class="z-0">
+                                        <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                                            <li class="nav-item">
+                                                <a href="#hasil_lab_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" data-toggle="tab" role="tab" class="nav-link active" aria-controls="activity_all" aria-selected="false">
+                                                    <span class="nav-link__count">01</span>
+                                                    Hasil
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#dokumen_lab_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+                                                    <span class="nav-link__count">02</span>
+                                                    Dokumen
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <div class="card">
+                                            <div class="card-body tab-content">
+                                                <div class="tab-pane show fade active" id="hasil_lab_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
+                                                    <?php
+                                                    foreach ($_POST['laboratorium'] as $LabKey => $LabValue) {
+                                                        ?>
+                                                        <div class="card">
+                                                            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                                                <h4 class="card-header__title flex m-0">
+                                                                    <i class="fa fa-hashtag"></i> <?php echo $LabValue['no_order']; ?>
+                                                                </h4>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <?php
+                                                                foreach ($LabValue['detail'] as $LabDKey => $LabDValue) {
+                                                                    ?>
+                                                                    <div class="col-auto d-flex align-items-center">
+                                                                        <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;<?php echo $LabDValue['tindakan']['nama']; ?></h5>
+                                                                    </div>
+                                                                    <br />
+                                                                    <table class="table table-bordered largeDataType">
+                                                                        <thead class="thead-dark">
+                                                                        <tr>
+                                                                            <th class="wrap_content">No</th>
+                                                                            <th>Item</th>
+                                                                            <th>Nilai</th>
+                                                                            <th class="wrap_content">Satuan</th>
+                                                                            <th class="wrap_content">Nilai Min</th>
+                                                                            <th class="wrap_content">Nilai Max</th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                        <?php
+                                                                        $autoLab = 1;
+                                                                        foreach ($LabDValue['nilai'] as $LabDNKey => $LabDNValue) {
+                                                                            ?>
+                                                                            <tr>
+                                                                                <td><?php echo $autoLab; ?></td>
+                                                                                <td><?php echo $LabDNValue['item_lab']['keterangan']; ?></td>
+                                                                                <td><?php echo (isset($LabDNValue['nilai']) && $LabDNValue['nilai'] !== '') ? $LabDNValue['nilai'] : '-'; ?></td>
+                                                                                <td><?php echo (isset($LabDNValue['item_lab']['satuan']) && $LabDNValue['item_lab']['satuan'] !== '') ? $LabDNValue['item_lab']['satuan'] : '-'; ?></td>
+                                                                                <td><?php echo (isset($LabDNValue['item_lab']['nilai_min']) && $LabDNValue['item_lab']['nilai_min'] !== '') ? $LabDNValue['item_lab']['nilai_min'] : '-'; ?></td>
+                                                                                <td><?php echo (isset($LabDNValue['item_lab']['nilai_maks']) && $LabDNValue['item_lab']['nilai_maks'] !== '') ? $LabDNValue['item_lab']['nilai_maks'] : '-'; ?></td>
+                                                                            </tr>
+                                                                            <?php
+                                                                            $autoLab++;
+                                                                        }
+                                                                        ?>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <br />
+                                                                    <div class="row">
+                                                                        <div class="col-lg-6">
+                                                                            <strong>Kesan:</strong>
+                                                                            <br />
+                                                                            <?php echo $LabValue['kesan']; ?>
+                                                                        </div>
+                                                                        <div class="col-lg-6">
+                                                                            <strong>Anjuran:</strong>
+                                                                            <br />
+                                                                            <?php echo $LabValue['anjuran']; ?>
+                                                                        </div>
+                                                                    </div>
+                                                                    <hr /><br /><br /><br />
+                                                                    <?php
+                                                                }
+                                                                ?>
+                                                            </div>
+                                                        </div>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                </div>
+                                                <div class="tab-pane show fade" id="dokumen_lab_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
+                                                    <table class="table table-bordered largeDataType">
+                                                        <thead class="thead-dark">
+                                                            <tr>
+                                                                <th class="wrap_content">No</th>
+                                                                <th>Dokumen</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php
+                                                        $autoLabDoc = 1;
+                                                        foreach ($_POST['laboratorium'] as $LabKey => $LabValue) {
+                                                            foreach ($LabValue['dokumen'] as $LabDocKey => $LabDocValue) {
+                                                                ?>
+                                                                <tr>
+                                                                    <td><?php echo $autoLabDoc; ?></td>
+                                                                    <td>
+                                                                        <a class="lampiran_view_trigger" href="#" target="<?php echo $_POST['__HOST__'] . '/document/laboratorium/' . $LabValue['uid'] . '/' . $LabDocValue['lampiran']; ?>">#Lampiran <?php echo $autoLabDoc; ?> [<?php echo $LabDocValue['lampiran']; ?>]</a>
+                                                                    </td>
+                                                                </tr>
+                                                                <?php
+                                                                $autoLabDoc++;
+                                                            }
+                                                        }
+                                                        ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="tab-pane show fade" id="radiologi_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
 
