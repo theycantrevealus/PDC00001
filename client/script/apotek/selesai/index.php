@@ -548,7 +548,7 @@
                             racikan_apotek.push({
                                 obat: "<b>R\/</b> " + detailRacikanApotek[c].detail.nama,
                                 kuantitas: ((detailRacikanApotek[c].pay[0] !== undefined) ? detailRacikanApotek[c].pay[0].qty : 0),
-                                signa: detail_racikan_apotek[b].signa_qty + " &times; " + detail_racikan_apotek[b].signa_pakai,
+                                signa: detail_racikan_apotek[b].change[b].signa_qty + " &times; " + detail_racikan_apotek[b].change[b].signa_pakai,
                                 keterangan: detail_racikan_apotek[b].keterangan,
                                 harga: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].harga), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",
                                 subtotal: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].subtotal), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",

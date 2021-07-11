@@ -85,8 +85,10 @@ class CPPT extends Utility {
             ))
             ->execute();
 	    $Poli = new Poli(self::$pdo);
-	    $Pegawai = new Pegawai(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
 	    $ICD10 = new Icd(self::$pdo);
+        $Inventori = new Inventori(self::$pdo);
+        $Tindakan = new Tindakan(self::$pdo);
 	    foreach ($Antrian['response_data'] as $key => $value) {
 	        if($value['uid'] !== $parameter['current']) {
                 $GrouperName = date('Y-m-d', strtotime($value['waktu_masuk']));
@@ -156,9 +158,178 @@ class CPPT extends Utility {
                 $Asesmen['response_data'][0]['icd10_banding'] = $parseICD10Banding;
 
 
+                //Tindakan
+                $TindakanList = self::$query->select('asesmen_tindakan', array(
+                    'tindakan'
+                ))
+                    ->where(array(
+                        'asesmen_tindakan.asesmen' => '= ?',
+                        'AND',
+                        'asesmen_tindakan.kunjungan' => '= ?',
+                        'AND',
+                        'asesmen_tindakan.antrian' => '= ?'
+                    ), array(
+                        $Asesmen['response_data'][0]['uid'],
+                        $value['kunjungan'],
+                        $value['uid']
+                    ))
+                    ->execute();
+                foreach ($TindakanList['response_data'] as $TindKey => $TindValue) {
+                    $TindakanList['response_data'][$TindKey]['tindakan'] = $Tindakan->get_tindakan_info($TindValue['tindakan'])['response_data'][0];
+                }
+                $Asesmen['response_data'][0]['tindakan'] = $TindakanList['response_data'];
+
+                //Resep
+                $Resep = self::$query->select('resep', array(
+                    'uid',
+                    'status_resep',
+                    'keterangan',
+                    'keterangan_racikan',
+                    'apoteker',
+                    'alergi_obat',
+                    'kode'
+                ))
+                    ->where(array(
+                        'resep.kunjungan' => '= ?',
+                        'AND',
+                        'resep.antrian' => '= ?',
+                        'AND',
+                        'resep.deleted_at' => 'iS NULL'
+                    ), array(
+                        $value['kunjungan'],
+                        $value['uid']
+                    ))
+                    ->execute();
+                foreach ($Resep['response_data'] as $RespKey => $RespValue) {
+                    //GetDetail
+                    $DetailResep = self::$query->select('resep_detail', array(
+                        'obat',
+                        'signa_qty',
+                        'signa_pakai',
+                        'qty',
+                        'aturan_pakai',
+                        'keterangan'
+                    ))
+                        ->where(array(
+                            'resep_detail.resep' => '= ?',
+                            'AND',
+                            'resep_detail.deleted_at' => 'IS NULL'
+                        ), array(
+                            $RespValue['uid']
+                        ))
+                        ->execute();
+                    foreach ($DetailResep['response_data'] as $DetailRespKey => $DetailRespValue) {
+                        $DetailResep['response_data'][$DetailRespKey]['obat'] = $Inventori->get_item_detail($DetailRespValue['obat'])['response_data'][0];
+                    }
+                    $Resep['response_data'][$RespKey]['detail'] = $DetailResep['response_data'];
+
+
+                    //Change
+                    $DetailResepApotek = self::$query->select('resep_change_log', array(
+                        'item',
+                        'signa_qty',
+                        'signa_pakai',
+                        'aturan_pakai',
+                        'keterangan',
+                        'qty',
+                        'verifikator'
+                    ))
+                        ->where(array(
+                            'resep_change_log.resep' => '= ?',
+                            'AND',
+                            'resep_change_log.deleted_at' => 'IS NULL'
+                        ), array(
+                            $RespValue['uid']
+                        ))
+                        ->execute();
+                    foreach ($DetailResepApotek['response_data'] as $DetailRespApotekKey => $DetailRespApotekValue) {
+                        $DetailResepApotek['response_data'][$DetailRespApotekKey]['item'] = $Inventori->get_item_detail($DetailRespApotekValue['item'])['response_data'][0];
+                    }
+                    $Resep['response_data'][$RespKey]['detail_apotek'] = $DetailResepApotek['response_data'];
+                }
+                $Asesmen['response_data'][0]['resep'] = $Resep['response_data'];
+
+
+
+                //Racikan
+                $Racikan = self::$query->select('racikan', array(
+                    'uid',
+                    'kode',
+                    'keterangan',
+                    'signa_qty',
+                    'signa_pakai',
+                    'qty',
+                    'aturan_pakai'
+                ))
+                    ->where(array(
+                        'racikan.asesmen' => '= ?',
+                        'AND',
+                        'racikan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $Asesmen['response_data'][0]['uid']
+                    ))
+                    ->execute();
+                foreach ($Racikan['response_data'] as $RacKey => $RacValue) {
+                    $DetailRacikan = self::$query->select('racikan_detail', array(
+                        'obat',
+                        'kekuatan'
+                    ))
+                        ->where(array(
+                            'racikan_detail.racikan' => '= ?',
+                            'AND',
+                            'racikan_detail.deleted_at' => 'IS NULL'
+                        ), array(
+                            $RacValue['uid']
+                        ))
+                        ->execute();
+                    foreach ($DetailRacikan['response_data'] as $RacDetailKey => $RacDetailValue) {
+                        $DetailRacikan['response_data'][$RacDetailKey]['obat'] = $Inventori->get_item_detail($RacDetailValue['obat'])['response_data'][0];
+                    }
+                    $Racikan['response_data'][$RacKey]['detail'] = $DetailRacikan['response_data'];
+
+                    //Racikan Apotek
+                    $RacikanApotek = self::$query->select('racikan_change_log', array(
+                        'jumlah',
+                        'signa_qty',
+                        'signa_pakai',
+                        'aturan_pakai'
+                    ))
+                        ->where(array(
+                            'racikan_change_log.racikan' => '= ?',
+                            'AND',
+                            'racikan_change_log.deleted_at' => 'IS NULL'
+                        ), array(
+                            $RacValue['uid']
+                        ))
+                        ->execute();
+                    foreach ($RacikanApotek['response_data'] as $RacApotekKey => $RacApotekValue) {
+                        $DetailRacikanApotek = self::$query->select('racikan_detail_change_log', array(
+                            'obat', 'kekuatan', 'jumlah'
+                        ))
+                            ->where(array(
+                                'racikan_detail_change_log.racikan' => '= ?',
+                                'AND',
+                                'racikan_detail_change_log.deleted_at' => 'IS NULL'
+                            ), array(
+                                $RacValue['uid']
+                            ))
+                            ->execute();
+                        foreach ($DetailRacikanApotek['response_data'] as $DetailRacikanApotekKey => $DetailRacikanApotekValue) {
+                            $DetailRacikanApotek['response_data'][$DetailRacikanApotekKey]['obat'] = $Inventori->get_item_detail($DetailRacikanApotekValue['obat'])['response_data'][0];
+                        }
+                        $RacikanApotek['response_data'][$RacApotekKey]['detail'] = $DetailRacikanApotek['response_data'];
+                    }
+
+                    $Racikan['response_data'][$RacKey]['racikan_apotek'] = $RacikanApotek['response_data'];
+                }
+                $Asesmen['response_data'][0]['racikan'] = $Racikan['response_data'];
+
+
+
                 $Antrian['response_data'][$key]['asesmen'] = $Asesmen['response_data'][0];
 
                 array_push($GroupTanggal[$GrouperName]['data'][$GrouperChild]['data'], $Antrian['response_data'][$key]);
+
             }
         }
 

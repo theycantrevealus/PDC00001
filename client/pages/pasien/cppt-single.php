@@ -13,39 +13,47 @@
                 </div>
             </div>
             <div class="card-header card-header-tabs-basic nav" role="tablist">
-                <a href="#asesmen_rawat_<?php echo $_POST['group_tanggal_name']; ?>" class="" data-toggle="tab" role="tab" aria-controls="activity_all" aria-selected="false">Asesmen Rawat</a>
-                <a href="#asesmen_medis_<?php echo $_POST['group_tanggal_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="active">Asesmen Medis</a>
-                <a href="#tindakan_<?php echo $_POST['group_tanggal_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Tindakan</a>
-                <a href="#resep_<?php echo $_POST['group_tanggal_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Resep</a>
-                <a href="#racikan_<?php echo $_POST['group_tanggal_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Racikan</a>
-                <a href="#laboratorium_<?php echo $_POST['group_tanggal_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Laboratorium</a>
-                <a href="#radiologi_<?php echo $_POST['group_tanggal_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Radiologi</a>
+                <a href="#asesmen_rawat_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" class="" data-toggle="tab" role="tab" aria-controls="activity_all" aria-selected="false">Asesmen Rawat</a>
+                <a href="#asesmen_medis_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="active">Asesmen Medis</a>
+                <a href="#tindakan_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Tindakan</a>
+                <a href="#resep_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Resep</a>
+                <a href="#racikan_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Racikan</a>
+                <a href="#laboratorium_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Laboratorium</a>
+                <a href="#radiologi_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" data-toggle="tab" role="tab" aria-selected="false" class="">Radiologi</a>
             </div>
             <div class="px-4 py-3">
                 <div class="row align-items-center">
                     <div class="col" style="min-width: 300px">
                         <div class="tab-content">
-                            <div class="tab-pane active show fade" id="asesmen_rawat_<?php echo $_POST['group_tanggal_name']; ?>">
+                            <div class="tab-pane show fade" id="asesmen_rawat_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
 
                             </div>
-                            <div class="tab-pane active show fade" id="asesmen_medis_<?php echo $_POST['group_tanggal_name']; ?>">
+                            <div class="tab-pane active show fade" id="asesmen_medis_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <h5><i class="material-icons icon-muted icon-20pt ml-2">folder</i> Keluhan Utama</h5>
+                                        <div class="col-auto d-flex align-items-center">
+                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Keluhan Utama</h5>
+                                        </div>
                                         <p><?php echo $_POST['keluhan_utama']; ?></p>
                                     </div>
                                     <div class="col-lg-6">
-                                        <h5><i class="material-icons icon-muted icon-20pt ml-2">folder</i> Keluhan Tambahan</h5>
+                                        <div class="col-auto d-flex align-items-center">
+                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Keluhan Tambahan</h5>
+                                        </div>
                                         <p><?php echo $_POST['keluhan_tambahan']; ?></p>
                                     </div>
                                 </div>
                                 <hr />
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <h5><i class="material-icons icon-muted icon-20pt ml-2">folder</i> Diagnosa Kerja</h5>
+                                        <div class="col-auto d-flex align-items-center">
+                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Diagnosa Kerja</h5>
+                                        </div>
                                     </div>
                                     <div class="col-lg-6">
-                                        <h5><i class="material-icons icon-muted icon-20pt ml-2">folder</i> Diagnosa Banding</h5>
+                                        <div class="col-auto d-flex align-items-center">
+                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Diagnosa Banding</h5>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -56,7 +64,7 @@
                                                 foreach ($_POST['icd10_kerja'] as $icd10KKey => $icd10KValue) {
                                                     if(isset($icd10KValue['nama']) && $icd10KValue['nama'] !== "") {
                                                         ?>
-                                                        <li><?php echo $icd10KValue['kode']; ?> - <?php echo $icd10KValue['nama']; ?></li>
+                                                        <li><b><?php echo $icd10KValue['kode']; ?></b> - <?php echo $icd10KValue['nama']; ?></li>
                                                         <?php
                                                     }
                                                 }
@@ -71,7 +79,7 @@
                                             foreach ($_POST['icd10_banding'] as $icd10BKey => $icd10BValue) {
                                                 if(isset($icd10BValue['nama']) && $icd10BValue['nama'] !== "") {
                                                     ?>
-                                                    <li><?php echo $icd10BValue['kode']; ?> - <?php echo $icd10BValue['nama']; ?></li>
+                                                    <li><b><?php echo $icd10BValue['kode']; ?></b> - <?php echo $icd10BValue['nama']; ?></li>
                                                     <?php
                                                 }
                                             }
@@ -91,28 +99,300 @@
                                 <hr />
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <h5><i class="material-icons icon-muted icon-20pt ml-2">folder</i> Pemeriksaan Fisik</h5>
+                                        <div class="col-auto d-flex align-items-center">
+                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Pemeriksaan Fisik</h5>
+                                        </div>
                                         <p><?php echo $_POST['pemeriksaan_fisik']; ?></p>
                                     </div>
                                     <div class="col-lg-6">
-                                        <h5><i class="material-icons icon-muted icon-20pt ml-2">folder</i> Planning</h5>
+                                        <div class="col-auto d-flex align-items-center">
+                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Planning</h5>
+                                        </div>
                                         <p><?php echo $_POST['planning']; ?></p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="tab-pane active show fade" id="tindakan_<?php echo $_POST['group_tanggal_name']; ?>">
+                            <div class="tab-pane show fade" id="tindakan_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <ol type="1">
+                                            <?php
+                                            foreach ($_POST['tindakan'] as $tindKey => $tindValue) {
+                                                if(isset($tindValue['tindakan']['nama']) && $tindValue['tindakan']['nama'] !== "") {
+                                                    ?>
+                                                    <li><?php echo $tindValue['tindakan']['nama']; ?></li>
+                                                    <?php
+                                                }
+                                            }
+                                            ?>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane show fade" id="resep_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
+                                <?php
+                                    $autoResep = 1;
+                                    foreach ($_POST['resep'] as $resKey => $resValue) {
+                                ?>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="alert alert-soft-info card-margin" role="alert">
+                                            <strong>Keterangan:</strong><br />
+                                            <?php echo $resValue['keterangan'] ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="col-auto d-flex align-items-center">
+                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Resep Dokter</h5>
+                                        </div>
+                                        <br />
+                                        <table class="table table-bordered largeDataType">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th class="wrap_content">No</th>
+                                                    <th>Obat</th>
+                                                    <th class="wrap_content">Signa</th>
+                                                    <th class="wrap_content">Jumlah</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td rowspan="<?php echo count($resValue['detail']); ?>"><?php echo $autoResep; ?></td>
+                                                    <td>
+                                                        <strong class="text-info">
+                                                            <?php echo $resValue['detail'][0]['obat']['nama']; ?>
+                                                        </strong><br /><br /><b>Keterangan:</b><br />
+                                                        <?php echo $resValue['detail'][0]['keterangan']; ?>
+                                                    </td>
+                                                    <td>
+                                                        <span class="wrap_content"><?php echo $resValue['detail'][0]['signa_pakai']; ?> &times; <?php echo $resValue['detail'][0]['signa_qty']; ?></span>
+                                                    </td>
+                                                    <td>
+                                                        <?php echo $resValue['detail'][0]['qty']; ?>
+                                                    </td>
+                                                </tr>
+                                                <?php
+                                                for ($a = 1; $a < (count($resValue['detail'])); $a++) {
+                                                    ?>
+                                                    <tr>
+                                                        <td>
+                                                            <strong class="text-info">
+                                                                <?php echo $resValue['detail'][$a]['obat']['nama']; ?>
+                                                            </strong><br /><br /><b>Keterangan:</b><br />
+                                                            <?php echo $resValue['detail'][$a]['keterangan']; ?>
+                                                        </td>
+                                                        <td>
+                                                            <span class="wrap_content"><?php echo $resValue['detail'][$a]['signa_pakai']; ?> &times; <?php echo $resValue['detail'][$a]['signa_qty']; ?></span>
+                                                        </td>
+                                                        <td>
+                                                            <?php echo $resValue['detail'][$a]['qty']; ?>
+                                                        </td>
+                                                    </tr>
+                                                    <?php
+                                                }
+                                            ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="col-auto d-flex align-items-center">
+                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Resep Apotek</h5>
+                                        </div>
+                                        <br />
+                                        <table class="table table-bordered largeDataType">
+                                            <thead class="thead-dark">
+                                            <tr>
+                                                <th class="wrap_content">No</th>
+                                                <th>Obat</th>
+                                                <th class="wrap_content">Signa</th>
+                                                <th class="wrap_content">Jumlah</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td rowspan="<?php echo count($resValue['detail']); ?>"><?php echo $autoResep; ?></td>
+                                                <td>
+                                                    <strong class="text-info">
+                                                        <?php echo $resValue['detail_apotek'][0]['item']['nama']; ?>
+                                                    </strong><br /><br /><b>Keterangan:</b><br />
+                                                    <?php echo $resValue['detail_apotek'][0]['keterangan']; ?>
+                                                </td>
+                                                <td>
+                                                    <span class="wrap_content"><?php echo $resValue['detail_apotek'][0]['signa_pakai']; ?> &times; <?php echo $resValue['detail_apotek'][0]['signa_qty']; ?></span>
+                                                </td>
+                                                <td>
+                                                    <?php echo $resValue['detail_apotek'][0]['qty']; ?>
+                                                </td>
+                                            </tr>
+                                            <?php
+                                            for ($a = 1; $a < (count($resValue['detail_apotek'])); $a++) {
+                                                ?>
+                                                <tr>
+                                                    <td>
+                                                        <strong class="text-info">
+                                                            <?php echo $resValue['detail_apotek'][$a]['item']['nama']; ?>
+                                                        </strong><br /><br /><b>Keterangan:</b><br />
+                                                        <?php echo $resValue['detail_apotek'][$a]['keterangan']; ?>
+                                                    </td>
+                                                    <td>
+                                                        <span class="wrap_content"><?php echo $resValue['detail_apotek'][$a]['signa_pakai']; ?> &times; <?php echo $resValue['detail_apotek'][$a]['signa_qty']; ?></span>
+                                                    </td>
+                                                    <td>
+                                                        <?php echo $resValue['detail_apotek'][$a]['qty']; ?>
+                                                    </td>
+                                                </tr>
+                                                <?php
+                                            }
+                                            ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                        <?php
+                                        $autoResep++;
+                                    }
+                                ?>
+                            </div>
+                            <div class="tab-pane show fade" id="racikan_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
+                                <?php
+                                $autoRacikan = 1;
+                                foreach ($_POST['racikan'] as $racKey => $racValue) {
+                                    ?>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="alert alert-soft-info card-margin" role="alert">
+                                                <strong>Keterangan:</strong><br />
+                                                <?php echo $racValue['keterangan'] ?>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="col-auto d-flex align-items-center">
+                                                <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Racikan Dokter</h5>
+                                            </div>
+                                            <br />
+                                            <table class="table table-bordered largeDataType">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th class="wrap_content">No</th>
+                                                    <th>Racikan</th>
+                                                    <th class="wrap_content">Signa</th>
+                                                    <th class="wrap_content">Jumlah</th>
+                                                    <th>Komposisi</th>
+                                                    <th class="wrap_content">Kekuatan</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td rowspan="<?php echo count($racValue['detail']); ?>"><?php echo $autoRacikan; ?></td>
+                                                        <td rowspan="<?php echo count($racValue['detail']); ?>">
+                                                            <?php echo $racValue['kode']; ?>
+                                                            <br /><br /><b>Keterangan:</b><br />
+                                                            <?php echo $racValue['keterangan']; ?>
+                                                        </td>
+                                                        <td rowspan="<?php echo count($racValue['detail']); ?>">
+                                                            <span class="wrap_content"><?php echo $racValue['signa_pakai']; ?> &times; <?php echo $racValue['signa_qty']; ?></span>
+                                                        </td>
+                                                        <td rowspan="<?php echo count($racValue['detail']); ?>">
+                                                            <?php echo $racValue['qty']; ?>
+                                                        </td>
+                                                        <td>
+                                                            <strong class="text-info">
+                                                                <?php echo $racValue['detail'][0]['obat']['nama']; ?>
+                                                            </strong>
+                                                        </td>
+                                                        <td>
+                                                            <?php echo $racValue['detail'][0]['kekuatan']; ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php
+                                                for ($a = 1; $a < (count($racValue['detail'])); $a++) {
+                                                    ?>
+                                                    <tr>
+                                                        <td>
+                                                            <strong class="text-info">
+                                                                <?php echo $racValue['detail'][$a]['obat']['nama']; ?>
+                                                            </strong>
+                                                        </td>
+                                                        <td>
+                                                            <?php echo $racValue['detail'][$a]['kekuatan']; ?>
+                                                        </td>
+                                                    </tr>
+                                                    <?php
+                                                }
+                                                ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="col-auto d-flex align-items-center">
+                                                <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Racikan Apotek</h5>
+                                            </div>
+                                            <br />
+                                            <table class="table table-bordered largeDataType">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th class="wrap_content">No</th>
+                                                    <th>Racikan</th>
+                                                    <th class="wrap_content">Signa</th>
+                                                    <th class="wrap_content">Jumlah</th>
+                                                    <th>Komposisi</th>
+                                                    <th class="wrap_content">Kekuatan</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td rowspan="<?php echo count($racValue['detail']); ?>"><?php echo $autoRacikan; ?></td>
+                                                    <td rowspan="<?php echo count($racValue['detail']); ?>">
+                                                        <?php echo $racValue['kode']; ?>
+                                                        <br /><br /><b>Keterangan:</b><br />
+                                                        <?php echo $racValue['keterangan']; ?>
+                                                    </td>
+                                                    <td rowspan="<?php echo count($racValue['detail']); ?>">
+                                                        <span class="wrap_content"><?php echo $racValue['racikan_apotek'][$racKey]['signa_pakai']; ?> &times; <?php echo $racValue['racikan_apotek'][$racKey]['signa_qty']; ?></span>
+                                                    </td>
+                                                    <td rowspan="<?php echo count($racValue['detail']); ?>">
+                                                        <?php echo $racValue['racikan_apotek'][$racKey]['jumlah']; ?>
+                                                    </td>
+                                                    <td>
+                                                        <strong class="text-info">
+                                                            <?php echo $racValue['racikan_apotek'][$racKey]['detail'][0]['obat']['nama']; ?>
+                                                        </strong>
+                                                    </td>
+                                                    <td>
+                                                        <strong class="text-info">
+                                                            <?php echo $racValue['racikan_apotek'][$racKey]['detail'][0]['kekuatan']; ?>
+                                                        </strong>
+                                                    </td>
+                                                </tr>
+                                                <?php
+                                                for ($a = 1; $a < (count($racValue['racikan_apotek'][$racKey]['detail'])); $a++) {
+                                                    ?>
+                                                    <tr>
+                                                        <td>
+                                                            <strong class="text-info">
+                                                                <?php echo $racValue['racikan_apotek'][$racKey]['detail'][$a]['obat']['nama']; ?>
+                                                            </strong><br />
+                                                        </td>
+                                                        <td>
+                                                            <?php echo $racValue['racikan_apotek'][$racKey]['detail'][$a]['kekuatan']; ?>
+                                                        </td>
+                                                    </tr>
+                                                    <?php
+                                                }
+                                                ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <?php
+                                    $autoRacikan++;
+                                }
+                                ?>
+                            </div>
+                            <div class="tab-pane show fade" id="laboratorium_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
 
                             </div>
-                            <div class="tab-pane active show fade" id="resep_<?php echo $_POST['group_tanggal_name']; ?>">
-
-                            </div>
-                            <div class="tab-pane active show fade" id="racikan_<?php echo $_POST['group_tanggal_name']; ?>">
-
-                            </div>
-                            <div class="tab-pane active show fade" id="laboratorium_<?php echo $_POST['group_tanggal_name']; ?>">
-
-                            </div>
-                            <div class="tab-pane active show fade" id="radiologi_<?php echo $_POST['group_tanggal_name']; ?>">
+                            <div class="tab-pane show fade" id="radiologi_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
 
                             </div>
                         </div>

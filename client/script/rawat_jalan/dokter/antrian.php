@@ -3521,6 +3521,7 @@
                                             data: {
                                                 group_tanggal_name: a,
                                                 waktu_masuk: listData[b].parsed,
+                                                waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),
                                                 departemen: currentData.departemen.nama,
                                                 dokter: currentData.dokter.nama,
                                                 dokter_pic: __HOST__ + currentData.dokter.profile_pic,
@@ -3532,6 +3533,9 @@
                                                 diagnosa_banding:currentData.asesmen.diagnosa_banding,
                                                 pemeriksaan_fisik:currentData.asesmen.pemeriksaan_fisik,
                                                 planning:currentData.asesmen.planning,
+                                                tindakan: currentData.asesmen.tindakan,
+                                                resep: currentData.asesmen.resep,
+                                                racikan: currentData.asesmen.racikan
                                             },
                                             success:function(responseSingle) {
                                                 $("#group_cppt_" + a).append(responseSingle);

@@ -1612,7 +1612,7 @@ class Asesmen extends Utility {
 
 
 		//Tindakan Management
-		//$returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter, $MasterUID);
+        $returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter, $MasterUID);
 
 		//Resep dan Racikan
 		$returnResponse['resep_response'] = self::set_resep_asesment($parameter, $MasterUID);
@@ -2315,6 +2315,21 @@ class Asesmen extends Utility {
 
 
         foreach ($parameter['tindakan'] as $key => $value) {
+            $Check = self::$query->select('asesmen_tindakan', array(
+                'tindakan'
+            ))
+                ->where(array(
+                    'asesmen_tindakan.kunjungan' => '= ?',
+                    'AND',
+                    'asesmen_tindakan.antrian' => '= ?',
+                    'AND',
+                    'asesmen_tindakan.tindakan' => '= ?'
+                ), array(
+                    $value['kunjungan'],
+                    $value['antrian'],
+                    $value['item']
+                ))
+                ->execute();
             $HargaTindakan = self::$query->select('master_tindakan_kelas_harga', array(
                 'id',
                 'tindakan',
@@ -2337,18 +2352,40 @@ class Asesmen extends Utility {
                 ))
                 ->execute();
             $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
-            $new_asesmen_tindakan = self::$query->insert('asesmen_tindakan', array(
-                'kunjungan' => $value['kunjungan'],
-                'antrian' => $value['antrian'],
-                'asesmen' => $MasterAsesmen,
-                'tindakan' => $value['item'],
-                'penjamin' => $parameter['penjamin'],
-                'kelas' => __UID_KELAS_GENERAL_RJ__,
-                'harga' => $HargaFinal,
-                'created_at' => parent::format_date(),
-                'updated_at' => parent::format_date()
-            ))
-                ->execute();
+            if(count($Check['response_data']) > 0) {
+                $new_asesmen_tindakan = self::$query->update('asesmen_tindakan', array(
+                    'harga' => $HargaFinal,
+                    'updated_at' => parent::format_date()
+                ))
+                    ->where(array(
+                        'asesmen_tindakan.kunjungan' => '= ?',
+                        'AND',
+                        'asesmen_tindakan.antrian' => '= ?',
+                        'AND',
+                        'asesmen_tindakan.tindakan' => '= ?'
+                    ), array(
+                        $value['kunjungan'],
+                        $value['antrian'],
+                        $value['item']
+                    ))
+                    ->execute();
+            } else {
+                $new_asesmen_tindakan = self::$query->insert('asesmen_tindakan', array(
+                    'kunjungan' => $value['kunjungan'],
+                    'antrian' => $value['antrian'],
+                    'asesmen' => $MasterAsesmen,
+                    'tindakan' => $value['item'],
+                    'penjamin' => $parameter['penjamin'],
+                    'kelas' => __UID_KELAS_GENERAL_RJ__,
+                    'harga' => $HargaFinal,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+
+
 
             if ($new_asesmen_tindakan['response_result'] > 0) {
                 if ($parameter['charge_invoice'] === 'Y') {
@@ -2394,6 +2431,7 @@ class Asesmen extends Utility {
 
 
         if($parameter['charge_invoice'] === 'Y')  {
+        //if($parameter['charge_tindakan']) {
             $antrian_status = self::$query->update('antrian_nomor', array(
                 'status' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'K' : 'P'
             ))
