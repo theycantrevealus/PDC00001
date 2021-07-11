@@ -47,6 +47,9 @@ class Antrian extends Utility
             case 'igd':
                 return self::antrian_igd($parameter);
                 break;
+            case 'cari_pasien':
+                return self::cari_pasien2($parameter);
+                break;
             default:
                 # code...
                 break;
@@ -55,7 +58,7 @@ class Antrian extends Utility
 
     private function antrian_igd($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -1892,8 +1895,157 @@ class Antrian extends Utility
         return $data;
     }
 
-    public function cari_pasien($params)
-    {
+    private function cari_pasien2($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $term = new Terminologi(self::$pdo);
+        $expect_data = array(
+            'no_rm', 'nik', 'tanggal_lahir', 'nama', 'panggilan', 'tanggal_lahir', 'tempat_lahir', 'jenkel', 'agama', 'warganegara', 'pendidikan',
+            'nama_ibu', 'alamat', 'no_telp', 'kode_pos'
+        );
+        if (isset($parameter['cari']) && !empty($parameter['cari'])) {
+            $paramData = array(
+                '(pasien.nik' => 'LIKE \'%' . $parameter['cari'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'LIKE \'%' . $parameter['cari'] . '%\'',
+                'OR',
+                'pasien.no_passport' => 'LIKE \'%' . $parameter['cari'] . '%\'',
+                'OR',
+                'pasien.driving_license' => 'LIKE \'%' . $parameter['cari'] . '%\'',
+                'OR',
+                'LOWER(pasien.nama)' => 'LIKE \'%' . $parameter['cari'] . '%\')',
+                'AND',
+                'pasien.deleted_at' => 'IS NULL'
+            );
+            $paramValue = array();
+
+            if ($parameter['length'] < 0) {
+                $data = self::$query->select('pasien', array(
+                    'uid',
+                    'no_rm',
+                    'nik',
+                    'nama',
+                    'tanggal_lahir',
+                    'jenkel AS id_jenkel',
+                    'panggilan AS id_panggilan',
+                    'warganegara',
+                    'no_passport',
+                    'driving_license'
+                ))
+                    ->where($paramData, $paramValue)
+                    ->order(array(
+                        'nama' => 'ASC'
+                    ))
+                    ->execute();
+            } else {
+                $data = self::$query->select('pasien', array(
+                    'uid',
+                    'no_rm',
+                    'nik',
+                    'nama',
+                    'tanggal_lahir',
+                    'jenkel AS id_jenkel',
+                    'panggilan AS id_panggilan',
+                    'warganegara',
+                    'no_passport',
+                    'driving_license'
+                ))
+                    ->where($paramData, $paramValue)
+                    ->order(array(
+                        'nama' => 'ASC'
+                    ))
+                    ->offset(intval($parameter['start']))
+                    ->limit(intval($parameter['length']))
+                    ->execute();
+            }
+
+            $autonum = intval($parameter['start']) + 1;
+
+            foreach ($data['response_data'] as $key => $value) {
+                $data_lengkap = false;
+                $data['response_data'][$key]['autonum'] = $autonum;
+
+                $data['response_data'][$key]['berobat'] = self::cekStatusAntrian($value['uid']);
+                $param = ['', 'terminologi-items-detail', $value['id_panggilan']];
+                $get_panggilan = $term->__GET__($param);
+                $data['response_data'][$key]['panggilan'] = $get_panggilan['response_data'][0]['nama'];
+
+                $param = ['', 'terminologi-items-detail', $value['id_jenkel']];
+                $get_jenkel = $term->__GET__($param);
+                $data['response_data'][$key]['jenkel'] = $get_jenkel['response_data'][0]['nama'];
+
+
+                //Penjamin
+                $Penjamin = self::$query->select('pasien_penjamin', array(
+                    'penjamin',
+                    'valid_awal',
+                    'valid_akhir',
+                    'rest_meta',
+                    'terdaftar'
+                ))
+                    ->where(array(
+                        'pasien_penjamin.deleted_at' => 'IS NULL',
+                        'AND',
+                        'pasien_penjamin.pasien' => '= ?'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+                $data['response_data'][$key]['penjamin'] = $Penjamin['response_data'];
+
+                if($value['warganegara'] === __WNI__) {
+                    foreach ($expect_data as $ExpKey => $ExpValue) {
+                        if(
+                            !isset($value[$ExpValue]) ||
+                            is_null($value[$ExpValue]) ||
+                            $value[$ExpValue] === '' ||
+                            empty($value[$ExpValue])
+                        ) {
+                            $data_lengkap = false;
+                            break;
+                        } else {
+                            $data_lengkap = true;
+                        }
+                    }
+                } else {
+                    if(
+                        !isset($value['no_passport']) ||
+                        is_null($value['no_passport']) ||
+                        $value['no_passport'] === '' ||
+                        empty($value['no_passport'])
+                    ) {
+                        $data_lengkap = false;
+                    }
+                }
+
+
+                $data['response_data'][$key]['lengkap'] = $data_lengkap;
+                $autonum++;
+            }
+
+            $itemTotal = count($data['response_data']);
+            $data['response_draw'] = $parameter['draw'];
+            $data['recordsTotal'] = count($itemTotal);
+            $data['recordsFiltered'] = count($itemTotal);
+            $data['length'] = intval($parameter['length']);
+            $data['start'] = intval($parameter['start']);
+
+            return $data;
+        } else {
+            return array(
+                'response_draw' => $parameter['draw'],
+                'response_data' => array(),
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'length' => intval($parameter['length']),
+                'start' => intval($parameter['start'])
+
+            );
+        }
+    }
+
+    public function cari_pasien($params) {
         $parameter = strtoupper($params);
 
         $data = self::$query
@@ -1904,15 +2056,22 @@ class Antrian extends Utility
                     'nama',
                     'tanggal_lahir',
                     'jenkel AS id_jenkel',
-                    'panggilan AS id_panggilan'
+                    'panggilan AS id_panggilan',
+                    'warganegara',
+                    'no_passport',
+                    'driving_license'
                 )
             )
             ->where(array(
-                'pasien.nik' => 'LIKE \'%' . $parameter . '%\'',
+                '(pasien.nik' => 'LIKE \'%' . $parameter . '%\'',
                 'OR',
                 'pasien.no_rm' => 'LIKE \'%' . $parameter . '%\'',
                 'OR',
-                'pasien.nama' => 'LIKE \'%' . $parameter . '%\'',
+                'pasien.no_passport' => 'LIKE \'%' . $parameter . '%\'',
+                'OR',
+                'pasien.driving_license' => 'LIKE \'%' . $parameter . '%\'',
+                'OR',
+                'pasien.nama' => 'LIKE \'%' . $parameter . '%\')',
                 'AND',
                 'pasien.deleted_at' => 'IS NULL'
             ),
@@ -1927,7 +2086,14 @@ class Antrian extends Utility
 
         $autonum = 1;
         $term = new Terminologi(self::$pdo);
+
+        $expect_data = array(
+            'no_rm', 'nik', 'tanggal_lahir', 'nama', 'panggilan', 'tanggal_lahir', 'tempat_lahir', 'jenkel', 'agama', 'warganegara', 'pendidikan',
+            'nama_ibu', 'alamat', 'no_telp', 'kode_pos'
+        );
+
         foreach ($data['response_data'] as $key => $value) {
+            $data_lengkap = false;
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
 
@@ -1958,6 +2124,34 @@ class Antrian extends Utility
                 ))
                 ->execute();
             $data['response_data'][$key]['penjamin'] = $Penjamin['response_data'];
+
+            if($value['warganegara'] === __WNI__) {
+                foreach ($expect_data as $ExpKey => $ExpValue) {
+                    if(
+                        !isset($value[$ExpValue]) ||
+                        is_null($value[$ExpValue]) ||
+                        $value[$ExpValue] === '' ||
+                        empty($value[$ExpValue])
+                    ) {
+                        $data_lengkap = false;
+                        break;
+                    } else {
+                        $data_lengkap = true;
+                    }
+                }
+            } else {
+                if(
+                    !isset($value['no_passport']) ||
+                    is_null($value['no_passport']) ||
+                    $value['no_passport'] === '' ||
+                    empty($value['no_passport'])
+                ) {
+                    $data_lengkap = false;
+                }
+            }
+
+
+            $data['response_data'][$key]['lengkap'] = $data_lengkap;
         }
 
         return $data;
