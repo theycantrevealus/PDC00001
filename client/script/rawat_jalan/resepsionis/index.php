@@ -1164,9 +1164,9 @@
                 {
                     "data" : "autonum", render: function(data, type, row, meta) {
                         if(!row.lengkap) {
-                            buttonAksi = "<button id=\"btn_lengkapi_pasien_" + row.uid + "\" class=\"btn btn-sm btn-warning btnLengkapiPasien\" data-toggle=\"tooltip\" title=\"Lengkapi Data Pasien\">" +
+                            buttonAksi = "<a href=\"" + __HOSTNAME__ + "/pasien/edit/" + row.uid + "?antrian=true\" id=\"btn_lengkapi_pasien_" + row.uid + "\" class=\"btn btn-sm btn-warning btnLengkapiPasien\" data-toggle=\"tooltip\" title=\"Lengkapi Data Pasien\">" +
                                 "<span><i class=\"fa fa-pencil-alt\"></i> Lengkapi Data</span>" +
-                                "</button>";
+                                "</a>";
                         } else {
                             buttonAksi = "<button id=\"btn_daftar_pasient_" + row.uid + "\" class=\"btn btn-sm btn-info btnDaftarPasien\" data-toggle=\"tooltip\" title=\"Tambah ke Antrian\">" +
                                 "<span><i class=\"fa fa-user-plus\"></i>Tambah</span>" +

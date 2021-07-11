@@ -123,7 +123,7 @@
 				}
 			});
 
-			if(requiredItem.length == 0) {
+			if(requiredItem.length === 0) {
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Pasien",

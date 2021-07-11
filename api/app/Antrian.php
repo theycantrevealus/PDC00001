@@ -1901,8 +1901,8 @@ class Antrian extends Utility
 
         $term = new Terminologi(self::$pdo);
         $expect_data = array(
-            'no_rm', 'nik', 'tanggal_lahir', 'nama', 'panggilan', 'tanggal_lahir', 'tempat_lahir', 'jenkel', 'agama', 'warganegara', 'pendidikan',
-            'nama_ibu', 'alamat', 'no_telp', 'kode_pos'
+            'no_rm', 'nik', 'tanggal_lahir', 'nama', 'id_panggilan', 'tanggal_lahir', 'tempat_lahir', 'id_jenkel', 'agama', 'warganegara', 'pendidikan',
+            'nama_ibu', 'alamat', 'no_telp'
         );
         if (isset($parameter['cari']) && !empty($parameter['cari'])) {
             $paramData = array(
@@ -1930,6 +1930,12 @@ class Antrian extends Utility
                     'jenkel AS id_jenkel',
                     'panggilan AS id_panggilan',
                     'warganegara',
+                    'tempat_lahir',
+                    'agama',
+                    'pendidikan',
+                    'nama_ibu',
+                    'alamat',
+                    'no_telp',
                     'no_passport',
                     'driving_license'
                 ))
@@ -1948,6 +1954,12 @@ class Antrian extends Utility
                     'jenkel AS id_jenkel',
                     'panggilan AS id_panggilan',
                     'warganegara',
+                    'tempat_lahir',
+                    'agama',
+                    'pendidikan',
+                    'nama_ibu',
+                    'alamat',
+                    'no_telp',
                     'no_passport',
                     'driving_license'
                 ))

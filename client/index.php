@@ -17,6 +17,7 @@
 	var __HOSTAPI__ = <?php echo json_encode(__HOSTAPI__); ?>;
 	var __PAGES__ = <?php echo json_encode(__PAGES__); ?>;
 	var __HOST__ = <?php echo json_encode(__HOST__); ?>;
+    var __WNI__ = <?php echo json_encode(__WNI__); ?>;
 
 	var __ME__ = <?php echo json_encode($_SESSION['uid']); ?>;
 	var __PROFILE_PIC__ = <?php echo json_encode($_SESSION['profile_pic']); ?>;
@@ -24,6 +25,7 @@
 	var __MY_PRIVILEGES__ = <?php echo json_encode($_SESSION['jabatan']); ?>;
 	var __UNIT__ = <?php echo json_encode($_SESSION['unit']); ?>;
     var __UNIT_MULTI__ = <?php echo json_encode($_SESSION['unit_multi']); ?>;
+
     if(__UNIT__ === null) {
         if(__UNIT_MULTI__ !== null) {
             __UNIT__ = __UNIT_MULTI__[0]['response_data'][0];
