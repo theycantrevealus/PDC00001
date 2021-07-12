@@ -1164,9 +1164,9 @@
                 {
                     "data" : "autonum", render: function(data, type, row, meta) {
                         if(!row.lengkap) {
-                            buttonAksi = "<a href=\"" + __HOSTNAME__ + "/pasien/edit/" + row.uid + "?antrian=true\" id=\"btn_lengkapi_pasien_" + row.uid + "\" class=\"btn btn-sm btn-warning btnLengkapiPasien\" data-toggle=\"tooltip\" title=\"Lengkapi Data Pasien\">" +
+                            buttonAksi = "<button id=\"btn_lengkapi_pasien_" + row.uid + "\" class=\"btn btn-sm btn-warning btnLengkapiPasien\" data-toggle=\"tooltip\" title=\"Lengkapi Data Pasien\">" +
                                 "<span><i class=\"fa fa-pencil-alt\"></i> Lengkapi Data</span>" +
-                                "</a>";
+                                "</button>";
                         } else {
                             buttonAksi = "<button id=\"btn_daftar_pasient_" + row.uid + "\" class=\"btn btn-sm btn-info btnDaftarPasien\" data-toggle=\"tooltip\" title=\"Tambah ke Antrian\">" +
                                 "<span><i class=\"fa fa-user-plus\"></i>Tambah</span>" +
@@ -1278,7 +1278,13 @@
 		});*/
 
 		$("body").on("click", ".btnLengkapiPasien", function () {
-		    //
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+
+            localStorage.setItem("currentPasien", uid);
+            localStorage.setItem("currentAntrianType", "DEFAULT");
+            localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
+            location.href = __HOSTNAME__ + "/pasien/edit/" + row.uid + "?antrian=true"
         });
 
 		$("#btnTambahPasien").click(function(){
