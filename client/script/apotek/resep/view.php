@@ -68,26 +68,30 @@
                 $("#txt_keterangan_resep").html(data.keterangan);
                 $("#txt_keterangan_resep_racikan").html(data.keterangan_racikan);
 
-                var icd_kerja = data.asesmen.icd_kerja;
-                if(icd_kerja !== undefined && icd_kerja !== null) {
-                    for(var icdA in icd_kerja) {
-                        if(icd_kerja[icdA] !== undefined && icd_kerja[icdA] !== null) {
-                            $("#icd_utama").append("<li>" +
-                                "<b><span class=\"text-info\">" + icd_kerja[icdA].kode + "</span> - " + icd_kerja[icdA].nama + "</b>" +
-                                "</li>");
+                if(data.asesmen.icd_kerja !== undefined && data.asesmen.icd_kerja !== null) {
+                    var icd_kerja = data.asesmen.icd_kerja;
+                    if(icd_kerja !== undefined && icd_kerja !== null) {
+                        for(var icdA in icd_kerja) {
+                            if(icd_kerja[icdA] !== undefined && icd_kerja[icdA] !== null) {
+                                $("#icd_utama").append("<li>" +
+                                    "<b><span class=\"text-info\">" + icd_kerja[icdA].kode + "</span> - " + icd_kerja[icdA].nama + "</b>" +
+                                    "</li>");
+                            }
                         }
                     }
                 }
 
 
 
-                var icd_banding = data.asesmen.icd_banding;
-                if(icd_banding !== undefined && icd_banding !== null) {
-                    for(var icdB in icd_banding) {
-                        if(icd_banding[icdB] !== undefined && icd_banding[icdB] !== null) {
-                            $("#icd_banding").append("<li>" +
-                                "<b><span class=\"text-info\">" + icd_kerja[icdB].kode + "</span> - " + icd_kerja[icdB].nama + "</b>" +
-                                "</li>");
+                if(data.asesmen.icd_banding !== undefined && data.asesmen.icd_banding !== null) {
+                    var icd_banding = data.asesmen.icd_banding;
+                    if(icd_banding !== undefined && icd_banding !== null) {
+                        for(var icdB in icd_banding) {
+                            if(icd_banding[icdB] !== undefined && icd_banding[icdB] !== null) {
+                                $("#icd_banding").append("<li>" +
+                                    "<b><span class=\"text-info\">" + icd_kerja[icdB].kode + "</span> - " + icd_kerja[icdB].nama + "</b>" +
+                                    "</li>");
+                            }
                         }
                     }
                 }
