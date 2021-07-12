@@ -89,7 +89,7 @@
                         for(var icdB in icd_banding) {
                             if(icd_banding[icdB] !== undefined && icd_banding[icdB] !== null) {
                                 $("#icd_banding").append("<li>" +
-                                    "<b><span class=\"text-info\">" + icd_kerja[icdB].kode + "</span> - " + icd_kerja[icdB].nama + "</b>" +
+                                    "<b><span class=\"text-info\">" + icd_banding[icdB].kode + "</span> - " + icd_banding[icdB].nama + "</b>" +
                                     "</li>");
                             }
                         }
