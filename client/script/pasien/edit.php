@@ -6,8 +6,7 @@
         var status_antrian = '<?= $_GET['antrian']; ?>';
 
         var currentAntrianID = localStorage.getItem("currentAntrianID");
-        alert(currentAntrianID);
-
+        
 		var allData = {};
 
 		loadTermSelectBox('panggilan', 3);

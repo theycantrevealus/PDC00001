@@ -1284,7 +1284,7 @@
             localStorage.setItem("currentPasien", uid);
             localStorage.setItem("currentAntrianType", "DEFAULT");
             localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
-            location.href = __HOSTNAME__ + "/pasien/edit/" + row.uid + "?antrian=true"
+            location.href = __HOSTNAME__ + "/pasien/edit/" + uid + "?antrian=true"
         });
 
 		$("#btnTambahPasien").click(function(){
