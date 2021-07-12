@@ -27,15 +27,18 @@
 
 		$("#list-tindakan-radiologi tbody tr td").on("click", ".linkTindakan", function(e) {
 
+
 			let id_tindakan = $(this).parent().parent().attr("id").split("_");
 			tindakanID = id_tindakan[id_tindakan.length - 1];
 
 
             if(forSave["tindakan_" + tindakanID] === undefined) {
-                forSave["tindakan_" + tindakanID] = {
+                /*forSave["tindakan_" + tindakanID] = {
                     keterangan: "",
                     kesimpulan: ""
-                };
+                };*/
+            } else {
+                console.log(forSave);
             }
 
             if(selectedState != tindakanID) {
@@ -66,6 +69,9 @@
 			.then( editor => {
 				editorKeteranganPeriksa = editor;
 				window.editor = editor;
+                /*editor.model.document.on( 'change:data', ( evt, data ) => {
+                    forSave["tindakan_" + selectedState].keterangan = editorKeteranganPeriksa.getData();
+                });*/
 
                 editor.editing.view.document.on( 'keydown', ( evt, data ) => {
                     forSave["tindakan_" + selectedState].keterangan = editorKeteranganPeriksa.getData();
@@ -74,6 +80,8 @@
 			.catch( err => {
 				//console.error( err.stack );
 			});
+
+
 
 
 		ClassicEditor
@@ -88,6 +96,10 @@
                 editor.editing.view.document.on( 'keydown', ( evt, data ) => {
                     forSave["tindakan_" + selectedState].kesimpulan = editorKesimpulanPeriksa.getData();
                 });
+
+                /*editor.model.document.on( 'change:data', ( evt, data ) => {
+                    forSave["tindakan_" + selectedState].kesimpulan = editorKesimpulanPeriksa.getData();
+                });*/
 			} )
 			.catch( err => {
 				//console.error( err.stack );
