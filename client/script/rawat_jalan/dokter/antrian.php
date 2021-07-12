@@ -3509,7 +3509,7 @@
                                 var listData = data[a].data;
                                 for(var b in listData) {
                                     var currentData = listData[b].data[0];
-                                    if(currentData.uid !== UID) {
+                                    //if(currentData.uid !== UID) {
                                         console.log(currentData);
                                         $.ajax({
                                             url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
@@ -3519,11 +3519,14 @@
                                             },
                                             type:"POST",
                                             data: {
+                                                currentData: UID,
                                                 __HOST__: __HOST__,
+                                                __ME__: __ME__,
                                                 group_tanggal_name: a,
                                                 waktu_masuk: listData[b].parsed,
                                                 waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),
                                                 departemen: currentData.departemen.nama,
+                                                dokter_uid: currentData.dokter.uid,
                                                 dokter: currentData.dokter.nama,
                                                 dokter_pic: __HOST__ + currentData.dokter.profile_pic,
                                                 icd10_kerja: currentData.asesmen.icd10_kerja,
@@ -3538,6 +3541,7 @@
                                                 resep: currentData.asesmen.resep,
                                                 racikan: currentData.asesmen.racikan,
                                                 laboratorium: currentData.asesmen.laboratorium,
+                                                radiologi: currentData.asesmen.radiologi
                                             },
                                             success:function(responseSingle) {
                                                 $("#group_cppt_" + a).append(responseSingle);
@@ -3546,7 +3550,7 @@
                                                 console.log(responseSingleError);
                                             }
                                         });
-                                    }
+                                    //}
                                 }
                             },
                             error: function(responseGrouperError) {

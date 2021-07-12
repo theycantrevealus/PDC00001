@@ -70,8 +70,8 @@ class CPPT extends Utility {
             'waktu_masuk'
         ))
             ->where(array(
-                'antrian.waktu_keluar' => 'IS NOT NULL',
-                'AND',
+                /*'antrian.waktu_keluar' => 'IS NOT NULL',
+                'AND',*/
                 'antrian.deleted_at' => 'IS NULL',
                 'AND',
                 'antrian.pasien' => '= ?',
@@ -403,6 +403,57 @@ class CPPT extends Utility {
 
 
                 //Radiologi
+                $RadiologiItem = self::$query->select('rad_order', array(
+                    'uid',
+                    'no_order',
+                    'dokter_radio',
+                    'petugas'
+                ))
+                    ->where(array(
+                        'rad_order.asesmen' => '= ?',
+                        'AND',
+                        'rad_order.status' => '= ?',
+                        'AND',
+                        'rad_order.deleted_at' => 'IS NULL'
+                    ), array(
+                        $Asesmen['response_data'][0]['uid'],
+                        'D'
+                    ))
+                    ->execute();
+                foreach ($RadiologiItem['response_data'] as $RadKey => $RadValue) {
+                    $RadDetail = self::$query->select('rad_order_detail', array(
+                        'tindakan', 'keterangan', 'kesimpulan', 'verifikator'
+                    ))
+                        ->where(array(
+                            'rad_order_detail.radiologi_order' => '= ?',
+                            'AND',
+                            'rad_order_detail.deleted_at' => 'IS NULL'
+                        ), array(
+                            $RadValue['uid']
+                        ))
+                        ->execute();
+                    foreach ($RadDetail['response_data'] as $RadDetKey => $RadDetValue) {
+                        $RadDetail['response_data'][$RadDetKey]['tindakan'] = $Tindakan->get_tindakan_info($RadDetValue['tindakan'])['response_data'][0];
+                    }
+                    $RadiologiItem['response_data'][$RadKey]['detail'] = $RadDetail['response_data'];
+
+                    $RadDoc = self::$query->select('rad_order_document', array(
+                        'lampiran'
+                    ))
+                        ->where(array(
+                            'rad_order_document.radiologi_order' => '= ?',
+                            'AND',
+                            'rad_order_document.deleted_at' => 'IS NULL'
+                        ), array(
+                            $RadValue['uid']
+                        ))
+                        ->execute();
+                    $RadiologiItem['response_data'][$RadKey]['dokumen'] = $RadDoc['response_data'];
+                }
+
+                $Asesmen['response_data'][0]['radiologi'] = $RadiologiItem['response_data'];
+
+
 
                 $Antrian['response_data'][$key]['asesmen'] = $Asesmen['response_data'][0];
 

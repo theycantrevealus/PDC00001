@@ -3,9 +3,9 @@
         <div class="text-dark-gray"><?php echo $_POST['waktu_masuk']; ?></div>
     </div>
     <div class="col-sm">
-        <div class="card m-0">
-            <div class="card-header card-header-large bg-white d-flex align-items-center">
-                <h4 class="card-header__title flex m-0"><?php echo $_POST['departemen']; ?></h4>
+        <div class="card m-0" style="margin-bottom: 20px !important; <?php echo ($_POST['__ME__'] === $_POST['dokter_uid']) ? 'background: #F1FFD7; box-shadow: 0 10px 25px 0 rgb(241 255 215 / 7%), 0 5px 15px 0 rgb(0 0 0 / 7%);' : ''; ?>">
+            <div class="card-header card-header-large d-flex align-items-center" style="<?php echo ($_POST['__ME__'] === $_POST['dokter_uid']) ? 'background: #F7FFE9' : ''; ?>">
+                <h4 class="card-header__title flex m-0"><?php echo $_POST['departemen']; ?> <?php echo ($_POST['__ME__'] === $_POST['dokter_uid']) ? '<span class=\'text-success\'><i class=\'material-icons text-success icon-20pt ml-2\'>verified_user</i> Asesmen Saya</span>' : ''; ?></h4>
                 <div>
                     <span class="badge badge-info badge-custom-caption">
                         <h6 style="color: #fff !important;">UMUM</h6>
@@ -513,7 +513,95 @@
                                 </div>
                             </div>
                             <div class="tab-pane show fade" id="radiologi_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
-
+                                <div class="col-lg">
+                                    <div class="z-0">
+                                        <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                                            <li class="nav-item">
+                                                <a href="#hasil_rad_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" data-toggle="tab" role="tab" class="nav-link active" aria-controls="activity_all" aria-selected="false">
+                                                    <span class="nav-link__count">01</span>
+                                                    Hasil
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#dokumen_rad_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+                                                    <span class="nav-link__count">02</span>
+                                                    Dokumen
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <div class="card">
+                                            <div class="card-body tab-content">
+                                                <div class="tab-pane show fade active" id="hasil_rad_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
+                                                    <?php
+                                                    foreach ($_POST['radiologi'] as $RadKey => $RadValue) {
+                                                        ?>
+                                                        <div class="card">
+                                                            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                                                <h4 class="card-header__title flex m-0">
+                                                                    <i class="fa fa-hashtag"></i> <?php echo $RadValue['no_order']; ?>
+                                                                </h4>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <?php
+                                                                foreach ($RadValue['detail'] as $RadDKey => $RadDValue) {
+                                                                    ?>
+                                                                    <div class="col-auto d-flex align-items-center">
+                                                                        <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;<?php echo $RadDValue['tindakan']['nama']; ?></h5>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-lg-6">
+                                                                            <strong>Keterangan:</strong>
+                                                                            <br />
+                                                                            <?php echo $RadDValue['keterangan']; ?>
+                                                                        </div>
+                                                                        <div class="col-lg-6">
+                                                                            <strong>Kesimpulan:</strong>
+                                                                            <br />
+                                                                            <?php echo $RadDValue['kesimpulan']; ?>
+                                                                        </div>
+                                                                    </div>
+                                                                    <hr /><br /><br /><br />
+                                                                    <?php
+                                                                }
+                                                                ?>
+                                                            </div>
+                                                        </div>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                </div>
+                                                <div class="tab-pane show fade" id="dokumen_rad_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
+                                                    <table class="table table-bordered largeDataType">
+                                                        <thead class="thead-dark">
+                                                        <tr>
+                                                            <th class="wrap_content">No</th>
+                                                            <th>Dokumen</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php
+                                                        $autoRadDoc = 1;
+                                                        foreach ($_POST['radiologi'] as $RadKey => $RadValue) {
+                                                            foreach ($RadValue['dokumen'] as $RadDocKey => $RadDocValue) {
+                                                                ?>
+                                                                <tr>
+                                                                    <td><?php echo $autoRadDoc; ?></td>
+                                                                    <td>
+                                                                        <a class="lampiran_view_trigger" href="#" target="<?php echo $_POST['__HOST__'] . '/document/radiologi/' . $RadValue['uid'] . '/' . $RadDocValue['lampiran']; ?>">#Lampiran <?php echo $autoRadDoc; ?> [<?php echo $RadDocValue['lampiran']; ?>]</a>
+                                                                    </td>
+                                                                </tr>
+                                                                <?php
+                                                                $autoRadDoc++;
+                                                            }
+                                                        }
+                                                        ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <hr />
