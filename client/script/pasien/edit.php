@@ -113,6 +113,7 @@
                     success: function(response) {
                         if (status_antrian === "true"){
                             localStorage.setItem("currentPasien", uid_pasien);
+                            localStorage.setItem("currentAntrianType", "DEFAULT");
                             location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + uid_pasien;
                         } else {
                             location.href = __HOSTNAME__ + '/pasien';
