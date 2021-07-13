@@ -131,6 +131,8 @@
         //var pasien_penjamin, pasien_penjamin_uid;
         var pasien_uid, pasien_nama, pasien_kontak, pasien_alamat, pasien_usia, pasien_rm, pasien_jenkel, pasien_tanggal_lahir, pasien_penjamin, pasien_penjamin_uid, pasien_tempat_lahir;
         var UID = __PAGES__[3];
+        var pages_split = __PAGES__;
+
         var kunjungan = {};
         $("#info-pasien-perawat").remove();
         $.ajax({
@@ -143,7 +145,6 @@
             success:function(response) {
                 antrianData = response.response_package.response_data[0];
 
-                console.log(antrianData);
                 if(antrianData.waktu_keluar !== null) {
                     /*$("#btnSelesai").remove();
                     allowEdit = false;*/
@@ -193,7 +194,7 @@
 
                 /*========================= CPPT ==========================*/
 
-                $("#cppt_pagination").pagination({
+                /*$("#cppt_pagination").pagination({
                     dataSource: __HOSTAPI__ + "/CPPT/semua/" + __PAGES__[3] + "/" + pasien_uid,
                     locator: 'response_package.response_data',
                     totalNumberLocator: function(response) {
@@ -219,7 +220,7 @@
 
                         $("#cppt_loader").html(dataHtml);
                     }
-                });
+                });*/
 
                 $(".nama_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
                 $(".jk_pasien").html(pasien_jenkel);
@@ -234,6 +235,7 @@
                     },
                     type:"GET",
                     success:function(response) {
+                        console.log(response.response_package.response_data[0]);
                         if(
                             response.response_package.response_data[0].status_asesmen !== null &&
                             response.response_package.response_data[0].status_asesmen !== undefined
@@ -3056,7 +3058,7 @@
                                     }
                                 });
                             } else {
-                                console.log(response);
+                                //
                             }
                         },
                         error: function(response) {
@@ -3077,7 +3079,7 @@
 
         function simpanAsesmen(
             antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi,
-            editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorKeteranganResep, editorKeteranganResepRacikan,
+            editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorAlergiObat, editorKeteranganResep, editorKeteranganResepRacikan,
             metaSwitchEdit,
             charge_invoice = "N"
         ) {
@@ -3270,7 +3272,8 @@
                     resep: resep,
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
-                    racikan: racikan
+                    racikan: racikan,
+                    editorAlergiObat: editorAlergiObat
                 };
             } else if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
                 var simetris = $("input[name=\"simetris\"]:checked").val();
@@ -3330,6 +3333,7 @@
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan,
+                    editorAlergiObat: editorAlergiObat,
 
                     simetris: simetris,
                     sendi: sendi,
@@ -3449,6 +3453,7 @@
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan,
+                    editorAlergiObat: editorAlergiObat,
 
                     gcs_e: gcs_e,
                     gcs_v: gcs_v,
@@ -3525,6 +3530,7 @@
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan,
+                    editorAlergiObat: editorAlergiObat,
 
                     mata_data: JSON.stringify(mataDataList),
                     tujuan_resep: tujuan_resep.join(",")
@@ -3571,6 +3577,7 @@
                     resep: resep,
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
+                    editorAlergiObat: editorAlergiObat,
                     racikan: racikan
                 };
             }
@@ -3578,7 +3585,7 @@
 
 
             //console.clear();
-            console.log(formData);
+            //console.log(formData);
 
             $.ajax({
                 async: false,
@@ -3590,7 +3597,6 @@
                 type: "POST",
                 success: function(response) {
                     savingResult = response;
-                    console.log(savingResult);
                 },
                 error: function(response) {
                     console.clear();
@@ -3605,8 +3611,8 @@
 
 
         $("#tab-asesmen-dokter .nav-link").click(function() {
+            var alergiObat = $("#alergi_obat").val();
             const simpanDataProcess = new Promise(function(resolve, reject) {
-                console.log(metaSwitchEdit.txt_keluhan_utama.editor);
                 resolve(simpanAsesmen(
                     antrianData,
                     UID,
@@ -3622,6 +3628,7 @@
                     metaSwitchEdit.txt_diagnosa_kerja.editor,
                     metaSwitchEdit.txt_diagnosa_banding.editor,
                     metaSwitchEdit.txt_planning.editor,
+                    alergiObat,
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     metaSwitchEdit));
@@ -3637,11 +3644,32 @@
 
 
         $("body").on("click", "#btnSimpan", function() {
+            var alergiObat = $("#alergi_obat").val();
             const simpanDataProcess = new Promise(function(resolve, reject) {
-                resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+                resolve(simpanAsesmen(
+                    antrianData,
+                    UID,
+                    metaSwitchEdit.txt_keluhan_utama.editor,
+                    metaSwitchEdit.txt_keluhan_tambahan.editor,
+                    metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                    editorTerapisAnamnesa,
+                    editorTerapisTataLaksana,
+                    editorTerapisEvaluasi,
+                    editorTerapisHasil,
+                    editorTerapisKesimpulan,
+                    editorTerapisRekomendasi,
+                    metaSwitchEdit.txt_diagnosa_kerja.editor,
+                    metaSwitchEdit.txt_diagnosa_banding.editor,
+                    metaSwitchEdit.txt_planning.editor,
+                    alergiObat,
+                    metaSwitchEdit.txt_keterangan_resep.editor,
+                    metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                    metaSwitchEdit
+                ));
             }).then(function(result) {
                 if(result.response_package.response_result > 0) {
                     notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
+                    location.href = __HOSTNAME__ + "/igd/dokter/index/" + pages_split[4] + "/" + pages_split[5];
                     /*if(result.response_package.resep_response !== undefined && result.response_package.resep_response !== null) {
                         if(result.response_package.resep_response.resep.length > 0 || result.response_package.resep_response.racikan.length) {
                             push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
@@ -3668,7 +3696,26 @@
 
 
         $("body").on("click", "#btnSelesai", function() {
-            simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit);
+            var alergiObat = $("#alergi_obat").val();
+            simpanAsesmen(
+                antrianData,
+                UID,
+                metaSwitchEdit.txt_keluhan_utama.editor,
+                metaSwitchEdit.txt_keluhan_tambahan.editor,
+                metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                editorTerapisAnamnesa, editorTerapisTataLaksana,
+                editorTerapisEvaluasi,
+                editorTerapisHasil,
+                editorTerapisKesimpulan,
+                editorTerapisRekomendasi,
+                metaSwitchEdit.txt_diagnosa_kerja.editor,
+                metaSwitchEdit.txt_diagnosa_banding.editor,
+                metaSwitchEdit.txt_planning.editor,
+                alergiObat,
+                metaSwitchEdit.txt_keterangan_resep.editor,
+                metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                metaSwitchEdit
+            );
             Swal.fire({
                 title: 'Selesai isi asesmen rawat?',
                 text: 'Jika sudah selesai maka asesmen akan hilang dari antrian dan biaya tindakan serta obat akan langsung ditagihkan pada pasien.',
@@ -3680,7 +3727,26 @@
                 if (result.isConfirmed) {
 
                     const simpanDataProcess = new Promise(function(resolve, reject) {
-                        resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit, "Y"));
+                        resolve(simpanAsesmen(
+                            antrianData,
+                            UID,
+                            metaSwitchEdit.txt_keluhan_utama.editor,
+                            metaSwitchEdit.txt_keluhan_tambahan.editor,
+                            metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                            editorTerapisAnamnesa,
+                            editorTerapisTataLaksana,
+                            editorTerapisEvaluasi,
+                            editorTerapisHasil,
+                            editorTerapisKesimpulan,
+                            editorTerapisRekomendasi,
+                            metaSwitchEdit.txt_diagnosa_kerja.editor,
+                            metaSwitchEdit.txt_diagnosa_banding.editor,
+                            metaSwitchEdit.txt_planning.editor,
+                            alergiObat,
+                            metaSwitchEdit.txt_keterangan_resep.editor,
+                            metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                            metaSwitchEdit,
+                            "Y"));
                     }).then(function(result) {
                         if(result.response_package.response_result > 0) {
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
@@ -3704,6 +3770,8 @@
 
                             if(antrianData.poli_info.uid !== __POLI_IGD__) {
                                 location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                            } else {
+                                location.href = __HOSTNAME__ + "/igd/dokter/index/" + pages_split[4] + "/" + pages_split[5];
                             }
                         } else {
                             notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
@@ -4850,7 +4918,7 @@
                 $("#check_all_lab").prop("checked", false);
             }
             else {
-                console.log(listTindakanLabTerpilih[uidTindakanLab]);
+                //
             }
         });
 
@@ -4890,8 +4958,6 @@
                 },
                 type: "POST",
                 success: function(response) {
-                    console.clear();
-                    console.log(response);
                     if(response.response_package.response_result > 0) {
                         notification ("success", "Laboratorium Berhasil Diorder", 3000, "hasil_tambah_dev");
                     } else {
@@ -4923,8 +4989,6 @@
             for(var lok in listTindakanLabTerpilih) {
                 listTindakanLabTerpilih[lok].tgl_sample = $("#tanggal_sample_" + lok).val()
             }
-
-            //console.log(listTindakanLabTerpilih);
 
             orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, "", uid_lab_order, dataTableLabOrder, __HOSTAPI__);
 
@@ -5133,7 +5197,7 @@
                                     $("#form-rujuk").modal("hide");
                                 });
                             } else {
-                                console.log(response);
+                                //
                             }
                         },
                         error: function(response) {
@@ -5255,6 +5319,7 @@
         }
 
         $("#btnProsesKonsul").click(function() {
+            var alergiObat = $("#alergi_obat").val();
             const proses_konsul = new Promise(function(proceed, reject) {
                 var dataObj = {};
                 $('.inputan_konsul').each(function() {
@@ -5282,7 +5347,26 @@
                     if (result.isConfirmed) {
 
                         const simpanDataProcess = new Promise(function(resolve, reject) {
-                            resolve(simpanAsesmen(antrianData, UID, metaSwitchEdit.txt_keluhan_utama.editor, metaSwitchEdit.txt_keluhan_tambahan.editor, metaSwitchEdit.txt_pemeriksaan_fisik.editor, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi, editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, metaSwitchEdit.txt_diagnosa_kerja.editor, metaSwitchEdit.txt_diagnosa_banding.editor, metaSwitchEdit.txt_planning.editor, metaSwitchEdit.txt_keterangan_resep.editor, metaSwitchEdit.txt_keterangan_resep_racikan.editor, metaSwitchEdit));
+                            resolve(simpanAsesmen(
+                                antrianData,
+                                UID,
+                                metaSwitchEdit.txt_keluhan_utama.editor,
+                                metaSwitchEdit.txt_keluhan_tambahan.editor,
+                                metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                                editorTerapisAnamnesa,
+                                editorTerapisTataLaksana,
+                                editorTerapisEvaluasi,
+                                editorTerapisHasil,
+                                editorTerapisKesimpulan,
+                                editorTerapisRekomendasi,
+                                metaSwitchEdit.txt_diagnosa_kerja.editor,
+                                metaSwitchEdit.txt_diagnosa_banding.editor,
+                                metaSwitchEdit.txt_planning.editor,
+                                alergiObat,
+                                metaSwitchEdit.txt_keterangan_resep.editor,
+                                metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                                metaSwitchEdit
+                            ));
                         }).then(function(result) {
                             if(result.response_package.response_result > 0) {
                                 $.ajax({
@@ -5416,8 +5500,7 @@
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                success: function(response){
-                    console.log(response);
+                success: function(response) {
                     var MetaData = dataPoli = response.response_package.response_data;
 
                     if (MetaData !== undefined){
@@ -5578,7 +5661,6 @@
                     if(metaSelOrdo[dbT].hilang) {
                         setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-times text-danger\"></i>");
                         tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " mis");
-                        console.log(dbT + " mis | " + targetClassGroup);
                     } else if(metaSelOrdo[dbT].fracture) {
                         setMord("#gigi_" + dbT + " .single_gigi_small .global_assigner_small", "<i class=\"fa fa-hashtag text-info\"></i>");
                         tableGigiMetaData["parse_" + targetClassGroup].push(dbT + " cfr");

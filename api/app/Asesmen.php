@@ -924,6 +924,7 @@ class Asesmen extends Utility {
                 if($antrian['response_data'][0]['departemen'] === __POLI_INAP__) {
                     $resep = self::$query->select('resep', array(
                         'uid',
+                        'alergi_obat',
                         'keterangan',
                         'keterangan_racikan'
                     ))
@@ -950,6 +951,7 @@ class Asesmen extends Utility {
                 } else {
                     $resep = self::$query->select('resep', array(
                         'uid',
+                        'alergi_obat',
                         'keterangan',
                         'keterangan_racikan'
                     ))
@@ -1003,8 +1005,6 @@ class Asesmen extends Utility {
 						'updated_at'
 					))
 					->where(array(
-						'resep_detail.deleted_at' => 'IS NULL',
-						'AND',
 						'resep_detail.resep' => '= ?'
 					), array(
 						$value['uid']
@@ -1060,10 +1060,6 @@ class Asesmen extends Utility {
 							'penjamin'
 						))
 						->where(array(
-							'racikan_detail.deleted_at' => 'IS NULL',
-							/*'AND',
-							'racikan_detail.resep' => '= ?',*/
-							'AND',
 							'racikan_detail.racikan' => '= ?'
 						), array(
 							//$value['uid'],

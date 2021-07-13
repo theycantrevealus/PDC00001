@@ -744,8 +744,6 @@ class Apotek extends Utility
                 'updated_at'
             ))
                 ->where(array(
-                    'resep_detail.deleted_at' => 'IS NULL',
-                    'AND',
                     'resep_detail.resep' => '= ?'
                 ), array(
                     $value['uid']
@@ -754,6 +752,59 @@ class Apotek extends Utility
             foreach ($resepDetail['response_data'] as $RDKey => $RDValue) {
                 $Inventori = new Inventori(self::$pdo);
                 $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori->get_item_detail($RDValue['obat'])['response_data'][0];
+            }
+
+            $dataResponse['resep'] = $resepDetail['response_data'];
+            $dataResponse['keterangan'] = $value['keterangan'];
+            $dataResponse['keterangan_racikan'] = $value['keterangan_racikan'];
+            //Racikan Detail
+            $racikan = self::$query->select('racikan', array(
+                'uid',
+                'asesmen',
+                'kode',
+                'keterangan',
+                'aturan_pakai',
+                'signa_qty',
+                'signa_pakai',
+                'qty',
+                'total'
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?'
+                ), array(
+                    $value['asesmen']
+                ))
+                ->execute();
+
+            foreach ($racikan['response_data'] as $RacikanKey => $RacikanValue) {
+                $RacikanDetailData = self::$query->select('racikan_detail', array(
+                    'asesmen',
+                    //'resep',
+                    'obat',
+                    'ratio',
+                    'pembulatan',
+                    'kekuatan',
+                    'takar_bulat',
+                    'takar_decimal',
+                    'harga',
+                    'racikan',
+                    'penjamin'
+                ))
+                    ->where(array(
+                        'racikan_detail.racikan' => '= ?'
+                    ), array(
+                        //$value['uid'],
+                        $RacikanValue['uid']
+                    ))
+                    ->execute();
+
+                foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
+                    $InventoriObat = new Inventori(self::$pdo);
+                    $RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat->get_item_detail($RVIValue['obat'])['response_data'][0];
+                }
+
+                $RacikanValue['item'] = $RacikanDetailData['response_data'];
+                array_push($dataResponse['racikan'], $RacikanValue);
             }
 
             //Asesmen Detail
@@ -787,64 +838,6 @@ class Apotek extends Utility
             }
 
             $dataResponse['asesmen'] = $Asesmen['response_data'][0];
-            $dataResponse['resep'] = $resepDetail['response_data'];
-            $dataResponse['keterangan'] = $value['keterangan'];
-            $dataResponse['keterangan_racikan'] = $value['keterangan_racikan'];
-            //Racikan Detail
-            $racikan = self::$query->select('racikan', array(
-                'uid',
-                'asesmen',
-                'kode',
-                'keterangan',
-                'aturan_pakai',
-                'signa_qty',
-                'signa_pakai',
-                'qty',
-                'total'
-            ))
-                ->where(array(
-                    'racikan.asesmen' => '= ?',
-                    'AND',
-                    'racikan.deleted_at' => 'IS NULL'
-                ), array(
-                    $value['asesmen']
-                ))
-                ->execute();
-
-            foreach ($racikan['response_data'] as $RacikanKey => $RacikanValue) {
-                $RacikanDetailData = self::$query->select('racikan_detail', array(
-                    'asesmen',
-                    //'resep',
-                    'obat',
-                    'ratio',
-                    'pembulatan',
-                    'kekuatan',
-                    'takar_bulat',
-                    'takar_decimal',
-                    'harga',
-                    'racikan',
-                    'penjamin'
-                ))
-                    ->where(array(
-                        'racikan_detail.deleted_at' => 'IS NULL',
-                        /*'AND',
-                        'racikan_detail.resep' => '= ?',*/
-                        'AND',
-                        'racikan_detail.racikan' => '= ?'
-                    ), array(
-                        //$value['uid'],
-                        $RacikanValue['uid']
-                    ))
-                    ->execute();
-
-                foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
-                    $InventoriObat = new Inventori(self::$pdo);
-                    $RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat::get_item_detail($RVIValue['obat'])['response_data'][0];
-                }
-
-                $RacikanValue['item'] = $RacikanDetailData['response_data'];
-                array_push($dataResponse['racikan'], $RacikanValue);
-            }
         }
 
 

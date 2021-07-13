@@ -60,6 +60,7 @@
             type:"GET",
             success:function(response) {
                 var data = response.response_package[0];
+                console.log(data);
                 currentAsesmen = data.asesmen.uid;
 
 
@@ -1581,57 +1582,59 @@
                             }
                         });
 
-                        var racikanItem = [];
-                        $("#table-resep-racikan > tbody > tr").each(function() {
-                            var racikan_nama = $(this).find("td:eq(1) input").val();
-                            if(racikan_nama !== undefined && racikan_nama !== "") {
-                                var komposisi = [];
-                                $(this).find("td:eq(1) table tbody tr").each(function() {
-                                    var hargaPerObatRacikan = 0;
-                                    if($(this).find("td:eq(1) ol").length > 0) {
-                                        hargaPerObatRacikan = $(this).find("td:eq(1) ol").attr("harga");
+                        if(allowSave) {
+                            var racikanItem = [];
+                            $("#table-resep-racikan > tbody > tr").each(function() {
+                                var racikan_nama = $(this).find("td:eq(1) input").val();
+                                if(racikan_nama !== undefined && racikan_nama !== "") {
+                                    var komposisi = [];
+                                    $(this).find("td:eq(1) table tbody tr").each(function() {
+                                        var hargaPerObatRacikan = 0;
+                                        if($(this).find("td:eq(1) ol").length > 0) {
+                                            hargaPerObatRacikan = $(this).find("td:eq(1) ol").attr("harga");
 
-                                        if($(this).find("td:eq(1) ol li").length === 0) {
-                                            allowSave = false;
-                                            return false;
-                                        } else {
-                                            $(this).find("td:eq(1) ol li").each(function() {
-                                                if($(this).find("i").hasClass("text-danger")) {
-                                                    allowSave = false;
-                                                    return false;
-                                                } else {
-                                                    allowSave = true;
-                                                }
-                                            });
+                                            if($(this).find("td:eq(1) ol li").length === 0) {
+                                                allowSave = false;
+                                                return false;
+                                            } else {
+                                                $(this).find("td:eq(1) ol li").each(function() {
+                                                    if($(this).find("i").hasClass("text-danger")) {
+                                                        allowSave = false;
+                                                        return false;
+                                                    } else {
+                                                        allowSave = true;
+                                                    }
+                                                });
+                                            }
                                         }
-                                    }
 
-                                    komposisi.push({
-                                        "obat": $(this).find("td:eq(1) h6").attr("uid-obat"),
-                                        "jumlah": $(this).find("td:eq(2) input").inputmask("unmaskedvalue"),
-                                        "kekuatan": $(this).find("td:eq(3)").html(),
-                                        "harga": parseFloat(hargaPerObatRacikan)
+                                        komposisi.push({
+                                            "obat": $(this).find("td:eq(1) h6").attr("uid-obat"),
+                                            "jumlah": $(this).find("td:eq(2) input").inputmask("unmaskedvalue"),
+                                            "kekuatan": $(this).find("td:eq(3)").html(),
+                                            "harga": parseFloat(hargaPerObatRacikan)
+                                        });
+
+                                        if($(this).find("td:eq(2) input").inputmask("unmaskedvalue") < 1) {
+                                            allowSave = false;
+                                            return  false;
+                                        }
                                     });
 
-                                    if($(this).find("td:eq(2) input").inputmask("unmaskedvalue") < 1) {
-                                        allowSave = false;
-                                        return  false;
-                                    }
-                                });
-
-                                racikanItem.push({
-                                    "racikan_uid": $(this).attr("uid"),
-                                    "racikan_nama": racikan_nama,
-                                    "racikan_komposisi": komposisi,
-                                    "aturan_pakai": $(this).find("td:eq(1) select").val(),
-                                    "keterangan": $(this).find("td:eq(1) textarea").val(),
-                                    "signa_qty": parseFloat($(this).find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue")),
-                                    "signa_pakai": parseFloat($(this).find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue")),
-                                    "harga": parseFloat($(this).find("td.master-racikan-cell:eq(6) span").html().replace(/(,)/g, "")),
-                                    "jumlah": parseFloat($(this).find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"))
-                                });
-                            }
-                        });
+                                    racikanItem.push({
+                                        "racikan_uid": $(this).attr("uid"),
+                                        "racikan_nama": racikan_nama,
+                                        "racikan_komposisi": komposisi,
+                                        "aturan_pakai": $(this).find("td:eq(1) select").val(),
+                                        "keterangan": $(this).find("td:eq(1) textarea").val(),
+                                        "signa_qty": parseFloat($(this).find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue")),
+                                        "signa_pakai": parseFloat($(this).find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue")),
+                                        "harga": parseFloat($(this).find("td.master-racikan-cell:eq(6) span").html().replace(/(,)/g, "")),
+                                        "jumlah": parseFloat($(this).find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"))
+                                    });
+                                }
+                            });
+                        }
                     }
 
                     if(allowSave) {
