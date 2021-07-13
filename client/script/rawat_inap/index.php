@@ -59,7 +59,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return (row.kamar !== null) ? "<span bed=\"" + row.bed.uid + "\" kamar=\"" + row.kamar.uid + "\" id=\"kamar_" + row.uid + "\">" + row.kamar.nama + "</span><br />" + row.bed.nama  + "<br /><b class=\"text-info\">[" + row.nurse_station.kode_ns + "]</b> " +row.nurse_station.nama_ns: "";
+                        if(row.nurse_station !== undefined && row.nurse_station !== null) {
+                            return (row.kamar !== null) ? "<span bed=\"" + row.bed.uid + "\" kamar=\"" + row.kamar.uid + "\" id=\"kamar_" + row.uid + "\">" + row.kamar.nama + "</span><br />" + row.bed.nama  + "<br /><b class=\"text-info\">[" + row.nurse_station.kode_ns + "]</b> " +row.nurse_station.nama_ns: "";
+                        } else {
+                            return "";
+                        }
                     }
                 },
                 {

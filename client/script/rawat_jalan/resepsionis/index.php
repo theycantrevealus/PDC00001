@@ -1282,7 +1282,7 @@
             uid = uid[uid.length - 1];
 
             localStorage.setItem("currentPasien", uid);
-            localStorage.setItem("currentAntrianType", "DEFAULT");
+            localStorage.setItem("currentAntrianType", currentAntrianType);
             localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
             location.href = __HOSTNAME__ + "/pasien/edit/" + uid + "?antrian=true"
         });
