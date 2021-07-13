@@ -155,22 +155,22 @@
                 pasien_usia = antrianData.pasien_info.usia;
                 pasien_rm = antrianData.pasien_info.no_rm;
                 pasien_kontak = antrianData.pasien_info.no_telp;
-                pasien_jenkel = antrianData.pasien_info.jenkel_nama;
+                pasien_jenkel = antrianData.pasien_info.jenkel_detail.nama;
                 pasien_alamat = antrianData.pasien_info.alamat;
                 pasien_tanggal_lahir = antrianData.pasien_info.tanggal_lahir;
                 pasien_tempat_lahir = antrianData.pasien_info.tempat_lahir;
                 pasien_penjamin = antrianData.penjamin_data.nama;
                 pasien_penjamin_uid = antrianData.penjamin_data.uid;
+                console.log(antrianData);
 
                 $("#tombolKembaliInap").attr({
                     "href": __HOSTNAME__ + "/rawat_inap/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid + "/" + pasien_penjamin_uid
                 });
-
-                $("#target_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
-                $("#nama-departemen").html("Asesmen");
-                $("#target_pasien").parent().attr({
-                    "href": __HOSTNAME__ + "/rawat_inap/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid
+                $(".nama_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
+                $("#target_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>").parent().attr({
+                    "href": __HOSTNAME__ + "/rawat_inap/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid + "/" + pasien_penjamin_uid
                 });
+                $("#nama-departemen").html("Asesmen");
                 $(".jk_pasien").html(pasien_jenkel);
                 $(".tanggal_lahir_pasien").html(pasien_tanggal_lahir);
                 $(".penjamin_pasien").html(pasien_penjamin);
@@ -183,7 +183,6 @@
                     },
                     type:"GET",
                     success:function(response) {
-                        console.log(response);
                         if(
                             response.response_package.response_data[0].status_asesmen !== null &&
                             response.response_package.response_data[0].status_asesmen !== undefined
@@ -788,8 +787,6 @@
                     //console.error( err.stack );
                 });
             $(this).remove();
-            console.clear();
-            console.log(metaSwitchEdit);
         });
 
         $("#btn_tambah_icd10_kerja").click(function() {
@@ -2851,7 +2848,7 @@
                                     }
                                 });
                             } else {
-                                console.log(response);
+
                             }
                         },
                         error: function(response) {
@@ -3299,7 +3296,6 @@
 
 
             //console.clear();
-            console.log(formData);
 
             $.ajax({
                 async: false,
@@ -3311,7 +3307,6 @@
                 type: "POST",
                 success: function(response) {
                     savingResult = response;
-                    console.log(savingResult);
                 },
                 error: function(response) {
                     console.clear();
@@ -3328,7 +3323,6 @@
             $("#tab-asesmen-inap .nav-link").click(function() {
                 if(allowEdit) {
                     const simpanDataProcess = new Promise(function(resolve, reject) {
-                        console.log(metaSwitchEdit.txt_keluhan_utama.editor);
                         resolve(simpanAsesmen(
                             antrianData,
                             UID,
@@ -4489,7 +4483,7 @@
                 setNomorUrut('table_tindakan_lab', 'no_urut_lab');
             }
             else {
-                console.log(listTindakanLabTerpilih[uidTindakanLab]);
+
             }
         });
 
@@ -4529,8 +4523,6 @@
                 },
                 type: "POST",
                 success: function(response) {
-                    console.clear();
-                    console.log(response);
                     if(response.response_package.response_result > 0) {
                         notification ("success", "Laboratorium Berhasil Diorder", 3000, "hasil_tambah_dev");
                     } else {
@@ -4712,7 +4704,7 @@
                                     $("#form-inap").modal("hide");
                                 });
                             } else {
-                                console.log(response);
+
                             }
                         },
                         error: function(response) {
@@ -4765,7 +4757,7 @@
                                     $("#form-rujuk").modal("hide");
                                 });
                             } else {
-                                console.log(response);
+
                             }
                         },
                         error: function(response) {
@@ -5051,7 +5043,6 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    console.log(response);
                     var MetaData = dataPoli = response.response_package.response_data;
 
                     if (MetaData !== undefined){
