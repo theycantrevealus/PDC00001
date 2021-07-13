@@ -243,7 +243,8 @@
             var keteranganPerObat = document.createElement("TEXTAREA");
             $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span>").append(keteranganPerObat);
             $(keteranganPerObat).addClass("form-control").attr({
-                "placeholder": "Keterangan per Obat"
+                "placeholder": "Keterangan per Obat",
+                "disabled": "disabled"
             }).css({
                 "min-height": "200px"
             }).val(setter.keterangan);
@@ -924,7 +925,8 @@
                 $(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
             }
             $(newKeteranganRacikan).addClass("form-control").attr({
-                "placeholder": "Keterangan racikan"
+                "placeholder": "Keterangan racikan",
+                "disabled": "disabled"
             }).css({
                 "min-height": "200px"
             }).val(setter.keterangan);
