@@ -43,6 +43,8 @@
     var __UIDDOKTER__ = <?php echo json_encode(__UIDDOKTER__); ?>;
     var __UIDFISIOTERAPI__ = <?php echo json_encode(__UIDFISIOTERAPI__); ?>;
     var __UIDPETUGASLAB__ = <?php echo json_encode(__UIDPETUGASLAB__); ?>;
+    var __UIDPETUGASRAD__ = <?php echo json_encode(__UIDPETUGASRAD__); ?>;
+    var __UIDAPOTEKER__ = <?php echo json_encode(__UIDAPOTEKER__); ?>;
     var __POLI_GIGI__ = <?php echo json_encode(__POLI_GIGI__); ?>;
     var __POLI_MATA__ = <?php echo json_encode(__POLI_MATA__); ?>;
     var __POLI_INAP__ = <?php echo json_encode(__POLI_INAP__); ?>;

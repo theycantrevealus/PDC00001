@@ -953,12 +953,11 @@
 
 
         setTimeout(function() {
-
-            tableServiceLabor.ajax.reload();
-            tableAntrianLabor.ajax.reload();
-            tableHistoryLabor.ajax.reload();
+            //tableServiceLabor.ajax.reload();
+            //tableAntrianLabor.ajax.reload();
+            //tableHistoryLabor.ajax.reload();
             tableVerifikasiLabor.ajax.reload();
-            tableLab.ajax.reload();
+            //tableLab.ajax.reload();
 
         }, 5000);
 

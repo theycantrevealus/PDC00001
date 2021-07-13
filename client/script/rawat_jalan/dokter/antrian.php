@@ -3691,9 +3691,9 @@
 
 
 
-                                    /*push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
+                                    push_socket(__ME__, "permintaan_resep_baru", __UIDAPOTEKER__, "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
                                         location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
-                                    });*/
+                                    });
                                 }
                             }
 
@@ -4279,7 +4279,7 @@
                 },
                 type: "POST",
                 success: function(response) {
-                    console.log(response);
+                    push_socket(__ME__, "permintaan_radio_baru", __UIDPETUGASRAD__, "Permintaan radiologi dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
                     // if(response.response_package.response_result > 0) {
                     // 	notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                     // } else {
@@ -5008,6 +5008,7 @@
                 type: "POST",
                 success: function(response) {
                     if(response.response_package.response_result > 0) {
+                        push_socket(__ME__, "permintaan_laboratorium_baru", __UIDPETUGASLAB__, "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
                         notification ("success", "Laboratorium Berhasil Diorder", 3000, "hasil_tambah_dev");
                     } else {
                         notification ("danger", response.response_package, 3000, "hasil_tambah_dev");

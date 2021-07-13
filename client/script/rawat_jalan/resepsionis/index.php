@@ -171,7 +171,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
+						return "<span class=\"wrap_content\" id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
 					}
 				},
 				{
@@ -343,7 +343,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
+                        return "<span class=\"wrap_content\" id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
                     }
                 },
                 {
@@ -436,7 +436,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
+                        return "<span class=\"wrap_content\" id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
                     }
                 },
                 {

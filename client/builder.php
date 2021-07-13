@@ -446,6 +446,7 @@
                 var time = signalData.time;
                 var parameter = signalData.parameter;
 
+
                 if(command !== undefined && command !== null && command !== "") {
 
                     if(protocolLib[command] !== undefined) {
@@ -497,10 +498,10 @@
                                     audio.play();
                                 }
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
-                                //console.log(__MY_PRIVILEGES__);
+                                //console.log("Sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
                             } else {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
-                                //alert("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
+                                //console.log("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
                             }
                         }
                     }

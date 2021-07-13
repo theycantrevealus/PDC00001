@@ -284,14 +284,25 @@
                                 return "<span class=\"text-danger wrap_content\"><i class=\"fa fa-ban\"></i> Belum ada nilai</span>";
                             }
                         } else {
-                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
-                                "<span><i class=\"fa fa-sign-out-alt\"></i> Proses</span>" +
-                                "</a>" +
-                                "<button class=\"btn btn-info btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
-                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
-                                "</button>" +
-                                "</div>";
+                            if(row.has_nilai) {
+                                return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                    "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-warning btn-sm\">" +
+                                    "<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
+                                    "</a>" +
+                                    "<button class=\"btn btn-info btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
+                                    "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                    "</button>" +
+                                    "</div>";
+                            } else {
+                                return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                    "<a href=\"" + __HOSTNAME__ + "/laboratorium/antrian/" + row['uid'] + "\" class=\"btn btn-success btn-sm\">" +
+                                    "<span><i class=\"fa fa-sign-out-alt\"></i> Proses</span>" +
+                                    "</a>" +
+                                    "<button class=\"btn btn-info btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
+                                    "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                    "</button>" +
+                                    "</div>";
+                            }
                         }
                     }
                 }
