@@ -315,6 +315,127 @@
 
 
 
+        var tableResep3 = $("#table-resep-3").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 15, -1], [20, 15, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: function(d){
+                    d.request = "get_resep_inap";
+                    d.request_type = "inap";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    console.log(response);
+                    var forReturn = [];
+                    var forReturnSelesai = [];
+                    var dataSet = response.response_package.response_data;
+                    if(dataSet === undefined) {
+                        dataSet = [];
+                    }
+
+
+
+                    var autonum = 1;
+
+                    for(var dKey in dataSet) {
+                        if(
+                            dataSet[dKey].antrian.departemen !== undefined &&
+                            dataSet[dKey].antrian.departemen !== null
+                        ) {
+                            if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+
+                                dataSet[dKey].autonum = autonum;
+                                if(dataSet[dKey].status_resep === "D") {
+                                    forReturnSelesai.push(dataSet[dKey]);
+                                } else {
+                                    forReturn.push(dataSet[dKey]);
+                                }
+                                autonum++;
+                            }
+                        }
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsTotal;
+
+                    return forReturn.concat(forReturnSelesai);
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Kode Amprah"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.antrian.departemen.uid === __POLI_INAP__) {
+                            return row.antrian.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.antrian.ns_detail.kode_ns + "]</span>" + row.antrian.ns_detail.nama_ns;
+                        } else {
+                            return row.antrian.departemen.nama;
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(
+                            row.pasien_info.panggilan_name !== undefined &&
+                            row.pasien_info.panggilan_name !== null
+                        ) {
+                            return row.pasien_info.panggilan_name.nama + " " + row.pasien_info.nama;
+                        } else {
+                            return row.pasien_info.nama;
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.antrian.nama_penjamin;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.status_resep !== "D") {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">" +
+                                "<span><i class=\"fa fa-check\"></i>Proses</span>" +
+                                "</a>" +
+                                "</div>";
+                        } else {
+                            return "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Selesai</span>";
+                        }
+                    }
+                }
+            ]
+        });
+
+
+
+
         var targettedData = {};
 
         $("body").on("click", ".btn-verfikasi", function() {

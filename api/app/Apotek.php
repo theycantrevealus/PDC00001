@@ -127,6 +127,10 @@ class Apotek extends Utility
                     $parameter['status'] = 'L';
                     return self::get_resep_backend_v2($parameter);
                     break;
+                case 'get_resep_inap':
+                    $parameter['status'] = 'K';
+                    return self::get_resep_backend_v2($parameter);
+                    break;
                 case 'proses_resep':
                     return self::proses_resep($parameter);
                     break;
@@ -721,7 +725,16 @@ class Apotek extends Utility
         foreach ($AntrianDetail['response_data'] as $AKey => $AValue) {
             $AntrianDetail['response_data'][$AKey]['pasien'] = $Pasien->get_pasien_detail('pasien', $AValue['pasien'])['response_data'][0];
             $AntrianDetail['response_data'][$AKey]['penjamin'] = $Penjamin->get_penjamin_detail($AValue['penjamin'])['response_data'][0];
-            $AntrianDetail['response_data'][$AKey]['departemen'] = $Poli->get_poli_detail($AValue['departemen'])['response_data'][0];
+            if($AntrianDetail['response_data'][$AKey]['departemen'] === __POLI_INAP__) {
+                $AntrianDetail['response_data'][$AKey]['departemen'] = array(
+                    'uid' => __POLI_INAP__,
+                    'nama' => 'Rawat Inap',
+                    'poli_asesmen' => 'inap'
+                );
+            } else {
+                $AntrianDetail['response_data'][$AKey]['departemen'] = $Poli->get_poli_detail($AValue['departemen'])['response_data'][0];
+            }
+
             $AntrianDetail['response_data'][$AKey]['dokter'] = $Dokter->get_detail_pegawai($AValue['dokter'])['response_data'][0];
         }
 
@@ -2088,35 +2101,68 @@ class Apotek extends Utility
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if(isset($parameter['request_type'])) {
-            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-                $paramData = array(
-                    'resep.deleted_at' => 'IS NULL',
-                    'AND',
-                    '((resep.status_resep' => '= ?',
-                    'OR',
-                    'resep.status_resep' => '= ?)',
-                    'OR',
-                    '(resep.status_resep' => '= ?))',
-                    'AND',
-                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                    'OR',
-                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
-                );
+            if($parameter['request_type'] === 'inap') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '((resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'OR',
+                        '(resep.status_resep' => '= ?))',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
 
-                $paramValue = array('D', 'P', 'S');
+                    $paramValue = array('K', 'K', 'K');
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '((resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'OR',
+                        '(resep.status_resep' => '= ?))'
+                    );
+
+                    $paramValue = array('K', 'K', 'K');
+                }
             } else {
-                $paramData = array(
-                    'resep.deleted_at' => 'IS NULL',
-                    'AND',
-                    '((resep.status_resep' => '= ?',
-                    'OR',
-                    'resep.status_resep' => '= ?)',
-                    'OR',
-                    '(resep.status_resep' => '= ?))'
-                );
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '((resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'OR',
+                        '(resep.status_resep' => '= ?))',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
 
-                $paramValue = array('D', 'P', 'S');
+                    $paramValue = array('D', 'P', 'S');
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '((resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'OR',
+                        '(resep.status_resep' => '= ?))'
+                    );
+
+                    $paramValue = array('D', 'P', 'S');
+                }
             }
+
         } else {
             if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
                 $paramData = array(
