@@ -549,10 +549,12 @@ class Antrian extends Utility
                                 ->where(array(
                                     'antrian_nomor.id' => '= ?',
                                     'AND',
-                                    'antrian_nomor.status' => '= ?'
+                                    '(antrian_nomor.status' => '= ?',
+                                    'OR',
+                                    'antrian_nomor.status' => '= ?)'
                                 ), array(
                                     $parameter['dataObj']['currentAntrianID'],
-                                    'D'
+                                    'D', 'C'
                                 ))
                                 ->execute();
                             $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
@@ -856,10 +858,12 @@ class Antrian extends Utility
                             ->where(array(
                                 'antrian_nomor.id' => '= ?',
                                 'AND',
-                                'antrian_nomor.status' => '= ?'
+                                '(antrian_nomor.status' => '= ?',
+                                'OR',
+                                'antrian_nomor.status' => '= ?)'
                             ), array(
                                 $parameter['dataObj']['currentAntrianID'],
-                                'D'
+                                'D', 'C'
                             ))
                             ->execute();
                         $Pasien = new Pasien(self::$pdo);

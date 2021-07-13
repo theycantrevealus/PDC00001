@@ -92,6 +92,8 @@
 
 					} else {
 
+					    console.log(dataObj);
+
 					    $.ajax({
 							async: false,
 							url: __HOSTAPI__ + "/Antrian",
@@ -104,9 +106,7 @@
 							},
 							type: "POST",
 							success: function(response){
-							    console.clear();
-                                console.log(response);
-                                localStorage.getItem("currentPasien");
+							    localStorage.getItem("currentPasien");
                                 localStorage.getItem("currentAntrianID");
 
                                 if(response.response_package.response_notif == 'K') {

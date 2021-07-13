@@ -1791,7 +1791,7 @@
                     var data = response.response_package.response_data;
                     for(var a in data) {
                         if(data[a].response_queue !== $("#txt_current_antrian").html()) {
-                            $("#antrian_terlewat").append("<option value=\"" + data[a].response_queue + "\">" + data[a].response_queue + "</option>");
+                            $("#antrian_terlewat").append("<option value=\"" + data[a].id + "\">" + data[a].response_queue + "</option>");
                         }
                     }
                 },
@@ -1802,7 +1802,12 @@
         }
 
         $("#btnSetLewat").click(function () {
-            $("#txt_current_antrian").html($("#antrian_terlewat").val());
+            //localStorage.setItem("currentPasien", uid);
+            //localStorage.setItem("currentAntrianType", currentAntrianType);
+            //localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
+            $("#txt_current_antrian").html($("#antrian_terlewat option:selected").text()).attr({
+                "current_queue" : $("#antrian_terlewat option:selected").val()
+            });
         });
 
 
