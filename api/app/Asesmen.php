@@ -1013,6 +1013,7 @@ class Asesmen extends Utility {
 					foreach ($resepDetail['response_data'] as $RDKey => $RDValue) {
 					    $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori->get_item_detail($RDValue['obat'])['response_data'][0];
                     }
+
 					$resep['response_data'][$key]['resep_detail'] = $resepDetail['response_data'];
 
 					//Racikan Detail

@@ -66,7 +66,7 @@
                     </button>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+                    <!--<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
                         <thead class="thead-dark">
                         <tr>
                             <th class="wrap_content">No</th>
@@ -78,7 +78,10 @@
                         <tbody>
 
                         </tbody>
-                    </table>
+                    </table>-->
+                    <div id="cppt_loader">
+
+                    </div>
                 </div>
 			</div>
 		</div>

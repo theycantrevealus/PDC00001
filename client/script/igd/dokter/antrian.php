@@ -876,8 +876,6 @@
                     //console.error( err.stack );
                 });
             $(this).remove();
-            console.clear();
-            console.log(metaSwitchEdit);
         });
 
         $("#btn_tambah_icd10_kerja").click(function() {
