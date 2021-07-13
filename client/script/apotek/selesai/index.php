@@ -713,7 +713,7 @@
 
 
                         var newDetailCellSigna = document.createElement("TD");
-                        $(newDetailCellSigna).html("<h5 class=\"text_center\">" + data.detail[a].signa_qty + " &times; " + data.detail[a].signa_pakai + "</h5>");
+                        $(newDetailCellSigna).html("<h5 class=\"text_center wrap_content\">" + data.detail[a].signa_qty + " &times; " + data.detail[a].signa_pakai + "</h5>");
 
                         $(newDetailCellSigna).find("input").inputmask({
                             alias: 'decimal',
@@ -730,7 +730,7 @@
                         var newQty = document.createElement("INPUT");
                         var statusSedia = "";
 
-                        $(newDetailCellQty).addClass("text_center").append("<h5 class=\"text_center\">" + parseFloat(data.detail[a].qty) + "</h5>").append(statusSedia);
+                        $(newDetailCellQty).addClass("text_center").append("<h5 class=\"text_center wrap_content\">" + parseFloat(data.detail[a].qty) + "</h5>").append(statusSedia);
                         /*$(newQty).inputmask({
                             alias: "decimal",
                             rightAlign: true,
@@ -773,6 +773,7 @@
 
             //==================================================================================== RACIKAN
             $("#load-detail-racikan tbody").html("");
+            console.log(data.racikan);
             for(var b = 0; b < data.racikan.length; b++) {
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
@@ -843,7 +844,7 @@
 
                         $(newCellRacikanID).attr("rowspan", racikanDetail.length).html((b + 1));
                         $(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
-                        $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
+                        $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5 class=\"wrap_content\">" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
                         $(newCellRacikanJlh).addClass("text-center").attr("rowspan", racikanDetail.length);
 
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
@@ -874,7 +875,7 @@
                             harga: harga_tertinggi_racikan
                         });
 
-                        $(newCellRacikanJlh).html("<h5>" + data.racikan[b].qty + "<h5>");
+                        $(newCellRacikanJlh).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[b].jumlah + "<h5>");
                         $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
@@ -1830,8 +1831,8 @@
                                     <tr>
                                         <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
                                         <th style="width: 40%;">Obat</th>
-                                        <th width="15%">Signa</th>
-                                        <th width="15%">Jumlah</th>
+                                        <th class="wrap_content">Signa</th>
+                                        <th class="wrap_content">Jumlah</th>
                                         <th>Keterangan</th>
                                     </tr>
                                     </thead>
@@ -1843,10 +1844,10 @@
                                     <thead class="thead-dark">
                                     <tr>
                                         <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
-                                        <th style="width: 15%;">Racikan</th>
-                                        <th style="width: 15%;">Signa</th>
-                                        <th style="width: 15%;">Jumlah</th>
-                                        <th>Obat</th>
+                                        <th style="width: 20%;">Racikan</th>
+                                        <th class="wrap_content">Signa</th>
+                                        <th class="wrap_content">Jumlah</th>
+                                        <th style="width: 25%;">Obat</th>
                                         <th>Keterangan</th>
                                     </tr>
                                     </thead>

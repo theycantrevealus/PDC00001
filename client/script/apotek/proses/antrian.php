@@ -165,7 +165,6 @@
                             harga: harga_tertinggi
                         });
 
-
                         var newDetailCellSigna = document.createElement("TD");
                         $(newDetailCellSigna).html("<h5 class=\"text_center wrap_content\">" + data.detail[a].signa_qty + " &times; " + data.detail[a].signa_pakai + "</h5>");
 
@@ -272,10 +271,6 @@
                                 butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
                             }
                         }
-                        /*console.log(racikanDetail[racDetailKey]);
-
-                        console.log(jlh_sedia);
-                        console.log(butuh_amprah);*/
                     }
                 }
             }
@@ -441,7 +436,7 @@
                             harga: harga_tertinggi_racikan
                         });
 
-                        $(newCellRacikanJlh).html("<h5>" + data.racikan[b].qty + "<h5>");
+                        $(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[b].jumlah + "<h5>");
                         $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
