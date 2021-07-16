@@ -50,13 +50,14 @@
 				        if(data[key].uid_poli !== __POLI_INAP__ && data[key].uid_poli !== __POLI_IGD__) {
 				            parsedData.push(data[key]);
                         }
+
 				        if(myPoli.indexOf(data[key].departemen) < 0) {
                             myPoli.push(data[key].departemen);
                         }
 
                     }
 
-                    $("#current-poli").prepend(myPoli.join(", "));
+                    $("#current-poli").html(myPoli.join(", "));
 					$("#jlh-antrian").html(parsedData.length);
 					return parsedData;
 				}
@@ -164,6 +165,12 @@
 
 
         protocolLib = {
+            antrian_poli_ubah: function (protocols, type, parameter, sender, receiver, time) {
+                if(receiver === __ME__) {
+                    notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
+                }
+                tableAntrian.ajax.reload();
+            },
             antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
                 tableAntrian.ajax.reload();

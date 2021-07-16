@@ -103,6 +103,28 @@
         function loadCPPT(from, to, pasien) {
             $("#cppt_loader").html("");
             $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Pasien/pasien-detail/" + pasien,
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function (response) {
+                    var pasienData = response.response_package.response_data;
+                    $("#target_pasien").html(pasienData[0].nama);
+                    $("#rm_pasien").html(pasienData[0].no_rm);
+                    $("#nama_pasien").html((pasienData[0].panggilan_name === null) ? pasienData[0].nama : pasienData[0].panggilan_name.nama + " " +  pasienData[0].nama);
+                    $("#usia_pasien").html(pasienData[0].usia);
+                    $("#jenkel_pasien").html(pasienData[0].jenkel_detail.nama);
+                    $("#tanggal_lahir_pasien").html(pasienData[0].tanggal_lahir_parsed);
+                    $("#tempat_lahir_pasien").html(pasienData[0].tempat_lahir);
+                    $("#alamat_pasien").html(pasienData[0].alamat);
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+            $.ajax({
                 url: __HOSTAPI__ + "/CPPT",
                 async:false,
                 beforeSend: function(request) {
@@ -117,7 +139,6 @@
                 },
                 success:function(response) {
                     var data = response.response_package;
-                    console.clear();
                     for(var a in data) {
                         $.ajax({
                             url: __HOSTNAME__ + "/pages/pasien/cppt-grouper.php",
@@ -136,7 +157,6 @@
                                 for(var b in listData) {
                                     var currentData = listData[b].data[0];
                                     //if(currentData.uid !== UID) {
-                                    console.log(currentData);
                                     $.ajax({
                                         url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
                                         async:false,

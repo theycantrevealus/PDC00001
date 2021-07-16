@@ -190,7 +190,9 @@
                 pasien_penjamin = antrianData.penjamin_data.nama;
                 pasien_penjamin_uid = antrianData.penjamin_data.uid;
 
-                $("#target_pasien").html(pasien_nama.toUpperCase());
+                $("#target_pasien").html(pasien_nama.toUpperCase()).parent().attr({
+                    "href": __HOSTNAME__ + "/igd/dokter/index/" + pasien_uid + "/" + kunjungan.uid + "/" + pasien_penjamin_uid
+                });
 
                 /*========================= CPPT ==========================*/
 
@@ -3750,7 +3752,7 @@
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                             if(result.response_package.resep_response !== undefined && result.response_package.resep_response !== null) {
                                 if(result.response_package.resep_response.resep.length > 0 || result.response_package.resep_response.racikan.length) {
-                                    push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
+                                    push_socket(__ME__, "permintaan_resep_baru", __UIDAPOTEKER__, "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
                                 }
                             }
 

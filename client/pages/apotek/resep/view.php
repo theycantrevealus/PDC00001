@@ -68,22 +68,47 @@
                 <div class="card card-body">
                     <div class="d-flex flex-row">
                         <div class="col-md-12">
-                            <h5>Diagnosa Utama</h5>
+                            <h5><i class="fa fa-list-alt text-info"></i> Diagnosa Utama</h5>
                             <br />
                             <ol type="1" id="icd_utama"></ol>
                             <br />
                             <p id="diagnosa_utama"></p>
+                            <div class="no-data" id="no-data-diagnosa-utama">
+                                <div>
+                                    <i class="fa fa-clipboard"></i> Tidak ada Data
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="card card-body">
                     <div class="d-flex flex-row">
                         <div class="col-md-12">
-                            <h5>Diagnosa Banding</h5>
+                            <h5><i class="fa fa-clipboard text-info"></i> Diagnosa Banding</h5>
                             <br />
                             <ol type="1" id="icd_banding"></ol>
                             <br />
                             <p id="diagnosa_banding"></p>
+                            <div class="no-data" id="no-data-diagnosa-banding">
+                                <div>
+                                    <i class="fa fa-clipboard"></i> Tidak ada Data
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="col-md-12">
+                        <h5><i class="fa fa-capsules text-warning"></i> Keterangan Alergi Obat</h5>
+                        <br />
+                        <p id="alergi_obat"></p>
+                        <div class="no-data" id="no-data-alergi-obat">
+                            <div>
+                                <i class="fa fa-clipboard"></i> Tidak ada Data
+                            </div>
                         </div>
                     </div>
                 </div>

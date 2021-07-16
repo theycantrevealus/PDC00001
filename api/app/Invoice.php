@@ -494,7 +494,7 @@ class Invoice extends Utility
 
 
 
-        /*$Ranap = self::$query->select('rawat_inap', array(
+        $Ranap = self::$query->select('rawat_inap', array(
             'uid',
             'bed',
             'petugas',
@@ -720,7 +720,7 @@ class Invoice extends Utility
                 ))
                     ->execute();
             }
-        }*/
+        }
 
 
 
@@ -1955,9 +1955,8 @@ class Invoice extends Utility
         $Pegawai = new Pegawai(self::$pdo);
         $Anjungan = new Anjungan(self::$pdo);
         $Penjamin = new Penjamin(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
-
-            $Pasien = new Pasien(self::$pdo);
             $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
@@ -2000,12 +1999,12 @@ class Invoice extends Utility
 
             foreach ($AntrianKunjungan['response_data'] as $AKKey => $AKValue) {
                 //Info Poliklinik
-                $PoliInfo = $Poli->get_poli_detail($AKValue['poli']);
+                $PoliInfo = $Poli->get_poli_info($AKValue['poli']);
                 $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                 //Info Pegawai
 
-                $PegawaiInfo = $Pegawai->get_detail($AKValue['pegawai']);
+                $PegawaiInfo = $Pegawai->get_info($AKValue['pegawai']);
                 $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                 //Info Loket
@@ -2059,7 +2058,7 @@ class Invoice extends Utility
 
                 $PenjaminInfo = $Penjamin->get_penjamin_detail($IDValue['penjamin']);
                 $InvoiceDetail['response_data'][$IDKey]['penjamin'] = $PenjaminInfo['response_data'][0];
-                $InvoiceDetailPoliInfo = $Poli->get_poli_detail($IDValue['departemen']);
+                $InvoiceDetailPoliInfo = $Poli->get_poli_info($IDValue['departemen']);
                 $InvoiceDetail['response_data'][$IDKey]['departemen_info'] = count($InvoiceDetailPoliInfo['response_data']) > 0 ? $InvoiceDetailPoliInfo['response_data'][0] : array(
                     'uid' => __POLI_INAP__,
                     'nama' => 'Rawat Inap'
@@ -2101,8 +2100,7 @@ class Invoice extends Utility
                 ->execute();
             $Hautonum = 1;
             foreach ($history['response_data'] as $HKey => $HValue) {
-                $Pegawai = new Pegawai(self::$pdo);
-                $PegawaiInfo = $Pegawai::get_detail($AKValue['pegawai']);
+                $PegawaiInfo = $Pegawai->get_info($AKValue['pegawai']);
 
                 $history['response_data'][$HKey]['tanggal_bayar'] = date('d F Y', strtotime($HValue['tanggal_bayar']));
                 $history['response_data'][$HKey]['pegawai'] = $PegawaiInfo['response_data'][0];

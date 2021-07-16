@@ -99,13 +99,13 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 25, -1], [20, 25, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d){
-                    d.request = "get_resep_lunas_backend";
+                    d.request = "get_resep_backend_v3";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -113,21 +113,17 @@
                 dataSrc:function(response) {
                     var forReturn = [];
                     var dataSet = response.response_package.response_data;
+                    console.log(dataSet);
                     if(dataSet == undefined) {
                         dataSet = [];
                     }
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].antrian.departemen !== undefined) {
-                            if(dataSet[dKey].antrian.departemen.uid !== __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid !== __POLI_INAP__) {
-                                forReturn.push(dataSet[dKey]);
-                            } else {
-                                //console.log(dataSet[dKey]);
-                            }
-                        } else {
-                            //console.log(dataSet[dKey]);
+                        if(dataSet[dKey].departemen !== undefined && dataSet[dKey].departemen !== null) {
+                            forReturn.push(dataSet[dKey]);
                         }
                     }
+                    console.log(forReturn);
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
@@ -154,7 +150,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.departemen.nama;
+                        return row.departemen.nama;
                     }
                 },
                 {
@@ -176,7 +172,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.nama_penjamin;
+                        return row.penjamin.nama;
                     }
                 },
                 {
@@ -199,20 +195,19 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[20, 15, -1], [20, 15, "All"]],
+            lengthMenu: [[20, 25, -1], [20, 25, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d){
-                    d.request = "get_resep_igd";
-                    //d.request_type = "igd_inap";
+                    d.request = "get_resep_backend_v3";
+                    d.request_type = "igd";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var forReturn = [];
                     var forReturnSelesai = [];
                     var dataSet = response.response_package.response_data;
@@ -226,10 +221,10 @@
 
                     for(var dKey in dataSet) {
                         if(
-                            dataSet[dKey].antrian.departemen !== undefined &&
-                            dataSet[dKey].antrian.departemen !== null
+                            dataSet[dKey].departemen !== undefined &&
+                            dataSet[dKey].departemen !== null
                         ) {
-                            if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+                            if(dataSet[dKey].departemen.uid === __POLI_IGD__ || dataSet[dKey].departemen.uid === __POLI_INAP__) {
 
                                 dataSet[dKey].autonum = autonum;
                                 if(dataSet[dKey].status_resep === "D") {
@@ -267,10 +262,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        if(row.antrian.departemen.uid === __POLI_INAP__) {
-                            return row.antrian.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.antrian.ns_detail.kode_ns + "]</span>" + row.antrian.ns_detail.nama_ns;
-                        } else {
-                            return row.antrian.departemen.nama;
+                        if(row.departemen !== null && row.departemen !== undefined) {
+                            if(row.departemen.uid === __POLI_INAP__) {
+                                return row.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.ns_detail.kode_ns + "]</span>" + row.ns_detail.nama_ns;
+                            } else {
+                                return row.departemen.nama;
+                            }
                         }
                     }
                 },
@@ -293,7 +290,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.nama_penjamin;
+                        return row.penjamin.nama;
                     }
                 },
                 {
@@ -320,20 +317,19 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[20, 15, -1], [20, 15, "All"]],
+            lengthMenu: [[20, 25, -1], [20, 25, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d){
-                    d.request = "get_resep_inap";
+                    d.request = "get_resep_backend_v3";
                     d.request_type = "inap";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var forReturn = [];
                     var forReturnSelesai = [];
                     var dataSet = response.response_package.response_data;
@@ -347,10 +343,10 @@
 
                     for(var dKey in dataSet) {
                         if(
-                            dataSet[dKey].antrian.departemen !== undefined &&
-                            dataSet[dKey].antrian.departemen !== null
+                            dataSet[dKey].departemen !== undefined &&
+                            dataSet[dKey].departemen !== null
                         ) {
-                            if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+                            if(dataSet[dKey].departemen.uid === __POLI_IGD__ || dataSet[dKey].departemen.uid === __POLI_INAP__) {
 
                                 dataSet[dKey].autonum = autonum;
                                 if(dataSet[dKey].status_resep === "D") {
@@ -388,10 +384,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        if(row.antrian.departemen.uid === __POLI_INAP__) {
-                            return row.antrian.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.antrian.ns_detail.kode_ns + "]</span>" + row.antrian.ns_detail.nama_ns;
-                        } else {
-                            return row.antrian.departemen.nama;
+                        if(row.departemen !== null && row.departemen !== undefined) {
+                            if (row.departemen.uid === __POLI_INAP__) {
+                                return row.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.ns_detail.kode_ns + "]</span>" + row.ns_detail.nama_ns;
+                            } else {
+                                return row.departemen.nama;
+                            }
                         }
                     }
                 },
@@ -414,7 +412,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.nama_penjamin;
+                        return row.penjamin.nama;
                     }
                 },
                 {

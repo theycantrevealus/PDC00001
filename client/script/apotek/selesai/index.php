@@ -6,6 +6,7 @@
                 notification ("info", parameter, 3000, "notif_pasien_baru");
                 tableResep.ajax.reload();
                 tableResep2.ajax.reload();
+                tableResep3.ajax.reload();
             }
         };
         var targettedUID;
@@ -246,8 +247,8 @@
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d){
-                    d.request = "get_resep_selesai_backend";
-                    d.request_type = "serah";
+                    d.request = "get_resep_backend_v3";
+                    d.request_type = "igd_lunas";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -262,12 +263,12 @@
 
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].antrian.departemen !== undefined) {
+                        if(dataSet[dKey].departemen !== undefined) {
                             if(
-                                dataSet[dKey].antrian.departemen !== undefined &&
-                                dataSet[dKey].antrian.departemen !== null
+                                dataSet[dKey].departemen !== undefined &&
+                                dataSet[dKey].departemen !== null
                             ) {
-                                if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+                                if(dataSet[dKey].departemen.uid === __POLI_IGD__ || dataSet[dKey].departemen.uid === __POLI_INAP__) {
                                     if(dataSet[dKey].status_resep !== "S") {
                                         forReturn.push(dataSet[dKey]);
                                     }
@@ -303,7 +304,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return (row.antrian.departemen !== undefined) ? row.antrian.departemen.nama : "";
+                        return (row.departemen !== undefined) ? row.departemen.nama : "";
                     }
                 },
                 {
@@ -318,7 +319,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.nama_penjamin;
+                        return row.penjamin.nama;
                     }
                 },
                 {
@@ -330,7 +331,7 @@
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -339,7 +340,123 @@
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                "</button>" +
+                                "</div>";
+                        } else if(row.status_resep === "S") {
+                            return "<i class=\"fa fa-check text-success\"></i>";
+                        }
+                    }
+                }
+            ]
+        });
+
+        var tableResep3 = $("#table-resep-3").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: function(d){
+                    d.request = "get_resep_backend_v3";
+                    d.request_type = "inap_lunas";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var forReturn = [];
+                    var dataSet = response.response_package.response_data;
+                    if(dataSet == undefined) {
+                        dataSet = [];
+                    }
+
+
+
+                    for(var dKey in dataSet) {
+                        if(dataSet[dKey].departemen !== undefined) {
+                            if(
+                                dataSet[dKey].departemen !== undefined &&
+                                dataSet[dKey].departemen !== null
+                            ) {
+                                if(dataSet[dKey].departemen.uid === __POLI_IGD__ || dataSet[dKey].departemen.uid === __POLI_INAP__) {
+                                    if(dataSet[dKey].status_resep !== "S") {
+                                        forReturn.push(dataSet[dKey]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = forReturn.length;
+
+                    return forReturn;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Pasien"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return (row.departemen !== undefined) ? row.departemen.nama : "";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.penjamin.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
+
+                        if(row.status_resep === "D") {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
+                                "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                "</button>" +
+                                "</div>";
+                        } else if(row.status_resep === "P") {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-check\"></i> Terima</span>" +
+                                "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -367,8 +484,8 @@
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d){
-                    d.request = "get_resep_selesai_backend";
-                    d.request_type = "serah";
+                    d.request = "get_resep_backend_v3";
+                    d.request_type = "riwayat";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -384,8 +501,8 @@
 
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].antrian.departemen !== undefined) {
-                            if(dataSet[dKey].antrian.departemen !== null) {
+                        if(dataSet[dKey].departemen !== undefined) {
+                            if(dataSet[dKey].departemen !== null) {
                                 if(dataSet[dKey].status_resep === "S") {
                                     forReturn.push(dataSet[dKey]);
                                 }
@@ -418,7 +535,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.departemen.nama;
+                        return row.departemen.nama;
                     }
                 },
                 {
@@ -433,7 +550,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.nama_penjamin;
+                        return row.penjamin.nama;
                     }
                 },
                 {
@@ -445,7 +562,7 @@
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : ((row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap")) + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.departemen.uid === __POLI_IGD__) ? "IGD" : ((row.departemen.uid === __POLI_INAP__) ? "Rawat Inap" : "Rawat Jalan")) + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -454,13 +571,13 @@
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
                                 "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : ((row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap")) + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.departemen.uid === __POLI_IGD__) ? "IGD" : ((row.departemen.uid === __POLI_INAP__) ? "Rawat Inap" : "Rawat Jalan")) + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "S") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.antrian.departemen.uid === __POLI_IGD__) ? "IGD" : ((row.antrian.departemen.uid === __POLI_INAP__) ? "Rawat Jalan" : "Rawat Inap")) + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.departemen.uid === __POLI_IGD__) ? "IGD" : ((row.departemen.uid === __POLI_INAP__) ? "Rawat Inap" : "Rawat Jalan")) + "\" id=\"cetak_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
                                 "</button>" +
                                 "</div>";
@@ -499,6 +616,7 @@
                 type:"GET",
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
+                    console.log(targettedData);
 
                     var detail_dokter = targettedData.detail_dokter;
                     var resep_dokter = [];
@@ -559,7 +677,7 @@
 
                     $.ajax({
                         async: false,
-                        url: __HOST__ + "miscellaneous/print_template/resep.php",
+                        url: __HOST__ + "miscellaneous/print_template/resep_view.php",
                         beforeSend: function (request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
@@ -573,7 +691,7 @@
                             no_mr: targettedData.pasien.no_rm,
                             jenis_pasien: jenis_pasien,
                             nama_pasien: targettedData.pasien.nama,
-                            departemen: targettedData.antrian.poli_info.nama,
+                            departemen: (targettedData.antrian.poli_info !== undefined && targettedData.antrian.poli_info !== null) ? targettedData.antrian.poli_info.nama : "Rawat Inap",
                             tanggal_lahir: targettedData.pasien.tanggal_lahir_parsed,
                             dokter: targettedData.dokter.nama,
                             jenis_kelamin: targettedData.pasien.jenkel_detail.nama,
@@ -630,7 +748,6 @@
                     var selectedBatchList = [];
 
                     var harga_tertinggi = 0;
-                    //console.log(data.detail[a]);
                     var kebutuhan = parseFloat(data.detail[a].qty);
                     var jlh_sedia = 0;
                     var butuh_amprah = 0;
@@ -773,7 +890,6 @@
 
             //==================================================================================== RACIKAN
             $("#load-detail-racikan tbody").html("");
-            console.log(data.racikan);
             for(var b = 0; b < data.racikan.length; b++) {
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
@@ -943,10 +1059,9 @@
                             if(response.response_package.response_result > 0) {
                                 tableResep.ajax.reload();
                                 tableResep2.ajax.reload();
+                                tableResep3.ajax.reload();
                                 tableResepRiwayat.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
-                            } else {
-                                console.log(response);
                             }
                         },
                         error: function(response) {
@@ -981,10 +1096,9 @@
                             if(response.response_package.response_result > 0) {
                                 tableResep.ajax.reload();
                                 tableResep2.ajax.reload();
+                                tableResep3.ajax.reload();
                                 tableResepRiwayat.ajax.reload();
                                 $("#modal-verifikasi").modal("hide");
-                            } else {
-                                console.log(response);
                             }
                         },
                         error: function(response) {

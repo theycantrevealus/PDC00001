@@ -88,6 +88,9 @@ class Apotek extends Utility
                     $parameter['status'] = 'L';
                     return self::get_resep_backend_v2($parameter);
                     break;
+                case 'get_resep_backend_v3':
+                    return self::get_resep_backend_v3($parameter);
+                    break;
                 case 'resep_inap':
                     return self::resep_inap($parameter);
                     break;
@@ -687,6 +690,7 @@ class Apotek extends Utility
             'uid',
             'asesmen',
             'antrian',
+            'alergi_obat',
             'keterangan',
             'keterangan_racikan'
         ))
@@ -698,6 +702,8 @@ class Apotek extends Utility
                 $parameter
             ))
             ->execute();
+
+        $dataResponse['alergi_obat'] = $resep['response_data'][0]['alergi_obat'];
 
         $AntrianDetail = self::$query->select('antrian', array(
                 'uid',
@@ -2095,6 +2101,323 @@ class Apotek extends Utility
         return $data;
     }
 
+    private function get_resep_backend_v3($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        if(isset($parameter['request_type'])) {
+            if($parameter['request_type'] === 'inap') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep.status_resep' => '= ?',
+                        'AND',
+                        'antrian.departemen' => '= ?',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep.status_resep' => '= ?',
+                        'AND',
+                        'antrian.departemen' => '= ?'
+                    );
+                }
+
+                $paramValue = array('K', __POLI_INAP__);
+            } else if($parameter['request_type'] === 'igd_lunas') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'AND',
+                        'antrian.departemen' =>'= ?',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'AND',
+                        'antrian.departemen' =>'= ?'
+                    );
+                }
+
+                $paramValue = array('D', 'P', __POLI_IGD__);
+            } else if($parameter['request_type'] === 'inap_lunas') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'AND',
+                        'antrian.departemen' => '= ?',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'AND',
+                        'antrian.departemen' => '= ?'
+                    );
+                }
+
+                $paramValue = array('D', 'P', __POLI_INAP__);
+            } else if($parameter['request_type'] === 'riwayat') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep.status_resep' => '= ?',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep.status_resep' => '= ?'
+                    );
+                }
+
+                $paramValue = array('S');
+            } else if($parameter['request_type'] === 'igd') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep.status_resep' => '= ?',
+                        'AND',
+                        'antrian.departemen' =>'= ?',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep.status_resep' => '= ?',
+                        'AND',
+                        'antrian.departemen' =>'= ?'
+                    );
+                }
+
+                $paramValue = array('L', __POLI_IGD__);
+            }
+        } else {
+            //Resep Poli Biasa
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'resep.deleted_at' => 'IS NULL',
+                    'AND',
+                    '(NOT antrian.departemen' =>'= ?',
+                    'AND',
+                    'NOT antrian.departemen' =>'= ?)',
+                    'AND',
+                    '((resep.status_resep' => '= ?',
+                    'OR',
+                    'resep.status_resep' => '= ?)',
+                    'OR',
+                    '(resep.status_resep' => '= ?))',
+                    'AND',
+                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                );
+            } else {
+                $paramData = array(
+                    'resep.deleted_at' => 'IS NULL',
+                    'AND',
+                    '(NOT antrian.departemen' =>'= ?',
+                    'AND',
+                    'NOT antrian.departemen' =>'= ?)',
+                    'AND',
+                    '((resep.status_resep' => '= ?',
+                    'OR',
+                    'resep.status_resep' => '= ?)',
+                    'OR',
+                    '(resep.status_resep' => '= ?))'
+                );
+            }
+
+            $paramValue = array(__POLI_IGD__, __POLI_INAP__, 'D', 'P', 'S');
+        }
+
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('resep', array(
+                'uid',
+                'kunjungan',
+                'antrian',
+                'asesmen',
+                'dokter',
+                'pasien',
+                'total',
+                'status_resep',
+                'created_at',
+                'updated_at'
+            ))
+                ->join('pasien', array(
+                    'nama as nama_pasien',
+                    'no_rm'
+                ))
+                ->join('antrian', array(
+                    'departemen',
+                    'penjamin'
+                ))
+                ->on(array(
+                    array('resep.pasien', '=', 'pasien.uid'),
+                    array('resep.antrian', '=', 'antrian.uid')
+                ))
+                ->order(array(
+                    'resep.updated_at' => 'DESC'
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('resep', array(
+                'uid',
+                'kunjungan',
+                'antrian',
+                'asesmen',
+                'dokter',
+                'pasien',
+                'total',
+                'status_resep',
+                'created_at',
+                'updated_at'
+            ))
+                ->join('pasien', array(
+                    'nama as nama_pasien',
+                    'no_rm'
+                ))
+                ->join('antrian', array(
+                    'departemen',
+                    'penjamin'
+                ))
+                ->on(array(
+                    array('resep.pasien', '=', 'pasien.uid'),
+                    array('resep.antrian', '=', 'antrian.uid')
+                ))
+                ->order(array(
+                    'resep.updated_at' => 'DESC'
+                ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+
+        $Pegawai = new Pegawai(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
+        $Poli = new Poli(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        $dataBiasa = array();
+
+        foreach ($data['response_data'] as $key => $value) {
+            //Dokter Info
+            $PegawaiInfo = $Pegawai->get_detail($value['dokter']);
+            $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
+
+            $PasienData = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            $data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
+
+            //Departemen Info
+            if($value['departemen'] === __POLI_INAP__) {
+                $data['response_data'][$key]['departemen'] = array(
+                    'uid' => __POLI_INAP__,
+                    'nama' => 'Rawat Inap'
+                );
+
+                //NS Info
+                $NS = self::$query->select('rawat_inap', array(
+                    'nurse_station'
+                ))
+                    ->join('nurse_station', array(
+                        'kode as kode_ns', 'nama as nama_ns'
+                    ))
+                    ->on(array(
+                        array('rawat_inap.nurse_station', '=', 'nurse_station.uid')
+                    ))
+                    ->where(array(
+                        'rawat_inap.kunjungan' => '= ?',
+                        'AND',
+                        'rawat_inap.dokter' => '= ?',
+                        'AND',
+                        'rawat_inap.pasien' => '= ?'
+                    ), array(
+                        $value['kunjungan'],
+                        $value['dokter'],
+                        $value['pasien']
+                    ))
+                    ->execute();
+                $data['response_data'][$key]['ns_detail'] = $NS['response_data'][0];
+            } else {
+                $PoliInfo = $Poli->get_poli_info($value['departemen']);
+                $data['response_data'][$key]['departemen'] = (count($PoliInfo['response_data']) > 0) ? $PoliInfo['response_data'][0] : $value['departemen'];
+            }
+
+            $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+            $data['response_data'][$key]['penjamin'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('resep', array(
+            'uid', 'pasien', 'antrian'
+        ))
+            ->join('pasien', array(
+                'nama as nama_pasien',
+                'no_rm'
+            ))
+            ->join('antrian', array(
+                'departemen'
+            ))
+            ->on(array(
+                array('resep.pasien', '=', 'pasien.uid'),
+                array('resep.antrian', '=', 'antrian.uid')
+            ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($data['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
     private function get_resep_backend_v2($parameter)
     {
         $Authorization = new Authorization();
@@ -2117,7 +2440,7 @@ class Apotek extends Utility
                         'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
                     );
 
-                    $paramValue = array('K', 'K', 'K');
+                    $paramValue = array('K', 'L', 'D');
                 } else {
                     $paramData = array(
                         'resep.deleted_at' => 'IS NULL',
@@ -2494,10 +2817,15 @@ class Apotek extends Utility
         ))
             ->where($paramData, $paramValue)
             ->execute();
+        $dataResult = array_merge($dataIGD, $dataBiasa);
+        if (intval($parameter['length']) < 0) {
+            $data['response_data'] = $dataResult;
+        } else {
+            $data['response_data'] = array_splice($dataResult, intval($parameter['start']), intval($parameter['length']));
+        }
 
-        $data['response_data'] = array_merge($dataIGD, $dataBiasa);
         $data['recordsTotal'] = count($itemTotal['response_data']);
-        $data['recordsFiltered'] = count($data['response_data']);
+        $data['recordsFiltered'] = count($dataResult);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
 

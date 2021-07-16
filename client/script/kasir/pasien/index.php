@@ -921,11 +921,13 @@
 
 
 		$("body").on("click", ".btnDetail", function() {
-			var uid = $(this).attr("id").split("_");
+		    var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
 			var me = $(this);
-			me.removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i>Loading</span>");
+			me.removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i>Loading</span>").attr({
+                "disabled": "disabled"
+            });
 			var poli = $(this).attr("poli");
 			var pasien = $(this).attr("pasien");
 			var penjamin = $(this).attr("penjamin");
@@ -1142,7 +1144,7 @@
 							}
 
 							$("#form-invoice").modal("show");
-                            me.removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-eye\"></i>Detail</span>");
+                            me.removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-eye\"></i>Detail</span>").removeAttr("disabled");
 						},
 						error: function(response) {
 							console.log("Error : " + response);

@@ -60,14 +60,31 @@
             type:"GET",
             success:function(response) {
                 var data = response.response_package[0];
-                console.log(data);
                 currentAsesmen = data.asesmen.uid;
 
+                if(data.alergi_obat !== undefined && data.alergi_obat !== "" && data.alergi_obat !== null) {
+                    $("#alergi_obat").html(data.alergi_obat);
+                    $("#no-data-alergi-obat").hide();
+                } else {
+                    $("#no-data-alergi-obat").show();
+                }
 
-                $("#diagnosa_utama").html(data.asesmen.diagnosa_kerja);
-                $("#diagnosa_banding").html(data.asesmen.diagnosa_banding);
-                $("#txt_keterangan_resep").html(data.keterangan);
-                $("#txt_keterangan_resep_racikan").html(data.keterangan_racikan);
+                if(data.asesmen.diagnosa_kerja !== undefined && data.asesmen.diagnosa_kerja !== "" && data.asesmen.diagnosa_kerja !== null) {
+                    $("#diagnosa_utama").html(data.asesmen.diagnosa_kerja);
+                    $("#no-data-diagnosa-utama").hide();
+                } else {
+                    $("#no-data-diagnosa-utama").show();
+                }
+
+                if(data.asesmen.diagnosa_banding !== undefined && data.asesmen.diagnosa_banding !== "" && data.asesmen.diagnosa_banding !== null) {
+                    $("#diagnosa_banding").html(data.asesmen.diagnosa_banding);
+                    $("#no-data-diagnosa-banding").hide();
+                } else {
+                    $("#no-data-diagnosa-banding").show();
+                }
+
+                $("#txt_keterangan_resep").html((data.keterangan !== "" && data.keterangan !== undefined && data.keterangan !== null) ? data.keterangan : "-");
+                $("#txt_keterangan_resep_racikan").html((data.keterangan_racikan !== "" && data.keterangan_racikan !== undefined && data.keterangan_racikan !== null) ? data.keterangan_racikan : "-");
 
                 if(data.asesmen.icd_kerja !== undefined && data.asesmen.icd_kerja !== null) {
                     var icd_kerja = data.asesmen.icd_kerja;
