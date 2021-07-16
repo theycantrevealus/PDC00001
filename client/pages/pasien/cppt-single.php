@@ -136,6 +136,16 @@
                                 ?>
                                 <div class="row">
                                     <div class="col-lg-12">
+                                        <?Php
+                                        if(isset($resValue['alasan_ubah']) && !empty($resValue['alasan_ubah']) && $resValue['alasan_ubah'] !== '') {
+                                        ?>
+                                            <div class="alert alert-soft-warning card-margin" role="alert">
+                                                <strong>Alasan Ubah Resep:</strong><br />
+                                                <?php echo $resValue['alasan_ubah'] ?>
+                                            </div>
+                                        <?php
+                                        }
+                                        ?>
                                         <div class="alert alert-soft-info card-margin" role="alert">
                                             <strong>Keterangan:</strong><br />
                                             <?php echo $resValue['keterangan'] ?>
@@ -260,6 +270,16 @@
                                     ?>
                                     <div class="row">
                                         <div class="col-lg-12">
+                                            <?Php
+                                            if(isset($resValue['alasan_ubah']) && !empty($resValue['alasan_ubah']) && $resValue['alasan_ubah'] !== '') {
+                                                ?>
+                                                <div class="alert alert-soft-warning card-margin" role="alert">
+                                                    <strong>Alasan Ubah Resep:</strong><br />
+                                                    <?php echo $resValue['alasan_ubah'] ?>
+                                                </div>
+                                                <?php
+                                            }
+                                            ?>
                                             <div class="alert alert-soft-info card-margin" role="alert">
                                                 <strong>Keterangan:</strong><br />
                                                 <?php echo $racValue['keterangan'] ?>

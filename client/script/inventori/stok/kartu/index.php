@@ -33,8 +33,7 @@
                         rawData = response.response_package.response_data;
                     }
 
-                    for(var dataKey in rawData)
-                    {
+                    for(var dataKey in rawData) {
                         if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
                             if(uniqueData[rawData[dataKey].barang] === undefined) {
                                 uniqueData[rawData[dataKey].barang] = {
@@ -61,12 +60,13 @@
                                             uniqueBatch[batchData[bKey].batch] = 0;
                                         }
                                         uniqueBatch[batchData[bKey].batch] = parseFloat(batchData[bKey].stok_terkini);
+                                        uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
                                     }
 
 
 
                                     /*if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
-                                        uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
+
                                     }*/
                                 }
 
@@ -75,11 +75,13 @@
                         }
                     }
 
+                    console.log(uniqueData);
+
                     var autonum = 1;
                     for(var pKey in uniqueData) {
 
                         for(var bza in uniqueData[pKey].batch) {
-                            uniqueData[rawData[dataKey].barang].stok_batch += uniqueBatch[bza];
+                            //uniqueData[rawData[dataKey].barang].stok_batch += uniqueBatch[bza];
                         }
 
                         returnedData.push({

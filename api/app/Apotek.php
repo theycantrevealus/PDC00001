@@ -157,7 +157,7 @@ class Apotek extends Utility
 
     private function panggil_antrian_selesai($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $worker = self::$query->update('resep', array(
             'status_resep' => 'P',
             'waktu_panggil' => parent::format_date(),
@@ -176,7 +176,7 @@ class Apotek extends Utility
 
     private function serah_antrian_selesai($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $worker = self::$query->update('resep', array(
             'status_resep' => 'S',
             'waktu_terima' => parent::format_date(),
@@ -3379,7 +3379,8 @@ class Apotek extends Utility
         $kajian_data = array();
 
         $UpdateStatusResep = self::$query->update('resep', array(
-            'status_resep' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? (($parameter['departemen'] === __POLI_IGD__) ? 'L' : 'K') : 'L'
+            'status_resep' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? (($parameter['departemen'] === __POLI_IGD__) ? 'L' : 'K') : 'L',
+            'alasan_ubah' => $parameter['alasan_ubah']
         ))
             ->where(array(
                 'resep.uid' => '= ?',

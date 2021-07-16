@@ -1,8 +1,20 @@
 <script type="text/javascript">
     $(function () {
-        var currentMetaData, currentAsesmen;
+        var currentMetaData, currentAsesmen, currentRacikanActive;
+        var alasanUbah = "";
         var totalResep = 0;
         var totalRacikan = 0;
+        var currentData = {
+            resep: {},
+            racikan: {}
+        };
+
+        var verifData = {
+            resep: {},
+            racikan: {}
+        };
+
+        var isChanged = false;
 
 
         $("input[type=\"radio\"][name=\"kajian_all\"][value=\"y\"]").change(function() {
@@ -117,8 +129,6 @@
 
                 if(data.resep !== undefined) {
                     currentMetaData = data.detail;
-
-
                     if(
                         currentMetaData.departemen === undefined ||
                         currentMetaData.departemen === null
@@ -153,9 +163,22 @@
                                 "signaHari": resep_obat_detail[resepKey].qty,
                                 //"pasien_penjamin_uid": pasien_penjamin_uid
                             });
-                        }
+                            if(currentData.resep[resep_obat_detail[resepKey].obat] === undefined) {
+                                currentData.resep[resep_obat_detail[resepKey].obat] = {
+                                    "aturan_pakai": 0,
+                                    "signaKonsumsi": 0,
+                                    "signaTakar": 0,
+                                    "signaHari": 0
+                                };
+                            }
 
-                        //autoResep();
+                            currentData.resep[resep_obat_detail[resepKey].obat] = {
+                                "aturan_pakai": resep_obat_detail[resepKey].aturan_pakai,
+                                "signaKonsumsi": resep_obat_detail[resepKey].signa_qty,
+                                "signaTakar": resep_obat_detail[resepKey].signa_pakai,
+                                "signaHari": resep_obat_detail[resepKey].qty
+                            };
+                        }
                     } else {
                         $("#table-resep tbody").append("<tr><td colspan=\"9\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada resep</td></tr>");
                     }
@@ -175,6 +198,25 @@
                                 item:racikan_detail[racikanKey].item,
                                 aturan_pakai: racikan_detail[racikanKey].aturan_pakai
                             });
+
+                            if(currentData.racikan[racikan_detail[racikanKey].uid] === undefined) {
+                                currentData.racikan[racikan_detail[racikanKey].uid] = {
+                                    signaKonsumsi: 0,
+                                    signaTakar: 0,
+                                    signaHari: 0,
+                                    item: [],
+                                    aturan_pakai: 0
+                                };
+                            }
+
+                            currentData.racikan[racikan_detail[racikanKey].uid] = {
+                                signaKonsumsi: racikan_detail[racikanKey].signa_qty,
+                                signaTakar: racikan_detail[racikanKey].signa_pakai,
+                                signaHari: racikan_detail[racikanKey].qty,
+                                item: [],
+                                aturan_pakai: racikan_detail[racikanKey].aturan_pakai
+                            };
+
                             var itemKomposisi = racikan_detail[racikanKey].item;
                             for(var komposisiKey in itemKomposisi) {
                                 var penjaminObatRacikanListUID = [];
@@ -186,8 +228,14 @@
                                 }
 
                                 itemKomposisi[komposisiKey].satuan = "<b>" + itemKomposisi[komposisiKey].takar_bulat + "</b><sub nilaiExact=\"" + itemKomposisi[komposisiKey].ratio + "\">" + itemKomposisi[komposisiKey].takar_decimal + "</sub>";
-
+                                itemKomposisi[komposisiKey].racikan = racikan_detail[racikanKey].uid;
                                 var totalKomposisi = autoKomposisi((parseInt(racikanKey) + 1), itemKomposisi[komposisiKey], racikan_detail[racikanKey].qty);
+
+                                currentData.racikan[racikan_detail[racikanKey].uid].item.push({
+                                    obat: itemKomposisi[komposisiKey].obat,
+                                    kekuatan: itemKomposisi[komposisiKey].kekuatan,
+                                    jumlah: racikan_detail[racikanKey].qty
+                                });
                             }
                         }
                         totalRacikan = calculate_racikan();
@@ -354,7 +402,12 @@
                 var id = $(this).attr("id").split("_");
                 id = id[id.length - 1];
 
-                $(this).children("[value=\""+ data["id"] + "\"]").attr({
+                var oldData = $("#resep_obat_" + id).attr("old-data");
+                if(data.id !== oldData) {
+                    isChanged = true;
+                }
+
+                $(this).children("[value=\""+ data.id + "\"]").attr({
                     "data-value": data["data-value"],
                     "penjamin-list": data["penjamin-list"],
                     "satuan-caption": data["satuan-caption"],
@@ -389,6 +442,9 @@
                 $(newObat).append("<option title=\"" + setter.obat_detail.nama + "\" value=\"" + setter.obat + "\" penjamin-list=\"" + setter.obat_detail.penjamin.join(",") + "\">" + setter.obat_detail.nama + "</option>");
                 $(newObat).select2("data", {id: setter.obat, text: setter.obat_detail.nama});
                 $(newObat).trigger("change");
+                $(newObat).attr({
+                    "old-data": setter.obat
+                });
 
                 if($(newObat).val() != "none") {
                     var dataKategoriPerObat = autoKategoriObat(setter.obat);
@@ -396,7 +452,7 @@
                     if(dataKategoriPerObat.length > 0) {
                         for(var kategoriObatKey in dataKategoriPerObat) {
                             if(
-                                dataKategoriPerObat[kategoriObatKey].kategori !== undefined&&
+                                dataKategoriPerObat[kategoriObatKey].kategori !== undefined &&
                                 dataKategoriPerObat[kategoriObatKey].kategori !== null
                             ) {
                                 kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
@@ -531,6 +587,10 @@
                 $(this).find("td:eq(0)").html(id);
                 $(this).find("td:eq(1) select.resep-obat").attr({
                     "id": "resep_obat_" + id
+                });
+
+                $(this).find("td:eq(1) select.aturan-pakai").attr({
+                    "id": "resep_obat_aturan_pakai_" + id
                 });
 
 
@@ -905,7 +965,8 @@
             $(newRacikanNama).addClass("form-control racikan_nama").css({
                 "margin-bottom": "20px"
             }).attr({
-                "placeholder": "Nama Racikan"
+                "placeholder": "Nama Racikan",
+                "disabled": "disabled"
             }).val(setter.nama);
 
             $(newRacikanCellNama).append(
@@ -934,9 +995,14 @@
 
             var dataAturanPakai = autoAturanPakai();
 
-            $(newAturanPakaiRacikan).addClass("form-control aturan-pakai");
+            $(newAturanPakaiRacikan).addClass("form-control aturan-pakai-racikan");
             var newKeteranganRacikan = document.createElement("TEXTAREA");
             $(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<span>Keterangan</span>").append(newKeteranganRacikan);
+            if(setter.uid !== "") {
+                $(newAturanPakaiRacikan).attr({
+                    "uid-racikan": setter.uid
+                });
+            }
             $(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
             for(var aturanPakaiKey in dataAturanPakai) {
                 $(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
@@ -970,6 +1036,12 @@
                 digitsOptional: true
             });
 
+            if(setter.uid !== "") {
+                $(newRacikanSignaA).attr({
+                    "uid-racikan": setter.uid
+                });
+            }
+
             $(newRacikanCellSignaX).html("<i class=\"fa fa-times signa-sign\"></i>");
 
             var newRacikanSignaB = document.createElement("INPUT");
@@ -985,6 +1057,12 @@
                 digitsOptional: true
             });
 
+            if(setter.uid !== "") {
+                $(newRacikanSignaB).attr({
+                    "uid-racikan": setter.uid
+                });
+            }
+
             var newRacikanJlh = document.createElement("INPUT");
             $(newRacikanCellJlh).append(newRacikanJlh);
             $(newRacikanJlh).addClass("form-control racikan_signa_jlh").attr({
@@ -997,6 +1075,12 @@
                 autoGroup: false,
                 digitsOptional: true
             });
+
+            if(setter.uid !== "") {
+                $(newRacikanJlh).attr({
+                    "uid-racikan": setter.uid
+                });
+            }
 
             var newRacikanDelete = document.createElement("BUTTON");
             //$(newRacikanCellAksi).append(newRacikanDelete);
@@ -1027,6 +1111,10 @@
 
                 $(this).find("td:eq(1) input.racikan_nama").attr({
                     "id": "racikan_nama_" + id
+                });
+
+                $(this).find("td:eq(1) select.aturan-pakai-racikan").attr({
+                    "id": "racikan_aturan_pakai_" + id
                 });
 
                 if($(this).find("td:eq(1) input") == "") {
@@ -1080,7 +1168,9 @@
                 $(newKomposisiCellObat).append("<h6></h6><ol></ol>");
 
                 var newKomposisiEdit = document.createElement("BUTTON");
-                $(newKomposisiEdit).addClass("btn btn-sm btn-info btn_edit_komposisi").html("<i class=\"fa fa-pencil-alt\"></i>");
+                $(newKomposisiEdit).addClass("btn btn-sm btn-info btn_edit_komposisi").html("<i class=\"fa fa-pencil-alt\"></i>").attr({
+                    "uid-racikan": setter.racikan
+                });
 
                 var newKomposisiDelete = document.createElement("BUTTON");
                 $(newKomposisiDelete).addClass("btn btn-sm btn-danger btn_delete_komposisi").html("<i class=\"fa fa-ban\"></i>");
@@ -1091,7 +1181,8 @@
 
                 var newJumlahObatRacikanPerItem = document.createElement("INPUT");
                 $(newJumlahObatRacikanPerItem).addClass("form-control jlh_obat_racikan").attr({
-                    "placeholder": "0"
+                    "placeholder": "0",
+                    "uid-racikan": setter.racikan
                 }).val(global_qty).inputmask({
                     alias: 'decimal',
                     rightAlign: true,
@@ -1271,7 +1362,7 @@
                 });
             }
 
-            $("#txt_racikan_obat").addClass("form-control resep-obat").select2({
+            $("#txt_racikan_obat").addClass("form-control").select2({
                 minimumInputLength: 2,
                 "language": {
                     "noResults": function(){
@@ -1360,6 +1451,8 @@
             var thisID = id[id.length - 1];
             var Pid = id[id.length - 2];
 
+            currentRacikanActive = $(this).attr("uid-racikan");
+
             prepareModal(Pid, {
                 obat: $("#obat_komposisi_" + Pid + "_" + thisID + " h6").attr("uid-obat"),
                 obat_nama: $("#obat_komposisi_" + Pid + "_" + thisID + " h6").text(),
@@ -1410,18 +1503,30 @@
             //Tentukan Batch setelah dipilih
             refreshBatch($("#txt_racikan_obat").val(), currentRacikID + "_" + currentKomposisiID, "racikan");
             $("#form-editor-racikan").modal("hide");
+            var racikanUID = currentRacikanActive;
+            verifData = CheckVerifRacikan(verifData, currentRacikID, {
+                uid: racikanUID
+            });
         });
 
         $("body").on("keyup", ".racikan_signa_a", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
             checkGenerateRacikan(id);
+            var racikanUID = $(this).attr("uid-racikan");
+            verifData = CheckVerifRacikan(verifData, id, {
+                uid: racikanUID
+            });
         });
 
         $("body").on("keyup", ".racikan_signa_b", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
             checkGenerateRacikan(id);
+            var racikanUID = $(this).attr("uid-racikan");
+            verifData = CheckVerifRacikan(verifData, id, {
+                uid: racikanUID
+            });
         });
 
         $("body").on("keyup", ".jlh_obat_racikan", function() {
@@ -1440,35 +1545,53 @@
             totalRacikan = calculate_racikan();
 
             $("#total_biaya_obat").html("Rp. " + number_format((totalResep + totalRacikan), 2, ".", ","));
+
+            var racikanUID = $(this).attr("uid-racikan");
+            verifData = CheckVerifRacikan(verifData, group, {
+                uid: racikanUID
+            });
         });
 
-        /*$("body").on("keyup", ".racikan_signa_jlh", function() {
+        $("body").on("keyup", ".racikan_signa_jlh", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
-            checkGenerateRacikan(id);
-        });*/
+            var racikanUID = $(this).attr("uid-racikan");
+            verifData = CheckVerifRacikan(verifData, id, {
+                uid: racikanUID
+            });
+        });
 
         //===========================================================================
         $("body").on("keyup", ".resep_konsumsi", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
+            verifData = CheckVerifResep(verifData, id, {
+                id: $("#resep_obat_" + id + " option:selected").val()
+            });
             //checkGenerateResep(id);
         });
 
         $("body").on("keyup", ".resep_takar", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
+            verifData = CheckVerifResep(verifData, id, {
+                id: $("#resep_obat_" + id + " option:selected").val()
+            });
             //checkGenerateResep(id);
         });
 
         $("body").on("keyup", ".resep_jlh_hari", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
+            verifData = CheckVerifResep(verifData, id, {
+                id: $("#resep_obat_" + id + " option:selected").val()
+            });
             //checkGenerateResep(id);
         });
 
         $("body").on("select2:select", ".resep-obat", function(e) {
             var data = e.params.data;
+
             $(this).children("[value=\""+ data["id"] + "\"]").attr({
                 "data-value": data["data-value"],
                 "penjamin-list": data["penjamin-list"],
@@ -1478,6 +1601,16 @@
 
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
+
+            //Reset Set Data
+            var oldDataObat = $(this).attr("old-data");
+            for(var az in verifData.resep) {
+                if(az !== oldDataObat) {
+                    delete verifData.resep[az];
+                }
+            }
+
+            verifData = CheckVerifResep(verifData, id, data);
 
             if($(this).val() != "none") {
                 var dataKategoriPerObat = autoKategoriObat(data['id']);
@@ -1544,7 +1677,188 @@
             }
         }
 
+        function CheckVerifResep(newData, id, data) {
+            if(newData.resep[data.id] === undefined) {
+                newData.resep[data.id] = {
+                    "aturan_pakai": $("#resep_obat_aturan_pakai_" + id + " option:selected").val(),
+                    "signaKonsumsi": $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue"),
+                    "signaTakar": $("#resep_signa_takar_" + id).inputmask("unmaskedvalue"),
+                    "signaHari": $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue")
+                };
+            } else {
+                newData.resep[data.id] = {
+                    "aturan_pakai": $("#resep_obat_aturan_pakai_" + id + " option:selected").val(),
+                    "signaKonsumsi": $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue"),
+                    "signaTakar": $("#resep_signa_takar_" + id).inputmask("unmaskedvalue"),
+                    "signaHari": $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue")
+                };
+            }
+            console.log(newData);
+            return newData;
+        }
+
+
+        function CheckVerifRacikan(newData, id, data) {
+            var itemNew = [];
+            $("#komposisi_" + id + " tbody tr").each(function(e) {
+                var komposisiID = (e + 1);
+                itemNew.push({
+                    obat: $(this).find("td:eq(1) h6").attr("uid-obat"),
+                    kekuatan: $("#takar_komposisi_" + id + "_" + komposisiID).html(),
+                    jumlah: $("#jlh_komposisi_" + id +"_" + komposisiID).inputmask("unmaskedvalue")
+                });
+            });
+
+            if(newData.racikan[data.uid] === undefined) {
+                newData.racikan[data.uid] = {
+                    signaKonsumsi: $("#racikan_signaA_" + id).inputmask("unmaskedvalue"),
+                    signaTakar: $("#racikan_signaB_" + id).inputmask("unmaskedvalue"),
+                    signaHari: $("#racikan_jumlah_" + id).inputmask("unmaskedvalue"),
+                    item: [],
+                    aturan_pakai: $("#racikan_aturan_pakai_" + id + " option:selected").val()
+                };
+            } else {
+                newData.racikan[data.uid] = {
+                    signaKonsumsi: $("#racikan_signaA_" + id).inputmask("unmaskedvalue"),
+                    signaTakar: $("#racikan_signaB_" + id).inputmask("unmaskedvalue"),
+                    signaHari: $("#racikan_jumlah_" + id).inputmask("unmaskedvalue"),
+                    item: itemNew,
+                    aturan_pakai: $("#racikan_aturan_pakai_" + id + " option:selected").val()
+                };
+            }
+            return newData;
+        }
+
+        function CompareVerif(oldData, newData) {
+            console.clear();
+            var changed = false;
+
+            if(
+                Object.keys(newData.resep).length === 0 && newData.resep.constructor === Object &&
+                Object.keys(newData.racikan).length === 0 && newData.racikan.constructor === Object
+            ) {
+                changed = false
+            } else {
+                for(var a in newData.resep) {
+                    if(oldData.resep[a] === undefined) {
+                        changed = true;
+                        break;
+                    } else {
+                        if(
+                            parseFloat(newData.resep[a].aturan_pakai) === parseFloat(oldData.resep[a].aturan_pakai) &&
+                            parseFloat(newData.resep[a].signaKonsumsi) === parseFloat(oldData.resep[a].signaKonsumsi) &&
+                            parseFloat(newData.resep[a].signaTakar) === parseFloat(oldData.resep[a].signaTakar) &&
+                            parseFloat(newData.resep[a].signaHari) === parseFloat(oldData.resep[a].signaHari)
+                        ) {
+                            changed = false;
+                        } else {
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(!changed) {
+                    for(var a in newData.racikan) {
+                        if(oldData.racikan[a] === undefined) {
+                            changed = true;
+                            break;
+                        } else {
+                            if(
+                                parseFloat(newData.racikan[a].aturan_pakai) === parseFloat(oldData.racikan[a].aturan_pakai) &&
+                                parseFloat(newData.racikan[a].signaKonsumsi) === parseFloat(oldData.racikan[a].signaKonsumsi) &&
+                                parseFloat(newData.racikan[a].signaTakar) === parseFloat(oldData.racikan[a].signaTakar) &&
+                                parseFloat(newData.racikan[a].signaHari) === parseFloat(oldData.racikan[a].signaHari)
+                            ) {
+                                var dataCheckNew = {};
+                                for(var b in newData.racikan[a].item) {
+                                    if(dataCheckNew[newData.racikan[a].item[b].obat] === undefined) {
+                                        dataCheckNew[newData.racikan[a].item[b].obat] =  {
+                                            kekuatan: newData.racikan[a].item[b].kekuatan,
+                                            jumlah: newData.racikan[a].item[b].jumlah
+                                        };
+                                    }
+                                }
+
+                                if(Object.keys(dataCheckNew).length === 0 && dataCheckNew.constructor === Object) {
+                                    changed = false;
+                                } else {
+                                    console.log(dataCheckNew);
+
+                                    for(var c in oldData.racikan[a].item) {
+                                        if(dataCheckNew[oldData.racikan[a].item[c].obat] === undefined) {
+                                            changed = true;
+                                            break;
+                                        } else {
+                                            if(
+                                                dataCheckNew[oldData.racikan[a].item[c].obat].kekuatan === oldData.racikan[a].item[c].kekuatan &&
+                                                parseFloat(dataCheckNew[oldData.racikan[a].item[c].obat].jumlah) === parseFloat(oldData.racikan[a].item[c].jumlah)
+                                            ) {
+                                                changed = false;
+                                            } else {
+                                                changed = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                changed = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return changed;
+        }
+
+        $("body").on("change", ".aturan-pakai", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            verifData = CheckVerifResep(verifData, id, {
+                id: $("#resep_obat_" + id + " option:selected").val()
+            });
+        });
+
+        $("body").on("change", ".aturan-pakai-racikan", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            var racikanUID = $(this).attr("uid-racikan");
+
+            verifData = CheckVerifRacikan(verifData, id, {
+                uid: racikanUID
+            });
+        });
+
+        $("#btnSubmitAlasanUbah").click(function() {
+            alasanUbah = $("#alasan-ubah-resep").val();
+            if(alasanUbah !== "") {
+                simpanDataVerifikasi();
+            } else {
+                Swal.fire(
+                    "Verifikasi Gagal!",
+                    "Alasan ubah harus diisi",
+                    "warning"
+                ).then((result) => {
+
+                });
+            }
+        });
+
         $("#btnSelesai").click(function() {
+            $("#alasan-ubah-resep").val(alasanUbah);
+            if(CompareVerif(currentData, verifData)) {
+                $("#form-alasan-ubah").modal("show");
+            } else {
+                simpanDataVerifikasi();
+            }
+        });
+
+        function simpanDataVerifikasi() {
             Swal.fire({
                 title: "Verfikasi Resep",
                 text: "Pastikan semua obat sudah sesuai dan stok mencukupi. Data sudah benar?",
@@ -1667,6 +1981,7 @@
                             data:{
                                 request: "verifikasi_resep_2",
                                 uid: __PAGES__[3],
+                                alasan_ubah: $("#alasan-ubah-resep").val(),
                                 asesmen:currentAsesmen,
                                 kunjungan: currentMetaData.kunjungan,
                                 antrian:currentMetaData.uid,
@@ -1678,8 +1993,6 @@
                                 kajian: kajian
                             },
                             success:function(response) {
-                                /*console.clear();
-                                console.log(response);*/
                                 if(response.response_package.antrian.response_result > 0) {
                                     if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
                                         Swal.fire(
@@ -1715,7 +2028,7 @@
                                 "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong. Harap isi kajian resep",
                                 "warning"
                             ).then((result) => {
-                                //location.href = __HOSTNAME__ + "/apotek/resep/";
+                                $("#form-alasan-ubah").modal("hide");
                             });
                         } else {
                             Swal.fire(
@@ -1723,13 +2036,15 @@
                                 "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong",
                                 "warning"
                             ).then((result) => {
-                                //location.href = __HOSTNAME__ + "/apotek/resep/";
+                                $("#form-alasan-ubah").modal("hide");
                             });
                         }
                     }
+                } else {
+                    $("#form-alasan-ubah").modal("hide");
                 }
             });
-        });
+        }
 
         $("#btnCopyResep").click(function() {
             //
@@ -1737,11 +2052,28 @@
     });
 </script>
 
+<div id="form-alasan-ubah" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Alasan Ubah Resep</h5>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" placeholder="Alasan Perubahan Resep" id="alasan-ubah-resep" style="min-height: 400px;"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+                <button type="button" class="btn btn-primary" id="btnSubmitAlasanUbah">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="form-editor-racikan" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal-large-title">Order Laboratorium</h5>
+                <h5 class="modal-title" id="modal-large-title">Komposisi Obat</h5>
                 <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button> -->
@@ -1790,7 +2122,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-                <button type="button" class="btn btn-primary" id="btnSubmitKomposisi">Order</button>
+                <button type="button" class="btn btn-primary" id="btnSubmitKomposisi">Simpan</button>
             </div>
         </div>
     </div>

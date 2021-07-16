@@ -188,6 +188,7 @@ class CPPT extends Utility {
                     'keterangan_racikan',
                     'apoteker',
                     'alergi_obat',
+                    'alasan_ubah',
                     'kode'
                 ))
                     ->where(array(
