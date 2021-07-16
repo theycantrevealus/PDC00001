@@ -590,6 +590,7 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+                    console.log(response);
                     var returnedData = [];
 
                     if(response == undefined || response.response_package == undefined) {
@@ -626,7 +627,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = returnedData.length;
 
                     return returnedData;
                 }
@@ -753,8 +754,6 @@
                     if(returnedData == undefined || returnedData.response_package == undefined) {
                         returnedData = [];
                     }
-
-                    console.log(response);
 
                     for(var InvKeyData in response.response_package.response_data) {
                         if(

@@ -330,12 +330,13 @@ class Invoice extends Utility
                         'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
                         'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
-                        'AND',
-                        'antrian_nomor.poli' => '= ?'
+                        /*'AND',
+                        'antrian_nomor.poli' => '= ?'*/
                     );
 
                     $paramValue = array(
-                        $parameter['from'], $parameter['to'], __POLI_INAP__
+                        //$parameter['from'], $parameter['to'], __POLI_INAP__
+                        $parameter['from'], $parameter['to']
                     );
                 }
             } else {
@@ -349,12 +350,13 @@ class Invoice extends Utility
                     'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                     'OR',
                     'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
-                    'AND',
-                    'antrian_nomor.poli' => '= ?'
+                    /*'AND',
+                    'antrian_nomor.poli' => '= ?'*/
                 );
 
                 $paramValue = array(
-                    $parameter['from'], $parameter['to'], __POLI_IGD__
+                    //$parameter['from'], $parameter['to'], __POLI_IGD__
+                    $parameter['from'], $parameter['to']
                 );
             }
         } else {
@@ -378,24 +380,26 @@ class Invoice extends Utility
                         'invoice.deleted_at' => 'IS NULL',
                         'AND',
                         'invoice.created_at' => 'BETWEEN ? AND ?',
-                        'AND',
-                        'antrian_nomor.poli' => '= ?'
+                        /*'AND',
+                        'antrian_nomor.poli' => '= ?'*/
                     );
 
                     $paramValue = array(
-                        date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day')), __POLI_INAP__
+                        //date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day')), __POLI_INAP__
+                        date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day'))
                     );
                 } else {
                     $paramData = array(
                         'invoice.deleted_at' => 'IS NULL',
                         'AND',
                         'invoice.created_at' => 'BETWEEN ? AND ?',
-                        'AND',
-                        'antrian_nomor.poli' => '= ?'
+                        /*'AND',
+                        'antrian_nomor.poli' => '= ?'*/
                     );
 
                     $paramValue = array(
-                        date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day')), __POLI_IGD__
+                        //date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day')), __POLI_IGD__
+                        date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day'))
                     );
                 }
             } else {
