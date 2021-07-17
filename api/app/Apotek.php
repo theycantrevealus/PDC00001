@@ -2229,6 +2229,34 @@ class Apotek extends Utility
                 }
 
                 $paramValue = array('L', __POLI_IGD__);
+            } else if($parameter['request_type'] === 'lunas') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep.status_resep' => '= ?',
+                        'AND',
+                        '(NOT antrian.departemen' =>'= ?',
+                        'AND',
+                        'NOT antrian.departemen' =>'= ?)',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep.status_resep' => '= ?',
+                        'AND',
+                        '(NOT antrian.departemen' =>'= ?',
+                        'AND',
+                        'NOT antrian.departemen' =>'= ?)'
+                    );
+                }
+
+                $paramValue = array('L', __POLI_IGD__, __POLI_INAP__);
             }
         } else {
             //Resep Poli Biasa
@@ -2266,7 +2294,7 @@ class Apotek extends Utility
                 );
             }
 
-            $paramValue = array(__POLI_IGD__, __POLI_INAP__, 'D', 'P', 'S');
+            $paramValue = array(__POLI_IGD__, __POLI_INAP__, 'L', 'P', 'S');
         }
 
 

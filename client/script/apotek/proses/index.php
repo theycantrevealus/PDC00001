@@ -106,6 +106,7 @@
                 type: "POST",
                 data: function(d){
                     d.request = "get_resep_backend_v3";
+                    d.request_type = "lunas";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
