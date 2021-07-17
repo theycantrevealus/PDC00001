@@ -3380,7 +3380,7 @@ class Apotek extends Utility
 
         $UpdateStatusResep = self::$query->update('resep', array(
             'status_resep' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? (($parameter['departemen'] === __POLI_IGD__) ? 'L' : 'K') : 'L',
-            'alasan_ubah' => $parameter['alasan_ubah']
+            'alasan_ubah' => (isset($parameter['alasan_ubah']) && !empty($parameter['alasan_ubah']) && $parameter['alasan_ubah'] !== '') ? $parameter['alasan_ubah'] : ''
         ))
             ->where(array(
                 'resep.uid' => '= ?',
