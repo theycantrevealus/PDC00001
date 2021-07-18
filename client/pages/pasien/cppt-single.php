@@ -388,6 +388,16 @@
                                                         <?php echo $racValue['kode']; ?>
                                                         <br /><br /><b>Keterangan:</b><br />
                                                         <?php echo $racValue['keterangan']; ?>
+                                                        <?php
+                                                        if(isset($racValue['racikan_apotek'][0]['alasan_ubah']) && !empty($racValue['racikan_apotek'][0]['alasan_ubah']) && $racValue['racikan_apotek'][0]['alasan_ubah'] !== '') {
+                                                            ?>
+                                                            <div class="alert alert-soft-danger card-margin" role="alert">
+                                                                <strong>Alasan Ubah:</strong><br />
+                                                                <?php echo $racValue['racikan_apotek'][0]['alasan_ubah']; ?>
+                                                            </div>
+                                                            <?php
+                                                        }
+                                                        ?>
                                                     </td>
                                                     <td rowspan="<?php echo count($racValue['racikan_apotek'][0]['detail']); ?>">
                                                         <span class="wrap_content"><?php echo $racValue['racikan_apotek'][0]['signa_qty']; ?> &times; <?php echo $racValue['racikan_apotek'][0]['signa_pakai']; ?></span>
