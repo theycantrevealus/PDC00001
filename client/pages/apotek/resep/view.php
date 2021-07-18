@@ -136,7 +136,7 @@
                                 </div>
                             </div>
                             <div class="col-md-12">
-                                <table class="table table-bordered largeDataType" id="table-resep">
+                                <table class="table largeDataType resepTable" id="table-resep">
                                     <thead class="thead-dark">
                                     <tr>
                                         <th class="wrap_content">No</th>
@@ -173,7 +173,7 @@
                                 </div>
                             </div>
                             <div class="col-md-12">
-                                <table class="table table-bordered largeDataType" id="table-resep-racikan">
+                                <table class="table largeDataType resepTable" id="table-resep-racikan">
                                     <thead class="thead-dark">
                                     <tr>
                                         <th class="wrap_content">No</th>

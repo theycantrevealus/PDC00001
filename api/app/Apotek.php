@@ -3320,6 +3320,13 @@ class Apotek extends Utility
         }
 
         foreach ($parameter['resep'] as $key => $value) {
+            $alasan_resep = "";
+            foreach ($parameter['alasan_resep'] as $AResKey => $AResValue) {
+                if($AResValue['obat'] === $value['obat']) {
+                    $alasan_resep = $AResValue['text'];
+                }
+            }
+
             $resepChange = self::$query->insert('resep_change_log', array(
                 'resep' => $parameter['uid'],
                 'verifikator' => $UserData['data']->uid,
@@ -3329,6 +3336,7 @@ class Apotek extends Utility
                 'signa_qty' => floatval($value['signa_qty']),
                 'signa_pakai' => floatval($value['signa_pakai']),
                 'keterangan' => $value['keterangan'],
+                'alasan_ubah' => $value['alasan_ubah'],
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date(),
             ))
@@ -3356,6 +3364,13 @@ class Apotek extends Utility
         }
 
         foreach ($parameter['racikan'] as $key => $value) {
+            $alasan_racikan = "";
+            foreach ($parameter['alasan_racikan'] as $ARacKey => $ARacValue) {
+                if($ARacValue['racikan'] === $value['racikan_uid']) {
+                    $alasan_racikan = $ARacValue['text'];
+                }
+            }
+
             $racikanChange = self::$query->insert('racikan_change_log', array(
                 'racikan' => $value['racikan_uid'],
                 'jumlah' => $value['jumlah'],
@@ -3363,6 +3378,7 @@ class Apotek extends Utility
                 'signa_pakai' => $value['signa_pakai'],
                 'keterangan' => $value['keterangan'],
                 'aturan_pakai' => $value['aturan_pakai'],
+                'alasan_ubah' => $alasan_racikan,
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             ))
