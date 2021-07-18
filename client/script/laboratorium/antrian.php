@@ -307,7 +307,7 @@
                             }
 
                             html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
-                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
+                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + " <strong class=\"pull-right badge badge-custom-caption badge-info\"><i class=\"material-icons\">verified_user</i><h5 class=\"text-white\">&nbsp;" + item.mitra.nama + "</h5></strong></h5>" +
                                 "</div><div class=\"card-body\">" +
                                 "<div class=\"row\">" +
                                 "<div class=\"col-12\">" +

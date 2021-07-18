@@ -365,6 +365,7 @@
 										"<td>" + (i + 1) +"</td>" +
 										"<td>" + MetaData[i].tindakan + "</td>" +
 										"<td>" + MetaData[i].penjamin + "</td>" +
+                                        "<td>" + MetaData[i].mitra.nama + "</td>" +
 										"<td>" +
 											"<a href=\"#\" class=\"linkTindakan btn btn-sm btn-info\">" +
 												"<i class=\"fa fa-eye\"></i>" +

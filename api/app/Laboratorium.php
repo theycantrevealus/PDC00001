@@ -3044,7 +3044,8 @@ class Laboratorium extends Utility {
 					'lab_order',
 					'request_item',
 					'tgl_ambil_sample',
-					'tindakan'
+					'tindakan',
+                    'mitra'
 				)
 			)
 			->where(array(
@@ -3056,12 +3057,13 @@ class Laboratorium extends Utility {
                 )
 			)
 			->execute();
-
+		$Mitra = new Mitra(self::$pdo);
 		foreach ($data['response_data'] as $key => $value){
 			$data_lab = self::get_lab_detail_data_only($value['tindakan']);
 			$data['response_data'][$key]['kode'] = $data_lab['response_data'][0]['kode'];
 			$data['response_data'][$key]['nama'] = $data_lab['response_data'][0]['nama'];
             $data['response_data'][$key]['naratif'] = $data_lab['response_data'][0]['naratif'];
+            $data['response_data'][$key]['mitra'] = $Mitra->get_mitra_detail($value['mitra'])['response_data'][0];
 			$data['response_data'][$key]['tgl_ambil_sample_parse'] = date('d F Y', strtotime($value['tgl_ambil_sample']));
             $data['response_data'][$key]['allow'] = ($value['tgl_ambil_sample'] <= date('Y-m-d')) ? true : false;
 			

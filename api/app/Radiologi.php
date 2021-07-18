@@ -591,6 +591,7 @@ class Radiologi extends Utility
                     'radiologi_order as uid_radiologi_order',
                     'tindakan as uid_tindakan',
                     'penjamin as uid_penjamin',
+                    'mitra',
                     'keterangan',
                     'kesimpulan',
                     'gambar',
@@ -605,6 +606,7 @@ class Radiologi extends Utility
             ->execute();
 
         $autonum = 1;
+        $Mitra = new Mitra(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['tindakan'] = self::get_tindakan_detail($value['uid_tindakan'])['response_data'][0]['nama'];
 
@@ -612,6 +614,8 @@ class Radiologi extends Utility
             $data['response_data'][$key]['penjamin'] = $penjamin->get_penjamin_detail($value['uid_penjamin'])['response_data'][0]['nama'];
 
             $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order']));
+
+            $data['response_data'][$key]['mitra'] = $Mitra->get_mitra_detail($value['mitra'])['response_data'][0];
 
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
