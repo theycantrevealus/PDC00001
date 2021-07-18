@@ -277,6 +277,7 @@
 
 
             $("#load-detail-racikan tbody").html("");
+            console.log(data.racikan);
             for(var b = 0; b < data.racikan.length; b++) {
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
@@ -436,7 +437,8 @@
                             harga: harga_tertinggi_racikan
                         });
 
-                        $(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[b].jumlah + "<h5>");
+                        $(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[0].jumlah + "<h5>");
+                        //$(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[b].jumlah + "<h5>");
                         $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {

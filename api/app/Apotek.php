@@ -122,8 +122,10 @@ class Apotek extends Utility
 
 
                     //return self::get_resep_serah_backend($parameter);
-                    $parameter['status'] = 'D';
-                    return self::get_resep_backend_v2($parameter);
+                    /*$parameter['status'] = 'D';
+                    return self::get_resep_backend_v2($parameter);*/
+
+                    return self::get_resep_backend_v3($parameter);
 
                     break;
                 case 'get_resep_igd':
@@ -2257,6 +2259,37 @@ class Apotek extends Utility
                 }
 
                 $paramValue = array('L', __POLI_IGD__, __POLI_INAP__);
+            } else if($parameter['request_type'] === 'serah') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        '(NOT antrian.departemen' =>'= ?',
+                        'AND',
+                        'NOT antrian.departemen' =>'= ?)',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'AND',
+                        '(NOT antrian.departemen' =>'= ?',
+                        'AND',
+                        'NOT antrian.departemen' =>'= ?)'
+                    );
+                }
+
+                $paramValue = array('D', 'P', __POLI_IGD__, __POLI_INAP__);
             }
         } else {
             //Resep Poli Biasa

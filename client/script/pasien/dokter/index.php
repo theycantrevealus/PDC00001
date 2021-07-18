@@ -114,7 +114,9 @@
                         if(row.rad_order.length > 0) {
                             isRad = 1
                         }
-                        return 	"<button lab=\"" + isLab + "\" rad=\"" + isRad + "\" antrian=\"" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\" id=\"detail_" + row.uid + "\"><i class=\"fa fa-eye\"></i> Detail</button>";
+
+                        //return 	"<button lab=\"" + isLab + "\" rad=\"" + isRad + "\" antrian=\"" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\" id=\"detail_" + row.uid + "\"><i class=\"fa fa-eye\"></i> Detail</button>";
+                        return 	"<a href=\"" + __HOSTNAME__ + "/pasien/dokter/view/" + row.pasien.uid + "/" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\"><i class=\"fa fa-eye\"></i> Detail</a>";
                     }
                 }
             ]

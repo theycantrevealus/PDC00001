@@ -1493,7 +1493,7 @@
 
             var racikanUID = $(this).attr("uid-racikan");
             currentRacikanActive = racikanUID;
-            verifData = CheckVerifRacikan(verifData, currentRacikID, {
+            verifData = CheckVerifRacikan(verifData, Pid, {
                 uid: racikanUID
             }, currentData, alasanRacikanLib);
 
@@ -1986,34 +1986,39 @@
                                 parseFloat(newData.racikan[a].signaHari) === parseFloat(oldData.racikan[a].signaHari)
                             ) {
                                 var dataCheckNew = {};
-                                for(var b in newData.racikan[a].item) {
-                                    if(dataCheckNew[newData.racikan[a].item[b].obat] === undefined) {
-                                        dataCheckNew[newData.racikan[a].item[b].obat] =  {
-                                            kekuatan: newData.racikan[a].item[b].kekuatan,
-                                            jumlah: newData.racikan[a].item[b].jumlah
-                                        };
+                                if(newData.racikan[a].item.length === oldData.racikan[a].item.length) {
+                                    for(var b in newData.racikan[a].item) {
+                                        if(dataCheckNew[newData.racikan[a].item[b].obat] === undefined) {
+                                            dataCheckNew[newData.racikan[a].item[b].obat] =  {
+                                                kekuatan: newData.racikan[a].item[b].kekuatan,
+                                                jumlah: newData.racikan[a].item[b].jumlah
+                                            };
+                                        }
                                     }
-                                }
 
-                                if(Object.keys(dataCheckNew).length === 0 && dataCheckNew.constructor === Object) {
-                                    changed = false;
-                                } else {
-                                    for(var c in oldData.racikan[a].item) {
-                                        if(dataCheckNew[oldData.racikan[a].item[c].obat] === undefined) {
-                                            changed = true;
-                                            break;
-                                        } else {
-                                            if(
-                                                dataCheckNew[oldData.racikan[a].item[c].obat].kekuatan === oldData.racikan[a].item[c].kekuatan &&
-                                                parseFloat(dataCheckNew[oldData.racikan[a].item[c].obat].jumlah) === parseFloat(oldData.racikan[a].item[c].jumlah)
-                                            ) {
-                                                changed = false;
-                                            } else {
+                                    if(Object.keys(dataCheckNew).length === 0 && dataCheckNew.constructor === Object) {
+                                        changed = false;
+                                    } else {
+                                        for(var c in oldData.racikan[a].item) {
+                                            if(dataCheckNew[oldData.racikan[a].item[c].obat] === undefined) {
                                                 changed = true;
                                                 break;
+                                            } else {
+                                                if(
+                                                    dataCheckNew[oldData.racikan[a].item[c].obat].kekuatan === oldData.racikan[a].item[c].kekuatan &&
+                                                    parseFloat(dataCheckNew[oldData.racikan[a].item[c].obat].jumlah) === parseFloat(oldData.racikan[a].item[c].jumlah)
+                                                ) {
+                                                    changed = false;
+                                                } else {
+                                                    changed = true;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
+                                } else {
+                                    changed = true;
+                                    break;
                                 }
                             } else {
                                 changed = true;
@@ -2076,26 +2081,31 @@
             console.log(alasanLib);
             console.log(alasanRacikanLib);
             var allowVerifReason = false;
-            $(".resep-reason").each(function(e) {
-                var a = (e + 1);
-                if($("#alasan_" + a).val() === "") {
-                    allowVerifReason = false;
-                    return false;
-                } else {
-                    allowVerifReason = true;
-                }
-            });
 
-            if(allowVerifReason) {
-                $(".racikan-reason").each(function(e) {
-                    var b = (e + 1);
-                    if($("#alasan_racikan_" + b).val() === "") {
+            if($(".resep-reason").length === 0 && $(".racikan-reason").length === 0) {
+                allowVerifReason = true;
+            } else {
+                $(".resep-reason").each(function(e) {
+                    var a = (e + 1);
+                    if($("#alasan_" + a).val() === "") {
                         allowVerifReason = false;
                         return false;
                     } else {
                         allowVerifReason = true;
                     }
                 });
+
+                if(allowVerifReason) {
+                    $(".racikan-reason").each(function(e) {
+                        var b = (e + 1);
+                        if($("#alasan_racikan_" + b).val() === "") {
+                            allowVerifReason = false;
+                            return false;
+                        } else {
+                            allowVerifReason = true;
+                        }
+                    });
+                }
             }
 
             if(allowVerifReason) {

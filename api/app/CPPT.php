@@ -234,7 +234,8 @@ class CPPT extends Utility {
                         'aturan_pakai',
                         'keterangan',
                         'qty',
-                        'verifikator'
+                        'verifikator',
+                        'alasan_ubah'
                     ))
                         ->where(array(
                             'resep_change_log.resep' => '= ?',
@@ -294,7 +295,8 @@ class CPPT extends Utility {
                         'jumlah',
                         'signa_qty',
                         'signa_pakai',
-                        'aturan_pakai'
+                        'aturan_pakai',
+                        'alasan_ubah'
                     ))
                         ->where(array(
                             'racikan_change_log.racikan' => '= ?',

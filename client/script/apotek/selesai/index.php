@@ -148,13 +148,9 @@
 
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].antrian.departemen !== undefined) {
-                            if(dataSet[dKey].antrian.departemen !== null) {
-                                if(dataSet[dKey].antrian.departemen.uid !== __POLI_IGD__ && dataSet[dKey].antrian.departemen.uid !== __POLI_INAP__) {
-                                    if(dataSet[dKey].status_resep !== "S") {
-                                        forReturn.push(dataSet[dKey]);
-                                    }
-                                }
+                        if(dataSet[dKey].departemen !== undefined && dataSet[dKey].departemen !== null) {
+                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
+                                forReturn.push(dataSet[dKey]);
                             }
                         }
                     }
@@ -184,7 +180,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.departemen.nama;
+                        return row.departemen.nama;
                     }
                 },
                 {
@@ -199,7 +195,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.nama_penjamin;
+                        return row.penjamin.nama;
                     }
                 },
                 {
@@ -616,7 +612,6 @@
                 type:"GET",
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
-                    console.log(targettedData);
 
                     var detail_dokter = targettedData.detail_dokter;
                     var resep_dokter = [];
@@ -666,7 +661,8 @@
                             racikan_apotek.push({
                                 obat: "<b>R\/</b> " + detailRacikanApotek[c].detail.nama,
                                 kuantitas: ((detailRacikanApotek[c].pay[0] !== undefined) ? detailRacikanApotek[c].pay[0].qty : 0),
-                                signa: detail_racikan_apotek[b].change[b].signa_qty + " &times; " + detail_racikan_apotek[b].change[b].signa_pakai,
+                                //signa: detail_racikan_apotek[b].change[b].signa_qty + " &times; " + detail_racikan_apotek[b].change[b].signa_pakai,
+                                signa: detail_racikan_apotek[b].change[0].signa_qty + " &times; " + detail_racikan_apotek[b].change[0].signa_pakai,
                                 keterangan: detail_racikan_apotek[b].keterangan,
                                 harga: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].harga), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",
                                 subtotal: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].subtotal), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",
@@ -960,7 +956,7 @@
 
                         $(newCellRacikanID).attr("rowspan", racikanDetail.length).html((b + 1));
                         $(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
-                        $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5 class=\"wrap_content\">" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
+                        $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[0].signa_qty + " &times " + data.racikan[b].change[0].signa_pakai + "</h5>");
                         $(newCellRacikanJlh).addClass("text-center").attr("rowspan", racikanDetail.length);
 
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
@@ -991,7 +987,8 @@
                             harga: harga_tertinggi_racikan
                         });
 
-                        $(newCellRacikanJlh).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[b].jumlah + "<h5>");
+                        $(newCellRacikanJlh).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[0].jumlah + "<h5>");
+                        //$(newCellRacikanJlh).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[b].jumlah + "<h5>");
                         $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
