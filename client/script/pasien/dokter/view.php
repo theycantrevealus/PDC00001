@@ -1,8 +1,10 @@
 <script type="text/javascript">
     $(function () {
         var UID = __PAGES__[4];
-        loadCPPT("2021-01-01", "2021-08-01", __PAGES__[3]);
+        loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
+        //loadCPPT("2021-01-01", "2021-08-01", __PAGES__[3]);
         function loadCPPT(from, to, pasien) {
+            console.clear();
             $("#cppt_loader").html("");
             $.ajax({
                 url: __HOSTAPI__ + "/CPPT",
@@ -20,8 +22,6 @@
                 },
                 success:function(response) {
                     var data = response.response_package;
-                    console.clear();
-                    //console.log(data);
                     for(var a in data) {
                         $.ajax({
                             url: __HOSTNAME__ + "/pages/pasien/cppt-grouper.php",
@@ -94,5 +94,9 @@
                 }
             });
         }
+
+        $("#filter_date").change(function() {
+            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
+        });
     });
 </script>

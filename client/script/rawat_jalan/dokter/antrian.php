@@ -3441,7 +3441,7 @@
                     allowLoadLab = false;
                 }
             } else if(targetID === "#tab-poli-7") {
-                loadCPPT("2021-01-01", "2021-08-01", pasien_uid);
+                loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], pasien_uid);
             }
 
             const simpanDataProcess = new Promise(function(resolve, reject) {
@@ -3564,6 +3564,10 @@
                 }
             });
         }
+
+        $("#filter_date").change(function() {
+            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], pasien_uid);
+        });
 
 
 

@@ -26,10 +26,10 @@
                         <div class="card card-form d-flex flex-column flex-sm-row">
                             <div class="card-form__body card-body-form-group flex">
                                 <div class="row">
-                                    <div class="col-sm-auto">
-                                        <div class="form-group" style="width: 200px;">
+                                    <div class="col-md-auto">
+                                        <div class="form-group" style="width: 400px;">
                                             <label for="filter_date">Dari - Sampai</label>
-                                            <input id="filter_date" type="text" class="form-control" placeholder="Select date ..." value="13/03/2018 to 20/03/2018" data-toggle="flatpickr" data-flatpickr-mode="range" data-flatpickr-alt-format="d/m/Y" data-flatpickr-date-format="d/m/Y">
+                                            <input id="filter_date" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
                                         </div>
                                     </div>
                                 </div>
