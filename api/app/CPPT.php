@@ -90,6 +90,7 @@ class CPPT extends Utility {
         $Inventori = new Inventori(self::$pdo);
         $Tindakan = new Tindakan(self::$pdo);
         $Laboratorium = new Laboratorium(self::$pdo);
+        $Mitra = new Mitra(self::$pdo);
 	    foreach ($Antrian['response_data'] as $key => $value) {
 	        //if($value['uid'] !== $parameter['current']) {
                 $GrouperName = date('Y-m-d', strtotime($value['waktu_masuk']));
@@ -351,7 +352,7 @@ class CPPT extends Utility {
                 foreach ($LaboratoriumItem['response_data'] as $LabKey => $LabValue) {
                     if($LabValue['status'] === 'D') {
                         $ItemLab = self::$query->select('lab_order_detail', array(
-                            'tindakan'
+                            'tindakan', 'mitra'
                         ))
                             ->where(array(
                                 'lab_order_detail.lab_order' => '= ?',
@@ -379,6 +380,8 @@ class CPPT extends Utility {
                                 $DetailLabor['response_data'][$DLabKey]['item_lab'] = $Laboratorium->get_lab_nilai_detail($DLabValue['id_lab_nilai'])['response_data'][0];
                             }
                             $ItemLab['response_data'][$LabItemKey]['nilai'] = $DetailLabor['response_data'];
+
+                            $ItemLab['response_data'][$LabItemKey]['mitra'] = $Mitra->get_mitra_detail($ItemItemValue['mitra'])['response_data'][0];
 
                             $ItemLab['response_data'][$LabItemKey]['tindakan'] = $Tindakan->get_tindakan_info($ItemItemValue['tindakan'])['response_data'][0];
                         }
@@ -425,7 +428,7 @@ class CPPT extends Utility {
                     ->execute();
                 foreach ($RadiologiItem['response_data'] as $RadKey => $RadValue) {
                     $RadDetail = self::$query->select('rad_order_detail', array(
-                        'tindakan', 'keterangan', 'kesimpulan', 'verifikator'
+                        'tindakan', 'keterangan', 'kesimpulan', 'verifikator', 'mitra'
                     ))
                         ->where(array(
                             'rad_order_detail.radiologi_order' => '= ?',
@@ -436,6 +439,7 @@ class CPPT extends Utility {
                         ))
                         ->execute();
                     foreach ($RadDetail['response_data'] as $RadDetKey => $RadDetValue) {
+                        $RadDetail['response_data'][$RadDetKey]['mitra'] = $Mitra->get_mitra_detail($RadDetValue['mitra'])['response_data'][0];
                         $RadDetail['response_data'][$RadDetKey]['tindakan'] = $Tindakan->get_tindakan_info($RadDetValue['tindakan'])['response_data'][0];
                     }
                     $RadiologiItem['response_data'][$RadKey]['detail'] = $RadDetail['response_data'];

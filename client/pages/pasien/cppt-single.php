@@ -474,9 +474,21 @@
                                                                 <?php
                                                                 foreach ($LabValue['detail'] as $LabDKey => $LabDValue) {
                                                                     ?>
-                                                                    <div class="col-auto d-flex align-items-center">
-                                                                        <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;<?php echo $LabDValue['tindakan']['nama']; ?></h5>
-                                                                    </div>
+                                                                        <div class="row">
+                                                                            <div class="col-lg-6">
+                                                                                <div class="col-auto d-flex align-items-center">
+                                                                                    <i class="material-icons text-warning icon-20pt ml-2">folder</i>
+                                                                                    <h5 class="text-info">&nbsp;&nbsp;<?php echo $LabDValue['tindakan']['nama']; ?></h5>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-lg-6">
+                                                                                <div class="col-auto d-flex">
+                                                                                    <i class="material-icons text-info icon-20pt ml-2">verified_users</i>
+                                                                                    <h6 class="text-right ml-10"><span class="text-info"><?php echo $LabDValue['mitra']['nama']; ?></span></h6>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
                                                                     <br />
                                                                     <table class="table table-bordered largeDataType">
                                                                         <thead class="thead-dark">
@@ -598,7 +610,7 @@
                                                                 foreach ($RadValue['detail'] as $RadDKey => $RadDValue) {
                                                                     ?>
                                                                     <div class="col-auto d-flex align-items-center">
-                                                                        <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;<?php echo $RadDValue['tindakan']['nama']; ?></h5>
+                                                                        <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;<?php echo $RadDValue['tindakan']['nama']; ?> - <h5 class="text-success text-right"><i class="material-icons">verified_user</i> <?php echo $RadDValue['mitra']['nama']; ?></h5></h5>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="col-lg-6">
