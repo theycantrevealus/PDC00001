@@ -2115,6 +2115,11 @@
                 }
             }
 
+            alert($(".resep-reason").length);
+            alert($(".racikan-reason").length);
+            alert(allowVerifReason);
+            alert(allowVerifRacikanReason);
+
             if(allowVerifReason && allowVerifRacikanReason) {
                 Swal.fire({
                     title: "Verfikasi Resep",
