@@ -2100,7 +2100,7 @@
                     });
                 }
 
-                if($(".resep-reason").length === 0) {
+                if($(".racikan-reason").length === 0) {
                     allowVerifRacikanReason = true;
                 } else {
                     $(".racikan-reason").each(function(e) {
@@ -2115,10 +2115,10 @@
                 }
             }
 
-            alert($(".resep-reason").length);
+            /*alert($(".resep-reason").length);
             alert($(".racikan-reason").length);
             alert(allowVerifReason);
-            alert(allowVerifRacikanReason);
+            alert(allowVerifRacikanReason);*/
 
             if(allowVerifReason && allowVerifRacikanReason) {
                 Swal.fire({
