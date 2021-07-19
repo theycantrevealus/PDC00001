@@ -957,7 +957,11 @@
 
                         $(newCellRacikanID).attr("rowspan", racikanDetail.length).html((b + 1));
                         $(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
-                        $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[0].signa_qty + " &times " + data.racikan[b].change[0].signa_pakai + "</h5>");
+                        if(data.racikan[b].change.length > 0) {
+                            $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[0].signa_qty + " &times " + data.racikan[b].change[0].signa_pakai + "</h5>");
+                        } else {
+                            $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5 class=\"wrap_content\">" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
+                        }
                         $(newCellRacikanJlh).addClass("text-center").attr("rowspan", racikanDetail.length);
 
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
