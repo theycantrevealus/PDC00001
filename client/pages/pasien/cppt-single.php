@@ -423,30 +423,60 @@
                                                     </td>
                                                     <td>
                                                         <strong class="text-info">
-                                                            <?php echo $racValue['racikan_apotek'][0]['detail'][0]['obat']['nama']; ?>
+                                                            <?php
+                                                                if(count($racValue['racikan_apotek']) > 0) {
+                                                                    echo $racValue['racikan_apotek'][0]['detail'][0]['obat']['nama'];
+                                                                } else {
+                                                                    echo $racValue['detail'][0]['obat']['nama'];
+                                                                }
+                                                                ?>
                                                         </strong>
                                                     </td>
                                                     <td>
                                                         <strong class="text-info">
-                                                            <?php echo $racValue['racikan_apotek'][0]['detail'][0]['kekuatan']; ?>
+                                                            <?php
+                                                                if(count($racValue['racikan_apotek']) > 0) {
+                                                                    echo $racValue['racikan_apotek'][0]['detail'][0]['kekuatan'];
+                                                                } else {
+                                                                    echo $racValue['detail'][0]['kekuatan'];
+                                                                }
+                                                            ?>
                                                         </strong>
                                                     </td>
                                                 </tr>
                                                 <?php
-                                                for ($a = 1; $a < (count($racValue['racikan_apotek'][0]['detail'])); $a++) {
-                                                    ?>
-                                                    <tr>
-                                                        <td>
-                                                            <strong class="text-info">
-                                                                <?php echo $racValue['racikan_apotek'][0]['detail'][$a]['obat']['nama']; ?>
-                                                            </strong><br />
-                                                        </td>
-                                                        <td>
-                                                            <?php echo $racValue['racikan_apotek'][0]['detail'][$a]['kekuatan']; ?>
-                                                        </td>
-                                                    </tr>
-                                                    <?php
+                                                if(count($racValue['racikan_apotek']) > 0) {
+                                                    for ($a = 1; $a < (count($racValue['racikan_apotek'][0]['detail'])); $a++) {
+                                                        ?>
+                                                        <tr>
+                                                            <td>
+                                                                <strong class="text-info">
+                                                                    <?php echo $racValue['racikan_apotek'][0]['detail'][$a]['obat']['nama']; ?>
+                                                                </strong><br />
+                                                            </td>
+                                                            <td>
+                                                                <?php echo $racValue['racikan_apotek'][0]['detail'][$a]['kekuatan']; ?>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                                    }
+                                                } else {
+                                                    for ($a = 1; $a < (count($racValue['detail'])); $a++) {
+                                                        ?>
+                                                        <tr>
+                                                            <td>
+                                                                <strong class="text-info">
+                                                                    <?php echo $racValue['detail'][$a]['obat']['nama']; ?>
+                                                                </strong><br />
+                                                            </td>
+                                                            <td>
+                                                                <?php echo $racValue['detail'][$a]['kekuatan']; ?>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                                    }
                                                 }
+
                                                 ?>
                                                 </tbody>
                                             </table>
