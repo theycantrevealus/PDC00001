@@ -886,6 +886,7 @@
 
             //==================================================================================== RACIKAN
             $("#load-detail-racikan tbody").html("");
+            console.log(data.racikan);
             for(var b = 0; b < data.racikan.length; b++) {
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
