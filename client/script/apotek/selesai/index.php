@@ -992,7 +992,12 @@
                             harga: harga_tertinggi_racikan
                         });
 
-                        $(newCellRacikanJlh).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[0].jumlah + "<h5>");
+                        if(data.racikan[b].change.length > 0) {
+                            $(newCellRacikanJlh).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[0].jumlah + "<h5>");
+                        } else {
+                            $(newCellRacikanJlh).html("<h5 class=\"wrap_content\">" + data.racikan[b].qty + "<h5>");
+                        }
+
                         //$(newCellRacikanJlh).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[b].jumlah + "<h5>");
                         $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
                         //alert(b + " - " + racDetailKey);
