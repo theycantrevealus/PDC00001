@@ -1557,8 +1557,8 @@
             group = id[id.length - 2];
             id = id[id.length - 1];
 
-            //var racikanUID = $(this).attr("uid-racikan");
-            var racikanUID = currentRacikanActive;
+            var racikanUID = $(this).attr("uid-racikan");
+            //var racikanUID = currentRacikanActive;
             verifData = CheckVerifRacikan(verifData, group, {
                 uid: racikanUID
             }, currentData, alasanRacikanLib);
