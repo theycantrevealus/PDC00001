@@ -612,7 +612,7 @@
                 type:"GET",
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
-
+                    console.log(targettedData);
                     var detail_dokter = targettedData.detail_dokter;
                     var resep_dokter = [];
                     for(var a in detail_dokter) {
