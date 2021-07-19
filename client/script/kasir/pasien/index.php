@@ -135,7 +135,13 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.terbayar;
+					    var terbayarAktual = row.record_terbayar;
+					    var parsedActual = 0;
+					    for(var a in terbayarAktual); {
+					        parsedActual += terbayarAktual[a].terbayar;
+                        }
+                        return number_format(parsedActual, 2, ".", ",");
+						//return row.terbayar;
 					}
 				},
 				{
@@ -590,7 +596,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var returnedData = [];
 
                     if(response == undefined || response.response_package == undefined) {
@@ -846,10 +851,15 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         var invDetail = row.invoice_detail;
+
+
+
                         var totalParse = 0;
                         for(var a in invDetail) {
-                            if(invDetail[a].departemen === __POLI_IGD__) {
-                                totalParse += parseFloat(invDetail[a].subtotal);
+                            if(invDetail[a].status_bayar === "N") {
+                                if(invDetail[a].departemen === __POLI_IGD__) {
+                                    totalParse += parseFloat(invDetail[a].subtotal);
+                                }
                             }
                         }
                         return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
@@ -1366,8 +1376,6 @@
                             keterangan:$("#keterangan-faktur").val()
                         },
                         success:function(response) {
-                            console.clear();
-                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 Swal.fire({
                                     title: "Pembayaran Berhasil!",

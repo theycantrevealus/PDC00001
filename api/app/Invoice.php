@@ -245,6 +245,7 @@ class Invoice extends Utility
                 $payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
 
                 $payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
+                $payment['response_data'][$key]['record_terbayar'] = self::get_payment($value['uid'])['response_data'];
 
                 $Detail = self::$query->select('invoice_payment_detail', array(
                     'penjamin', 'status'
