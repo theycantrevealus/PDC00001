@@ -326,6 +326,7 @@ class CPPT extends Utility {
                     }
 
                     $Racikan['response_data'][$RacKey]['racikan_apotek'] = $RacikanApotek['response_data'];
+                    $Racikan['response_data'][$RacKey]['racikan_apotek_raw'] = $RacikanApotek;
                 }
                 $Asesmen['response_data'][0]['racikan'] = $Racikan['response_data'];
 

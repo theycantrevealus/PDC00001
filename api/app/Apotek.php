@@ -2472,6 +2472,7 @@ class Apotek extends Utility
             ->execute();
 
         $data['recordsTotal'] = count($itemTotal['response_data']);
+        //$data['recordsTotal'] = $itemTotal;
         $data['recordsFiltered'] = count($data['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
