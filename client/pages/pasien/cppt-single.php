@@ -403,11 +403,11 @@
                                                         <?php
                                                         if(count($racValue['racikan_apotek']) > 0) {
                                                         ?>
-                                                            <span class="wrap_content"><?php echo $racValue['signa_qty']; ?> &times; <?php echo $racValue['signa_pakai']; ?></span>
+                                                            <span class="wrap_content"><?php echo $racValue['racikan_apotek'][0]['signa_qty']; ?> &times; <?php echo $racValue['racikan_apotek'][0]['signa_pakai']; ?></span>
                                                         <?php
                                                         } else {
                                                         ?>
-                                                            <span class="wrap_content"><?php echo $racValue['racikan_apotek'][0]['signa_qty']; ?> &times; <?php echo $racValue['racikan_apotek'][0]['signa_pakai']; ?></span>
+                                                            <span class="wrap_content"><?php echo $racValue['signa_qty']; ?> &times; <?php echo $racValue['signa_pakai']; ?></span>
                                                         <?php
                                                         }
                                                         ?>
