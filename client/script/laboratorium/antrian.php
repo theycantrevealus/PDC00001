@@ -299,6 +299,7 @@
                     if (response.response_package.response_result > 0) {
                         var allow_save = [];
                         dataItem = response.response_package.response_data;
+                        console.log(dataItem);
                         $.each(dataItem, function(key, item) {
                             if(item.allow) {
                                 allow_save.push(1);
