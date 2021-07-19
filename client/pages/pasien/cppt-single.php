@@ -383,8 +383,8 @@
                                                 </thead>
                                                 <tbody>
                                                 <tr>
-                                                    <td rowspan="<?php echo count($racValue['racikan_apotek'][0]['detail']); ?>"><?php echo $autoRacikan; ?></td>
-                                                    <td rowspan="<?php echo count($racValue['racikan_apotek'][0]['detail']); ?>">
+                                                    <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>"><?php echo $autoRacikan; ?></td>
+                                                    <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>">
                                                         <?php echo $racValue['kode']; ?>
                                                         <br /><br /><b>Keterangan:</b><br />
                                                         <?php echo $racValue['keterangan']; ?>
@@ -399,7 +399,7 @@
                                                         }
                                                         ?>
                                                     </td>
-                                                    <td rowspan="<?php echo count($racValue['racikan_apotek'][0]['detail']); ?>">
+                                                    <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>">
                                                         <?php
                                                         if(count($racValue['racikan_apotek']) > 0) {
                                                         ?>
@@ -412,7 +412,7 @@
                                                         }
                                                         ?>
                                                     </td>
-                                                    <td rowspan="<?php echo count($racValue['racikan_apotek'][0]['detail']); ?>">
+                                                    <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>">
                                                         <?php
                                                         if(count($racValue['racikan_apotek']) > 0) {
                                                             echo $racValue['racikan_apotek'][0]['jumlah'];
