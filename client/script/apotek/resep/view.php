@@ -2081,24 +2081,17 @@
             console.log(alasanLib);
             console.log(alasanRacikanLib);
             var allowVerifReason = false;
+            var allowVerifRacikanReason = false;
 
             if($(".resep-reason").length === 0 && $(".racikan-reason").length === 0) {
                 allowVerifReason = true;
             } else {
-                $(".resep-reason").each(function(e) {
-                    var a = (e + 1);
-                    if($("#alasan_" + a).val() === "") {
-                        allowVerifReason = false;
-                        return false;
-                    } else {
-                        allowVerifReason = true;
-                    }
-                });
-
-                if(allowVerifReason) {
-                    $(".racikan-reason").each(function(e) {
-                        var b = (e + 1);
-                        if($("#alasan_racikan_" + b).val() === "") {
+                if($(".resep-reason").length === 0) {
+                    allowVerifReason = true;
+                } else {
+                    $(".resep-reason").each(function(e) {
+                        var a = (e + 1);
+                        if($("#alasan_" + a).val() === "") {
                             allowVerifReason = false;
                             return false;
                         } else {
@@ -2106,9 +2099,23 @@
                         }
                     });
                 }
+
+                if($(".resep-reason").length === 0) {
+                    allowVerifRacikanReason = true;
+                } else {
+                    $(".racikan-reason").each(function(e) {
+                        var b = (e + 1);
+                        if($("#alasan_racikan_" + b).val() === "") {
+                            allowVerifRacikanReason = false;
+                            return false;
+                        } else {
+                            allowVerifRacikanReason = true;
+                        }
+                    });
+                }
             }
 
-            if(allowVerifReason) {
+            if(allowVerifReason && allowVerifRacikanReason) {
                 Swal.fire({
                     title: "Verfikasi Resep",
                     text: "Pastikan semua obat sudah sesuai dan stok mencukupi. Data sudah benar?",
