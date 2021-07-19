@@ -415,9 +415,9 @@
                                                     <td rowspan="<?php echo count($racValue['racikan_apotek'][0]['detail']); ?>">
                                                         <?php
                                                         if(count($racValue['racikan_apotek']) > 0) {
-                                                            echo $racValue['qty'];
-                                                        } else {
                                                             echo $racValue['racikan_apotek'][0]['jumlah'];
+                                                        } else {
+                                                            echo $racValue['qty'];
                                                         }
                                                         ?>
                                                     </td>
