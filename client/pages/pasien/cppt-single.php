@@ -400,10 +400,26 @@
                                                         ?>
                                                     </td>
                                                     <td rowspan="<?php echo count($racValue['racikan_apotek'][0]['detail']); ?>">
-                                                        <span class="wrap_content"><?php echo $racValue['racikan_apotek'][0]['signa_qty']; ?> &times; <?php echo $racValue['racikan_apotek'][0]['signa_pakai']; ?></span>
+                                                        <?php
+                                                        if(count($racValue['racikan_apotek']) > 0) {
+                                                        ?>
+                                                            <span class="wrap_content"><?php echo $racValue['signa_qty']; ?> &times; <?php echo $racValue['signa_pakai']; ?></span>
+                                                        <?php
+                                                        } else {
+                                                        ?>
+                                                            <span class="wrap_content"><?php echo $racValue['racikan_apotek'][0]['signa_qty']; ?> &times; <?php echo $racValue['racikan_apotek'][0]['signa_pakai']; ?></span>
+                                                        <?php
+                                                        }
+                                                        ?>
                                                     </td>
                                                     <td rowspan="<?php echo count($racValue['racikan_apotek'][0]['detail']); ?>">
-                                                        <?php echo $racValue['racikan_apotek'][0]['jumlah']; ?>
+                                                        <?php
+                                                        if(count($racValue['racikan_apotek']) > 0) {
+                                                            echo $racValue['qty'];
+                                                        } else {
+                                                            echo $racValue['racikan_apotek'][0]['jumlah'];
+                                                        }
+                                                        ?>
                                                     </td>
                                                     <td>
                                                         <strong class="text-info">
