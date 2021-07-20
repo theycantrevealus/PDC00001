@@ -240,6 +240,10 @@
             ]
         });
 
+        setInterval(function() {
+            tableResep.ajax.reload();
+        }, 20000);
+
 
         /*var tableResep = $("#table-resep").DataTable({
             //"data": load_resep(),
