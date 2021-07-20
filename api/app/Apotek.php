@@ -1304,7 +1304,8 @@ class Apotek extends Utility
             'keterangan',
             'keterangan_racikan',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'alasan_ubah'
         ))
             ->where(array(
                 'resep.uid' => '= ?',
@@ -1316,6 +1317,22 @@ class Apotek extends Utility
             ->execute();
 
         foreach($resep_dokter['response_data'] as $key => $value) {
+            //Kajian Apotek
+            $Kajian = self::$query->select('resep_kajian', array(
+                'parameter_kajian', 'nilai'
+            ))
+                ->where(array(
+                    'resep_kajian.resep' => '= ?',
+                    'AND',
+                    'resep_kajian.pasien' => '= ?',
+                    'AND',
+                    'resep_kajian.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid'], $value['pasien']
+                ))
+                ->execute();
+            $resep_dokter['response_data'][$key]['kajian'] = $Kajian['response_data'];
+
             //Charged Item
             $Invoice_detail = self::$query->select('invoice', array(
                 'uid'
@@ -1411,7 +1428,8 @@ class Apotek extends Utility
                 'signa_qty',
                 'signa_pakai',
                 'aturan_pakai',
-                'verifikator'
+                'verifikator',
+                'alasan_ubah'
             ))
                 ->where(array(
                     'resep_change_log.resep' => '= ?',
@@ -1522,6 +1540,7 @@ class Apotek extends Utility
                     'id',
                     'asesmen',
                     'obat',
+                    'kekuatan',
                     'ratio',
                     'pembulatan',
                     'harga',
@@ -1552,7 +1571,8 @@ class Apotek extends Utility
                     'signa_qty',
                     'signa_pakai',
                     'aturan_pakai',
-                    'keterangan'
+                    'keterangan',
+                    'alasan_ubah'
                 ))
                     ->where(array(
                         'racikan_change_log.racikan' => '= ?',

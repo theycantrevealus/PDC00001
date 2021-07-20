@@ -612,7 +612,11 @@
                 type:"GET",
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
-                    console.log(targettedData);
+                    var kajian = targettedData.kajian;
+                    for(var kaj in kajian) {
+                        $("#hasil_" + kajian[kaj].parameter_kajian).html((kajian[kaj].nilai === "y") ? "<span class=\"text-success wrap_content\"><i class=\"fa fa-check-circle\"></i> Ya</span>" : "<span class=\"text-danger wrap_content\"><i class=\"fa fa-times-circle\"></i> Tidak</span>");
+                    }
+
                     var detail_dokter = targettedData.detail_dokter;
                     var resep_dokter = [];
                     for(var a in detail_dokter) {
@@ -632,7 +636,8 @@
                             racikan: "<b>R\/</b> " + detail_racikan_dokter[b].kode,
                             kuantitas: detail_racikan_dokter[b].qty,
                             signa: detail_racikan_dokter[b].signa_qty + " &times; " + detail_racikan_dokter[b].signa_pakai,
-                            keterangan: detail_racikan_dokter[b].keterangan
+                            keterangan: detail_racikan_dokter[b].keterangan,
+                            item: detail_racikan_dokter[b].detail_dokter
                         });
                     }
 
@@ -646,6 +651,7 @@
                             kuantitas: detail_apotek[a].qty,
                             signa: detail_apotek[a].signa_qty + " &times; " + detail_apotek[a].signa_pakai,
                             keterangan: detail_apotek[a].keterangan,
+                            alasan_ubah: (detail_apotek[a].alasan_ubah !== "" && detail_apotek[a].alasan_ubah !== undefined && detail_apotek[a].alasan_ubah !== null) ? detail_apotek[a].alasan_ubah : "-",
                             harga: "<h6 class=\"number_style\">" + ((detail_apotek[a].pay[0] !== undefined) ? number_format(parseFloat(detail_apotek[a].pay[0].harga), 2, ".", ",") : number_format(parseFloat(0), 2, ".", ",")) + "</h6>",
                             subtotal: "<h6 class=\"number_style\">" + ((detail_apotek[a].pay[0] !== undefined) ? number_format(parseFloat(detail_apotek[a].pay[0].subtotal), 2, ".", ",") : number_format(parseFloat(0), 2, ".", ",")) + "</h6>",
                         });
@@ -657,31 +663,44 @@
                     var racikan_apotek = [];
                     for(var b in detail_racikan_apotek) {
                         var detailRacikanApotek = detail_racikan_apotek[b].detail;
+                        var subtotalRacikanApotek = 0;
+
+
+                        var prepareRacikanApotek = {
+                            kode: "<b>R\/</b> " + detail_racikan_apotek[b].kode,
+                            kuantitas: (detail_racikan_apotek[b].change.length > 0) ? detail_racikan_apotek[b].change[0].jumlah : detail_racikan_apotek[b].qty,
+                            signa: (detail_racikan_apotek[b].change.length > 0) ? detail_racikan_apotek[b].change[0].signa_qty + " &times; " + detail_racikan_apotek[b].change[0].signa_pakai : detail_racikan_apotek[b].signa_qty + " &times; " + detail_racikan_apotek[b].signa_pakai,
+                            keterangan: (detail_racikan_apotek[b].change.length > 0) ? detail_racikan_apotek[b].change[0].keterangan : detail_racikan_apotek[b].keterangan,
+                            alasan_ubah: (detail_racikan_apotek[b].change.length > 0) ? detail_racikan_apotek[b].change[0].alasan_ubah : "-",
+                            subtotal: 0,
+                            detail: []
+                        };
+
+
                         for(var c in detailRacikanApotek) {
                             if(detail_racikan_apotek[b].change.length > 0) {
-                                racikan_apotek.push({
-                                    obat: "<b>R\/</b> " + detailRacikanApotek[c].detail.nama,
+                                prepareRacikanApotek.detail.push({
+                                    obat: detailRacikanApotek[c].detail.nama,
                                     kuantitas: ((detailRacikanApotek[c].pay[0] !== undefined) ? detailRacikanApotek[c].pay[0].qty : 0),
-                                    //signa: detail_racikan_apotek[b].change[b].signa_qty + " &times; " + detail_racikan_apotek[b].change[b].signa_pakai,
-                                    signa: detail_racikan_apotek[b].change[0].signa_qty + " &times; " + detail_racikan_apotek[b].change[0].signa_pakai,
                                     keterangan: detail_racikan_apotek[b].keterangan,
                                     harga: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].harga), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",
                                     subtotal: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].subtotal), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",
                                 });
                             } else {
-                                racikan_apotek.push({
-                                    obat: "<b>R\/</b> " + detailRacikanApotek[c].detail.nama,
+                                prepareRacikanApotek.detail.push({
+                                    obat: detailRacikanApotek[c].detail.nama,
                                     kuantitas: ((detailRacikanApotek[c].pay[0] !== undefined) ? detailRacikanApotek[c].pay[0].qty : 0),
-                                    //signa: detail_racikan_apotek[b].change[b].signa_qty + " &times; " + detail_racikan_apotek[b].change[b].signa_pakai,
                                     signa: detail_racikan_apotek[b].signa_qty + " &times; " + detail_racikan_apotek[b].signa_pakai,
                                     keterangan: detail_racikan_apotek[b].keterangan,
                                     harga: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].harga), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",
                                     subtotal: "<h6 class=\"number_style\">" + ((detailRacikanApotek[c].pay[0] !== undefined) ? number_format(parseFloat(detailRacikanApotek[c].pay[0].subtotal), 2, ".", ",") : number_format(0, 2, ".", ",")) + "</h6>",
                                 });
                             }
-
+                            subtotalRacikanApotek += ((detailRacikanApotek[c].pay[0] !== undefined) ? parseFloat(detailRacikanApotek[c].pay[0].subtotal) : 0);
                             totalAll += ((detailRacikanApotek[c].pay[0] !== undefined) ? parseFloat(detailRacikanApotek[c].pay[0].subtotal) : 0);
                         }
+
+                        racikan_apotek.push(prepareRacikanApotek);
                     }
 
                     $.ajax({
@@ -705,6 +724,9 @@
                             dokter: targettedData.dokter.nama,
                             jenis_kelamin: targettedData.pasien.jenkel_detail.nama,
                             penjamin: targettedData.antrian.penjamin_data.nama,
+                            keterangan_resep: targettedData.keterangan,
+                            keterangan_racikan: targettedData.keterangan_racikan,
+                            alasan_ubah: targettedData.alasan_ubah,
                             alergi: targettedData.alergi_obat,
                             sep: (targettedData.antrian.penjamin === __UIDPENJAMINUMUM__) ? "-" : targettedData.bpjs.sep,
                             resep_dokter: resep_dokter,
@@ -749,6 +771,11 @@
 
 
         function loadDetailResep(data) {
+            console.log(data);
+            $(".txt_alasan_ubah").html((data.alasan_ubah !== undefined && data.alasan_ubah !== null && data.alasan_ubah !== "") ? data.alasan_ubah : "-");
+            $("#txt_keterangan_resep").html((data.keterangan !== undefined && data.keterangan !== null && data.keterangan !== "") ? data.keterangan : "-");
+            $("#txt_keterangan_racikan").html((data.keterangan_racikan !== undefined && data.keterangan_racikan !== null && data.keterangan_racikan !== "") ? data.keterangan_racikan : "-");
+            //SINICOY
             $("#load-detail-resep tbody tr").remove();
             for(var a = 0; a < data.detail.length; a++) {
                 if(data.detail[a].detail !== null) {
@@ -883,12 +910,17 @@
 
                         var newDetailCellKeterangan = document.createElement("TD");
                         $(newDetailCellKeterangan).html(data.detail[a].keterangan);
+
+                        var newDetailCellAlasan = document.createElement("TD");
+                        $(newDetailCellAlasan).html((data.detail[a].alasan_ubah !== undefined && data.detail[a].alasan_ubah !== null && data.detail[a].alasan_ubah !== "") ? data.detail[a].alasan_ubah : "-");
+
                         //=======================================
                         $(newDetailRow).append(newDetailCellID);
                         $(newDetailRow).append(newDetailCellObat);
                         $(newDetailRow).append(newDetailCellSigna);
                         $(newDetailRow).append(newDetailCellQty);
                         $(newDetailRow).append(newDetailCellKeterangan);
+                        $(newDetailRow).append(newDetailCellAlasan);
 
                         $("#load-detail-resep tbody").append(newDetailRow);
                     }
@@ -899,7 +931,6 @@
 
             //==================================================================================== RACIKAN
             $("#load-detail-racikan tbody").html("");
-            console.log(data.racikan);
             for(var b = 0; b < data.racikan.length; b++) {
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
@@ -967,6 +998,7 @@
                         var newCellRacikanObat = document.createElement("TD");
                         var newCellRacikanJlh = document.createElement("TD");
                         var newCellRacikanKeterangan = document.createElement("TD");
+                        var newCellRacikanAlasan = document.createElement("TD");
 
                         $(newCellRacikanID).attr("rowspan", racikanDetail.length).html((b + 1));
                         $(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
@@ -1013,6 +1045,7 @@
 
                         //$(newCellRacikanJlh).html("<h5 class=\"wrap_content\">" + data.racikan[b].change[b].jumlah + "<h5>");
                         $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
+                        $(newCellRacikanAlasan).html((data.racikan[b].change.length > 0) ? ((data.racikan[b].change[0].alasan_ubah !== undefined && data.racikan[b].change[0].alasan_ubah !== null && data.racikan[b].change[0].alasan_ubah !== "") ? data.racikan[b].change[0].alasan_ubah : "-") : "-");
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
                             $(newRacikanRow).append(newCellRacikanID);
@@ -1022,11 +1055,13 @@
 
                             $(newRacikanRow).append(newCellRacikanObat);
                             $(newRacikanRow).append(newCellRacikanKeterangan);
+                            $(newRacikanRow).append(newCellRacikanAlasan);
                         } else {
                             $(newRacikanRow).append(newCellRacikanObat);
                         }
 
                         $(newCellRacikanKeterangan).attr("rowspan", racikanDetail.length);
+                        $(newCellRacikanAlasan).attr("rowspan", racikanDetail.length);
                         $("#load-detail-racikan tbody").append(newRacikanRow);
                     } else {
                         console.log("No Batch");
@@ -1960,6 +1995,13 @@
                         </div>
                         <div class="card-body tab-content" id="load-observer">
                             <div class="tab-pane active show fade" id="tab-resep">
+                                <div class="alert alert-soft-info card-margin" role="alert">
+                                    <h6>
+                                        <i class="fa fa-paperclip"></i> Keterangan Resep
+                                    </h6>
+                                    <br />
+                                    <div id="txt_keterangan_resep" style="color: #000 !important;"></div>
+                                </div>
                                 <table id="load-detail-resep" class="table table-bordered table-striped largeDataType">
                                     <thead class="thead-dark">
                                     <tr>
@@ -1968,12 +2010,27 @@
                                         <th class="wrap_content">Signa</th>
                                         <th class="wrap_content">Jumlah</th>
                                         <th>Keterangan</th>
+                                        <th>Alasan Ubah</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
+                                <div class="alert alert-soft-danger card-margin" role="alert">
+                                    <h6>
+                                        <i class="fa fa-paperclip"></i> Alasan Ubah
+                                    </h6>
+                                    <br />
+                                    <div class="txt_alasan_ubah" style="color: #000 !important;"></div>
+                                </div>
                             </div>
                             <div class="tab-pane show fade" id="tab-racikan">
+                                <div class="alert alert-soft-info card-margin" role="alert">
+                                    <h6>
+                                        <i class="fa fa-paperclip"></i> Keterangan Racikan
+                                    </h6>
+                                    <br />
+                                    <div id="txt_keterangan_racikan" style="color: #000 !important;"></div>
+                                </div>
                                 <table id="load-detail-racikan" class="table table-bordered largeDataType">
                                     <thead class="thead-dark">
                                     <tr>
@@ -1983,10 +2040,18 @@
                                         <th class="wrap_content">Jumlah</th>
                                         <th style="width: 25%;">Obat</th>
                                         <th>Keterangan</th>
+                                        <th>Alasan Ubah</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
+                                <div class="alert alert-soft-danger card-margin" role="alert">
+                                    <h6>
+                                        <i class="fa fa-paperclip"></i> Alasan Ubah
+                                    </h6>
+                                    <br />
+                                    <div class="txt_alasan_ubah" style="color: #000 !important;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2020,42 +2085,91 @@
             <div class="modal-body">
                 <div class="col-lg">
                     <div class="card">
-                        <div class="card-header card-header-large bg-white">
-                            <div class="row">
-                                <div class="col-lg-6">
-                                    <h5 class="card-header__title flex m-0">Cetak Resep</h5>
+                        <div class="card-header card-header-large bg-white d-flex align-items-center">
+                            <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Detail Resep</h5>
+                        </div>
+                        <div class="card-header card-header-tabs-basic nav" role="tablist">
+                            <a href="#cetak-utama" class="active" data-toggle="tab" role="tab" aria-controls="cetak-utama" aria-selected="true">Resep/Racikan</a>
+                            <a href="#cetak-kajian" data-toggle="tab" role="tab" aria-selected="false">Kajian Apotek</a>
+                        </div>
+                        <div class="card-body tab-content" style="min-height: 100px;">
+                            <div class="tab-pane active show fade" id="cetak-utama">
+                                <div id="cetak">
+
                                 </div>
                             </div>
-                        </div>
-                        <div class="card-body">
-                            <div id="cetak">
-
+                            <div class="tab-pane show fade" id="cetak-kajian">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="table table-bordered largeDataType">
+                                            <thead class="thead-dark">
+                                            <tr>
+                                                <th colspan="2" style="width: 80%">Aspek Kajian</th>
+                                                <th class="wrap_content">
+                                                    Hasil
+                                                </th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td rowspan="3" class="wrap_content">a.</td>
+                                                <td colspan="2" style="background: rgba(215, 242, 255 , .5) !important;">
+                                                    <b>Aspek Administrasi</b>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-left: 30px">Resep Lengkap</td>
+                                                <td id="hasil_kajian_resep_lengkap"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-left: 30px">Pasien Sesuai</td>
+                                                <td id="hasil_kajian_pasien_sesuai"></td>
+                                            </tr>
+                                            <tr>
+                                                <td rowspan="3" class="wrap_content">b.</td>
+                                                <td colspan="2" style="background: rgba(215, 242, 255 , .5) !important;">
+                                                    <b>Aspek Farmasetik</b>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-left: 30px">Benar Obat</td>
+                                                <td id="hasil_kajian_benar_obat"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-left: 30px">Benar Bentuk/Kekuatan/Jumlah</td>
+                                                <td id="hasil_kajian_benar_bentuk"></td>
+                                            </tr>
+                                            <tr>
+                                                <td rowspan="6" class="wrap_content">c.</td>
+                                                <td colspan="2" style="background: rgba(215, 242, 255 , .5) !important;">
+                                                    <b>Aspek Klinik</b>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-left: 30px">Benar Dosis/Frekuensi/Aturan Pakai</td>
+                                                <td id="hasil_kajian_benar_dosis"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-left: 30px">Benar Rute Pemberian</td>
+                                                <td id="hasil_kajian_benar_rute"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-left: 30px">Tidak Ada Interaksi Obat</td>
+                                                <td id="hasil_kajian_interaksi"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-left: 30px">Tidak Ada Duplikasi</td>
+                                                <td id="hasil_kajian_duplikasi"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-left: 30px">Tidak Alergi/Kontradiksi</td>
+                                                <td id="hasil_kajian_alergi"></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                            <!--<table id="load-detail-resep" class="table table-bordered table-striped largeDataType">
-                                <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
-                                    <th style="width: 40%;">Obat</th>
-                                    <th width="15%">Signa</th>
-                                    <th width="15%">Jumlah</th>
-                                    <th>Keterangan</th>
-                                </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                            <table id="load-detail-racikan" class="table table-bordered largeDataType">
-                                <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content"><i class="fa fa-hashtag"></i></th>
-                                    <th style="width: 15%;">Racikan</th>
-                                    <th style="width: 15%;">Signa</th>
-                                    <th style="width: 15%;">Jumlah</th>
-                                    <th>Obat</th>
-                                    <th>Keterangan</th>
-                                </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>-->
                         </div>
                     </div>
                 </div>
