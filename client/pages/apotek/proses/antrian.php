@@ -69,7 +69,8 @@
                                                         <th style="width: 40%;">Obat</th>
                                                         <th class="wrap_content">Signa</th>
                                                         <th width="15%">Jumlah</th>
-                                                        <th>Keterangan</th>
+                                                        <th width="20%">Keterangan</th>
+                                                        <th width="20%">Alasan Ubah</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody></tbody>
@@ -104,7 +105,8 @@
                                                         <th class="wrap_content">Signa</th>
                                                         <th class="wrap_content">Jumlah</th>
                                                         <th width="30%;">Obat</th>
-                                                        <th>Keterangan</th>
+                                                        <th width="20%">Keterangan</th>
+                                                        <th width="20%">Alasan Ubah</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody></tbody>

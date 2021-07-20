@@ -235,12 +235,16 @@
 
                         var newDetailCellKeterangan = document.createElement("TD");
                         $(newDetailCellKeterangan).html(data.detail[a].keterangan);
+
+                        var newDetailCellAlasan = document.createElement("TD");
+                        $(newDetailCellAlasan).html((data.detail[a].alasan_ubah !== undefined && data.detail[a].alasan_ubah !== null && data.detail[a].alasan_ubah !== "") ? data.detail[a].alasan_ubah : "-");
                         //=======================================
                         $(newDetailRow).append(newDetailCellID);
                         $(newDetailRow).append(newDetailCellObat);
                         $(newDetailRow).append(newDetailCellSigna);
                         $(newDetailRow).append(newDetailCellQty);
                         $(newDetailRow).append(newDetailCellKeterangan);
+                        $(newDetailRow).append(newDetailCellAlasan);
 
                         $("#load-detail-resep tbody").append(newDetailRow);
                     }
@@ -277,7 +281,6 @@
 
 
             $("#load-detail-racikan tbody").html("");
-            console.log(data.racikan);
             for(var b = 0; b < data.racikan.length; b++) {
                 var racikanDetail = data.racikan[b].detail;
                 for(var racDetailKey = 0; racDetailKey < racikanDetail.length; racDetailKey++) {
@@ -348,6 +351,7 @@
                         var newCellRacikanObat = document.createElement("TD");
                         var newCellRacikanJlh = document.createElement("TD");
                         var newCellRacikanKeterangan = document.createElement("TD");
+                        var newCellRacikanAlasan = document.createElement("TD");
 
                         $(newCellRacikanID).attr("rowspan", racikanDetail.length).html((b + 1));
                         $(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
@@ -445,6 +449,7 @@
 
                         //$(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[b].jumlah + "<h5>");
                         $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
+                        $(newCellRacikanAlasan).html((data.racikan[b].change.length > 0) ? ((data.racikan[b].change[0].alasan_ubah !== undefined && data.racikan[b].change[0].alasan_ubah !== null && data.racikan[b].change[0].alasan_ubah !== "") ? data.racikan[b].change[0].alasan_ubah : "-") : "-");
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
                             $(newRacikanRow).append(newCellRacikanID);
@@ -454,11 +459,13 @@
 
                             $(newRacikanRow).append(newCellRacikanObat);
                             $(newRacikanRow).append(newCellRacikanKeterangan);
+                            $(newRacikanRow).append(newCellRacikanAlasan);
                         } else {
                             $(newRacikanRow).append(newCellRacikanObat);
                         }
 
                         $(newCellRacikanKeterangan).attr("rowspan", racikanDetail.length);
+                        $(newCellRacikanAlasan).attr("rowspan", racikanDetail.length);
                         $("#load-detail-racikan tbody").append(newRacikanRow);
                     } else {
                         console.log("No Batch");

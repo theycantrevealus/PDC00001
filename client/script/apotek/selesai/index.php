@@ -771,7 +771,6 @@
 
 
         function loadDetailResep(data) {
-            console.log(data);
             $(".txt_alasan_ubah").html((data.alasan_ubah !== undefined && data.alasan_ubah !== null && data.alasan_ubah !== "") ? data.alasan_ubah : "-");
             $("#txt_keterangan_resep").html((data.keterangan !== undefined && data.keterangan !== null && data.keterangan !== "") ? data.keterangan : "-");
             $("#txt_keterangan_racikan").html((data.keterangan_racikan !== undefined && data.keterangan_racikan !== null && data.keterangan_racikan !== "") ? data.keterangan_racikan : "-");
