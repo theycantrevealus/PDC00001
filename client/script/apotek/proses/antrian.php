@@ -76,6 +76,7 @@
 
 
         function loadDetailResep(data) {
+            $("#txt_alasan_ubah").html((data.alasan_ubah !== undefined && data.alasan_ubah !== null && data.alasan_ubah !== "") ? data.alasan_ubah : "-");
             $("#load-detail-resep tbody tr").remove();
             for(var a = 0; a < data.detail.length; a++) {
                 if(data.detail[a].detail !== null) {

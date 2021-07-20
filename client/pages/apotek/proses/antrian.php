@@ -116,6 +116,17 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="alert alert-soft-danger card-margin" role="alert">
+                                        <h6>
+                                            <i class="fa fa-paperclip"></i> Alasan Ubah
+                                        </h6>
+                                        <br />
+                                        <div id="txt_alasan_ubah" style="color: #000 !important;"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-12">
                             <button class="btn btn-success" id="btnSelesai">
