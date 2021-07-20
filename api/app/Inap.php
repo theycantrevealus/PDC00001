@@ -372,6 +372,7 @@ class Inap extends Utility
         $Mutasi = $Inventori->tambah_mutasi(array(
             'access_token' => $parameter['access_token'],
             'dari' => $parameter['gudang'],
+            'status' => $parameter['status'],
             'ke' => __GUDANG_APOTEK__,
             'keterangan' => 'Retur Obat Inap. ' . $parameter['remark'],
             'inap' => true,
@@ -510,8 +511,8 @@ class Inap extends Utility
                 'rawat_inap_batch.gudang' => '= ?',
                 'AND',
                 'rawat_inap_batch.pasien' => '= ?',
-                'AND',
-                'kunjungan.waktu_keluar' => 'IS NULL',
+                /*'AND',
+                'kunjungan.waktu_keluar' => 'IS NULL',*/
                 'AND',
                 'kunjungan.uid' => '= ?'
             ), array(

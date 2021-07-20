@@ -64,6 +64,7 @@
 									<th>Dari</th>
 									<th>Ke</th>
 									<th>Diproses Oleh</th>
+                                    <th>Status</th>
 									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>

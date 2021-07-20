@@ -65,7 +65,6 @@
 
                 var autonum = 1;
                 for(var a in filteredLunas) {
-                    console.log(filteredLunas[a]);
                     var newRow = document.createElement("TR");
                     var newNo = document.createElement("TD");
                     var newItem = document.createElement("TD");
@@ -514,7 +513,6 @@
                 },
                 success:function(response) {
                     targettedDataResep = response.response_package.response_data[0];
-                    console.log(targettedDataResep);
                     $("#form-berikan-resep").modal("show");
                     $("#resep_dokter").html(targettedDataResep.dokter.nama);
                     $("#resep_tanggal").html(targettedDataResep.created_at_parsed);
@@ -744,7 +742,6 @@
 
 
 
-            console.log(item);
             if(item.length > 0) {
                 Swal.fire({
                     title: "Riwayat Pemberian Obat",
@@ -768,7 +765,6 @@
                                 item: item
                             },
                             success:function(response) {
-                                console.log(response);
                                 $("#form-berikan-resep").modal("hide");
                                 $("#form-konfirmasi-berikan-resep").modal("hide");
                                 tableRiwayatObat.ajax.reload();
@@ -1219,7 +1215,14 @@
                 denyButtonText: "Belum",
             }).then((result) => {
                 if (result.isConfirmed) {
-                                        //Get Riwayat Pemberian Obat
+                    //Get Riwayat Pemberian Obat
+                    console.log({
+                        request: "kalkulasi_sisa_obat_2",
+                        kunjungan: selectedKunjungan,
+                        pasien: __PAGES__[3],
+                        gudang: nurse_station_info.gudang,
+                        nurse_station: nurse_station
+                    });
                     $.ajax({
                         async: false,
                         url: __HOSTAPI__ + "/Inap",
@@ -1240,7 +1243,7 @@
                                 data = response.response_package.response_data;
                             }
 
-                            console.log(data);
+                            console.log(response);
 
                             var kebutuhan = 0;
 
@@ -1424,6 +1427,7 @@
                         type: "POST",
                         data: {
                             request: "konfirmasi_retur_obat",
+                            status: "N",
                             gudang: nurse_station_info.gudang,
                             pasien: __PAGES__[3],
                             item: parsedData,

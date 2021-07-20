@@ -217,12 +217,16 @@ class Inventori extends Utility
                 return self::get_gudang_back_end();
                 break;
 
+            case 'proses_mutasi':
+                return self::proses_mutasi($parameter);
+                break;
+
             case 'get_stok_batch_unit':
                 return self::get_stok_batch_unit($parameter);
                 break;
 
             default:
-                return $parameter;
+                return array('Unknown');
                 break;
         }
     }
@@ -4054,7 +4058,7 @@ class Inventori extends Utility
     private function get_stok_gudang($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -4532,6 +4536,213 @@ class Inventori extends Utility
         return $data;
     }
 
+    private function proses_mutasi($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $data = self::$query->update('inventori_mutasi', array(
+            'status' => $parameter['status'],
+            'diproses_oleh' => $UserData['data']->uid,
+            'updated_at' => parent::format_date()
+        ))
+            ->where(array(
+                'inventori_mutasi.uid' => '= ?',
+                'AND',
+                'inventori_mutasi.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
+        if($data['response_result'] > 0) {
+            if($parameter['status'] === 'R') {
+                $target = self::$query->select('inventori_mutasi', array(
+                    'dari', 'ke'
+                ))
+                    ->where(array(
+                        'inventori_mutasi.uid' => '= ?'
+                    ), array(
+                        $parameter['uid']
+                    ))
+                    ->execute();
+                foreach ($target['response_data'] as $tarKey => $tarValue) {
+                    //Check Inap db9147b3-c659-4130-a93b-1cb65fdabf79
+                    $CheckUnitAsal = self::$query->select('master_unit', array(
+                        'uid'
+                    ))
+                        ->join('nurse_station', array(
+                            'kode'
+                        ))
+                        ->on(array(
+                            array('master_unit.uid', '=', 'nurse_station.unit')
+                        ))
+                        ->where(array(
+                            'master_unit.gudang' => '= ?'
+                        ), array(
+                            $tarValue['dari']
+                        ))
+                        ->execute();
+
+                    $CheckUnitTujuan = self::$query->select('master_unit', array(
+                        'uid'
+                    ))
+                        ->join('nurse_station', array(
+                            'kode'
+                        ))
+                        ->on(array(
+                            array('master_unit.uid', '=', 'nurse_station.unit')
+                        ))
+                        ->where(array(
+                            'master_unit.gudang' => '= ?'
+                        ), array(
+                            $tarValue['ke']
+                        ))
+                        ->execute();
+
+
+                    $mutasi_detail = self::$query->select('inventori_mutasi_detail', array(
+                        'item', 'batch', 'qty', 'keterangan'
+                    ))
+                        ->where(array(
+                            'inventori_mutasi_detail.mutasi' => '= ?',
+                            'AND',
+                            'inventori_mutasi_detail.deleted_at' => 'IS NULL'
+                        ), array(
+                            $parameter['uid']
+                        ))
+                        ->execute();
+
+                    foreach($mutasi_detail['response_data'] as $MutKey => $MutValue) {
+
+
+
+                        $stok_dari_old = self::$query->select('inventori_stok', array(
+                            'stok_terkini'
+                        ))
+                            ->where(array(
+                                'inventori_stok.barang' => '= ?',
+                                'AND',
+                                'inventori_stok.batch' => '= ?',
+                                'AND',
+                                'inventori_stok.gudang' => '= ?'
+                            ), array(
+                                $MutValue['item'],
+                                $MutValue['batch'],
+                                $tarValue['dari']
+                            ))
+                            ->execute();
+
+                        $update_stok_old_dari = self::$query->update('inventori_stok', array(
+                            'stok_terkini' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) - floatval($MutValue['qty'])
+                        ))
+                            ->where(array(
+                                'inventori_stok.barang' => '= ?',
+                                'AND',
+                                'inventori_stok.batch' => '= ?',
+                                'AND',
+                                'inventori_stok.gudang' => '= ?'
+                            ), array(
+                                $MutValue['item'],
+                                $MutValue['batch'],
+                                $tarValue['dari']
+                            ))
+                            ->execute();
+
+                        if ($update_stok_old_dari['response_result'] > 0) {
+                            //Update Stok Log Dari
+                            $update_dari_log = self::$query->insert('inventori_stok_log', array(
+                                'barang' => $MutValue['item'],
+                                'batch' => $MutValue['batch'],
+                                'uid_foreign' => $parameter['uid'],
+                                'jenis_transaksi' => 'inventori_mutasi',
+                                'gudang' => $tarValue['dari'],
+                                'masuk' => 0,
+                                'keluar' => floatval($MutValue['qty']),
+                                'saldo' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) - floatval($MutValue['qty']),
+                                'type' => (count($CheckUnitAsal['response_data']) > 0 || count($CheckUnitTujuan['response_data']) > 0) ? __STATUS_BARANG_KELUAR_INAP__ : __STATUS_MUTASI_STOK__,
+                                'keterangan' => $MutValue['keterangan']
+                            ))
+                                ->execute();
+                        }
+
+
+
+
+
+
+
+                        //Update Stok Tujuan
+                        $stok_ke_old = self::$query->select('inventori_stok', array(
+                            'stok_terkini'
+                        ))
+                            ->where(array(
+                                'inventori_stok.barang' => '= ?',
+                                'AND',
+                                'inventori_stok.batch' => '= ?',
+                                'AND',
+                                'inventori_stok.gudang' => '= ?'
+                            ), array(
+                                $MutValue['item'],
+                                $MutValue['batch'],
+                                $tarValue['ke']
+                            ))
+                            ->execute();
+
+                        if (count($stok_ke_old['response_data']) > 0) {
+                            $update_stok_old_ke = self::$query->update('inventori_stok', array(
+                                'stok_terkini' => floatval($stok_ke_old['response_data'][0]['stok_terkini']) + floatval($MutValue['qty'])
+                            ))
+                                ->where(array(
+                                    'inventori_stok.barang' => '= ?',
+                                    'AND',
+                                    'inventori_stok.batch' => '= ?',
+                                    'AND',
+                                    'inventori_stok.gudang' => '= ?'
+                                ), array(
+                                    $MutValue['item'],
+                                    $MutValue['batch'],
+                                    $tarValue['ke']
+                                ))
+                                ->execute();
+                        } else {
+                            $update_stok_old_ke = self::$query->insert('inventori_stok', array(
+                                'stok_terkini' => floatval($MutValue['qty']),
+                                'barang' => $MutValue['item'],
+                                'batch' => $MutValue['batch'],
+                                'gudang' => $tarValue['ke']
+                            ))
+                                ->execute();
+                        }
+
+                        if ($update_stok_old_ke['response_result'] > 0) {
+                            //Update Stok Log Ke
+                            $update_ke_log = self::$query->insert('inventori_stok_log', array(
+                                'barang' => $MutValue['item'],
+                                'batch' => $MutValue['batch'],
+                                'uid_foreign' => $parameter['uid'],
+                                'jenis_transaksi' => 'inventori_mutasi',
+                                'gudang' => $tarValue['ke'],
+                                'masuk' => floatval($MutValue['qty']),
+                                'keluar' => 0,
+                                'saldo' => floatval($stok_ke_old['response_data'][0]['stok_terkini']) + floatval($MutValue['qty']),
+                                'type' => (count($CheckUnitAsal['response_data']) > 0 || count($CheckUnitTujuan['response_data']) > 0) ? __STATUS_BARANG_MASUK_INAP__ : __STATUS_MUTASI_STOK__,
+                                'keterangan' => $MutValue['keterangan']
+                            ))
+                                ->execute();
+                        }
+
+
+
+
+                    }
+
+                }
+            }
+        }
+
+        return $data;
+    }
+
     public function tambah_mutasi($parameter)
     {
         $Authorization = new Authorization();
@@ -4557,6 +4768,7 @@ class Inventori extends Utility
             'ke' => $parameter['ke'],
             'keterangan' => $parameter['keterangan'],
             'pegawai' => $UserData['data']->uid,
+            'status' => (isset($parameter['status']) && !empty($parameter['status'])) ? $parameter['status'] : 'N',
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date()
         ))
@@ -4632,7 +4844,10 @@ class Inventori extends Utility
                         //Update Stok dan Stok Log
                         //Recent Stok
                         //Update Stok Asal
-                        $stok_dari_old = self::$query->select('inventori_stok', array(
+
+
+
+                        /*$stok_dari_old = self::$query->select('inventori_stok', array(
                             'stok_terkini'
                         ))
                             ->where(array(
@@ -4745,7 +4960,7 @@ class Inventori extends Utility
                                 'keterangan' => $parameter['keterangan']
                             ))
                                 ->execute();
-                        }
+                        }*/
                     }
                 } else {
                     array_push($mutasiDetailRecorded, $value[$key]['mutasi']);
@@ -5458,7 +5673,7 @@ class Inventori extends Utility
     private function get_mutasi_request($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -5486,6 +5701,8 @@ class Inventori extends Utility
                 'ke',
                 'pegawai',
                 'keterangan',
+                'status',
+                'diproses_oleh',
                 'created_at',
                 'updated_at'
             ))
@@ -5497,6 +5714,9 @@ class Inventori extends Utility
                     array('inventori_mutasi.pegawai', '=', 'pegawai.uid')
                 ))
                 ->where($paramData, $paramValue)
+                ->order(array(
+                    'inventori_mutasi.updated_at' => 'DESC'
+                ))
                 ->execute();
         } else {
             $data = self::$query->select('inventori_mutasi', array(
@@ -5507,6 +5727,8 @@ class Inventori extends Utility
                 'ke',
                 'pegawai',
                 'keterangan',
+                'status',
+                'diproses_oleh',
                 'created_at',
                 'updated_at'
             ))
@@ -5518,6 +5740,9 @@ class Inventori extends Utility
                     array('inventori_mutasi.pegawai', '=', 'pegawai.uid')
                 ))
                 ->where($paramData, $paramValue)
+                ->order(array(
+                    'inventori_mutasi.updated_at' => 'DESC'
+                ))
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))
                 ->execute();
@@ -5526,10 +5751,12 @@ class Inventori extends Utility
         $data['response_draw'] = $parameter['draw'];
         $allData = array();
         $autonum = intval($parameter['start']) + 1;
+        $Unit = new Unit(self::$pdo);
+        $UnitCheck = $Unit->get_unit_detail($UserData['data']->unit)['response_data'][0];
         foreach ($data['response_data'] as $key => $value) {
 
             //Filter Unit yang sama
-            if($value['unit'] == $UserData['data']->unit) {
+            if($value['dari'] === $UnitCheck['gudang'] || $value['ke'] === $UnitCheck['gudang'] || isset($parameter['inap'])) {
                 $data['response_data'][$key]['autonum'] = $autonum;
 
                 $data['response_data'][$key]['tanggal'] = date('d F Y', strtotime($value['tanggal']));
@@ -5548,8 +5775,6 @@ class Inventori extends Utility
                 array_push($allData, $data['response_data'][$key]);
                 $autonum++;
             }
-
-
         }
 
         $data['response_data'] = $allData;
