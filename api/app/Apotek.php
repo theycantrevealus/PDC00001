@@ -94,7 +94,12 @@ class Apotek extends Utility
                 case 'resep_inap':
                     return self::resep_inap($parameter);
                     break;
-
+                case 'batalkan_resep':
+                    return self::batalkan_resep($parameter);
+                    break;
+                case 'aktifkan_resep':
+                    return self::aktifkan_resep($parameter);
+                    break;
                 case 'get_resep_selesai_backend':
                     /*$parameter['status'] = 'D';
                     $selesai = self::get_resep_backend($parameter);
@@ -2127,6 +2132,101 @@ class Apotek extends Utility
         return $data;
     }
 
+    private function aktifkan_resep($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $worker = self::$query->update('resep', array(
+            'deleted_at' => NULL
+        ))
+            ->where(array(
+                'resep.uid' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+        if($worker['response_result'] > 0) {
+            $log = parent::log(array(
+                'type' => 'activity',
+                'column' => array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'old_value',
+                    'new_value',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value' => array(
+                    $parameter['uid'],
+                    $UserData['data']->uid,
+                    'resep_kajian',
+                    'U',
+                    'Aktifkan Kembali Resep',
+                    $parameter['alasan'],
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class' => __CLASS__
+            ));
+        }
+
+        return $worker;
+    }
+
+    private function batalkan_resep($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $worker = self::$query->update('resep', array(
+            'deleted_at' => parent::format_date()
+        ))
+            ->where(array(
+                'resep.uid' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+        if($worker['response_result'] > 0) {
+            //Catat Alasan
+            $CancelationReason = self::$query->insert('cancelation_resep', array(
+                'resep' => $parameter['uid'],
+                'oleh' => $UserData['data']->uid,
+                'alasan' => $parameter['alasan'],
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+            if($CancelationReason['response_result'] > 0) {
+                $log = parent::log(array(
+                    'type' => 'activity',
+                    'column' => array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value' => array(
+                        $parameter['uid'],
+                        $UserData['data']->uid,
+                        'resep',
+                        'D',
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class' => __CLASS__
+                ));
+            }
+        }
+
+        return $worker;
+    }
+
     private function get_resep_backend_v3($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
@@ -2155,6 +2255,22 @@ class Apotek extends Utility
                 }
 
                 $paramValue = array('K', __POLI_INAP__);
+            } else if($parameter['request_type'] === 'batal') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NOT NULL',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NOT NULL'
+                    );
+                }
+
+                $paramValue = array();
             } else if($parameter['request_type'] === 'igd_lunas') {
                 if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
                     $paramData = array(
@@ -2430,8 +2546,28 @@ class Apotek extends Utility
         $dataBiasa = array();
 
         foreach ($data['response_data'] as $key => $value) {
+            //Check Cancelation
+            $Cancelation = self::$query->select('cancelation_resep', array(
+                'alasan', 'oleh', 'created_at'
+            ))
+                ->where(array(
+                    'cancelation_resep.resep' => '= ?',
+                    'AND',
+                    'cancelation_resep.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($Cancelation['response_data'] as $CKey => $CValue) {
+                $Cancelation['response_data'][$CKey]['created_at'] = date('d F Y', strtotime($CValue['created_at'])) . ' - ' . date('[H:i]', strtotime($CValue['created_at']));
+                $Cancelation['response_data'][$CKey]['oleh'] = $Pegawai->get_info($CValue['oleh'])['response_data'][0];
+            }
+
+            $data['response_data'][$key]['cancelation'] = $Cancelation['response_data'];
+
+
             //Dokter Info
-            $PegawaiInfo = $Pegawai->get_detail($value['dokter']);
+            $PegawaiInfo = $Pegawai->get_info($value['dokter']);
             $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
 
             $PasienData = $Pasien->get_pasien_detail('pasien', $value['pasien']);

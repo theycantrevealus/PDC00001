@@ -1,6 +1,8 @@
 <script type="text/javascript">
     $(function() {
 
+        var currentUIDBatal = "";
+
         protocolLib = {
             permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", parameter, 3000, "notif_pasien_baru");
@@ -230,11 +232,22 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
-                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
-                            "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
-                            "</a>" +
-                            "</div>";
+                        if(__MY_PRIVILEGES__.response_data[0].uid === __UIDKARUAPOTEKER__) {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
+                                "</a>" +
+                                "<button class=\"btn btn-warning btn-sm btn-cancel-resep " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob yellow" : "") + "\" id=\"cancel_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-ban\"></i> Batalkan</span>" +
+                                "</button>" +
+                                "</div>";
+                        } else {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
+                                "</a>" +
+                                "</div>";
+                        }
                     }
                 }
             ]
@@ -243,6 +256,66 @@
         setInterval(function() {
             tableResep.ajax.reload();
         }, 20000);
+
+        $("body").on("click", ".btn-cancel-resep", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+            currentUIDBatal = id;
+            $("#modal-batal").modal("show");
+        });
+
+        $("#btnProsesBatalResep").click(function() {
+            var alasan = $("#keterangan_batal").val();
+            if(alasan !== "") {
+                Swal.fire({
+                    title: "Batalkan Resep?",
+                    showDenyButton: true,
+                    confirmButtonText: `Ya`,
+                    denyButtonText: `Tidak`,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: __HOSTAPI__ + "/Apotek",
+                            async: false,
+                            beforeSend: function (request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type: "POST",
+                            data: {
+                                request: "batalkan_resep",
+                                uid: currentUIDBatal,
+                                alasan: alasan
+                            },
+                            success: function (response) {
+                                if(response.response_package.response_result > 0) {
+                                    Swal.fire(
+                                        "Pembatalan Resep Berhasil!",
+                                        "Resep tidak akan lanjut diproses",
+                                        "success"
+                                    ).then((result) => {
+                                        tableResep.ajax.reload();
+                                        $("#modal-batal").modal("hide");
+                                    });
+                                } else {
+                                    console.log(response);
+                                }
+                            },
+                            error: function (response) {
+                                //
+                            }
+                        });
+                    }
+                });
+            } else {
+                Swal.fire(
+                    "Pembatalan Resep",
+                    "Alasan harus diisi",
+                    "warning"
+                ).then((result) => {
+                    //
+                });
+            }
+        });
 
 
         /*var tableResep = $("#table-resep").DataTable({
@@ -1086,6 +1159,29 @@
         }
     });
 </script>
+
+<div id="modal-batal" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Batalkan Resep</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <strong>Keterangan Pembatalan Resep:</strong>
+                <textarea id="keterangan_batal" class="form-control" style="min-height: 300px" placeholder="Wajib Isi (Required)"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnProsesBatalResep"><i class="fa fa-check"></i> Proses Batal Resep</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <div id="modal-verifikasi" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
