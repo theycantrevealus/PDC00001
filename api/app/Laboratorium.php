@@ -453,10 +453,13 @@ class Laboratorium extends Utility {
                 'AND',
                 'invoice_detail.item' => '= ?',
                 'AND',
-                'invoice_detail.deleted_at' => 'IS NULL'
+                'invoice_detail.deleted_at' => 'IS NULL',
+                'AND',
+                'invoice_detail.departemen' => '= ?'
             ), array(
                 $invoice_master['response_data'][0]['uid'],
-                $parameter['tindakan']
+                $parameter['tindakan'],
+                $AntrianDetail['poli']
             ))
             ->execute();
 

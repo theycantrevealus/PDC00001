@@ -2,7 +2,8 @@
 <script type="text/javascript">
     $(function() {
 
-        var currentPenjamin = '';
+        var currentPenjamin = "";
+        var currentPoli = "";
         var printMode = false;
 
 
@@ -73,6 +74,9 @@
         $("body").on("click", ".btn-detail-verif", function() {
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
+
+            var poli = $("#departemen_" + uid).attr("uid");
+            currentPoli = poli;
 
             var penjamin = $(this).attr("penjamin");
 
@@ -243,7 +247,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["departemen"];
+                        return "<span id=\"departemen_" + row.uid + "\" uid=\"" + row.uid_poli + "\">" + row["departemen"] + "</span>";
                     }
                 },
                 {
@@ -490,7 +494,8 @@
                                     harga: harga,
                                     mitra: pelaksana,
                                     tindakan: tindakan,
-                                    asesmen: asesmen
+                                    asesmen: asesmen,
+                                    poli: currentPoli
                                 },
                                 beforeSend: function(request) {
                                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
