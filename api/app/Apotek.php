@@ -449,6 +449,7 @@ class Apotek extends Utility
                     'dari' => $UserData['data']->gudang,
                     'ke' => $RawatInap['response_data'][0]['gudang'],
                     'keterangan' => 'Kebutuhan Resep Rawat Inap',
+                    'status' => 'N',
                     'inap' => true,
                     'item' => $itemMutasi
                 ));
