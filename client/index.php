@@ -25,6 +25,7 @@
 	var __MY_PRIVILEGES__ = <?php echo json_encode($_SESSION['jabatan']); ?>;
 	var __UNIT__ = <?php echo json_encode($_SESSION['unit']); ?>;
     var __UNIT_MULTI__ = <?php echo json_encode($_SESSION['unit_multi']); ?>;
+    var __POLI__ = <?php echo json_encode($_SESSION['poli']); ?>;
 
     if(__UNIT__ === null) {
         if(__UNIT_MULTI__ !== null) {

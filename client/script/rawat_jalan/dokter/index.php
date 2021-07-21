@@ -1,6 +1,7 @@
 <script type="text/javascript">
 	$(function() {
 		var poliList = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
+		var myPoliAvail = [];
 
 		if(poliList.length > 1) {
 			$("#change-poli").show();
@@ -45,8 +46,28 @@
 				},
 				dataSrc:function(response) {
 				    var data = response.response_package.response_data;
+				    console.log(data);
+				    var poliList = [];
+				    var my_poliData = __POLI__.response_data;
+				    for(var a in my_poliData) {
+				        var poliGet = my_poliData[a].poli.response_data;
+				        for(var b in poliGet) {
+                            if(myPoli.indexOf(poliGet[b].nama) < 0) {
+                                myPoli.push(poliGet[b].nama);
+                            }
+
+                            if(myPoliAvail.indexOf(poliGet[b].uid) < 0) {
+                                myPoliAvail.push(poliGet[b].uid);
+                            }
+                        }
+                    }
 				    var parsedData = [];
-				    for(var key in data) {
+                    for(var key in data) {
+                        if(data[key].uid_poli !== __POLI_INAP__ && data[key].uid_poli !== __POLI_IGD__ && myPoliAvail.indexOf(data[key].uid_poli) >= 0) {
+                            parsedData.push(data[key]);
+                        }
+                    }
+				    /*for(var key in data) {
 				        if(data[key].uid_poli !== __POLI_INAP__ && data[key].uid_poli !== __POLI_IGD__) {
 				            parsedData.push(data[key]);
                         }
@@ -55,7 +76,7 @@
                             myPoli.push(data[key].departemen);
                         }
 
-                    }
+                    }*/
 
                     $("#current-poli").html(myPoli.join(", "));
 					$("#jlh-antrian").html(parsedData.length);

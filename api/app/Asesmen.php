@@ -3199,6 +3199,7 @@ class Asesmen extends Utility {
 		foreach ($antrian['response_data'] as $key => $value) {
             if($value['uid_poli'] === __POLI_INAP__) {
                 $PoliDetail = array(
+                    'uid' => __POLI_INAP__,
                     'poli_asesmen' => 'inap'
                 );
             } else {
