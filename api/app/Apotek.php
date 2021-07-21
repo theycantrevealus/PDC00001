@@ -451,6 +451,7 @@ class Apotek extends Utility
                     'keterangan' => 'Kebutuhan Resep Rawat Inap',
                     'status' => 'N',
                     'inap' => true,
+                    'apotek_order' => true,
                     'item' => $itemMutasi
                 ));
 

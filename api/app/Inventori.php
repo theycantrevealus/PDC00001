@@ -4847,7 +4847,7 @@ class Inventori extends Utility
 
 
 
-                        if(isset($parameter['inap'])) {
+                        if(isset($parameter['apotek_order'])) {
                             $stok_dari_old = self::$query->select('inventori_stok', array(
                                 'stok_terkini'
                             ))
