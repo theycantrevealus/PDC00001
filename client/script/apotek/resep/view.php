@@ -2085,7 +2085,9 @@
 
             if($(".resep-reason").length === 0 && $(".racikan-reason").length === 0) {
                 allowVerifReason = true;
+                allowVerifRacikanReason = true;
             } else {
+                alert();
                 if($(".resep-reason").length === 0) {
                     allowVerifReason = true;
                 } else {
