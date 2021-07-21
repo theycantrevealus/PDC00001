@@ -302,15 +302,27 @@
 		$("#add_file").change(function(e) {
 		
 			file = e.target.files[0];
-			if (file.name != ""){
-				status_file = checkFile(file.name);
-			}
+            var fileSize = file.size / 1000000;
+            if(fileSize <= __MAX_UPLOAD_FILE_SIZE__) {
+                if (file.name != ""){
+                    status_file = checkFile(file.name);
+                }
 
-			if (status_file == true){
-				$("#form-upload-lampiran").modal("show");
-			} else {
-				alert("Berkas harus PDF");
-			}
+                if (status_file == true){
+                    $("#form-upload-lampiran").modal("show");
+                } else {
+                    alert("Berkas harus PDF");
+                }
+            } else {
+                Swal.fire(
+                    "Upload dokumen Laboratorium",
+                    "File tidak boleh melebihi 5MB. Harap kompresi file atau turunkan resolusi scan dokumen",
+                    "warning"
+                ).then((result) => {
+                    //
+                });
+            }
+
 		});
 
 		$("#btnSubmitLampiran").click(function() {

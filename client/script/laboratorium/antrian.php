@@ -221,8 +221,20 @@
 
 
 		$("#add_file").change(function(e) {
-			$("#form-upload-lampiran").modal("show");
+
 			file = e.target.files[0];
+			var fileSize = file.size / 1000000;
+			if(fileSize <= __MAX_UPLOAD_FILE_SIZE__) {
+                $("#form-upload-lampiran").modal("show");
+            } else {
+                Swal.fire(
+                    "Upload dokumen Laboratorium",
+                    "File tidak boleh melebihi 5MB. Harap kompresi file atau turunkan resolusi scan dokumen",
+                    "warning"
+                ).then((result) => {
+                    //
+                });
+            }
 		});
 
 		$("#btnSubmitLampiran").click(function() {

@@ -64,6 +64,8 @@
     var yyyy = today.getFullYear();
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 	var __TODAY__  = mm + ' ' + monthNames[today.getMonth()] + ' ' + yyyy;
+
+	var __MAX_UPLOAD_FILE_SIZE__ = parseFloat(<?php echo json_encode(__MAX_UPLOAD_FILE_SIZE__); ?>);
 	//Kelas
 	var __UID_KELAS_GENERAL_RJ__ = <?php echo json_encode(__UID_KELAS_GENERAL_RJ__); ?>;
 </script>
