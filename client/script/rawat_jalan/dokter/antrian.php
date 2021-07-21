@@ -121,7 +121,7 @@
             type:"GET",
             success:function(response) {
                 antrianData = response.response_package.response_data[0];
-
+                loadPerawatObjective(UID);
                 prioritas_antrian = antrianData.prioritas;
                 kunjungan = antrianData.kunjungan_detail;
 
@@ -3911,6 +3911,61 @@
             });
             return radiologiTindakan;
         }*/
+
+        function loadPerawatObjective(params) {
+            var MetaData = null;
+
+            if (params != ""){
+                $.ajax({
+                    async: false,
+                    url:__HOSTAPI__ + "/Asesmen/asesmen-rawat-detail/" + params,
+                    type: "GET",
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    success: function(response){
+                        if (response.response_package != ""){
+                            MetaData = response.response_package;
+
+                            $.each(MetaData.pasien, function(key, item){
+                                $("#" + key).html(item);
+                            });
+
+                            $.each(MetaData.antrian, function(key, item){
+                                $("#" + key).val(item);
+                            });
+
+                            if (MetaData.pasien.id_jenkel == 2){
+                                $(".wanita").attr("hidden",true);
+                            } else {
+                                $(".pria").attr("hidden",true);
+                            }
+
+                            if (MetaData.asesmen_rawat != ""){
+                                $.each(MetaData.asesmen_rawat, function(key, item){
+                                    $("#" + key).val(item);
+
+                                    if(key === "tinggi_badan") {
+                                        $("#txt_" + key).val(item);
+
+                                    } else {
+                                        $("#txt_" + key).val(item);
+                                    }
+
+                                    checkedRadio(key, item);
+                                    checkedCheckbox(key, item);
+                                });
+                            }
+                        }
+                    },
+                    error: function(response) {
+                        console.log(response);
+                    }
+                });
+            }
+
+            return MetaData;
+        }
 
         function loadPasien(params){
             var MetaData = null;

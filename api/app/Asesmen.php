@@ -42,6 +42,10 @@ class Asesmen extends Utility {
 					return self::get_asesmen_rawat($parameter[2]);
 					break;
 
+                case 'get_asesmen_rawat_objective':
+                    return self::get_asesmen_rawat_objective($parameter[2]);
+                    break;
+
 				case 'antrian-asesmen-rawat':
 					return self::get_antrian_asesmen_rawat($parameter);
 					break;
@@ -2733,6 +2737,118 @@ class Asesmen extends Utility {
 
 
 	/*--------------------------- ASESMEN RAWAT-------------------------------*/
+    private function get_asesmen_rawat_objective($parameter) {
+        $antrian = self::get_pasien_asesmen_rawat($parameter);
+        $antrian['asesmen_rawat'] = [];
+        $Invetori = new Inventori(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+
+        if(count($antrian) > 0) {
+            //Poli Info
+            $Poli = new Poli(self::$pdo);
+            $PoliDetail = $Poli->get_poli_detail($antrian['antrian']['departemen'])['response_data'][0];
+
+            $data = self::$query
+                ->select('asesmen_rawat_' . $PoliDetail['poli_asesmen'], array('tanda_vital_td', 'tanda_vital_n', 'tanda_vital_s', 'tanda_vital_rr', 'berat_badan', 'tinggi_badan'))
+                ->where(array(
+                    'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
+                    'AND',
+                    'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.kunjungan' => '= ?',
+                    'AND',
+                    'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?',
+                    'AND',
+                    'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.pasien' => '= ?'
+                ), array(
+                        $antrian['antrian']['kunjungan'],
+                        $antrian['antrian']['uid'],
+                        $antrian['antrian']['uid_pasien']
+                    )
+                )
+                ->execute();
+            if ($data['response_result'] > 0){
+                //Asesmen Kebidanan
+                $bidan = self::$query->select('asesmen_kebidanan', array(
+                    'tanggal_partus',
+                    'tempat_partus',
+                    'jenis_partus',
+                    'penolong',
+                    'nifas',
+                    'jenkel_anak',
+                    'keadaan_sekarang',
+                    'keterangan',
+                    'bb_anak',
+                    'usia_kehamilan'
+                ))
+                    ->where(array(
+                        'asesmen_kebidanan.asesmen' => '= ?',
+                        'AND',
+                        'asesmen_kebidanan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $data['response_data'][0]['asesmen']
+                    ))
+                    ->execute();
+
+                $antrian['asesmen_bidan'] = $bidan['response_data'];
+
+
+
+                //Hanya untuk IGD
+                if($antrian['antrian']['departemen'] === __POLI_IGD__) {
+                    $infus = self::$query->select('asesmen_igd_infus', array(
+                        'id',
+                        'asesmen',
+                        'pukul',
+                        'obat',
+                        'dosis',
+                        'rute',
+                        'keputusan',
+                        'oleh',
+                        'created_at',
+                        'updated_at',
+                        'deleted_at',
+                        'igd_type'
+                    ))
+                        ->where(array(
+                            'asesmen_igd_infus.asesmen' => '= ?'
+                        ), array(
+                            $data['response_data'][0]['asesmen']
+                        ))
+                        ->order(array(
+                            'created_at' => 'ASC'
+                        ))
+                        ->execute();
+                    foreach ($infus['response_data'] as $infusKey => $infusValue) {
+                        $infus['response_data'][$infusKey]['obat'] = $Invetori->get_item_detail($infusValue['obat'])['response_data'][0];
+                        $infus['response_data'][$infusKey]['oleh'] = $Pegawai->get_detail_pegawai($infusValue['oleh'])['response_data'][0];
+                        if(isset($infusValue['deleted_at'])) {
+                            $LogInfo = self::$query->select('log_activity', array(
+                                'id',
+                                'user_uid'
+                            ))
+                                ->where(array(
+                                    'log_activity.table_name' => '= ?',
+                                    'AND',
+                                    'log_activity.unique_target' => '= ?',
+                                    'AND',
+                                    'log_activity.action' => '= ?'
+                                ), array(
+                                    'asesmen_igd_infus',
+                                    $infusValue['id'],
+                                    'D'
+                                ))
+                                ->execute();
+                            $infus['response_data'][$infusKey]['dihapus_oleh'] = $Pegawai->get_detail_pegawai($LogInfo['response_data'][0]['user_uid'])['response_data'][0]['nama'];
+                        }
+                    }
+                    $antrian['asesmen_infus'] = $infus['response_data'];
+                }
+
+                $antrian['asesmen_rawat'] = $data['response_data'][0];
+            }
+        }
+
+        return $antrian;
+    }
 	private function get_asesmen_rawat($parameter){		//uid antrian
 		$antrian = self::get_pasien_asesmen_rawat($parameter);
 		$antrian['asesmen_rawat'] = [];
