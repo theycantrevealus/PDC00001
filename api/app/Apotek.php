@@ -673,7 +673,9 @@ class Apotek extends Utility
             'mutasi' => $Mutasi,
             'batch' => $usedBatch,
             'parse_mutas' => $itemMutasi,
-            'stok_result' => ($updateResult == count($usedBatch)) ? 1 : 0
+            'stok_result' => ($updateResult == count($usedBatch)) ? 1 : 0,
+            'update_resep' => $updateResep,
+            'update_racikan' => $updateRacikan,
         );
     }
 
