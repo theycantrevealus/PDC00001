@@ -27,11 +27,14 @@
                     console.clear();
 
 
+
                     if(response === undefined || response.response_package === undefined) {
                         rawData = [];
                     } else {
                         rawData = response.response_package.response_data;
                     }
+
+                    console.log(rawData);
 
                     for(var dataKey in rawData) {
                         if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
@@ -75,14 +78,14 @@
                         }
                     }
 
-                    console.log(uniqueData);
-
                     var autonum = 1;
                     for(var pKey in uniqueData) {
 
                         for(var bza in uniqueData[pKey].batch) {
                             //uniqueData[rawData[dataKey].barang].stok_batch += uniqueBatch[bza];
                         }
+
+                        console.log(uniqueData[pKey].detail.nama);
 
                         returnedData.push({
                             autonum: autonum,
