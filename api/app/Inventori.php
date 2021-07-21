@@ -4847,81 +4847,65 @@ class Inventori extends Utility
 
 
 
-                        /*$stok_dari_old = self::$query->select('inventori_stok', array(
-                            'stok_terkini'
-                        ))
-                            ->where(array(
-                                'inventori_stok.barang' => '= ?',
-                                'AND',
-                                'inventori_stok.batch' => '= ?',
-                                'AND',
-                                'inventori_stok.gudang' => '= ?'
-                            ), array(
-                                $ItemUIDBatch[0],
-                                $ItemUIDBatch[1],
-                                $parameter['dari']
+                        if(isset($parameter['inap'])) {
+                            $stok_dari_old = self::$query->select('inventori_stok', array(
+                                'stok_terkini'
                             ))
-                            ->execute();
-
-                        $update_stok_old_dari = self::$query->update('inventori_stok', array(
-                            'stok_terkini' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) - floatval($value['mutasi'])
-                        ))
-                            ->where(array(
-                                'inventori_stok.barang' => '= ?',
-                                'AND',
-                                'inventori_stok.batch' => '= ?',
-                                'AND',
-                                'inventori_stok.gudang' => '= ?'
-                            ), array(
-                                $ItemUIDBatch[0],
-                                $ItemUIDBatch[1],
-                                $parameter['dari']
-                            ))
-                            ->execute();
-
-                        if ($update_stok_old_dari['response_result'] > 0) {
-                            //Update Stok Log Dari
-                            $update_dari_log = self::$query->insert('inventori_stok_log', array(
-                                'barang' => $ItemUIDBatch[0],
-                                'batch' => $ItemUIDBatch[1],
-                                'uid_foreign' => $uid,
-                                'jenis_transaksi' => 'inventori_mutasi',
-                                'gudang' => $parameter['dari'],
-                                'masuk' => 0,
-                                'keluar' => floatval($value['mutasi']),
-                                'saldo' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) - floatval($value['mutasi']),
-                                'type' => (isset($parameter['inap'])) ? __STATUS_BARANG_KELUAR_INAP__ : __STATUS_MUTASI_STOK__,
-                                'keterangan' => $parameter['keterangan']
-                            ))
+                                ->where(array(
+                                    'inventori_stok.barang' => '= ?',
+                                    'AND',
+                                    'inventori_stok.batch' => '= ?',
+                                    'AND',
+                                    'inventori_stok.gudang' => '= ?'
+                                ), array(
+                                    $ItemUIDBatch[0],
+                                    $ItemUIDBatch[1],
+                                    $parameter['dari']
+                                ))
                                 ->execute();
-                        }
 
-
-
-
-
-
-
-                        //Update Stok Tujuan
-                        $stok_ke_old = self::$query->select('inventori_stok', array(
-                            'stok_terkini'
-                        ))
-                            ->where(array(
-                                'inventori_stok.barang' => '= ?',
-                                'AND',
-                                'inventori_stok.batch' => '= ?',
-                                'AND',
-                                'inventori_stok.gudang' => '= ?'
-                            ), array(
-                                $ItemUIDBatch[0],
-                                $ItemUIDBatch[1],
-                                $parameter['ke']
+                            $update_stok_old_dari = self::$query->update('inventori_stok', array(
+                                'stok_terkini' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) - floatval($value['mutasi'])
                             ))
-                            ->execute();
+                                ->where(array(
+                                    'inventori_stok.barang' => '= ?',
+                                    'AND',
+                                    'inventori_stok.batch' => '= ?',
+                                    'AND',
+                                    'inventori_stok.gudang' => '= ?'
+                                ), array(
+                                    $ItemUIDBatch[0],
+                                    $ItemUIDBatch[1],
+                                    $parameter['dari']
+                                ))
+                                ->execute();
 
-                        if (count($stok_ke_old['response_data']) > 0) {
-                            $update_stok_old_ke = self::$query->update('inventori_stok', array(
-                                'stok_terkini' => floatval($stok_ke_old['response_data'][0]['stok_terkini']) + floatval($value['mutasi'])
+                            if ($update_stok_old_dari['response_result'] > 0) {
+                                //Update Stok Log Dari
+                                $update_dari_log = self::$query->insert('inventori_stok_log', array(
+                                    'barang' => $ItemUIDBatch[0],
+                                    'batch' => $ItemUIDBatch[1],
+                                    'uid_foreign' => $uid,
+                                    'jenis_transaksi' => 'inventori_mutasi',
+                                    'gudang' => $parameter['dari'],
+                                    'masuk' => 0,
+                                    'keluar' => floatval($value['mutasi']),
+                                    'saldo' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) - floatval($value['mutasi']),
+                                    'type' => (isset($parameter['inap'])) ? __STATUS_BARANG_KELUAR_INAP__ : __STATUS_MUTASI_STOK__,
+                                    'keterangan' => $parameter['keterangan']
+                                ))
+                                    ->execute();
+                            }
+
+
+
+
+
+
+
+                            //Update Stok Tujuan
+                            $stok_ke_old = self::$query->select('inventori_stok', array(
+                                'stok_terkini'
                             ))
                                 ->where(array(
                                     'inventori_stok.barang' => '= ?',
@@ -4935,32 +4919,51 @@ class Inventori extends Utility
                                     $parameter['ke']
                                 ))
                                 ->execute();
-                        } else {
-                            $update_stok_old_ke = self::$query->insert('inventori_stok', array(
-                                'stok_terkini' => floatval($value['mutasi']),
-                                'barang' => $ItemUIDBatch[0],
-                                'batch' => $ItemUIDBatch[1],
-                                'gudang' => $parameter['ke']
-                            ))
-                                ->execute();
-                        }
 
-                        if ($update_stok_old_ke['response_result'] > 0) {
-                            //Update Stok Log Ke
-                            $update_ke_log = self::$query->insert('inventori_stok_log', array(
-                                'barang' => $ItemUIDBatch[0],
-                                'batch' => $ItemUIDBatch[1],
-                                'uid_foreign' => $uid,
-                                'jenis_transaksi' => 'inventori_mutasi',
-                                'gudang' => $parameter['ke'],
-                                'masuk' => floatval($value['mutasi']),
-                                'keluar' => 0,
-                                'saldo' => floatval($stok_ke_old['response_data'][0]['stok_terkini']) + floatval($value['mutasi']),
-                                'type' => (isset($parameter['inap'])) ? __STATUS_BARANG_MASUK_INAP__ : __STATUS_MUTASI_STOK__,
-                                'keterangan' => $parameter['keterangan']
-                            ))
-                                ->execute();
-                        }*/
+                            if (count($stok_ke_old['response_data']) > 0) {
+                                $update_stok_old_ke = self::$query->update('inventori_stok', array(
+                                    'stok_terkini' => floatval($stok_ke_old['response_data'][0]['stok_terkini']) + floatval($value['mutasi'])
+                                ))
+                                    ->where(array(
+                                        'inventori_stok.barang' => '= ?',
+                                        'AND',
+                                        'inventori_stok.batch' => '= ?',
+                                        'AND',
+                                        'inventori_stok.gudang' => '= ?'
+                                    ), array(
+                                        $ItemUIDBatch[0],
+                                        $ItemUIDBatch[1],
+                                        $parameter['ke']
+                                    ))
+                                    ->execute();
+                            } else {
+                                $update_stok_old_ke = self::$query->insert('inventori_stok', array(
+                                    'stok_terkini' => floatval($value['mutasi']),
+                                    'barang' => $ItemUIDBatch[0],
+                                    'batch' => $ItemUIDBatch[1],
+                                    'gudang' => $parameter['ke']
+                                ))
+                                    ->execute();
+                            }
+
+                            if ($update_stok_old_ke['response_result'] > 0) {
+                                //Update Stok Log Ke
+                                $update_ke_log = self::$query->insert('inventori_stok_log', array(
+                                    'barang' => $ItemUIDBatch[0],
+                                    'batch' => $ItemUIDBatch[1],
+                                    'uid_foreign' => $uid,
+                                    'jenis_transaksi' => 'inventori_mutasi',
+                                    'gudang' => $parameter['ke'],
+                                    'masuk' => floatval($value['mutasi']),
+                                    'keluar' => 0,
+                                    'saldo' => floatval($stok_ke_old['response_data'][0]['stok_terkini']) + floatval($value['mutasi']),
+                                    'type' => (isset($parameter['inap'])) ? __STATUS_BARANG_MASUK_INAP__ : __STATUS_MUTASI_STOK__,
+                                    'keterangan' => $parameter['keterangan']
+                                ))
+                                    ->execute();
+                            }
+                        }
+                        /**/
                     }
                 } else {
                     array_push($mutasiDetailRecorded, $value[$key]['mutasi']);
