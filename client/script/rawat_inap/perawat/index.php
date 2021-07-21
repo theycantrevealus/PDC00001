@@ -82,7 +82,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/rawat_inap/perawat/asesmen-detail/" + row.pasien.uid + "/" + row.kunjungan + "/" + row.penjamin.uid + "/" + row.nurse_station.nurse_station + "\" class=\"btn btn-sm btn-info btnProsesInap\" id=\"btn_proses_" + row.uid + "\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/rawat_inap/perawat/asesmen-detail/" + row.pasien.uid + "/" + row.kunjungan + "/" + row.penjamin.uid + "/" + row.nurse_station.nurse_station + "/" + row.uid + "\" class=\"btn btn-sm btn-info btnProsesInap\" id=\"btn_proses_" + row.uid + "\">" +
                             "<span><i class=\"fa fa-sign-out-alt\"></i> Proses</span>" +
                             "<a>" +
                             "</div>";

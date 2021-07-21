@@ -1175,7 +1175,7 @@ class Antrian extends Utility
                 ->where($paramKey, $parameterValue)
                 ->order(array(
                     'antrian.prioritas' => 'DESC',
-                    'antrian.waktu_masuk' => 'DESC'
+                    'antrian.waktu_masuk' => 'ASC'
                 ))
                 ->execute();
         } else {
@@ -1220,7 +1220,7 @@ class Antrian extends Utility
                 ->where($paramKey, $parameterValue)
                 ->order(array(
                     'antrian.prioritas' => 'DESC',
-                    'antrian.waktu_masuk' => 'DESC'
+                    'antrian.waktu_masuk' => 'ASC'
                 ))
                 ->execute();
         }
@@ -2293,7 +2293,7 @@ class Antrian extends Utility
             )
             ->order(
                 array(
-                    'antrian.waktu_masuk' => 'DESC'
+                    'antrian.waktu_masuk' => 'ASC'
                 )
             )
             ->execute();

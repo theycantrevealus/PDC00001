@@ -46,7 +46,6 @@
 				},
 				dataSrc:function(response) {
 				    var data = response.response_package.response_data;
-				    console.log(data);
 				    var poliList = [];
 				    var my_poliData = __POLI__.response_data;
 				    for(var a in my_poliData) {

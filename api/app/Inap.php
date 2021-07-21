@@ -369,6 +369,7 @@ class Inap extends Utility
             }
         }
 
+        //Dulu dimutasikan, sekarangn dianggurin aja dikipas kipas pake sampul majalah bobo
         $Mutasi = $Inventori->tambah_mutasi(array(
             'access_token' => $parameter['access_token'],
             'dari' => $parameter['gudang'],
@@ -396,11 +397,12 @@ class Inap extends Utility
         $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
 
         if($Mutasi['response_result'] > 0) {
-            //Catat Informasi retur obat
+
             $mutasi_uid = $Mutasi['response_unique'];
             foreach ($usedBatchInap as $bKey => $bValue) {
                 if(floatval($bValue['aktual']) > 0) {
                     $proceed_catat = self::$query->insert('rawat_inap_retur_obat', array(
+                        'uid_ranap' => $parameter['uid'],
                         'mutasi' => $mutasi_uid,
                         'petugas' => $UserData['data']->uid,
                         'obat' => $bValue['obat'],
@@ -481,7 +483,6 @@ class Inap extends Utility
         }
 
         return array(
-            'mutasi' => $Mutasi,
             'kunjungan' => $Kunjungan,
             'pulang' => $Pulang
         );

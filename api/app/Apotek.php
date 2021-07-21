@@ -2382,7 +2382,7 @@ class Apotek extends Utility
                     array('resep.antrian', '=', 'antrian.uid')
                 ))
                 ->order(array(
-                    'resep.updated_at' => 'DESC'
+                    'resep.created_at' => 'ASC'
                 ))
                 ->where($paramData, $paramValue)
                 ->execute();
@@ -2412,7 +2412,7 @@ class Apotek extends Utility
                     array('resep.antrian', '=', 'antrian.uid')
                 ))
                 ->order(array(
-                    'resep.updated_at' => 'DESC'
+                    'resep.created_at' => 'ASC'
                 ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
@@ -2620,7 +2620,7 @@ class Apotek extends Utility
                         array('resep.pasien', '=', 'pasien.uid')
                     ))
                     ->order(array(
-                        'resep.updated_at' => 'DESC'
+                        'resep.created_at' => 'ASC'
                     ))
                     ->where($paramData, $paramValue)
                     ->execute();
@@ -2645,7 +2645,7 @@ class Apotek extends Utility
                         array('resep.pasien', '=', 'pasien.uid')
                     ))
                     ->order(array(
-                        'resep.updated_at' => 'DESC'
+                        'resep.created_at' => 'ASC'
                     ))
                     ->where($paramData, $paramValue)
                     ->offset(intval($parameter['start']))
@@ -2674,7 +2674,7 @@ class Apotek extends Utility
                         array('resep.pasien', '=', 'pasien.uid')
                     ))
                     ->order(array(
-                        'resep.updated_at' => 'DESC'
+                        'resep.created_at' => 'ASC'
                     ))
                     ->where($paramData, $paramValue)
                     ->execute();
@@ -2699,7 +2699,7 @@ class Apotek extends Utility
                         array('resep.pasien', '=', 'pasien.uid')
                     ))
                     ->order(array(
-                        'resep.updated_at' => 'DESC'
+                        'resep.created_at' => 'ASC'
                     ))
                     ->where($paramData, $paramValue)
                     ->offset(intval($parameter['start']))

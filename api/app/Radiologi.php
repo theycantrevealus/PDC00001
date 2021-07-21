@@ -568,7 +568,7 @@ class Radiologi extends Utility
             ))
             ->order(
                 array(
-                    'rad_order.waktu_order' => 'DESC'
+                    'rad_order.waktu_order' => 'ASC'
                 )
             )
             ->execute();

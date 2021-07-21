@@ -2886,7 +2886,7 @@ class Laboratorium extends Utility {
                 ->where($paramData, $paramValue)
                 ->order(
                     array(
-                        'lab_order.waktu_order' => 'DESC'
+                        'lab_order.waktu_order' => 'ASC'
                     )
                 )
                 ->execute();
@@ -2947,7 +2947,7 @@ class Laboratorium extends Utility {
                 ->limit(intval($parameter['length']))
                 ->order(
                     array(
-                        'lab_order.waktu_order' => 'DESC'
+                        'lab_order.waktu_order' => 'ASC'
                     )
                 )
                 ->execute();

@@ -4,6 +4,7 @@
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "", targettedDataResep = {};
         var kelompokObat = {};
         var nurse_station = __PAGES__[6];
+        var uid_ranap = __PAGES__[7];
         var nurse_station_info = {};
 
         $.ajax({
@@ -1427,6 +1428,7 @@
                         type: "POST",
                         data: {
                             request: "konfirmasi_retur_obat",
+                            uid: uid_ranap,
                             status: "N",
                             gudang: nurse_station_info.gudang,
                             pasien: __PAGES__[3],

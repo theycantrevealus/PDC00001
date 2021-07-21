@@ -6,7 +6,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Radiologi",
