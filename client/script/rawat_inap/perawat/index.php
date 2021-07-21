@@ -22,6 +22,7 @@
                         returnedData = [];
                     } else {
                         var data = response.response_package.response_data;
+                        console.log(data);
                         var autonum = 1;
                         for(var key in data) {
                             if(
