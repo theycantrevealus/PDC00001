@@ -1599,6 +1599,7 @@ class Inap extends Utility
                 'nama' => $parameter['nama'],
                 'kode' => $parameter['kode'],
                 'unit' => $parameter['unit'],
+                'type' => 'INAP',
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             ))
@@ -1724,18 +1725,22 @@ class Inap extends Utility
             $paramData = array(
                 'nurse_station.deleted_at' => 'IS NULL',
                 'AND',
+                'nurse_station.type' => '= ?',
+                'AND',
                 '(nurse_station.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
                 'nurse_station.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
-            $paramValue = array();
+            $paramValue = array('INAP');
         } else {
             $paramData = array(
-                'nurse_station.deleted_at' => 'IS NULL'
+                'nurse_station.deleted_at' => 'IS NULL',
+                'AND',
+                'nurse_station.type' => '= ?'
             );
 
-            $paramValue = array();
+            $paramValue = array('INAP');
         }
 
 

@@ -4891,7 +4891,7 @@ class Inventori extends Utility
                                     'masuk' => 0,
                                     'keluar' => floatval($value['mutasi']),
                                     'saldo' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) - floatval($value['mutasi']),
-                                    'type' => (isset($parameter['inap'])) ? __STATUS_BARANG_KELUAR_INAP__ : __STATUS_MUTASI_STOK__,
+                                    'type' => (isset($parameter['special_code_out'])) ? $parameter['special_code'] : __STATUS_MUTASI_STOK__,
                                     'keterangan' => $parameter['keterangan']
                                 ))
                                     ->execute();
@@ -4957,7 +4957,7 @@ class Inventori extends Utility
                                     'masuk' => floatval($value['mutasi']),
                                     'keluar' => 0,
                                     'saldo' => floatval($stok_ke_old['response_data'][0]['stok_terkini']) + floatval($value['mutasi']),
-                                    'type' => (isset($parameter['inap'])) ? __STATUS_BARANG_MASUK_INAP__ : __STATUS_MUTASI_STOK__,
+                                    'type' => (isset($parameter['special_code_in'])) ? $parameter['special_code_in'] : __STATUS_MUTASI_STOK__,
                                     'keterangan' => $parameter['keterangan']
                                 ))
                                     ->execute();
@@ -5678,8 +5678,8 @@ class Inventori extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        $Unit = new Unit(self::$pdo);
-        $UnitCheck = $Unit->get_unit_detail($UserData['data']->unit)['response_data'][0];
+        /*$Unit = new Unit(self::$pdo);
+        $UnitCheck = $Unit->get_unit_detail($UserData['data']->unit)['response_data'][0];*/
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -5692,7 +5692,7 @@ class Inventori extends Utility
                 'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
             );
 
-            $paramValue = array($UnitCheck['gudang'], $UnitCheck['gudang']);
+            $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
         } else {
             $paramData = array(
                 'inventori_mutasi.deleted_at' => 'IS NULL',
@@ -5702,7 +5702,7 @@ class Inventori extends Utility
                 'inventori_mutasi.ke' => '= ?)'
             );
 
-            $paramValue = array($UnitCheck['gudang'], $UnitCheck['gudang']);
+            $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
         }
 
 

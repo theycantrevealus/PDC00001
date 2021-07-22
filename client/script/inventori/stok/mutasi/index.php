@@ -44,7 +44,7 @@
 			autoWidth: false,
 			language: {
 				search: "",
-				searchPlaceholder: "Cari Kode Amprah"
+				searchPlaceholder: "Cari Kode Mutasi"
 			},
 			"columns" : [
 				{

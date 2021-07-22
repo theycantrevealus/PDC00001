@@ -483,6 +483,54 @@ class Antrian extends Utility
                                 ->execute();
 
 
+                            //Ambil Nurse Station Terkait
+                            $NSAdil = array();
+                            $NSMonitor = array();
+                            $NSRanjang = self::$query->select('nurse_station_ranjang', array(
+                                'nurse_station'
+                            ))
+                                ->where(array(
+                                    'nurse_station_ranjang.ranjang' => '= ?',
+                                    'AND',
+                                    'nurse_station_ranjang.deleted_at' => 'IS NULL'
+                                ), array(
+                                    $parameter['dataObj']['bangsal']
+                                ))
+                                ->execute();
+                            foreach ($NSRanjang['response_data'] as $NSKey => $NSValue) {
+                                if(!isset($NSAdil[$NSValue['nurse_station']])) {
+                                    $NSAdil[$NSValue['nurse_station']] = 0;
+                                }
+                            }
+
+                            foreach ($NSAdil as $NSAKey => $NSAValue) {
+                                $CountIGDNS = self::$query->select('igd', array(
+                                    'uid'
+                                ))
+                                    ->where(array(
+                                        'igd.nurse_station' => '= ?',
+                                        'AND',
+                                        'igd.deleted_at' => 'IS NULL',
+                                        'AND',
+                                        'igd.waktu_keluar' => 'IS NULL'
+                                    ), array(
+                                        $NSAKey
+                                    ))
+                                    ->execute();
+
+                                $NSAdil[$NSAKey] = count($CountIGDNS['response_data']);
+
+                                array_push($NSMonitor, array(
+                                    'ns' => $NSAKey,
+                                    'jumlah' => $NSAdil[$NSAKey]
+                                ));
+                            }
+
+                            usort($NSMonitor, function($a, $b){
+                                $t1 = $a['jumlah'];
+                                $t2 = $b['jumlah'];
+                                return $t1 - $t2;
+                            });
 
                             //Auto IGD
                             $IGD = parent::gen_uuid();
@@ -497,6 +545,7 @@ class Antrian extends Utility
                                 'kamar' => __KAMAR_IGD__,
                                 'bed' => $parameter['dataObj']['bangsal'],
                                 'pegawai_daftar' => $UserData['data']->uid,
+                                'nurse_station' => $NSMonitor[0]['ns'],
                                 'keterangan' => '',
                                 'created_at' => parent::format_date(),
                                 'updated_at' => parent::format_date()
