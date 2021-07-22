@@ -67,6 +67,7 @@
 	var __TODAY__  = mm + ' ' + monthNames[today.getMonth()] + ' ' + yyyy;
 
 	var __MAX_UPLOAD_FILE_SIZE__ = parseFloat(<?php echo json_encode(__MAX_UPLOAD_FILE_SIZE__); ?>);
+	var __RULE_PRA_INAP_ALLOW_ADMINISTRASI__ = parseFloat(<?php echo json_encode(__RULE_PRA_INAP_ALLOW_ADMINISTRASI__); ?>);
 	//Kelas
 	var __UID_KELAS_GENERAL_RJ__ = <?php echo json_encode(__UID_KELAS_GENERAL_RJ__); ?>;
 </script>

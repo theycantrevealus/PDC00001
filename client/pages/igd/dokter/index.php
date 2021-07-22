@@ -46,6 +46,11 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-lg-12">
+                                    <button type="button" class="btn btn-purple" id="btnInap">
+                                        <i class="fa fa-bed"></i> Pindah Rawat Inap
+                                    </button>
+                                </div>
                                 <!--divclass="col-md col-lg-3 handy print_manager" id="kartu">
                                     <div class="card form-row__card bg-purple text-white">
                                         <div class="card-body">

@@ -94,7 +94,11 @@ class IGD extends Utility
                 /*'AND',
                 'igd.dokter' => '= ?',*/
                 'AND',
-                'igd.waktu_keluar' => 'IS NULL'
+                'igd.waktu_keluar' => 'IS NULL',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
             );
 
             //$paramValue = array($UserData['data']->uid);
@@ -130,6 +134,14 @@ class IGD extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('pasien', array(
+                    'uid as uid_pasien',
+                    'nama as nama_pasien',
+                    'no_rm'
+                ))
+                ->on(array(
+                    array('igd.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -147,6 +159,14 @@ class IGD extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('pasien', array(
+                    'uid as uid_pasien',
+                    'nama as nama_pasien',
+                    'no_rm'
+                ))
+                ->on(array(
+                    array('igd.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))

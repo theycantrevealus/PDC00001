@@ -158,7 +158,9 @@
                     $("#mata_loader").hide();
                 }
 
-                $("#heading_nama_poli").html(antrianData.poli_info.nama);
+                $("#heading_nama_poli").html(antrianData.poli_info.nama).attr({
+                    "uid" : antrianData.poli_info.uid
+                });
                 pasien_uid = antrianData.pasien_info.uid;
                 pasien_nama = antrianData.pasien_info.nama;
                 pasien_usia = antrianData.pasien_info.usia;
@@ -5274,6 +5276,7 @@
                             //kamar: $("#inap_kamar").val(),
                             penjamin: $("#inap_penjamin").val(),
                             //bed: $("#inap_bed").val(),
+                            poli_asal: $("#heading_nama_poli").attr("uid"),
                             dokter: $("#inap_dokter").val(),
                             kunjungan: kunjungan.uid,
                             keterangan: $("#inap_keterangan").val()

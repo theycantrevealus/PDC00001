@@ -17,6 +17,7 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+
                     var returnedData = [];
                     if(response == undefined || response.response_package == undefined) {
                         returnedData = [];
@@ -25,6 +26,8 @@
                         for(var key in data) {
                             if(data[key].pasien !== null && data[key].pasien !== undefined) {
                                 returnedData.push(data[key]);
+                            } else {
+                                console.log(data[key]);
                             }
                         }
                     }
@@ -44,12 +47,71 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                        var apotekAllow = 0;
+                        var apotek = row.tagihan_apotek;
+                        for(var a in apotek) {
+                            if(
+                                apotek[a].status_resep === "N" ||   //Verifikasi
+                                apotek[a].status_resep === "K"      //Bayar
+                            ) {
+                                apotekAllow = 0;
+                                break;
+                            } else {
+                                apotekAllow = 1;
+                            }
+                        }
+
+
+                        var laborAllow = 0;
+                        var labor = row.tagihan_laboratorim;
+                        if(labor.length > 0) {
+                            for(var a in labor) {
+                                if(
+                                    labor[a].status === "V" ||   //Verifikasi
+                                    labor[a].status === "K"      //Bayar
+                                ) {
+                                    laborAllow = 0;
+                                    break;
+                                } else {
+                                    laborAllow = 1;
+                                }
+                            }
+                        } else {
+                            laborAllow = 1;
+                        }
+
+
+
+                        var radioAllow = 0;
+                        var radio = row.tagihan_radiologi;
+                        if(radio.length > 0) {
+                            for(var a in radio) {
+                                if(
+                                    radio[a].status === "V" ||   //Verifikasi
+                                    radio[a].status === "K"      //Bayar
+                                ) {
+                                    radioAllow = 0;
+                                    break;
+                                } else {
+                                    radioAllow = 1;
+                                }
+                            }
+                        } else {
+                            radioAllow = 1;
+                        }
+
+
+                        if(row.bed !== undefined && row.bed !== null) {
+                            return "<span allow-inap=\"" + 1 + "|" + 1 + "|" + 1 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                        } else {
+                            return "<span allow-inap=\"" + apotekAllow + "|" + laborAllow + "|" + radioAllow + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                        }
+
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_masuk_tanggal;
+                        return "<span class=\"wrap_content\">" + row.waktu_masuk_tanggal + "</span>";
                     }
                 },
                 {
@@ -62,18 +124,23 @@
                         if(row.nurse_station !== undefined && row.nurse_station !== null) {
                             return (row.kamar !== null) ? "<span bed=\"" + row.bed.uid + "\" kamar=\"" + row.kamar.uid + "\" id=\"kamar_" + row.uid + "\">" + row.kamar.nama + "</span><br />" + row.bed.nama  + "<br /><b class=\"text-info\">[" + row.nurse_station.kode_ns + "]</b> " +row.nurse_station.nama_ns: "";
                         } else {
-                            return "";
+                            return "-";
                         }
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"dokter_" + row.uid + "\" data=\"" + row.dokter.uid + "\">" + row.dokter.nama + "</span>"
+                        return "<span class=\"wrap_content\" id=\"dokter_" + row.uid + "\" data=\"" + row.dokter.uid + "\">" + row.dokter.nama + "</span>"
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"penjamin_" + row.uid + "\" data=\"" + row.penjamin.uid + "\">" + row.penjamin.nama + "</span>";
+                        return "<span class=\"wrap_content\">" + ((row.asal !== undefined && row.asal !== null) ? row.asal.nama : "") + "</span>"
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\" id=\"penjamin_" + row.uid + "\" data=\"" + row.penjamin.uid + "\">" + row.penjamin.nama + "</span>";
                     }
                 },
                 {
@@ -106,19 +173,197 @@
             selectedPasien = $("#pasien_" + id).attr("data");
             selectedKunjungan = $("#pasien_" + id).attr("kunjungan");
 
-            $("#inap_penjamin").html("<option value=\"" + $("#penjamin_" + id).attr("data") + "\">" + $("#penjamin_" + id).html() + "</option>");
-            $("#inap_dokter").html("<option>" + $("#dokter_" + id).html() + "</option>");
-            $("#inap_keterangan").html($("#uid_" + id).attr("keterangan"));
+            if(__RULE_PRA_INAP_ALLOW_ADMINISTRASI__ === 0) {
+                $("#inap_penjamin").html("<option value=\"" + $("#penjamin_" + id).attr("data") + "\">" + $("#penjamin_" + id).html() + "</option>");
+                $("#inap_dokter").html("<option>" + $("#dokter_" + id).html() + "</option>");
+                $("#inap_keterangan").html($("#uid_" + id).attr("keterangan"));
 
-            var kamar = $("#kamar_" + id).attr("kamar");
-            var bed = $("#kamar_" + id).attr("bed");
-
-
-            loadKamar("inap", kamar);
-            loadBangsal("inap", $("#inap_kamar").val(), bed);
+                var kamar = $("#kamar_" + id).attr("kamar");
+                var bed = $("#kamar_" + id).attr("bed");
 
 
-            $("#form-inap").modal("show");
+                loadKamar("inap", kamar);
+                loadBangsal("inap", $("#inap_kamar").val(), bed);
+
+
+                $("#form-inap").modal("show");
+            } else {
+                var SpliterStatus = $("#uid_" + id).attr("allow-inap").split("|");
+                var allowResep = parseInt(SpliterStatus[0]);
+                var allowLabor = parseInt(SpliterStatus[1]);
+                var allowRadio = parseInt(SpliterStatus[2]);
+
+                console.log(SpliterStatus);
+
+                if(allowResep === 1 && allowLabor === 1 && allowRadio === 1) {
+                    $("#inap_penjamin").html("<option value=\"" + $("#penjamin_" + id).attr("data") + "\">" + $("#penjamin_" + id).html() + "</option>");
+                    $("#inap_dokter").html("<option>" + $("#dokter_" + id).html() + "</option>");
+                    $("#inap_keterangan").html($("#uid_" + id).attr("keterangan"));
+
+                    var kamar = $("#kamar_" + id).attr("kamar");
+                    var bed = $("#kamar_" + id).attr("bed");
+
+
+                    loadKamar("inap", kamar);
+                    loadBangsal("inap", $("#inap_kamar").val(), bed);
+
+
+                    $("#form-inap").modal("show");
+                } else {
+                    //Detail Allow Inap
+                    $.ajax({
+                        async: false,
+                        url:__HOSTAPI__ + "/Inap/tagihan_pra_inap/" + id,
+                        type: "GET",
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function(response) {
+                            var dataTagihan = response.response_package.response_data;
+                            $("#form-administrasi").modal("show");
+                            $("#table-tagihan-pra-inap tbody").html("");
+                            var totalBiaya = 0;
+
+                            for(var a in dataTagihan) {
+                                console.log(dataTagihan[a]);
+                                var autoTagihanID = 1;
+
+
+
+                                var tagihanAdministrasi = dataTagihan[a].administrasi;
+                                for(var b in tagihanAdministrasi) {
+                                    totalBiaya += parseFloat(tagihanAdministrasi[b].subtotal);
+
+                                    $("#table-tagihan-pra-inap tbody").append("<tr>" +
+                                        "<td>" + autoTagihanID + "</td>" +
+                                        "<td>" + tagihanAdministrasi[b].item.nama + "</td>" +
+                                        "<td class=\"wrap_content\"><span class=\"text-danger\">" + ((tagihanAdministrasi[b].status_bayar === "Y") ? "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>" : "<i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>") + "</td>" +
+                                        "<td class=\"number_style\">" + number_format(parseFloat(tagihanAdministrasi[b].subtotal), 2, ".", ",") + "</td>" +
+                                        "</tr>");
+                                    autoTagihanID++;
+                                }
+
+
+
+
+                                var tagihanTindakan = dataTagihan[a].tindakan;
+                                for(var b in tagihanTindakan) {
+
+                                    totalBiaya += parseFloat(tagihanTindakan[b].subtotal);
+
+                                    $("#table-tagihan-pra-inap tbody").append("<tr>" +
+                                        "<td>" + autoTagihanID + "</td>" +
+                                        "<td>" + tagihanTindakan[b].item.nama + "</td>" +
+                                        "<td class=\"wrap_content\"><span class=\"text-danger\">" + ((tagihanTindakan[b].status_bayar === "Y") ? "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>" : "<i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>") + "</td>" +
+                                        "<td class=\"number_style\">" + number_format(parseFloat(tagihanTindakan[b].subtotal), 2, ".", ",") + "</td>" +
+                                        "</tr>");
+                                    autoTagihanID++;
+                                }
+
+
+
+
+
+
+                                var tagihanApotek = dataTagihan[a].tagihan_apotek;
+                                for(var b in tagihanApotek) {
+                                    var status_parse = "";
+                                    var status = tagihanApotek[b].status_resep;
+                                    if(status === "N") {
+                                        status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</i></span>";
+                                    } else if(status === "K") {
+                                        status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>";
+                                    } else if(status === "L" || status === "P" || status === "S") {
+                                        status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>";
+                                    }
+                                    var kalkulasiTotal = 0;
+                                    var TotalBiayaApotek = tagihanApotek[b].biaya;
+                                    for(var tbApotek in TotalBiayaApotek) {
+                                        kalkulasiTotal += parseFloat(TotalBiayaApotek[tbApotek].subtotal);
+                                    }
+
+                                    totalBiaya += kalkulasiTotal;
+
+                                    $("#table-tagihan-pra-inap tbody").append("<tr>" +
+                                        "<td>" + autoTagihanID + "</td>" +
+                                        "<td>" + tagihanApotek[b].kode + "</td>" +
+                                        "<td class=\"wrap_content\">" + status_parse + "</td>" +
+                                        "<td class=\"number_style\">" + number_format(kalkulasiTotal, 2, ".", ",") + "</td>" +
+                                        "</tr>");
+                                    autoTagihanID++;
+                                }
+
+
+
+                                var tagihanLabor = dataTagihan[a].tagihan_laboratorium;
+                                for(var b in tagihanLabor) {
+                                    var status_parse = "";
+                                    var status = tagihanLabor[b].status;
+                                    if(status === "V") {
+                                        status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</i></span>";
+                                    } else if(status === "K") {
+                                        status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>";
+                                    } else if(status === "L" || status === "P" || status === "D") {
+                                        status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>";
+                                    }
+                                    var kalkulasiTotal = 0;
+                                    var TotalBiayaLaboratorium = tagihanLabor[b].biaya;
+                                    for(var tbLabor in TotalBiayaLaboratorium) {
+                                        kalkulasiTotal += parseFloat(TotalBiayaLaboratorium[tbLabor].subtotal);
+                                    }
+
+                                    totalBiaya += kalkulasiTotal;
+
+                                    $("#table-tagihan-pra-inap tbody").append("<tr>" +
+                                        "<td>" + autoTagihanID + "</td>" +
+                                        "<td>" + tagihanLabor[b].no_order + "</td>" +
+                                        "<td class=\"wrap_content\">" + status_parse + "</td>" +
+                                        "<td class=\"number_style\">" + ((tagihanLabor[b].status === "V") ? number_format(0, 2, ".", ",") : number_format(kalkulasiTotal, 2, ".", ",")) + "</td>" +
+                                        "</tr>");
+                                    autoTagihanID++;
+                                }
+
+
+                                var tagihanRadio = dataTagihan[a].tagihan_radiologi;
+                                for(var b in tagihanRadio) {
+                                    var status_parse = "";
+                                    var status = tagihanRadio[b].status;
+                                    if(status === "V") {
+                                        status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</i></span>";
+                                    } else if(status === "K") {
+                                        status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>";
+                                    } else if(status === "L" || status === "P" || status === "D") {
+                                        status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>";
+                                    }
+                                    var kalkulasiTotal = 0;
+                                    var TotalBiayaRadiologi = tagihanRadio[b].biaya;
+                                    for(var tbRadio in TotalBiayaRadiologi) {
+                                        kalkulasiTotal += parseFloat(TotalBiayaRadiologi[tbRadio].subtotal);
+                                    }
+
+                                    totalBiaya += kalkulasiTotal;
+
+                                    $("#table-tagihan-pra-inap tbody").append("<tr>" +
+                                        "<td>" + autoTagihanID + "</td>" +
+                                        "<td>" + tagihanRadio[b].no_order + "</td>" +
+                                        "<td class=\"wrap_content\">" + status_parse + "</td>" +
+                                        "<td class=\"number_style\">" + ((tagihanRadio[b].status === "V") ? number_format(0, 2, ".", ",") : number_format(kalkulasiTotal, 2, ".", ",")) + "</td>" +
+                                        "</tr>");
+                                    autoTagihanID++;
+                                }
+
+
+                            }
+
+                            $("#total_biaya").html(number_format(totalBiaya, 2, ".", ","));
+
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            }
         });
 
         $("body").on("click", ".btn-pulangkan-pasien", function () {
@@ -279,7 +524,7 @@
                 error: function(response) {
                     console.log(response);
                 }
-            })
+            });
         }
 
         function loadBangsal(target_ui, kamar, selected = ""){
@@ -372,6 +617,39 @@
         </div>
     </div>
 </div>
+
+<div id="form-administrasi" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Administrasi Pasien</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered largeDataType" id="table-tagihan-pra-inap">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="wrap_content">No</th>
+                            <th>Item Penagihan</th>
+                            <th class="wrap_content">Status</th>
+                            <th class="wrap_content">Biaya</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3">TOTAL</td>
+                            <td id="total_biaya" class="number_style"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 

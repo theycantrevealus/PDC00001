@@ -2284,6 +2284,8 @@
                                                 });
                                             });
                                         }
+                                    } else {
+                                        console.log(response);
                                     }
                                 },
                                 error: function(response) {

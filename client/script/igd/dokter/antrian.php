@@ -3613,7 +3613,7 @@
                 }
             });
 
-            orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, charge_invoice);
+            //orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, charge_invoice);
             listTindakanRadiologiDihapus = [];		//set back to empty
             return savingResult;
         }
@@ -3678,7 +3678,8 @@
             }).then(function(result) {
                 if(result.response_package.response_result > 0) {
                     notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
-                    location.href = __HOSTNAME__ + "/igd/dokter/index/" + pages_split[4] + "/" + pages_split[5];
+                    location.href = __HOSTNAME__ + "/igd/dokter/index/" + pages_split[4] + "/" + pages_split[5] + "/" + pasien_penjamin;
+                    //alert(__HOSTNAME__ + "/igd/dokter/index/" + pages_split[4] + "/" + pages_split[5] + "/" + pasien_penjamin_uid);
                     /*if(result.response_package.resep_response !== undefined && result.response_package.resep_response !== null) {
                         if(result.response_package.resep_response.resep.length > 0 || result.response_package.resep_response.racikan.length) {
                             push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
@@ -3696,7 +3697,7 @@
                             push_socket(__ME__, "permintaan_laboratorium_baru", "*", "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
                         }
                     }*/
-                    location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                    //location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                 } else {
                     notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                 }
@@ -3780,7 +3781,7 @@
                             if(antrianData.poli_info.uid !== __POLI_IGD__) {
                                 location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                             } else {
-                                location.href = __HOSTNAME__ + "/igd/dokter/index/" + pages_split[4] + "/" + pages_split[5];
+                                location.href = __HOSTNAME__ + "/igd/dokter/index/" + pages_split[4] + "/" + pages_split[5] + "/" + pasien_penjamin_uid;
                             }
                         } else {
                             notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
@@ -4999,7 +5000,7 @@
                 listTindakanLabTerpilih[lok].tgl_sample = $("#tanggal_sample_" + lok).val()
             }
 
-            orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, "", uid_lab_order, dataTableLabOrder, __HOSTAPI__);
+            //orderLab(LabMode, UID, listTindakanLabTerpilih, selectedLabItemList, "", uid_lab_order, dataTableLabOrder, __HOSTAPI__);
 
         });
 
