@@ -60,7 +60,7 @@
 			</div>
 			<div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">List Asesmen</h5>
+                    <h5 class="card-header__title flex m-0">Rekam Medis</h5>
                     <button class="btn btn-info pull-right" id="btnTambahAsesmen">
                         <i class="fa fa-plus"></i> Tambah Asesmen
                     </button>

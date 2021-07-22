@@ -2074,6 +2074,14 @@
                 var signa_hari = $("#racikan_signaB_" + id).inputmask("unmaskedvalue");
                 var aturanPakai = $("#aturan_pakai_racikan_" + id).val();
 
+                console.clear();
+                console.log(obat);
+                console.log(komposisi);
+                console.log(jlh_obat);
+                console.log(signa_konsumsi);
+                console.log(signa_hari);
+                console.log(aturanPakai);
+
                 if(
                     parseFloat(jlh_obat) > 0 &&
                     parseFloat(signa_konsumsi) > 0 &&
@@ -2254,7 +2262,7 @@
 
                 $(this).find("td:eq(1) input").attr({
                     "id": "racikan_nama_" + id
-                });
+                }).val("Racikan " + id);
 
                 if($(this).find("td:eq(1) input") == "") {
                     $(this).find("td:eq(1) input").val("RACIKAN " + id);
@@ -2561,6 +2569,7 @@
                     });
             }
 
+            checkGenerateRacikan(currentRacikID);
             //$("#jlh_komposisi_" + currentRacikID + "_" + currentKomposisiID).html($("#txt_racikan_jlh").val());
             $("#takar_komposisi_" + currentRacikID + "_" + currentKomposisiID).html("<b style=\"font-size: 15pt; display: none\">" + $("#txt_racikan_takar_bulat").val() + "</b><sub nilaiExact=\"" + eval($("#txt_racikan_takar").val()) + "\">" + $("#txt_racikan_takar").val() + "</sub><h6>" + $("#txt_racikan_kekuatan").val() + "</h6>");
             //if($("#txt_racikan_jlh").val() != "" && $("#txt_racikan_takar").val()) {
