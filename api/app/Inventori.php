@@ -5678,20 +5678,31 @@ class Inventori extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
+        $Unit = new Unit(self::$pdo);
+        $UnitCheck = $Unit->get_unit_detail($UserData['data']->unit)['response_data'][0];
+
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
                 'inventori_mutasi.deleted_at' => 'IS NULL',
                 'AND',
+                '(inventori_mutasi.dari' => '= ?',
+                'OR',
+                'inventori_mutasi.ke' => '= ?)',
+                'AND',
                 'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
             );
 
-            $paramValue = array();
+            $paramValue = array($UnitCheck['gudang'], $UnitCheck['gudang']);
         } else {
             $paramData = array(
-                'inventori_mutasi.deleted_at' => 'IS NULL'
+                'inventori_mutasi.deleted_at' => 'IS NULL',
+                'AND',
+                '(inventori_mutasi.dari' => '= ?',
+                'OR',
+                'inventori_mutasi.ke' => '= ?)'
             );
 
-            $paramValue = array();
+            $paramValue = array($UnitCheck['gudang'], $UnitCheck['gudang']);
         }
 
 
