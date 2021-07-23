@@ -956,13 +956,25 @@ class Inap extends Utility
 
     private function riwayat_obat_inap($parameter) {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-            $paramData = array();
+            $paramData = array(
+                'rawat_inap_riwayat_obat.pasien' => '= ?',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
 
-            $paramValue = array();
+            $paramValue = array(
+                $parameter['pasien']
+            );
         } else {
-            $paramData = array();
+            $paramData = array(
+                'rawat_inap_riwayat_obat.pasien' => '= ?'
+            );
 
-            $paramValue = array();
+            $paramValue = array(
+                $parameter['pasien']
+            );
         }
 
 
@@ -980,8 +992,16 @@ class Inap extends Utility
                 ->join('pegawai', array(
                     'nama as nama_petugas'
                 ))
+                ->join('resep', array(
+                    'pasien'
+                ))
+                ->join('pasien', array(
+                    'nama', 'no_rm'
+                ))
                 ->on(array(
-                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid')
+                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid'),
+                    array('rawat_inap_riwayat_obat.resep', '=', 'resep.uid'),
+                    array('resep.pasien', '=', 'pasien.uid')
                 ))
                 ->order(array(
                     'logged_at' => 'DESC'
@@ -1002,8 +1022,16 @@ class Inap extends Utility
                 ->join('pegawai', array(
                     'nama as nama_petugas'
                 ))
+                ->join('resep', array(
+                    'pasien'
+                ))
+                ->join('pasien', array(
+                    'nama', 'no_rm'
+                ))
                 ->on(array(
-                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid')
+                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid'),
+                    array('rawat_inap_riwayat_obat.resep', '=', 'resep.uid'),
+                    array('resep.pasien', '=', 'pasien.uid')
                 ))
                 ->order(array(
                     'logged_at' => 'DESC'

@@ -69,10 +69,10 @@
             lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
-                url: __HOSTAPI__ + "/Inap",
+                url: __HOSTAPI__ + "/IGD",
                 type: "POST",
                 data: function(d) {
-                    d.request = "riwayat_obat_inap";
+                    d.request = "riwayat_obat_igd";
                     d.pasien = __PAGES__[3];
                     d.kunjungan = __PAGES__[4];
                 },

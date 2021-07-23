@@ -38,7 +38,7 @@
                 var totalLunas = 0, totalTunggak = 0;
                 for(var a in data) {
                     for(var b in data[a].detail) {
-                        if(data[a].detail[b].departemen === __POLI_INAP__) {
+                        if(data[a].detail[b].departemen === __POLI_IGD__) {
                             if(data[a].detail[b].status_bayar === "Y") {
                                 filteredLunas.push({
                                     invoice: data[a].nomor_invoice,

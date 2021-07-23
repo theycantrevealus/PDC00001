@@ -381,7 +381,7 @@ class IGD extends Utility
             foreach ($usedBatchInap as $bKey => $bValue) {
                 if(floatval($bValue['aktual']) > 0) {
                     $proceed_catat = self::$query->insert('igd_retur_obat', array(
-                        'uid_ranap' => $parameter['uid'],
+                        'uid_igd' => $parameter['uid'],
                         'mutasi' => $mutasi_uid,
                         'petugas' => $UserData['data']->uid,
                         'obat' => $bValue['obat'],
@@ -463,7 +463,8 @@ class IGD extends Utility
 
         return array(
             'kunjungan' => $Kunjungan,
-            'pulang' => $Pulang
+            'pulang' => $Pulang,
+            'invoice' => $InvoiceCheck
         );
     }
 
@@ -742,13 +743,25 @@ class IGD extends Utility
 
     private function riwayat_obat_igd($parameter) {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-            $paramData = array();
+            $paramData = array(
+                'igd_riwayat_obat.pasien' => '= ?',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
 
-            $paramValue = array();
+            $paramValue = array(
+                $parameter['pasien']
+            );
         } else {
-            $paramData = array();
+            $paramData = array(
+                'igd_riwayat_obat.pasien' => '= ?'
+            );
 
-            $paramValue = array();
+            $paramValue = array(
+                $parameter['pasien']
+            );
         }
 
 
@@ -766,8 +779,16 @@ class IGD extends Utility
                 ->join('pegawai', array(
                     'nama as nama_petugas'
                 ))
+                ->join('resep', array(
+                    'pasien'
+                ))
+                ->join('pasien', array(
+                    'nama', 'no_rm'
+                ))
                 ->on(array(
-                    array('igd_riwayat_obat.petugas', '=', 'pegawai.uid')
+                    array('igd_riwayat_obat.petugas', '=', 'pegawai.uid'),
+                    array('igd_riwayat_obat.resep', '=', 'resep.uid'),
+                    array('resep.pasien', '=', 'pasien.uid')
                 ))
                 ->order(array(
                     'logged_at' => 'DESC'
@@ -788,8 +809,16 @@ class IGD extends Utility
                 ->join('pegawai', array(
                     'nama as nama_petugas'
                 ))
+                ->join('resep', array(
+                    'pasien'
+                ))
+                ->join('pasien', array(
+                    'nama', 'no_rm'
+                ))
                 ->on(array(
-                    array('igd_riwayat_obat.petugas', '=', 'pegawai.uid')
+                    array('igd_riwayat_obat.petugas', '=', 'pegawai.uid'),
+                    array('igd_riwayat_obat.resep', '=', 'resep.uid'),
+                    array('resep.pasien', '=', 'pasien.uid')
                 ))
                 ->order(array(
                     'logged_at' => 'DESC'
