@@ -11,7 +11,7 @@
 							
 
 							<div class="card card-form d-flex flex-column flex-sm-row">
-								<div class="card-form__body card-body-form-group flex">
+								<div class="card-body-form-group flex">
                                     <div class="row">
                                         <div class="col-md-auto">
                                             <div class="form-group" style="width: 400px;">
@@ -28,9 +28,23 @@
                             <div id="cppt_pagination">
 
                             </div>
-                            <div id="cppt_loader">
-
-							</div>
+                            <div class="card">
+                                <div id="cppt_loader" class="card-body">
+                                    <div class="no-data-panel">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div style="padding: 50px;">
+                                                    <h1 class="text-muted">Tidak ada Data Ditemukan</h1>
+                                                    <p style="padding: 10px;">Silahkan ubah filter pencarian untuk mendapatkan data lain.</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <img style="width: 100%;" alt="no-data" src="<?php echo __HOSTNAME__; ?>/template/assets/images/illustration/undraw_startled_8p0r.png" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
 
 							<div class="mt-4">

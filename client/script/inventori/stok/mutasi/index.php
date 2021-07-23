@@ -49,7 +49,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum + "<input type=\"hidden\" id=\"keterangan_" + row.uid + "\" value=\"" + row.keterangan + "\" />";
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5><input type=\"hidden\" id=\"keterangan_" + row.uid + "\" value=\"" + row.keterangan + "\" />";
 					}
 				},
 				{
@@ -59,27 +59,27 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<b status=\"" + row.status + "\" id=\"kode_" + row.uid + "\">" + row.kode + "</b>";
+						return "<span class=\"wrap_content\" status=\"" + row.status + "\" id=\"kode_" + row.uid + "\"><img class=\"icon-pack\" src=\"" + __HOSTNAME__ + "/template/assets/images/icons/bill.png\"> " + row.kode + "</span>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"unit_asal_" + row.uid + "\">" + row.dari.nama + "</span>";
+						return "<span class=\"wrap_content\"><img class=\"icon-pack\" src=\"" + __HOSTNAME__ + "/template/assets/images/icons/wholesaler.png\"> <b id=\"unit_asal_" + row.uid + "\">" + row.dari.nama + "</b></span>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span uid=\"" + row.ke.uid + "\" id=\"unit_tujuan_" + row.uid + "\">" + row.ke.nama + "</span>";
+						return "<span class=\"wrap_content\"><img class=\"icon-pack\" src=\"" + __HOSTNAME__ + "/template/assets/images/icons/wholesaler.png\"> <b uid=\"" + row.ke.uid + "\" id=\"unit_tujuan_" + row.uid + "\">" + row.ke.nama + "</b></span>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span uid=\"" + row.pegawai.uid + "\" id=\"oleh_" + row.uid + "\">" + row.pegawai.nama + "</span>";
+						return "<span class=\"wrap_content\"><img class=\"icon-pack\" src=\"" + __HOSTNAME__ + "/template/assets/images/icons/employee.png\"> <b uid=\"" + row.pegawai.uid + "\" id=\"oleh_" + row.uid + "\">" + row.pegawai.nama + "</b></span>";
 					}
 				},
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return (row.status === "R") ? "<span class=\"text-success\">Diterima</span>" : ((row.status === "N") ? "<span class=\"text-info\">Baru</span>" : "<span class=\"text-danger\">Dibatalkan</span>");
+                        return (row.status === "R") ? "<span class=\"text-success\"><img class=\"icon-pack\" src=\"" + __HOSTNAME__ + "/template/assets/images/icons/logistic/check-list.png\"> Diterima</span>" : ((row.status === "N") ? "<span class=\"text-info\"><img class=\"icon-pack\" src=\"" + __HOSTNAME__ + "/template/assets/images/icons/logistic/return.png\"> Baru</span>" : "<span class=\"text-warning\"><img class=\"icon-pack\" src=\"" + __HOSTNAME__ + "/template/assets/images/icons/logistic/trolley.png\"> Dibatalkan</span>");
                     }
                 },
 				{
@@ -249,7 +249,7 @@
                             <div class="card-header card-header-large bg-white">
                                 <div class="row">
                                     <div class="col-12">
-                                        <table class="form-mode">
+                                        <table class="table form-mode">
                                             <tr>
                                                 <td>Dari</td>
                                                 <td class="wrap_content">:</td>
@@ -272,11 +272,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header card-header-large bg-white">
+                            <div class="card-body">
                                 <div class="row">
                                     <div class="col-12">
                                         <table class="table table-bordered table-striped largeDataType" id="mutasi_detail_item">
@@ -293,14 +289,6 @@
                                             <tbody></tbody>
                                         </table>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header card-header-large bg-white">
-                                <div class="row">
                                     <div class="col-12">
                                         <b>
                                             <h6>Keterangan:</h6>

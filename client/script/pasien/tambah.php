@@ -3,6 +3,12 @@
 	$(function(){
 		var status_antrian = '<?= $_GET['antrian']; ?>';
 
+		if(status_antrian === "true") {
+		    $("#btnBatal").attr({
+                "href": __HOSTNAME__ + "/rawat_jalan/resepsionis"
+            });
+        }
+
 		var allData = {};
 		loadTermSelectBox('panggilan', 3);
 		loadTermSelectBox('suku', 6);

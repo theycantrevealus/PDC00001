@@ -475,7 +475,7 @@ class Tindakan extends Utility {
 
 	private function get_tindakan_backend($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -536,7 +536,7 @@ class Tindakan extends Utility {
                 ))
                 ->execute();
             foreach ($tindakan_poli['response_data'] as $PKey => $PValue) {
-                $PoliDetail = $Poli::get_poli_detail($PValue['uid_poli'])['response_data'][0];
+                $PoliDetail = $Poli->get_poli_info($PValue['uid_poli'])['response_data'][0];
                 array_push($poliList, $PoliDetail);
             }
 

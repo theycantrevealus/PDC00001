@@ -246,6 +246,9 @@ class Asesmen extends Utility {
                 ->on(array(
                     array('asesmen.pasien', '=', 'pasien.uid')
                 ))
+                ->order(array(
+                    'asesmen.created_at' => 'ASC'
+                ))
                 ->execute();
         } else {
             $data = self::$query->select('asesmen', array(
@@ -270,6 +273,9 @@ class Asesmen extends Utility {
                 ))
                 ->on(array(
                     array('asesmen.pasien', '=', 'pasien.uid')
+                ))
+                ->order(array(
+                    'asesmen.created_at' => 'ASC'
                 ))
                 ->execute();
         }

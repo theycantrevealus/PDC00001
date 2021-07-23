@@ -161,7 +161,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -333,7 +333,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -426,7 +426,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -1110,8 +1110,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.clear();
-                    console.log(response);
                     $("#loader-search").attr("hidden",true);
                     var returnedData = [];
                     var parsedData = [];
@@ -1119,6 +1117,12 @@
                         returnedData = [];
                     } else {
                         returnedData = response.response_package.response_data;
+                    }
+
+                    if(returnedData.length === 0 && $("#txt_cari").val() !== "") {
+                        $("#btnTambahPasien").fadeIn();
+                    } else {
+                        $("#btnTambahPasien").fadeOut();
                     }
 
                     response.draw = parseInt(response.response_package.response_draw);
@@ -1138,7 +1142,7 @@
             "columns" : [
                 {
                     "data" : "autonum", render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -1983,7 +1987,7 @@
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="modal-large-title">Tambah Antrian</h5>
+				<h5 class="modal-title" id="modal-large-title">Tambah Kunjungan</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>

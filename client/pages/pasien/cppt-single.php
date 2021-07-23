@@ -3,9 +3,9 @@
         <div class="text-dark-gray"><?php echo $_POST['waktu_masuk']; ?></div>
     </div>
     <div class="col-sm">
-        <div class="card m-0" style="margin-bottom: 20px !important; <?php echo ($_POST['__ME__'] === $_POST['dokter_uid']) ? 'background: #F1FFD7; box-shadow: 0 10px 25px 0 rgb(241 255 215 / 7%), 0 5px 15px 0 rgb(0 0 0 / 7%);' : ''; ?>">
-            <div class="card-header card-header-large d-flex align-items-center" style="<?php echo ($_POST['__ME__'] === $_POST['dokter_uid']) ? 'background: #F7FFE9' : ''; ?>">
-                <h4 class="card-header__title flex m-0"><?php echo $_POST['departemen']; ?> <?php echo ($_POST['__ME__'] === $_POST['dokter_uid']) ? '<span class=\'text-success\'><i class=\'material-icons text-success icon-20pt ml-2\'>verified_user</i> Asesmen Saya</span>' : ''; ?></h4>
+        <div class="card m-0">
+            <div class="card-header bg-white card-header-large d-flex align-items-center">
+                <h4 class="flex m-0 cppt-poli"><?php echo $_POST['departemen']; ?> <?php echo ($_POST['__ME__'] === $_POST['dokter_uid']) ? '<span class=\'text-success\'><i class=\'material-icons text-success icon-20pt ml-2\'>verified_user</i> Asesmen Saya</span>' : ''; ?></h4>
                 <div>
                     <span class="badge badge-info badge-custom-caption">
                         <h6 style="color: #fff !important;">UMUM</h6>
@@ -34,13 +34,39 @@
                                         <div class="col-auto d-flex align-items-center">
                                             <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Keluhan Utama</h5>
                                         </div>
+                                        <?php
+                                            if(!empty($_POST['keluhan_utama']) && $_POST['keluhan_utama'] !== '') {
+                                        ?>
                                         <p><?php echo $_POST['keluhan_utama']; ?></p>
+                                        <?php
+                                            } else {
+                                                ?>
+                                                    <div class="panel-image">
+                                                        <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_No_data_re_kwbl.png" alt="no-data" />
+                                                        <h3 class="text-center">Tidak Ada Data</h3>
+                                                    </div>
+                                                <?php
+                                            }
+                                        ?>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="col-auto d-flex align-items-center">
                                             <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Keluhan Tambahan</h5>
                                         </div>
-                                        <p><?php echo $_POST['keluhan_tambahan']; ?></p>
+                                        <?php
+                                        if(!empty($_POST['keluhan_tambahan']) && $_POST['keluhan_tambahan'] !== '') {
+                                            ?>
+                                            <p><?php echo $_POST['keluhan_tambahan']; ?></p>
+                                            <?php
+                                        } else {
+                                            ?>
+                                            <div class="panel-image">
+                                                <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_No_data_re_kwbl.png" alt="no-data" />
+                                                <h3 class="text-center">Tidak Ada Data</h3>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
                                     </div>
                                 </div>
                                 <hr />
@@ -90,10 +116,36 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <p><?php echo $_POST['diagnosa_kerja']; ?></p>
+                                        <?php
+                                        if(!empty($_POST['diagnosa_kerja']) && $_POST['diagnosa_kerja'] !== '') {
+                                            ?>
+                                            <p><?php echo $_POST['diagnosa_kerja']; ?></p>
+                                            <?php
+                                        } else {
+                                            ?>
+                                            <div class="panel-image">
+                                                <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_No_data_re_kwbl.png" alt="no-data" />
+                                                <h3 class="text-center">Tidak Ada Data</h3>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
                                     </div>
                                     <div class="col-lg-6">
-                                        <p><?php echo $_POST['diagnosa_banding']; ?></p>
+                                        <?php
+                                        if(!empty($_POST['diagnosa_banding']) && $_POST['diagnosa_banding'] !== '') {
+                                            ?>
+                                            <p><?php echo $_POST['diagnosa_banding']; ?></p>
+                                            <?php
+                                        } else {
+                                            ?>
+                                            <div class="panel-image">
+                                                <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_No_data_re_kwbl.png" alt="no-data" />
+                                                <h3 class="text-center">Tidak Ada Data</h3>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
                                     </div>
                                 </div>
                                 <hr />
@@ -102,13 +154,39 @@
                                         <div class="col-auto d-flex align-items-center">
                                             <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Pemeriksaan Fisik</h5>
                                         </div>
-                                        <p><?php echo $_POST['pemeriksaan_fisik']; ?></p>
+                                        <?php
+                                        if(!empty($_POST['pemeriksaan_fisik']) && $_POST['pemeriksaan_fisik'] !== '') {
+                                            ?>
+                                            <p><?php echo $_POST['pemeriksaan_fisik']; ?></p>
+                                            <?php
+                                        } else {
+                                            ?>
+                                            <div class="panel-image">
+                                                <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_No_data_re_kwbl.png" alt="no-data" />
+                                                <h3 class="text-center">Tidak Ada Data</h3>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
                                     </div>
                                     <div class="col-lg-6">
                                         <div class="col-auto d-flex align-items-center">
                                             <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Planning</h5>
                                         </div>
-                                        <p><?php echo $_POST['planning']; ?></p>
+                                        <?php
+                                        if(!empty($_POST['planning']) && $_POST['planning'] !== '') {
+                                            ?>
+                                            <p><?php echo $_POST['planning']; ?></p>
+                                            <?php
+                                        } else {
+                                            ?>
+                                            <div class="panel-image">
+                                                <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_No_data_re_kwbl.png" alt="no-data" />
+                                                <h3 class="text-center">Tidak Ada Data</h3>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
                                     </div>
                                 </div>
                             </div>
@@ -117,12 +195,21 @@
                                     <div class="col-lg-12">
                                         <ol type="1">
                                             <?php
-                                            foreach ($_POST['tindakan'] as $tindKey => $tindValue) {
-                                                if(isset($tindValue['tindakan']['nama']) && $tindValue['tindakan']['nama'] !== "") {
-                                                    ?>
-                                                    <li><?php echo $tindValue['tindakan']['nama']; ?></li>
-                                                    <?php
+                                            if(count($_POST['tindakan']) > 0) {
+                                                foreach ($_POST['tindakan'] as $tindKey => $tindValue) {
+                                                    if(isset($tindValue['tindakan']['nama']) && $tindValue['tindakan']['nama'] !== "") {
+                                                        ?>
+                                                        <li><?php echo $tindValue['tindakan']['nama']; ?></li>
+                                                        <?php
+                                                    }
                                                 }
+                                            } else {
+                                                ?>
+                                                <div class="panel-image">
+                                                    <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_No_data_re_kwbl.png" alt="no-data" />
+                                                    <h3 class="text-center">Tidak Ada Data</h3>
+                                                </div>
+                                                <?php
                                             }
                                             ?>
                                         </ol>
@@ -508,18 +595,19 @@
                                             <div class="card-body tab-content">
                                                 <div class="tab-pane show fade active" id="hasil_lab_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
                                                     <?php
-                                                    foreach ($_POST['laboratorium'] as $LabKey => $LabValue) {
-                                                        ?>
-                                                        <div class="card">
-                                                            <div class="card-header card-header-large bg-white d-flex align-items-center">
-                                                                <h4 class="card-header__title flex m-0">
-                                                                    <i class="fa fa-hashtag"></i> <?php echo $LabValue['no_order']; ?>
-                                                                </h4>
-                                                            </div>
-                                                            <div class="card-body">
-                                                                <?php
-                                                                foreach ($LabValue['detail'] as $LabDKey => $LabDValue) {
-                                                                    ?>
+                                                    if(count($_POST['laboratorium']) > 0) {
+                                                        foreach ($_POST['laboratorium'] as $LabKey => $LabValue) {
+                                                            ?>
+                                                            <div class="card">
+                                                                <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                                                    <h4 class="card-header__title flex m-0">
+                                                                        <i class="fa fa-hashtag"></i> <?php echo $LabValue['no_order']; ?>
+                                                                    </h4>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <?php
+                                                                    foreach ($LabValue['detail'] as $LabDKey => $LabDValue) {
+                                                                        ?>
                                                                         <div class="row">
                                                                             <div class="col-lg-6">
                                                                                 <div class="col-auto d-flex align-items-center">
@@ -535,87 +623,117 @@
                                                                             </div>
                                                                         </div>
 
-                                                                    <br />
-                                                                    <table class="table table-bordered largeDataType">
-                                                                        <thead class="thead-dark">
-                                                                        <tr>
-                                                                            <th class="wrap_content">No</th>
-                                                                            <th>Item</th>
-                                                                            <th>Nilai</th>
-                                                                            <th class="wrap_content">Satuan</th>
-                                                                            <th class="wrap_content">Nilai Min</th>
-                                                                            <th class="wrap_content">Nilai Max</th>
-                                                                        </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                        <?php
-                                                                        $autoLab = 1;
-                                                                        foreach ($LabDValue['nilai'] as $LabDNKey => $LabDNValue) {
-                                                                            ?>
+                                                                        <br />
+                                                                        <table class="table table-bordered largeDataType">
+                                                                            <thead class="thead-dark">
                                                                             <tr>
-                                                                                <td><?php echo $autoLab; ?></td>
-                                                                                <td><?php echo $LabDNValue['item_lab']['keterangan']; ?></td>
-                                                                                <td><?php echo (isset($LabDNValue['nilai']) && $LabDNValue['nilai'] !== '') ? $LabDNValue['nilai'] : '-'; ?></td>
-                                                                                <td><?php echo (isset($LabDNValue['item_lab']['satuan']) && $LabDNValue['item_lab']['satuan'] !== '') ? $LabDNValue['item_lab']['satuan'] : '-'; ?></td>
-                                                                                <td><?php echo (isset($LabDNValue['item_lab']['nilai_min']) && $LabDNValue['item_lab']['nilai_min'] !== '') ? $LabDNValue['item_lab']['nilai_min'] : '-'; ?></td>
-                                                                                <td><?php echo (isset($LabDNValue['item_lab']['nilai_maks']) && $LabDNValue['item_lab']['nilai_maks'] !== '') ? $LabDNValue['item_lab']['nilai_maks'] : '-'; ?></td>
+                                                                                <th class="wrap_content">No</th>
+                                                                                <th>Item</th>
+                                                                                <th>Nilai</th>
+                                                                                <th class="wrap_content">Satuan</th>
+                                                                                <th class="wrap_content">Nilai Min</th>
+                                                                                <th class="wrap_content">Nilai Max</th>
                                                                             </tr>
+                                                                            </thead>
+                                                                            <tbody>
                                                                             <?php
-                                                                            $autoLab++;
-                                                                        }
-                                                                        ?>
-                                                                        </tbody>
-                                                                    </table>
-                                                                    <br />
-                                                                    <div class="row">
-                                                                        <div class="col-lg-6">
-                                                                            <strong>Kesan:</strong>
-                                                                            <br />
-                                                                            <?php echo $LabValue['kesan']; ?>
+                                                                            $autoLab = 1;
+                                                                            foreach ($LabDValue['nilai'] as $LabDNKey => $LabDNValue) {
+                                                                                ?>
+                                                                                <tr>
+                                                                                    <td><?php echo $autoLab; ?></td>
+                                                                                    <td><?php echo $LabDNValue['item_lab']['keterangan']; ?></td>
+                                                                                    <td><?php echo (isset($LabDNValue['nilai']) && $LabDNValue['nilai'] !== '') ? $LabDNValue['nilai'] : '-'; ?></td>
+                                                                                    <td><?php echo (isset($LabDNValue['item_lab']['satuan']) && $LabDNValue['item_lab']['satuan'] !== '') ? $LabDNValue['item_lab']['satuan'] : '-'; ?></td>
+                                                                                    <td><?php echo (isset($LabDNValue['item_lab']['nilai_min']) && $LabDNValue['item_lab']['nilai_min'] !== '') ? $LabDNValue['item_lab']['nilai_min'] : '-'; ?></td>
+                                                                                    <td><?php echo (isset($LabDNValue['item_lab']['nilai_maks']) && $LabDNValue['item_lab']['nilai_maks'] !== '') ? $LabDNValue['item_lab']['nilai_maks'] : '-'; ?></td>
+                                                                                </tr>
+                                                                                <?php
+                                                                                $autoLab++;
+                                                                            }
+                                                                            ?>
+                                                                            </tbody>
+                                                                        </table>
+                                                                        <br />
+                                                                        <div class="row">
+                                                                            <div class="col-lg-6">
+                                                                                <strong>Kesan:</strong>
+                                                                                <br />
+                                                                                <?php echo $LabValue['kesan']; ?>
+                                                                            </div>
+                                                                            <div class="col-lg-6">
+                                                                                <strong>Anjuran:</strong>
+                                                                                <br />
+                                                                                <?php echo $LabValue['anjuran']; ?>
+                                                                            </div>
                                                                         </div>
-                                                                        <div class="col-lg-6">
-                                                                            <strong>Anjuran:</strong>
-                                                                            <br />
-                                                                            <?php echo $LabValue['anjuran']; ?>
-                                                                        </div>
-                                                                    </div>
-                                                                    <hr /><br /><br /><br />
-                                                                    <?php
-                                                                }
-                                                                ?>
+                                                                        <hr /><br /><br /><br />
+                                                                        <?php
+                                                                    }
+                                                                    ?>
+                                                                </div>
                                                             </div>
+                                                            <?php
+                                                        }
+                                                    } else {
+                                                        ?>
+                                                        <div class="panel-image">
+                                                            <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_medicine_b1ol.png" alt="no-data" />
+                                                            <h3 class="text-center">Tidak Ada Data</h3>
                                                         </div>
                                                         <?php
                                                     }
+
                                                     ?>
                                                 </div>
                                                 <div class="tab-pane show fade" id="dokumen_lab_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
-                                                    <table class="table table-bordered largeDataType">
-                                                        <thead class="thead-dark">
-                                                            <tr>
-                                                                <th class="wrap_content">No</th>
-                                                                <th>Dokumen</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
+
                                                         <?php
                                                         $autoLabDoc = 1;
+
+                                                        $totalDoc = 0;
                                                         foreach ($_POST['laboratorium'] as $LabKey => $LabValue) {
                                                             foreach ($LabValue['dokumen'] as $LabDocKey => $LabDocValue) {
-                                                                ?>
-                                                                <tr>
-                                                                    <td><?php echo $autoLabDoc; ?></td>
-                                                                    <td>
-                                                                        <a class="lampiran_view_trigger" href="#" target="<?php echo $_POST['__HOST__'] . '/document/laboratorium/' . $LabValue['uid'] . '/' . $LabDocValue['lampiran']; ?>">#Lampiran <?php echo $autoLabDoc; ?> [<?php echo $LabDocValue['lampiran']; ?>]</a>
-                                                                    </td>
-                                                                </tr>
-                                                                <?php
-                                                                $autoLabDoc++;
+                                                                $totalDoc += 1;
                                                             }
                                                         }
-                                                        ?>
+                                                        if($totalDoc > 0) {
+                                                            ?>
+                                                    <table class="table table-bordered largeDataType">
+                                                        <thead class="thead-dark">
+                                                        <tr>
+                                                            <th class="wrap_content">No</th>
+                                                            <th>Dokumen</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <?php
+                                                            foreach ($_POST['laboratorium'] as $LabKey => $LabValue) {
+                                                                foreach ($LabValue['dokumen'] as $LabDocKey => $LabDocValue) {
+                                                                    ?>
+                                                                    <tr>
+                                                                        <td><?php echo $autoLabDoc; ?></td>
+                                                                        <td>
+                                                                            <a class="lampiran_view_trigger" href="#" target="<?php echo $_POST['__HOST__'] . '/document/laboratorium/' . $LabValue['uid'] . '/' . $LabDocValue['lampiran']; ?>">#Lampiran <?php echo $autoLabDoc; ?> [<?php echo $LabDocValue['lampiran']; ?>]</a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <?php
+                                                                    $autoLabDoc++;
+                                                                }
+                                                            }
+                                                            ?>
                                                         </tbody>
                                                     </table>
+                                                            <?php
+                                                        } else {
+                                                            ?>
+                                                            <div class="panel-image">
+                                                                <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_pending_approval_xuu9.png" alt="no-data" />
+                                                                <h3 class="text-center">Tidak Ada Data</h3>
+                                                            </div>
+                                                            <?php
+                                                        }
+                                                        ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -643,44 +761,64 @@
                                             <div class="card-body tab-content">
                                                 <div class="tab-pane show fade active" id="hasil_rad_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
                                                     <?php
-                                                    foreach ($_POST['radiologi'] as $RadKey => $RadValue) {
-                                                        ?>
-                                                        <div class="card">
-                                                            <div class="card-header card-header-large bg-white d-flex align-items-center">
-                                                                <h4 class="card-header__title flex m-0">
-                                                                    <i class="fa fa-hashtag"></i> <?php echo $RadValue['no_order']; ?>
-                                                                </h4>
-                                                            </div>
-                                                            <div class="card-body">
-                                                                <?php
-                                                                foreach ($RadValue['detail'] as $RadDKey => $RadDValue) {
-                                                                    ?>
-                                                                    <div class="col-auto d-flex align-items-center">
-                                                                        <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;<?php echo $RadDValue['tindakan']['nama']; ?> - <h5 class="text-success text-right"><i class="material-icons">verified_user</i> <?php echo $RadDValue['mitra']['nama']; ?></h5></h5>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col-lg-6">
-                                                                            <strong>Keterangan:</strong>
-                                                                            <br />
-                                                                            <?php echo $RadDValue['keterangan']; ?>
-                                                                        </div>
-                                                                        <div class="col-lg-6">
-                                                                            <strong>Kesimpulan:</strong>
-                                                                            <br />
-                                                                            <?php echo $RadDValue['kesimpulan']; ?>
-                                                                        </div>
-                                                                    </div>
-                                                                    <hr /><br /><br /><br />
+                                                    if(count($_POST['radiologi']) > 0) {
+                                                        foreach ($_POST['radiologi'] as $RadKey => $RadValue) {
+                                                            ?>
+                                                            <div class="card">
+                                                                <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                                                    <h4 class="card-header__title flex m-0">
+                                                                        <i class="fa fa-hashtag"></i> <?php echo $RadValue['no_order']; ?>
+                                                                    </h4>
+                                                                </div>
+                                                                <div class="card-body">
                                                                     <?php
-                                                                }
-                                                                ?>
+                                                                    foreach ($RadValue['detail'] as $RadDKey => $RadDValue) {
+                                                                        ?>
+                                                                        <div class="col-auto d-flex align-items-center">
+                                                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;<?php echo $RadDValue['tindakan']['nama']; ?> - <h5 class="text-success text-right"><i class="material-icons">verified_user</i> <?php echo $RadDValue['mitra']['nama']; ?></h5></h5>
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <div class="col-lg-6">
+                                                                                <strong>Keterangan:</strong>
+                                                                                <br />
+                                                                                <?php echo $RadDValue['keterangan']; ?>
+                                                                            </div>
+                                                                            <div class="col-lg-6">
+                                                                                <strong>Kesimpulan:</strong>
+                                                                                <br />
+                                                                                <?php echo $RadDValue['kesimpulan']; ?>
+                                                                            </div>
+                                                                        </div>
+                                                                        <hr /><br /><br /><br />
+                                                                        <?php
+                                                                    }
+                                                                    ?>
+                                                                </div>
                                                             </div>
+                                                            <?php
+                                                        }
+                                                    } else {
+                                                        ?>
+                                                        <div class="panel-image">
+                                                            <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_medicine_b1ol.png" alt="no-data" />
+                                                            <h3 class="text-center">Tidak Ada Data</h3>
                                                         </div>
                                                         <?php
                                                     }
                                                     ?>
                                                 </div>
                                                 <div class="tab-pane show fade" id="dokumen_rad_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
+
+                                                        <?php
+                                                        $autoRadDoc = 1;
+                                                        $totalDoc = 0;
+                                                        foreach ($_POST['radiologi'] as $RadKey => $RadValue) {
+                                                            foreach ($RadValue['dokumen'] as $RadDocKey => $RadDocValue) {
+                                                                $totalDoc += 1;
+                                                            }
+                                                        }
+                                                        if($totalDoc > 0) {
+                                                            ?>
                                                     <table class="table table-bordered largeDataType">
                                                         <thead class="thead-dark">
                                                         <tr>
@@ -689,24 +827,33 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        <?php
-                                                        $autoRadDoc = 1;
-                                                        foreach ($_POST['radiologi'] as $RadKey => $RadValue) {
-                                                            foreach ($RadValue['dokumen'] as $RadDocKey => $RadDocValue) {
-                                                                ?>
-                                                                <tr>
-                                                                    <td><?php echo $autoRadDoc; ?></td>
-                                                                    <td>
-                                                                        <a class="lampiran_view_trigger" href="#" target="<?php echo $_POST['__HOST__'] . '/document/radiologi/' . $RadValue['uid'] . '/' . $RadDocValue['lampiran']; ?>">#Lampiran <?php echo $autoRadDoc; ?> [<?php echo $RadDocValue['lampiran']; ?>]</a>
-                                                                    </td>
-                                                                </tr>
-                                                                <?php
-                                                                $autoRadDoc++;
+                                                            <?php
+                                                            foreach ($_POST['radiologi'] as $RadKey => $RadValue) {
+                                                                foreach ($RadValue['dokumen'] as $RadDocKey => $RadDocValue) {
+                                                                    ?>
+                                                                    <tr>
+                                                                        <td><?php echo $autoRadDoc; ?></td>
+                                                                        <td>
+                                                                            <a class="lampiran_view_trigger" href="#" target="<?php echo $_POST['__HOST__'] . '/document/radiologi/' . $RadValue['uid'] . '/' . $RadDocValue['lampiran']; ?>">#Lampiran <?php echo $autoRadDoc; ?> [<?php echo $RadDocValue['lampiran']; ?>]</a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <?php
+                                                                    $autoRadDoc++;
+                                                                }
                                                             }
-                                                        }
-                                                        ?>
+                                                            ?>
                                                         </tbody>
                                                     </table>
+                                                            <?php
+                                                        } else {
+                                                            ?>
+                                                            <div class="panel-image">
+                                                                <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_pending_approval_xuu9.png" alt="no-data" />
+                                                                <h3 class="text-center">Tidak Ada Data</h3>
+                                                            </div>
+                                                            <?php
+                                                        }
+                                                        ?>
                                                 </div>
                                             </div>
                                         </div>

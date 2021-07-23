@@ -34,8 +34,6 @@
                         rawData = response.response_package.response_data;
                     }
 
-                    console.log(rawData);
-
                     for(var dataKey in rawData) {
                         if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
                             if(uniqueData[rawData[dataKey].barang] === undefined) {
@@ -115,7 +113,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -141,7 +139,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"number_style\">" + row.stok_batch + "</h5>";
+                        return "<h5 class=\"number_style wrap_content\">" + row.stok_batch + "</h5>";
                     }
                 },
                 {

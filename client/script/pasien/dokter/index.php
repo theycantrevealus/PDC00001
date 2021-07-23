@@ -15,7 +15,7 @@
 
         var pasienTable = $("#table-pasien").DataTable({
             processing: true,
-            lengthMenu: [[10, 15, -1], [10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Asesmen",
@@ -69,17 +69,17 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.nama
+                        return "<span class=\"wrap_content\">" + row.pasien.nama + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.poli.nama;
+                        return "<span class=\"wrap_content\">" + row.poli.nama + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.tanggal_kunjungan;
+                        return "<span class=\"wrap_content\">" + row.tanggal_kunjungan + "</span>";
                     }
                 },
                 {
@@ -88,7 +88,7 @@
                         if(row.lab_order.length > 0) {
                             for(var labKey in row.lab_order) {
                                 if(row.lab_order[labKey].no_order !== null) {
-                                    listTunjang += "<div class=\"badge badge-" + ((row.lab_order[labKey].status === "D") ? "success" : "info") + " badge-custom\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + row.lab_order[labKey].no_order + "</div>";
+                                    listTunjang += "<div style=\"margin: 1px;\" class=\"badge badge-" + ((row.lab_order[labKey].status === "D") ? "success" : "info") + " badge-custom-caption\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + row.lab_order[labKey].no_order + "</div>";
                                 }
                             }
                         }
@@ -96,11 +96,11 @@
                         if(row.rad_order.length > 0) {
                             for(var radKey in row.rad_order) {
                                 if(row.rad_order[radKey].no_order !== null) {
-                                    listTunjang += "<div class=\"badge badge-" + ((row.rad_order[radKey].selesai === true) ? "success" : "purple") + " badge-custom\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + row.rad_order[radKey].no_order + "</div>";
+                                    listTunjang += "<div style=\"margin: 1px;\"  class=\"badge badge-" + ((row.rad_order[radKey].selesai === true) ? "success" : "purple") + " badge-custom-caption\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + row.rad_order[radKey].no_order + "</div>";
                                 }
                             }
                         }
-                        return listTunjang;
+                        return listTunjang + "<br /><br />";
                     }
                 },
                 {
@@ -116,7 +116,9 @@
                         }
 
                         //return 	"<button lab=\"" + isLab + "\" rad=\"" + isRad + "\" antrian=\"" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\" id=\"detail_" + row.uid + "\"><i class=\"fa fa-eye\"></i> Detail</button>";
-                        return 	"<a href=\"" + __HOSTNAME__ + "/pasien/dokter/view/" + row.pasien.uid + "/" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\"><i class=\"fa fa-eye\"></i> Detail</a>";
+                        return 	"<div class=\"btn-group wrap_content\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/pasien/dokter/view/" + row.pasien.uid + "/" + row.antrian + "\" class=\"btn btn-info btn-sm btnDetailPemeriksaan\"><i class=\"fa fa-eye\"></i> Detail</a>" +
+                            "</div>";
                     }
                 }
             ]

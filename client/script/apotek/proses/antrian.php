@@ -143,7 +143,7 @@
                         });
 
                         var newDetailCellID = document.createElement("TD");
-                        $(newDetailCellID).addClass("text-center").html((a + 1));
+                        $(newDetailCellID).addClass("text-center").html("<h5 class=\"autonum\">" + (a + 1) + "</h5>");
 
                         var newDetailCellObat = document.createElement("TD");
                         var newObat = document.createElement("SELECT");
@@ -354,7 +354,7 @@
                         var newCellRacikanKeterangan = document.createElement("TD");
                         var newCellRacikanAlasan = document.createElement("TD");
 
-                        $(newCellRacikanID).attr("rowspan", racikanDetail.length).html((b + 1));
+                        $(newCellRacikanID).attr("rowspan", racikanDetail.length).html("<h5 class=\"autonum\">" + (b + 1) + "</h5>");
                         $(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
                         $(newCellRacikanSigna).addClass("text-center wrap_content").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
                         $(newCellRacikanJlh).addClass("text-center").attr("rowspan", racikanDetail.length);

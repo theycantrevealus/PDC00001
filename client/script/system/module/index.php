@@ -222,7 +222,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autoNum"];
+                        return "<h5 class=\"autonum\">" + row.autoNum + "</h5>";
 					}
 				},
 				{
