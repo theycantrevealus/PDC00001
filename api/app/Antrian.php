@@ -1314,7 +1314,7 @@ class Antrian extends Utility
         $dataAntrian = self::get_data_antrian_detail($parameter);
 
         $pasien = new Pasien(self::$pdo);
-        $dataPasien = $pasien->get_data_pasien($dataAntrian['uid_pasien']);
+        $dataPasien = $pasien->get_pasien_info('pasien', $dataAntrian['uid_pasien'])['response_data'][0];
 
         $result = ['antrian' => $dataAntrian, 'pasien' => $dataPasien];
 

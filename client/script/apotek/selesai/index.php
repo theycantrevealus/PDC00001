@@ -1,4 +1,5 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/qrcode/qrcode.js"></script>
 <script type="text/javascript">
     $(function() {
         protocolLib = {
@@ -10,6 +11,11 @@
             }
         };
         var targettedUID;
+        var targetKodeResep;
+        var targetRM;
+        var targetNamaPasien;
+        var targetTanggalResep;
+        var targetHargaTotal;
 
         function load_resep() {
             var selected = [];
@@ -600,6 +606,7 @@
             uid = uid[uid.length - 1];
             targettedUID = uid;
 
+
             var jenis_pasien = $(this).attr("jenis");
 
             //Load Resep Detail
@@ -703,6 +710,12 @@
                         racikan_apotek.push(prepareRacikanApotek);
                     }
 
+                    targetKodeResep = targettedData.kode;
+                    targetRM = targettedData.pasien.no_rm;
+                    targetNamaPasien = targettedData.pasien.nama;
+                    targetTanggalResep = targettedData.created_at_parsed;
+                    targetHargaTotal = "Rp. " + number_format(totalAll, 2, ".", ",");
+
                     $.ajax({
                         async: false,
                         url: __HOST__ + "miscellaneous/print_template/resep_view.php",
@@ -712,6 +725,7 @@
                         type: "POST",
                         data: {
                             __PC_CUSTOMER__: __PC_CUSTOMER__,
+                            __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
                             __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                             __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                             kode: targettedData.kode,
@@ -752,16 +766,59 @@
         });
 
         $("#btnCetakResep").click(function () {
-            $("#cetak").printThis({
-                loadCSS: "template/assets/css/app.css",
-                /*importCSS: true,
-                base: true,
-                importStyle: true,*/
-                header: null,
-                footer: null,
-                pageTitle: "Cetak Resep",
-                afterPrint: function() {
-                    $("#form-payment-detail").modal("hide");
+            var dataCetak = $("#target-cetak-resep").html();
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/resep_print.php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    __HOSTNAME__: __HOSTNAME__,
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
+                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    dataCetak: dataCetak
+                },
+                success: function(response) {
+                    var printResepContainer = document.createElement("DIV");
+                    $(printResepContainer).html(response);
+
+                    var QRConst = document.createElement("DIV");
+                    $(QRConst).qrcode({
+                        width: 128,
+                        height: 128,
+                        text: targetRM + "\n" +
+                            targetNamaPasien + "\n" +
+                            targetTanggalResep + "\n" +
+                            targetHargaTotal + "\n"
+                    });
+
+                    var imgcanvas = $(QRConst).find("canvas")[0].toDataURL();
+                    $(printResepContainer).find("#qrcodeImage img").attr({
+                        src: imgcanvas
+                    });
+
+                    /*var win = window.open("", "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=" + screen.width + ",height=" + screen.height + ",top=0,left=0");
+                    win.document.body.innerHTML = $(printResepContainer).html();*/
+
+
+
+                    $(printResepContainer).printThis({
+                        loadCSS: "template/assets/css/app.css",
+                        header: null,
+                        footer: null,
+                        pageTitle: targetKodeResep,
+                        afterPrint: function() {
+                            //
+                        }
+                    });
+
+                },
+                error: function(response) {
+                    //
                 }
             });
         });
@@ -2093,8 +2150,13 @@
                         </div>
                         <div class="card-body tab-content" style="min-height: 100px;">
                             <div class="tab-pane active show fade" id="cetak-utama">
-                                <div id="cetak">
-
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="cetak"></div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <button type="button" class="btn btn-purple pull-right" id="btnCetakResep"><i class="fa fa-print"></i> Cetak</button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="tab-pane show fade" id="cetak-kajian">
@@ -2174,7 +2236,6 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-purple" id="btnCetakResep"><i class="fa fa-print"></i> Cetak</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
             </div>
         </div>

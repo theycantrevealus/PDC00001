@@ -2,11 +2,19 @@
     <table>
         <tr>
             <td style="text-align:center; width:5%">
-                <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-icon.png" class="logo">
+                <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-text-white.png" class="logo">
             </td>
             <td style="width:45%;">
-                <span class="title"><b>PEMERINTAH PROVINSI RIAU</b></span>
-                <span class="title"><?php echo $_POST['__PC_CUSTOMER__']; ?></span>
+                <h1 class="title">
+                    <b>
+                        <span class="title"><?php echo $_POST['__PC_CUSTOMER_GROUP__']; ?></span>
+                    </b>
+                    <br />
+                    <small>
+                        <span class="title"><?php echo $_POST['__PC_CUSTOMER__']; ?></span>
+                    </small>
+                </h1>
+
                 <br />
                 <span class="alamat"><?php echo $_POST['__PC_CUSTOMER_ADDRESS__']; ?></span>
                 <span class="telepon">Telp. <?php echo $_POST['__PC_CUSTOMER_CONTACT__']; ?></span>
@@ -14,6 +22,9 @@
             <td style="width:2%;"></td>
         </tr>
     </table>
+
+</div>
+<div id="target-cetak-resep">
     <hr />
     <table class="form-mode">
         <tr>
@@ -71,8 +82,6 @@
             <td><?php echo $_POST['sep'] ?></td>
         </tr>
     </table>
-</div>
-<div>
     <hr />
     <center style="padding: 1% 0 1% 0; font-size: 1.5rem;"><b>RESEP DOKTER</b></center>
     <div>
@@ -85,7 +94,6 @@
                 <th class="wrap_content">Satuan</th>
                 <th class="wrap_content">Kuantitas</th>
                 <th class="wrap_content">Aturan Pakai</th>
-                <th>Keterangan</th>
             </tr>
             </thead>
             <tbody>
@@ -94,12 +102,20 @@
             foreach ($_POST['resep_dokter'] as $key => $value) {
                 ?>
                 <tr>
-                    <td><?php echo $autonum; ?></td>
-                    <td><span class="wrap_content"><h5 class="text-info"><?php echo $value['obat']; ?></h5></span></td>
+                    <td>
+                        <h5 class="autonum">
+                            <?php echo $autonum; ?>
+                        </h5>
+                    </td>
+                    <td>
+                        <span class="wrap_content"><h5 class="text-info"><?php echo $value['obat']; ?></h5></span>
+                        <br />
+                        <b>Keterangan:</b>
+                        <p><?php echo $value['keterangan']; ?></p>
+                    </td>
                     <td><?php echo $value['satuan']; ?></td>
                     <td><?php echo $value['kuantitas']; ?></td>
                     <td><?php echo $value['signa']; ?></td>
-                    <td><?php echo $value['keterangan']; ?></td>
                 </tr>
                 <?php
                 $autonum++;
@@ -110,8 +126,6 @@
         <br />
         <strong>Keterangan Resep Dokter :</strong>
         <p><?php echo (isset($_POST['keterangan_resep']) && !empty($_POST['keterangan_resep']) && $_POST['keterangan_resep'] !== '') ? $_POST['keterangan_resep'] : '-'; ?></p>
-        <br /><br />
-        <hr />
         <h5>Racikan</h5>
         <table class="table table-bordered largeDataType">
             <thead class="thead-dark">
@@ -120,7 +134,6 @@
                 <th style="width: 20%">Nama Racikan</th>
                 <th class="wrap_content">Kuantitas</th>
                 <th class="wrap_content">Aturan Pakai</th>
-                <th>Keterangan</th>
             </tr>
             </thead>
             <tbody>
@@ -129,7 +142,11 @@
             foreach ($_POST['racikan_dokter'] as $key => $value) {
                 ?>
                 <tr>
-                    <td><?php echo $autonum; ?></td>
+                    <td>
+                        <h5 class="autonum">
+                            <?php echo $autonum; ?>
+                        </h5>
+                    </td>
                     <td>
                         <span class="wrap_content">
                             <h5 class="text-info"><?php echo $value['racikan']; ?></h5>
@@ -143,10 +160,13 @@
                                 <?php
                             }
                         ?>
+                        <br />
+                        <b>Keterangan:</b>
+                        <p><?php echo $value['keterangan']; ?></p>
+                        <br />
                     </td>
                     <td><?php echo $value['kuantitas']; ?></td>
                     <td><?php echo $value['signa']; ?></td>
-                    <td><?php echo $value['keterangan']; ?></td>
                 </tr>
                 <?php
                 $autonum++;
@@ -159,8 +179,6 @@
     <strong>Keterangan Racikan Dokter :</strong>
     <p><?php echo (isset($_POST['keterangan_racikan']) && !empty($_POST['keterangan_racikan']) && $_POST['keterangan_racikan'] !== '') ? $_POST['keterangan_racikan'] : '-'; ?></p>
     <br />
-    <hr />
-    <hr />
     <center style="padding: 1% 0 1% 0; font-size: 1.5rem;"><b>BILLING APOTEK</b></center>
     <div>
         <h5>Obat/BHP</h5>
@@ -172,8 +190,6 @@
                 <th class="wrap_content">Satuan</th>
                 <th class="wrap_content">Kuantitas</th>
                 <th class="wrap_content">Aturan Pakai</th>
-                <th>Keterangan</th>
-                <th>Alasan Ubah</th>
                 <th colspan="2" style="max-width: 15%; width: 15%">Harga</th>
                 <th colspan="2" style="max-width: 15%; width: 15%">Subtotal</th>
             </tr>
@@ -184,17 +200,35 @@
             foreach ($_POST['resep_apotek'] as $key => $value) {
                 ?>
                 <tr>
-                    <td><?php echo $autonum; ?></td>
-                    <td><?php echo $value['obat']; ?></td>
+                    <td>
+                        <h5 class="autonum">
+                            <?php echo $autonum; ?>
+                        </h5>
+                    </td>
+                    <td style="width: 50%">
+                        <?php echo $value['obat']; ?>
+                    </td>
                     <td><?php echo $value['satuan']; ?></td>
                     <td><?php echo $value['kuantitas']; ?></td>
                     <td class="text-center"><?php echo $value['signa']; ?></td>
-                    <td><?php echo $value['keterangan']; ?></td>
-                    <td><?php echo $value['alasan_ubah']; ?></td>
                     <td style="border-right: solid 1px #fff !important">Rp.</td>
                     <td><?php echo $value['harga']; ?></td>
                     <td style="border-right: solid 1px #fff !important">Rp.</td>
                     <td><?php echo $value['subtotal']; ?></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td colspan="8" class="text-mode" style="padding-bottom: 20px;">
+                        <b>Keterangan:</b>
+                        <p>
+                            <?php echo $value['keterangan']; ?>
+                        </p>
+                        <br />
+                        <b>Alasan Ubah:</b>
+                        <p>
+                            <?php echo $value['alasan_ubah']; ?>
+                        </p>
+                    </td>
                 </tr>
                 <?php
                 $autonum++;
@@ -208,13 +242,11 @@
             <thead class="thead-dark">
             <tr>
                 <th class="wrap_content">No</th>
-                <th style="max-width: 20%; width: 20%">Nama Racikan</th>
+                <th style="max-width: 50%; width: 50%">Nama Racikan</th>
                 <th class="wrap_content">Kuantitas</th>
                 <th colspan="2" style="max-width: 15%; width: 10%">Harga</th>
                 <th colspan="2" style="max-width: 15%; width: 10%">Subtotal</th>
                 <th class="wrap_content">Aturan Pakai</th>
-                <th style="max-width: 20%; width: 20%">Keterangan</th>
-                <th style="max-width: 20%; width: 20%">Alasan Ubah</th>
             </tr>
             </thead>
             <tbody>
@@ -223,15 +255,19 @@
             foreach ($_POST['racikan_apotek'] as $key => $value) {
                 $detailRacikanApotek = $value['detail'];
                 ?>
-            <tr>
-                <td rowspan="<?php echo count($detailRacikanApotek) + 1; ?>"><?php echo $autonum; ?></td>
-                <td><h5 class="text-info"><?php echo $value['kode']; ?></h5></td>
-                <td><?php echo $value['kuantitas']; ?></td>
-                <td colspan="4"></td>
-                <td class="text-center" rowspan="<?php echo count($detailRacikanApotek) + 1; ?>"><span class="wrap_content"><?php echo $value['signa']; ?></span></td>
-                <td rowspan="<?php echo count($detailRacikanApotek) + 1; ?>"><?php echo $value['keterangan']; ?></td>
-                <td rowspan="<?php echo count($detailRacikanApotek) + 1; ?>"><?php echo (isset($value['alasan_ubah']) && !empty($value['alasan_ubah']) && $value['alasan_ubah'] !== '') ? $value['alasan_ubah'] : '-'; ?></td>
-            </tr>
+                <tr>
+                    <td rowspan="<?php echo count($detailRacikanApotek) + 1; ?>">
+                        <h5 class="autonum">
+                            <?php echo $autonum; ?>
+                        </h5>
+                    </td>
+                    <td>
+                        <h5 class="text-info"><?php echo $value['kode']; ?></h5>
+                    </td>
+                    <td><?php echo $value['kuantitas']; ?></td>
+                    <td colspan="4"></td>
+                    <td class="text-center" rowspan="<?php echo count($detailRacikanApotek) + 1; ?>"><span class="wrap_content"><?php echo $value['signa']; ?></span></td>
+                </tr>
                 <?php
                     for($a = 0; $a < count($detailRacikanApotek); $a++) {
                         ?>
@@ -248,6 +284,20 @@
                     $autonum++;
                 }
             ?>
+                <tr>
+                    <td></td>
+                    <td colspan="6" class="text-mode" style="padding-bottom: 20px;">
+                        <b>Keterangan:</b>
+                        <p>
+                            <?php echo $value['keterangan']; ?>
+                        </p>
+                        <br />
+                        <b>Alasan Ubah:</b>
+                        <p>
+                            <?php echo (isset($value['alasan_ubah']) && !empty($value['alasan_ubah']) && $value['alasan_ubah'] !== '') ? $value['alasan_ubah'] : '-'; ?>
+                        </p>
+                    </td>
+                </tr>
             </tbody>
         </table>
         <br />
@@ -267,5 +317,4 @@
             </td>
         </tr>
     </table>
-    <span>Tanggal Cetak:<br /><b><?php echo date('d F Y, H:i'); ?></b></span>
 </div>

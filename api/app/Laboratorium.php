@@ -2837,7 +2837,8 @@ class Laboratorium extends Utility {
                     array(
                         'uid',
                         'asesmen as uid_asesmen',
-                        'waktu_order'
+                        'waktu_order',
+                        'no_order'
                     )
                 )
                 ->join('asesmen', array(
@@ -2896,7 +2897,8 @@ class Laboratorium extends Utility {
                     array(
                         'uid',
                         'asesmen as uid_asesmen',
-                        'waktu_order'
+                        'waktu_order',
+                        'no_order'
                     )
                 )
                 ->join('asesmen', array(
@@ -3002,13 +3004,19 @@ class Laboratorium extends Utility {
     }
 
 	/*------------------- GET DATA PASIEN and ANTRIAN --------------------*/
-	private function get_data_pasien_antrian($parameter){
+	private function get_data_pasien_antrian($parameter) {
+	    $Poli = new Poli(self::$pdo);
+	    $ICD10 = new Icd(self::$pdo);
+	    $Pegawai = new Pegawai(self::$pdo);
 		$get_uid_asesmen = self::$query
 			->select('lab_order', array(
 					'asesmen',
                     'kesan',
                     'anjuran',
-                    'tanggal_sampling'
+                    'kunjungan',
+                    'tanggal_sampling',
+                    'no_order',
+                    'updated_at'
 				)
 			)
 			->where(
@@ -3019,7 +3027,7 @@ class Laboratorium extends Utility {
 			)
 			->execute();
 
-		$result = "";
+		$result = array();
 		if ($get_uid_asesmen['response_result'] > 0){
 			$get_uid_antrian = self::$query
 				->select('asesmen', array('antrian'))
@@ -3030,9 +3038,59 @@ class Laboratorium extends Utility {
 			$uid_antrian = $get_uid_antrian['response_data'][0]['antrian'];
 
 			$antrian = new Antrian(self::$pdo);
-			$result = $antrian->get_data_pasien_dan_antrian($uid_antrian);	//call function for get data antrian and 
-																			//pasien in class antrian
+			$result = $antrian->get_data_pasien_dan_antrian($uid_antrian);
 
+			$result['antrian']['dokter'] = $Pegawai->get_info($result['antrian']['dokter'])['response_data'][0];
+
+            $Asesmen = self::$query->select('asesmen', array(
+                'uid', 'antrian', 'poli'
+            ))
+                ->where(array(
+                    'asesmen.uid' => '= ?'
+                ), array(
+                    $get_uid_asesmen['response_data'][0]['asesmen']
+                ))
+                ->execute();
+
+            $Departemen = $Poli->get_poli_info($Asesmen['response_data'][0]['poli'])['response_data'][0];
+
+
+            $AsesmenMedis = self::$query->select('asesmen_medis_' . $Departemen['poli_asesmen'], array(
+                'keluhan_utama',
+                'keluhan_tambahan',
+                'pemeriksaan_fisik',
+                'diagnosa_kerja',
+                'diagnosa_banding',
+                'icd10_kerja',
+                'icd10_banding',
+                'planning'
+            ))
+                ->where(array(
+                    'asesmen_medis_' . $Departemen['poli_asesmen'] . '.asesmen' => '= ?'
+                ), array(
+                    $get_uid_asesmen['response_data'][0]['asesmen']
+                ))
+                ->execute();
+
+
+
+            $parseICD10Kerja = array();
+            $ICD10Kerja = explode(',', $AsesmenMedis['response_data'][0]['icd10_kerja']);
+            foreach ($ICD10Kerja as $ICD10KerjaKey => $ICD10KerjaValue) {
+                array_push($parseICD10Kerja, $ICD10->get_icd_detail('master_icd_10', $ICD10KerjaValue)['response_data'][0]);
+            }
+            $AsesmenMedis['response_data'][0]['icd10_kerja'] = $parseICD10Kerja;
+
+
+            $parseICD10Banding = array();
+            $ICD10Banding = explode(',', $AsesmenMedis['response_data'][0]['icd10_banding']);
+            foreach ($ICD10Banding as $ICD10BandingKey => $ICD10BandingValue) {
+                array_push($parseICD10Banding, $ICD10->get_icd_detail('master_icd_10', $ICD10BandingValue)['response_data'][0]);
+            }
+            $AsesmenMedis['response_data'][0]['icd10_banding'] = $parseICD10Banding;
+
+            $result['asesmen_data'] = $AsesmenMedis['response_data'][0];
+            $get_uid_asesmen['response_data'][0]['updated_at'] = date('d F Y', strtotime($get_uid_asesmen['response_data'][0]['updated_at']));
 		}
 		$result['laboratorium'] = $get_uid_asesmen['response_data'][0];
 		return $result;

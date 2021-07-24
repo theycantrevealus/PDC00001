@@ -67,6 +67,7 @@
         }
 
         .content {
+            position: relative;
             width: 8.5in;
             min-height: 14in;
             background: #fff;
@@ -162,10 +163,6 @@
             width: 25%;
         }
 
-        .row div.col-6 {
-            width: 25%;
-        }
-
         .row div.col-12 {
             width: 100%;
         }
@@ -249,12 +246,6 @@
             text-align: center;
             background: #ccc;
         }
-
-        .signing-panel {
-            height: 100px !important;
-            min-height: 100px !important;
-            border-bottom: solid 1px #000 !important;
-        }
     </style>
 
 </head>
@@ -283,7 +274,7 @@
         </table>
     </div>
     <?php
-    if(isset($_POST['lab_item'])) {
+    if(isset($_POST['dataCetak'])) {
         ?>
 
         <table class="constructor">
@@ -302,132 +293,96 @@
                         <div class="print-date">
                             <span>Tanggal Cetak:<br /><b><?php echo date('d F Y, H:i'); ?></b></span>
                         </div>
-                        <h1 class="title-name">HASIL LABORATORIUM</h1>
-                        <br />
-                        <hr />
-                        <table class="form-mode largeDataType">
-                            <tr>
-                                <td class="wrap_content">Nama Pasien</td>
-                                <td class="wrap_content">:</td>
-                                <td><?php echo $_POST['nama'] ?></td>
-
-                                <td class="wrap_content">Permintaan Dokter</td>
-                                <td class="wrap_content">:</td>
-                                <td><?php echo $_POST['dokter_peminta'] ?></td>
-                            </tr>
-                            <tr>
-                                <td>Tanggal Lahir</td>
-                                <td class="wrap_content">:</td>
-                                <td><?php echo $_POST['tanggal_lahir'] ?></td>
-
-                                <td>Jenis Sample</td>
-                                <td class="wrap_content">:</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>Alamat</td>
-                                <td class="wrap_content">:</td>
-                                <td><?php echo $_POST['alamat'] ?></td>
-
-                                <td>Tanggal Pemeriksaan</td>
-                                <td class="wrap_content">:</td>
-                                <td><?php echo $_POST['tanggal_periksa'] ?></td>
-                            </tr>
-                            <tr>
-                                <td colspan="3"></td></td>
-
-                                <td>No. Laboratorium</td>
-                                <td class="wrap_content">:</td>
-                                <td><?php echo $_POST['no_order'] ?></td>
-                            </tr>
-                            <tr>
-                                <td colspan="3"></td></td>
-
-                                <td>No. Rekam Medis</td>
-                                <td class="wrap_content">:</td>
-                                <td><?php echo $_POST['no_rm'] ?></td>
-                            </tr>
-                            <tr>
-                                <td colspan="3"></td></td>
-
-                                <td>Jam Sample</td>
-                                <td class="wrap_content">:</td>
-                                <td><?php echo $_POST['jam_sample'] ?></td>
-                            </tr>
-                            <tr>
-                                <td colspan="6">
-                                    <hr />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="3">
-                                    <b>Diagnosa Kerja:</b>
-                                    <ol type="1">
-                                        <?Php
-                                            foreach ($_POST['icd_kerja'] as $icdKK => $icdKV) {
-                                                ?>
-                                                <li>
-                                                    <b style="color: #0199f0;"><?php echo $icdKV['kode']; ?></b> - <?php echo $icdKV['nama']; ?>
-                                                </li>
-                                                <?php
-                                            }
-                                        ?>
-                                    </ol>
-                                    <p>
-                                        <?php echo $_POST['diagnosa_kerja']; ?>
-                                    </p>
-                                </td>
-                                <td colspan="3">
-                                    <b>Diagnosa Banding:</b>
-                                    <ol type="1">
-                                        <?Php
-                                        foreach ($_POST['icd_banding'] as $icdBK => $icdBV) {
-                                            ?>
-                                            <li>
-                                                <b style="color: #0199f0;"><?php echo $icdBV['kode']; ?></b> - <?php echo $icdBV['nama']; ?>
-                                            </li>
-                                            <?php
-                                        }
-                                        ?>
-                                    </ol>
-                                    <p>
-                                        <?php echo $_POST['diagnosa_banding']; ?>
-                                    </p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="6">
-                                    <hr />
-                                </td>
-                            </tr>
-                        </table>
+                        <h1 class="title-name">RESEP & RACIKAN</h1>
                         <?php
-                        echo($_POST['lab_item']);
+                        echo($_POST['dataCetak']);
                         ?>
-                        <hr />
-                        <b>Kesan:</b>
-                        <p>
-                            <?php echo($_POST['kesan']); ?>
-                        </p>
                         <br />
-                        <b>Anjuran:</b>
-                        <p>
-                            <?php echo($_POST['anjuran']); ?>
-                        </p>
-                        <br /><br /><br />
-                        <table class="form-mode largeDataType">
-                            <tbody>
-                                <tr>
-                                    <td></td>
-                                    <td colspan="5" class="text-mode text-center wrap_content special-type-padding signing-panel">
-                                        <?php echo $_POST['__PC_CUSTOMER_ADDRESS_SHORT__']; ?>, <?php echo date('d F Y, H:i'); ?><br />
-                                        <b>Ka. Instalasi Laboratorium <?php echo $_POST['__PC_CUSTOMER__']; ?></b>
-                                        <br /><br /><br /><br /><br />
-                                        <hr />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-bordered-full largeDataType">
+                                    <tbody>
+                                    <tr>
+                                        <td colspan="5" class="text-mode text-center wrap_content grey-up">
+                                            <small>Nama Petugas</small>
+                                        </td>
+                                        <td style="width: 15%" class="text-center wrap_content grey-up">
+                                            <small>Penerima Obat</small>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Harga</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Ambil</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Racik</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding" colspan="2" style="width: 30%">
+                                            <small>Serah</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Nama</small>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" class="text-mode text-center wrap_content grey-up">
+                                            <small>Telaah Obat</small>
+                                        </td>
+                                        <td rowspan="2" class="text-center wrap_content special-type-padding">
+                                            <small>Tanda Tangan</small>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Obat</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Jumlah</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Rute</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Waktu</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding" style="width: 30%">
+                                            <small>Frekuensi</small>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" class="text-mode text-center wrap_content grey-up">
+                                            <small>Pemberian Informasi Obat</small>
+                                        </td>
+                                        <td rowspan="2" class="text-center">
+                                            <div id="qrcodeImage">
+                                                <img />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Indikasi Obat</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Aturan Pakai Obat</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Cara Penyimpanan Obat</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding" style="width: 30%">
+                                            <small>Kedaluarsa Obat</small>
+                                        </td>
+                                        <td class="text-center wrap_content special-type-padding">
+                                            <small>Efek Samping Obat(jika diperlukan)   </small>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </td>
             </tr>
@@ -436,16 +391,16 @@
         <?php
     } else {
         ?>
-        <table class="constructor">
-            <thead>
-            <tr>
-                <td>
-                    <div class="header-space"></div>
-                </td>
-            </tr>
-            </thead>
+    <table class="constructor">
+        <thead>
+        <tr>
+            <td>
+                <div class="header-space"></div>
+            </td>
+        </tr>
+        </thead>
 
-            <tbody>
+        <tbody>
             <tr>
                 <td>
                     <div class="report_content">
@@ -551,8 +506,8 @@
                     </div>
                 </td>
             </tr>
-            </tbody>
-        </table>
+        </tbody>
+    </table>
         <?php
     }
     ?>

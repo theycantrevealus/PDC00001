@@ -41,23 +41,31 @@
                 </div>
             </div>
             <div class="card card-body">
-                <input id="range_history" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
-                <table class="table table-bordered table-striped" id="table-history-labor" style="font-size: 0.9rem;">
-                    <thead class="thead-dark">
-                    <tr>
-                        <th class="wrap_content">No</th>
-                        <th>Waktu Order</th>
-                        <th>No. RM</th>
-                        <th>Pasien</th>
-                        <th>Poliklinik</th>
-                        <th>Dokter</th>
-                        <th class="wrap_content">Aksi</th>
-                    </tr>
-                    </thead>
-                    <tbody>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <input id="range_history" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                    </div>
+                    <div class="col-lg-12">
+                        <br />
+                        <table class="table table-bordered table-striped" id="table-history-labor" style="font-size: 0.9rem;">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>No. Order</th>
+                                <th>Waktu Order</th>
+                                <th>No. RM</th>
+                                <th>Pasien</th>
+                                <th>Poliklinik</th>
+                                <th>Dokter</th>
+                                <th class="wrap_content">Aksi</th>
+                            </tr>
+                            </thead>
+                            <tbody>
 
-                    </tbody>
-                </table>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

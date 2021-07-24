@@ -9,6 +9,8 @@
 <script type="text/javascript">
     var __CURRENT_DATE__ = <?php echo json_encode(date('Y-m-d')); ?>;
     var __PC_CUSTOMER__ = <?php echo json_encode(__PC_CUSTOMER__); ?>;
+    var __PC_CUSTOMER_GROUP__ = <?php echo json_encode(__PC_CUSTOMER_GROUP__); ?>;
+    var __PC_CUSTOMER_ADDRESS_SHORT__ = <?php echo json_encode(__PC_CUSTOMER_ADDRESS_SHORT__); ?>;
     var __PC_CUSTOMER_ADDRESS__ = <?php echo json_encode(__PC_CUSTOMER_ADDRESS__); ?>;
     var __PC_CUSTOMER_CONTACT__ = <?php echo json_encode(__PC_CUSTOMER_CONTACT__); ?>;
 	var __SYNC__ = <?php echo json_encode(__SYNC__); ?>;

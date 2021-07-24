@@ -5,6 +5,7 @@
 		var selectedUID;
 		var selectedUIDPasien;
 		var selectedUIDKwitansi;
+		var selectedKodeKwitansi;
 		var selectedPoli;
 		var selectedPasien;
 		var selectedPenjamin;
@@ -98,9 +99,9 @@
 					        row.pasien.panggilan_name !== undefined &&
                             row.pasien.panggilan_name !== null
                         ) {
-                            return row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama;
+                            return "<span id=\"kode_kwitansi_" + row.uid + "\">" + row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</span>";
                         } else {
-                            return row.nomor_kwitansi + " - " + row.pasien.nama;
+                            return "<span id=\"kode_kwitansi_" + row.uid + "\">" + row.nomor_kwitansi + " - " + row.pasien.nama + "</span>";
                         }
 					}
 				},
@@ -196,12 +197,12 @@
                 "padding-top": "20px"
             });
 
-            $(containerTemp).find("table tbody tr td:eq(2)").css({
+            /*$(containerTemp).find("table tbody tr td:eq(2)").css({
                 "width": "50%",
                 "color": "#000 !important"
             });
 
-            $(containerTemp).find("table thead").addClass("thead-dark");
+            $(containerTemp).find("table thead").addClass("thead-dark");*/
 		    $(containerTemp).find("#keterangan-faktur").attr({
                 "colspan": "3"
             });
@@ -220,6 +221,7 @@
                 type: "POST",
                 data: {
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     kwitansi_data: $(containerTemp).html(),
@@ -236,12 +238,9 @@
 
                     $(containerItem).html(response);
                     $(containerItem).printThis({
-                        importCSS: true,
-                        base: true,
-                        importStyle: true,
                         header: null,
                         footer: null,
-                        pageTitle: "Kwitansi",
+                        pageTitle: selectedKodeKwitansi,
                         afterPrint: function() {
                             $("#form-payment-detail").modal("hide");
                         }
@@ -263,6 +262,8 @@
 
 			selectedUID = $(this).attr("invoice");
 			selectedUIDKwitansi = $(this).attr("invoice_payment");
+
+			selectedKodeKwitansi = $("#kode_kwitansi_" + selectedUIDKwitansi).html();
 
 			$.ajax({
                 async: false,
@@ -359,19 +360,19 @@
 
 							for(var groupKey in billing_group) {
                                 $("#invoice_detail_history tbody").append("<tr>" +
-                                    "<td></td>" +
-                                    "<td colspan=\"5\" class=\"bg-info\" style=\"color: #fff\">" + groupKey.toUpperCase() + "</td>" +
+                                    "<td class=\"wrap_content\"></td>" +
+                                    "<td colspan=\"5\" class=\"bg-info wrap_content text-left\" style=\"color: #fff\">" + groupKey.toUpperCase() + "</td>" +
                                     "</tr>");
                                 for(var itemKey in billing_group[groupKey]) {
                                     var returned = (billing_group[groupKey][itemKey].status === "R" && billing_group[groupKey][itemKey].allow_retur);
                                     $("#invoice_detail_history tbody").append(
                                         "<tr>" +
                                         "<td>" + ((billing_group[groupKey][itemKey].status === "P") ? ((billing_group[groupKey][itemKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + billing_group[groupKey][itemKey].uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
-                                        "<td style=\"width: 50px !important;\">" + (parseInt(itemKey) + 1)+ "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\">" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
+                                        "<td class=\"wrap_content\">" + (parseInt(itemKey) + 1)+ "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "; width: 50%\">" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
                                         "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style\">" + billing_group[groupKey][itemKey].qty + "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
                                         "</tr>"
                                     );
                                 }
@@ -1049,23 +1050,23 @@
                                 }
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
-                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
+                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice form-control\" />";
                                 } else if(invoice_detail_item[invKey].status_bayar == 'V') {
-                                    status_bayar = "<span class=\"text-info\" style=\"white-space: pre\"><i class=\"fa fa-info-circle\"></i> Verifikasi</span>";
+                                    status_bayar = "<h6 class=\"text-info text-center\" style=\"white-space: pre\"><i class=\"fa fa-info-circle\"></i> Verifikasi</h6>";
 								} else {
 									if(invoice_detail_item[invKey].item.allow_retur == true) {
 										if(invoice_detail_item[invKey].status_berobat == undefined) {
-											status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+											status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 										} else {
 											if(invoice_detail_item[invKey].status_berobat.status == "N") {
 												//status_bayar = "<button class=\"btn btn-info btn-sm btn-retur-pembayaran\" id=\"retur_pembayaran_" + invoice_detail_item[invKey].item.uid + "\">Retur</button>";
-												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 											} else {
-												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 											}
 										}
 									} else {
-										status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+										status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 									}
 								}
 
@@ -1311,19 +1312,21 @@
 						});
 
 						var totalFaktur = 0;
-
+						var autoFakturNum = 1;
 						for(var selKey in itemMeta) {
 							if(selectedPay.indexOf(itemMeta[selKey].id) >= 0) {
 								totalFaktur += parseFloat(itemMeta[selKey].subtotal);
 								$("#fatur_detail_item tbody").append(
 									"<tr>" +
-										"<td>" + itemMeta[selKey].autonum + "</td>" +
+										//"<td>" + itemMeta[selKey].autonum + "</td>" +
+                                        "<td>" + autoFakturNum + "</td>" +
 										"<td>" + itemMeta[selKey].item.nama + "</td>" +
 										"<td>" + itemMeta[selKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(itemMeta[selKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(itemMeta[selKey].subtotal, 2, ".", ",") + "</td>" +
 									"</tr>"
 								);
+                                autoFakturNum++;
 							}
 						}
 
@@ -1469,9 +1472,9 @@
 										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
 										"<td>" + historyDetail[historyKey].item + "</td>" +
-										"<td>" + historyDetail[historyKey].qty + "</td>" +
-										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
-										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
+										"<td class=\"number_style\">" + historyDetail[historyKey].qty + "</td>" +
+										"<td class=\"text-right number_style\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
+										"<td class=\"text-right number_style\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
 									"</tr>"
 								);
 							}

@@ -4,6 +4,7 @@
 
         var currentPenjamin = '';
         var printMode = false;
+        var selectedKode = "";
 
         var tableServiceLabor = $("#service_labor").DataTable({
             processing: true,
@@ -114,7 +115,7 @@
             "columns" : [
                 {
                     "data" : "autonum", render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -235,7 +236,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -389,7 +390,12 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"kode_" + row.uid + "\">" + row["no_order"] + "</span>";
                     }
                 },
                 {
@@ -423,7 +429,7 @@
                             "<a href=\"" + __HOSTNAME__ + "/laboratorium/view/" + row['uid'] + "/\" class=\"btn btn-info btn-sm\">" +
                             "<i class=\"fa fa-eye\"></i> Detail" +
                             "</a>" +
-                            "<button class=\"btn btn-info btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
+                            "<button class=\"btn btn-purple btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
                             "<i class=\"fa fa-print\"></i> Cetak" +
                             "</button>" +
                             "</div>";
@@ -439,11 +445,16 @@
             var uid = $(this).attr("id").split("_");
             uid = uid[uid.length - 1];
 
+            selectedKode = $("#kode_" + uid).html();
+
             var labPasien = loadPasien(uid);
             var labItem = loadLabOrderItem(uid);
             var labLampiran = loadLampiran(uid);
 
-            //console.log(labItem);
+            /*console.clear();
+            console.log(labPasien);*/
+
+
             $.ajax({
                 async: false,
                 url: __HOST__ + "miscellaneous/print_template/lab_hasil.php",
@@ -456,22 +467,33 @@
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    __PC_CUSTOMER_ADDRESS_SHORT__: __PC_CUSTOMER_ADDRESS_SHORT__,
                     lab_pasien: labPasien,
                     lab_item: labItem,
                     lab_lampiran: labLampiran,
-                    tanggal: $("#tanggal_labor_" + uid).html()
+                    nama: labPasien.pasien.nama,
+                    dokter_peminta: labPasien.antrian.dokter.nama,
+                    tanggal_lahir: labPasien.pasien.tanggal_lahir,
+                    alamat: labPasien.pasien.alamat,
+                    tanggal_periksa: labPasien.laboratorium.updated_at,
+                    no_order: labPasien.laboratorium.no_order,
+                    no_rm: labPasien.pasien.no_rm,
+                    jam_sample: labPasien.laboratorium.tanggal_sampling,
+                    diagnosa_kerja: labPasien.asesmen_data.diagnosa_kerja,
+                    diagnosa_banding: labPasien.asesmen_data.diagnosa_banding,
+                    icd_kerja: labPasien.asesmen_data.icd10_kerja,
+                    icd_banding: labPasien.asesmen_data.icd10_banding,
+                    tanggal: $("#tanggal_labor_" + uid).html(),
+                    kesan: labPasien.laboratorium.kesan,
+                    anjuran: labPasien.laboratorium.anjuran
                 },
                 success: function (response) {
-                    /*var win = window.open("", "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=1280,height=800,top="+(screen.height-400)+",left="+(screen.width-840));
-                    win.document.body.innerHTML = response;*/
 
                     printMode = true;
                     $(response).printThis({
                         printDelay: 1000,
-                        importCSS: true,
-                        base: __HOSTNAME__,
                         canvas: true,
-                        pageTitle: "Laporan Laboratorium " + labPasien.pasien.no_rm,
+                        pageTitle: selectedKode,
                         afterPrint: function() {
                             //
                         }
@@ -481,10 +503,10 @@
                     $(containerItem).html(response);
                     $(containerItem).on("load", function () {
 
-                        /*if(printMode) {
+                        if(printMode) {
                             printMode = false;
 
-                        }*/
+                        }
                     });
                 },
                 error: function (response) {
@@ -1242,18 +1264,8 @@
                     beforeSend: function(request) {
                         request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                     },
-                    success: function(response){
+                    success: function(response) {
                         MetaData = response.response_package;
-
-                        /*if (Object.size(MetaData) > 0){
-                            if (MetaData.pasien != ""){
-                                $("#no_rm").html(MetaData.pasien.no_rm);
-                                $("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir);
-                                $("#panggilan").html(MetaData.pasien.panggilan);
-                                $("#nama").html(MetaData.pasien.nama);
-                                $("#jenkel").html(MetaData.pasien.jenkel);
-                            }
-                        }*/
                     },
                     error: function(response) {
                         console.log(response);
@@ -1282,8 +1294,10 @@
                             dataItem = response.response_package.response_data;
                             $.each(dataItem, function(key, item){
                                 html += "<div class=\"card\"><div class=\"card-header bg-white\">" +
-                                    "<h5 class=\"card-header__title flex m-0\" style=\"padding-top: 20px;\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
-                                    "</div><div class=\"card-body\">" +
+                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
+                                    "</div>" +
+                                    "<br />" +
+                                    "<div class=\"card-body\">" +
                                     "<table class=\"table table-bordered table-striped largeDataType border-style\">" +
                                     "<thead class=\"thead-dark\">" +
                                     "<tr>" +
