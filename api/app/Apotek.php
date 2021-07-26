@@ -847,7 +847,10 @@ class Apotek extends Utility
             'antrian',
             'alergi_obat',
             'keterangan',
-            'keterangan_racikan'
+            'iterasi',
+            'kode',
+            'keterangan_racikan',
+            'created_at'
         ))
             ->where(array(
                 'resep.deleted_at' => 'IS NULL',
@@ -859,6 +862,9 @@ class Apotek extends Utility
             ->execute();
 
         $dataResponse['alergi_obat'] = $resep['response_data'][0]['alergi_obat'];
+        $dataResponse['iterasi'] = $resep['response_data'][0]['iterasi'];
+        $dataResponse['kode'] = $resep['response_data'][0]['kode'];
+        $dataResponse['created_at_parsed'] = date('d F Y', strtotime($resep['response_data'][0]['created_at']));
 
         $AntrianDetail = self::$query->select('antrian', array(
                 'uid',
@@ -910,6 +916,7 @@ class Apotek extends Utility
                 'harga',
                 'signa_qty',
                 'signa_pakai',
+                'iterasi',
                 'keterangan',
                 'aturan_pakai',
                 'qty',
@@ -938,6 +945,7 @@ class Apotek extends Utility
                 'kode',
                 'keterangan',
                 'aturan_pakai',
+                'iterasi',
                 'signa_qty',
                 'signa_pakai',
                 'qty',

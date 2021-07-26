@@ -934,6 +934,7 @@ class Asesmen extends Utility {
                 if($antrian['response_data'][0]['departemen'] === __POLI_INAP__) {
                     $resep = self::$query->select('resep', array(
                         'uid',
+                        'iterasi',
                         'alergi_obat',
                         'keterangan',
                         'keterangan_racikan'
@@ -961,6 +962,7 @@ class Asesmen extends Utility {
                 } else {
                     $resep = self::$query->select('resep', array(
                         'uid',
+                        'iterasi',
                         'alergi_obat',
                         'keterangan',
                         'keterangan_racikan'
@@ -1002,6 +1004,7 @@ class Asesmen extends Utility {
 					//GET Resep Detail
 					$resepDetail = self::$query->select('resep_detail', array(
 						'id',
+                        'iterasi',
 						'resep',
 						'obat',
 						'harga',
@@ -1025,68 +1028,60 @@ class Asesmen extends Utility {
                     }
 
 					$resep['response_data'][$key]['resep_detail'] = $resepDetail['response_data'];
+				}
 
-					//Racikan Detail
-					$racikan = self::$query->select('racikan', array(
-						'uid',
-						'asesmen',
-						//'resep',
-						'kode',
-						'keterangan',
-						'aturan_pakai',
-						'signa_qty',
-						'signa_pakai',
-						'qty',
-						'total'
-					))
-					->where(array(
-						'racikan.asesmen' => '= ?',
-						'AND',
-						'racikan.deleted_at' => 'IS NULL'
-					), array(
-						$data['response_data'][0]['asesmen']
-					))
-					->execute();
+                //Racikan Detail
+                $racikan = self::$query->select('racikan', array(
+                    'uid',
+                    'asesmen',
+                    'iterasi',
+                    'kode',
+                    'keterangan',
+                    'aturan_pakai',
+                    'signa_qty',
+                    'signa_pakai',
+                    'qty',
+                    'total'
+                ))
+                    ->where(array(
+                        'racikan.asesmen' => '= ?',
+                        'AND',
+                        'racikan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $data['response_data'][0]['asesmen']
+                    ))
+                    ->execute();
 
-                    if($isCPPT) {
-                        /*$RacikanApotekItem = self::$query->select('racikan_change_log')
-                            ->where(array(
-                                'racikan_change_log.racikan'
-                            ), array())
-                            ->execute();*/
+                foreach ($racikan['response_data'] as $RacikanKey => $RacikanValue) {
+                    $RacikanDetailData = self::$query->select('racikan_detail', array(
+                        'asesmen',
+                        //'resep',
+                        'obat',
+                        'ratio',
+                        'pembulatan',
+                        'kekuatan',
+                        'takar_bulat',
+                        'takar_decimal',
+                        'harga',
+                        'racikan',
+                        'penjamin'
+                    ))
+                        ->where(array(
+                            'racikan_detail.racikan' => '= ?'
+                        ), array(
+                            //$value['uid'],
+                            $RacikanValue['uid']
+                        ))
+                        ->execute();
+
+                    foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
+                        $RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $Inventori->get_item_detail($RVIValue['obat'])['response_data'][0];
                     }
 
-					foreach ($racikan['response_data'] as $RacikanKey => $RacikanValue) {
-						$RacikanDetailData = self::$query->select('racikan_detail', array(
-							'asesmen',
-							//'resep',
-							'obat',
-							'ratio',
-							'pembulatan',
-							'kekuatan',
-							'takar_bulat',
-							'takar_decimal',
-							'harga',
-							'racikan',
-							'penjamin'
-						))
-						->where(array(
-							'racikan_detail.racikan' => '= ?'
-						), array(
-							//$value['uid'],
-							$RacikanValue['uid']
-						))
-						->execute();
+                    $RacikanValue['item'] = $RacikanDetailData['response_data'];
 
-						foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
-							$RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $Inventori->get_item_detail($RVIValue['obat'])['response_data'][0];
-						}
-
-						$RacikanValue['item'] = $RacikanDetailData['response_data'];
-
-						array_push($racikanData, $RacikanValue);
-					}
-				}
+                    array_push($racikanData, $RacikanValue);
+                }
 
 
 
@@ -1815,6 +1810,7 @@ class Asesmen extends Utility {
 			$resepUpdate = self::$query->update('resep', array(
 			    'alergi_obat' => (isset($parameter['editorAlergiObat']) && !is_null($parameter['editorAlergiObat']) && !empty($parameter['editorAlergiObat'])) ? $parameter['editorAlergiObat'] : '',
                 'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
+				'iterasi' => (isset($parameter['iterasi'])) ? intval($parameter['iterasi']) : 0,
 				'keterangan' => $parameter['keteranganResep'],
 				'keterangan_racikan' => $parameter['keteranganRacikan']
 			))
@@ -1870,6 +1866,7 @@ class Asesmen extends Utility {
 					$worker = self::$query->update('resep_detail', array(
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
+                        'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
 						'qty' => $value['signaHari'],
 						'aturan_pakai' => intval($value['aturanPakai']),
 						'keterangan' => $value['keteranganPerObat'],
@@ -1890,6 +1887,7 @@ class Asesmen extends Utility {
 						'resep' => $uid,
 						'obat' => $value['obat'],
 						'harga' => 0,
+						'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
 						'signa_qty' => $value['signaKonsumsi'],
 						'signa_pakai' => $value['signaTakar'],
 						'qty' => $value['signaHari'],
@@ -1938,6 +1936,7 @@ class Asesmen extends Utility {
 			foreach ($racikanOld['response_data'] as $key => $value) {
 				$racikanUpdate = self::$query->update('racikan', array(
 					'kode' => '['. $Kode . ']' . $parameter['racikan'][$key]['nama'],
+                    'iterasi' => (isset($parameter['racikan'][$key]['iterasi'])) ? intval($parameter['racikan'][$key]['iterasi']) : 0,
 					'aturan_pakai' => intval($parameter['racikan'][$key]['aturanPakai']),
 					'keterangan' => $parameter['racikan'][$key]['keterangan'],
 					'signa_qty' => $parameter['racikan'][$key]['signaKonsumsi'],
@@ -2075,6 +2074,7 @@ class Asesmen extends Utility {
 					'kode' => '['. $Kode . ']' . $value['nama'],
 					'total' => 0,
 					'signa_qty' => $value['signaKonsumsi'],
+                    'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
                     'keterangan' => $value['keterangan'],
 					'signa_pakai' => $value['signaTakar'],
 					'aturan_pakai' => intval($value['aturanPakai']),
@@ -2141,6 +2141,7 @@ class Asesmen extends Utility {
                     'pasien' => $parameter['pasien'],
                     'alergi_obat' => (isset($parameter['editorAlergiObat']) && !is_null($parameter['editorAlergiObat']) && !empty($parameter['editorAlergiObat'])) ? $parameter['editorAlergiObat'] : '',
                     'total' => 0,
+                    'iterasi' => (isset($parameter['iterasi'])) ? intval($parameter['iterasi']) : 0,
                     'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
                     'created_at' => parent::format_date(),
                     'updated_at' => parent::format_date()
@@ -2158,6 +2159,7 @@ class Asesmen extends Utility {
                             'resep' => $uid,
                             'obat' => $value['obat'],
                             'aturan_pakai' => intval($value['aturanPakai']),
+                            'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
                             'harga' => 0,
                             'signa_qty' => $value['signaKonsumsi'],
                             'signa_pakai' => $value['signaTakar'],
@@ -2178,6 +2180,7 @@ class Asesmen extends Utility {
                             'asesmen' => $MasterAsesmen,
                             //'resep' => $uid,
                             'kode' => '['. $Kode . ']' . $value['nama'],
+                            'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
                             'signa_qty' => $value['signaKonsumsi'],
                             'signa_pakai' => $value['signaTakar'],
                             'keterangan' => $value['keterangan'],

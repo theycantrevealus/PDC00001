@@ -2,10 +2,19 @@
 	<div class="col-lg">
         <div class="card">
             <div class="card-header card-header-large bg-white d-flex align-items-center">
-                <h5 class="card-header__title flex m-0">Alergi Obat</h5>
+                <h5 class="card-header__title flex m-0">Keterangan Tambahan</h5>
             </div>
             <div class="card-body">
-                <textarea placeholder="Keterangan Alergi Obat" id="alergi_obat" class="form-control"></textarea>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <b>Alergi:</b>
+                        <textarea placeholder="Keterangan Alergi Obat" id="alergi_obat" class="form-control"></textarea>
+                    </div>
+                    <div class="col-lg-3">
+                        <b>Iterasi Resep:</b>
+                        <input placeholder="Iterasi Resep" id="iterasi_resep" class="form-control" />
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card">

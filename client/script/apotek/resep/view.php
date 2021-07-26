@@ -1,6 +1,7 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
     $(function () {
-        var currentMetaData, currentAsesmen, currentRacikanActive;
+        var currentMetaData, currentAsesmen, currentRacikanActive, targetKodeResep;
         var alasanUbah = "";
         var totalResep = 0;
         var totalRacikan = 0;
@@ -73,7 +74,17 @@
             type:"GET",
             success:function(response) {
                 var data = response.response_package[0];
+
                 currentAsesmen = data.asesmen.uid;
+                targetKodeResep = data.kode;
+
+
+                if(data.iterasi > 0) {
+                    $("#iter-identifier").show();
+                    $("#iterasi-resep").html(parseInt(data.iterasi));
+                } else {
+                    $("#iter-identifier").hide();
+                }
 
                 if(data.alergi_obat !== undefined && data.alergi_obat !== "" && data.alergi_obat !== null) {
                     $("#alergi_obat").html(data.alergi_obat);
@@ -145,6 +156,9 @@
                     $(".penjamin_pasien").html(currentMetaData.penjamin.nama);
                     $(".poliklinik").html(currentMetaData.departemen.nama);
                     $(".dokter").html(currentMetaData.dokter.nama);
+                    $("#copy-resep-dokter").html(currentMetaData.dokter.nama);
+                    $("#copy-resep-pasien").html((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama);
+                    $("#copy-resep-tanggal").html(data.created_at_parsed);
 
                     if(data.resep.length > 0) {
 
@@ -162,7 +176,7 @@
                                 "signaKonsumsi": resep_obat_detail[resepKey].signa_qty,
                                 "signaTakar": resep_obat_detail[resepKey].signa_pakai,
                                 "signaHari": resep_obat_detail[resepKey].qty,
-                                //"pasien_penjamin_uid": pasien_penjamin_uid
+                                "iterasi": resep_obat_detail[resepKey].iterasi
                             });
                             if(currentData.resep[resep_obat_detail[resepKey].obat] === undefined) {
                                 currentData.resep[resep_obat_detail[resepKey].obat] = {
@@ -197,6 +211,7 @@
                                 signaTakar: racikan_detail[racikanKey].signa_pakai,
                                 signaHari: racikan_detail[racikanKey].qty,
                                 item:racikan_detail[racikanKey].item,
+                                iterasi:racikan_detail[racikanKey].iterasi,
                                 aturan_pakai: racikan_detail[racikanKey].aturan_pakai
                             });
 
@@ -271,7 +286,8 @@
             "signaKonsumsi": 0,
             "signaTakar": 0,
             "signaHari": 0,
-            "pasien_penjamin_uid": ""
+            "pasien_penjamin_uid": "",
+            "iterasi": 0
         }) {
             $("#table-resep tbody tr").removeClass("last-resep");
             var newRowResep = document.createElement("TR");
@@ -286,6 +302,14 @@
             var newCellHarga = document.createElement("TD");
             var newCellResepPenjamin = document.createElement("TD");
             var newCellResepAksi = document.createElement("TD");
+
+
+            var checkCopyResep = document.createElement("INPUT");
+            $(checkCopyResep).attr({
+                "type": "checkbox"
+            }).addClass("form-control copy-resep");
+
+            $(newCellResepAksi).append(checkCopyResep);
 
             var newObat = document.createElement("SELECT");
             $(newCellResepObat).append(newObat).append("<ol></ol>");
@@ -317,6 +341,10 @@
             }).css({
                 "min-height": "200px"
             }).val(setter.keterangan);
+
+            if(parseInt(setter.iterasi) > 0) {
+                $(newCellResepObat).append("<br /><h3 class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times;</h3>");
+            }
 
             var itemData = [];
             var parsedItemData = [];
@@ -428,7 +456,7 @@
                             dataKategoriPerObat[kategoriObatKey].kategori !== undefined &&
                             dataKategoriPerObat[kategoriObatKey].kategori !== null
                         ) {
-                            kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+                            kategoriObatDOM += "<span class=\"badge badge-custom-caption badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
                         }
                     }
                     $(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
@@ -459,7 +487,7 @@
                                 dataKategoriPerObat[kategoriObatKey].kategori !== undefined &&
                                 dataKategoriPerObat[kategoriObatKey].kategori !== null
                             ) {
-                                kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+                                kategoriObatDOM += "<span class=\"badge badge-custom-caption badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
                             }
                         }
                         $(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
@@ -593,9 +621,17 @@
                 $(this).attr({
                     "id": "resep_row_" + id
                 });
-                $(this).find("td:eq(0)").html(id);
+                $(this).find("td:eq(0)").html("<h5 class=\"autonum\">" + id + "</h5>");
                 $(this).find("td:eq(1) select.resep-obat").attr({
                     "id": "resep_obat_" + id
+                });
+
+                $(this).find("td:eq(1) textarea").attr({
+                    "id": "keterangan_resep_obat_" + id
+                });
+
+                $(this).find("td:eq(1) h3").attr({
+                    "id": "iterasi_resep_obat_" + id
                 });
 
                 $(this).find("td:eq(1) select.aturan-pakai").attr({
@@ -630,6 +666,9 @@
                 });
                 $(this).find("td:eq(8) button").attr({
                     "id": "resep_delete_" + id
+                });
+                $(this).find("td:eq(8) input").attr({
+                    "id": "resep_copy_" + id
                 });
 
                 //Sini
@@ -943,6 +982,7 @@
             "signaTakar": "",
             "signaHari": "",
             "aturan_pakai": "",
+            "iterasi": 0,
             "item":[]
         }) {
             $("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
@@ -958,6 +998,13 @@
             var newRacikanCellJlh = document.createElement("TD");
             var newRacikanCellHarga = document.createElement("TD");
             var newRacikanCellAksi = document.createElement("TD");
+
+            var checkCopyRacikan = document.createElement("INPUT");
+            $(checkCopyRacikan).attr({
+                "type": "checkbox"
+            }).addClass("form-control copy-racikan");
+
+            $(newRacikanCellAksi).append(checkCopyRacikan);
 
             $(newRacikanCellHarga).addClass("number_style master-racikan-cell").append("<span></span>");
 
@@ -1025,6 +1072,10 @@
             }).css({
                 "min-height": "200px"
             }).val(setter.keterangan);
+
+            if(parseInt(setter.iterasi) > 0) {
+                $(newRacikanCellNama).append("<br /><h3 class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times;</h3>");
+            }
 
             /*var newRacikanObat = document.createElement("SELECT");
             var newObatTakar = document.createElement("INPUT");
@@ -1119,7 +1170,7 @@
                     "id": "row_racikan_" + id
                 });
 
-                $(this).find("td:eq(0)").html(id);
+                $(this).find("td:eq(0)").html("<h5 class=\"autonum\">" + id + "</h5>");
 
                 $(this).find("td:eq(1) input.racikan_nama").attr({
                     "id": "racikan_nama_" + id
@@ -1127,6 +1178,14 @@
 
                 $(this).find("td:eq(1) select.aturan-pakai-racikan").attr({
                     "id": "racikan_aturan_pakai_" + id
+                });
+
+                $(this).find("td:eq(1) textarea").attr({
+                    "id": "racikan_keterangan_" + id
+                });
+
+                $(this).find("td:eq(1) h3").attr({
+                    "id": "racikan_iterasi_" + id
                 });
 
                 if($(this).find("td:eq(1) input") == "") {
@@ -1159,6 +1218,9 @@
 
                 $(this).find("td:eq(7) button").attr({
                     "id": "racikan_delete_" + id
+                });
+                $(this).find("td:eq(7) input").attr({
+                    "id": "racikan_copy_" + id
                 });
             });
         }
@@ -2327,7 +2389,136 @@
         }
 
         $("#btnCopyResep").click(function() {
-            //
+            console.clear();
+            var itemP = [];
+
+            //Ambil Semua Resep yang dicentang
+            $(".copy-resep").each(function(e) {
+                var id = $(this).attr("id").split("_");
+                id = id[id.length - 1];
+                var me = $(this);
+
+                var obat = $("#resep_obat_" + id + " option:selected").html();
+                var signaA = $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue");
+                var signaB = $("#resep_signa_takar_" + id).inputmask("unmaskedvalue");
+                var jumlah = $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue");
+                var konsumsi = $("#resep_obat_aturan_pakai_" + id + " option:selected").html();
+                var keterangan = $("#keterangan_resep_obat_" + id).val();
+                var iterasi = $("#iterasi_resep_obat_" + id).attr("data");
+                itemP.push({
+                    obat: [obat],
+                    signa: signaA + " &times; " + signaB,
+                    konsumsi: konsumsi,
+                    keterangan: keterangan,
+                    jumlah: jumlah,
+                    iterasi: iterasi,
+                    detOrig: (me.is(":checked")) ? "Y" : "N"
+                });
+            });
+
+
+
+            $(".copy-racikan").each(function() {
+                var id = $(this).attr("id").split("_");
+                id = id[id.length - 1];
+                var me = $(this);
+
+                var obatList = [];
+                var signaA = $("#racikan_signaA_" + id).inputmask("unmaskedvalue");
+                var signaB = $("#racikan_signaB_" + id).inputmask("unmaskedvalue");
+                var jumlah = $("#racikan_jumlah_" + id).inputmask("unmaskedvalue");
+                var konsumsi = $("#racikan_aturan_pakai_" + id + " option:selected").html();
+                var keterangan = $("#racikan_keterangan_" + id).val();
+                var iterasi = $("#racikan_iterasi_" + id).attr("data");
+
+
+                $("#komposisi_" + id + " tbody tr").each(function() {
+                    var obat = $(this).find("td:eq(1) h6").html();
+                    var kekuatan = $(this).find("td:eq(3)").html();
+
+                    obatList.push(obat + " <b>" + kekuatan + "</b>");
+
+                });
+
+                itemP.push({
+                    obat: obatList,
+                    signa: signaA + " &times; " + signaB,
+                    konsumsi: konsumsi,
+                    keterangan: keterangan,
+                    jumlah: jumlah,
+                    iterasi: iterasi,
+                    detOrig: (me.is(":checked")) ? "Y" : "N"
+                });
+            });
+            //Ambil Semua Racikan yang dicentang
+
+            $("#copy-resep-report").html("");
+            $("#form-copy-resep").modal("show");
+
+            if(parseInt($("#iterasi-resep").html()) > 0) {
+                $("#iter-copy-resep").html("Iter " + $("#iterasi-resep").html() + " &times;");
+            } else {
+                $("#iter-copy-resep").html("Ne Iter");
+            }
+
+            for(var a in itemP) {
+                var obatList = "";
+                for(var b in itemP[a].obat) {
+                    obatList += itemP[a].obat[b] + "<br />";
+                }
+
+                $("#copy-resep-report").append("<tr>" +
+                    "<td class=\"resep_script\">R/</td>" +
+                    "<td style=\"padding-bottom: 2cm\">" +
+                    obatList + "" +
+                    "<h5 class=\"text-right resep_script\">" + ((parseInt(itemP[a].iterasi) > 0) ? ("Iter " + itemP[a].iterasi + " &times;") : "") + "</h5>" +
+                    "<h6 class=\"text-right\">..........." + ((parseInt(itemP[a].jumlah) > 0) ? ("det orig +" + itemP[a].jumlah) : "ne det") + "...</h6>" +
+                    "</td>" +
+                    "</tr>");
+            }
+        });
+
+        $("#btnCetakCopyResep").click(function() {
+            var dataCetak = $("#copy-resep-cetak").html();
+            $.ajax({
+                async: false,
+                url: __HOST__ + "miscellaneous/print_template/resep_copy.php",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    __HOSTNAME__: __HOSTNAME__,
+                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
+                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    dataCetak: dataCetak
+                },
+                success: function(response) {
+                    var printResepContainer = document.createElement("DIV");
+                    $(printResepContainer).html(response);
+
+                    /*var win = window.open("", "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=" + screen.width + ",height=" + screen.height + ",top=0,left=0");
+                    win.document.body.innerHTML = $(printResepContainer).html();*/
+
+
+
+                    $(printResepContainer).printThis({
+                        loadCSS: "template/assets/css/app.css",
+                        header: null,
+                        footer: null,
+                        pageTitle: "COPY_RESEP_" + targetKodeResep,
+                        afterPrint: function() {
+                            //
+                        }
+                    });
+
+                },
+                error: function(response) {
+                    //
+                }
+            });
         });
     });
 </script>
@@ -2344,6 +2535,36 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
                 <button type="button" class="btn btn-primary" id="btnSubmitAlasanUbah">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="form-copy-resep" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Copy Resep</h5>
+            </div>
+            <div class="modal-body">
+                <div id="copy-resep-cetak">
+
+                    <p class="text-center">
+                        Dari dokter: <b id="copy-resep-dokter"></b>
+                        <br />
+                        Untuk: <b id="copy-resep-pasien"></b>
+                        <br />
+                        Tanggal Resep: <b id="copy-resep-tanggal"></b>
+                    </p>
+                    <h5 id="iter-copy-resep" class="resep_script"></h5>
+                    <table class="form-mode table largeDataType" id="copy-resep-report">
+
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+                <button type="button" class="btn btn-primary" id="btnCetakCopyResep">Cetak</button>
             </div>
         </div>
     </div>

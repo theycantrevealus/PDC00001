@@ -101,14 +101,19 @@
 
             <div class="card">
                 <div class="card-body">
-                    <div class="col-md-12">
-                        <h5><i class="fa fa-capsules text-warning"></i> Keterangan Alergi Obat</h5>
-                        <br />
-                        <p id="alergi_obat"></p>
-                        <div class="no-data" id="no-data-alergi-obat">
-                            <div>
-                                <i class="fa fa-clipboard"></i> Tidak ada Data
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fa fa-capsules text-warning"></i> Keterangan Alergi Obat</h5>
+                            <br />
+                            <p id="alergi_obat"></p>
+                            <div class="no-data" id="no-data-alergi-obat">
+                                <div>
+                                    <i class="fa fa-clipboard"></i> Tidak ada Data
+                                </div>
                             </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 id="iter-identifier" class="resep_script"><i class="fa fa-receipt text-success"></i> Iter <span id="iterasi-resep"></span>&nbsp;&times;</h5>
                         </div>
                     </div>
                 </div>
@@ -145,7 +150,7 @@
                                         <th style="width: 10%">Jlh Obat</th>
                                         <th class="wrap_content">Satuan</th>
                                         <th style="width: 8%;">Harga</th>
-                                        <th class="wrap_content">Aksi</th>
+                                        <th class="wrap_content">Copy Resep</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -181,7 +186,7 @@
                                         <th colspan="3" style="width: 20%;">Signa/Hari</th>
                                         <th style="width: 10%">Jlh Obat</th>
                                         <th style="width: 10%">Total Biaya</th>
-                                        <th class="wrap_content">Aksi</th>
+                                        <th class="wrap_content">Copy Resep</th>
                                     </tr>
                                     </thead>
                                     <tbody class="racikan"></tbody>

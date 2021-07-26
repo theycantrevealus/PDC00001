@@ -76,6 +76,15 @@
             }
         };
 
+        $("#iterasi_resep").inputmask({
+            alias: 'decimal',
+            rightAlign: true,
+            placeholder: "0.00",
+            prefix: "",
+            autoGroup: false,
+            digitsOptional: true
+        });
+
         var temporEdit = {
             txt_keluhan_utama: "",
             txt_keluhan_tambahan: "",
@@ -278,6 +287,8 @@
                                     var resep_uid = response.response_package.response_data[0].resep[0].uid;
                                     var resep_obat_detail = response.response_package.response_data[0].resep[0].resep_detail;
 
+                                    iterasi = response.response_package.response_data[0].resep[0].iterasi;
+                                    $("#iterasi_resep").val(iterasi);
                                     keterangan_resep = response.response_package.response_data[0].resep[0].keterangan;
                                     keterangan_racikan = response.response_package.response_data[0].resep[0].keterangan_racikan;
 
@@ -290,6 +301,7 @@
                                             "signaKonsumsi": resep_obat_detail[resepKey].signa_qty,
                                             "signaTakar": resep_obat_detail[resepKey].signa_pakai,
                                             "signaHari": resep_obat_detail[resepKey].qty,
+                                            "iterasi": resep_obat_detail[resepKey].iterasi,
                                             "pasien_penjamin_uid": pasien_penjamin_uid
                                         });
                                     }
@@ -300,15 +312,17 @@
                                 }
 
                                 var racikan_detail = response.response_package.response_data[0].racikan;
+
                                 for(var racikanKey in racikan_detail) {
                                     autoRacikan({
                                         nama: racikan_detail[racikanKey].kode,
                                         keterangan: racikan_detail[racikanKey].keterangan,
-                                        "signaKonsumsi": racikan_detail[racikanKey].signa_qty,
-                                        "signaTakar": racikan_detail[racikanKey].signa_pakai,
-                                        "signaHari": racikan_detail[racikanKey].qty,
-                                        "item":racikan_detail[racikanKey].item,
-                                        "aturan_pakai": racikan_detail[racikanKey].aturan_pakai
+                                        signaKonsumsi: racikan_detail[racikanKey].signa_qty,
+                                        signaTakar: racikan_detail[racikanKey].signa_pakai,
+                                        signaHari: racikan_detail[racikanKey].qty,
+                                        iterasi: racikan_detail[racikanKey].iterasi,
+                                        item:racikan_detail[racikanKey].item,
+                                        aturan_pakai: racikan_detail[racikanKey].aturan_pakai
                                     });
                                     var itemKomposisi = racikan_detail[racikanKey].item;
                                     for(var komposisiKey in itemKomposisi) {
@@ -777,7 +791,7 @@
 
 
                 //Auto Simpan Pertama (Agar tidak bisa retur lagi di kasir)
-                var alergiObat = $("#alergi_obat").val();
+                /*var alergiObat = $("#alergi_obat").val();
                 simpanAsesmen(
                     antrianData,
                     UID,
@@ -796,8 +810,9 @@
                     alergiObat,
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                    $("#iterasi_resep").inputmask("unmaskedvalue"),
                     metaSwitchEdit
-                );
+                );*/
             },
             error: function(response) {
                 console.log(response);
@@ -1607,17 +1622,31 @@
                 "<div style=\"position: relative\" class=\"col-md-12 penjamin-container text-right\"></div>" +
                 "<div class=\"col-md-7 aturan-pakai-container\"><span>Aturan Pakai</span></div>" +
                 "<div class=\"col-md-5 kategori-obat-container\"><span>Kategori Obat</span><br /></div>" +
+                "<div class=\"col-md-6 iterasi-container\"><span>Iterasi</span><br /></div>" +
                 "<div style=\"position: relative; padding-top: 5px;\" class=\"col-md-12 keterangan-container\"></div>" +
                 "</div>");
             var newAturanPakai = document.createElement("SELECT");
             var dataAturanPakai = autoAturanPakai();
-
             $(newCellResepObat).find("div.aturan-pakai-container").append(newAturanPakai);
             $(newAturanPakai).addClass("form-control aturan-pakai-resep");
             $(newAturanPakai).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
             for(var aturanPakaiKey in dataAturanPakai) {
                 $(newAturanPakai).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
             }
+
+            var newIterasi = document.createElement("INPUT");
+            $(newIterasi).inputmask({
+                alias: 'decimal',
+                rightAlign: true,
+                placeholder: "0.00",
+                prefix: "",
+                autoGroup: false,
+                digitsOptional: true
+            }).addClass("form-control").attr({
+                "placeholder": "0"
+            }).val((setter.iterasi == 0) ? "" : setter.iterasi);
+            $(newCellResepObat).find("div.iterasi-container").append(newIterasi);
+
 
             var keteranganPerObat = document.createElement("TEXTAREA");
             $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span>").append(keteranganPerObat);
@@ -1873,6 +1902,10 @@
                     "id": "resep_aturan_pakai_" + id
                 });
 
+                $(this).find("td:eq(1) input").attr({
+                    "id": "resep_iterasi_" + id
+                });
+
                 //load_product_resep($(this).find("td:eq(1) select.resep-obat"), "");
                 if($(this).find("td:eq(1) select.resep-obat").val() != "none") {
                     /*var penjaminAvailable = $(this).find("td:eq(1) select option:selected").attr("penjamin-list").split(",");
@@ -1943,6 +1976,7 @@
             "signaTakar": "",
             "signaHari": "",
             "aturan_pakai": "",
+            "iterasi": 0,
             "item":[]
         }) {
             $("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
@@ -1967,7 +2001,7 @@
 
             var newRacikanNama = document.createElement("INPUT");
             $(newRacikanCellNama).append(newRacikanNama);
-            $(newRacikanNama).addClass("form-control").css({
+            $(newRacikanNama).addClass("form-control nama_racikan").css({
                 "margin-bottom": "20px"
             }).attr({
                 "placeholder": "Nama Racikan"
@@ -2000,8 +2034,11 @@
             var dataAturanPakai = autoAturanPakai();
 
             $(newAturanPakaiRacikan).addClass("form-control aturan-pakai-racikan");
+
+
+
             var newKeteranganRacikan = document.createElement("TEXTAREA");
-            $(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<span>Keterangan</span>").append(newKeteranganRacikan);
+            $(newRacikanCellNama).append("<br /><span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<br /><br /><span>Keterangan</span>").append(newKeteranganRacikan);
             $(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
             for(var aturanPakaiKey in dataAturanPakai) {
                 $(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
@@ -2009,6 +2046,22 @@
             $(newKeteranganRacikan).addClass("form-control").attr({
                 "placeholder": "Keterangan racikan"
             }).val(setter.keterangan);
+
+            var newIterasiRacikan = document.createElement("INPUT");
+            $(newIterasiRacikan).inputmask({
+                alias: 'decimal',
+                rightAlign: true,
+                placeholder: "0.00",
+                prefix: "",
+                autoGroup: false,
+                digitsOptional: true
+            }).addClass("form-control racikan_iterasi").attr({
+                "placeholder": "0"
+            }).val((parseInt(setter.iterasi) === 0) ? "" : parseInt(setter.iterasi));
+
+            $(newRacikanCellNama).append("<br /><span>Iterasi</span>").append(newIterasiRacikan);
+
+
 
             /*var newRacikanObat = document.createElement("SELECT");
             var newObatTakar = document.createElement("INPUT");
@@ -2086,12 +2139,12 @@
 
                 $(this).find("td:eq(0)").html(id);
 
-                $(this).find("td:eq(1) input").attr({
+                $(this).find("td:eq(1) input.nama_racikan").attr({
                     "id": "racikan_nama_" + id
                 }).val("Racikan " + id);
 
-                if($(this).find("td:eq(1) input") == "") {
-                    $(this).find("td:eq(1) input").val("RACIKAN " + id);
+                if($(this).find("td:eq(1) input.nama_racikan") == "") {
+                    $(this).find("td:eq(1) input.nama_racikan").val("RACIKAN " + id);
                 }
 
                 $(this).find("td:eq(1) table").attr({
@@ -2104,6 +2157,10 @@
 
                 $(this).find("td:eq(1) select.aturan-pakai-racikan").attr({
                     "id": "aturan_pakai_racikan_" + id
+                });
+
+                $(this).find("td:eq(1) input.racikan_iterasi").attr({
+                    "id": "iterasi_racikan_" + id
                 });
 
                 $(this).find("td:eq(2) input").attr({
@@ -2166,7 +2223,7 @@
                     }).html(setter.obat_detail.nama.toUpperCase());
 
                     //$(newKomposisiCellJumlah).html(setter.ratio);
-                    $(newKomposisiCellSatuan).html(setter.kekuatan);
+                    $(newKomposisiCellSatuan).html("<h6>" + setter.kekuatan + "</h6>");
                 } else {
                     prepareModal(id);
                 }
@@ -2856,6 +2913,7 @@
         function simpanAsesmen(
             antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi,
             editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorAlergiObat, editorKeteranganResep, editorKeteranganResepRacikan,
+            iterasiObat,
             metaSwitchEdit,
             charge_invoice = "N"
         ) {
@@ -2919,6 +2977,7 @@
                 var obat = $(this).find("td:eq(1) select.resep-obat").val();
                 var aturanPakai = $(this).find("td:eq(1) select.aturan-pakai-resep").val();
                 var keteranganPerObat = $(this).find("td:eq(1) textarea").val();
+                var iterasi = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
                 var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
                 var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
                 var signaHari = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
@@ -2939,7 +2998,8 @@
                         "keteranganPerObat": keteranganPerObat,
                         "signaKonsumsi": signaKonsumsi,
                         "signaTakar": signaTakar,
-                        "signaHari": signaHari
+                        "signaHari": signaHari,
+                        "iterasi": iterasi
                     });
                 }
             });
@@ -2954,15 +3014,17 @@
                     "nama": "",
                     "item": [],
                     "keterangan": "",
+                    "iterasi": 0,
                     "signaKonsumsi": 0,
                     "signaTakar": 0,
                     "signaHari": 0,
                     "aturanPakai": 0
                 };
 
-                dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input").val();
+                dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.nama_racikan").val();
                 dataRacikan.aturanPakai = (masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val() === "none") ? 0 : parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
                 dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
+                dataRacikan.iterasi = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.racikan_iterasi").inputmask("unmaskedvalue");
                 dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
                 dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));
                 dataRacikan.signaHari = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"));
@@ -2970,7 +3032,7 @@
 
 
 
-                $(this).find("td:eq(1) table.komposisi-racikan tbody.komposisi-item tr.komposisi-row").each(function() {
+                masterRacikanRow.find("td:eq(1) table.komposisi-racikan tbody.komposisi-item tr.komposisi-row").each(function() {
                     var obat = $(this).find("td:eq(1)").attr("uid-obat");
                     //var qty = $(this).find("td:eq(2)").html();
                     var takaranBulat = $(this).find("td:eq(2) b").html();
@@ -2982,7 +3044,6 @@
                     if(obat !== undefined) {
                         dataRacikan.item.push({
                             "obat": obat,
-                            //"qty": qty,
                             "takaranBulat": takaranBulat,
                             "takaranDecimal": takaranDecimal,
                             "takaranDecimalText": takaranDecimalText,
@@ -2993,7 +3054,7 @@
                 });
 
                 if(
-                    dataRacikan.nama != "" &&
+                    dataRacikan.nama !== "" &&
                     dataRacikan.item.length > 0 &&
 
                     dataRacikan.signaKonsumsi > 0 &&
@@ -3049,6 +3110,7 @@
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan,
+                    iterasi: iterasiObat,
                     editorAlergiObat: editorAlergiObat
                 };
             } else if(antrianData.poli_info.uid === __POLI_GIGI__ || antrianData.poli_info.uid === __POLI_ORTODONTIE__) {
@@ -3109,6 +3171,7 @@
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan,
+                    iterasi: iterasiObat,
                     editorAlergiObat: editorAlergiObat,
 
                     simetris: simetris,
@@ -3181,6 +3244,7 @@
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan,
+                    iterasi: iterasiObat,
                     editorAlergiObat: editorAlergiObat,
 
                     mata_data: JSON.stringify(mataDataList),
@@ -3229,6 +3293,7 @@
                     keteranganResep: keteranganResep,
                     keteranganRacikan: keteranganRacikan,
                     racikan: racikan,
+                    iterasi: iterasiObat,
                     editorAlergiObat: editorAlergiObat
                 };
             }
@@ -3465,6 +3530,7 @@
                     alergiObat,
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                    $("#iterasi_resep").inputmask("unmaskedvalue"),
                     metaSwitchEdit));
             }).then(function(result) {
                 if(result.response_package.response_result > 0) {
@@ -3493,7 +3559,6 @@
                 },
                 success:function(response) {
                     var data = response.response_package;
-                    console.clear();
                     for(var a in data) {
                         $.ajax({
                             url: __HOSTNAME__ + "/pages/pasien/cppt-grouper.php",
@@ -3512,7 +3577,6 @@
                                 for(var b in listData) {
                                     var currentData = listData[b].data[0];
                                     //if(currentData.uid !== UID) {
-                                        console.log(currentData);
                                         $.ajax({
                                             url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
                                             async:false,
@@ -3594,6 +3658,7 @@
                     alergiObat,
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                    $("#iterasi_resep").inputmask("unmaskedvalue"),
                     metaSwitchEdit));
             }).then(function(result) {
                 if(result.response_package.response_result > 0) {
@@ -3643,6 +3708,7 @@
                 alergiObat,
                 metaSwitchEdit.txt_keterangan_resep.editor,
                 metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                $("#iterasi_resep").inputmask("unmaskedvalue"),
                 metaSwitchEdit);
             Swal.fire({
                 title: 'Selesai isi asesmen rawat?',
@@ -3673,6 +3739,7 @@
                             alergiObat,
                             metaSwitchEdit.txt_keterangan_resep.editor,
                             metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                            $("#iterasi_resep").inputmask("unmaskedvalue"),
                             metaSwitchEdit,
                             "Y"));
                     }).then(function(result) {
@@ -5229,6 +5296,7 @@
                     alergiObat,
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                    $("#iterasi_resep").inputmask("unmaskedvalue"),
                     metaSwitchEdit
                 ));
             }).then(function(result) {
@@ -5306,6 +5374,7 @@
                                         alergiObat,
                                         metaSwitchEdit.txt_keterangan_resep.editor,
                                         metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                                        $("#iterasi_resep").inputmask("unmaskedvalue"),
                                         metaSwitchEdit,
                                         "Y"));
                                 }).then(function(AssesmenResult) {
@@ -5530,6 +5599,7 @@
                         alergiObat,
                         metaSwitchEdit.txt_keterangan_resep.editor,
                         metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                        $("#iterasi_resep").inputmask("unmaskedvalue"),
                         metaSwitchEdit
                     ));
                 }).then(function(result) {
@@ -5560,6 +5630,7 @@
                                     alergiObat,
                                     metaSwitchEdit.txt_keterangan_resep.editor,
                                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                                    $("#iterasi_resep").inputmask("unmaskedvalue"),
                                     metaSwitchEdit,
                                     "Y"
                                 );
