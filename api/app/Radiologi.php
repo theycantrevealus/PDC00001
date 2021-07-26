@@ -56,6 +56,9 @@ class Radiologi extends Utility
                 case 'get-radiologi-order':
                     return self::get_radiologi_order($parameter[2]);
                     break;
+                case 'get-radiologi-order-dokter':
+                    return self::get_radiologi_order_dokter($parameter[2]);
+                    break;
                 case 'get-data-pasien-antrian':
                     return self::get_data_pasien_antrian($parameter[2]);
                     break;
@@ -565,7 +568,7 @@ class Radiologi extends Utility
             ))
             ->order(
                 array(
-                    'rad_order.waktu_order' => 'DESC'
+                    'rad_order.waktu_order' => 'ASC'
                 )
             )
             ->execute();
@@ -588,6 +591,7 @@ class Radiologi extends Utility
                     'radiologi_order as uid_radiologi_order',
                     'tindakan as uid_tindakan',
                     'penjamin as uid_penjamin',
+                    'mitra',
                     'keterangan',
                     'kesimpulan',
                     'gambar',
@@ -602,14 +606,89 @@ class Radiologi extends Utility
             ->execute();
 
         $autonum = 1;
+        $Mitra = new Mitra(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['tindakan'] = self::get_tindakan_detail($value['uid_tindakan'])['response_data'][0]['nama'];
 
             $penjamin = new Penjamin(self::$pdo);
             $data['response_data'][$key]['penjamin'] = $penjamin->get_penjamin_detail($value['uid_penjamin'])['response_data'][0]['nama'];
 
+            $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order']));
+
+            $data['response_data'][$key]['mitra'] = $Mitra->get_mitra_detail($value['mitra'])['response_data'][0];
+
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
+        }
+
+        return $data;
+    }
+
+    private function get_radiologi_order_dokter($parameter) {
+        $get_antrian = new Antrian(self::$pdo);
+        $antrian = $get_antrian->get_antrian_detail('antrian', $parameter);
+        $data_antrian = $antrian['response_data'][0];
+        $Pegawai = new Pegawai(self::$pdo);
+        $Tindakan = new Tindakan(self::$pdo);
+        $get_asesmen = self::$query->select('asesmen', array('uid'))
+            ->where(array(
+                'asesmen.deleted_at' => 'IS NULL',
+                'AND',
+                'asesmen.poli' => '= ?',
+                'AND',
+                'asesmen.kunjungan' => '= ?',
+                'AND',
+                'asesmen.antrian' => '= ?',
+                'AND',
+                'asesmen.pasien' => '= ?',
+                'AND',
+                'asesmen.dokter' => '= ?'
+            ), array(
+                    $data_antrian['departemen'],
+                    $data_antrian['kunjungan'],
+                    $parameter,
+                    $data_antrian['pasien'],
+                    $data_antrian['dokter']
+                )
+            )
+            ->execute();
+
+        if ($get_asesmen['response_result'] > 0) {
+            $data_order = self::$query->select('rad_order', array(
+                'uid', 'asesmen', 'waktu_order', 'created_at', 'petugas', 'no_order'
+            ))
+                ->where(array(
+                    'rad_order.asesmen' => '= ?',
+                    'AND',
+                    'rad_order.deleted_at' => 'IS NULL'
+                ), array(
+                    $get_asesmen['response_data'][0]['uid']
+                ))
+                ->execute();
+            $data = $data_order['response_data'];
+            $autonum = 1;
+            foreach ($data as $key => $value) {
+                $order_detail = self::$query->select('rad_order_detail', array(
+                    'tindakan'
+                ))
+                    ->where(array(
+                        'rad_order_detail.radiologi_order' => '= ?',
+                        'AND',
+                        'rad_order_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+                foreach ($order_detail['response_data'] as $DKey => $DValue) {
+                    $order_detail['response_data'][$DKey]['tindakan'] = $Tindakan->get_tindakan_detail($DValue['tindakan'])['response_data'][0];
+                }
+
+                $data[$key]['detail'] = $order_detail['response_data'];
+
+                $data[$key]['pegawai'] = $Pegawai->get_detail($value['petugas'])['response_data'][0];
+                $data[$key]['autonum'] = $autonum;
+                $autonum++;
+            }
         }
 
         return $data;
@@ -840,7 +919,7 @@ class Radiologi extends Utility
                 return self::edit_tindakan($parameter);
                 break;
             case 'add-order-radiologi':
-                return self::add_order_radiologi($parameter);
+                return self::add_order_radiologi2($parameter);
                 break;
             case 'update-hasil-radiologi':
                 return self::update_hasil_radiologi($parameter);
@@ -860,25 +939,168 @@ class Radiologi extends Utility
             case 'verifikasi_item_rad':
                 return self::verifikasi_item_rad($parameter);
                 break;
+            case 'riwayat_radiologi':
+                return self::riwayat_radiologi($parameter);
+                break;
             default:
                 # code...
                 break;
         }
     }
 
+    private function riwayat_radiologi($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'rad_order.deleted_at' => 'IS NULL',
+                'AND',
+                'rad_order.waktu_order' => 'BETWEEN ? AND ?',
+                'AND',
+                'rad_order.status' => '= ?',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+
+            $paramValue = array(
+                $parameter['from'], $parameter['to'], 'D'
+            );
+        } else {
+            $paramData = array(
+                'rad_order.deleted_at' => 'IS NULL',
+                'AND',
+                'rad_order.waktu_order' => 'BETWEEN ? AND ?',
+                'AND',
+                'rad_order.status' => '= ?'
+            );
+
+            $paramValue = array(
+                $parameter['from'], $parameter['to'], 'D'
+            );
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('rad_order', array(
+                'uid',
+                'asesmen',
+                'waktu_order',
+                'petugas',
+                'dokter_radio',
+                'pasien',
+                'status',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->join('pasien', array(
+                    'nama as nama_pasien', 'no_rm'
+                ))
+                ->on(array(
+                    array('rad_order.pasien', '=', 'pasien.uid')
+                ))
+                ->execute();
+        } else {
+
+            $data = self::$query->select('rad_order', array(
+                'uid',
+                'asesmen',
+                'waktu_order',
+                'petugas',
+                'dokter_radio',
+                'pasien',
+                'status',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->join('pasien', array(
+                    'nama as nama_pasien', 'no_rm'
+                ))
+                ->on(array(
+                    array('rad_order.pasien', '=', 'pasien.uid')
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        $Pegawai = new Pegawai(self::$pdo);
+        $Poli = new Poli(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['tanggal'] = date('d F Y', strtotime($value['waktu_order']));
+            $AsesmenInfo = self::$query->select('asesmen', array(
+                'kunjungan',
+                'antrian',
+                'pasien',
+                'poli',
+                'dokter'
+            ))
+                ->where(array(
+                    'asesmen.uid' => '= ?',
+                    'AND',
+                    'asesmen.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['asesmen']
+                ))
+                ->execute();
+            foreach ($AsesmenInfo['response_data'] as $AsKey => $AsValue) {
+                $AsesmenInfo['response_data'][$AsKey]['poli'] = $Poli->get_poli_info($AsValue['poli'])['response_data'][0];
+                $AsesmenInfo['response_data'][$AsKey]['dokter'] = $Pegawai->get_info($AsValue['dokter'])['response_data'][0];
+            }
+
+            $data['response_data'][$key]['asesmen'] = $AsesmenInfo['response_data'][0];
+            $data['response_data'][$key]['petugas'] = $Pegawai->get_info($value['petugas'])['response_data'][0];
+            $data['response_data'][$key]['dokter_radio'] = $Pegawai->get_info($value['dokter_radio'])['response_data'][0];
+
+            $autonum++;
+        }
+
+        $dataTotal = self::$query->select('rad_order', array(
+            'uid',
+        ))
+            ->where($paramData, $paramValue)
+            ->join('pasien', array(
+                'nama', 'no_rm'
+            ))
+            ->on(array(
+                array('rad_order.pasien', '=', 'pasien.uid')
+            ))
+            ->execute();
+
+        $data['recordsTotal'] = count($dataTotal['response_data']);
+        $data['recordsFiltered'] = count($dataTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
     private function verifikasi_item_rad($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $processResult = array();
+
+        //Simpan petugas
+        $UpdateRadio = self::$query->update('rad_order', array(
+            'petugas' => $UserData['data']->uid
+        ))
+            ->where(array(
+                'rad_order.uid' => '= ?',
+                'AND',
+                'rad_order.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
         foreach ($parameter['data_set'] as $key => $value) {
-
-
-
-
-
-
-
-
             $worker = self::$query->update('rad_order_detail', array(
                 'mitra' => $value['mitra'],
                 'verifikator' => $UserData['data']->uid
@@ -973,21 +1195,34 @@ class Radiologi extends Utility
 
             }
 
-            $invoice_master = self::$query->select('invoice', array(
+            $Invoice = new Invoice(self::$pdo);
+
+            $InvoiceCheck = self::$query->select('invoice', array(
                 'uid',
                 'total_after_discount'
             ))
                 ->where(array(
                     'invoice.kunjungan' => '= ?',
                     'AND',
-                    'invoice.pasien' => '= ?'
+                    'invoice.deleted_at' => 'IS NULL'
                 ), array(
-                    $AntrianDetail['kunjungan'],
-                    $AntrianDetail['pasien']
+                    $AntrianDetail['kunjungan']
                 ))
                 ->execute();
 
-            $totalInvoice = $invoice_master['response_data'][0]['total_after_discount'];
+            if (count($InvoiceCheck['response_data']) > 0) {
+                $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+                $totalInvoice = $InvoiceCheck['response_data'][0]['total_after_discount'];
+            } else {
+                $InvMasterParam = array(
+                    'kunjungan' => $AntrianDetail['kunjungan'],
+                    'pasien' => $AntrianDetail['pasien'],
+                    'keterangan' => 'Tagihan radiologi'
+                );
+                $NewInvoice = $Invoice->create_invoice($InvMasterParam);
+                $TargetInvoice = $NewInvoice['response_unique'];
+                $totalInvoice = 0;
+            }
 
             $invoice_detail = self::$query->update('invoice_detail', array(
                 'status_bayar' => 'N',
@@ -1002,7 +1237,7 @@ class Radiologi extends Utility
                     'AND',
                     'invoice_detail.deleted_at' => 'IS NULL'
                 ), array(
-                    $invoice_master['response_data'][0]['uid'],
+                    $TargetInvoice,
                     $value['tindakan']
                 ))
                 ->execute();
@@ -1017,7 +1252,7 @@ class Radiologi extends Utility
                     'AND',
                     'invoice.deleted_at' => 'IS NULL'
                 ), array(
-                    $invoice_master['response_data'][0]['uid']
+                    $TargetInvoice
                 ))
                 ->execute();
 
@@ -1038,7 +1273,8 @@ class Radiologi extends Utility
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $update = self::$query->update('rad_order', array(
-            'petugas' => $UserData['data']->uid,
+            //'petugas' => $UserData['data']->uid,
+            'dokter_radio' => $UserData['data']->uid,
             'selesai' => 'true',
             'status' => 'D'
         ))
@@ -1538,6 +1774,249 @@ class Radiologi extends Utility
         );
 
         return $result;
+    }
+
+    private function add_order_radiologi2($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        //GET Last Invoice
+        $lastNumber = self::$query->select('rad_order', array(
+            'no_order'
+        ))
+            ->where(array(
+                'EXTRACT(month FROM created_at)' => '= ?'
+            ), array(
+                intval(date('m'))
+            ))
+            ->execute();
+
+        $get_antrian = new Antrian(self::$pdo);
+        $antrian = $get_antrian->get_antrian_detail('antrian', $parameter['uid_antrian']);
+        $data_antrian = $antrian['response_data'][0];
+        $get_asesmen = self::$query->select('asesmen', array('uid'))
+            ->where(array(
+                'asesmen.deleted_at' => 'IS NULL',
+                'AND',
+                'asesmen.poli' => '= ?',
+                'AND',
+                'asesmen.kunjungan' => '= ?',
+                'AND',
+                'asesmen.antrian' => '= ?',
+                'AND',
+                'asesmen.pasien' => '= ?',
+                'AND',
+                'asesmen.dokter' => '= ?'
+            ), array(
+                    $data_antrian['departemen'],
+                    $data_antrian['kunjungan'],
+                    $parameter['uid_antrian'],
+                    $data_antrian['pasien'],
+                    $data_antrian['dokter']
+                )
+            )
+            ->execute();
+        if (count($get_asesmen['response_data']) > 0) {
+            $uidAsesmen = $get_asesmen['response_data'][0]['uid'];
+        } else {
+            $uidAsesmen = parent::gen_uuid();
+            $asesmen_poli = self::$query
+                ->insert('asesmen',
+                    array(
+                        'uid' => $uidAsesmen,
+                        'poli' => $data_antrian['departemen'],
+                        'kunjungan' => $data_antrian['kunjungan'],
+                        'antrian' => $parameter['uid_antrian'],
+                        'pasien' => $data_antrian['pasien'],
+                        'dokter' => $data_antrian['dokter'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    )
+                )
+                ->execute();
+
+            if ($asesmen_poli['response_result'] > 0) {
+
+                $log = parent::log(array(
+                    'type' => 'activity',
+                    'column' => array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value' => array(
+                        $uidAsesmen,
+                        $UserData['data']->uid,
+                        'asesmen',
+                        'I',
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class' => __CLASS__
+                ));
+
+                $result['new_asesmen'] = $asesmen_poli;
+            }
+        }
+
+
+        $uidRadioOrder = parent::gen_uuid();
+        //New Order
+        $data = self::$query->insert('rad_order', array(
+            'uid' => $uidRadioOrder,
+            'asesmen' => $uidAsesmen,
+            'status' => 'V', //Langsung masuk verifikator
+            'pasien' => $data_antrian['pasien'],
+            'kunjungan' => $data_antrian['kunjungan'],
+            'no_order' => 'RO/' . date('Y/m') . '/' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT),
+            'selesai' => 'false',
+            'waktu_order' => parent::format_date(),
+            'created_at' => parent::format_date(),
+            'updated_at' => parent::format_date()
+        ))
+            ->execute();
+
+
+        if($data['response_result'] > 0) {
+            $Invoice = new Invoice(self::$pdo);
+            $invoice_charge = array();
+            foreach ($parameter['listTindakan'] as $keyTindakan => $valueTindakan) {
+                $checkDetailRadiologi = self::$query
+                    ->select('rad_order_detail', array('id'))
+                    ->where(
+                        array(
+                            'rad_order_detail.radiologi_order' => '= ?',
+                            'AND',
+                            'rad_order_detail.tindakan' => '= ?',
+                            'AND',
+                            'rad_order_detail.deleted_at' => 'IS NULL'
+                        ), array(
+                            $uidRadioOrder,
+                            $keyTindakan
+                        )
+                    )
+                    ->execute();
+
+                if ($checkDetailRadiologi['response_result'] == 0) {
+
+
+                    $addDetailRadiologi = self::$query
+                        ->insert('rad_order_detail',
+                            array(
+                                'radiologi_order' => $uidRadioOrder,
+                                'tindakan' => $keyTindakan,
+                                'penjamin' => $valueTindakan,
+                                'created_at' => parent::format_date(),
+                                'updated_at' => parent::format_date()
+                            )
+                        )
+                        ->execute();
+
+                    if ($addDetailRadiologi['response_result'] > 0) {
+
+
+                        //Check Invoice
+
+                        $InvoiceCheck = self::$query->select('invoice', array(
+                            'uid'
+                        ))
+                            ->where(array(
+                                'invoice.kunjungan' => '= ?',
+                                'AND',
+                                'invoice.deleted_at' => 'IS NULL'
+                            ), array(
+                                $data_antrian['kunjungan']
+                            ))
+                            ->execute();
+
+                        if (count($InvoiceCheck['response_data']) > 0) {
+                            $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+                        } else {
+                            $InvMasterParam = array(
+                                'kunjungan' => $data_antrian['kunjungan'],
+                                'pasien' => $data_antrian['pasien'],
+                                'keterangan' => 'Tagihan radiologi'
+                            );
+                            $NewInvoice = $Invoice->create_invoice($InvMasterParam);
+                            $TargetInvoice = $NewInvoice['response_unique'];
+                        }
+
+
+                        $HargaTindakan = self::$query->select('master_tindakan_kelas_harga', array(
+                            'id',
+                            'tindakan',
+                            'kelas',
+                            'penjamin',
+                            'harga'
+                        ))
+                            ->where(array(
+                                'master_tindakan_kelas_harga.penjamin' => '= ?',
+                                'AND',
+                                'master_tindakan_kelas_harga.kelas' => '= ?',
+                                'AND',
+                                'master_tindakan_kelas_harga.tindakan' => '= ?',
+                                'AND',
+                                'master_tindakan_kelas_harga.deleted_at' => 'IS NULL'
+                            ), array(
+                                $valueTindakan,
+                                __UID_KELAS_GENERAL_RAD__,    //Fix 1 harga kelas GENERAL
+                                $keyTindakan
+                            ))
+                            ->execute();
+                        $HargaFinal = (count($HargaTindakan['response_data']) > 0) ? $HargaTindakan['response_data'][0]['harga'] : 0;
+
+                        $InvoiceDetail = $Invoice->append_invoice(array(
+                            'invoice' => $TargetInvoice,
+                            'item' => $keyTindakan,
+                            'item_origin' => 'master_tindakan',
+                            'qty' => 1,
+                            'harga' => $HargaFinal,
+                            'status_bayar' => ($valueTindakan === __UIDPENJAMINUMUM__) ? 'V' : 'Y', // Check Penjamin. Jika non umum maka langsung lunas
+                            'subtotal' => $HargaFinal,
+                            'discount' => 0,
+                            'discount_type' => 'N',
+                            'pasien' => $data_antrian['pasien'],
+                            'penjamin' => $valueTindakan,
+                            'billing_group' => 'radiologi',
+                            'keterangan' => 'Biaya Radiologi',
+                            'departemen' => $data_antrian['departemen']
+                        ));
+
+                        array_push($invoice_charge, $InvoiceDetail);
+
+                        $log = parent::log(array(
+                            'type' => 'activity',
+                            'column' => array(
+                                'unique_target',
+                                'user_uid',
+                                'table_name',
+                                'action',
+                                'logged_at',
+                                'status',
+                                'login_id'
+                            ),
+                            'value' => array(
+                                $uidRadioOrder . "; " . $keyTindakan,
+                                $UserData['data']->uid,
+                                'rad_order_detail',
+                                'I',
+                                parent::format_date(),
+                                'N',
+                                $UserData['data']->log_id
+                            ),
+                            'class' => __CLASS__
+                        ));
+                    }
+                }
+            }
+        }
+        $data['charge'] = $invoice_charge;
+        return $data;
     }
 
     private function add_order_radiologi($parameter)

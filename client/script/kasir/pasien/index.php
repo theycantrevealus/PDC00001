@@ -5,6 +5,7 @@
 		var selectedUID;
 		var selectedUIDPasien;
 		var selectedUIDKwitansi;
+		var selectedKodeKwitansi;
 		var selectedPoli;
 		var selectedPasien;
 		var selectedPenjamin;
@@ -30,7 +31,7 @@
 			serverSide: true,
 			sPaginationType: "full_numbers",
 			bPaginate: true,
-			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
 			serverMethod: "POST",
             "order": [[ 1, "desc" ]],
 			"ajax":{
@@ -89,7 +90,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -98,9 +99,9 @@
 					        row.pasien.panggilan_name !== undefined &&
                             row.pasien.panggilan_name !== null
                         ) {
-                            return row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama;
+                            return "<span id=\"kode_kwitansi_" + row.uid + "\">" + row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</span>";
                         } else {
-                            return row.nomor_kwitansi + " - " + row.pasien.nama;
+                            return "<span id=\"kode_kwitansi_" + row.uid + "\">" + row.nomor_kwitansi + " - " + row.pasien.nama + "</span>";
                         }
 					}
 				},
@@ -135,7 +136,13 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.terbayar;
+					    var terbayarAktual = row.record_terbayar;
+					    var parsedActual = 0;
+					    for(var a in terbayarAktual); {
+					        parsedActual += terbayarAktual[a].terbayar;
+                        }
+                        return number_format(parsedActual, 2, ".", ",");
+						//return row.terbayar;
 					}
 				},
 				{
@@ -190,12 +197,12 @@
                 "padding-top": "20px"
             });
 
-            $(containerTemp).find("table tbody tr td:eq(2)").css({
+            /*$(containerTemp).find("table tbody tr td:eq(2)").css({
                 "width": "50%",
                 "color": "#000 !important"
             });
 
-            $(containerTemp).find("table thead").addClass("thead-dark");
+            $(containerTemp).find("table thead").addClass("thead-dark");*/
 		    $(containerTemp).find("#keterangan-faktur").attr({
                 "colspan": "3"
             });
@@ -214,6 +221,7 @@
                 type: "POST",
                 data: {
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     kwitansi_data: $(containerTemp).html(),
@@ -230,12 +238,9 @@
 
                     $(containerItem).html(response);
                     $(containerItem).printThis({
-                        importCSS: true,
-                        base: true,
-                        importStyle: true,
                         header: null,
                         footer: null,
-                        pageTitle: "Kwitansi",
+                        pageTitle: selectedKodeKwitansi,
                         afterPrint: function() {
                             $("#form-payment-detail").modal("hide");
                         }
@@ -257,6 +262,8 @@
 
 			selectedUID = $(this).attr("invoice");
 			selectedUIDKwitansi = $(this).attr("invoice_payment");
+
+			selectedKodeKwitansi = $("#kode_kwitansi_" + selectedUIDKwitansi).html();
 
 			$.ajax({
                 async: false,
@@ -353,19 +360,19 @@
 
 							for(var groupKey in billing_group) {
                                 $("#invoice_detail_history tbody").append("<tr>" +
-                                    "<td></td>" +
-                                    "<td colspan=\"5\" class=\"bg-info\" style=\"color: #fff\">" + groupKey.toUpperCase() + "</td>" +
+                                    "<td class=\"wrap_content\"></td>" +
+                                    "<td colspan=\"5\" class=\"bg-info wrap_content text-left\" style=\"color: #fff\">" + groupKey.toUpperCase() + "</td>" +
                                     "</tr>");
                                 for(var itemKey in billing_group[groupKey]) {
                                     var returned = (billing_group[groupKey][itemKey].status === "R" && billing_group[groupKey][itemKey].allow_retur);
                                     $("#invoice_detail_history tbody").append(
                                         "<tr>" +
                                         "<td>" + ((billing_group[groupKey][itemKey].status === "P") ? ((billing_group[groupKey][itemKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + billing_group[groupKey][itemKey].uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
-                                        "<td style=\"width: 50px !important;\">" + (parseInt(itemKey) + 1)+ "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\">" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
+                                        "<td class=\"wrap_content\">" + (parseInt(itemKey) + 1)+ "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "; width: 50%\">" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
                                         "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style\">" + billing_group[groupKey][itemKey].qty + "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
                                         "</tr>"
                                     );
                                 }
@@ -406,9 +413,6 @@
 						returnedData = [];
 					}
 
-					console.log(response);
-
-
 					for(var InvKeyData in response.response_package.response_data) {
 					    if(
                             response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
@@ -447,6 +451,10 @@
                         }
 					}
 
+					for(var a in returnedData) {
+					    returnedData[a].autonum = (parseInt(a) + 1);
+                    }
+
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = returnedData.length;
@@ -462,7 +470,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -578,7 +586,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Invoice",
@@ -629,7 +637,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = returnedData.length;
 
                     return returnedData;
                 }
@@ -642,7 +650,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -737,7 +745,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Invoice",
@@ -746,7 +754,7 @@
                     d.request = "biaya_pasien";
                     d.from = getDateRange("#range_invoice")[0];
                     d.to = getDateRange("#range_invoice")[1];
-                    d.filter_poli = "IGD";
+                    d.filter_poli = "igd";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -781,8 +789,8 @@
                     }
 
                     response.draw = parseInt(response.response_package.response_draw);
-                    response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsTotal = returnedData.length;
+                    response.recordsFiltered = returnedData.length;
 
                     return returnedData;
                 }
@@ -795,7 +803,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -848,10 +856,15 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         var invDetail = row.invoice_detail;
+
+
+
                         var totalParse = 0;
                         for(var a in invDetail) {
-                            if(invDetail[a].departemen === __POLI_IGD__) {
-                                totalParse += parseFloat(invDetail[a].subtotal);
+                            if(invDetail[a].status_bayar === "N") {
+                                if(invDetail[a].departemen === __POLI_IGD__) {
+                                    totalParse += parseFloat(invDetail[a].subtotal);
+                                }
                             }
                         }
                         return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
@@ -922,11 +935,13 @@
 
 
 		$("body").on("click", ".btnDetail", function() {
-			var uid = $(this).attr("id").split("_");
+		    var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
 			var me = $(this);
-			me.removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i>Loading</span>");
+			me.removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i>Loading</span>").attr({
+                "disabled": "disabled"
+            });
 			var poli = $(this).attr("poli");
 			var pasien = $(this).attr("pasien");
 			var penjamin = $(this).attr("penjamin");
@@ -1035,23 +1050,23 @@
                                 }
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
-                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
+                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice form-control\" />";
                                 } else if(invoice_detail_item[invKey].status_bayar == 'V') {
-                                    status_bayar = "<span class=\"text-info\" style=\"white-space: pre\"><i class=\"fa fa-info-circle\"></i> Verifikasi</span>";
+                                    status_bayar = "<h6 class=\"text-info text-center\" style=\"white-space: pre\"><i class=\"fa fa-info-circle\"></i> Verifikasi</h6>";
 								} else {
 									if(invoice_detail_item[invKey].item.allow_retur == true) {
 										if(invoice_detail_item[invKey].status_berobat == undefined) {
-											status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+											status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 										} else {
 											if(invoice_detail_item[invKey].status_berobat.status == "N") {
 												//status_bayar = "<button class=\"btn btn-info btn-sm btn-retur-pembayaran\" id=\"retur_pembayaran_" + invoice_detail_item[invKey].item.uid + "\">Retur</button>";
-												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 											} else {
-												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 											}
 										}
 									} else {
-										status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+										status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 									}
 								}
 
@@ -1143,7 +1158,7 @@
 							}
 
 							$("#form-invoice").modal("show");
-                            me.removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-eye\"></i>Detail</span>");
+                            me.removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-eye\"></i>Detail</span>").removeAttr("disabled");
 						},
 						error: function(response) {
 							console.log("Error : " + response);
@@ -1297,19 +1312,21 @@
 						});
 
 						var totalFaktur = 0;
-
+						var autoFakturNum = 1;
 						for(var selKey in itemMeta) {
 							if(selectedPay.indexOf(itemMeta[selKey].id) >= 0) {
 								totalFaktur += parseFloat(itemMeta[selKey].subtotal);
 								$("#fatur_detail_item tbody").append(
 									"<tr>" +
-										"<td>" + itemMeta[selKey].autonum + "</td>" +
+										//"<td>" + itemMeta[selKey].autonum + "</td>" +
+                                        "<td>" + autoFakturNum + "</td>" +
 										"<td>" + itemMeta[selKey].item.nama + "</td>" +
 										"<td>" + itemMeta[selKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(itemMeta[selKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(itemMeta[selKey].subtotal, 2, ".", ",") + "</td>" +
 									"</tr>"
 								);
+                                autoFakturNum++;
 							}
 						}
 
@@ -1366,8 +1383,6 @@
                             keterangan:$("#keterangan-faktur").val()
                         },
                         success:function(response) {
-                            console.clear();
-                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 Swal.fire({
                                     title: "Pembayaran Berhasil!",
@@ -1457,9 +1472,9 @@
 										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
 										"<td>" + historyDetail[historyKey].item + "</td>" +
-										"<td>" + historyDetail[historyKey].qty + "</td>" +
-										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
-										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
+										"<td class=\"number_style\">" + historyDetail[historyKey].qty + "</td>" +
+										"<td class=\"text-right number_style\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
+										"<td class=\"text-right number_style\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
 									"</tr>"
 								);
 							}

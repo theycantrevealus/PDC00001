@@ -25,11 +25,12 @@
 							<thead class="thead-dark">
 								<tr>
 									<th class="wrap_content">No</th>
-									<th>Waktu Masuk</th>
+									<th class="wrap_content">Waktu Masuk</th>
 									<th>Pasien</th>
                                     <th>Ruangan</th>
-									<th>Dokter</th>
-									<th>Penjamin</th>
+									<th class="wrap_content">DPJP</th>
+                                    <th class="wrap_content">Asal</th>
+									<th class="wrap_content">Penjamin</th>
 									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>

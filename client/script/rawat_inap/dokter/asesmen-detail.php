@@ -261,13 +261,16 @@
                     var filteredData = [];
                     var data = response.response_package.response_data;
 
+                    var reautoNum = 1;
                     for(var a = 0; a < data.length; a++) {
                         if(
                             data[a].uid_pasien === __PAGES__[3] &&
                             data[a].uid_kunjungan === __PAGES__[4] &&
                             data[a].uid_poli === __POLI_INAP__
                         ) {
+                            data[a].autonum = reautoNum;
                             filteredData.push(data[a]);
+                            reautoNum++;
                         }
                     }
 
@@ -354,6 +357,13 @@
                 "disabled": "disabled"
             }).removeClass("btn-info").addClass("btn-warning").html("<i class=\"fa fa-sync\"></i> Menambahkan Asesmen");
 
+            /*console.log({
+                request: "tambah_asesmen",
+                penjamin: __PAGES__[5],
+                kunjungan: __PAGES__[4],
+                pasien: __PAGES__[3],
+                poli: __POLI_INAP__
+            });*/
             var formData = {
                 request: "tambah_asesmen",
                 penjamin: __PAGES__[5],
@@ -371,6 +381,7 @@
                 type:"POST",
                 data: formData,
                 success:function(response) {
+                    //console.log(response);
                     location.href = __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4];
                 },
                 error: function(response) {

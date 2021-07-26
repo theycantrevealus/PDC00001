@@ -40,6 +40,9 @@ class Inap extends Utility
                     'obat' => $parameter[4]
                 ));
                 break;
+            case 'tagihan_pra_inap':
+                return self::tagihan_pra_inap($parameter);
+                break;
             default:
                 return array();
                 break;
@@ -135,6 +138,185 @@ class Inap extends Utility
             default:
                 return self::get_all($parameter);
         }
+    }
+
+    private function tagihan_pra_inap($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $Tindakan = new Tindakan(self::$pdo);
+
+        $data = self::$query->select('rawat_inap', array(
+            'uid',
+            'pasien',
+            'waktu_masuk',
+            'waktu_keluar',
+            'kamar',
+            'kunjungan',
+            'bed',
+            'keterangan',
+            'dokter',
+            'penjamin',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'rawat_inap.uid' => '= ?'
+            ), array(
+                $parameter[2]
+            ))
+            ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            $ApotekVerif = self::$query->select('resep', array(
+                'status_resep', 'kode'
+            ))
+                ->where(array(
+                    'resep.kunjungan' => '= ?'
+                ), array(
+                    $value['kunjungan']
+                ))
+                ->execute();
+            foreach ($ApotekVerif['response_data'] as $ApKey => $ApValue) {
+                $BiayaKasir = self::$query->select('invoice', array(
+                    'uid'
+                ))
+                    ->join('invoice_detail', array(
+                        'item', 'subtotal'
+                    ))
+                    ->on(array(
+                        array('invoice_detail.invoice', '=', 'invoice.uid')
+                    ))
+                    ->where(array(
+                        'invoice.kunjungan' => '= ?',
+                        'AND',
+                        'invoice_detail.billing_group' => '= ?'
+                    ), array(
+                        $value['kunjungan'],
+                        'obat'
+                    ))
+                    ->execute();
+                $ApotekVerif['response_data'][$ApKey]['biaya'] = $BiayaKasir['response_data'];
+            }
+            $data['response_data'][$key]['tagihan_apotek'] = $ApotekVerif['response_data'];
+
+
+
+
+
+            //Laboratorium
+            $LaborVerif = self::$query->select('lab_order', array(
+                'status', 'no_order'
+            ))
+                ->where(array(
+                    'lab_order.kunjungan' => '= ?'
+                ), array(
+                    $value['kunjungan']
+                ))
+                ->execute();
+            foreach ($LaborVerif['response_data'] as $LbKey => $LbValue) {
+                $BiayaKasir = self::$query->select('invoice', array(
+                    'uid'
+                ))
+                    ->join('invoice_detail', array(
+                        'item', 'subtotal'
+                    ))
+                    ->on(array(
+                        array('invoice_detail.invoice', '=', 'invoice.uid')
+                    ))
+                    ->where(array(
+                        'invoice.kunjungan' => '= ?',
+                        'AND',
+                        'invoice_detail.billing_group' => '= ?'
+                    ), array(
+                        $value['kunjungan'],
+                        'laboratorium'
+                    ))
+                    ->execute();
+                $LaborVerif['response_data'][$LbKey]['biaya'] = $BiayaKasir['response_data'];
+            }
+            $data['response_data'][$key]['tagihan_laboratorium'] = $LaborVerif['response_data'];
+
+            //Radiologi
+            $RadioVerif = self::$query->select('rad_order', array(
+                'status', 'no_order'
+            ))
+                ->where(array(
+                    'rad_order.kunjungan' => '= ?'
+                ), array(
+                    $value['kunjungan']
+                ))
+                ->execute();
+            foreach ($RadioVerif['response_data'] as $RdKey => $RdValue) {
+                $BiayaKasir = self::$query->select('invoice', array(
+                    'uid'
+                ))
+                    ->join('invoice_detail', array(
+                        'item', 'subtotal'
+                    ))
+                    ->on(array(
+                        array('invoice_detail.invoice', '=', 'invoice.uid')
+                    ))
+                    ->where(array(
+                        'invoice.kunjungan' => '= ?',
+                        'AND',
+                        'invoice_detail.billing_group' => '= ?'
+                    ), array(
+                        $value['kunjungan'],
+                        'radiologi'
+                    ))
+                    ->execute();
+                $RadioVerif['response_data'][$RdKey]['biaya'] = $BiayaKasir['response_data'];
+            }
+            $data['response_data'][$key]['tagihan_radiologi'] = $RadioVerif['response_data'];
+
+
+            $BiayaKasir = self::$query->select('invoice', array(
+                'uid'
+            ))
+                ->join('invoice_detail', array(
+                    'item', 'subtotal', 'status_bayar'
+                ))
+                ->on(array(
+                    array('invoice_detail.invoice', '=', 'invoice.uid')
+                ))
+                ->where(array(
+                    'invoice.kunjungan' => '= ?',
+                    'AND',
+                    'invoice_detail.billing_group' => '= ?'
+                ), array(
+                    $value['kunjungan'],
+                    'administrasi'
+                ))
+                ->execute();
+            foreach ($BiayaKasir['response_data'] as $AdmKey => $AdmValue) {
+                $BiayaKasir['response_data'][$AdmKey]['item'] = $Tindakan->get_tindakan_info($AdmValue['item'])['response_data'][0];
+            }
+            $data['response_data'][$key]['administrasi'] = $BiayaKasir['response_data'];
+
+            $BiayaKasir = self::$query->select('invoice', array(
+                'uid'
+            ))
+                ->join('invoice_detail', array(
+                    'item', 'subtotal', 'status_bayar'
+                ))
+                ->on(array(
+                    array('invoice_detail.invoice', '=', 'invoice.uid')
+                ))
+                ->where(array(
+                    'invoice.kunjungan' => '= ?',
+                    'AND',
+                    'invoice_detail.billing_group' => '= ?'
+                ), array(
+                    $value['kunjungan'],
+                    'tindakan'
+                ))
+                ->execute();
+            foreach ($BiayaKasir['response_data'] as $AdmKey => $AdmValue) {
+                $BiayaKasir['response_data'][$AdmKey]['item'] = $Tindakan->get_tindakan_info($AdmValue['item'])['response_data'][0];
+            }
+            $data['response_data'][$key]['tindakan'] = $BiayaKasir['response_data'];
+        }
+
+        return $data;
     }
 
     private function sedia_obat($parameter) {
@@ -369,9 +551,11 @@ class Inap extends Utility
             }
         }
 
+        //Dulu dimutasikan, sekarangn dianggurin aja dikipas kipas pake sampul majalah bobo
         $Mutasi = $Inventori->tambah_mutasi(array(
             'access_token' => $parameter['access_token'],
             'dari' => $parameter['gudang'],
+            'status' => $parameter['status'],
             'ke' => __GUDANG_APOTEK__,
             'keterangan' => 'Retur Obat Inap. ' . $parameter['remark'],
             'inap' => true,
@@ -395,11 +579,12 @@ class Inap extends Utility
         $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
 
         if($Mutasi['response_result'] > 0) {
-            //Catat Informasi retur obat
+
             $mutasi_uid = $Mutasi['response_unique'];
             foreach ($usedBatchInap as $bKey => $bValue) {
                 if(floatval($bValue['aktual']) > 0) {
                     $proceed_catat = self::$query->insert('rawat_inap_retur_obat', array(
+                        'uid_ranap' => $parameter['uid'],
                         'mutasi' => $mutasi_uid,
                         'petugas' => $UserData['data']->uid,
                         'obat' => $bValue['obat'],
@@ -480,7 +665,6 @@ class Inap extends Utility
         }
 
         return array(
-            'mutasi' => $Mutasi,
             'kunjungan' => $Kunjungan,
             'pulang' => $Pulang
         );
@@ -510,8 +694,8 @@ class Inap extends Utility
                 'rawat_inap_batch.gudang' => '= ?',
                 'AND',
                 'rawat_inap_batch.pasien' => '= ?',
-                'AND',
-                'kunjungan.waktu_keluar' => 'IS NULL',
+                /*'AND',
+                'kunjungan.waktu_keluar' => 'IS NULL',*/
                 'AND',
                 'kunjungan.uid' => '= ?'
             ), array(
@@ -772,13 +956,25 @@ class Inap extends Utility
 
     private function riwayat_obat_inap($parameter) {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-            $paramData = array();
+            $paramData = array(
+                'rawat_inap_riwayat_obat.pasien' => '= ?',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
 
-            $paramValue = array();
+            $paramValue = array(
+                $parameter['pasien']
+            );
         } else {
-            $paramData = array();
+            $paramData = array(
+                'rawat_inap_riwayat_obat.pasien' => '= ?'
+            );
 
-            $paramValue = array();
+            $paramValue = array(
+                $parameter['pasien']
+            );
         }
 
 
@@ -796,8 +992,16 @@ class Inap extends Utility
                 ->join('pegawai', array(
                     'nama as nama_petugas'
                 ))
+                ->join('resep', array(
+                    'pasien'
+                ))
+                ->join('pasien', array(
+                    'nama', 'no_rm'
+                ))
                 ->on(array(
-                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid')
+                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid'),
+                    array('rawat_inap_riwayat_obat.resep', '=', 'resep.uid'),
+                    array('resep.pasien', '=', 'pasien.uid')
                 ))
                 ->order(array(
                     'logged_at' => 'DESC'
@@ -818,8 +1022,16 @@ class Inap extends Utility
                 ->join('pegawai', array(
                     'nama as nama_petugas'
                 ))
+                ->join('resep', array(
+                    'pasien'
+                ))
+                ->join('pasien', array(
+                    'nama', 'no_rm'
+                ))
                 ->on(array(
-                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid')
+                    array('rawat_inap_riwayat_obat.petugas', '=', 'pegawai.uid'),
+                    array('rawat_inap_riwayat_obat.resep', '=', 'resep.uid'),
+                    array('resep.pasien', '=', 'pasien.uid')
                 ))
                 ->order(array(
                     'logged_at' => 'DESC'
@@ -1415,6 +1627,7 @@ class Inap extends Utility
                 'nama' => $parameter['nama'],
                 'kode' => $parameter['kode'],
                 'unit' => $parameter['unit'],
+                'type' => 'INAP',
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             ))
@@ -1540,18 +1753,22 @@ class Inap extends Utility
             $paramData = array(
                 'nurse_station.deleted_at' => 'IS NULL',
                 'AND',
+                'nurse_station.type' => '= ?',
+                'AND',
                 '(nurse_station.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
                 'nurse_station.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
-            $paramValue = array();
+            $paramValue = array('INAP');
         } else {
             $paramData = array(
-                'nurse_station.deleted_at' => 'IS NULL'
+                'nurse_station.deleted_at' => 'IS NULL',
+                'AND',
+                'nurse_station.type' => '= ?'
             );
 
-            $paramValue = array();
+            $paramValue = array('INAP');
         }
 
 
@@ -1751,6 +1968,7 @@ class Inap extends Utility
                 'bed',
                 'keterangan',
                 'dokter',
+                'asal',
                 'penjamin',
                 'created_at',
                 'updated_at'
@@ -1768,6 +1986,7 @@ class Inap extends Utility
                 'bed',
                 'keterangan',
                 'dokter',
+                'asal',
                 'penjamin',
                 'created_at',
                 'updated_at'
@@ -1781,6 +2000,7 @@ class Inap extends Utility
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
         $Pasien = new Pasien(self::$pdo);
+        $Poli = new Poli(self::$pdo);
         $Pegawai = new Pegawai(self::$pdo);
         $Penjamin = new Penjamin(self::$pdo);
         $Ruangan = new Ruangan(self::$pdo);
@@ -1788,13 +2008,53 @@ class Inap extends Utility
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
 
+            //Check Administrasi Pending
+            //Apotek
+            $ApotekVerif = self::$query->select('resep', array(
+                'status_resep'
+            ))
+                ->where(array(
+                    'resep.kunjungan' => '= ?'
+                ), array(
+                    $value['kunjungan']
+                ))
+                ->execute();
+            $data['response_data'][$key]['tagihan_apotek'] = $ApotekVerif['response_data'];
+
+            //Laboratorium
+            $LaborVerif = self::$query->select('lab_order', array(
+                'status'
+            ))
+                ->where(array(
+                    'lab_order.kunjungan' => '= ?'
+                ), array(
+                    $value['kunjungan']
+                ))
+                ->execute();
+            $data['response_data'][$key]['tagihan_laboratorim'] = $LaborVerif['response_data'];
+
+            //Radiologi
+            $RadioVerif = self::$query->select('rad_order', array(
+                'status'
+            ))
+                ->where(array(
+                    'rad_order.kunjungan' => '= ?'
+                ), array(
+                    $value['kunjungan']
+                ))
+                ->execute();
+            $data['response_data'][$key]['tagihan_radiologi'] = $RadioVerif['response_data'];
+
             //Pasien
-            $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            $PasienDetail = $Pasien->get_pasien_info('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienDetail['response_data'][0];
+            $data['response_data'][$key]['pasien_raw'] = $PasienDetail;
 
             //Dokter
             $PegawaiDetail = $Pegawai->get_detail($value['dokter']);
             $data['response_data'][$key]['dokter'] = $PegawaiDetail['response_data'][0];
+
+            $data['response_data'][$key]['asal'] = $Poli->get_poli_info($value['asal'])['response_data'][0];
 
             //Penjamin
             $PenjaminDetail = $Penjamin->get_penjamin_detail($value['penjamin']);
@@ -1814,9 +2074,6 @@ class Inap extends Utility
                 ))
                 ->on(array(
                     array('nurse_station_ranjang.nurse_station', '=', 'nurse_station.uid')
-                ))
-                ->order(array(
-                    'nurse_station_ranjang.created_at' => 'DESC'
                 ))
                 ->where(array(
                     'nurse_station_ranjang.ranjang' => '= ?',
@@ -2188,6 +2445,7 @@ class Inap extends Utility
             'waktu_masuk' => date('Y-m-d'),
             //'kamar' => $parameter['kamar'],
             //'bed' => $parameter['bed'],
+            'asal' => (($parameter['asal'] === 'igd') ? __POLI_IGD__ : $parameter['poli_asal']),
             'kunjungan' => $parameter['kunjungan'],
             'keterangan' => $parameter['keterangan'],
             'created_at' => parent::format_date(),

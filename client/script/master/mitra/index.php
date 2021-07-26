@@ -32,7 +32,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{

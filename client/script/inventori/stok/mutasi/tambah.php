@@ -215,7 +215,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<b id=\"item_identifier_" + row.uid_item + "|" + row.batch.uid + "\">" + row.nama + "</b>";
+						return "<b id=\"item_identifier_" + row.barang + "|" + row.batch.uid + "\">" + row.nama + "</b>";
 					}
 				},
 				{
@@ -360,38 +360,45 @@
 
 		
 		$("#btnSubmitVerifikasi").click(function() {
-			var conf = confirm("Proses Mutasi Stok?");
-			if(conf) {
-				$("#btnSubmitVerifikasi").attr("disabled", "disabled");
-				$.ajax({
-					url:__HOSTAPI__ + "/Inventori",
-					async:false,
-					data:{
-						request : "tambah_mutasi",
-						dari: $("#txt_unit_asal").val(),
-						ke: $("#txt_unit_tujuan").val(),
-						keterangan : $("#txt_keterangan").val(),
-						item : metaData
-					},
-					beforeSend: function(request) {
-						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-					},
-					type:"POST",
-					success:function(response) {
-						if(response.response_package.response_result > 0) {
-							notification ("success", "Mutasi Stok berhasil di proses", 3000, "hasil_mutasi");
-							location.href = __HOSTNAME__ + "/inventori/stok/mutasi";
-						} else {
-							notification ("danger", "Mutasi Stok gagal di proses", 3000, "hasil_mutasi");
-							$("#btnSubmitVerifikasi").removeAttr("disabled");
-						}
-					},
-					error: function(response) {
-						console.log(response);
-						$("#btnSubmitVerifikasi").removeAttr("disabled");
-					}
-				});
-			}
+
+            Swal.fire({
+                title: "Proses Mutasi?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $("#btnSubmitVerifikasi").attr("disabled", "disabled");
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Inventori",
+                        async:false,
+                        data:{
+                            request : "tambah_mutasi",
+                            dari: $("#txt_unit_asal").val(),
+                            ke: $("#txt_unit_tujuan").val(),
+                            keterangan : $("#txt_keterangan").val(),
+                            item : metaData
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        success:function(response) {
+                            if(response.response_package.response_result > 0) {
+                                notification ("success", "Mutasi Stok berhasil di proses", 3000, "hasil_mutasi");
+                                location.href = __HOSTNAME__ + "/inventori/stok/mutasi";
+                            } else {
+                                notification ("danger", "Mutasi Stok gagal di proses", 3000, "hasil_mutasi");
+                                $("#btnSubmitVerifikasi").removeAttr("disabled");
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                            $("#btnSubmitVerifikasi").removeAttr("disabled");
+                        }
+                    });
+                }
+            });
 		});
 	});
 </script>
@@ -432,7 +439,7 @@
 								<td id="verif_unit_tujuan"></td>
 							</tr>
 							<tr>
-								<td class="wrap_content">Tanggal Amprah</td>
+								<td class="wrap_content">Tanggal Mutasi</td>
 								<td class="wrap_content">:</td>
 								<td id="verif_tanggal"></td>
 							</tr>
@@ -462,7 +469,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Edit Data</button>
-				<button type="button" class="btn btn-primary" id="btnSubmitVerifikasi">Proses Amprah</button>
+				<button type="button" class="btn btn-primary" id="btnSubmitVerifikasi">Proses Mutasi</button>
 			</div>
 		</div>
 	</div>

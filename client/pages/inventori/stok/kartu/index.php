@@ -34,7 +34,7 @@
                                         <tr>
                                             <th class="wrap_content">No</th>
                                             <th style="width: 50%;">Item</th>
-                                            <th style="wrap_content">Stok Terkini</th>
+                                            <th class="wrap_content">Stok Terkini</th>
                                             <th class="wrap_content">Aksi</th>
                                         </tr>
                                         </thead>

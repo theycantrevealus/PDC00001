@@ -27,15 +27,18 @@
 
 		$("#list-tindakan-radiologi tbody tr td").on("click", ".linkTindakan", function(e) {
 
+
 			let id_tindakan = $(this).parent().parent().attr("id").split("_");
 			tindakanID = id_tindakan[id_tindakan.length - 1];
 
 
             if(forSave["tindakan_" + tindakanID] === undefined) {
-                forSave["tindakan_" + tindakanID] = {
+                /*forSave["tindakan_" + tindakanID] = {
                     keterangan: "",
                     kesimpulan: ""
-                };
+                };*/
+            } else {
+                console.log(forSave);
             }
 
             if(selectedState != tindakanID) {
@@ -66,6 +69,9 @@
 			.then( editor => {
 				editorKeteranganPeriksa = editor;
 				window.editor = editor;
+                /*editor.model.document.on( 'change:data', ( evt, data ) => {
+                    forSave["tindakan_" + selectedState].keterangan = editorKeteranganPeriksa.getData();
+                });*/
 
                 editor.editing.view.document.on( 'keydown', ( evt, data ) => {
                     forSave["tindakan_" + selectedState].keterangan = editorKeteranganPeriksa.getData();
@@ -74,6 +80,8 @@
 			.catch( err => {
 				//console.error( err.stack );
 			});
+
+
 
 
 		ClassicEditor
@@ -88,6 +96,10 @@
                 editor.editing.view.document.on( 'keydown', ( evt, data ) => {
                     forSave["tindakan_" + selectedState].kesimpulan = editorKesimpulanPeriksa.getData();
                 });
+
+                /*editor.model.document.on( 'change:data', ( evt, data ) => {
+                    forSave["tindakan_" + selectedState].kesimpulan = editorKesimpulanPeriksa.getData();
+                });*/
 			} )
 			.catch( err => {
 				//console.error( err.stack );
@@ -183,7 +195,7 @@
                     if(order_detail > 0) {
                         notification ("success", "Data Berhasil Disimpan", 3000, "hasil_tambah_dev");
                         if(id === "btnSimpan") {
-                            location.href = __HOSTNAME__ + "/radiologi";
+                            location.href = __HOSTNAME__ + "/radiologi/proses";
                         } else {
                             var uid = uid_order;
 
@@ -212,7 +224,7 @@
                                                     "Pemeriksaan berhasil terkirim",
                                                     "success"
                                                 ).then((result) => {
-                                                    location.href = __HOSTNAME__ + "/radiologi";
+                                                    location.href = __HOSTNAME__ + "/radiologi/proses";
                                                 });
                                             } else {
                                                 Swal.fire(
@@ -290,15 +302,27 @@
 		$("#add_file").change(function(e) {
 		
 			file = e.target.files[0];
-			if (file.name != ""){
-				status_file = checkFile(file.name);
-			}
+            var fileSize = file.size / 1000000;
+            if(fileSize <= __MAX_UPLOAD_FILE_SIZE__) {
+                if (file.name != ""){
+                    status_file = checkFile(file.name);
+                }
 
-			if (status_file == true){
-				$("#form-upload-lampiran").modal("show");
-			} else {
-				alert("Berkas harus PDF");
-			}
+                if (status_file == true){
+                    $("#form-upload-lampiran").modal("show");
+                } else {
+                    alert("Berkas harus PDF");
+                }
+            } else {
+                Swal.fire(
+                    "Upload dokumen Laboratorium",
+                    "File tidak boleh melebihi 5MB. Harap kompresi file atau turunkan resolusi scan dokumen",
+                    "warning"
+                ).then((result) => {
+                    //
+                });
+            }
+
 		});
 
 		$("#btnSubmitLampiran").click(function() {
@@ -353,6 +377,7 @@
 										"<td>" + (i + 1) +"</td>" +
 										"<td>" + MetaData[i].tindakan + "</td>" +
 										"<td>" + MetaData[i].penjamin + "</td>" +
+                                        "<td>" + MetaData[i].mitra.nama + "</td>" +
 										"<td>" +
 											"<a href=\"#\" class=\"linkTindakan btn btn-sm btn-info\">" +
 												"<i class=\"fa fa-eye\"></i>" +

@@ -76,11 +76,11 @@
                     </div>
 
                     <div class="col-12 col-md-6 mb-3 poli_lain">
-                        <label>Penanggung Jawab Pasien <span class="red">*</span></label>
+                        <label>Penanggung Jawab Pasien</label>
                         <input type="" name="pj_pasien" id="pj_pasien" maxlength="100" class="form-control inputan" required value="">
                     </div>
                     <div class="col-12 col-md-6 mb-3 poli_lain">
-                        <label>Informasi didapat dari <span class="red">*</span></label>
+                        <label>Informasi didapat dari</label>
                         <input type="" name="info_didapat_dari" id="info_didapat_dari" maxlength="100" class="form-control inputan" required value="">
                     </div>
 
