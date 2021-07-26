@@ -30,6 +30,7 @@
 				reload_jabatan(resp.response_package.response_data[0].jabatan);
 				reload_unit(resp.response_package.response_data[0].unit);
 				render_module(resp.response_package.response_module);
+
 				
 			},
 			error: function(resp) {
@@ -123,7 +124,7 @@
                         $(newModuleRow).insertAfter($("tr.module_row_" + dataMeta[key].parent + ":eq(" + ($("tr.module_row_" + dataMeta[key].parent + ":last-child").length - 1) + ")"));
                     }
 
-					var paddingSet = ($("module_row_" + dataMeta[key].parent).css("padding-left") == undefined) ? 0 : $("module_row_" + dataMeta[key].parent).css("padding-left");
+					var paddingSet = ($("#module_row_" + dataMeta[key].parent).css("padding-left") == undefined) ? 0 : $("#module_row_" + dataMeta[key].parent).css("padding-left");
 					$(newModuleName).css({
 						"padding-left": (paddingSet + (25 * parseInt(dataMeta[key].level))) + "px"
 					});
@@ -248,13 +249,13 @@
 
 					for(var met in data[keys]) {
 						let classIdentifier;
-						if(data[keys][met].name == "__construct") {
+						if(data[keys][met].name === "__construct") {
 							classIdentifier = "danger";
 						} else if(
-							data[keys][met].name == "__POST__" ||
-							data[keys][met].name == "__GET__" ||
-							data[keys][met].name == "__DELETE__" ||
-							data[keys][met].name == "__PUT__"
+							data[keys][met].name === "__POST__" ||
+							data[keys][met].name === "__GET__" ||
+							data[keys][met].name === "__DELETE__" ||
+							data[keys][met].name === "__PUT__"
 						) {
 							classIdentifier = "success";
 						} else {

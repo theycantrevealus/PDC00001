@@ -328,7 +328,7 @@
                     "data" : null, render: function(data, type, row, meta) {
                         //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
 
-                        if(row.status_resep === "D") {
+                        /*if(row.status_resep === "D") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
@@ -338,6 +338,19 @@
                                 "</button>" +
                                 "</div>";
                         } else if(row.status_resep === "P") {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-check\"></i> Terima</span>" +
+                                "</button>" +
+                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
+                                "</button>" +
+                                "</div>";
+                        } else if(row.status_resep === "S") {
+                            return "<i class=\"fa fa-check text-success\"></i>";
+                        }*/
+
+                        if(row.status_resep === "D") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
@@ -445,15 +458,6 @@
                         //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
 
                         if(row.status_resep === "D") {
-                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<button class=\"btn btn-info btn-sm btn-apotek-panggil\" id=\"panggil_" + row.uid + "\">" +
-                                "<span><i class=\"fa fa-bullhorn\"></i> Panggil</span>" +
-                                "</button>" +
-                                "<button class=\"btn btn-purple btn-sm btn-apotek-cetak\" jenis=\"" + ((row.departemen.uid === __POLI_IGD__) ? "IGD" : "Rawat Inap") + "\" id=\"cetak_" + row.uid + "\">" +
-                                "<span><i class=\"fa fa-print\"></i> Cetak</span>" +
-                                "</button>" +
-                                "</div>";
-                        } else if(row.status_resep === "P") {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button class=\"btn btn-success btn-sm btn-apotek-terima\" id=\"terima_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check\"></i> Terima</span>" +
