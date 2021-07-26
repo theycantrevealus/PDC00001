@@ -13,6 +13,7 @@
 					return response.response_package.response_data;
 				}
 			},
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
 			autoWidth: false,
 			aaSorting: [[0, "asc"]],
 			"columnDefs":[
