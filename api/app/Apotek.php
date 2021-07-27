@@ -888,6 +888,7 @@ class Apotek extends Utility
         $Poli = new Poli(self::$pdo);
         $Dokter = new Pegawai(self::$pdo);
         $ICD10 = new Icd(self::$pdo);
+        $Inventori = new Inventori(self::$pdo);
 
         foreach ($AntrianDetail['response_data'] as $AKey => $AValue) {
             $AntrianDetail['response_data'][$AKey]['pasien'] = $Pasien->get_pasien_detail('pasien', $AValue['pasien'])['response_data'][0];
@@ -931,8 +932,8 @@ class Apotek extends Utility
                 ))
                 ->execute();
             foreach ($resepDetail['response_data'] as $RDKey => $RDValue) {
-                $Inventori = new Inventori(self::$pdo);
                 $resepDetail['response_data'][$RDKey]['obat_detail'] = $Inventori->get_item_detail($RDValue['obat'])['response_data'][0];
+                $resepDetail['response_data'][$RDKey]['qty_roman'] = parent::numberToRoman($RDValue['qty']);
             }
 
             $dataResponse['resep'] = $resepDetail['response_data'];
@@ -981,11 +982,11 @@ class Apotek extends Utility
                     ->execute();
 
                 foreach ($RacikanDetailData['response_data'] as $RVIKey => $RVIValue) {
-                    $InventoriObat = new Inventori(self::$pdo);
-                    $RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $InventoriObat->get_item_detail($RVIValue['obat'])['response_data'][0];
+                    $RacikanDetailData['response_data'][$RVIKey]['obat_detail'] = $Inventori->get_item_detail($RVIValue['obat'])['response_data'][0];
                 }
 
                 $RacikanValue['item'] = $RacikanDetailData['response_data'];
+                $RacikanValue['qty_roman'] = parent::numberToRoman($RacikanValue['qty']);
                 array_push($dataResponse['racikan'], $RacikanValue);
             }
 

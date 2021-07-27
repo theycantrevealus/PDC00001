@@ -1,4 +1,5 @@
-<div id="header" class="mdk-header js-mdk-header m-0" data-fixed>
+
+<div id="header" class="mdk-header js-mdk-header m-0" data-fixed style="visibility: hidden; display: none">
 	<div class="mdk-header__content">
 
 		<div class="navbar navbar-expand-sm navbar-main navbar-dark bg-custom  pr-0" id="navbar" data-primary>
