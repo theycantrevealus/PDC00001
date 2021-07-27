@@ -55,11 +55,7 @@
 ?>
 <div class="mdk-drawer  js-mdk-drawer" id="default-drawer" data-align="start">
 	<div class="mdk-drawer__content">
-        <a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand">
-            <img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="200" height="100" alt="<?php echo __PC_CUSTOMER__; ?>">
-            <!--h3 style="padding-left: 60px !important; color: #fff;"><?php echo __PC_CUSTOMER__; ?></h3-->
-        </a>
-		<div class="sidebar sidebar-light sidebar-left simplebar" style="padding-top:0px" data-simplebar>
+        <div class="sidebar sidebar-light sidebar-left simplebar" style="padding-top:0px" data-simplebar>
             <!--<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
                 <li class="nav-item dropdown">
                     <a href="<?php /*echo __HOSTNAME__; */?>/template/#account_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
@@ -81,15 +77,7 @@
                     </div>
                 </li>
             </ul>-->
-            <div class="sidebar-heading sidebar-m-t" id="sidemenu_1"><img style="margin-right: 20px;" src="<?php echo __HOST__; ?>images/pegawai/<?php echo $_SESSION['uid']; ?>.png?d=<?php echo date('H:i:s'); ?>" class="rounded-circle" width="32" alt="Frontted" /><?php echo $_SESSION['nama']; ?></div>
-            <ul class="sidebar-menu">
-                <li class="sidebar-menu-item">
-                    <a class="sidebar-menu-button" href="<?php echo __HOSTNAME__ ?>/system/profile">
-                        <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">apps</i> Profile
-                    </a>
-                </li>
-            </ul>
-			<div class="sidebar-heading sidebar-m-t" id="sidemenu_1">Menu</div>
+            <div class="sidebar-heading sidebar-m-t" id="sidemenu_1">Menu</div>
 			<ul class="sidebar-menu">
 				<?php
 					$sideMenu1 = reloadModul($pdo, 0, 1, $_SESSION['akses_halaman']);

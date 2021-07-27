@@ -22,6 +22,7 @@ document/
 client/template/
 client/plugins/
 client/header.php
+client/head.php
 api/index.php
 api/sync.php
 api/constant.php

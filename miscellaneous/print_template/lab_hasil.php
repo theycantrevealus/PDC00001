@@ -67,7 +67,6 @@
         }
 
         .content {
-            width: 8.5in;
             min-height: 14in;
             background: #fff;
             margin: -1px !important;

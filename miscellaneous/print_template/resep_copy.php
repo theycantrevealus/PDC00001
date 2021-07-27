@@ -27,7 +27,7 @@
 
         @media print {
             @page {
-                size: 12cm 20cm;
+                size: 1.7in 7.8in portrait;
             }
 
             html, body {
