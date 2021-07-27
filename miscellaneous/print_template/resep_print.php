@@ -256,7 +256,7 @@
         <table>
             <tr>
                 <td class="logo-container">
-                    <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-text-white.png" class="logo">
+                    <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-text-white-<?php echo $_POST['__PC_IDENT__']; ?>.png" class="logo">
                 </td>
                 <td>
                     <h1>

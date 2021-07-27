@@ -76,6 +76,8 @@
             .content .tl {
                 position: fixed;
                 top: -5px; left: -5px;
+                width: 250px; height: 250px;
+                opacity: .1;
             }
 
             .header {
@@ -83,7 +85,6 @@
                 right: 2cm;
                 position: fixed;
                 text-align:left;
-                margin-bottom:1rem;
                 font-family: GreyCLiff;
             }
 
@@ -109,14 +110,14 @@
             }
 
             .header h1 small {
-                color: #0199f0;
+                color: #0e8900;
                 letter-spacing: 0;
             }
 
             .header table {
                 width: 100%;
-                padding-bottom: .5cm;
-                border-bottom: solid 3px #0199f0;
+                padding-bottom: 0cm;
+                border-bottom: solid 3px #0e8900;
             }
 
             .header table tr td {
@@ -128,14 +129,16 @@
             }
 
             .logo-container {
+                position: relative;
                 width: 10%;
             }
 
             img.logo{
+                margin-top: -20px;
                 float:left;
                 padding-right: 1cm;
                 width: 4cm;
-                height: 2cm;
+                height: 3.8cm;
             }
 
             .print-date {
@@ -260,12 +263,12 @@
     </head>
     <body>
     <div class="content">
-        <img class="tl" src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/TOPLEFT.png" style="width: 250px; height: 250px;" alt="top-left" />
+        <img class="tl" src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/TOPLEFT-GREEN.png" alt="top-left" />
         <div class="header">
             <table>
                 <tr>
                     <td class="logo-container">
-                        <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-text-white.png" class="logo">
+                        <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/clients//logo-text-white-<?php echo $_POST['__PC_IDENT__']; ?>.png" class="logo">
                     </td>
                     <td>
                         <h1>
