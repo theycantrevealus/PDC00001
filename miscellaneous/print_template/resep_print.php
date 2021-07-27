@@ -8,12 +8,12 @@
 
         @page {
             size: auto;
-            margin: 0
         }
 
         @media print {
             @page {
                 size: legal;
+                counter-increment: section_counter;
             }
 
             html, body {
@@ -26,8 +26,13 @@
                 border: none;
             }
 
-            table.constructor thead {display: table-header-group !important;}
-            table.constructor tfoot {display: table-footer-group !important;}
+            table.constructor thead {
+                display: table-header-group !important;
+            }
+
+            table.constructor tfoot {
+                display: table-footer-group !important;
+            }
 
 
         }
@@ -89,8 +94,29 @@
             font-family: GreyCLiff;
         }
 
+        .footer {
+            left: 2cm;
+            bottom: 1cm;
+            right: 2cm;
+            position: fixed;
+            text-align:left;
+            font-family: GreyCLiff;
+        }
+
+
+        .footer-space {
+            position: relative;
+            font-size: 14pt;
+            color: #808080;
+            font-family: GreyCLiff;
+        }
+
         .header-space {
             height: 180px;
+        }
+
+        .footer-space {
+            height: 80px;
         }
 
         h1.title-name {
@@ -274,6 +300,9 @@
             </tr>
         </table>
     </div>
+    <div class="footer">
+        <h6 class="text-right"></h6>
+    </div>
     <?php
     if(isset($_POST['dataCetak'])) {
         ?>
@@ -299,7 +328,7 @@
                         echo($_POST['dataCetak']);
                         ?>
                         <br />
-                        <div class="row">
+                        <div class="row" style="page-break-inside:avoid;">
                             <div class="col-12">
                                 <table class="table table-bordered-full largeDataType">
                                     <tbody>
@@ -388,6 +417,13 @@
                 </td>
             </tr>
             </tbody>
+            <tfoot>
+                <tr>
+                    <td>
+                        <div class="footer-space"></div>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
         <?php
     } else {

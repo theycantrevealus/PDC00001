@@ -8,7 +8,6 @@
 
             @page {
                 size: auto;
-                margin: 0
             }
 
             @media print {
@@ -67,7 +66,6 @@
             }
 
             .content {
-                width: 8.5in;
                 background: #fff;
                 margin: -1px !important;
             }
@@ -80,8 +78,8 @@
             }
 
             .header {
-                left: 2cm; top: 2cm;
-                right: 2cm;
+                left: 1cm; top: 1cm;
+                right: 1cm;
                 position: fixed;
                 text-align:left;
                 font-family: GreyCLiff;

@@ -2,7 +2,7 @@
     <table>
         <tr>
             <td style="text-align:center; width:5%">
-                <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-text-white.png" class="logo">
+                <img width="200" height="180" src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/clients/logo-text-white-<?php echo $_POST['__PC_IDENT__']; ?>.png" class="logo">
             </td>
             <td style="width:45%;">
                 <h1 class="title">

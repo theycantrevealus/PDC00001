@@ -730,6 +730,7 @@
                         data: {
                             __PC_CUSTOMER__: __PC_CUSTOMER__,
                             __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
+                            __PC_IDENT__: __PC_IDENT__,
                             __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                             __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                             kode: targettedData.kode,
@@ -812,9 +813,8 @@
 
 
                     $(printResepContainer).printThis({
-                        loadCSS: "template/assets/css/app.css",
-                        header: null,
-                        footer: null,
+                        /*header: null,
+                        footer: null,*/
                         pageTitle: targetKodeResep,
                         afterPrint: function() {
                             //
