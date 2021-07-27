@@ -16,6 +16,10 @@
             font-style: italic !important;
         }
 
+        .integral_sign {
+            font-size: 14pt !important;
+        }
+
         @page {
             size: auto;
             margin: 0
@@ -69,7 +73,7 @@
         }
 
         table.constructor tbody td {
-            padding: 0cm 2cm;
+            padding: 0cm 1cm;
         }
 
         table.form-mode tbody tr td {
@@ -88,11 +92,11 @@
         }
 
         .header {
-            left: 2cm; top: 1cm;
-            right: 2cm;
+            left: 1cm; top: 1cm;
+            right: 1cm;
             position: fixed;
             text-align:left;
-            margin-bottom: 0;
+            margin-bottom: 10px;
             font-family: GreyCLiff;
         }
 
@@ -125,6 +129,7 @@
         .header table {
             width: 100%;
             padding-bottom: 0cm;
+            margin-bottom: 5px;
             border-bottom: dashed 1px #000;
         }
 
@@ -134,10 +139,6 @@
 
         .header .header-information {
             color: #979797;
-        }
-
-        .logo-container {
-            width: 5%;
         }
 
         img.logo{
@@ -155,6 +156,11 @@
         .report_content {
             font-size: 10pt;
             page-break-after: avoid;
+            margin-top: 10px;
+        }
+
+        .report_content h4 {
+            font-size: 14pt !important;
         }
 
         .row {
@@ -295,7 +301,7 @@
             <tr>
                 <td>
                     <div class="report_content">
-                        <h1 class="text-center resep_script">Salinan Resep</h1>
+                        <h2 class="text-center resep_script">Salinan Resep</h2>
                         <?php
                         echo($_POST['dataCetak']);
                         ?>

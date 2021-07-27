@@ -176,7 +176,8 @@
                                 "signaKonsumsi": resep_obat_detail[resepKey].signa_qty,
                                 "signaTakar": resep_obat_detail[resepKey].signa_pakai,
                                 "signaHari": resep_obat_detail[resepKey].qty,
-                                "iterasi": resep_obat_detail[resepKey].iterasi
+                                "iterasi": resep_obat_detail[resepKey].iterasi,
+                                "qty_roman": resep_obat_detail[resepKey].qty_roman
                             });
                             if(currentData.resep[resep_obat_detail[resepKey].obat] === undefined) {
                                 currentData.resep[resep_obat_detail[resepKey].obat] = {
@@ -212,7 +213,8 @@
                                 signaHari: racikan_detail[racikanKey].qty,
                                 item:racikan_detail[racikanKey].item,
                                 iterasi:racikan_detail[racikanKey].iterasi,
-                                aturan_pakai: racikan_detail[racikanKey].aturan_pakai
+                                aturan_pakai: racikan_detail[racikanKey].aturan_pakai,
+                                qty_roman: racikan_detail[racikanKey].qty_roman
                             });
 
                             if(currentData.racikan[racikan_detail[racikanKey].uid] === undefined) {
@@ -287,7 +289,8 @@
             "signaTakar": 0,
             "signaHari": 0,
             "pasien_penjamin_uid": "",
-            "iterasi": 0
+            "iterasi": 0,
+            "qty_roman": ""
         }) {
             $("#table-resep tbody tr").removeClass("last-resep");
             var newRowResep = document.createElement("TR");
@@ -312,6 +315,9 @@
             $(newCellResepAksi).append(checkCopyResep);
 
             var newObat = document.createElement("SELECT");
+            $(newObat).attr({
+                "roman": setter.qty_roman
+            })
             $(newCellResepObat).append(newObat).append("<ol></ol>");
 
             $(newCellResepObat).append(
@@ -983,6 +989,7 @@
             "signaHari": "",
             "aturan_pakai": "",
             "iterasi": 0,
+            "qty_roman": "",
             "item":[]
         }) {
             $("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
@@ -1025,7 +1032,8 @@
             }).attr({
                 "placeholder": "Nama Racikan",
                 "disabled": "disabled",
-                "old-data": setter.uid
+                "old-data": setter.uid,
+                "roman": setter.qty_roman
             }).val(setter.nama);
 
             $(newRacikanCellNama).append(
@@ -2405,14 +2413,16 @@
                 var konsumsi = $("#resep_obat_aturan_pakai_" + id + " option:selected").html();
                 var keterangan = $("#keterangan_resep_obat_" + id).val();
                 var iterasi = $("#iterasi_resep_obat_" + id).attr("data");
+                var roman = $("#resep_obat_" + id).attr("roman");
                 itemP.push({
                     obat: [obat],
-                    signa: signaA + " &times; " + signaB,
+                    signa: "<b class=\"resep_script\"><span class=\"integral_sign\">&int;</span> " + signaA + " dd. " + signaB + "</b>",
                     konsumsi: konsumsi,
                     keterangan: keterangan,
                     jumlah: jumlah,
                     iterasi: iterasi,
-                    detOrig: (me.is(":checked")) ? "Y" : "N"
+                    detOrig: (me.is(":checked")) ? "Y" : "N",
+                    roman: roman
                 });
             });
 
@@ -2430,6 +2440,7 @@
                 var konsumsi = $("#racikan_aturan_pakai_" + id + " option:selected").html();
                 var keterangan = $("#racikan_keterangan_" + id).val();
                 var iterasi = $("#racikan_iterasi_" + id).attr("data");
+                var roman = $("#racikan_nama_" + id).attr("roman");
 
 
                 $("#komposisi_" + id + " tbody tr").each(function() {
@@ -2442,10 +2453,11 @@
 
                 itemP.push({
                     obat: obatList,
-                    signa: signaA + " &times; " + signaB,
+                    signa: "<b class=\"resep_script\"><span class=\"integral_sign\">&int;</span> " + signaA + " dd. " + signaB + "</b>",
                     konsumsi: konsumsi,
                     keterangan: keterangan,
                     jumlah: jumlah,
+                    roman: roman,
                     iterasi: iterasi,
                     detOrig: (me.is(":checked")) ? "Y" : "N"
                 });
@@ -2464,15 +2476,16 @@
             for(var a in itemP) {
                 var obatList = "";
                 for(var b in itemP[a].obat) {
-                    obatList += itemP[a].obat[b] + "<br />";
+                    obatList += "<h5>" + itemP[a].obat[b] + "</h5>";
                 }
 
                 $("#copy-resep-report").append("<tr>" +
                     "<td class=\"resep_script\">R/</td>" +
-                    "<td style=\"padding-bottom: 2cm\">" +
-                    obatList + "" +
-                    "<h5 class=\"text-right resep_script\">" + ((parseInt(itemP[a].iterasi) > 0) ? ("Iter " + itemP[a].iterasi + " &times;") : "") + "</h5>" +
-                    "<h6 class=\"text-right\">..........." + ((parseInt(itemP[a].jumlah) > 0) ? ("det orig +" + itemP[a].jumlah) : "ne det") + "...</h6>" +
+                    "<td style=\"padding-bottom: 1cm !important; position: relative\">" +
+                    obatList +
+                    "<h5 class=\"text-right resep_script\">" + " <b>" + itemP[a].roman + "</b><br />" +((parseInt(itemP[a].iterasi) > 0) ? ("Iter " + itemP[a].iterasi + " &times;") : "") + "</h5>" +
+                    "<h4>" + itemP[a].signa + "</h4>" +
+                    "<h6 class=\"text-right resep_script\" style=\"border-bottom: dashed 1px #000; margin-bottom: 10px\">" + ((parseInt(itemP[a].jumlah) > 0) ? ("det orig") : "ne det") + "</h6>" +
                     "</td>" +
                     "</tr>");
             }
@@ -2557,6 +2570,7 @@
                         Tanggal Resep: <b id="copy-resep-tanggal"></b>
                     </p>
                     <h5 id="iter-copy-resep" class="resep_script"></h5>
+                    <hr />
                     <table class="form-mode table largeDataType" id="copy-resep-report">
 
                     </table>
