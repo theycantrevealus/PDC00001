@@ -49,7 +49,7 @@
 				},
 				dataSrc:function(response) {
 					antrian_count = response.response_package.length;
-					//console.log(response);
+					console.log(response);
 					return response.response_package;
 				}
 			},
@@ -139,36 +139,53 @@
 		$("#jlh-antrian").html(antrian_count);
 
 		$("body").on("change", ".selector_dokter", function() {
-			var conf = confirm("Ubah Dokter ?");
-			if(conf) {
-				var dokter = $(this).val();
-				var uid = $(this).attr("antrian");
-				
-				$.ajax({
-		    		async: false,
-		            url:__HOSTAPI__ + "/Antrian",
-		            type: "POST",
-		            data:{
-		            	request:"ubah_dokter_antrian",
-		            	dokter:dokter,
-		            	uid:uid
-		            },
-		            beforeSend: function(request) {
-		                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-		            },
-		            success: function(response){
-		            	console.log(response);
-		            	if(response != undefined) {
-		            		if(response.response_package.response_result > 0) {
-			            		tableAntrianPerawat.ajax.reload();
-			            	}
-		            	}
-		            },
-		            error: function(response) {
-		                console.log(response);
-		            }
-		    	});
-			}
+			Swal.fire({
+                title: "Ubah Dokter?",
+                showDenyButton: true,
+                type: "warning",
+                confirmButtonText: "Ya",
+                confirmButtonColor: "#1297fb",
+                denyButtonText: "Tidak",
+                denyButtonColor: "#ff2a2a"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var dokter = $(this).val();
+                    var uid = $(this).attr("antrian");
+
+                    $.ajax({
+                        async: false,
+                        url:__HOSTAPI__ + "/Antrian",
+                        type: "POST",
+                        data:{
+                            request:"ubah_dokter_antrian",
+                            dokter: dokter,
+                            uid:uid
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function(response){
+                            if(response !== undefined) {
+                                if(response.response_package.response_result > 0) {
+                                    push_socket(__ME__, "antrian_poli_ubah", dokter, "Antrian pasien baru telah diubah untuk Anda", "warning").then(function () {
+                                        Swal.fire(
+                                            'Berhasil diubah!',
+                                            'Dokter berhasil diubah',
+                                            'success'
+                                        ).then((result) => {
+                                            tableAntrianPerawat.ajax.reload();
+
+                                        });
+                                    });
+                                }
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            });
 		});
 
 

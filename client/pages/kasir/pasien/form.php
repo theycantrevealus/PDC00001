@@ -14,7 +14,7 @@
 					<table class="table table-bordered table-striped largeDataType" id="invoice_detail_item">
 						<thead class="thead-dark">
 							<tr>
-								<th class="wrap_content"><input type="checkbox" id="bulk-all" /></th>
+								<th class="wrap_content"><input type="checkbox" class="form-control" id="bulk-all" /></th>
 								<th class="wrap_content">No</th>
 								<th>Item</th>
 								<th class="wrap_content">Jlh</th>

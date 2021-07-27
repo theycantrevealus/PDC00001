@@ -30,6 +30,7 @@
 				reload_jabatan(resp.response_package.response_data[0].jabatan);
 				reload_unit(resp.response_package.response_data[0].unit);
 				render_module(resp.response_package.response_module);
+
 				
 			},
 			error: function(resp) {
@@ -78,6 +79,7 @@
 		function render_module(dataMeta, parent = 0) {
 			//$("#module-table tbody tr").remove();
 			for(var key in dataMeta) {
+
 				var newModuleRow = document.createElement("TR");
 				$(newModuleRow).attr({
 					"id": "module_row_" + dataMeta[key].id
@@ -104,7 +106,7 @@
 					"<label class=\"custom-control-label\" for=\"module-allow-" + dataMeta[key].id + "\">Yes</label>"
 				);
 
-				$(newModuleName).html(dataMeta[key].nama)
+				$(newModuleName).html("<span style=\"" + ((dataMeta[key].level > 1) ? "" : "font-weight: bolder") + "\" class=\"" + ((dataMeta[key].level > 1) ? "" : "text-info") + "\">" + dataMeta[key].nama + "</span>")
 				$(newModulePages).html("<a href=\"" + __HOSTNAME__ + "/" + dataMeta[key].identifier + "\"><span class=\"badge badge-success\"><i style=\"margin-right: 8px;\" class=\"fa fa-link\"></i>" + __HOSTNAME__ + "</span><span class=\"badge badge-warning\">/" + dataMeta[key].identifier + "</span>");
 
 				$(newModuleRow).append(newModuleName);
@@ -114,7 +116,7 @@
 					$("#module-table tbody").append(newModuleRow);
 				} else {
                     if($("tr.module_row_" + dataMeta[key].parent).length === 0) {
-                        //$(newModuleRow).insertAfter($("#module-table tbody tr#module_row_" + dataMeta[key].parent));
+                        $(newModuleRow).insertAfter($("#module-table tbody tr#module_row_" + dataMeta[key].parent));
                     } else {
                         /*if(dataMeta[key].parent == 36) {
                             alert($("tr.module_row_" + dataMeta[key].parent + ":last-child").length);
@@ -122,9 +124,9 @@
                         $(newModuleRow).insertAfter($("tr.module_row_" + dataMeta[key].parent + ":eq(" + ($("tr.module_row_" + dataMeta[key].parent + ":last-child").length - 1) + ")"));
                     }
 
-					var paddingSet = ($("module_row_" + dataMeta[key].parent).css("padding-left") == undefined) ? 0 : $("module_row_" + dataMeta[key].parent).css("padding-left");
+					var paddingSet = ($("#module_row_" + dataMeta[key].parent).css("padding-left") == undefined) ? 0 : $("#module_row_" + dataMeta[key].parent).css("padding-left");
 					$(newModuleName).css({
-						"padding-left": (paddingSet + 50) + "px"
+						"padding-left": (paddingSet + (25 * parseInt(dataMeta[key].level))) + "px"
 					});
 				}
 			}
@@ -247,13 +249,13 @@
 
 					for(var met in data[keys]) {
 						let classIdentifier;
-						if(data[keys][met].name == "__construct") {
+						if(data[keys][met].name === "__construct") {
 							classIdentifier = "danger";
 						} else if(
-							data[keys][met].name == "__POST__" ||
-							data[keys][met].name == "__GET__" ||
-							data[keys][met].name == "__DELETE__" ||
-							data[keys][met].name == "__PUT__"
+							data[keys][met].name === "__POST__" ||
+							data[keys][met].name === "__GET__" ||
+							data[keys][met].name === "__DELETE__" ||
+							data[keys][met].name === "__PUT__"
 						) {
 							classIdentifier = "success";
 						} else {

@@ -17,7 +17,7 @@
 <div class="container-fluid page__container">
 	<div class="row card-group-row">
 		<div class="col-lg-12 col-md-12">
-			<div class="card-group">
+			<!--div class="card-group">
 				<div class="card card-body">
 					<div class="d-flex flex-row">
 						<div class="col-md-2">
@@ -54,7 +54,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div-->
 			<div class="card">
 				<div class="card-header card-header-large bg-white d-flex align-items-center">
 					<h5 class="card-header__title flex m-0">Apotek</h5>

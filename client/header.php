@@ -12,9 +12,9 @@
 
 
 				<!-- Navbar Brand -->
-				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand" style="padding: 0px;">
-                    <img class="navbar-brand-icon" style="position: absolute; margin-top: 0px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="50" alt="<?php echo __PC_CUSTOMER__; ?>">
-                    <h3 style="padding-left: 60px !important; color: #fff;"><?php echo __PC_CUSTOMER__; ?></h3>
+				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand">
+                    <img class="navbar-brand-icon" style="position: absolute; margin-top: 50px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="200" height="100" alt="<?php echo __PC_CUSTOMER__; ?>">
+                    <!--h3 style="padding-left: 60px !important; color: #fff;"><?php echo __PC_CUSTOMER__; ?></h3-->
 				</a>
 				<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
                     <?php
@@ -57,9 +57,8 @@
 								<div><?php echo $_SESSION['email']; ?></div>
 							</div>
 							<div class="dropdown-divider"></div>
-							<a class="dropdown-item active" href="<?php echo __HOSTNAME__; ?>/template/index.html">Dashboard</a>
+							<a class="dropdown-item active" href="<?php echo __HOSTNAME__; ?>">Dashboard</a>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/profile">My profile</a>
-							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/template/edit-account.html">Edit account</a>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/logout">Logout</a>
 						</div>

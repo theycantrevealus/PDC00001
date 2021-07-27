@@ -161,7 +161,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 							<div class="form-group col-lg-8">
 								<label for="txt_lingkar_lengan">Lingkar Lengan Atas</label>
 								<div class="input-group input-group-merge">
-									<input type="text" value="0" id="txt_lingkar_lengan" class="form-control form-control-appended" placeholder="Lingkar Lengan Atas" readonly />
+									<input type="text" value="0" id="txt_lingkar_lengan" class="form-control form-control-appended" placeholder="Lingkar Lengan Atas" />
 									<div class="input-group-append">
 										<div class="input-group-text">
 											<span>cm</span>
@@ -188,10 +188,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 			</div>
 			<div class="card-body tab-content" style="min-height: 200px">
 				<div class="tab-pane active show fade" id="asesmen-kerja">
-                    <div class="edit-switch-container" target="txt_diagnosa_kerja">
-                        <i class="fa fa-pencil-alt"></i> Edit
-                    </div>
-					<div class="form-group">
+                    <div class="form-group">
 						<label for="txt_icd_10_kerja">ICD 10</label>
 						<div class="row">
 							<div class="col-lg-8">
@@ -219,12 +216,12 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 						<br />
 						<div id="txt_diagnosa_kerja"></div>
 					</div>
-				</div>
-				<div class="tab-pane show fade" id="asesmen-banding">
-                    <div class="edit-switch-container" target="txt_diagnosa_banding">
+                    <div class="edit-switch-container" target="txt_diagnosa_kerja">
                         <i class="fa fa-pencil-alt"></i> Edit
                     </div>
-					<div class="form-group">
+				</div>
+				<div class="tab-pane show fade" id="asesmen-banding">
+                    <div class="form-group">
 						<label for="txt_icd_10_banding">ICD 10</label>
 						<div class="row">
 							<div class="col-lg-8">
@@ -252,6 +249,9 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 						<br />
 						<div id="txt_diagnosa_banding"></div>
 					</div>
+                    <div class="edit-switch-container" target="txt_diagnosa_banding">
+                        <i class="fa fa-pencil-alt"></i> Edit
+                    </div>
 				</div>
 			</div>
 		</div>

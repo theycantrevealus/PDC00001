@@ -3,13 +3,19 @@
 	$(function(){
 		var status_antrian = '<?= $_GET['antrian']; ?>';
 
+		if(status_antrian === "true") {
+		    $("#btnBatal").attr({
+                "href": __HOSTNAME__ + "/rawat_jalan/resepsionis"
+            });
+        }
+
 		var allData = {};
 		loadTermSelectBox('panggilan', 3);
 		loadTermSelectBox('suku', 6);
 		loadTermSelectBox('pendidikan', 8);
 		loadTermSelectBox('pekerjaan', 9);
 		loadTermSelectBox('status_suami_istri', 10);
-		loadTermSelectBox('alamat_kecamatan', 12);
+		//loadTermSelectBox('alamat_kecamatan', 12);
 		loadTermSelectBox('goldar', 4);
 		loadTermSelectBox('agama', 5);
 		loadTermSelectBox('warganegara', 7);
@@ -123,7 +129,7 @@
 				}
 			});
 
-			if(requiredItem.length == 0) {
+			if(requiredItem.length === 0) {
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Pasien",

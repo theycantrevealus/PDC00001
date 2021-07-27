@@ -26,7 +26,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -44,6 +44,11 @@
 						return "<span id=\"lantai_" + row["uid"] + "\" data-uid=\""+ row['uid_lantai'] +"\">" + row["lantai"] + "</span>";
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span id=\"tarif_" + row["uid"] + "\" data-uid=\""+ row['uid_lantai'] +"\">" + number_format(parseFloat(row.tarif), 2, ".", ",") + "</span>";
+                    }
+                },
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
@@ -73,6 +78,14 @@
 	            } );
 	        }*/
 		});
+
+		$("#txt_tarif").inputmask({
+            alias: 'decimal',
+            rightAlign: true,
+            placeholder: "0.00",
+            prefix: "",
+            digitsOptional: true
+        });
 
 		$("body").on("click", ".btn-delete-bed", function(){
 			var uid = $(this).attr("id").split("_");
@@ -109,6 +122,8 @@
             var ruangan = $("#ruangan_" + uid).data("uid");
             $("#ruangan").val(ruangan).trigger('change');
 
+            $("#txt_tarif").val($("#tarif_" + uid).html());
+
 			$("#form-tambah").modal("show");
 			return false;
 		});
@@ -127,6 +142,7 @@
 			var nama = $("#txt_nama").val();
 			var ruangan = $("#ruangan").val();
             var lantai = $("#lantai").val();
+            var tarif = $("#txt_tarif").inputmask("unmaskedvalue");
 
 			if(nama != "" && ruangan != "") {
 				var form_data = {};
@@ -135,7 +151,8 @@
 						"request": "tambah_bed",
 						"nama": nama,
                         "lantai": lantai,
-						"ruangan": ruangan
+						"ruangan": ruangan,
+                        "tarif": tarif
 					};
 				} else {
 					form_data = {
@@ -143,7 +160,8 @@
 						"uid": selectedUID,
 						"nama": nama,
                         "lantai": lantai,
-						"ruangan": ruangan
+						"ruangan": ruangan,
+                        "tarif": tarif
 					};
 				}
 
@@ -156,12 +174,14 @@
 					},
 					type: "POST",
 					success: function(response){
-					    console.log(response);
-						$("#txt_nama").val("");
-						$("#ruangan").val("");
-						$("#ruangan").trigger('change');
-						$("#form-tambah").modal("hide");
-						tableBed.ajax.reload();
+					    var result = response.response_package.response_result;
+					    if(result > 0) {
+                            $("#txt_nama").val("");
+                            $("#ruangan").val("");
+                            $("#ruangan").trigger('change');
+                            $("#form-tambah").modal("hide");
+                            tableBed.ajax.reload();
+                        }
 					},
 					error: function(response) {
 						console.log(response);
@@ -255,11 +275,23 @@
 						<label for="txt_nama">Nama Bed:</label>
 						<input type="text" class="form-control" id="txt_nama" />
 					</div>
+                    <div class="form-group col-md-12">
+                        <label for="txt_nama">Tarif/Hari:</label>
+                        <input type="text" class="form-control" id="txt_tarif" />
+                    </div>
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-				<button type="button" class="btn btn-primary" id="btnSubmit">Submit</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
+				<button type="button" class="btn btn-primary" id="btnSubmit">
+                    <span>
+                        <i class="fa fa-check"></i> Submit
+                    </span>
+                </button>
 			</div>
 		</div>
 	</div>

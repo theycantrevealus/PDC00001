@@ -222,7 +222,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autoNum"];
+                        return "<h5 class=\"autonum\">" + row.autoNum + "</h5>";
 					}
 				},
 				{
@@ -326,7 +326,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary" id="btn_submit_modul">Tambah</button>
+				<button type="button" class="btn btn-primary" id="btn_submit_modul">Add</button>
 			</div>
 		</div>
 	</div>

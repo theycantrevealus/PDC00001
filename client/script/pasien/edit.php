@@ -3,6 +3,10 @@
 <script type="text/javascript">
 	
 	$(function(){
+        var status_antrian = '<?= $_GET['antrian']; ?>';
+
+        var currentAntrianID = localStorage.getItem("currentAntrianID");
+        
 		var allData = {};
 
 		loadTermSelectBox('panggilan', 3);
@@ -10,7 +14,7 @@
 		loadTermSelectBox('pendidikan', 8);
 		loadTermSelectBox('pekerjaan', 9);
 		//loadTermSelectBox('status_suami_istri', 10);
-		loadTermSelectBox('alamat_kecamatan', 12);
+		//loadTermSelectBox('alamat_kecamatan', 12);
 		loadTermSelectBox('goldar', 4);
 		loadTermSelectBox('agama', 5);
 		loadTermSelectBox('warganegara', 7);
@@ -48,10 +52,35 @@
 			var jenkel = $("input[name='jenkel']:checked").val();
 			allData.jenkel = jenkel;
 
+            if(parseInt($("#warganegara option:selected").val()) === __WNI__) {
+                $("#nik").attr({
+                    "required": "required"
+                }).addClass("required");
+
+                $("#no_passport").removeAttr("required").removeClass("required");
+            } else {
+                $("#no_passport").attr({
+                    "required": "required"
+                }).addClass("required");
+
+                $("#nik").removeAttr("required").removeClass("required");
+            }
+
+            var requiredItem = [];
+
 			$(".inputan").each(function(){
 				var value = $(this).val();
 
-				if (value != "" && value != null){
+                if($(this).hasClass("required")) {
+                    if (value == "" || value == null || value == undefined ) {
+                        $("label[for=\"" + $(this).attr("id") + "\"]").addClass("text-danger");
+                        requiredItem.push($(this).attr("id"));
+                    } else {
+                        $("label[for=\"" + $(this).attr("id") + "\"]").removeClass("text-danger");
+                    }
+                }
+
+				if (value !== "" && value !== null){
 					$this = $(this);
 					if ($this.is('input') || $this.is('textarea')){
 						value = value.toUpperCase();
@@ -62,7 +91,7 @@
 					}
 
 					var name = $(this).attr("name");
-					if (name == 'email'){
+					if (name === "email"){
 						value = value.toLowerCase();
 					}
 
@@ -70,26 +99,37 @@
 				}
 			});
 
-			$.ajax({
-				async: false,
-				url: __HOSTAPI__ + "/Pasien",
-				data: {
-					request : "edit-pasien",
-					dataObj : allData,
-					uid: uid_pasien
-				},
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-				},
-				type: "POST",
-				success: function(response){
-					location.href = __HOSTNAME__ + '/pasien';
-				},
-				error: function(response) {
-					console.log("Error : ");
-					console.log(response);
-				}
-			});
+            if(requiredItem.length === 0) {
+                $.ajax({
+                    async: false,
+                    url: __HOSTAPI__ + "/Pasien",
+                    data: {
+                        request : "edit-pasien",
+                        dataObj : allData,
+                        uid: uid_pasien
+                    },
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    type: "POST",
+                    success: function(response) {
+                        if (status_antrian === "true"){
+                            localStorage.setItem("currentPasien", uid_pasien);
+                            location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + uid_pasien;
+                        } else {
+                            location.href = __HOSTNAME__ + '/pasien';
+                        }
+                    },
+                    error: function(response) {
+                        console.log("Error : ");
+                        console.log(response);
+                    }
+                });
+            } else {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $("#" + requiredItem[0]).offset().top - 300
+                }, 500);
+            }
 
 			return false;
 		});
@@ -146,6 +186,18 @@
 		});
 
 		$(".select2").select2({});
+        $("#warganegara").val(__WNI__).trigger("change");
+        $(".loader-wna").hide();
+        $("#warganegara").change(function() {
+            var currentChange = $("#warganegara option:selected").val();
+            if(parseInt(currentChange) === __WNI__) {
+                $(".loader-wni").show();
+                $(".loader-wna").hide();
+            } else {
+                $(".loader-wni").hide();
+                $(".loader-wna").show();
+            }
+        });
 		
 		$('#no_rm').inputmask('99-99-99');
 
@@ -218,16 +270,30 @@
             beforeSend: function(request) {
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
-            success: function(response){
+            success: function(response) {
                 var MetaData = response.response_package.response_data;
 
-                if (MetaData != ""){
-                	for(i = 0; i < MetaData.length; i++){
-	                    var selection = document.createElement("OPTION");
+                if (MetaData !== "") {
+                    if(selector === "warganegara") {
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+                            if (MetaData[i].id === __WNI__) {
+                                $(selection).attr({
+                                    "selected": "selected"
+                                });
+                            }
+                            $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+                            $("#" + selector).append(selection);
+                        }
+                        //$("#" + selector).val(__WNI__).trigger("change");
+                    } else {
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
 
-	                    $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
-	                    $("#" + selector).append(selection);
-	                }
+                            $(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+                            $("#" + selector).append(selection);
+                        }
+                    }
                 }
                 
             },
@@ -382,7 +448,6 @@
         dataSource: __HOSTAPI__ + "/CPPT/semua/all/" + __PAGES__[2],
         locator: 'response_package.response_data',
         totalNumberLocator: function(response) {
-            console.log(response);
             return response.response_package.response_total;
         },
         pageSize: 1,
@@ -468,7 +533,7 @@
             success: function(response){
                 var MetaData = response.response_package.response_data;
 
-                if (MetaData != ""){
+                if (MetaData !== undefined){
                 	for(i = 0; i < MetaData.length; i++){
 	                    var selection = document.createElement("OPTION");
 

@@ -39,11 +39,14 @@
 				</div>
 				<div class="card-body">
 					<div class="row">
-						<div class="col-lg-2" style="border-right: solid 1px #cccc;">
+                        <div class="col-lg-2" style="border-right: solid 1px #cccc;">
 							<center>Antrian terkini</center>
 							<h1 class="text-center" id="txt_current_antrian">0</h1>
 						</div>
-						<div class="col-lg-5">
+						<div class="col-lg-3" style="border-right: solid 1px #cccc;">
+                            <div class="col-lg-12">
+                                <br />
+                            </div>
 							<button class="btn btn-info" id="btnPanggil">
 								<i class="fa fa-bullhorn"></i> PANGGIL
 							</button>
@@ -54,10 +57,25 @@
 								<i class="fa fa-plus"></i> DAFTAR PASIEN
 							</button>
 						</div>
-						<div class="col-lg-5">
-							<span class="text-secondary">Sisa Antrian</span><br />
-							<h5><b id="sisa_antrian">0</b></h5>
+						<div class="col-lg-2" style="border-right: solid 1px #cccc;">
+                            <center>
+                                <span class="text-secondary">Sisa Antrian</span><br />
+                                <h5><b id="sisa_antrian">0</b></h5>
+                            </center>
 						</div>
+                        <div class="col-lg-3">
+                            <span class="text-secondary">Antrian Terlewat</span>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <select id="antrian_terlewat" class="form-control"></select>
+                                </div>
+                                <div class="col-lg-6">
+                                    <button class="btn btn-purple" id="btnSetLewat">
+                                        <i class="fa fa-check"></i> AKTIFKAN
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
 					</div>
 				</div>
 			</div>
@@ -120,7 +138,7 @@
                                                     <th>Dokter</th>
                                                     <th>Penjamin</th>
                                                     <th>Oleh</th>
-                                                    <th>Aksi</th>
+                                                    <th class="wrap_content">Aksi</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -150,7 +168,7 @@
                                             <th>Pasien</th>
                                             <th>Dokter</th>
                                             <th>Penjamin</th>
-                                            <th>Aksi</th>
+                                            <th class="wrap_content">Aksi</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -179,7 +197,7 @@
                                             <th>Dokter</th>
                                             <th>Penjamin</th>
                                             <th>Oleh</th>
-                                            <th>Aksi</th>
+                                            <th class="wrap_content">Aksi</th>
                                         </tr>
                                         </thead>
                                         <tbody>
