@@ -71,12 +71,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return (row.petugas !== undefined) ? row.petugas.nama : "";
+                        return (row.petugas !== undefined && row.petugas !== null) ? row.petugas.nama : "";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return (row.dokter_radio.nama !== undefined && row.dokter_radio.nama !== null) ? row.dokter_radio.nama : "";
+                        return (row.dokter_radio !== undefined && row.dokter_radio !== null) ? row.dokter_radio.nama : "";
                     }
                 },
                 {

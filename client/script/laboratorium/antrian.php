@@ -31,7 +31,36 @@
 		$("#btnSelesai").click(function (e) {
             e.preventDefault();
 
-            if($("#kesan").val() !== "" && $("#anjuran").val() !== "") {
+            if(__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) {
+                if(
+                    $("#kesan").val() !== "" && $("#anjuran").val() !== ""
+                ) {
+                    Swal.fire({
+                        title: 'Selesai pemeriksaan laboratorium?',
+                        text: 'Setelah selesai, pemeriksaan sudah tidak dapat diedit lagi dan langsung menjadi riwayat pemeriksaan',
+                        showDenyButton: true,
+                        //showCancelButton: true,
+                        confirmButtonText: `Ya`,
+                        denyButtonText: `Belum`,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            mode_selesai = "Y";
+                            form_data.append("selesai", "Y");
+                            $("#formHasilLab").submit();
+                        } else if (result.isDenied) {
+                            //
+                        }
+                    });
+                } else {
+                    Swal.fire(
+                        "Pemeriksaan Gagal Disimpan!",
+                        "Kesan Dan Anjuran Harus Diisi",
+                        "error"
+                    ).then((result) => {
+                        //location.href = __HOSTNAME__ + "/laboratorium/proses";
+                    });
+                }
+            } else {
                 Swal.fire({
                     title: 'Selesai pemeriksaan laboratorium?',
                     text: 'Setelah selesai, pemeriksaan sudah tidak dapat diedit lagi dan langsung menjadi riwayat pemeriksaan',
@@ -48,22 +77,42 @@
                         //
                     }
                 });
-            } else {
-                Swal.fire(
-                    "Pemeriksaan Gagal Disimpan!",
-                    "Kesan Dan Anjuran Harus Diisi",
-                    "error"
-                ).then((result) => {
-                    location.href = __HOSTNAME__ + "/laboratorium/proses";
-                });
             }
+
 
             return false;
         });
 
         $("#btnSimpan").click(function (e) {
             e.preventDefault();
-            if($("#kesan").val() !== "" && $("#anjuran").val() !== "") {
+            if(__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) {
+                if($("#kesan").val() !== "" && $("#anjuran").val() !== "") {
+                    Swal.fire({
+                        title: 'Simpan data pemeriksaan laboratorium?',
+                        text: 'Simpan dahulu hasil pemeriksaan untuk di-edit lagi',
+                        showDenyButton: true,
+                        //showCancelButton: true,
+                        confirmButtonText: `Ya`,
+                        denyButtonText: `Belum`,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            mode_selesai = "N";
+                            form_data.append("selesai", "N");
+                            $("#formHasilLab").submit();
+                        } else if (result.isDenied) {
+                            //
+                        }
+                    });
+                } else {
+                    Swal.fire(
+                        "Pemeriksaan Gagal Disimpan!",
+                        "Kesan Dan Anjuran Harus Diisi",
+                        "error"
+                    ).then((result) => {
+                        //location.href = __HOSTNAME__ + "/laboratorium/proses";
+                    });
+                }
+            } else {
                 Swal.fire({
                     title: 'Simpan data pemeriksaan laboratorium?',
                     text: 'Simpan dahulu hasil pemeriksaan untuk di-edit lagi',
@@ -80,15 +129,8 @@
                         //
                     }
                 });
-            } else {
-                Swal.fire(
-                    "Pemeriksaan Gagal Disimpan!",
-                    "Kesan Dan Anjuran Harus Diisi",
-                    "error"
-                ).then((result) => {
-                    location.href = __HOSTNAME__ + "/laboratorium/proses";
-                });
             }
+
 
             return false;
         });
