@@ -20,7 +20,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var dataSet = response.response_package.response_data;
                     if(response.response_package === undefined || dataSet === undefined) {
                         dataSet = [];
@@ -70,7 +69,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return (row.petugas !== undefined && row.petugas !== null) ? row.petugas.nama : "";
+                        return (row.petugas.nama !== undefined && row.petugas.nama !== null) ? row.petugas.nama : "";
                     }
                 },
                 {
