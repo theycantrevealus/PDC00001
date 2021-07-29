@@ -49,16 +49,20 @@
                     "data" : null, render: function(data, type, row, meta) {
                         var apotekAllow = 0;
                         var apotek = row.tagihan_apotek;
-                        for(var a in apotek) {
-                            if(
-                                apotek[a].status_resep === "N" ||   //Verifikasi
-                                apotek[a].status_resep === "K"      //Bayar
-                            ) {
-                                apotekAllow = 0;
-                                break;
-                            } else {
-                                apotekAllow = 1;
+                        if(apotek.length > 0) {
+                            for(var a in apotek) {
+                                if(
+                                    apotek[a].status_resep === "N" ||   //Verifikasi
+                                    apotek[a].status_resep === "K"      //Bayar
+                                ) {
+                                    apotekAllow = 0;
+                                    break;
+                                } else {
+                                    apotekAllow = 1;
+                                }
                             }
+                        } else {
+                            apotekAllow = 1;
                         }
 
 
@@ -225,7 +229,6 @@
                             var totalBiaya = 0;
 
                             for(var a in dataTagihan) {
-                                console.log(dataTagihan[a]);
                                 var autoTagihanID = 1;
 
 
