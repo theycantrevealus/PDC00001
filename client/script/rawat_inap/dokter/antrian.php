@@ -2356,6 +2356,8 @@
             //if($("#txt_racikan_jlh").val() != "" && $("#txt_racikan_takar").val()) {
             $("#form-editor-racikan").modal("hide");
             //}
+
+            checkGenerateRacikan(currentRacikID);
         });
 
         $("body").on("keyup", ".racikan_signa_a", function() {
