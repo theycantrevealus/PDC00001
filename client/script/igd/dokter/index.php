@@ -5,9 +5,6 @@
 
         $("#btnInap").click(function() {
             loadPenjamin("inap", __PAGES__[5]);
-            //loadPoli("igd");
-            //loadKamar("inap");
-            //loadBangsal("inap", $("#inap_kamar").val());
             $("#form-inap").modal("show");
         });
 

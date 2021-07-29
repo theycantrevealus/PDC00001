@@ -60,6 +60,11 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md col-lg-3">
+                                    <button type="button" class="btn btn-purple" id="btnInap">
+                                        <i class="fa fa-bed"></i> Pindah Rawat Inap
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

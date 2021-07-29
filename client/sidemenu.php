@@ -88,6 +88,11 @@
                         <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">apps</i> Profile
                     </a>
                 </li>
+                <li class="sidebar-menu-item">
+                    <a class="sidebar-menu-button" href="<?php echo __HOSTNAME__ ?>/system/logout">
+                        <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">apps</i> Logout
+                    </a>
+                </li>
             </ul>
 			<div class="sidebar-heading sidebar-m-t" id="sidemenu_1">Menu</div>
 			<ul class="sidebar-menu">

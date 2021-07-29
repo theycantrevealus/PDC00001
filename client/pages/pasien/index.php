@@ -33,7 +33,7 @@
                             <a style="width: 400px;">
                                 <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
                             </a>
-                            <a style="width: 200px;">
+                            <a style="width: 600px;">
                                 <select class="form-control" id="filter-kunjungan">
                                     <option value="all">Semua</option>
                                     <option value="data_kurang">Data Belum Lengkap</option>
@@ -41,7 +41,9 @@
                             </a>
                             <a style="width: 200px;">
                                 <button class="btn btn-info" id="btn-import">
-                                    <i class="fa fa-download"></i> Import
+                                    <span>
+                                        <i class="fa fa-download"></i> Import
+                                    </span>
                                 </button>
                             </a>
                         </div>
