@@ -20,6 +20,7 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+                    console.log(response);
                     var dataSet = response.response_package.response_data;
                     if(response.response_package === undefined || dataSet === undefined) {
                         dataSet = [];
@@ -74,7 +75,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return (row.dokter_radio !== undefined && row.dokter_radio !== null) ? row.dokter_radio.nama : "";
+                        return (row.dokter_radio.nama !== undefined && row.dokter_radio.nama !== null) ? row.dokter_radio.nama : "";
                     }
                 },
                 {
