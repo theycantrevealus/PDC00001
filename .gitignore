@@ -46,3 +46,4 @@ api/*.sql
 *.sql
 *.png
 *.zip
+error_log
