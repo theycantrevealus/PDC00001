@@ -2,7 +2,7 @@
 
 namespace PondokCoder;
 
-use PondokCoder\Authorization as Authorization;
+use PondokCoder\Authorization;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
 use PondokCoder\Antrian as Antrian;
@@ -105,6 +105,9 @@ class Apotek extends Utility
                     break;
                 case 'aktifkan_resep':
                     return self::aktifkan_resep($parameter);
+                    break;
+                case 'extend_resep':
+                    return self::extend_resep($parameter);
                     break;
                 case 'get_resep_selesai_backend':
                     /*$parameter['status'] = 'D';
@@ -867,6 +870,7 @@ class Apotek extends Utility
         $dataResponse['alergi_obat'] = $resep['response_data'][0]['alergi_obat'];
         $dataResponse['iterasi'] = $resep['response_data'][0]['iterasi'];
         $dataResponse['kode'] = $resep['response_data'][0]['kode'];
+        $dataResponse['asesmen_uid'] = $resep['response_data'][0]['asesmen'];
         $dataResponse['created_at_parsed'] = date('d F Y', strtotime($resep['response_data'][0]['created_at']));
 
         $AntrianDetail = self::$query->select('antrian', array(
@@ -909,12 +913,13 @@ class Apotek extends Utility
 
             $AntrianDetail['response_data'][$AKey]['dokter'] = $Dokter->get_detail_pegawai($AValue['dokter'])['response_data'][0];
 
-            $current = strtotime(date('Y-m-d'));
-            $date    = strtotime($AValue['created_at']);
+            $date = strtotime($AValue['created_at']);
 
-            $datediff = $date - $current;
-            $difference = floor($datediff/(60*60*24));
-            $AntrianDetail['response_data'][$AKey]['allow_edit'] = ($difference === 0);
+            $datediff = time() - $date;
+            $datediff = ($datediff < 1) ? 1 : $datediff;
+            $difference = floor($datediff / (60 * 60 * __RECIPE_TIME_TOLERANCE__));
+            $AntrianDetail['response_data'][$AKey]['allow_edit'] = ($difference <= 0);
+            $AntrianDetail['response_data'][$AKey]['created_time'] = parent::humanTiming($date);
         }
 
         $dataResponse['detail'] = $AntrianDetail['response_data'][0];
@@ -931,6 +936,7 @@ class Apotek extends Utility
                 'iterasi',
                 'keterangan',
                 'aturan_pakai',
+                'satuan_konsumsi',
                 'qty',
                 'satuan',
                 'created_at',
@@ -1004,6 +1010,8 @@ class Apotek extends Utility
             //Asesmen Detail
             $Asesmen = self::$query->select('asesmen_medis_' . $AntrianDetail['response_data'][0]['departemen']['poli_asesmen'], array(
                 'uid',
+                'kunjungan',
+                'antrian',
                 'diagnosa_kerja',
                 'diagnosa_banding',
                 'icd10_kerja',
@@ -2513,6 +2521,504 @@ class Apotek extends Utility
         return $data;
     }
 
+    private function extend_resep($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        //Check Invoice
+        $Invoice = new Invoice(self::$pdo);
+        $InvoiceCheck = self::$query->select('invoice', array(
+            'uid'
+        ))
+            ->where(array(
+                'invoice.kunjungan' => '= ?',
+                'AND',
+                'invoice.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['kunjungan']
+            ))
+            ->execute();
+
+        if(count($InvoiceCheck['response_data']) > 0) {
+            $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
+        } else {
+            $InvMasterParam = array(
+                'kunjungan' => $parameter['kunjungan'],
+                'pasien' => $parameter['pasien'],
+                'keterangan' => 'Tagihan tindakan perobatan'
+            );
+            $NewInvoice = $Invoice->create_invoice($InvMasterParam);
+            $TargetInvoice = $NewInvoice['response_unique'];
+        }
+
+
+        $check = self::$query->select('resep', array(
+            'uid',
+            'kode'
+        ))
+            ->where(array(
+                'resep.kunjungan' => '= ?',
+                'AND',
+                'resep.antrian' => '= ?',
+                'AND',
+                'resep.asesmen' => '= ?',
+                'AND',
+                'resep.dokter' => '= ?',
+                'AND',
+                'resep.pasien' => '= ?',
+                'AND',
+                '(resep.status_resep' => '= ?',
+                'OR',
+                'resep.status_resep' => '= ?)',
+                'AND',
+                'resep.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['kunjungan'],
+                $parameter['antrian'],
+                $parameter['asesmen'],
+                $UserData['data']->uid,
+                $parameter['pasien'],
+                'N',
+                'C'
+            ))
+            ->execute();
+
+        if(count($check['response_data']) > 0) {
+            $uid = $check['response_data'][0]['uid'];
+            $Kode = $check['response_data'][0]['kode'];
+
+            //Update resep master
+            $resepUpdate = self::$query->update('resep', array(
+                'alergi_obat' => (isset($parameter['editorAlergiObat']) && !is_null($parameter['editorAlergiObat']) && !empty($parameter['editorAlergiObat'])) ? $parameter['editorAlergiObat'] : '',
+                'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
+                'iterasi' => (isset($parameter['iterasi'])) ? intval($parameter['iterasi']) : 0,
+                'alasan_tambahan' => $parameter['alasan'],
+                'keterangan' => $parameter['keteranganResep'],
+                'keterangan_racikan' => $parameter['keteranganRacikan']
+            ))
+                ->where(array(
+                    'resep.uid' => '= ?',
+                    'AND',
+                    'resep.deleted_at' => 'IS NULL'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+
+            //Reset Resep Detail
+            $resetResep = self::$query->update('resep_detail', array(
+                'deleted_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'resep_detail.resep' => '= ?'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+
+            //Update Detail Resep
+            $used_obat = array();
+            $old_resep_detail = array();
+            $detail_check = self::$query->select('resep_detail', array(
+                'id',
+                'obat'
+            ))
+                ->where(array(
+                    'resep_detail.resep' => '= ?'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+
+            foreach ($detail_check['response_data'] as $key => $value) {
+                if(!in_array($value['obat'], $used_obat)) {
+                    array_push($used_obat, $value['obat']);
+                    array_push($old_resep_detail, $value);
+                }
+            }
+
+            $resepProcess = array();
+
+            foreach ($parameter['resep'] as $key => $value) {
+                //Prepare Data Obat
+                $ObatDetail = new Inventori(self::$pdo);
+                $ObatInfo = $ObatDetail->get_item_detail($value['obat'])['response_data'][0];
+
+                if(in_array($value['obat'], $used_obat)) {
+                    $worker = self::$query->update('resep_detail', array(
+                        'signa_qty' => $value['signaKonsumsi'],
+                        'signa_pakai' => $value['signaTakar'],
+                        'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
+                        'qty' => $value['signaHari'],
+                        'aturan_pakai' => intval($value['aturanPakai']),
+                        'keterangan' => $value['keteranganPerObat'],
+                        'satuan_konsumsi' => $value['satuanPemakaian'],
+                        'updated_at'=> parent::format_date(),
+                        'deleted_at' => NULL
+                    ))
+                        ->where(array(
+                            'resep_detail.resep' => '= ?',
+                            'AND',
+                            'resep_detail.obat' => '= ?'
+                        ), array(
+                            $uid,
+                            $value['obat']
+                        ))
+                        ->execute();
+                } else {
+                    $worker = self::$query->insert('resep_detail', array(
+                        'resep' => $uid,
+                        'obat' => $value['obat'],
+                        'harga' => 0,
+                        'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
+                        'signa_qty' => $value['signaKonsumsi'],
+                        'signa_pakai' => $value['signaTakar'],
+                        'qty' => $value['signaHari'],
+                        'satuan' => $ObatInfo['satuan_terkecil'],
+                        'aturan_pakai' => intval($value['aturanPakai']),
+                        'keterangan' => $value['keteranganPerObat'],
+                        'satuan_konsumsi' => $value['satuanPemakaian'],
+                        'created_at' => parent::format_date(),
+                        'updated_at'=> parent::format_date()
+                    ))
+                        ->execute();
+                }
+                array_push($resepProcess, $worker);
+            }
+
+
+
+
+            //Reset Racikan
+            $racikReset = self::$query->update('racikan', array(
+                'deleted_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?'
+                ), array(
+                    $parameter['asesmen']
+                ))
+                ->execute();
+
+
+            //Filter #1
+            $racikanOld = self::$query->select('racikan', array(
+                'uid'
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?'
+                    /*,'AND',
+                    'racikan.kode' => '= ?'*/
+                ), array(
+                    $parameter['asesmen']
+                    //,$parameter['racikan'][$key]['nama']
+                ))
+                ->execute();
+
+            $racikanError = array();
+
+            foreach ($racikanOld['response_data'] as $key => $value) {
+                $racikanUpdate = self::$query->update('racikan', array(
+                    'kode' => '['. $Kode . ']' . $parameter['racikan'][$key]['nama'],
+                    'iterasi' => (isset($parameter['racikan'][$key]['iterasi'])) ? intval($parameter['racikan'][$key]['iterasi']) : 0,
+                    'aturan_pakai' => intval($parameter['racikan'][$key]['aturanPakai']),
+                    'keterangan' => $parameter['racikan'][$key]['keterangan'],
+                    'signa_qty' => $parameter['racikan'][$key]['signaKonsumsi'],
+                    'signa_pakai' => $parameter['racikan'][$key]['signaTakar'],
+                    'qty' => $parameter['racikan'][$key]['signaHari'],
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'racikan.uid' => '= ?'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+                if($racikanUpdate['response_result'] > 0) {
+                    //
+                } else {
+                    //array_push($racikanError, $racikanUpdate);
+                }
+
+
+
+                //Reset Racikan Detail
+                /*$resetRacikanDetail = self::$query->update('racikan_detail', array(
+                    'deleted_at' => parent::format_date()
+                ))
+                    ->where(array(
+                        'racikan_detail.racikan' => '= ?',
+                        'AND',
+                        'racikan_detail.asesmen' => '= ?'
+                    ), array(
+                        $value['uid'],
+                        $MasterAsesmen
+                    ))
+                    ->execute();*/
+
+                $resetRacikanDetail = self::$query->hard_delete('racikan_detail')
+                    ->where(array(
+                        /*'racikan_detail.resep' => '= ?',
+                        'AND',*/
+                        'racikan_detail.racikan' => '= ?',
+                        'AND',
+                        'racikan_detail.asesmen' => '= ?'
+                    ), array(
+                        //$uid,
+                        $value['uid'],
+                        $parameter['asesmen']
+                    ))
+                    ->execute();
+
+                //Old Racikan Detail
+                $checkRacikanDetail = self::$query->select('racikan_detail', array(
+                    'id',
+                    'obat'
+                ))
+                    ->where(array(
+                        /*'racikan_detail.resep' => '= ?',
+                        'AND',*/
+                        'racikan_detail.racikan' => '= ?',
+                        'AND',
+                        'racikan_detail.asesmen' => '= ?'
+                    ), array(
+                        //$uid,
+                        $value['uid'],
+                        $parameter['asesmen']
+                    ))
+                    ->execute();
+
+                $oldRacikanDetail = array();
+                $usedRacikanDetail = array();
+                foreach ($checkRacikanDetail['response_data'] as $RDKey => $RDValue) {
+                    if(!in_array($RDValue['obat'], $usedRacikanDetail)) {
+                        array_push($usedRacikanDetail, $RDValue['obat']);
+                        array_push($oldRacikanDetail, $RDValue);
+                    }
+                }
+
+                foreach ($parameter['racikan'][$key]['item'] as $RDIKey => $RDIValue) {
+                    if(in_array($RDIValue['obat'], $usedRacikanDetail)) {
+                        $racikanDetailWorker = self::$query->update('racikan_detail', array(
+                            'obat' => $RDIValue['obat'],
+                            'ratio' => floatval($RDIValue['takaran']),
+                            'kekuatan' => $RDIValue['kekuatan'],
+                            'penjamin' => $parameter['penjamin'],
+                            //'takar_bulat' => $RDIValue['takaranBulat'],
+                            //'takar_decimal' => $RDIValue['takaranDecimalText'],
+                            'pembulatan' => ceil($RDIValue['takaran']),
+                            'deleted_at' => NULL
+                        ))
+                            ->where(array(
+                                /*'racikan_detail.resep' => '= ?',
+                                'AND',*/
+                                'racikan_detail.racikan' => '= ?',
+                                'AND',
+                                'racikan_detail.asesmen' => '= ?',
+                                'AND',
+                                'racikan_detail.obat' => '= ?'
+                            ), array(
+                                //$uid,
+                                $value['uid'],
+                                $parameter['asesmen'],
+                                $RDIValue['obat']
+                            ))
+                            ->execute();
+                    } else {
+                        $racikanDetailWorker = self::$query->insert('racikan_detail', array(
+                            'asesmen' => $parameter['asesmen'],
+                            //'resep' => $uid,
+                            'obat' => $RDIValue['obat'],
+                            'pembulatan' => ceil($RDIValue['takaran']),
+                            'kekuatan' => $RDIValue['kekuatan'],
+                            //'takar_bulat' => $RDIValue['takaranBulat'],
+                            //'takar_decimal' => $RDIValue['takaranDecimalText'],
+                            'harga' => 0,
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date(),
+                            'racikan' => $value['uid'],
+                            'ratio' => floatval($RDIValue['takaran'])
+                        ))
+                            ->execute();
+                    }
+                }
+
+                //array_push($racikanError, $racikanDetailWorker);
+
+                //Unset processed data from parameter
+                unset($parameter['racikan'][$key]);
+            }
+
+            //UnProcessed Racikan
+            foreach ($parameter['racikan'] as $key => $value) {
+                $newRacikanUID = parent::gen_uuid();
+                $newRacikan = self::$query->insert('racikan', array(
+                    'uid' => $newRacikanUID,
+                    'asesmen' => $parameter['asesmen'],
+                    'kode' => '['. $Kode . ']' . $value['nama'],
+                    'total' => 0,
+                    'signa_qty' => $value['signaKonsumsi'],
+                    'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
+                    'keterangan' => $value['keterangan'],
+                    'signa_pakai' => $value['signaTakar'],
+                    'aturan_pakai' => intval($value['aturanPakai']),
+                    'qty' => $value['signaHari'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+
+                if($newRacikan['response_result'] > 0) {
+                    $racikanDetail = $parameter['racikan']['item'];
+                    foreach ($racikanDetail as $RDKey => $RDValue) {
+                        $detailRacikan = self::$query->insert('racikan_detail', array(
+                            'asesmen' => $parameter['asesmen'],
+                            'racikan' => $newRacikanUID,
+                            //'resep' => $uid,
+                            'obat' => $RDValue['obat'],
+                            'ratio' => floatval($RDValue['takaran']),
+                            'pembulatan' => ceil($RDValue['takaran']),
+                            'kekuatan' => $RDValue['kekuatan'],
+                            //'takar_bulat' => $RDIValue['takaranBulat'],
+                            //'takar_decimal' => $RDIValue['takaranDecimalText'],
+                            'harga' => 0,
+                            'penjamin' => '',
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date(),
+                        ))
+                            ->execute();
+                        array_push($racikanError, $detailRacikan);
+                    }
+                } else {
+                    array_push($racikanError, $newRacikan);
+                }
+            }
+            return array('resep' => $resepProcess, 'racikan' => $racikanError);
+
+        } else { //Jika Resep baru
+
+
+            if(count($parameter['resep']) > 0 || count($parameter['racikan']) > 0) {
+                //New Resep
+                $uid = parent::gen_uuid();
+
+                $lastNumber = self::$query->select('resep', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'EXTRACT(month FROM created_at)' => '= ?'
+                    ), array(
+                        intval(date('m'))
+                    ))
+                    ->execute();
+                $Kode = 'RSP-' . date('Y/m') . '-' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT);
+
+                $newResep = self::$query->insert('resep',array(
+                    'uid' => $uid,
+                    'kode' => $Kode,
+                    'kunjungan' => $parameter['kunjungan'],
+                    'antrian' => $parameter['antrian'],
+                    'keterangan' => $parameter['keteranganResep'],
+                    'keterangan_racikan' => $parameter['keteranganRacikan'],
+                    'asesmen' => $parameter['asesmen'],
+                    'dokter' => $UserData['data']->uid,
+                    'pasien' => $parameter['pasien'],
+                    'alergi_obat' => (isset($parameter['editorAlergiObat']) && !is_null($parameter['editorAlergiObat']) && !empty($parameter['editorAlergiObat'])) ? $parameter['editorAlergiObat'] : '',
+                    'total' => 0,
+                    'iterasi' => (isset($parameter['iterasi'])) ? intval($parameter['iterasi']) : 0,
+                    'alasan_tambahan' => $parameter['alasan'],
+                    'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+
+                if($newResep['response_result'] > 0) {
+                    $resep_detail_error = array();
+                    //SetDetail
+                    foreach ($parameter['resep'] as $key => $value) {
+                        $ObatDetail = new Inventori(self::$pdo);
+                        $ObatInfo = $ObatDetail->get_item_detail($value['obat'])['response_data'][0];
+
+                        $newResepDetail = self::$query->insert('resep_detail', array(
+                            'resep' => $uid,
+                            'obat' => $value['obat'],
+                            'aturan_pakai' => intval($value['aturanPakai']),
+                            'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
+                            'harga' => 0,
+                            'signa_qty' => $value['signaKonsumsi'],
+                            'signa_pakai' => $value['signaTakar'],
+                            'qty' => $value['signaHari'],
+                            'satuan' => $ObatInfo['satuan_terkecil'],
+                            'satuan_konsumsi' => $value['satuanPemakaian'],
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date(),
+                            'keterangan' => $value['keteranganPerObat']
+                        ))
+                            ->execute();
+                        array_push($resep_detail_error, $newResepDetail);
+                    }
+
+                    foreach ($parameter['racikan'] as $key => $value) {
+                        $uid_racikan = parent::gen_uuid();
+                        $newRacikan = self::$query->insert('racikan', array(
+                            'uid' => $uid_racikan,
+                            'asesmen' => $parameter['asesmen'],
+                            //'resep' => $uid,
+                            'kode' => '['. $Kode . ']' . $value['nama'],
+                            'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
+                            'signa_qty' => $value['signaKonsumsi'],
+                            'signa_pakai' => $value['signaTakar'],
+                            'keterangan' => $value['keterangan'],
+                            'aturan_pakai' => intval($value['aturanPakai']),
+                            'qty' => $value['signaHari'],
+                            'total' => 0,
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date()
+                        ))
+                            ->execute();
+
+                        if($newRacikan['response_result'] > 0) {
+                            /*$newResepDetail = self::$pdo->insert('resep_detail', array(
+                                'resep' => $uid,
+                                'obat' => $uid_racikan,
+                                'aturan_pakai' => $value['aturanPakai'],
+                                'harga' => 0,
+                                'signa_qty' => $value['signaKonsumsi'],
+                                'signa_pakai' => $value['signaTakar'],
+                                'qty' => $value['signaHari'],
+                                'satuan' => '',
+                                'created_at' => parent::format_date(),
+                                'updated_at' => parent::format_date()
+                            ))
+                            ->execute();*/
+
+                            //Set Racikan Detail
+                            foreach ($value['item'] as $RIKey => $RIValue) {
+                                $newRacikanDetail = self::$query->insert('racikan_detail', array(
+                                    'asesmen' => $parameter['asesmen'],
+                                    //'resep' => $uid_racikan,
+                                    'obat' => $RIValue['obat'],
+                                    'ratio' => floatval($RIValue['takaran']),
+                                    'pembulatan' => ceil(floatval($RIValue['takaran'])),
+                                    'kekuatan' => $RIValue['kekuatan'],
+                                    //'takar_bulat' => $RIValue['takaranBulat'],
+                                    //'takar_decimal' => $RIValue['takaranDecimalText'],
+                                    'harga' => 0,
+                                    'racikan' => $uid_racikan,
+                                    'created_at' => parent::format_date(),
+                                    'updated_at' => parent::format_date()
+                                ))
+                                    ->execute();
+                            }
+                        }
+                    }
+                }
+            }
+            return $newResep;
+        }
+    }
+
     private function aktifkan_resep($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
@@ -2777,6 +3283,7 @@ class Apotek extends Utility
 
 
             $data['response_data'][$key]['allow_edit'] = ($difference === 0);
+            $data['response_data'][$key]['created_time'] = parent::humanTiming($date);
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
         }

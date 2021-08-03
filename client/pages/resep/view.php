@@ -136,9 +136,6 @@
                                     </div>
                                     <div class="col-md-12" style="margin-top: 20px; min-height: 200px">
                                         <b>Keterangan:</b>
-                                        <div class="edit-switch-container" target="txt_keterangan_resep">
-                                            <i class="fa fa-pencil-alt"></i> Edit
-                                        </div>
                                         <div id="txt_keterangan_resep"></div>
                                     </div>
                                 </div>
@@ -161,9 +158,6 @@
                                     </div>
                                     <div class="col-md-12" style="margin-top: 20px; min-height: 200px">
                                         <b>Keterangan Resep Racikan:</b>
-                                        <div class="edit-switch-container" target="txt_keterangan_resep_racikan">
-                                            <i class="fa fa-pencil-alt"></i> Edit
-                                        </div>
                                         <div id="txt_keterangan_resep_racikan"></div>
                                     </div>
                                 </div>
@@ -174,7 +168,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <a href="<?php echo __HOSTNAME__; ?>/apotek/resep/" class="btn btn-danger">
+                    <a href="<?php echo __HOSTNAME__; ?>/resep" class="btn btn-danger">
                         <i class="fa fa-ban"></i> Kembali
                     </a>
                     <button type="button" class="btn btn-success pull-right" id="btnSelesai">

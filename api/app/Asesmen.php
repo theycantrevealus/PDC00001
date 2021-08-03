@@ -1012,6 +1012,7 @@ class Asesmen extends Utility {
 						'signa_pakai',
 						'keterangan',
 						'aturan_pakai',
+						'satuan_konsumsi',
 						'qty',
 						'satuan',
 						'created_at',
@@ -1870,6 +1871,7 @@ class Asesmen extends Utility {
 						'qty' => $value['signaHari'],
 						'aturan_pakai' => intval($value['aturanPakai']),
 						'keterangan' => $value['keteranganPerObat'],
+						'satuan_konsumsi' => $value['satuanPemakaian'],
 						'updated_at'=> parent::format_date(),
 						'deleted_at' => NULL
 					))
@@ -1894,6 +1896,7 @@ class Asesmen extends Utility {
 						'satuan' => $ObatInfo['satuan_terkecil'],
 						'aturan_pakai' => intval($value['aturanPakai']),
 						'keterangan' => $value['keteranganPerObat'],
+                        'satuan_konsumsi' => $value['satuanPemakaian'],
 						'created_at' => parent::format_date(),
 						'updated_at'=> parent::format_date()
 					))
@@ -2165,6 +2168,7 @@ class Asesmen extends Utility {
                             'signa_pakai' => $value['signaTakar'],
                             'qty' => $value['signaHari'],
                             'satuan' => $ObatInfo['satuan_terkecil'],
+                            'satuan_konsumsi' => $value['satuanPemakaian'],
                             'created_at' => parent::format_date(),
                             'updated_at' => parent::format_date(),
                             'keterangan' => $value['keteranganPerObat']

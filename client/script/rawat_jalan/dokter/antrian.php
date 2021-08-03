@@ -302,6 +302,7 @@
                                             "signaTakar": resep_obat_detail[resepKey].signa_pakai,
                                             "signaHari": resep_obat_detail[resepKey].qty,
                                             "iterasi": resep_obat_detail[resepKey].iterasi,
+                                            "satuan_pemakaian": resep_obat_detail[resepKey].satuan_konsumsi,
                                             "pasien_penjamin_uid": pasien_penjamin_uid
                                         });
                                     }
@@ -1512,13 +1513,17 @@
             } else {
                 var obat = $("#resep_obat_" + id).val();
                 var jlh_hari = $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue");
-                var signa_konsumsi = $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue");
-                var signa_hari = $("#resep_signa_takar_" + id).inputmask("unmaskedvalue");
+                /*var signa_konsumsi = $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue");
+                var signa_hari = $("#resep_signa_takar_" + id).inputmask("unmaskedvalue");*/
+                var signa_konsumsi = $("#resep_signa_konsumsi_" + id).val();
+                var signa_hari = $("#resep_signa_takar_" + id).val();
                 var aturanPakai = $("#resep_aturan_pakai_" + id).val();
                 if(
                     parseFloat(jlh_hari) > 0 &&
-                    parseFloat(signa_konsumsi) > 0 &&
-                    parseFloat(signa_hari) > 0 &&
+                    /*parseFloat(signa_konsumsi) > 0 &&
+                    parseFloat(signa_hari) > 0 &&*/
+                    parseFloat(signa_konsumsi) !== "" &&
+                    parseFloat(signa_hari) !== "" &&
                     obat != null &&
                     $("#resep_row_" + id).hasClass("last-resep")
                     //&& parseInt(aturanPakai) > 0
@@ -1599,7 +1604,8 @@
             "signaKonsumsi": 0,
             "signaTakar": 0,
             "signaHari": 0,
-            "pasien_penjamin_uid": ""
+            "pasien_penjamin_uid": "",
+            "satuan_pemakaian": ""
         }) {
             $("#table-resep tbody tr").removeClass("last-resep");
             var newRowResep = document.createElement("TR");
@@ -1639,7 +1645,7 @@
             }
 
             var newSatuanPemakaian = document.createElement("INPUT");
-            $(newSatuanPemakaian).addClass("form-control").val(setter.satuan_pemakaian);
+            $(newSatuanPemakaian).addClass("form-control resep-satuan-pemakaian").val(setter.satuan_pemakaian);
             $(newCellResepObat).find("div.satuan-pemakaian-container").append(newSatuanPemakaian);
 
             var newIterasi = document.createElement("INPUT");
@@ -1650,7 +1656,7 @@
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            }).addClass("form-control").attr({
+            }).addClass("form-control resep-iterasi").attr({
                 "placeholder": "0"
             }).val((setter.iterasi == 0) ? "" : setter.iterasi);
             $(newCellResepObat).find("div.iterasi-container").append(newIterasi);
@@ -1688,6 +1694,8 @@
                     title: itemData[dataKey].nama
                 });
             }
+
+            $(newCellResepSatuan).html((setter.obat_detail !== undefined && setter.obat_detail.satuan_terkecil_info !== undefined) ? setter.obat_detail.satuan_terkecil_info.nama : "");
 
             $(newObat).addClass("form-control resep-obat").select2({
                 minimumInputLength: 2,
@@ -1855,31 +1863,31 @@
 
             var newKonsumsi = document.createElement("INPUT");
             $(newCellResepSigna1).append(newKonsumsi);
-            $(newKonsumsi).addClass("form-control resep_konsumsi").attr({
+            $(newKonsumsi).addClass("form-control resep_konsumsi text-right").attr({
                 "placeholder": "0"
-            }).inputmask({
+            })/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            }).val((setter.signaKonsumsi == 0) ? "" : setter.signaKonsumsi);
+            })*/.val((setter.signaKonsumsi == 0) ? "" : setter.signaKonsumsi);
 
             $(newCellResepSigna2).html("<i class=\"fa fa-times signa-sign\"></i>");
 
             var newTakar = document.createElement("INPUT");
             $(newCellResepSigna3).append(newTakar);
-            $(newTakar).addClass("form-control resep_takar").attr({
+            $(newTakar).addClass("form-control resep_takar text-right").attr({
                 "placeholder": "0"
-            }).inputmask({
+            })/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            }).val((setter.signaTakar == 0) ? "" : setter.signaTakar);
+            })*/.val((setter.signaTakar == 0) ? "" : setter.signaTakar);
 
 
             var newDeleteResep = document.createElement("BUTTON");
@@ -1917,8 +1925,12 @@
                     "id": "resep_aturan_pakai_" + id
                 });
 
-                $(this).find("td:eq(1) input").attr({
+                $(this).find("td:eq(1) input.resep-iterasi").attr({
                     "id": "resep_iterasi_" + id
+                });
+
+                $(this).find("td:eq(1) input.resep-satuan-pemakaian").attr({
+                    "id": "resep_satuan_pemakaian_" + id
                 });
 
                 //load_product_resep($(this).find("td:eq(1) select.resep-obat"), "");
@@ -2992,9 +3004,12 @@
                 var obat = $(this).find("td:eq(1) select.resep-obat").val();
                 var aturanPakai = $(this).find("td:eq(1) select.aturan-pakai-resep").val();
                 var keteranganPerObat = $(this).find("td:eq(1) textarea").val();
-                var iterasi = $(this).find("td:eq(1) input").inputmask("unmaskedvalue");
-                var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
-                var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
+                var iterasi = $(this).find("td:eq(1) input.resep-iterasi").inputmask("unmaskedvalue");
+                var satuanPemakaian = $(this).find("td:eq(1) input.resep-satuan-pemakaian").val();
+                /*var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+                var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");*/
+                var signaKonsumsi = $(this).find("td:eq(2) input").val();
+                var signaTakar = $(this).find("td:eq(4) input").val();
                 var signaHari = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
                 //var penjamin = $(this).find("td:eq(6) select").val();
                 if(
@@ -3002,8 +3017,10 @@
                     obat !== "none" &&
                     obat !== "" &&
 
-                    parseFloat(signaKonsumsi) > 0 &&
-                    parseFloat(signaTakar) > 0 &&
+                    /*parseFloat(signaKonsumsi) > 0 &&
+                    parseFloat(signaTakar) > 0 &&*/
+                    parseFloat(signaKonsumsi) !== "" &&
+                    parseFloat(signaTakar) !== "" &&
                     parseFloat(signaHari) > 0
 
                 ) {
@@ -3014,7 +3031,8 @@
                         "signaKonsumsi": signaKonsumsi,
                         "signaTakar": signaTakar,
                         "signaHari": signaHari,
-                        "iterasi": iterasi
+                        "iterasi": iterasi,
+                        "satuanPemakaian": satuanPemakaian
                     });
                 }
             });
@@ -3325,6 +3343,8 @@
                 type: "POST",
                 success: function(response) {
                     savingResult = response;
+                    console.clear();
+                    console.log(response);
                 },
                 error: function(response) {
                     console.clear();

@@ -1,7 +1,10 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
     $(function () {
         var currentMetaData, currentAsesmen, currentRacikanActive, targetKodeResep;
+        var kunjungan, antrian, asesmen, penjamin, pasien;
+        var keteranganRacikan, keteranganResep;
         var allowEdit = false;
         var alasanUbah = "";
         var totalResep = 0;
@@ -50,6 +53,168 @@
             }
         });
 
+        $("#btnSelesai").click(function() {
+            $("#form-alasan-edit").modal("show");
+        });
+
+        $("#btnSubmitAlasan").click(function() {
+            var alasan = $("#txt_alasan_perubahan").val();
+            var resep = [];
+            $("#table-resep tbody tr").each(function() {
+                var obat = $(this).find("td:eq(1) select.resep-obat").val();
+                var aturanPakai = $(this).find("td:eq(1) select.aturan-pakai-resep").val();
+                var keteranganPerObat = $(this).find("td:eq(1) textarea").val();
+                var iterasi = $(this).find("td:eq(1) input.resep-iterasi").inputmask("unmaskedvalue");
+                var satuanPemakaian = $(this).find("td:eq(1) input.resep-satuan-pemakaian").val();
+                /*var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+                var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");*/
+                var signaKonsumsi = $(this).find("td:eq(2) input").val();
+                var signaTakar = $(this).find("td:eq(4) input").val();
+                var signaHari = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
+                //var penjamin = $(this).find("td:eq(6) select").val();
+                if(
+                    obat !== undefined &&
+                    obat !== "none" &&
+                    obat !== "" &&
+
+                    /*parseFloat(signaKonsumsi) > 0 &&
+                    parseFloat(signaTakar) > 0 &&*/
+                    parseFloat(signaKonsumsi) !== "" &&
+                    parseFloat(signaTakar) !== "" &&
+                    parseFloat(signaHari) > 0
+
+                ) {
+                    resep.push({
+                        "obat": obat,
+                        "aturanPakai": parseInt(aturanPakai),
+                        "keteranganPerObat": keteranganPerObat,
+                        "signaKonsumsi": signaKonsumsi,
+                        "signaTakar": signaTakar,
+                        "signaHari": signaHari,
+                        "iterasi": iterasi,
+                        "satuanPemakaian": satuanPemakaian
+                    });
+                }
+            });
+
+            var keteranganResepData = keteranganResep.getData();
+            var keteranganRacikanData = keteranganRacikan.getData();
+
+            var racikan = [];
+            $("#resep-racikan tbody.racikan tr.racikan-master").each(function() {
+                var masterRacikanRow = $(this);
+                var dataRacikan = {
+                    "nama": "",
+                    "item": [],
+                    "keterangan": "",
+                    "iterasi": 0,
+                    "signaKonsumsi": 0,
+                    "signaTakar": 0,
+                    "signaHari": 0,
+                    "aturanPakai": 0
+                };
+
+                dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.nama_racikan").val();
+                dataRacikan.aturanPakai = (masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val() === "none") ? 0 : parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
+                dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
+                dataRacikan.iterasi = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.racikan_iterasi").inputmask("unmaskedvalue");
+                dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
+                dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));
+                dataRacikan.signaHari = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"));
+
+                masterRacikanRow.find("td:eq(1) table.komposisi-racikan tbody.komposisi-item tr.komposisi-row").each(function() {
+                    var obat = $(this).find("td:eq(1)").attr("uid-obat");
+                    //var qty = $(this).find("td:eq(2)").html();
+                    var takaranBulat = $(this).find("td:eq(2) b").html();
+                    var takaranDecimal = $(this).find("td:eq(2) sub").attr("nilaiExact");
+                    var takaranDecimalText = $(this).find("td:eq(2) sub").html();
+                    var takaranKekuatan = $(this).find("td:eq(2) h6").html();
+                    var takaran = parseFloat(takaranBulat) + parseFloat(takaranDecimal);
+
+                    if(obat !== undefined) {
+                        dataRacikan.item.push({
+                            "obat": obat,
+                            "takaranBulat": takaranBulat,
+                            "takaranDecimal": takaranDecimal,
+                            "takaranDecimalText": takaranDecimalText,
+                            "takaran": (isNaN(takaran) ? 1 : takaran),
+                            "kekuatan": takaranKekuatan
+                        });
+                    }
+                });
+
+                if(
+                    dataRacikan.nama !== "" &&
+                    dataRacikan.item.length > 0 &&
+
+                    dataRacikan.signaKonsumsi > 0 &&
+                    dataRacikan.signaTakar > 0 &&
+                    dataRacikan.signaHari > 0
+                ) {
+                    racikan.push(dataRacikan);
+                }
+            });
+
+
+            //Simpan Data
+            Swal.fire({
+                title: 'Selesai Membuat Resep?',
+                text: 'Resep akan dikirimkan kepada verifikator apotek menggantikan resep sebelumnya. Segala alasan perubahan data resep akan dilaporkan',
+                showDenyButton: true,
+                //showCancelButton: true,
+                confirmButtonText: `Ya`,
+                denyButtonText: `Tidak`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    /*console.log({
+                        asesmen: asesmen,
+                        kunjungan: kunjungan,
+                        antrian: antrian,
+                        pasien: pasien,
+                        penjamin: penjamin,
+                        editorAlergiObat: $("#alergi_obat").val(),
+                        iterasi: $("#iterasi_resep").val(),
+                        charge_invoice: "Y",
+                        keteranganResep: keteranganResepData,
+                        keteranganRacikan: keteranganRacikanData,
+                        resep: resep,
+                        racikan: racikan,
+                        alasan: alasan
+                    });*/
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Apotek",
+                        type: "POST",
+                        data: {
+                            request: "extend_resep",
+                            asesmen: asesmen,
+                            kunjungan: kunjungan,
+                            antrian: antrian,
+                            pasien: pasien,
+                            penjamin: penjamin,
+                            editorAlergiObat: $("#alergi_obat").val(),
+                            iterasi: $("#iterasi_resep").val(),
+                            charge_invoice: "Y",
+                            keteranganResep: keteranganResepData,
+                            keteranganRacikan: keteranganRacikanData,
+                            resep: resep,
+                            racikan: racikan,
+                            alasan: alasan
+                        },
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function (response) {
+                            console.log(response);
+                        },
+                        error: function (response) {
+                            //
+                        }
+                    });
+                }
+            });
+        });
+
         function populateAllKajian() {
             var populateData = {};
             $(".kajian_sel").each(function () {
@@ -66,6 +231,129 @@
             return populateData;
         }
 
+        class MyUploadAdapter {
+            static loader;
+            constructor( loader ) {
+                // CKEditor 5's FileLoader instance.
+                this.loader = loader;
+
+                // URL where to send files.
+                this.url = __HOSTAPI__ + "/Upload";
+
+                this.imageList = [];
+            }
+
+            // Starts the upload process.
+            upload() {
+                return new Promise( ( resolve, reject ) => {
+                    this._initRequest();
+                    this._initListeners( resolve, reject );
+                    this._sendRequest();
+                } );
+            }
+
+            // Aborts the upload process.
+            abort() {
+                if ( this.xhr ) {
+                    this.xhr.abort();
+                }
+            }
+
+            // Example implementation using XMLHttpRequest.
+            _initRequest() {
+                const xhr = this.xhr = new XMLHttpRequest();
+
+                xhr.open( 'POST', this.url, true );
+                xhr.setRequestHeader("Authorization", 'Bearer ' + <?php echo json_encode($_SESSION["admin_ciscard"]); ?>);
+                xhr.responseType = 'json';
+            }
+
+            // Initializes XMLHttpRequest listeners.
+            _initListeners( resolve, reject ) {
+                const xhr = this.xhr;
+                const loader = this.loader;
+                const genericErrorText = 'Couldn\'t upload file:' + ` ${ loader.file.name }.`;
+
+                xhr.addEventListener( 'error', () => reject( genericErrorText ) );
+                xhr.addEventListener( 'abort', () => reject() );
+                xhr.addEventListener( 'load', () => {
+                    const response = xhr.response;
+
+                    if ( !response || response.error ) {
+                        return reject( response && response.error ? response.error.message : genericErrorText );
+                    }
+
+                    // If the upload is successful, resolve the upload promise with an object containing
+                    // at least the "default" URL, pointing to the image on the server.
+                    resolve( {
+                        default: response.url
+                    } );
+                } );
+
+                if ( xhr.upload ) {
+                    xhr.upload.addEventListener( 'progress', evt => {
+                        if ( evt.lengthComputable ) {
+                            loader.uploadTotal = evt.total;
+                            loader.uploaded = evt.loaded;
+                        }
+                    } );
+                }
+            }
+
+
+            // Prepares the data and sends the request.
+            _sendRequest() {
+                const toBase64 = file => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+                var Axhr = this.xhr;
+
+                async function doSomething(fileTarget) {
+                    fileTarget.then(function(result) {
+                        var ImageName = result.name;
+
+                        toBase64(result).then(function(renderRes) {
+                            const data = new FormData();
+                            data.append( 'upload', renderRes);
+                            data.append( 'name', ImageName);
+                            Axhr.send( data );
+                        });
+                    });
+                }
+
+                var ImageList = this.imageList;
+
+                this.loader.file.then(function(toAddImage) {
+
+                    ImageList.push(toAddImage.name);
+
+                });
+
+                this.imageList = ImageList;
+
+                doSomething(this.loader.file);
+            }
+        }
+
+
+        function MyCustomUploadAdapterPlugin( editor ) {
+            editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
+                var MyCust = new MyUploadAdapter( loader );
+                var dataToPush = MyCust.imageList;
+                hiJackImage(dataToPush);
+                return MyCust;
+            };
+        }
+
+        var imageResultPopulator = [];
+
+        function hiJackImage(toHi) {
+            imageResultPopulator.push(toHi);
+        }
+
         $.ajax({
             url:__HOSTAPI__ + "/Apotek/detail_resep_2/" + __PAGES__[2],
             async:false,
@@ -75,7 +363,43 @@
             type:"GET",
             success:function(response) {
                 var data = response.response_package[0];
-                console.log(data);
+
+                asesmen = data.asesmen_uid;
+                kunjungan = data.asesmen.kunjungan;
+                antrian = data.asesmen.antrian;
+                penjamin = data.detail.penjamin.uid;
+                pasien = data.detail.pasien.uid;
+
+
+                ClassicEditor
+                    .create( document.querySelector( "#txt_keterangan_resep"), {
+                        extraPlugins: [ MyCustomUploadAdapterPlugin ],
+                        placeholder: "Keterangan Resep",
+                        removePlugins: ['MediaEmbed']
+                    } )
+                    .then( editor => {
+                        editor.setData(data.keterangan);
+                        keteranganResep = editor;
+                    } )
+                    .catch( err => {
+                        //console.error( err.stack );
+                    });
+
+                ClassicEditor
+                    .create( document.querySelector( "#txt_keterangan_resep_racikan"), {
+                        extraPlugins: [ MyCustomUploadAdapterPlugin ],
+                        placeholder: "Keterangan Racikan",
+                        removePlugins: ['MediaEmbed']
+                    } )
+                    .then( editor => {
+                        editor.setData(data.keterangan_racikan);
+                        keteranganRacikan = editor;
+                    } )
+                    .catch( err => {
+                        //console.error( err.stack );
+                    });
+
+
                 allowEdit = data.detail.allow_edit;
                 if(allowEdit) {
                     $("#btnSelesai").show();
@@ -86,19 +410,8 @@
                 targetKodeResep = data.kode;
 
 
-                if(data.iterasi > 0) {
-                    $("#iter-identifier").show();
-                    $("#iterasi-resep").html(parseInt(data.iterasi));
-                } else {
-                    $("#iter-identifier").hide();
-                }
-
-                if(data.alergi_obat !== undefined && data.alergi_obat !== "" && data.alergi_obat !== null) {
-                    $("#alergi_obat").html(data.alergi_obat);
-                    $("#no-data-alergi-obat").hide();
-                } else {
-                    $("#no-data-alergi-obat").show();
-                }
+                $("#iterasi_resep").val(parseInt(data.iterasi));
+                $("#alergi_obat").val(data.alergi_obat);
 
                 if(data.asesmen.diagnosa_kerja !== undefined && data.asesmen.diagnosa_kerja !== "" && data.asesmen.diagnosa_kerja !== null) {
                     $("#diagnosa_utama").html(data.asesmen.diagnosa_kerja);
@@ -175,7 +488,7 @@
                         keterangan_racikan = data.resep[0].keterangan_racikan;
 
                         for(var resepKey in resep_obat_detail) {
-                            totalResep = autoResep({
+                            autoResep({
                                 "obat": resep_obat_detail[resepKey].obat,
                                 "obat_detail": resep_obat_detail[resepKey].obat_detail,
                                 "aturan_pakai": resep_obat_detail[resepKey].aturan_pakai,
@@ -184,6 +497,7 @@
                                 "signaTakar": resep_obat_detail[resepKey].signa_pakai,
                                 "signaHari": resep_obat_detail[resepKey].qty,
                                 "iterasi": resep_obat_detail[resepKey].iterasi,
+                                "satuan_pemakaian": resep_obat_detail[resepKey].satuan_konsumsi,
                                 "qty_roman": resep_obat_detail[resepKey].qty_roman
                             });
                             if(currentData.resep[resep_obat_detail[resepKey].obat] === undefined) {
@@ -328,7 +642,9 @@
             "signaKonsumsi": 0,
             "signaTakar": 0,
             "signaHari": 0,
-            "pasien_penjamin_uid": ""
+            "pasien_penjamin_uid": "",
+            "satuan_pemakaian": "",
+            "qty_roman": ""
         }) {
             $("#table-resep tbody tr").removeClass("last-resep");
             var newRowResep = document.createElement("TR");
@@ -348,20 +664,28 @@
 
             $(newCellResepObat).append(
                 "<div class=\"row\" style=\"padding-top: 5px;\">" +
+                "<div class=\"col-md-12\"><br /></div>" +
                 "<div style=\"position: relative\" class=\"col-md-12 penjamin-container text-right\"></div>" +
                 "<div class=\"col-md-7 aturan-pakai-container\"><span>Aturan Pakai</span></div>" +
                 "<div class=\"col-md-5 kategori-obat-container\"><span>Kategori Obat</span><br /></div>" +
-                "<div class=\"col-md-6 iterasi-container\"><span>Iterasi</span><br /></div>" +
+                "<div class=\"col-md-12\"><br /></div>" +
+                "<div class=\"col-md-6 iterasi-container\"><span>Iterasi</span><br /></div><div class=\"col-md-6 satuan-pemakaian-container\"><span>Satuan Pemakaian</span><br /></div>" +
+                "<div class=\"col-md-12\"><br /></div>" +
                 "<div style=\"position: relative; padding-top: 5px;\" class=\"col-md-12 keterangan-container\"></div>" +
                 "</div>");
             var newAturanPakai = document.createElement("SELECT");
             var dataAturanPakai = autoAturanPakai();
             $(newCellResepObat).find("div.aturan-pakai-container").append(newAturanPakai);
+
             $(newAturanPakai).addClass("form-control aturan-pakai-resep");
             $(newAturanPakai).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
             for(var aturanPakaiKey in dataAturanPakai) {
                 $(newAturanPakai).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
             }
+
+            var newSatuanPemakaian = document.createElement("INPUT");
+            $(newSatuanPemakaian).addClass("form-control resep-satuan-pemakaian").val(setter.satuan_pemakaian);
+            $(newCellResepObat).find("div.satuan-pemakaian-container").append(newSatuanPemakaian);
 
             var newIterasi = document.createElement("INPUT");
             $(newIterasi).inputmask({
@@ -371,7 +695,7 @@
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            }).addClass("form-control").attr({
+            }).addClass("form-control resep-iterasi").attr({
                 "placeholder": "0"
             }).val((setter.iterasi == 0) ? "" : setter.iterasi);
             $(newCellResepObat).find("div.iterasi-container").append(newIterasi);
@@ -409,6 +733,8 @@
                     title: itemData[dataKey].nama
                 });
             }
+
+            $(newCellResepSatuan).html((setter.obat_detail !== undefined && setter.obat_detail.satuan_terkecil_info !== undefined) ? setter.obat_detail.satuan_terkecil_info.nama : "");
 
             $(newObat).addClass("form-control resep-obat").select2({
                 minimumInputLength: 2,
@@ -466,6 +792,12 @@
                 }
             }).on("select2:select", function(e) {
                 var data = e.params.data;
+                var identifier = $(this).attr("id").split("_");
+                identifier = identifier[identifier.length - 1];
+
+                console.clear();
+                console.log(data);
+
                 $(this).children("[value=\""+ data["id"] + "\"]").attr({
                     "data-value": data["data-value"],
                     "penjamin-list": data["penjamin-list"],
@@ -477,7 +809,7 @@
 
                 //============KATEGORI OBAT
 
-                if(setter.obat != "") {
+                if(setter.obat !== "") {
                     if($(newObat).val() != "none") {
                         var dataKategoriPerObat = autoKategoriObat(setter.obat);
                         var kategoriObatDOM = "";
@@ -487,7 +819,7 @@
                                     dataKategoriPerObat[kategoriObatKey].kategori !== undefined &&
                                     dataKategoriPerObat[kategoriObatKey].kategori !== null
                                 ) {
-                                    kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+                                    kategoriObatDOM += "<span class=\"badge badge-info badge-custom-caption resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
                                 }
                             }
                             $(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
@@ -509,8 +841,8 @@
                     } else {
                         //$(newCellResepObat).find("div.penjamin-container").html("<b class=\"badge badge-danger obat-penjamin-notifier\"><i class=\"fa fa-ban\" style=\"margin-right: 5px;\"></i> Tidak Ditanggung Penjamin</b>");
                     }
-                    $(newCellResepSatuan).html(data["satuan-caption"]);
                 }
+                $("#resep_satuan_" + identifier).html(data.satuan_terkecil);
             });
 
             if(setter.obat != "") {
@@ -527,7 +859,7 @@
                                 dataKategoriPerObat[kategoriObatKey].kategori !== undefined&&
                                 dataKategoriPerObat[kategoriObatKey].kategori !== null
                             ) {
-                                kategoriObatDOM += "<span class=\"badge badge-info resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
+                                kategoriObatDOM += "<span class=\"badge badge-info badge-custom-caption resep-kategori-obat\">" + dataKategoriPerObat[kategoriObatKey].kategori.nama + "</span>";
                             }
                         }
                         $(newCellResepObat).find("div.kategori-obat-container").append(kategoriObatDOM);
@@ -570,31 +902,31 @@
 
             var newKonsumsi = document.createElement("INPUT");
             $(newCellResepSigna1).append(newKonsumsi);
-            $(newKonsumsi).addClass("form-control resep_konsumsi").attr({
+            $(newKonsumsi).addClass("form-control resep_konsumsi text-right").attr({
                 "placeholder": "0"
-            }).inputmask({
+            })/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            }).val((setter.signaKonsumsi == 0) ? "" : setter.signaKonsumsi);
+            })*/.val((setter.signaKonsumsi == 0) ? "" : setter.signaKonsumsi);
 
             $(newCellResepSigna2).html("<i class=\"fa fa-times signa-sign\"></i>");
 
             var newTakar = document.createElement("INPUT");
             $(newCellResepSigna3).append(newTakar);
-            $(newTakar).addClass("form-control resep_takar").attr({
+            $(newTakar).addClass("form-control resep_takar text-right").attr({
                 "placeholder": "0"
-            }).inputmask({
+            })/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            }).val((setter.signaTakar == 0) ? "" : setter.signaTakar);
+            })*/.val((setter.signaTakar == 0) ? "" : setter.signaTakar);
 
 
             var newDeleteResep = document.createElement("BUTTON");
@@ -1454,6 +1786,35 @@
 
     });
 </script>
+
+<div id="form-alasan-edit" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Perubahan/Penambahan Resep</h5>
+                <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button> -->
+            </div>
+            <div class="modal-body">
+                <strong>Alasan pembuatan resep:</strong>
+                <textarea class="form-control" id="txt_alasan_perubahan" placeholder="Alasan Pembuatan Resep"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSubmitAlasan">
+                    <span>
+                        <i class="fa fa-save"></i> Simpan
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
