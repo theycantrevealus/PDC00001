@@ -65,6 +65,7 @@ class CPPT extends Utility {
 	    $Antrian = self::$query->select('antrian', array(
 	        'uid',
 	        'kunjungan',
+	        'penjamin',
 	        'departemen',
             'dokter',
             'waktu_masuk'
@@ -118,7 +119,7 @@ class CPPT extends Utility {
                 $Antrian['response_data'][$key]['dokter'] = $Dokter;
 
                 $Asesmen = self::$query->select('asesmen', array(
-                    'uid'
+                    'uid', 'kunjungan', 'antrian', 'pasien'
                 ))
                     ->join('asesmen_medis_' . $Departemen['poli_asesmen'], array(
                         'keluhan_utama',
@@ -192,6 +193,9 @@ class CPPT extends Utility {
                     'alasan_ubah',
                     'kode'
                 ))
+                    ->order(array(
+                        'created_at' => 'ASC'
+                    ))
                     ->where(array(
                         'resep.kunjungan' => '= ?',
                         'AND',

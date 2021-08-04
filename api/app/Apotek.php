@@ -874,22 +874,22 @@ class Apotek extends Utility
         $dataResponse['created_at_parsed'] = date('d F Y', strtotime($resep['response_data'][0]['created_at']));
 
         $AntrianDetail = self::$query->select('antrian', array(
-                'uid',
-                'kunjungan',
-                'penjamin',
-                'pasien',
-                'dokter',
-                'departemen',
-                'created_at'
-            ))
-            ->where(array(
-                'antrian.uid' => '= ?',
-                'AND',
-                'antrian.deleted_at' => 'IS NULL'
-            ), array(
-                $resep['response_data'][0]['antrian']
-            ))
-            ->execute();
+            'uid',
+            'kunjungan',
+            'penjamin',
+            'pasien',
+            'dokter',
+            'departemen',
+            'created_at'
+        ))
+        ->where(array(
+            'antrian.uid' => '= ?',
+            'AND',
+            'antrian.deleted_at' => 'IS NULL'
+        ), array(
+            $resep['response_data'][0]['antrian']
+        ))
+        ->execute();
 
         $Penjamin = new Penjamin(self::$pdo);
         $Pasien = new Pasien(self::$pdo);
@@ -2893,12 +2893,13 @@ class Apotek extends Utility
                     array_push($racikanError, $newRacikan);
                 }
             }
-            return array('resep' => $resepProcess, 'racikan' => $racikanError);
+
+            return array('resep' => $resepProcess, 'racikan' => $racikanError, 'response_unique' => $uid);
 
         } else { //Jika Resep baru
 
 
-            if(count($parameter['resep']) > 0 || count($parameter['racikan']) > 0) {
+            if(count($parameter['resep']) > 0 || count($parameter['racikan']) > 0 || isset($parameter['isnew'])) {
                 //New Resep
                 $uid = parent::gen_uuid();
 
@@ -3014,8 +3015,9 @@ class Apotek extends Utility
                         }
                     }
                 }
+                $newResep['response_unique'] = $uid;
+                return $newResep;
             }
-            return $newResep;
         }
     }
 

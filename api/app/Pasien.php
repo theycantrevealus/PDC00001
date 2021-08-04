@@ -8,6 +8,7 @@ use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\Terminologi as Terminologi;
+use function Sodium\library_version_minor;
 
 class Pasien extends Utility
 {
@@ -43,6 +44,10 @@ class Pasien extends Utility
 
                 case 'cek-no-rm':
                     return self::cekNoRM($parameter[2]);
+                    break;
+
+                case 'asesmen_resep_lupa':
+                    return self::asesmen_resep_lupa($parameter);
                     break;
 
                 default:
@@ -723,7 +728,7 @@ class Pasien extends Utility
 
     private function get_pasien_back_end($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -809,6 +814,35 @@ class Pasien extends Utility
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
 
+        return $data;
+    }
+
+    private function asesmen_resep_lupa($parameter) {
+        $data = self::$query->select('asesmen', array(
+            'uid', 'pasien', 'poli', 'kunjungan', 'antrian'
+        ))
+            ->join('pasien', array(
+                'nama', 'no_rm'
+            ))
+            ->join('antrian', array(
+                'penjamin'
+            ))
+            ->on(array(
+                array('asesmen.pasien', '=', 'pasien.uid'),
+                array('asesmen.antrian', '=', 'antrian.uid')
+            ))
+            ->where(array(
+                'asesmen.created_at' => '>= now()::date + interval \'1h\'',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
+            ), array())
+            /*->order(array(
+                'created_at' => 'DESC'
+            ))
+            ->limit(1)*/
+            ->execute();
         return $data;
     }
 

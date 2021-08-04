@@ -284,6 +284,9 @@
                                     var listData = data[a].data;
                                     for(var b in listData) {
                                         var currentData = listData[b].data[0];
+                                        currentData.asesmen.resep = [currentData.asesmen.resep[currentData.asesmen.resep.length - 1]];
+                                        currentData.asesmen.racikan = [currentData.asesmen.racikan[currentData.asesmen.racikan.length - 1]];
+                                        console.log(currentData);
                                         $.ajax({
                                             url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
                                             async:false,
@@ -293,8 +296,14 @@
                                             type:"POST",
                                             data: {
                                                 currentData: UID,
+                                                __HOSTNAME__: __HOSTNAME__,
                                                 __HOST__: __HOST__,
                                                 __ME__: __ME__,
+                                                asesmen: currentData.asesmen,
+                                                kunjungan: currentData.kunjungan,
+                                                antrian: currentData.uid,
+                                                penjamin: currentData.penjamin,
+                                                pasien: currentData.asesmen.pasien,
                                                 group_tanggal_name: a,
                                                 waktu_masuk: listData[b].parsed,
                                                 waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),

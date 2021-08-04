@@ -140,8 +140,6 @@
                     var parsedData = [];
                     var IGD = [];
 
-                    console.log(resepDataRaw);
-
                     for(var resepKey in resepDataRaw) {
                         if(resepDataRaw[resepKey].antrian.departemen !== undefined && resepDataRaw[resepKey].antrian.departemen !== null) {
                             if(resepDataRaw[resepKey].antrian.departemen.uid === __POLI_IGD__) {
@@ -228,6 +226,150 @@
             ]
         });
 
+        $("#btnTambahResep").click(function() {
+            $("#pasien_saya").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function(){
+                        return "Pasien tidak ditemukan";
+                    }
+                },
+                placeholder: "Cari Pasien",
+                ajax: {
+                    dataType: "json",
+                    headers:{
+                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type" : "application/json",
+                    },
+                    url:__HOSTAPI__ + "/Pasien/asesmen_resep_lupa",
+                    type: "GET",
+                    data: function (term) {
+                        return {
+                            search:term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function (response) {
+                        var data = response.response_package.response_data;
+                        return {
+                            results: $.map(data, function (item) {
+                                console.log(item);
+                                return {
+                                    text: "[" + item.no_rm + "] " + item.nama,
+                                    id: item.pasien,
+                                    asesmen: item.uid,
+                                    kunjungan: item.kunjungan,
+                                    antrian: item.antrian,
+                                    penjamin: item.penjamin
+                                }
+                            })
+                        };
+                    }
+                }
+            }).on("select2:select", function(e) {
+                var data = e.params.data;
+                $("#pasien_saya option:selected").attr({
+                    asesmen: data.asesmen,
+                    kunjungan: data.kunjungan,
+                    antrian: data.antrian,
+                    penjamin: data.penjamin
+                })
+            });
+
+            $("#form-tambah-resep").modal("show");
+        });
+
+        $("#btnSubmitAlasan").click(function() {
+            var alasan = $("#txt_alasan_perubahan").val();
+            var pasien = $("#pasien_saya").val();
+            var asesmen = $("#pasien_saya option:selected").attr("asesmen");
+            var kunjungan = $("#pasien_saya option:selected").attr("kunjungan");
+            var antrian = $("#pasien_saya option:selected").attr("antrian");
+            var penjamin = $("#pasien_saya option:selected").attr("penjamin");
+
+            var protocol = {
+                request: "extend_resep",
+                asesmen: asesmen,
+                kunjungan: kunjungan,
+                antrian: antrian,
+                pasien: pasien,
+                penjamin: penjamin,
+                editorAlergiObat: "",
+                iterasi: 0,
+                keteranganResep: "",
+                keteranganRacikan: "",
+                resep: [],
+                racikan: [],
+                alasan: alasan,
+                isnew: true
+            };
+
+            console.clear();
+            console.log(protocol);
+
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: protocol,
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function (response) {
+                    tableResep.ajax.reload();
+                    location.href = __HOSTNAME__ + "/resep/view/" + response.response_package.response_unique;
+                },
+                error: function (response) {
+                    //
+                }
+            });
+
+        });
+
 
     });
 </script>
+<div id="form-tambah-resep" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Perubahan/Penambahan Resep</h5>
+                <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button> -->
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <strong>Pasien:</strong>
+                        <select id="pasien_saya" class="form-control"></select>
+                        <br /><br />
+                    </div>
+                    <div class="col-lg-12">
+                        <strong>Alasan pembuatan resep:</strong>
+                        <textarea style="min-height: 200px;" class="form-control" id="txt_alasan_perubahan" placeholder="Alasan Pembuatan Resep"></textarea>
+                        <br />
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="alert alert-soft-warning d-flex align-items-center card-margin" role="alert">
+                            <i class="material-icons mr-3">error_outline</i>
+                            <div class="text-body"><strong>Entry Resep.</strong> Resep baru akan ditambahkan ke asesmen terakhir pasien. Keterangan penambahan resep wajib diisi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSubmitAlasan">
+                    <span>
+                        <i class="fa fa-plus"></i> Tambahkan
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

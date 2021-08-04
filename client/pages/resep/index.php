@@ -19,7 +19,12 @@
         <div class="col-lg-12 col-md-12">
             <div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">Resep DOkter</h5>
+                    <h5 class="card-header__title flex m-0">Resep Dokter</h5>
+                    <button class="btn btn-info" id="btnTambahResep">
+                        <span>
+                            <i class="fa fa-plus"></i> Tambah Resep
+                        </span>
+                    </button>
                 </div>
                 <div class="card-body tab-content">
                     <div class="tab-pane active show fade" id="list-resep">

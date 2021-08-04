@@ -168,7 +168,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <a href="<?php echo __HOSTNAME__; ?>/resep" class="btn btn-danger">
+                    <a href="<?php echo __HOSTNAME__; ?>/resep" class="btn btn-danger" id="btnCancel">
                         <i class="fa fa-ban"></i> Kembali
                     </a>
                     <button type="button" class="btn btn-success pull-right" id="btnSelesai">
