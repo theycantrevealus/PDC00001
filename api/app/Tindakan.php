@@ -891,9 +891,11 @@ class Tindakan extends Utility {
                 'AND',
                 'master_tindakan_kelas.deleted_at' => 'IS NULL',
                 'AND',
-                'master_tindakan_kelas_harga.penjamin' => '= ?'
+                'master_tindakan_kelas_harga.penjamin' => '= ?',
+                'AND',
+                'master_tindakan_kelas_harga.tindakan' => '= ?'
             ), array(
-                $parameter[2], $parameter[3]
+                $parameter[2], $parameter[3], $parameter[4]
             ))
             ->order(array(
                 'master_tindakan_kelas.created_at' => 'ASC'
@@ -909,7 +911,7 @@ class Tindakan extends Utility {
             $Tindakan = self::get_tindakan_info($value['tindakan']);
             $TKValue['tindakan_detail'] = $Tindakan['response_data'][0];
 
-            //Kelas Detail
+            //Kelas Details
             $KelasDetail = self::get_kelas_tindakan_detail($value['kelas']);
             $TKValue['kelas'] = $KelasDetail['response_data'][0];
 
