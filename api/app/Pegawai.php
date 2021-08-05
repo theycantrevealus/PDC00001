@@ -126,7 +126,7 @@ class Pegawai extends Utility {
 
     private function delete($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $worker = self::$query
             ->delete($parameter[6])
