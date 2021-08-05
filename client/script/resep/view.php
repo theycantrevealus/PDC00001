@@ -528,12 +528,12 @@
                                     };
                                 }
                             } else {
-                                $("#table-resep tbody").append("<tr><td colspan=\"9\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada resep</td></tr>");
+                                //$("#table-resep tbody").append("<tr><td colspan=\"9\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada resep</td></tr>");
                             }
 
                             var racikan_detail = data.racikan;
                             if(racikan_detail.length === 0) {
-                                $("#table-resep-racikan tbody.racikan").append("<tr><td colspan=\"8\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada racikan</td></tr>");
+                                //$("#table-resep-racikan tbody.racikan").append("<tr><td colspan=\"8\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada racikan</td></tr>");
                             } else {
                                 for(var racikanKey in racikan_detail) {
                                     autoRacikan({
