@@ -473,6 +473,8 @@
                 $(newCellResepSatuan).html(data["satuan-caption"]);
             });
 
+            $(newCellResepSatuan).html(setter.obat_detail.satuan_terkecil_info.nama);
+
 
 
 
@@ -505,7 +507,7 @@
 
             var newJumlah = document.createElement("INPUT");
             $(newCellResepJlh).append(newJumlah);
-            $(newJumlah).addClass("form-control resep_jlh_hari").inputmask({
+            $(newJumlah).addClass("form-control resep_jlh_hari number_style").inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
@@ -521,33 +523,33 @@
             $(newCellResepSigna1).append(newKonsumsi).css({
                 "position": "relative"
             });
-            $(newKonsumsi).addClass("form-control resep_konsumsi").attr({
+            $(newKonsumsi).addClass("form-control resep_konsumsi number_style").attr({
                 "placeholder": "0",
                 "old-data": (setter.signaKonsumsi == 0) ? "" : setter.signaKonsumsi
-            }).inputmask({
+            })/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            }).val((setter.signaKonsumsi == 0) ? "" : setter.signaKonsumsi);
+            })*/.val((setter.signaKonsumsi == 0) ? "" : setter.signaKonsumsi);
 
             $(newCellResepSigna2).html("<i class=\"fa fa-times signa-sign\"></i>");
 
             var newTakar = document.createElement("INPUT");
             $(newCellResepSigna3).append(newTakar);
-            $(newTakar).addClass("form-control resep_takar").attr({
+            $(newTakar).addClass("form-control resep_takar number_style").attr({
                 "placeholder": "0",
                 "old-data": (setter.signaTakar == 0) ? "" : setter.signaTakar
-            }).inputmask({
+            })/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            }).val((setter.signaTakar == 0) ? "" : setter.signaTakar);
+            })*/.val((setter.signaTakar == 0) ? "" : setter.signaTakar);
 
 
             var newDeleteResep = document.createElement("BUTTON");
@@ -1096,16 +1098,16 @@
 
             var newRacikanSignaA = document.createElement("INPUT");
             $(newRacikanCellSignaA).append(newRacikanSignaA);
-            $(newRacikanSignaA).addClass("form-control racikan_signa_a").attr({
+            $(newRacikanSignaA).addClass("form-control racikan_signa_a number_style").attr({
                 "placeholder": "0"
-            }).val(setter.signaKonsumsi).inputmask({
+            }).val(setter.signaKonsumsi)/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            });
+            })*/;
 
             if(setter.uid !== "") {
                 $(newRacikanSignaA).attr({
@@ -1117,16 +1119,16 @@
 
             var newRacikanSignaB = document.createElement("INPUT");
             $(newRacikanCellSignaB).append(newRacikanSignaB);
-            $(newRacikanSignaB).addClass("form-control racikan_signa_b").attr({
+            $(newRacikanSignaB).addClass("form-control racikan_signa_b number_style").attr({
                 "placeholder": "0"
-            }).val(setter.signaTakar).inputmask({
+            }).val(setter.signaTakar)/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            });
+            })*/;
 
             if(setter.uid !== "") {
                 $(newRacikanSignaB).attr({
@@ -1136,7 +1138,7 @@
 
             var newRacikanJlh = document.createElement("INPUT");
             $(newRacikanCellJlh).append(newRacikanJlh);
-            $(newRacikanJlh).addClass("form-control racikan_signa_jlh").attr({
+            $(newRacikanJlh).addClass("form-control racikan_signa_jlh number_style").attr({
                 "placeholder": "0"
             }).val(setter.signaHari).inputmask({
                 alias: 'decimal',
@@ -1776,15 +1778,19 @@
             if(newData.resep[data.id] === undefined) {
                 newData.resep[data.id] = {
                     "aturan_pakai": $("#resep_obat_aturan_pakai_" + id + " option:selected").val(),
-                    "signaKonsumsi": $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue"),
-                    "signaTakar": $("#resep_signa_takar_" + id).inputmask("unmaskedvalue"),
+                    /*"signaKonsumsi": $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue"),
+                    "signaTakar": $("#resep_signa_takar_" + id).inputmask("unmaskedvalue"),*/
+                    "signaKonsumsi": $("#resep_signa_konsumsi_" + id).val(),
+                    "signaTakar": $("#resep_signa_takar_" + id).val(),
                     "signaHari": $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue")
                 };
             } else {
                 newData.resep[data.id] = {
                     "aturan_pakai": $("#resep_obat_aturan_pakai_" + id + " option:selected").val(),
-                    "signaKonsumsi": $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue"),
-                    "signaTakar": $("#resep_signa_takar_" + id).inputmask("unmaskedvalue"),
+                    /*"signaKonsumsi": $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue"),
+                    "signaTakar": $("#resep_signa_takar_" + id).inputmask("unmaskedvalue"),*/
+                    "signaKonsumsi": $("#resep_signa_konsumsi_" + id).val(),
+                    "signaTakar": $("#resep_signa_takar_" + id).val(),
                     "signaHari": $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue")
                 };
             }
@@ -1800,8 +1806,10 @@
                 console.log("Compare hari : " + (parseFloat($("#resep_jlh_hari_" + id).inputmask("unmaskedvalue")) === parseFloat($("#resep_jlh_hari_" + id).attr("old-data"))));*/
                 if(
                     parseFloat($("#resep_obat_aturan_pakai_" + id + " option:selected").val()) === parseFloat($("#resep_obat_aturan_pakai_" + id).attr("old-data")) &&
-                    parseFloat($("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue")) === parseFloat($("#resep_signa_konsumsi_" + id).attr("old-data")) &&
-                    parseFloat($("#resep_signa_takar_" + id).inputmask("unmaskedvalue")) === parseFloat($("#resep_signa_takar_" + id).attr("old-data")) &&
+                    /*parseFloat($("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue")) === parseFloat($("#resep_signa_konsumsi_" + id).attr("old-data")) &&
+                    parseFloat($("#resep_signa_takar_" + id).inputmask("unmaskedvalue")) === parseFloat($("#resep_signa_takar_" + id).attr("old-data")) &&*/
+                    $("#resep_signa_konsumsi_" + id).val() === $("#resep_signa_konsumsi_" + id).attr("old-data") &&
+                    $("#resep_signa_takar_" + id).val() === $("#resep_signa_takar_" + id).attr("old-data") &&
                     parseFloat($("#resep_jlh_hari_" + id).inputmask("unmaskedvalue")) === parseFloat($("#resep_jlh_hari_" + id).attr("old-data"))
                 ) {
                     $("#alasan_" + id).animate({
@@ -2147,9 +2155,6 @@
         });
 
         function simpanDataVerifikasi(alasanLib, alasanRacikanLib) {
-            console.clear();
-            console.log(alasanLib);
-            console.log(alasanRacikanLib);
             var allowVerifReason = false;
             var allowVerifRacikanReason = false;
 
@@ -2239,8 +2244,10 @@
 
                                     resepItem.push({
                                         "obat": $(this).find("td:eq(1) select:eq(0)").val(),
-                                        "signa_qty": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
-                                        "signa_pakai": parseFloat($(this).find("td:eq(4) input").inputmask("unmaskedvalue")),
+                                        /*"signa_qty": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
+                                        "signa_pakai": parseFloat($(this).find("td:eq(4) input").inputmask("unmaskedvalue")),*/
+                                        "signa_qty": $(this).find("td:eq(2) input").val(),
+                                        "signa_pakai": $(this).find("td:eq(4) input").val(),
                                         "jumlah": parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")),
                                         "harga": parseFloat($(this).find("td:eq(1) ol").attr("harga")),
                                         "aturan_pakai": $(this).find("td:eq(1) select:eq(1)").val(),
@@ -2297,8 +2304,10 @@
                                             "alasan_ubah": ($("#alasan_racikan_" + racikanVerifIDSave).length > 0) ? $("#alasan_racikan_" + racikanVerifIDSave).val() : "",
                                             "aturan_pakai": $(this).find("td:eq(1) select").val(),
                                             "keterangan": $(this).find("td:eq(1) textarea").val(),
-                                            "signa_qty": parseFloat($(this).find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue")),
-                                            "signa_pakai": parseFloat($(this).find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue")),
+                                            /*"signa_qty": parseFloat($(this).find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue")),
+                                            "signa_pakai": parseFloat($(this).find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue")),*/
+                                            "signa_qty": $(this).find("td.master-racikan-cell:eq(2) input").val(),
+                                            "signa_pakai": $(this).find("td.master-racikan-cell:eq(2) input").val(),
                                             "harga": parseFloat($(this).find("td.master-racikan-cell:eq(6) span").html().replace(/(,)/g, "")),
                                             "jumlah": parseFloat($(this).find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"))
                                         });
@@ -2407,8 +2416,10 @@
                 var me = $(this);
 
                 var obat = $("#resep_obat_" + id + " option:selected").html();
-                var signaA = $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue");
-                var signaB = $("#resep_signa_takar_" + id).inputmask("unmaskedvalue");
+                /*var signaA = $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue");
+                var signaB = $("#resep_signa_takar_" + id).inputmask("unmaskedvalue");*/
+                var signaA = $("#resep_signa_konsumsi_" + id).val();
+                var signaB = $("#resep_signa_takar_" + id).val();
                 var jumlah = $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue");
                 var konsumsi = $("#resep_obat_aturan_pakai_" + id + " option:selected").html();
                 var keterangan = $("#keterangan_resep_obat_" + id).val();
@@ -2434,8 +2445,10 @@
                 var me = $(this);
 
                 var obatList = [];
-                var signaA = $("#racikan_signaA_" + id).inputmask("unmaskedvalue");
-                var signaB = $("#racikan_signaB_" + id).inputmask("unmaskedvalue");
+                /*var signaA = $("#racikan_signaA_" + id).inputmask("unmaskedvalue");
+                var signaB = $("#racikan_signaB_" + id).inputmask("unmaskedvalue");*/
+                var signaA = $("#racikan_signaA_" + id).val();
+                var signaB = $("#racikan_signaB_" + id).val();
                 var jumlah = $("#racikan_jumlah_" + id).inputmask("unmaskedvalue");
                 var konsumsi = $("#racikan_aturan_pakai_" + id + " option:selected").html();
                 var keterangan = $("#racikan_keterangan_" + id).val();

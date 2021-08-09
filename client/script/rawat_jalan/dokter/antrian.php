@@ -170,6 +170,7 @@
                 $("#heading_nama_poli").html(antrianData.poli_info.nama).attr({
                     "uid" : antrianData.poli_info.uid
                 });
+
                 pasien_uid = antrianData.pasien_info.uid;
                 pasien_nama = antrianData.pasien_info.nama;
                 pasien_usia = antrianData.pasien_info.usia;
@@ -289,6 +290,7 @@
 
                                     iterasi = response.response_package.response_data[0].resep[0].iterasi;
                                     $("#iterasi_resep").val(iterasi);
+                                    $("#alergi_obat").val(response.response_package.response_data[0].resep[0].alergi_obat);
                                     keterangan_resep = response.response_package.response_data[0].resep[0].keterangan;
                                     keterangan_racikan = response.response_package.response_data[0].resep[0].keterangan_racikan;
 
@@ -1025,8 +1027,6 @@
                 },
                 type:"GET",
                 success:function(response) {
-                    console.clear();
-                    console.log(response);
                     var tinData = response.response_package;
                     for(var tinKey in tinData) {
 
@@ -1758,8 +1758,6 @@
                 var identifier = $(this).attr("id").split("_");
                 identifier = identifier[identifier.length - 1];
 
-                console.clear();
-                console.log(data);
 
                 $(this).children("[value=\""+ data["id"] + "\"]").attr({
                     "data-value": data["data-value"],
@@ -2105,14 +2103,14 @@
             $(newRacikanCellSignaA).append(newRacikanSignaA);
             $(newRacikanSignaA).addClass("form-control racikan_signa_a").attr({
                 "placeholder": "0"
-            }).val(setter.signaKonsumsi).inputmask({
+            }).val(setter.signaKonsumsi)/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            });
+            })*/;
 
             $(newRacikanCellSignaX).html("<i class=\"fa fa-times signa-sign\"></i>");
 
@@ -2120,14 +2118,14 @@
             $(newRacikanCellSignaB).append(newRacikanSignaB);
             $(newRacikanSignaB).addClass("form-control racikan_signa_b").attr({
                 "placeholder": "0"
-            }).val(setter.signaTakar).inputmask({
+            }).val(setter.signaTakar)/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            });
+            })*/;
 
             var newRacikanJlh = document.createElement("INPUT");
             $(newRacikanCellJlh).append(newRacikanJlh);
@@ -3060,8 +3058,10 @@
                 dataRacikan.aturanPakai = (masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val() === "none") ? 0 : parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
                 dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
                 dataRacikan.iterasi = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.racikan_iterasi").inputmask("unmaskedvalue");
-                dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
-                dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));
+                /*dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
+                dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));*/
+                dataRacikan.signaKonsumsi = masterRacikanRow.find("td.master-racikan-cell:eq(2) input").val();
+                dataRacikan.signaTakar = masterRacikanRow.find("td.master-racikan-cell:eq(4) input").val();
                 dataRacikan.signaHari = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"));
 
 
@@ -3092,8 +3092,10 @@
                     dataRacikan.nama !== "" &&
                     dataRacikan.item.length > 0 &&
 
-                    dataRacikan.signaKonsumsi > 0 &&
-                    dataRacikan.signaTakar > 0 &&
+                    /*dataRacikan.signaKonsumsi > 0 &&
+                    dataRacikan.signaTakar > 0 &&*/
+                    dataRacikan.signaKonsumsi !== "" &&
+                    dataRacikan.signaTakar !== "" &&
                     dataRacikan.signaHari > 0
                 ) {
                     racikan.push(dataRacikan);
@@ -3345,8 +3347,6 @@
                 type: "POST",
                 success: function(response) {
                     savingResult = response;
-                    console.clear();
-                    console.log(response);
                 },
                 error: function(response) {
                     console.clear();

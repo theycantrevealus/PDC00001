@@ -22,6 +22,8 @@
                 $("#jk-pasien").html(targettedData.antrian.pasien_info.jenkel_nama);
                 $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
                 //$("#verifikator").html(targettedData.verifikator.nama);
+                console.clear();
+                console.log(targettedData);
                 loadDetailResep(targettedData);
 
             },
@@ -356,7 +358,12 @@
 
                         $(newCellRacikanID).attr("rowspan", racikanDetail.length).html("<h5 class=\"autonum\">" + (b + 1) + "</h5>");
                         $(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
-                        $(newCellRacikanSigna).addClass("text-center wrap_content").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
+                        if(data.racikan[b].change.length > 0) {
+                            $(newCellRacikanSigna).addClass("text-center wrap_content").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].change[0].signa_qty + " &times " + data.racikan[b].change[0].signa_pakai + "</h5>");
+                        } else {
+                            $(newCellRacikanSigna).addClass("text-center wrap_content").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
+                        }
+
                         $(newCellRacikanJlh).addClass("text-center").attr("rowspan", racikanDetail.length);
 
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
