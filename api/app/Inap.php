@@ -170,9 +170,11 @@ class Inap extends Utility
                 'status_resep', 'kode'
             ))
                 ->where(array(
-                    'resep.kunjungan' => '= ?'
+                    'resep.kunjungan' => '= ?',
+                    'AND',
+                    'resep.pasien' => '= ?'
                 ), array(
-                    $value['kunjungan']
+                    $value['kunjungan'], $value['pasien']
                 ))
                 ->execute();
             foreach ($ApotekVerif['response_data'] as $ApKey => $ApValue) {
@@ -207,9 +209,11 @@ class Inap extends Utility
                 'status', 'no_order'
             ))
                 ->where(array(
-                    'lab_order.kunjungan' => '= ?'
+                    'lab_order.kunjungan' => '= ?',
+                    'AND',
+                    'lab_order.pasien' => '= ?'
                 ), array(
-                    $value['kunjungan']
+                    $value['kunjungan'], $value['pasien']
                 ))
                 ->execute();
             foreach ($LaborVerif['response_data'] as $LbKey => $LbValue) {
@@ -240,9 +244,11 @@ class Inap extends Utility
                 'status', 'no_order'
             ))
                 ->where(array(
-                    'rad_order.kunjungan' => '= ?'
+                    'rad_order.kunjungan' => '= ?',
+                    'AND',
+                    'rad_order.pasien' => '= ?'
                 ), array(
-                    $value['kunjungan']
+                    $value['kunjungan'], $value['pasien']
                 ))
                 ->execute();
             foreach ($RadioVerif['response_data'] as $RdKey => $RdValue) {

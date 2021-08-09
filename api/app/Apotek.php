@@ -3069,7 +3069,8 @@ class Apotek extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $worker = self::$query->update('resep', array(
-            'deleted_at' => parent::format_date()
+            'deleted_at' => parent::format_date(),
+            'status_resep' => 'C'
         ))
             ->where(array(
                 'resep.uid' => '= ?'

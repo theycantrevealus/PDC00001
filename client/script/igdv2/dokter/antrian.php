@@ -1938,6 +1938,7 @@
             "signaTakar": "",
             "signaHari": "",
             "aturan_pakai": "",
+            "iterasi": 0,
             "item":[]
         }) {
             $("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
@@ -1962,7 +1963,7 @@
 
             var newRacikanNama = document.createElement("INPUT");
             $(newRacikanCellNama).append(newRacikanNama);
-            $(newRacikanNama).addClass("form-control").css({
+            $(newRacikanNama).addClass("form-control nama_racikan").css({
                 "margin-bottom": "20px"
             }).attr({
                 "placeholder": "Nama Racikan"
@@ -1995,8 +1996,11 @@
             var dataAturanPakai = autoAturanPakai();
 
             $(newAturanPakaiRacikan).addClass("form-control aturan-pakai-racikan");
+
+
+
             var newKeteranganRacikan = document.createElement("TEXTAREA");
-            $(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<span>Keterangan</span>").append(newKeteranganRacikan);
+            $(newRacikanCellNama).append("<br /><span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<br /><br /><span>Keterangan</span>").append(newKeteranganRacikan);
             $(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
             for(var aturanPakaiKey in dataAturanPakai) {
                 $(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
@@ -2004,6 +2008,22 @@
             $(newKeteranganRacikan).addClass("form-control").attr({
                 "placeholder": "Keterangan racikan"
             }).val(setter.keterangan);
+
+            var newIterasiRacikan = document.createElement("INPUT");
+            $(newIterasiRacikan).inputmask({
+                alias: 'decimal',
+                rightAlign: true,
+                placeholder: "0.00",
+                prefix: "",
+                autoGroup: false,
+                digitsOptional: true
+            }).addClass("form-control racikan_iterasi").attr({
+                "placeholder": "0"
+            }).val((parseInt(setter.iterasi) === 0) ? "" : parseInt(setter.iterasi));
+
+            $(newRacikanCellNama).append("<br /><span>Iterasi</span>").append(newIterasiRacikan);
+
+
 
             /*var newRacikanObat = document.createElement("SELECT");
             var newObatTakar = document.createElement("INPUT");
@@ -2018,14 +2038,14 @@
             $(newRacikanCellSignaA).append(newRacikanSignaA);
             $(newRacikanSignaA).addClass("form-control racikan_signa_a").attr({
                 "placeholder": "0"
-            }).val(setter.signaKonsumsi).inputmask({
+            }).val(setter.signaKonsumsi)/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            });
+            })*/;
 
             $(newRacikanCellSignaX).html("<i class=\"fa fa-times signa-sign\"></i>");
 
@@ -2033,14 +2053,14 @@
             $(newRacikanCellSignaB).append(newRacikanSignaB);
             $(newRacikanSignaB).addClass("form-control racikan_signa_b").attr({
                 "placeholder": "0"
-            }).val(setter.signaTakar).inputmask({
+            }).val(setter.signaTakar)/*.inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
                 prefix: "",
                 autoGroup: false,
                 digitsOptional: true
-            });
+            })*/;
 
             var newRacikanJlh = document.createElement("INPUT");
             $(newRacikanCellJlh).append(newRacikanJlh);
@@ -2079,14 +2099,14 @@
                     "id": "row_racikan_" + id
                 });
 
-                $(this).find("td:eq(0)").html(id);
+                $(this).find("td:eq(0)").html("<h5 class=\"autonum\">" + id + "</h5>");
 
-                $(this).find("td:eq(1) input").attr({
+                $(this).find("td:eq(1) input.nama_racikan").attr({
                     "id": "racikan_nama_" + id
-                });
+                }).val("Racikan " + id);
 
-                if($(this).find("td:eq(1) input") == "") {
-                    $(this).find("td:eq(1) input").val("RACIKAN " + id);
+                if($(this).find("td:eq(1) input.nama_racikan") == "") {
+                    $(this).find("td:eq(1) input.nama_racikan").val("RACIKAN " + id);
                 }
 
                 $(this).find("td:eq(1) table").attr({
@@ -2099,6 +2119,10 @@
 
                 $(this).find("td:eq(1) select.aturan-pakai-racikan").attr({
                     "id": "aturan_pakai_racikan_" + id
+                });
+
+                $(this).find("td:eq(1) input.racikan_iterasi").attr({
+                    "id": "iterasi_racikan_" + id
                 });
 
                 $(this).find("td:eq(2) input").attr({
@@ -2977,8 +3001,12 @@
                 var obat = $(this).find("td:eq(1) select.resep-obat").val();
                 var aturanPakai = $(this).find("td:eq(1) select.aturan-pakai-resep").val();
                 var keteranganPerObat = $(this).find("td:eq(1) textarea").val();
-                var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
-                var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");
+                var iterasi = $(this).find("td:eq(1) input.resep-iterasi").inputmask("unmaskedvalue");
+                var satuanPemakaian = $(this).find("td:eq(1) input.resep-satuan-pemakaian").val();
+                /*var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+                var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");*/
+                var signaKonsumsi = $(this).find("td:eq(2) input").val();
+                var signaTakar = $(this).find("td:eq(4) input").val();
                 var signaHari = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
                 //var penjamin = $(this).find("td:eq(6) select").val();
                 if(
@@ -2986,8 +3014,10 @@
                     obat !== "none" &&
                     obat !== "" &&
 
-                    parseFloat(signaKonsumsi) > 0 &&
-                    parseFloat(signaTakar) > 0 &&
+                    /*parseFloat(signaKonsumsi) > 0 &&
+                    parseFloat(signaTakar) > 0 &&*/
+                    parseFloat(signaKonsumsi) !== "" &&
+                    parseFloat(signaTakar) !== "" &&
                     parseFloat(signaHari) > 0
 
                 ) {
@@ -2997,7 +3027,9 @@
                         "keteranganPerObat": keteranganPerObat,
                         "signaKonsumsi": signaKonsumsi,
                         "signaTakar": signaTakar,
-                        "signaHari": signaHari
+                        "signaHari": signaHari,
+                        "iterasi": iterasi,
+                        "satuanPemakaian": satuanPemakaian
                     });
                 }
             });
@@ -3012,23 +3044,27 @@
                     "nama": "",
                     "item": [],
                     "keterangan": "",
+                    "iterasi": 0,
                     "signaKonsumsi": 0,
                     "signaTakar": 0,
                     "signaHari": 0,
                     "aturanPakai": 0
                 };
 
-                dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input").val();
+                dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.nama_racikan").val();
                 dataRacikan.aturanPakai = (masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val() === "none") ? 0 : parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
                 dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
-                dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
-                dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));
+                dataRacikan.iterasi = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.racikan_iterasi").inputmask("unmaskedvalue");
+                /*dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
+                dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));*/
+                dataRacikan.signaKonsumsi = masterRacikanRow.find("td.master-racikan-cell:eq(2) input").val();
+                dataRacikan.signaTakar = masterRacikanRow.find("td.master-racikan-cell:eq(4) input").val();
                 dataRacikan.signaHari = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"));
 
 
 
 
-                $(this).find("td:eq(1) table.komposisi-racikan tbody.komposisi-item tr.komposisi-row").each(function() {
+                masterRacikanRow.find("td:eq(1) table.komposisi-racikan tbody.komposisi-item tr.komposisi-row").each(function() {
                     var obat = $(this).find("td:eq(1)").attr("uid-obat");
                     //var qty = $(this).find("td:eq(2)").html();
                     var takaranBulat = $(this).find("td:eq(2) b").html();
@@ -3037,10 +3073,9 @@
                     var takaranKekuatan = $(this).find("td:eq(2) h6").html();
                     var takaran = parseFloat(takaranBulat) + parseFloat(takaranDecimal);
 
-                    if(obat != undefined) {
+                    if(obat !== undefined) {
                         dataRacikan.item.push({
                             "obat": obat,
-                            //"qty": qty,
                             "takaranBulat": takaranBulat,
                             "takaranDecimal": takaranDecimal,
                             "takaranDecimalText": takaranDecimalText,
@@ -3051,16 +3086,21 @@
                 });
 
                 if(
-                    dataRacikan.nama != "" &&
+                    dataRacikan.nama !== "" &&
                     dataRacikan.item.length > 0 &&
 
-                    dataRacikan.signaKonsumsi > 0 &&
-                    dataRacikan.signaTakar > 0 &&
+                    /*dataRacikan.signaKonsumsi > 0 &&
+                    dataRacikan.signaTakar > 0 &&*/
+                    dataRacikan.signaKonsumsi !== "" &&
+                    dataRacikan.signaTakar !== "" &&
                     dataRacikan.signaHari > 0
                 ) {
                     racikan.push(dataRacikan);
                 }
             });
+
+            console.log(resep);
+            console.log(racikan);
 
             var formData = {};
 
@@ -3383,8 +3423,6 @@
                             metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                             metaSwitchEdit));
                     }).then(function(result) {
-                        //console.clear();
-                        //console.log(result);
                         if(result.response_package.response_result > 0) {
                             notification ("success", "Asesmen Berhasil Disimpan", 1000, "hasil_tambah_dev");
                         } else {

@@ -26,8 +26,6 @@
                         for(var key in data) {
                             if(data[key].pasien !== null && data[key].pasien !== undefined) {
                                 returnedData.push(data[key]);
-                            } else {
-                                console.log(data[key]);
                             }
                         }
                     }
@@ -197,8 +195,6 @@
                 var allowLabor = parseInt(SpliterStatus[1]);
                 var allowRadio = parseInt(SpliterStatus[2]);
 
-                console.log(SpliterStatus);
-
                 if(allowResep === 1 && allowLabor === 1 && allowRadio === 1) {
                     $("#inap_penjamin").html("<option value=\"" + $("#penjamin_" + id).attr("data") + "\">" + $("#penjamin_" + id).html() + "</option>");
                     $("#inap_dokter").html("<option>" + $("#dokter_" + id).html() + "</option>");
@@ -274,6 +270,8 @@
                                     var status = tagihanApotek[b].status_resep;
                                     if(status === "N") {
                                         status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</i></span>";
+                                    } else if(status === "C") {
+                                        status_parse = "<span class=\"text-muted\"><i class=\"fa fa-exclamation-triangle\"></i> Cancel</i></span>";
                                     } else if(status === "K") {
                                         status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>";
                                     } else if(status === "L" || status === "P" || status === "S") {
@@ -405,8 +403,6 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function(response) {
-                            console.clear();
-                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 Swal.fire(
                                     "Rawat Inap",
