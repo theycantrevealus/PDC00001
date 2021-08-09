@@ -3395,7 +3395,7 @@
                 }
             });
 
-            orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, charge_invoice);
+            // orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, charge_invoice);
             listTindakanRadiologiDihapus = [];		//set back to empty
             return savingResult;
         }
