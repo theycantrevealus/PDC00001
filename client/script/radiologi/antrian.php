@@ -427,10 +427,10 @@
 						
 						if (MetaData.pasien != ""){
 							$("#no_rm").html(MetaData.pasien.no_rm);
-							$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir);
-							$("#panggilan").html(MetaData.pasien.panggilan);
+							$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir_parsed);
+							$("#panggilan").html(MetaData.pasien.panggilan_name.nama);
 							$("#nama").html(MetaData.pasien.nama);
-							$("#jenkel").html(MetaData.pasien.jenkel);
+							$("#jenkel").html(MetaData.pasien.jenkel_detail.nama);
 						}
 					}
 				},
