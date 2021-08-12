@@ -7,27 +7,17 @@
         }
 
         @font-face {
-            font-family: "Pacifico";
-            src: url("<?php echo $_POST['__HOSTNAME__'] . '/template/assets/fonts/Pacifico-Regular.ttf'; ?>");
-        }
-
-        .resep_script {
-            font-family: Pacifico !important;
-            font-style: italic !important;
-        }
-
-        .integral_sign {
-            font-size: 14pt !important;
+            font-family: "Arial";
+            src: url("<?php echo $_POST['__HOSTNAME__'] . '/template/assets/fonts/ArialCEMTBlack.ttf'; ?>");
         }
 
         @page {
             size: auto;
-            margin: 0
         }
 
         @media print {
             @page {
-                size: 1.7in 7.8in portrait;
+                size: legal;
             }
 
             html, body {
@@ -81,7 +71,6 @@
         }
 
         .content {
-            position: relative;
             background: #fff;
             margin: -1px !important;
         }
@@ -89,6 +78,8 @@
         .content .tl {
             position: fixed;
             top: -5px; left: -5px;
+            width: 250px; height: 250px;
+            opacity: .1;
         }
 
         .header {
@@ -96,16 +87,14 @@
             right: 1cm;
             position: fixed;
             text-align:left;
-            margin-bottom: 10px;
             font-family: GreyCLiff;
         }
 
         .header-space {
-            height: 160px;
+            height: 210px;
         }
 
         h1.title-name {
-            font-family: GreyCLiff;
             font-size: 14pt;
             text-align: center;
             letter-spacing: 2px;
@@ -117,20 +106,19 @@
         }
 
         .header h1 {
-            font-size: 14pt;
+            font-family: Arial;
             letter-spacing: 2px;
         }
 
         .header h1 small {
-            color: #0199f0;
+            color: #0e8900;
             letter-spacing: 0;
         }
 
         .header table {
             width: 100%;
-            padding-bottom: 0cm;
-            margin-bottom: 5px;
-            border-bottom: dashed 1px #000;
+            padding-bottom: .4cm;
+            border-bottom: solid 2px #000;
         }
 
         .header table tr td {
@@ -138,12 +126,28 @@
         }
 
         .header .header-information {
-            color: #979797;
+            font-size: 12pt;
+            color: #000;
         }
 
-        img.logo{
+        .logo-container {
+            position: relative;
+            width: 10%;
+        }
+
+        img.logo {
+            float:left;
+            margin: 1px;
+        }
+
+        img.logo {
             width: 2cm;
-            height: 1cm;
+            height: 3cm;
+        }
+
+        img.logo2 {
+            width: 2.5cm;
+            height: 3cm;
         }
 
         .print-date {
@@ -266,20 +270,26 @@
         <table>
             <tr>
                 <td class="logo-container">
-                    <center>
-                        <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/logo-text-white.png" class="logo">
-                        <h4 class="text-center">
-                            <center>
-                                <small><?php echo (isset($_POST['__PC_CUSTOMER_GROUP__'])) ? $_POST['__PC_CUSTOMER_GROUP__'] : 'CUSTOMER GROUP NAME'; ?></small>
-                                <br />
-                                <?php echo (isset($_POST['__PC_CUSTOMER__'])) ? $_POST['__PC_CUSTOMER__'] : 'CUSTOMER COMPANY FULL NAME'; ?>
-                            </center>
-                        </h4>
-                        <small class="header-information">
-                            <?php echo (isset($_POST['__PC_CUSTOMER_ADDRESS__'])) ? $_POST['__PC_CUSTOMER_ADDRESS__'] : 'CUSTOMER ADDRESS'; ?><br />
-                            Telp. <?php echo (isset($_POST['__PC_CUSTOMER_CONTACT__'])) ? $_POST['__PC_CUSTOMER_CONTACT__'] : '085261510202'; ?>
-                        </small>
-                    </center>
+                    <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/clients/logo-icon-sub-<?php echo $_POST['__PC_IDENT__']; ?>.png" class="logo">
+                </td>
+                <td>
+                    <h1 class="text-center" style="font-size: 14pt !important;">
+                        <?php echo (isset($_POST['__PC_CUSTOMER_GROUP__'])) ? $_POST['__PC_CUSTOMER_GROUP__'] : 'CUSTOMER GROUP NAME'; ?>
+                    </h1>
+                    <h1 class="text-center" style="font-size: 18pt !important; letter-spacing: -1px">
+                        <?php echo (isset($_POST['__PC_CUSTOMER__'])) ? $_POST['__PC_CUSTOMER__'] : 'CUSTOMER COMPANY FULL NAME'; ?>
+                    </h1>
+                    <small class="header-information text-center">
+                        <center>
+                            <?php echo (isset($_POST['__PC_CUSTOMER_ADDRESS__'])) ? $_POST['__PC_CUSTOMER_ADDRESS__'] : 'CUSTOMER ADDRESS'; ?> Telp. <?php echo (isset($_POST['__PC_CUSTOMER_CONTACT__'])) ? $_POST['__PC_CUSTOMER_CONTACT__'] : '085261510202'; ?>
+                            <br />
+                            Email: <?php echo $_POST['__PC_CUSTOMER_EMAIL__']; ?><br />
+                            <b><?php echo $_POST['__PC_CUSTOMER_ADDRESS_SHORT__']; ?></b>
+                        </center>
+                    </small>
+                </td>
+                <td class="logo-container">
+                    <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/clients/logo-icon-<?php echo $_POST['__PC_IDENT__']; ?>.png" class="logo2">
                 </td>
             </tr>
         </table>

@@ -3,20 +3,26 @@
 		<div class="card">
 			<div class="card-header card-header-large bg-white align-items-center">
                 <div class="row info-kwitansi">
-                    <div class="col-6">
+                    <div class="col-4">
+                        <span class="nomor-faktur"></span>
+                    </div>
+                    <div class="col-4">
                         <span id="nama-pasien-faktur"></span>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         <span id="pegawai-faktur"></span>
                     </div>
-                </div>
-                <br />
-                <div class="row info-kwitansi">
-                    <div class="col-6">
+                    <div class="col-12">
+                        <br />
+                    </div>
+                    <div class="col-4">
                         <span id="tanggal-faktur"></span>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         <span id="poli"></span>
+                    </div>
+                    <div class="col-12">
+                        <br />
                     </div>
                 </div>
 			</div>

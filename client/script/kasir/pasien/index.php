@@ -220,11 +220,13 @@
                 },
                 type: "POST",
                 data: {
-                    __PC_CUSTOMER__: __PC_CUSTOMER__,
-                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
+                    __PC_CUSTOMER__: __PC_CUSTOMER__.toUpperCase(),
+                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__.toUpperCase(),
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     __PC_IDENT__: __PC_IDENT__,
+                    __PC_CUSTOMER_EMAIL__: __PC_CUSTOMER_EMAIL__,
+                    __PC_CUSTOMER_ADDRESS_SHORT__: __PC_CUSTOMER_ADDRESS_SHORT__.toUpperCase(),
                     kwitansi_data: $(containerTemp).html(),
                     pasien: $("#payment-detail-loader .info-kwitansi col-3:eq(1)").html(),
                     pegawai: $("#payment-detail-loader .info-kwitansi col-3:eq(2)").html(),
@@ -298,14 +300,12 @@
                             } else {
                                 $("#nama-pasien-faktur").html("Pasien:<br /><b>" + pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]</b>");
                             }
-
-							$("#nomor-faktur").html($("#kwitansi_" + uid).html());
-
 							var historyData = response_data.response_package.response_data[0];
 							var historyDetail = historyData.detail;
 
 							$("#pegawai-faktur").html("Diterima Oleh :<br /><b>" + historyData.pegawai.nama + "</b>");
 							$("#tanggal-faktur").html("Tanggal Bayar :<br /><b>" + historyData.tanggal_bayar + "</b>");
+                            $(".nomor-faktur").html("Nomor Faktur :<br /><b>" + historyData.nomor_kwitansi + "</b>");
 							var deptList = [];
 							for(var depKey in historyData.antrian) {
 							    deptList.push(historyData.antrian[depKey].nama);
@@ -371,7 +371,7 @@
                                         "<td>" + ((billing_group[groupKey][itemKey].status === "P") ? ((billing_group[groupKey][itemKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + billing_group[groupKey][itemKey].uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
                                         "<td class=\"wrap_content\">" + (parseInt(itemKey) + 1)+ "</td>" +
                                         "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "; width: 50%\">" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style\">" + billing_group[groupKey][itemKey].qty + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-center\">" + billing_group[groupKey][itemKey].qty + "</td>" +
                                         "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
                                         "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
                                         "</tr>"

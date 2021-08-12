@@ -1,29 +1,4 @@
-<div class="header">
-    <table>
-        <tr>
-            <td style="text-align:center; width:5%">
-                <img width="200" height="180" src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/clients/logo-text-white-<?php echo $_POST['__PC_IDENT__']; ?>.png" class="logo">
-            </td>
-            <td style="width:45%;">
-                <h1 class="title">
-                    <b>
-                        <span class="title"><?php echo $_POST['__PC_CUSTOMER_GROUP__']; ?></span>
-                    </b>
-                    <br />
-                    <small>
-                        <span class="title"><?php echo $_POST['__PC_CUSTOMER__']; ?></span>
-                    </small>
-                </h1>
 
-                <br />
-                <span class="alamat"><?php echo $_POST['__PC_CUSTOMER_ADDRESS__']; ?></span>
-                <span class="telepon">Telp. <?php echo $_POST['__PC_CUSTOMER_CONTACT__']; ?></span>
-            </td>
-            <td style="width:2%;"></td>
-        </tr>
-    </table>
-
-</div>
 <div id="target-cetak-resep">
     <hr />
     <table class="form-mode">

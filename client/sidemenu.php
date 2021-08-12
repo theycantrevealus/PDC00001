@@ -55,7 +55,7 @@
 ?>
 <div class="mdk-drawer  js-mdk-drawer" id="default-drawer" data-align="start">
 	<div class="mdk-drawer__content">
-        <div class="sidebar sidebar-light sidebar-left simplebar" style="padding-top:0px" data-simplebar>
+        <div class="sidebar sidebar-light sidebar-left simplebar" style="padding-top:10px" data-simplebar>
             <!--<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
                 <li class="nav-item dropdown">
                     <a href="<?php /*echo __HOSTNAME__; */?>/template/#account_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">

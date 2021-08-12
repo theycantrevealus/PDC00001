@@ -6,9 +6,18 @@
             src: url("<?php echo $_POST['__HOSTNAME__'] . '/template/assets/fonts/FontsFree-Net-greycliff-cf-bold.ttf'; ?>");
         }
 
+        @font-face {
+            font-family: "Arial";
+            src: url("<?php echo $_POST['__HOSTNAME__'] . '/template/assets/fonts/ArialCEMTBlack.ttf'; ?>");
+        }
+
+        @font-face {
+            font-family: "ArialCE";
+            src: url("<?php echo $_POST['__HOSTNAME__'] . '/template/assets/fonts/ArialCE.ttf'; ?>");
+        }
+
         @page {
             size: auto;
-            margin: 0
         }
 
         @media print {
@@ -59,7 +68,7 @@
         }
 
         table.constructor tbody td {
-            padding: 0cm 2cm;
+            padding: 0cm 1cm;
         }
 
         table.form-mode tbody tr td {
@@ -67,7 +76,6 @@
         }
 
         .content {
-            min-height: 14in;
             background: #fff;
             margin: -1px !important;
         }
@@ -80,20 +88,18 @@
         }
 
         .header {
-            left: 2cm; top: 2cm;
-            right: 2cm;
+            left: 1cm; top: 1cm;
+            right: 1cm;
             position: fixed;
             text-align:left;
-            margin-bottom:1rem;
             font-family: GreyCLiff;
         }
 
         .header-space {
-            height: 200px;
+            height: 210px;
         }
 
         h1.title-name {
-            font-family: GreyCLiff;
             font-size: 14pt;
             text-align: center;
             letter-spacing: 2px;
@@ -105,7 +111,7 @@
         }
 
         .header h1 {
-            font-size: 14pt;
+            font-family: Arial;
             letter-spacing: 2px;
         }
 
@@ -116,8 +122,8 @@
 
         .header table {
             width: 100%;
-            padding-bottom: .5cm;
-            border-bottom: solid 3px #0e8900;
+            padding-bottom: .4cm;
+            border-bottom: solid 2px #000;
         }
 
         .header table tr td {
@@ -125,19 +131,29 @@
         }
 
         .header .header-information {
-            color: #979797;
+            font-family: ArialCE !important;
+            font-size: 12pt;
+            color: #000;
         }
 
         .logo-container {
+            position: relative;
             width: 10%;
         }
 
-        img.logo{
-            margin-top: -20px;
+        img.logo {
             float:left;
-            padding-right: 1cm;
-            width: 4cm;
-            height: 2.8cm;
+            margin: 1px;
+        }
+
+        img.logo {
+            width: 2cm;
+            height: 3cm;
+        }
+
+        img.logo2 {
+            width: 2.5cm;
+            height: 3cm;
         }
 
         .print-date {
@@ -262,25 +278,32 @@
 </head>
 <body>
 <div class="content">
-    <img class="tl" src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/TOPLEFT-GREEN.png" style="width: 250px; height: 250px;" alt="top-left" />
+    <!--img class="tl" src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/TOPLEFT-GREEN.png" alt="top-left" /-->
     <div class="header">
         <table>
             <tr>
                 <td class="logo-container">
-                    <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/clients/logo-text-white-<?php echo $_POST['__PC_IDENT__']; ?>.png" class="logo">
+                    <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/clients/logo-icon-sub-<?php echo $_POST['__PC_IDENT__']; ?>.png" class="logo">
                 </td>
                 <td>
-                    <h1>
-                        <small><?php echo (isset($_POST['__PC_CUSTOMER_GROUP__'])) ? $_POST['__PC_CUSTOMER_GROUP__'] : 'CUSTOMER GROUP NAME'; ?></small>
-                        <br />
+                    <h1 class="text-center" style="font-size: 14pt !important;">
+                        <?php echo (isset($_POST['__PC_CUSTOMER_GROUP__'])) ? $_POST['__PC_CUSTOMER_GROUP__'] : 'CUSTOMER GROUP NAME'; ?>
+                    </h1>
+                    <h1 class="text-center" style="font-size: 18pt !important; letter-spacing: -1px">
                         <?php echo (isset($_POST['__PC_CUSTOMER__'])) ? $_POST['__PC_CUSTOMER__'] : 'CUSTOMER COMPANY FULL NAME'; ?>
                     </h1>
-                    <small class="header-information">
-                        <?php echo (isset($_POST['__PC_CUSTOMER_ADDRESS__'])) ? $_POST['__PC_CUSTOMER_ADDRESS__'] : 'CUSTOMER ADDRESS'; ?><br />
-                        Telp. <?php echo (isset($_POST['__PC_CUSTOMER_CONTACT__'])) ? $_POST['__PC_CUSTOMER_CONTACT__'] : '085261510202'; ?>
+                    <small class="header-information text-center">
+                        <center>
+                            <?php echo (isset($_POST['__PC_CUSTOMER_ADDRESS__'])) ? $_POST['__PC_CUSTOMER_ADDRESS__'] : 'CUSTOMER ADDRESS'; ?> Telp. <?php echo (isset($_POST['__PC_CUSTOMER_CONTACT__'])) ? $_POST['__PC_CUSTOMER_CONTACT__'] : '085261510202'; ?>
+                            <br />
+                            Email: <?php echo $_POST['__PC_CUSTOMER_EMAIL__']; ?><br />
+                            <b><?php echo $_POST['__PC_CUSTOMER_ADDRESS_SHORT__']; ?></b>
+                        </center>
                     </small>
                 </td>
-                <td style="width:2%;"></td>
+                <td class="logo-container">
+                    <img src="http://<?php echo $_SERVER['SERVER_ADDR'] ?>/simrsv2/client/template/assets/images/clients/logo-icon-<?php echo $_POST['__PC_IDENT__']; ?>.png" class="logo2">
+                </td>
             </tr>
         </table>
     </div>
