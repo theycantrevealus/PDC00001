@@ -73,7 +73,7 @@
                     forSave["tindakan_" + selectedState].keterangan = editorKeteranganPeriksa.getData();
                 });*/
 
-                editor.editing.view.document.on( 'keydown', ( evt, data ) => {
+                editor.editing.view.document.on( 'keyup', ( evt, data ) => {
                     forSave["tindakan_" + selectedState].keterangan = editorKeteranganPeriksa.getData();
                 });
 			})
@@ -93,7 +93,7 @@
 				editorKesimpulanPeriksa = editor;
 				window.editor = editor;
 
-                editor.editing.view.document.on( 'keydown', ( evt, data ) => {
+                editor.editing.view.document.on( 'keyup', ( evt, data ) => {
                     forSave["tindakan_" + selectedState].kesimpulan = editorKesimpulanPeriksa.getData();
                 });
 
