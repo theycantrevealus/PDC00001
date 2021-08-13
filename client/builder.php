@@ -246,7 +246,7 @@
             });
 		});
 
-        function loadCPPT(from, to, pasien, UID) {
+        function loadCPPT(from, to, pasien, UID = "") {
             $.ajax({
                 url: __HOSTAPI__ + "/CPPT",
                 async:false,
@@ -284,8 +284,8 @@
                                     var listData = data[a].data;
                                     for(var b in listData) {
                                         var currentData = listData[b].data[0];
-                                        currentData.asesmen.resep = [currentData.asesmen.resep[currentData.asesmen.resep.length - 1]];
-                                        currentData.asesmen.racikan = [currentData.asesmen.racikan[currentData.asesmen.racikan.length - 1]];
+                                        currentData.asesmen.resep = (currentData.asesmen.resep !== undefined && currentData.asesmen.resep !== null) ? [currentData.asesmen.resep[currentData.asesmen.resep.length - 1]] : [];
+                                        currentData.asesmen.racikan = (currentData.asesmen.racikan !== undefined && currentData.asesmen.racikan !== null) ? [currentData.asesmen.racikan[currentData.asesmen.racikan.length - 1]] : [];
                                         console.log(currentData);
                                         $.ajax({
                                             url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",

@@ -164,11 +164,11 @@
                 console.log(antrianData);
 
                 $("#tombolKembaliInap").attr({
-                    "href": __HOSTNAME__ + "/igdv2/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid + "/" + pasien_penjamin_uid
+                    "href": __HOSTNAME__ + "/igdv2/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid + "/" + pasien_penjamin_uid + "/" + __PAGES__[7]
                 });
                 $(".nama_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>");
                 $("#target_pasien").html(pasien_nama + " <span class=\"text-info\">[" + pasien_rm + "]</span>").parent().attr({
-                    "href": __HOSTNAME__ + "/igdv2/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid + "/" + pasien_penjamin_uid
+                    "href": __HOSTNAME__ + "/igdv2/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid + "/" + pasien_penjamin_uid + "/" + __PAGES__[7]
                 });
                 $("#nama-departemen").html("Asesmen");
                 $(".jk_pasien").html(pasien_jenkel);
@@ -3467,8 +3467,7 @@
                         if(result.response_package.response_result > 0) {
                             notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
                             push_socket(__ME__, "permintaan_resep_baru", "*", "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
-
-                                location.href = __HOSTNAME__ + "/igdv2/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid;
+                                location.href = __HOSTNAME__ + "/igdv2/dokter/asesmen-detail/" + pasien_uid + "/" + kunjungan.uid + "/" + pasien_penjamin_uid + "/" + __PAGES__[7];
                             });
 
                         } else {

@@ -3,6 +3,11 @@
     $(function() {
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "";
 
+        /*
+        *
+        * 4 - 7 PAGES
+        *
+        * */
         $.ajax({
             url: __HOSTAPI__ + "/Invoice/biaya_pasien_total/" + __PAGES__[3],
             async:false,
@@ -250,7 +255,13 @@
             ]
         });
 
-        var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
+        loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
+
+        $("#filter_date").change(function() {
+            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
+        });
+
+        /*var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
             "ajax":{
                 url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis/igd",
                 type: "GET",
@@ -351,7 +362,7 @@
                     }
                 }
             ]
-        });
+        });*/
 
         $("#btnInap").click(function() {
             loadPenjamin("inap", __PAGES__[5]);
@@ -380,7 +391,7 @@
                 type:"POST",
                 data: formData,
                 success:function(response) {
-                    location.href = __HOSTNAME__ + "/igdv2/dokter/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4];
+                    location.href = __HOSTNAME__ + "/igdv2/dokter/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4] + "/" + __PAGES__[5] + "/" + __PAGES__[6];
                 },
                 error: function(response) {
                     console.log(response);
