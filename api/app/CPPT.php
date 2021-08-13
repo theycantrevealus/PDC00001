@@ -113,7 +113,11 @@ class CPPT extends Utility {
 
                 //Prepare Data
                 $Departemen = $Poli->get_poli_info($value['departemen'])['response_data'][0];
-                $Antrian['response_data'][$key]['departemen'] = $Departemen;
+                $Antrian['response_data'][$key]['departemen'] = (isset($value['departemen']) && $value['departemen'] !== null && $value['departemen'] !== __POLI_INAP__) ? $Departemen : array(
+                    'uid' => __POLI_INAP__,
+                    'nama' => 'Rawat Inap',
+                    'poli_asesmen' => 'inap'
+                );
 
                 $Dokter = $Pegawai->get_detail($value['dokter'])['response_data'][0];
                 $Antrian['response_data'][$key]['dokter'] = $Dokter;

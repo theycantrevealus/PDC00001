@@ -247,6 +247,7 @@
 		});
 
         function loadCPPT(from, to, pasien, UID = "") {
+            $("#cppt_loader").html("");
             $.ajax({
                 url: __HOSTAPI__ + "/CPPT",
                 async:false,
@@ -265,8 +266,6 @@
                     var data = response.response_package;
                     if(data && Object.keys(data).length > 0 && data.constructor === Object) {
                         $("#no-data-panel").hide();
-                        $("#cppt_loader").html("");
-
                         for(var a in data) {
                             $.ajax({
                                 url: __HOSTNAME__ + "/pages/pasien/cppt-grouper.php",
@@ -286,7 +285,6 @@
                                         var currentData = listData[b].data[0];
                                         currentData.asesmen.resep = (currentData.asesmen.resep !== undefined && currentData.asesmen.resep !== null) ? [currentData.asesmen.resep[currentData.asesmen.resep.length - 1]] : [];
                                         currentData.asesmen.racikan = (currentData.asesmen.racikan !== undefined && currentData.asesmen.racikan !== null) ? [currentData.asesmen.racikan[currentData.asesmen.racikan.length - 1]] : [];
-                                        console.log(currentData);
                                         $.ajax({
                                             url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
                                             async:false,
@@ -307,7 +305,7 @@
                                                 group_tanggal_name: a,
                                                 waktu_masuk: listData[b].parsed,
                                                 waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),
-                                                departemen: currentData.departemen.nama,
+                                                departemen: (currentData.departemen !== undefined && currentData.departemen !== null) ? currentData.departemen.nama : "Rawat Inap",
                                                 dokter_uid: currentData.dokter.uid,
                                                 dokter: currentData.dokter.nama,
                                                 dokter_pic: __HOST__ + currentData.dokter.profile_pic,

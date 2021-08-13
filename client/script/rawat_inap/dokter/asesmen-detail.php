@@ -172,8 +172,10 @@
                     }
 
                     for(var a in rawData) {
-                        if(rawData[a].antrian_detail.departemen === __POLI_INAP__) {
-                            returnedData.push(rawData[a]);
+                        if(rawData[a].antrian_detail !== undefined && rawData[a].antrian_detail !== null) {
+                            if(rawData[a].antrian_detail.departemen === __POLI_INAP__) {
+                                returnedData.push(rawData[a]);
+                            }
                         }
                     }
 
@@ -250,7 +252,7 @@
             ]
         });
 
-        var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
+        /*var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
             "ajax":{
                 url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis/inap",
                 type: "GET",
@@ -350,6 +352,12 @@
                     }
                 }
             ]
+        });*/
+
+        loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
+
+        $("#filter_date").change(function() {
+            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
         });
 
         $("#btnTambahAsesmen").click(function() {
@@ -382,7 +390,7 @@
                 data: formData,
                 success:function(response) {
                     //console.log(response);
-                    location.href = __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4];
+                    location.href = __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4] + "/" + __PAGES__[5]+ "/" + __PAGES__[6];
                 },
                 error: function(response) {
                     console.log(response);

@@ -185,18 +185,22 @@ class Poli extends Utility {
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
+                'master_poli.editable' => '= ?',
+                'AND',
                 'master_poli.deleted_at' => 'IS NULL',
                 'AND',
                 'master_poli.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
             );
 
-            $paramValue = array();
+            $paramValue = array('TRUE');
         } else {
             $paramData = array(
+                'master_poli.editable' => '= ?',
+                'AND',
                 'master_poli.deleted_at' => 'IS NULL'
             );
 
-            $paramValue = array();
+            $paramValue = array('TRUE');
         }
 
         if ($parameter['length'] < 0) {
