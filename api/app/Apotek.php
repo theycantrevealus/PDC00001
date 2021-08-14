@@ -3344,6 +3344,21 @@ class Apotek extends Utility
                 }
 
                 $paramValue = array('K', __POLI_INAP__);
+            } else if($parameter['request_type'] === 'verifikasi') {
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL'
+                    );
+                }
+                $paramValue = array();
             } else if($parameter['request_type'] === 'batal') {
                 if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
                     $paramData = array(
@@ -3815,7 +3830,6 @@ class Apotek extends Utility
                     'resep.deleted_at' => 'IS NULL',
                     'AND',
                     'resep.status_resep' => '= ?'
-                    //'resep.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
                 );
 
                 $paramValue = array((isset($parameter['status']) ? $parameter['status'] : 'N'));
@@ -3873,8 +3887,8 @@ class Apotek extends Utility
                         'resep.created_at' => 'ASC'
                     ))
                     ->where($paramData, $paramValue)
-                    ->offset(intval($parameter['start']))
-                    ->limit(intval($parameter['length']))
+                    /*->offset(intval($parameter['start']))
+                    ->limit(intval($parameter['length']))*/
                     ->execute();
             }
         } else {
@@ -3927,8 +3941,8 @@ class Apotek extends Utility
                         'resep.created_at' => 'ASC'
                     ))
                     ->where($paramData, $paramValue)
-                    ->offset(intval($parameter['start']))
-                    ->limit(intval($parameter['length']))
+                    /*->offset(intval($parameter['start']))
+                    ->limit(intval($parameter['length']))*/
                     ->execute();
             }
         }
@@ -4128,15 +4142,16 @@ class Apotek extends Utility
         ))
             ->where($paramData, $paramValue)
             ->execute();
-        $dataResult = array_merge($dataIGD, $dataBiasa);
-        if (intval($parameter['length']) < 0) {
+        // $dataResult = array_merge($dataIGD, $dataBiasa);
+        /*if (intval($parameter['length']) < 0) {
             $data['response_data'] = $dataResult;
         } else {
             $data['response_data'] = array_splice($dataResult, intval($parameter['start']), intval($parameter['length']));
-        }
+        }*/
 
-        $data['recordsTotal'] = count($itemTotal['response_data']);
-        $data['recordsFiltered'] = count($dataResult);
+        // $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsTotal'] = count($data);
+        $data['recordsFiltered'] = count($data);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
 

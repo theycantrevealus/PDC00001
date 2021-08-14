@@ -130,32 +130,29 @@
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d) {
-                    d.request = "get_resep_backend_v2";
+                    d.request = "get_resep_backend_v3";
+                    d.request_type = "verifikasi";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+
+                    console.clear();
+                    console.log(response);
                     var resepDataRaw = response.response_package.response_data;
                     var parsedData = [];
                     var IGD = [];
 
                     for(var resepKey in resepDataRaw) {
-                        if(resepDataRaw[resepKey].antrian.departemen !== undefined && resepDataRaw[resepKey].antrian.departemen !== null) {
-                            if(resepDataRaw[resepKey].antrian.departemen.uid === __POLI_IGD__) {
+                        if(resepDataRaw[resepKey].departemen !== undefined && resepDataRaw[resepKey].departemen !== null) {
+                            if(resepDataRaw[resepKey].departemen.uid === __POLI_IGD__) {
                                 IGD.push(resepDataRaw[resepKey]);
                             } else {
-                                /*if(resepDataRaw[resepKey].antrian.departemen !== null) {
-                                    parsedData.push(resepDataRaw[resepKey]);
-                                } else {
-                                    resepDataRaw[resepKey].antrian.departemen = {
-                                        uid: __POLI_INAP__,
-                                        nama: "Rawat Inap"
-                                    };
-                                    parsedData.push(resepDataRaw[resepKey]);
-                                }*/
                                 parsedData.push(resepDataRaw[resepKey]);
                             }
+                        } else {
+                            console.log(resepDataRaw[resepKey]);
                         }
                     }
                     var autonum = 1;
@@ -183,7 +180,7 @@
                 {"targets":0, "className":"dt-body-left"}
             ],
             "rowCallback": function ( row, data, index ) {
-                if(data.antrian.departemen.uid === __POLI_IGD__) {
+                if(data.departemen.uid === __POLI_IGD__) {
                     $("td", row).addClass("bg-danger").css({
                         "color": "#fff"
                     });
@@ -202,12 +199,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        if(row.antrian.departemen !== undefined && row.antrian.departemen !== null) {
-                            if(row.antrian.departemen.uid === __POLI_INAP__) {
-                                return row.antrian.departemen.nama + "<br />" +
-                                    "<span class=\"text-info\">" + row.antrian.ns_detail.kode_ns + "</span> - " + row.antrian.ns_detail.nama_ns;
+                        if(row.departemen !== undefined && row.departemen !== null) {
+                            if(row.departemen.uid === __POLI_INAP__) {
+                                return row.departemen.nama + "<br />" +
+                                    "<span class=\"text-info\">" + row.ns_detail.kode_ns + "</span> - " + row.ns_detail.nama_ns;
                             } else {
-                                return row.antrian.departemen.nama;
+                                return row.departemen.nama;
                             }
                         } else {
                             return "";
@@ -226,7 +223,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.nama_penjamin;
+                        return row.penjamin.nama;
                     }
                 },
                 {
@@ -234,16 +231,16 @@
                         //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
                         if(__MY_PRIVILEGES__.response_data[0].uid === __UIDKARUAPOTEKER__) {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                                "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
                                 "</a>" +
-                                "<button class=\"btn btn-warning btn-sm btn-cancel-resep " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob yellow" : "") + "\" id=\"cancel_" + row.uid + "\">" +
+                                "<button class=\"btn btn-warning btn-sm btn-cancel-resep " + ((row.departemen.uid === __POLI_IGD__) ? "blob yellow" : "") + "\" id=\"cancel_" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-ban\"></i> Batalkan</span>" +
                                 "</button>" +
                                 "</div>";
                         } else {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                                "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
                                 "</a>" +
                                 "</div>";
@@ -253,9 +250,9 @@
             ]
         });
 
-        setInterval(function() {
+        /*setInterval(function() {
             tableResep.ajax.reload();
-        }, 20000);
+        }, 20000);*/
 
         $("body").on("click", ".btn-cancel-resep", function () {
             var id = $(this).attr("id").split("_");
