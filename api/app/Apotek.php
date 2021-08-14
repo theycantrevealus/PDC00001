@@ -1478,6 +1478,7 @@ class Apotek extends Utility
             'antrian',
             'asesmen',
             'dokter',
+            'apoteker',
             'pasien',
             'total',
             'alergi_obat',
@@ -1531,6 +1532,9 @@ class Apotek extends Utility
             //Dokter Info
             $PegawaiInfo = $Pegawai->get_detail($value['dokter']);
             $resep_dokter['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
+
+            $ApotekerInfo = $Pegawai->get_detail($value['apoteker']);
+            $resep_dokter['response_data'][$key]['verifikator'] = $ApotekerInfo['response_data'][0];
 
             $resep_dokter['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
 
@@ -3349,6 +3353,8 @@ class Apotek extends Utility
                     $paramData = array(
                         'resep.deleted_at' => 'IS NULL',
                         'AND',
+                        'resep.status_resep' => '= ?',
+                        'AND',
                         'antrian.departemen' => '!= ?',
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
@@ -3359,10 +3365,12 @@ class Apotek extends Utility
                     $paramData = array(
                         'resep.deleted_at' => 'IS NULL',
                         'AND',
+                        'resep.status_resep' => '= ?',
+                        'AND',
                         'antrian.departemen' => '!= ?'
                     );
                 }
-                $paramValue = array(__POLI_IGD__);
+                $paramValue = array('N', __POLI_IGD__);
             } else if($parameter['request_type'] === 'batal') {
                 if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
                     $paramData = array(
@@ -4836,6 +4844,7 @@ class Apotek extends Utility
         $kajian_data = array();
 
         $UpdateStatusResep = self::$query->update('resep', array(
+            'apoteker' => $UserData['data']->uid,
             'status_resep' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? (($parameter['departemen'] === __POLI_IGD__) ? 'L' : 'K') : 'L',
             'alasan_ubah' => (isset($parameter['alasan_ubah']) && !empty($parameter['alasan_ubah']) && $parameter['alasan_ubah'] !== '') ? $parameter['alasan_ubah'] : ''
         ))

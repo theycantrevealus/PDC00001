@@ -13,7 +13,8 @@
             success:function(response) {
 
                 targettedData = response.response_package.response_data[0];
-                $("#verifikator").html(targettedData.detail[0].verifikator.nama);
+                // $("#verifikator").html(targettedData.detail[0].verifikator.nama);
+                $("#verifikator").html(targettedData.verifikator.nama);
                 $("#txt_keterangan_resep").html(targettedData.keterangan);
                 $("#txt_keterangan_racikan").html(targettedData.keterangan_racikan);
                 $("#nama-pasien").attr({

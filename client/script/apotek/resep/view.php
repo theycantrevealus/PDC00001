@@ -196,7 +196,7 @@
                             };
                         }
                     } else {
-                        $("#table-resep tbody").append("<tr><td colspan=\"9\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada resep</td></tr>");
+                        $("#table-resep tbody").append("<tr class=\"no-resep\"><td colspan=\"9\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada resep</td></tr>");
                     }
 
                     var racikan_detail = data.racikan;
@@ -1757,13 +1757,17 @@
             } else {
                 var obat = $("#racikan_nama_" + id).val();
                 var jlh_obat = $("#racikan_jumlah_" + id).inputmask("unmaskedvalue");
-                var signa_konsumsi = $("#racikan_signaA_" + id).inputmask("unmaskedvalue");
-                var signa_hari = $("#racikan_signaB_" + id).inputmask("unmaskedvalue");
+                /*var signa_konsumsi = $("#racikan_signaA_" + id).inputmask("unmaskedvalue");
+                var signa_hari = $("#racikan_signaB_" + id).inputmask("unmaskedvalue");*/
+                var signa_konsumsi = $("#racikan_signaA_" + id).val();
+                var signa_hari = $("#racikan_signaB_" + id).val();
 
                 if(
                     parseFloat(jlh_obat) > 0 &&
-                    parseFloat(signa_konsumsi) > 0 &&
-                    parseFloat(signa_hari) > 0 &&
+                    /*parseFloat(signa_konsumsi) > 0 &&
+                    parseFloat(signa_hari) > 0 &&*/
+                    signa_konsumsi !== "" &&
+                    signa_hari !== "" &&
                     obat != null &&
                     $("#row_racikan_" + id).hasClass("last-racikan")
                 ) {
@@ -2224,36 +2228,42 @@
 
                         if(allowSave) {
                             var resepItem = [];
+                            if($("#table-resep tbody tr").length === 1 && $("#table-resep tbody tr:eq(1)").hasClass("no-resep")) {
+                                allowSave = true;
+                            }
+
                             $("#table-resep tbody tr").each(function(e) {
-                                var resepVerifIDSave = (e + 1);
-                                var obat = $(this).find("td:eq(1) select:eq(0)").val();
-                                if(obat !== null) {
-                                    if($(this).find("td:eq(1) ol li").length === 0) {
-                                        allowSave = false;
-                                        return false;
-                                    } else {
-                                        $(this).find("td:eq(1) ol li").each(function() {
-                                            if($(this).find("i").hasClass("text-danger")) {
-                                                allowSave = false;
-                                                return false;
-                                            } else {
-                                                allowSave = true;
-                                            }
+                                if(!$(this).hasClass("no-resep")) {
+                                    var resepVerifIDSave = (e + 1);
+                                    var obat = $(this).find("td:eq(1) select:eq(0)").val();
+                                    if(obat !== null) {
+                                        if($(this).find("td:eq(1) ol li").length === 0) {
+                                            allowSave = false;
+                                            return false;
+                                        } else {
+                                            $(this).find("td:eq(1) ol li").each(function() {
+                                                if($(this).find("i").hasClass("text-danger")) {
+                                                    allowSave = false;
+                                                    return false;
+                                                } else {
+                                                    allowSave = true;
+                                                }
+                                            });
+                                        }
+
+                                        resepItem.push({
+                                            "obat": $(this).find("td:eq(1) select:eq(0)").val(),
+                                            /*"signa_qty": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
+                                            "signa_pakai": parseFloat($(this).find("td:eq(4) input").inputmask("unmaskedvalue")),*/
+                                            "signa_qty": $(this).find("td:eq(2) input").val(),
+                                            "signa_pakai": $(this).find("td:eq(4) input").val(),
+                                            "jumlah": parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")),
+                                            "harga": parseFloat($(this).find("td:eq(1) ol").attr("harga")),
+                                            "aturan_pakai": $(this).find("td:eq(1) select:eq(1)").val(),
+                                            "keterangan": $(this).find("td:eq(1) textarea").val(),
+                                            "alasan_ubah": ($("#alasan_" + resepVerifIDSave).length > 0) ? $("#alasan_" + resepVerifIDSave).val() : ""
                                         });
                                     }
-
-                                    resepItem.push({
-                                        "obat": $(this).find("td:eq(1) select:eq(0)").val(),
-                                        /*"signa_qty": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
-                                        "signa_pakai": parseFloat($(this).find("td:eq(4) input").inputmask("unmaskedvalue")),*/
-                                        "signa_qty": $(this).find("td:eq(2) input").val(),
-                                        "signa_pakai": $(this).find("td:eq(4) input").val(),
-                                        "jumlah": parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")),
-                                        "harga": parseFloat($(this).find("td:eq(1) ol").attr("harga")),
-                                        "aturan_pakai": $(this).find("td:eq(1) select:eq(1)").val(),
-                                        "keterangan": $(this).find("td:eq(1) textarea").val(),
-                                        "alasan_ubah": ($("#alasan_" + resepVerifIDSave).length > 0) ? $("#alasan_" + resepVerifIDSave).val() : ""
-                                    });
                                 }
                             });
 
@@ -2307,7 +2317,7 @@
                                             /*"signa_qty": parseFloat($(this).find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue")),
                                             "signa_pakai": parseFloat($(this).find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue")),*/
                                             "signa_qty": $(this).find("td.master-racikan-cell:eq(2) input").val(),
-                                            "signa_pakai": $(this).find("td.master-racikan-cell:eq(2) input").val(),
+                                            "signa_pakai": $(this).find("td.master-racikan-cell:eq(4) input").val(),
                                             "harga": parseFloat($(this).find("td.master-racikan-cell:eq(6) span").html().replace(/(,)/g, "")),
                                             "jumlah": parseFloat($(this).find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"))
                                         });
