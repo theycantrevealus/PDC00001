@@ -4732,6 +4732,26 @@ class Inventori extends Utility
                         }
 
 
+                        if(isset($parameter['inap'])) {
+                            //Check Semua Permintaan Resep NS
+                            $CheckNS = self::$query->update('rawat_inap_batch', array(
+                                'status' => 'Y'
+                            ))
+                                ->where(array(
+                                    'rawat_inap_batch.obat' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.batch' => '= ?',
+                                    'AND',
+                                    'rawat_inap_batch.mutasi' => '= ?'
+                                ), array(
+                                    $MutValue['item'],
+                                    $MutValue['batch'],
+                                    $parameter['uid']
+                                ))
+                                ->execute();
+                        }
+
+
 
 
                     }

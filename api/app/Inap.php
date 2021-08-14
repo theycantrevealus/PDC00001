@@ -963,7 +963,7 @@ class Inap extends Utility
     private function riwayat_obat_inap($parameter) {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
-                'rawat_inap_riwayat_obat.pasien' => '= ?',
+                'resep.pasien' => '= ?',
                 'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
@@ -975,7 +975,7 @@ class Inap extends Utility
             );
         } else {
             $paramData = array(
-                'rawat_inap_riwayat_obat.pasien' => '= ?'
+                'resep.pasien' => '= ?'
             );
 
             $paramValue = array(

@@ -497,7 +497,9 @@ class Apotek extends Utility
                                     ->execute();
                                 if(count($inapBatch['response_data']) > 0) {
                                     $updateBatchInap = self::$query->update('rawat_inap_batch', array(
+                                        'status' => 'N',
                                         'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
+                                        'mutasi' => $Mutasi['response_unique'],
                                         'updated_at' => parent::format_date()
                                     ))
                                         ->where(array(
@@ -508,12 +510,14 @@ class Apotek extends Utility
                                         ->execute();
                                 } else {
                                     $updateBatchInap = self::$query->insert('rawat_inap_batch', array(
+                                        'status' => 'N',
                                         'gudang' => $RawatInap['response_data'][0]['gudang'],
                                         'pasien' => $RawatInap['response_data'][0]['pasien'],
                                         'resep' => $parameter['resep'],
                                         'obat' => $BarangBatch[0],
                                         'batch' => $BarangBatch[1],
                                         'qty' => floatval($mutValue['mutasi']),
+                                        'mutasi' => $Mutasi['response_unique'],
                                         'created_at' => parent::format_date(),
                                         'updated_at' => parent::format_date()
                                     ))
@@ -637,7 +641,9 @@ class Apotek extends Utility
                                     ->execute();
                                 if(count($inapBatch['response_data']) > 0) {
                                     $updateBatchInap = self::$query->update('igd_batch', array(
+                                        'status' => 'N',
                                         'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
+                                        'mutasi' => $Mutasi['response_unique'],
                                         'updated_at' => parent::format_date()
                                     ))
                                         ->where(array(
@@ -648,12 +654,14 @@ class Apotek extends Utility
                                         ->execute();
                                 } else {
                                     $updateBatchInap = self::$query->insert('igd_batch', array(
+                                        'status' => 'N',
                                         'gudang' => $RawatInap['response_data'][0]['gudang'],
                                         'pasien' => $RawatInap['response_data'][0]['pasien'],
                                         'resep' => $parameter['resep'],
                                         'obat' => $BarangBatch[0],
                                         'batch' => $BarangBatch[1],
                                         'qty' => floatval($mutValue['mutasi']),
+                                        'mutasi' => $Mutasi['response_unique'],
                                         'created_at' => parent::format_date(),
                                         'updated_at' => parent::format_date()
                                     ))
@@ -2199,7 +2207,7 @@ class Apotek extends Utility
 
                 //Check Ketersediaan Obat pada NS
                 $NSInap = self::$query->select('rawat_inap_batch', array(
-                    'qty'
+                    'qty', 'status'
                 ))
                     ->where(array(
                         'rawat_inap_batch.gudang' => '= ?',
