@@ -426,6 +426,7 @@
                         }
                     }
 
+                    console.log(filteredData[0].uid_kunjungan);
                     if(filteredData.length > 0) {
                         selectedKunjungan = filteredData[0].uid_kunjungan;
                         selectedPenjamin = filteredData[0].uid_penjamin;
@@ -1238,12 +1239,13 @@
                         type: "POST",
                         data: {
                             request: "kalkulasi_sisa_obat_2",
-                            kunjungan: selectedKunjungan,
+                            kunjungan: __PAGES__[4],
                             pasien: __PAGES__[3],
                             gudang: nurse_station_info.gudang,
                             nurse_station: nurse_station
                         },
                         success: function (response) {
+                            console.log(response);
                             var data = [];
                             if(response.response_package !== undefined) {
                                 data = response.response_package.response_data;
