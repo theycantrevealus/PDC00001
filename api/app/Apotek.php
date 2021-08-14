@@ -3349,16 +3349,20 @@ class Apotek extends Utility
                     $paramData = array(
                         'resep.deleted_at' => 'IS NULL',
                         'AND',
+                        'antrian.departemen' => '!= ?',
+                        'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
                         'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
                     );
                 } else {
                     $paramData = array(
-                        'resep.deleted_at' => 'IS NULL'
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        'antrian.departemen' => '!= ?'
                     );
                 }
-                $paramValue = array();
+                $paramValue = array(__POLI_IGD__);
             } else if($parameter['request_type'] === 'batal') {
                 if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
                     $paramData = array(
@@ -3574,71 +3578,182 @@ class Apotek extends Utility
             $paramValue = array(__POLI_IGD__, __POLI_INAP__, 'L', 'P', 'S');
         }
 
-
-
-        if ($parameter['length'] < 0) {
-            $data = self::$query->select('resep', array(
-                'uid',
-                'kunjungan',
-                'antrian',
-                'asesmen',
-                'dokter',
-                'pasien',
-                'total',
-                'status_resep',
-                'created_at',
-                'updated_at'
+        $dataIGD = self::$query->select('resep', array(
+            'uid',
+            'kunjungan',
+            'antrian',
+            'asesmen',
+            'dokter',
+            'pasien',
+            'total',
+            'status_resep',
+            'created_at',
+            'updated_at'
+        ))
+            ->join('pasien', array(
+                'nama as nama_pasien',
+                'no_rm'
             ))
-                ->join('pasien', array(
-                    'nama as nama_pasien',
-                    'no_rm'
+            ->join('antrian', array(
+                'departemen',
+                'penjamin'
+            ))
+            ->on(array(
+                array('resep.pasien', '=', 'pasien.uid'),
+                array('resep.antrian', '=', 'antrian.uid')
+            ))
+            ->order(array(
+                'resep.created_at' => 'ASC'
+            ))
+            ->where(array(
+                'resep.deleted_at' => 'IS NULL',
+                'AND',
+                'antrian.departemen' => '= ?',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . ((isset($parameter['search']['value'])) ? $parameter['search']['value'] : '') . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . ((isset($parameter['search']['value'])) ? $parameter['search']['value'] : '') . '%\')'
+            ), array(
+                __POLI_IGD__
+            ))
+            ->execute();
+
+
+        if($parameter['request_type'] === 'verifikasi') {
+            if ($parameter['length'] < 0) {
+                $dataMixed = self::$query->select('resep', array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'asesmen',
+                    'dokter',
+                    'pasien',
+                    'total',
+                    'status_resep',
+                    'created_at',
+                    'updated_at'
                 ))
-                ->join('antrian', array(
-                    'departemen',
-                    'penjamin'
+                    ->join('pasien', array(
+                        'nama as nama_pasien',
+                        'no_rm'
+                    ))
+                    ->join('antrian', array(
+                        'departemen',
+                        'penjamin'
+                    ))
+                    ->on(array(
+                        array('resep.pasien', '=', 'pasien.uid'),
+                        array('resep.antrian', '=', 'antrian.uid')
+                    ))
+                    ->order(array(
+                        'resep.created_at' => 'ASC'
+                    ))
+                    ->where($paramData, $paramValue)
+                    ->execute();
+            } else {
+                $dataMixed = self::$query->select('resep', array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'asesmen',
+                    'dokter',
+                    'pasien',
+                    'total',
+                    'status_resep',
+                    'created_at',
+                    'updated_at'
                 ))
-                ->on(array(
-                    array('resep.pasien', '=', 'pasien.uid'),
-                    array('resep.antrian', '=', 'antrian.uid')
-                ))
-                ->order(array(
-                    'resep.created_at' => 'ASC'
-                ))
-                ->where($paramData, $paramValue)
-                ->execute();
+                    ->join('pasien', array(
+                        'nama as nama_pasien',
+                        'no_rm'
+                    ))
+                    ->join('antrian', array(
+                        'departemen',
+                        'penjamin'
+                    ))
+                    ->on(array(
+                        array('resep.pasien', '=', 'pasien.uid'),
+                        array('resep.antrian', '=', 'antrian.uid')
+                    ))
+                    ->order(array(
+                        'resep.created_at' => 'ASC'
+                    ))
+                    ->where($paramData, $paramValue)
+                    ->offset(intval($parameter['start']))
+                    ->limit(intval($parameter['length']))
+                    ->execute();
+            }
+            $data = array(
+                // 'response_data' => array_merge($dataIGD['response_data'], array_splice($dataMixed['response_data'], 0, (count($dataMixed['response_data']) - count($dataIGD['response_data']))))
+                // 'response_data' => $dataMixed['response_data']
+                'response_data' => array_merge($dataIGD['response_data'], $dataMixed['response_data'])
+            );
         } else {
-            $data = self::$query->select('resep', array(
-                'uid',
-                'kunjungan',
-                'antrian',
-                'asesmen',
-                'dokter',
-                'pasien',
-                'total',
-                'status_resep',
-                'created_at',
-                'updated_at'
-            ))
-                ->join('pasien', array(
-                    'nama as nama_pasien',
-                    'no_rm'
+            if ($parameter['length'] < 0) {
+                $data = self::$query->select('resep', array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'asesmen',
+                    'dokter',
+                    'pasien',
+                    'total',
+                    'status_resep',
+                    'created_at',
+                    'updated_at'
                 ))
-                ->join('antrian', array(
-                    'departemen',
-                    'penjamin'
+                    ->join('pasien', array(
+                        'nama as nama_pasien',
+                        'no_rm'
+                    ))
+                    ->join('antrian', array(
+                        'departemen',
+                        'penjamin'
+                    ))
+                    ->on(array(
+                        array('resep.pasien', '=', 'pasien.uid'),
+                        array('resep.antrian', '=', 'antrian.uid')
+                    ))
+                    ->order(array(
+                        'resep.created_at' => 'ASC'
+                    ))
+                    ->where($paramData, $paramValue)
+                    ->execute();
+            } else {
+                $data = self::$query->select('resep', array(
+                    'uid',
+                    'kunjungan',
+                    'antrian',
+                    'asesmen',
+                    'dokter',
+                    'pasien',
+                    'total',
+                    'status_resep',
+                    'created_at',
+                    'updated_at'
                 ))
-                ->on(array(
-                    array('resep.pasien', '=', 'pasien.uid'),
-                    array('resep.antrian', '=', 'antrian.uid')
-                ))
-                ->order(array(
-                    'resep.created_at' => 'ASC'
-                ))
-                ->where($paramData, $paramValue)
-                ->offset(intval($parameter['start']))
-                ->limit(intval($parameter['length']))
-                ->execute();
+                    ->join('pasien', array(
+                        'nama as nama_pasien',
+                        'no_rm'
+                    ))
+                    ->join('antrian', array(
+                        'departemen',
+                        'penjamin'
+                    ))
+                    ->on(array(
+                        array('resep.pasien', '=', 'pasien.uid'),
+                        array('resep.antrian', '=', 'antrian.uid')
+                    ))
+                    ->order(array(
+                        'resep.created_at' => 'ASC'
+                    ))
+                    ->where($paramData, $paramValue)
+                    ->offset(intval($parameter['start']))
+                    ->limit(intval($parameter['length']))
+                    ->execute();
+            }
         }
+
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
@@ -3735,8 +3850,8 @@ class Apotek extends Utility
             ->where($paramData, $paramValue)
             ->execute();
 
+        // $data['recordsTotal'] = ($parameter['request_type'] === 'verifikasi') ? (count($itemTotal['response_data']) + count($dataIGD['response_data'])) : count($itemTotal['response_data']);
         $data['recordsTotal'] = count($itemTotal['response_data']);
-        //$data['recordsTotal'] = $itemTotal;
         $data['recordsFiltered'] = count($data['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);

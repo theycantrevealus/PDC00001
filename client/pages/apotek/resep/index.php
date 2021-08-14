@@ -65,8 +65,8 @@
 							<thead class="thead-dark">
 								<tr>
 									<th class="wrap_content">No</th>
-                                    <th>Tanggal</th>
-									<th>Poliklinik</th>
+                                    <th style="width: 10%">Tanggal</th>
+									<th style="width: 20%">Poliklinik</th>
 									<th>Pasien</th>
 									<th>Dokter</th>
 									<th>Penjamin</th>

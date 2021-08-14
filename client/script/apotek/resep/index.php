@@ -124,7 +124,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            lengthMenu: [[5, 50, -1], [5, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Apotek",
