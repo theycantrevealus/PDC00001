@@ -983,7 +983,6 @@ class Inap extends Utility
             );
         }
 
-
         if ($parameter['length'] < 0) {
             $data = self::$query->select('rawat_inap_riwayat_obat', array(
                 'id',
