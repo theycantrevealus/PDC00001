@@ -156,10 +156,6 @@
                         returnedData = response.response_package.response_data;
                     }
 
-                    console.log(__PAGES__[3]);
-                    console.log(__PAGES__[4]);
-                    console.log(response);
-
                     var filteredData = [];
                     for(var a in returnedData) {
                         if(returnedData[a].resep_pasien === __PAGES__[3]) {
