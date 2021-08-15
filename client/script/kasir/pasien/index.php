@@ -308,7 +308,9 @@
                             $(".nomor-faktur").html("Nomor Faktur :<br /><b>" + historyData.nomor_kwitansi + "</b>");
 							var deptList = [];
 							for(var depKey in historyData.antrian) {
-							    deptList.push(historyData.antrian[depKey].nama);
+							    if(deptList.indexOf(historyData.antrian[depKey].nama) < 0) {
+                                    deptList.push(historyData.antrian[depKey].nama);
+                                }
                             }
 							$("#poli").html("Departemen/Poli :<br /><b>" + deptList.join(", ") + "</b>");
 							$("#keterangan-faktur").html(historyData.keterangan);
