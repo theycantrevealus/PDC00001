@@ -470,6 +470,7 @@
                     __PC_IDENT__: __PC_IDENT__,
                     __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
                     __PC_CUSTOMER_ADDRESS_SHORT__: __PC_CUSTOMER_ADDRESS_SHORT__,
+                    __PC_CUSTOMER_EMAIL__: __PC_CUSTOMER_EMAIL__,
                     lab_pasien: labPasien,
                     lab_item: labItem,
                     lab_lampiran: labLampiran,

@@ -98,6 +98,7 @@
             var radPasien = loadRadOrderPasien(uid);
 
 
+
             $.ajax({
                 async: false,
                 url: __HOST__ + "miscellaneous/print_template/rad_hasil.php",
@@ -106,22 +107,28 @@
                 },
                 type: "POST",
                 data: {
+                    __HOSTNAME__ : __HOSTNAME__,
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    __PC_CUSTOMER_EMAIL__: __PC_CUSTOMER_EMAIL__,
+                    __PC_IDENT__: __PC_IDENT__,
+                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
+                    __PC_CUSTOMER_ADDRESS_SHORT__: __PC_CUSTOMER_ADDRESS_SHORT__,
                     rad_pasien: radPasien,
                     rad_item: radItem,
-                    rad_lampiran: radLampiran
+                    //rad_lampiran: radLampiran
                 },
                 success: function (response) {
                     var containerItem = document.createElement("DIV");
                     $(containerItem).html(response);
                     $(containerItem).printThis({
-                        importCSS: true,
-                        base: false,
                         pageTitle: "Laporan Radiologi " + radPasien.pasien.no_rm,
                         afterPrint: function() {
-                            //
+                            if(radLampiran !== "") {
+                                var newWindow = window.open();
+                                newWindow.document.write(radLampiran);
+                            }
                         }
                     });
                 },
@@ -161,7 +168,8 @@
                         $.each(dataItem, function(key, item){
                             html += "<li style=\"border-bottom: dashed 1px #808080; padding: 10px 0;\">" +
                                 "<div style=\"margin-left: 10px\">" +
-                                "<h4>" + item.tindakan + "</h4>" +
+                                "<h2 style=\"font-size: 16pt !important;\">" + item.tindakan + "</h2>" +
+                                "<span class=\"text-muted\">Waktu Order: " + item.waktu_order + " [" + item.jam_order + " WIB]</span><br />" +
                                 "<b>Keterangan:</b><br />" + item.keterangan +
                                 "<br />" +
                                 "<b>Kesimpulan:</b><br />" + item.kesimpulan +
@@ -191,9 +199,16 @@
                 success: function(response){
                     MetaData = response.response_package.response_data;
                     for(LampKey in MetaData) {
-                        html += "<div class=\"pagebreak\">" +
-                            "<embed type=\"application/pdf\" src=\"" + __HOST__ + "document/radiologi/" + MetaData[LampKey].radiologi_order + "/" + MetaData[LampKey].lampiran + "\" width=\"100%\" height=\"100%\" />" +
-                            "</div>";
+                        if(MetaData[LampKey].file_check) {
+                            html += "<div class=\"pagebreak\">" +
+                                "<embed type=\"application/pdf\" src=\"" + __HOST__ + "document/radiologi/" + MetaData[LampKey].radiologi_order + "/" + MetaData[LampKey].lampiran + "\" width=\"100%\" height=\"100%\" />" +
+                                "</div>";
+                            //html += "<iframe src=\"https://docs.google.com/gview?url=" + __HOST__ + "document/radiologi/" + MetaData[LampKey].radiologi_order + "/" + MetaData[LampKey].lampiran + "&embedded=true\" frameborder=\"0\"></iframe>";
+                            // html += "<iframe src=\"" + __HOST__ + "document/radiologi/" + MetaData[LampKey].radiologi_order + "/" + MetaData[LampKey].lampiran + "\" frameborder=\"0\"></iframe>";
+                        } else {
+                            html = "";
+                        }
+
                     }
                 },
                 error: function(response) {

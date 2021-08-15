@@ -595,6 +595,8 @@ class Radiologi extends Utility
                     'keterangan',
                     'kesimpulan',
                     'gambar',
+                    'created_at',
+                    'updated_at'
                 )
             )
             ->where(array(
@@ -613,7 +615,8 @@ class Radiologi extends Utility
             $penjamin = new Penjamin(self::$pdo);
             $data['response_data'][$key]['penjamin'] = $penjamin->get_penjamin_detail($value['uid_penjamin'])['response_data'][0]['nama'];
 
-            $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order']));
+            $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['created_at']));
+            $data['response_data'][$key]['jam_order'] = date('H:i', strtotime($value['created_at']));
 
             $data['response_data'][$key]['mitra'] = $Mitra->get_mitra_detail($value['mitra'])['response_data'][0];
 
@@ -849,6 +852,7 @@ class Radiologi extends Utility
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $data['response_data'][$key]['file_location'] = '../document/radiologi/' . $parameter . '/' . $value['lampiran'];
+            $data['response_data'][$key]['file_check'] = file_exists('../document/radiologi/' . $parameter . '/' . $value['lampiran']);
             $autonum++;
         }
 
