@@ -340,16 +340,17 @@
 	            },
 	            success: function(response){
                     var MetaData = response.response_package;
+                    console.log(MetaData);
                     if (Object.size(MetaData) > 0){
 	                	if (MetaData.pasien !== ""){
 	                	    $("#tanggal_sampling").val(MetaData.laboratorium.tanggal_sampling);
                             $("#kesan").val(MetaData.laboratorium.kesan);
                             $("#anjuran").val(MetaData.laboratorium.anjuran);
 	                		$("#no_rm").html(MetaData.pasien.no_rm);
-	                		$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir);
+	                		$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir_parsed);
 	                		$("#panggilan").html(MetaData.pasien.panggilan);
 	                		$("#nama").html(MetaData.pasien.nama);
-	                		$("#jenkel").html(MetaData.pasien.jenkel);
+	                		$("#jenkel").html(MetaData.pasien.jenkel_detail.nama);
 	                	}
 	                }
 	            },
