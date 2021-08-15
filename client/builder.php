@@ -264,7 +264,6 @@
                 },
                 success:function(response) {
                     var data = response.response_package;
-                    console.log(data);
                     if(data && Object.keys(data).length > 0 && data.constructor === Object) {
                         $("#no-data-panel").hide();
                         for(var a in data) {

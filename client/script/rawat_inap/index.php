@@ -45,7 +45,25 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        var tagihanAllow = 0;
+                        var itemTagihanApotek = [];
+                        var tagihan = row.invoice;
+                        for(var ab in tagihan) {
+                            for(az in tagihan[ab].invoice_detail) {
+                                if(tagihan[ab].invoice_detail[az].status_bayar === "Y") {
+                                    tagihanAllow = 1;
+                                } else {
+                                    if(tagihan[ab].invoice_detail[az].item_type === "master_inv" && itemTagihanApotek.indexOf(tagihan[ab].invoice_detail[az].item) < 0) {
+                                        itemTagihanApotek.push(tagihan[ab].invoice_detail[az].item);
+                                    }
+                                    tagihanAllow = 0;
+                                    break;
+                                }
+                            }
+                        }
+
                         var apotekAllow = 0;
+
                         var apotek = row.tagihan_apotek;
                         if(apotek.length > 0) {
                             for(var a in apotek) {
@@ -56,7 +74,12 @@
                                     apotekAllow = 0;
                                     break;
                                 } else {
-                                    apotekAllow = 1;
+                                    if(itemTagihanApotek.length > 0 && apotek[a].status_resep === "L") {
+                                        apotekAllow = 0;
+                                        break;
+                                    } else {
+                                        apotekAllow = 1;
+                                    }
                                 }
                             }
                         } else {
@@ -103,10 +126,14 @@
                         }
 
 
-                        if(row.bed !== undefined && row.bed !== null) {
-                            return "<span allow-inap=\"" + 1 + "|" + 1 + "|" + 1 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                        if(tagihanAllow > 0) {
+                            if(row.bed !== undefined && row.bed !== null) {
+                                return "<span allow-inap=\"" + 1 + "|" + 1 + "|" + 1 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                            } else {
+                                return "<span allow-inap=\"" + apotekAllow + "|" + laborAllow + "|" + radioAllow + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                            }
                         } else {
-                            return "<span allow-inap=\"" + apotekAllow + "|" + laborAllow + "|" + radioAllow + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                            return "<span allow-inap=\"" + 0 + "|" + 0 + "|" + 0 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
                         }
 
                     }
@@ -267,20 +294,28 @@
                                 var tagihanApotek = dataTagihan[a].tagihan_apotek;
                                 for(var b in tagihanApotek) {
                                     var status_parse = "";
+                                    var watchTagihan = 0;
                                     var status = tagihanApotek[b].status_resep;
                                     if(status === "N") {
-                                        status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</i></span>";
+                                        status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</span>";
                                     } else if(status === "C") {
-                                        status_parse = "<span class=\"text-muted\"><i class=\"fa fa-exclamation-triangle\"></i> Cancel</i></span>";
+                                        status_parse = "<span class=\"text-muted\"><i class=\"fa fa-exclamation-triangle\"></i> Cancel</span>";
                                     } else if(status === "K") {
-                                        status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>";
+                                        status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</span>";
                                     } else if(status === "L" || status === "P" || status === "S") {
-                                        status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>";
+                                        status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</span>";
                                     }
                                     var kalkulasiTotal = 0;
                                     var TotalBiayaApotek = tagihanApotek[b].biaya;
                                     for(var tbApotek in TotalBiayaApotek) {
+                                        if(TotalBiayaApotek[tbApotek].status_bayar === "N") {
+                                            watchTagihan += 1;
+                                        }
                                         kalkulasiTotal += parseFloat(TotalBiayaApotek[tbApotek].subtotal);
+                                    }
+
+                                    if(watchTagihan > 0) {
+                                        status_parse = "<span class=\"text-warning\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas - Dilunaskan Secara Prosedur</span>";
                                     }
 
                                     totalBiaya += kalkulasiTotal;

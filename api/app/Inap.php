@@ -182,7 +182,7 @@ class Inap extends Utility
                     'uid'
                 ))
                     ->join('invoice_detail', array(
-                        'item', 'subtotal'
+                        'item', 'subtotal', 'status_bayar'
                     ))
                     ->on(array(
                         array('invoice_detail.invoice', '=', 'invoice.uid')
@@ -2010,8 +2010,31 @@ class Inap extends Utility
         $Penjamin = new Penjamin(self::$pdo);
         $Ruangan = new Ruangan(self::$pdo);
         $Bed = new Bed(self::$pdo);
+        $Invoice = new Invoice(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+
+            //Tagihan Lainnya
+            $InvoiceItem = self::$query->select('invoice', array('uid'))
+                ->where(array(
+                    'invoice.kunjungan' => '= ?',
+                    'AND',
+                    'invoice.pasien' => '= ?'
+                ), array(
+                    $value['kunjungan'],
+                    $value['pasien']
+                ))
+                ->execute();
+            foreach ($InvoiceItem['response_data'] as $InvKey => $InvValue) {
+                $InvoiceDetail = $Invoice->get_biaya_pasien_detail($InvValue['uid'])['response_data'][0];
+                foreach ($InvoiceDetail as $InvPKey => $InvPValue) {
+                    if($InvPKey !== 'uid') {
+                        $InvoiceItem['response_data'][$InvKey][$InvPKey] = $InvPValue;
+                    }
+                }
+            }
+
+            $data['response_data'][$key]['invoice'] = $InvoiceItem['response_data'];
 
             //Check Administrasi Pending
             //Apotek

@@ -1930,7 +1930,7 @@ class Invoice extends Utility
     }
 
 
-    private function get_biaya_pasien_detail($parameter)
+    public function get_biaya_pasien_detail($parameter)
     {
 
         $data = self::$query->select('invoice', array(

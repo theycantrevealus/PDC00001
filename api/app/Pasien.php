@@ -38,6 +38,10 @@ class Pasien extends Utility
                     return self::get_pasien_detail('pasien', $parameter[2]);
                     break;
 
+                case 'pasien-info':
+                    return self::get_pasien_info('pasien', $parameter[2]);
+                    break;
+
                 case 'cek-nik':
                     return self::cekNIK($parameter[2]);
                     break;
@@ -392,7 +396,7 @@ class Pasien extends Utility
     private function edit_pasien($table, $parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $dataObj = $parameter['dataObj'];
         $old = self::get_pasien_detail($table, $parameter['uid']);
         $allData = [];
