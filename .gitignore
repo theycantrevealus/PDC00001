@@ -21,6 +21,8 @@ audio/
 document/
 client/template/
 client/plugins/
+client/header.php
+client/head.php
 api/index.php
 api/sync.php
 api/constant.php
@@ -44,4 +46,4 @@ api/*.sql
 *.sql
 *.png
 *.zip
-head.php
+error_log

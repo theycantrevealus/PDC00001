@@ -4,6 +4,7 @@
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "", targettedDataResep = {};
         var kelompokObat = {};
         var nurse_station = __PAGES__[6];
+        var uid_ranap = __PAGES__[7];
         var nurse_station_info = {};
 
         $.ajax({
@@ -65,7 +66,6 @@
 
                 var autonum = 1;
                 for(var a in filteredLunas) {
-                    console.log(filteredLunas[a]);
                     var newRow = document.createElement("TR");
                     var newNo = document.createElement("TD");
                     var newItem = document.createElement("TD");
@@ -266,7 +266,9 @@
                         for(var b in returnedData[a].detail) { //Resep
                             currentResepQty = parseFloat(returnedData[a].detail[b].qty);
                             for(var c in returnedData[a].detail[b].stok_ns) {
-                                ResepStokTersedia += parseFloat(returnedData[a].detail[b].stok_ns[c].qty);
+                                if(returnedData[a].detail[b].stok_ns[c].status === "Y") {
+                                    ResepStokTersedia += parseFloat(returnedData[a].detail[b].stok_ns[c].qty);
+                                }
                             }
                         }
 
@@ -387,7 +389,7 @@
                             return "<span class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-info-circle\"></i> Belum Diserahkan</span>";
                         } else {
                             if(row.habis) {
-                                return "<span class=\"badge badge-danger badge-custom-caption\"><i class=\"fa fa-times-circle\"></i> Stok Habis</span>";
+                                return "<span class=\"badge badge-danger badge-custom-caption\"><i class=\"fa fa-times-circle\"></i> Tidak Tersedia</span>";
                             } else {
                                 return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                     "<button class=\"btn btn-success btn-sm berikanObat\" id=\"resep_" + row.uid + "\">" +
@@ -424,6 +426,7 @@
                         }
                     }
 
+                    console.log(filteredData[0].uid_kunjungan);
                     if(filteredData.length > 0) {
                         selectedKunjungan = filteredData[0].uid_kunjungan;
                         selectedPenjamin = filteredData[0].uid_penjamin;
@@ -514,7 +517,6 @@
                 },
                 success:function(response) {
                     targettedDataResep = response.response_package.response_data[0];
-                    console.log(targettedDataResep);
                     $("#form-berikan-resep").modal("show");
                     $("#resep_dokter").html(targettedDataResep.dokter.nama);
                     $("#resep_tanggal").html(targettedDataResep.created_at_parsed);
@@ -554,11 +556,14 @@
 
                 $(newResepRemark).addClass("form-control").attr({
                     "placeholder": "Keterangan Tambahan"
+                }).css({
+                    "min-height": "100px"
                 });
 
-                var kebutuhan = parseFloat(targettedDataResep.detail[a].signa_pakai);
+                // var kebutuhan = parseFloat(targettedDataResep.detail[a].signa_pakai);
+                var kebutuhan = parseFloat(eval(targettedDataResep.detail[a].signa_pakai));
 
-                $(newResepNo).html(autonum);
+                $(newResepNo).html("<h5 class=\"autonum\">" + autonum + "</h5>");
 
                 var currentTotal = 0;
 
@@ -608,7 +613,7 @@
 
                         currentTotal = totalItem;
 
-                        $(newResepQtyCount).val(parseFloat(targettedDataResep.detail[a].signa_pakai)).inputmask({
+                        /*$(newResepQtyCount).val(parseFloat(targettedDataResep.detail[a].signa_pakai)).inputmask({
                             alias: 'decimal',
                             rightAlign: true,
                             placeholder: "0.00",
@@ -619,6 +624,12 @@
                             "max-width": "50px",
                             "float": "right"
                         }).attr({
+                            "disabled": "disabled"
+                        });*/
+                        $(newResepQtyCount).val(targettedDataResep.detail[a].signa_pakai).css({
+                            "max-width": "50px",
+                            "float": "right"
+                        }).addClass("form-control").attr({
                             "disabled": "disabled"
                         });
 
@@ -727,7 +738,8 @@
                         }
 
                     });
-                    var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                    // var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                    var qty = parseFloat(eval($(this).find("td:eq(2) input").val()));
                     var keterangan = $(this).find("td:eq(1) textarea").val();
                     if(obat !== "" && qty > 0) {
                         item.push({
@@ -744,7 +756,6 @@
 
 
 
-            console.log(item);
             if(item.length > 0) {
                 Swal.fire({
                     title: "Riwayat Pemberian Obat",
@@ -768,7 +779,6 @@
                                 item: item
                             },
                             success:function(response) {
-                                console.log(response);
                                 $("#form-berikan-resep").modal("hide");
                                 $("#form-konfirmasi-berikan-resep").modal("hide");
                                 tableRiwayatObat.ajax.reload();
@@ -1219,7 +1229,7 @@
                 denyButtonText: "Belum",
             }).then((result) => {
                 if (result.isConfirmed) {
-                                        //Get Riwayat Pemberian Obat
+                    //Get Riwayat Pemberian Obat
                     $.ajax({
                         async: false,
                         url: __HOSTAPI__ + "/Inap",
@@ -1229,18 +1239,17 @@
                         type: "POST",
                         data: {
                             request: "kalkulasi_sisa_obat_2",
-                            kunjungan: selectedKunjungan,
+                            kunjungan: __PAGES__[4],
                             pasien: __PAGES__[3],
                             gudang: nurse_station_info.gudang,
                             nurse_station: nurse_station
                         },
                         success: function (response) {
+                            console.log(response);
                             var data = [];
                             if(response.response_package !== undefined) {
                                 data = response.response_package.response_data;
                             }
-
-                            console.log(data);
 
                             var kebutuhan = 0;
 
@@ -1424,6 +1433,8 @@
                         type: "POST",
                         data: {
                             request: "konfirmasi_retur_obat",
+                            uid: uid_ranap,
+                            status: "N",
                             gudang: nurse_station_info.gudang,
                             pasien: __PAGES__[3],
                             item: parsedData,

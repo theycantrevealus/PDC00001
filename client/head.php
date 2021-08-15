@@ -6,7 +6,7 @@
 	<meta name="robots" content="noindex">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/simplebar.min.css" rel="stylesheet">
 	<?php require 'plugins/google/font.php'; ?>
-	<link rel="icon" href="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.ico" type="image/ico" sizes="16x16" />
+	<link rel="icon" href="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-icon-<?php echo __PC_IDENT__; ?>.ico" type="image/ico" sizes="16x16" />
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/app.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/app.rtl.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-material-icons.css" rel="stylesheet">
@@ -59,5 +59,6 @@
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/custom.css" rel="stylesheet">
+    <!--link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/solomon.css" rel="stylesheet"-->
     <!--link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/bintan.css" rel="stylesheet"-->
 </head>

@@ -102,7 +102,7 @@
 							<div class="tab-pane active show fade" id="pegawai-modul">
 								<h5>Module</h5>
 								<table class="table table-bordered largeDataType" id="module-table">
-									<thead>
+									<thead class="thead-dark">
 										<tr>
 											<th>Module</th>
 											<th>Pages</th>
@@ -115,7 +115,7 @@
 							<div class="tab-pane show fade" id="pegawai-akses">
 								<h5>Access Manager</h5>
 								<table class="table table-bordered largeDataType" id="access-table">
-									<thead>
+									<thead class="thead-dark">
 										<tr>
 											<th>Class</th>
 											<th>Methods</th>

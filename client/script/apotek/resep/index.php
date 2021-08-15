@@ -1,6 +1,8 @@
 <script type="text/javascript">
     $(function() {
 
+        var currentUIDBatal = "";
+
         protocolLib = {
             permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", parameter, 3000, "notif_pasien_baru");
@@ -110,13 +112,210 @@
             return obatList;
         }
 
-        var listResep = load_resep();
+        /*var listResep = load_resep();
         var requiredItem = populateObat(listResep);
         for(var requiredItemKey in requiredItem) {
-            $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase()/* + " <b class=\"text-danger\">" + requiredItem[requiredItemKey].counter + " <i class=\"fa fa-receipt\"></i></b>"*/ + "</li>");
-        }
+            $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase()/!* + " <b class=\"text-danger\">" + requiredItem[requiredItemKey].counter + " <i class=\"fa fa-receipt\"></i></b>"*!/ + "</li>");
+        }*/
+
 
         var tableResep = $("#table-resep").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[5, 50, -1], [5, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: function(d) {
+                    d.request = "get_resep_backend_v3";
+                    d.request_type = "verifikasi";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+
+                    console.clear();
+                    console.log(response);
+                    var resepDataRaw = response.response_package.response_data;
+                    var parsedData = [];
+                    var IGD = [];
+
+                    for(var resepKey in resepDataRaw) {
+                        if(resepDataRaw[resepKey].departemen !== undefined && resepDataRaw[resepKey].departemen !== null) {
+                            if(resepDataRaw[resepKey].departemen.uid === __POLI_IGD__) {
+                                IGD.push(resepDataRaw[resepKey]);
+                            } else {
+                                parsedData.push(resepDataRaw[resepKey]);
+                            }
+                        } else {
+                            console.log(resepDataRaw[resepKey]);
+                        }
+                    }
+                    var autonum = 1;
+                    var finalData = IGD.concat(parsedData);
+                    for(var az in finalData) {
+                        finalData[az].autonum = autonum;
+                        autonum++;
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsTotal;
+
+                    return finalData;
+                }
+            },
+            language: {
+                search: "",
+                searchPlaceholder: "No.RM/Nama Pasien"
+            },
+            autoWidth: false,
+            "bInfo" : false,
+            aaSorting: [[2, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "rowCallback": function ( row, data, index ) {
+                if(data.departemen.uid === __POLI_IGD__) {
+                    $("td", row).addClass("bg-danger").css({
+                        "color": "#fff"
+                    });
+                }
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.departemen !== undefined && row.departemen !== null) {
+                            if(row.departemen.uid === __POLI_INAP__) {
+                                return row.departemen.nama + "<br />" +
+                                    "<span class=\"text-info\">" + row.ns_detail.kode_ns + "</span> - " + row.ns_detail.nama_ns;
+                            } else {
+                                return row.departemen.nama;
+                            }
+                        } else {
+                            return "";
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.penjamin.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        //return "<button id=\"verif_" + row.uid + "_" + row.autonum + "\" class=\"btn btn-sm btn-info btn-verfikasi\"><i class=\"fa fa-check-double\"></i> Verifikasi</button>";
+                        if(__MY_PRIVILEGES__.response_data[0].uid === __UIDKARUAPOTEKER__) {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
+                                "</a>" +
+                                "<button class=\"btn btn-warning btn-sm btn-cancel-resep " + ((row.departemen.uid === __POLI_IGD__) ? "blob yellow" : "") + "\" id=\"cancel_" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-ban\"></i> Batalkan</span>" +
+                                "</button>" +
+                                "</div>";
+                        } else {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.antrian.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/apotek/resep/view/" + row.uid + "\">" +
+                                "<span><i class=\"fa fa-check-double\"></i> Verifikasi</span>" +
+                                "</a>" +
+                                "</div>";
+                        }
+                    }
+                }
+            ]
+        });
+
+        /*setInterval(function() {
+            tableResep.ajax.reload();
+        }, 20000);*/
+
+        $("body").on("click", ".btn-cancel-resep", function () {
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+            currentUIDBatal = id;
+            $("#modal-batal").modal("show");
+        });
+
+        $("#btnProsesBatalResep").click(function() {
+            var alasan = $("#keterangan_batal").val();
+            if(alasan !== "") {
+                Swal.fire({
+                    title: "Batalkan Resep?",
+                    showDenyButton: true,
+                    confirmButtonText: `Ya`,
+                    denyButtonText: `Tidak`,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: __HOSTAPI__ + "/Apotek",
+                            async: false,
+                            beforeSend: function (request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type: "POST",
+                            data: {
+                                request: "batalkan_resep",
+                                uid: currentUIDBatal,
+                                alasan: alasan
+                            },
+                            success: function (response) {
+                                if(response.response_package.response_result > 0) {
+                                    Swal.fire(
+                                        "Pembatalan Resep Berhasil!",
+                                        "Resep tidak akan lanjut diproses",
+                                        "success"
+                                    ).then((result) => {
+                                        tableResep.ajax.reload();
+                                        $("#modal-batal").modal("hide");
+                                    });
+                                } else {
+                                    console.log(response);
+                                }
+                            },
+                            error: function (response) {
+                                //
+                            }
+                        });
+                    }
+                });
+            } else {
+                Swal.fire(
+                    "Pembatalan Resep",
+                    "Alasan harus diisi",
+                    "warning"
+                ).then((result) => {
+                    //
+                });
+            }
+        });
+
+
+        /*var tableResep = $("#table-resep").DataTable({
             //"data": load_resep(),
             "ajax":{
                 url:__HOSTAPI__ + "/Apotek",
@@ -209,7 +408,7 @@
                     }
                 }
             ]
-        });
+        });*/
 
         var targettedData;
 
@@ -957,6 +1156,29 @@
         }
     });
 </script>
+
+<div id="modal-batal" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Batalkan Resep</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <strong>Keterangan Pembatalan Resep:</strong>
+                <textarea id="keterangan_batal" class="form-control" style="min-height: 300px" placeholder="Wajib Isi (Required)"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnProsesBatalResep"><i class="fa fa-check"></i> Proses Batal Resep</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <div id="modal-verifikasi" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">

@@ -340,7 +340,7 @@ class Laporan extends Utility
                 'obat' => $Inventori->get_item_detail($key)['response_data'][0],
                 'penjamin' => $value
             ));*/
-            $rowParse['total'] = $total;
+            $rowParse['total'] = '<h6 class=\'number_style\'>' . $total . '</h6>';
             array_push($data_parse, $rowParse);
 
             $autonum++;

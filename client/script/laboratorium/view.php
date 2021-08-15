@@ -98,6 +98,17 @@
                 success: function(response){
                     var MetaData = response.response_package;
 
+                    $("#kesan").val(MetaData.laboratorium.kesan).attr({
+                        "disabled": "disabled"
+                    });
+                    $("#anjuran").val(MetaData.laboratorium.anjuran).attr({
+                        "disabled": "disabled"
+                    });
+
+                    $("#tanggal_sampling").val(MetaData.laboratorium.tanggal_sampling).attr({
+                        "disabled": "disabled"
+                    });
+
                     if (Object.size(MetaData) > 0){
                         if (MetaData.pasien != ""){
                             $("#no_rm").html(MetaData.pasien.no_rm);

@@ -9,51 +9,129 @@
 		var file;					//for upload file
 
         loadPasien(uid_order);
+        if(__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) {
+            $("#tanggal_sampling").attr("disabled", "disabled");
+        } else {
+            $("#tanggal_sampling").removeAttr("disabled");
+        }
         loadLabOrderItem(uid_order);
 		loadLampiran(uid_order);
         var form_data = new FormData();
+
+        if(__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) {
+            $(".tab-dokter").show();
+            $("#btnSelesai").show();
+        } else {
+            $(".tab-dokter").hide();
+            $("#btnSelesai").hide();
+        }
 
         var mode_selesai = "N";
 
 		$("#btnSelesai").click(function (e) {
             e.preventDefault();
-            Swal.fire({
-                title: 'Selesai pemeriksaan laboratorium?',
-                text: 'Setelah selesai, pemeriksaan sudah tidak dapat diedit lagi dan langsung menjadi riwayat pemeriksaan',
-                showDenyButton: true,
-                //showCancelButton: true,
-                confirmButtonText: `Ya`,
-                denyButtonText: `Belum`,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    mode_selesai = "Y";
-                    form_data.append("selesai", "Y");
-                    $("#formHasilLab").submit();
-                } else if (result.isDenied) {
-                    //
+
+            if(__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) {
+                if(
+                    $("#kesan").val() !== "" && $("#anjuran").val() !== ""
+                ) {
+                    Swal.fire({
+                        title: 'Selesai pemeriksaan laboratorium?',
+                        text: 'Setelah selesai, pemeriksaan sudah tidak dapat diedit lagi dan langsung menjadi riwayat pemeriksaan',
+                        showDenyButton: true,
+                        //showCancelButton: true,
+                        confirmButtonText: `Ya`,
+                        denyButtonText: `Belum`,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            mode_selesai = "Y";
+                            form_data.append("selesai", "Y");
+                            $("#formHasilLab").submit();
+                        } else if (result.isDenied) {
+                            //
+                        }
+                    });
+                } else {
+                    Swal.fire(
+                        "Pemeriksaan Gagal Disimpan!",
+                        "Kesan Dan Anjuran Harus Diisi",
+                        "error"
+                    ).then((result) => {
+                        //location.href = __HOSTNAME__ + "/laboratorium/proses";
+                    });
                 }
-            });
+            } else {
+                Swal.fire({
+                    title: 'Selesai pemeriksaan laboratorium?',
+                    text: 'Setelah selesai, pemeriksaan sudah tidak dapat diedit lagi dan langsung menjadi riwayat pemeriksaan',
+                    showDenyButton: true,
+                    //showCancelButton: true,
+                    confirmButtonText: `Ya`,
+                    denyButtonText: `Belum`,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        mode_selesai = "Y";
+                        form_data.append("selesai", "Y");
+                        $("#formHasilLab").submit();
+                    } else if (result.isDenied) {
+                        //
+                    }
+                });
+            }
+
+
             return false;
         });
 
         $("#btnSimpan").click(function (e) {
             e.preventDefault();
-            Swal.fire({
-                title: 'Simpan data pemeriksaan laboratorium?',
-                text: 'Simpan dahulu hasil pemeriksaan untuk di-edit lagi',
-                showDenyButton: true,
-                //showCancelButton: true,
-                confirmButtonText: `Ya`,
-                denyButtonText: `Belum`,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    mode_selesai = "N";
-                    form_data.append("selesai", "N");
-                    $("#formHasilLab").submit();
-                } else if (result.isDenied) {
-                    //
+            if(__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) {
+                if($("#kesan").val() !== "" && $("#anjuran").val() !== "") {
+                    Swal.fire({
+                        title: 'Simpan data pemeriksaan laboratorium?',
+                        text: 'Simpan dahulu hasil pemeriksaan untuk di-edit lagi',
+                        showDenyButton: true,
+                        //showCancelButton: true,
+                        confirmButtonText: `Ya`,
+                        denyButtonText: `Belum`,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            mode_selesai = "N";
+                            form_data.append("selesai", "N");
+                            $("#formHasilLab").submit();
+                        } else if (result.isDenied) {
+                            //
+                        }
+                    });
+                } else {
+                    Swal.fire(
+                        "Pemeriksaan Gagal Disimpan!",
+                        "Kesan Dan Anjuran Harus Diisi",
+                        "error"
+                    ).then((result) => {
+                        //location.href = __HOSTNAME__ + "/laboratorium/proses";
+                    });
                 }
-            });
+            } else {
+                Swal.fire({
+                    title: 'Simpan data pemeriksaan laboratorium?',
+                    text: 'Simpan dahulu hasil pemeriksaan untuk di-edit lagi',
+                    showDenyButton: true,
+                    //showCancelButton: true,
+                    confirmButtonText: `Ya`,
+                    denyButtonText: `Belum`,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        mode_selesai = "N";
+                        form_data.append("selesai", "N");
+                        $("#formHasilLab").submit();
+                    } else if (result.isDenied) {
+                        //
+                    }
+                });
+            }
+
+
             return false;
         });
 
@@ -78,6 +156,7 @@
             form_data.append("kesan", $("#kesan").val());
             form_data.append("anjuran", $("#anjuran").val());
             form_data.append('data_nilai', JSON.stringify(nilaiItemTindakan));
+            form_data.append("tanggal_sampling", $("#tanggal_sampling").val());
 
 
             for(var i = 0; i < fileList.length; i++) {
@@ -148,7 +227,7 @@
                                 response.response_package.response_message,
                                 'success'
                             ).then((result) => {
-                                location.href = __HOSTNAME__ + "/laboratorium";
+                                location.href = __HOSTNAME__ + "/laboratorium/proses";
                             });
                         });
                     } else {
@@ -207,8 +286,20 @@
 
 
 		$("#add_file").change(function(e) {
-			$("#form-upload-lampiran").modal("show");
+
 			file = e.target.files[0];
+			var fileSize = file.size / 1000000;
+			if(fileSize <= __MAX_UPLOAD_FILE_SIZE__) {
+                $("#form-upload-lampiran").modal("show");
+            } else {
+                Swal.fire(
+                    "Upload dokumen Laboratorium",
+                    "File tidak boleh melebihi 5MB. Harap kompresi file atau turunkan resolusi scan dokumen",
+                    "warning"
+                ).then((result) => {
+                    //
+                });
+            }
 		});
 
 		$("#btnSubmitLampiran").click(function() {
@@ -249,14 +340,17 @@
 	            },
 	            success: function(response){
                     var MetaData = response.response_package;
-                    
-	                if (Object.size(MetaData) > 0){
-	                	if (MetaData.pasien != ""){
+                    console.log(MetaData);
+                    if (Object.size(MetaData) > 0){
+	                	if (MetaData.pasien !== ""){
+	                	    $("#tanggal_sampling").val(MetaData.laboratorium.tanggal_sampling);
+                            $("#kesan").val(MetaData.laboratorium.kesan);
+                            $("#anjuran").val(MetaData.laboratorium.anjuran);
 	                		$("#no_rm").html(MetaData.pasien.no_rm);
-	                		$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir);
+	                		$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir_parsed);
 	                		$("#panggilan").html(MetaData.pasien.panggilan);
 	                		$("#nama").html(MetaData.pasien.nama);
-	                		$("#jenkel").html(MetaData.pasien.jenkel);
+	                		$("#jenkel").html(MetaData.pasien.jenkel_detail.nama);
 	                	}
 	                }
 	            },
@@ -283,6 +377,7 @@
                     if (response.response_package.response_result > 0) {
                         var allow_save = [];
                         dataItem = response.response_package.response_data;
+                        console.log(dataItem);
                         $.each(dataItem, function(key, item) {
                             if(item.allow) {
                                 allow_save.push(1);
@@ -291,7 +386,7 @@
                             }
 
                             html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
-                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
+                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + " <strong class=\"pull-right badge badge-custom-caption badge-info\"><i class=\"material-icons\">verified_user</i><h5 class=\"text-white\">&nbsp;" + item.mitra.nama + "</h5></strong></h5>" +
                                 "</div><div class=\"card-body\">" +
                                 "<div class=\"row\">" +
                                 "<div class=\"col-12\">" +
@@ -326,10 +421,11 @@
                                     }
 
                                     var naratifMode =  "";
+
                                     if(item.naratif === 'N' || item.naratif === undefined || item.naratif === null) {
-                                        naratifMode = "<input " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" />";
+                                        naratifMode = "<input " + ((!item.allow) ? "disabled=\"disabled\"" : ((__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) ? "disabled=\"disabled\"" : "")) + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" />";
                                     } else {
-                                        naratifMode = "<textarea " + ((!item.allow) ? "disabled=\"disabled\"" : "") + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" class=\"form-control inputItemTindakan\">" + nilai + "</textarea>";
+                                        naratifMode = "<textarea " + ((!item.allow) ? "disabled=\"disabled\"" : ((__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) ? "disabled=\"disabled\"" : "")) + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" class=\"form-control inputItemTindakan\">" + nilai + "</textarea>";
                                     }
                                     // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
                                     if(requestedItem.indexOf(items.id_lab_nilai) < 0) {

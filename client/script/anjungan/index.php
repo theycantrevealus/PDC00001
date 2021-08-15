@@ -1,3 +1,4 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function(){
 		var jenisData = load_anjungan("#anjungan_selection");
@@ -87,23 +88,41 @@
 				success: function(response){
 					if(response.response_package.response_result > 0) {
 						push_socket(__ME__, "anjungan_kunjungan_baru", "*", "Antrian Baru dengan nomor " + response.response_package.response_antrian, "warning").then(function () {
-                            $.ajax({
+						    $.ajax({
                                 async: false,
                                 url: __HOSTNAME__ + "/print/antrian_anjungan.php",
                                 data: {
-                                    antrian: response.response_package.response_antrian
+                                    antrian: response.response_package.response_antrian,
+                                    __HOSTNAME__: __HOSTNAME__,
+                                    __PC_CUSTOMER__: __PC_CUSTOMER__.toUpperCase(),
+                                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__.toUpperCase(),
+                                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                                    __PC_IDENT__: __PC_IDENT__,
+                                    __PC_CUSTOMER_EMAIL__: __PC_CUSTOMER_EMAIL__,
+                                    __PC_CUSTOMER_ADDRESS_SHORT__: __PC_CUSTOMER_ADDRESS_SHORT__.toUpperCase()
                                 },
                                 beforeSend: function(request) {
                                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                                 },
                                 type: "POST",
-                                success: function(html){
-                                    var win = window.open(document.URL, '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');
+                                success: function(response){
+                                    var containerItem = document.createElement("DIV");
+                                    $(containerItem).html(response);
+                                    $(containerItem).printThis({
+                                        header: null,
+                                        footer: null,
+                                        pageTitle: "Antrian",
+                                        afterPrint: function() {
+                                            $("#form-payment-detail").modal("hide");
+                                        }
+                                    });
+                                    /*var win = window.open(document.URL, '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');
                                     win.document.write(html);
                                     win.document.close();
                                     win.focus();
                                     win.print();
-                                    win.close();
+                                    win.close();*/
                                 },
                                 error: function(response) {
                                     console.log(response);

@@ -246,6 +246,108 @@
             });
 		});
 
+        function loadCPPT(from, to, pasien, UID = "") {
+            $("#cppt_loader").html("");
+            $.ajax({
+                url: __HOSTAPI__ + "/CPPT",
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"POST",
+                data: {
+                    request: "group_tanggal",
+                    pasien: pasien,
+                    from: from,
+                    to: to,
+                    current: UID
+                },
+                success:function(response) {
+                    var data = response.response_package;
+                    if(data && Object.keys(data).length > 0 && data.constructor === Object) {
+                        $("#no-data-panel").hide();
+                        for(var a in data) {
+                            $.ajax({
+                                url: __HOSTNAME__ + "/pages/pasien/cppt-grouper.php",
+                                async:false,
+                                beforeSend: function(request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                type:"POST",
+                                data: {
+                                    group_tanggal_caption: data[a].parsed,
+                                    group_tanggal_name: a
+                                },
+                                success:function(responseGrouper) {
+                                    $("#cppt_loader").append(responseGrouper);
+                                    var listData = data[a].data;
+                                    for(var b in listData) {
+                                        var currentData = listData[b].data[0];
+                                        currentData.asesmen.resep = (currentData.asesmen.resep !== undefined && currentData.asesmen.resep !== null) ? [currentData.asesmen.resep[currentData.asesmen.resep.length - 1]] : [];
+                                        currentData.asesmen.racikan = (currentData.asesmen.racikan !== undefined && currentData.asesmen.racikan !== null) ? [currentData.asesmen.racikan[currentData.asesmen.racikan.length - 1]] : [];
+                                        $.ajax({
+                                            url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
+                                            async:false,
+                                            beforeSend: function(request) {
+                                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                            },
+                                            type:"POST",
+                                            data: {
+                                                currentData: UID,
+                                                __HOSTNAME__: __HOSTNAME__,
+                                                __HOST__: __HOST__,
+                                                __ME__: __ME__,
+                                                asesmen: currentData.asesmen,
+                                                kunjungan: currentData.kunjungan,
+                                                antrian: currentData.uid,
+                                                penjamin: currentData.penjamin,
+                                                pasien: currentData.asesmen.pasien,
+                                                group_tanggal_name: a,
+                                                waktu_masuk: listData[b].parsed,
+                                                waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),
+                                                departemen: (currentData.departemen !== undefined && currentData.departemen !== null) ? currentData.departemen.nama : "Rawat Inap",
+                                                dokter_uid: currentData.dokter.uid,
+                                                dokter: currentData.dokter.nama,
+                                                dokter_pic: __HOST__ + currentData.dokter.profile_pic,
+                                                icd10_kerja: currentData.asesmen.icd10_kerja,
+                                                icd10_banding: currentData.asesmen.icd10_banding,
+                                                keluhan_utama:currentData.asesmen.keluhan_utama,
+                                                keluhan_tambahan:currentData.asesmen.keluhan_tambahan,
+                                                diagnosa_kerja:currentData.asesmen.diagnosa_kerja,
+                                                diagnosa_banding:currentData.asesmen.diagnosa_banding,
+                                                pemeriksaan_fisik:currentData.asesmen.pemeriksaan_fisik,
+                                                planning:currentData.asesmen.planning,
+                                                tindakan: currentData.asesmen.tindakan,
+                                                resep: currentData.asesmen.resep,
+                                                racikan: currentData.asesmen.racikan,
+                                                laboratorium: currentData.asesmen.laboratorium,
+                                                radiologi: currentData.asesmen.radiologi
+                                            },
+                                            success:function(responseSingle) {
+                                                $("#group_cppt_" + a).append(responseSingle);
+                                            },
+                                            error: function(responseSingleError) {
+                                                console.log(responseSingleError);
+                                            }
+                                        });
+                                        //}
+                                    }
+                                },
+                                error: function(responseGrouperError) {
+                                    console.log(responseGrouperError);
+                                }
+                            });
+                        }
+                    } else {
+                        $("#no-data-panel").show();
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
+
         function getDateRange(target) {
             var rangeItem = $(target).val().split(" to ");
             if(rangeItem.length > 1) {
@@ -329,6 +431,9 @@
                 } else {
                     //
                 }
+            },
+            reset_password: function(protocols, type, parameter, sender, receiver, time) {
+                location.href = __HOSTNAME__ + "/system/logout";
             },
             refresh: function(protocols, type, parameter, sender, receiver, time) {
                 location.reload();
@@ -443,12 +548,13 @@
                 var time = signalData.time;
                 var parameter = signalData.parameter;
 
+
                 if(command !== undefined && command !== null && command !== "") {
 
                     if(protocolLib[command] !== undefined) {
                         if(command === "anjungan_kunjungan_panggil") {
-                            if(audio !== undefined && audio.audio !== undefined) {
-                                if(!audio.paused) {
+                            if (audio !== undefined && audio.audio !== undefined) {
+                                if (!audio.paused) {
                                     audio.audio.pause();
                                     audio.audio.currentTime = 0;
                                 } else {
@@ -456,13 +562,48 @@
                                 }
                             }
                             audio = protocolLib[command](command, type, parameter, sender, receiver, time);
-                        } else {
-                            if(receiver == __ME__ || sender == __ME__ || receiver == "*" || receiver == __MY_PRIVILEGES__.response_data[0]["uid"]) {
+                        } else if(command === "reset_password") {
+                            if(receiver === __ME__) {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
-                                //console.log(__MY_PRIVILEGES__);
+                            }
+                        } else {
+                            if(receiver === __ME__ || sender === __ME__ || receiver === "*" || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
+                                if(receiver === __ME__ || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
+                                    var audio = new Audio(), i = 0;
+                                    audio.volume = 0.5;
+                                    audio.playbackRate = 0.1;
+                                    audio.loop = false;
+                                    var playlist = [
+                                        __HOST__ + "/audio/notif.mp3"
+                                    ];
+                                    var currentLength = 0;
+
+                                    audio.addEventListener('ended', function () {
+                                        i++;
+                                        if(i == playlist.length) {
+                                            audio.pause();
+                                            audio.currentTime = 0;
+                                            i = 0;
+                                            console.log("Finished");
+                                        } else {
+                                            console.log("Playing : " + playlist[i]);
+                                            audio.src = playlist[i];
+                                            audio.play();
+                                        }
+                                    });
+
+                                    audio.src = playlist[0];
+                                    audio.currentTime = 0;
+                                    audio.volume = 0.5;
+                                    audio.playbackRate = 1;
+                                    audio.loop = false;
+                                    audio.play();
+                                }
+                                protocolLib[command](command, type, parameter, sender, receiver, time);
+                                //console.log("Sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
                             } else {
                                 protocolLib[command](command, type, parameter, sender, receiver, time);
-                                //alert("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
+                                //console.log("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
                             }
                         }
                     }
@@ -598,6 +739,17 @@
 				$(alertContainer).fadeOut();
 			}, time);
 		}
+
+        function titleCase(str) {
+            var splitStr = str.toLowerCase().split(' ');
+            for (var i = 0; i < splitStr.length; i++) {
+                // You do not need to check if i is larger than splitStr length, as your for does that for you
+                // Assign it back to the array
+                splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+            }
+            // Directly return the joined string
+            return splitStr.join(' ');
+        }
 
 		function number_format (number, decimals, dec_point, thousands_sep) {
 			// Strip all characters but numerical ones.

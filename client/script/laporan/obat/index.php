@@ -70,7 +70,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 async:false,
@@ -107,14 +107,13 @@
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
-                    totalData = returnedData;
                     return returnedData;
                 }
             },
             autoWidth: false,
             language: {
                 search: "",
-                searchPlaceholder: "Cari Nomor Invoice"
+                searchPlaceholder: "Cari Obat"
             },
             columns : penjaminColumn,
             drawCallback: function () {
@@ -124,6 +123,7 @@
         });
 
         $("#btnCetak").click(function () {
+
             $.ajax({
                 async: false,
                 url: __HOST__ + "miscellaneous/print_template/laporan_pemakaian_obat.php",
@@ -136,28 +136,29 @@
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
                     __NAMA_SAYA__ : __MY_NAME__,
                     __PENJAMIN__ : penjaminData,
                     __JUDUL__ : "Laporan Pemakaian Obat \n per Penjamin",
                     __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
                     __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
-                    data: returnedData
+                    data_laporan: returnedData
 
                 },
                 success: function (response) {
+                    console.log(returnedData);
                     var containerItem = document.createElement("DIV");
                     $(containerItem).html(response);
-                    $(containerItem).printThis({
-                        importCSS: true,
-                        base: false,
-                        importStyle: true,
+                    var win = window.open("", "Title", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=" + screen.width + ",height=" + screen.height + ",top=0,left=0");
+                    win.document.body.innerHTML = $(containerItem).html();
+                    /*$(containerItem).printThis({
                         header: null,
                         footer: null,
-                        pageTitle: "Kwitansi",
+                        pageTitle: "Laporan Pemakaian Obat " + getDateRange("#range_laporan")[0] + " sampai " + getDateRange("#range_laporan")[1],
                         afterPrint: function() {
                             $("#form-payment-detail").modal("hide");
                         }
-                    });
+                    });*/
                 },
                 error: function (response) {
                     //
