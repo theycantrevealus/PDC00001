@@ -291,10 +291,10 @@
                 </td>
                 <td>
                     <h1 class="text-center" style="font-size: 14pt !important;">
-                        <?php echo (isset($_POST['__PC_CUSTOMER_GROUP__'])) ? $_POST['__PC_CUSTOMER_GROUP__'] : 'CUSTOMER GROUP NAME'; ?>
+                        <?php echo (isset($_POST['__PC_CUSTOMER_GROUP__'])) ? strtoupper($_POST['__PC_CUSTOMER_GROUP__']) : 'CUSTOMER GROUP NAME'; ?>
                     </h1>
                     <h1 class="text-center" style="font-size: 18pt !important; letter-spacing: -1px">
-                        <?php echo (isset($_POST['__PC_CUSTOMER__'])) ? $_POST['__PC_CUSTOMER__'] : 'CUSTOMER COMPANY FULL NAME'; ?>
+                        <?php echo (isset($_POST['__PC_CUSTOMER__'])) ? strtoupper($_POST['__PC_CUSTOMER__']) : 'CUSTOMER COMPANY FULL NAME'; ?>
                     </h1>
                     <small class="header-information text-center">
                         <center>
