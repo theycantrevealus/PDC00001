@@ -64,7 +64,7 @@
 									<th>Kode Amprah</th>
 									<th>Diminta Oleh</th>
 									<th>Status</th>
-									<th>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody></tbody>
@@ -93,7 +93,7 @@
 									<th>Kode Amprah</th>
 									<th>Diminta Oleh</th>
 									<th>Status</th>
-									<th>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody></tbody>
