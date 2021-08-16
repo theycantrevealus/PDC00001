@@ -430,29 +430,34 @@
                         echo($_POST['lab_item']);
                         ?>
                         <hr />
-                        <b>Kesan:</b>
-                        <p>
-                            <?php echo($_POST['kesan']); ?>
-                        </p>
                         <br />
-                        <b>Anjuran:</b>
-                        <p>
-                            <?php echo($_POST['anjuran']); ?>
-                        </p>
-                        <br /><br /><br />
-                        <table class="form-mode largeDataType">
-                            <tbody>
+                        <div style="page-break-inside:avoid;">
+                            <b>Kesan:</b>
+                            <p>
+                                <?php echo($_POST['kesan']); ?>
+                            </p>
+                            <br />
+                            <b>Anjuran:</b>
+                            <p>
+                                <?php echo($_POST['anjuran']); ?>
+                            </p>
+                            <br /><br />
+                            <table class="form-mode largeDataType">
+                                <tbody>
                                 <tr>
                                     <td></td>
                                     <td colspan="5" class="text-mode text-center wrap_content special-type-padding signing-panel">
                                         <?php echo $_POST['__PC_CUSTOMER_ADDRESS_SHORT__']; ?>, <?php echo date('d F Y, H:i'); ?><br />
-                                        <b>Ka. Instalasi Laboratorium <?php echo $_POST['__PC_CUSTOMER__']; ?></b>
+                                        <b>Ka. Instalasi Laboratorium</b>
                                         <br /><br /><br /><br /><br />
+                                        <b>dr. Wiwit Nila Sukma, Sp.PK </b><br />
+                                        NIP. 19811217 200803 2 001
                                         <hr />
                                     </td>
                                 </tr>
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </td>
             </tr>

@@ -364,6 +364,24 @@
                         </table>
                         <hr />
                         <?php print_r($_POST['rad_item']); ?>
+                        <br /><br />
+                        <div style="page-break-inside:avoid;">
+                            <table class="form-mode largeDataType">
+                                <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td colspan="5" class="text-mode text-center wrap_content special-type-padding signing-panel">
+                                        <?php echo $_POST['__PC_CUSTOMER_ADDRESS_SHORT__']; ?>, <?php echo date('d F Y, H:i'); ?><br />
+                                        <b>Ka. Instalasi Radiologi</b>
+                                        <br /><br /><br /><br /><br />
+                                        <b>dr. Hendra F. Saragih, Sp.Rad</b><br />
+                                        NIP. 19680312 2009604 1 001
+                                        <hr />
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <?php echo $_POST['rad_lampiran']; ?>
                     </div>
                 </td>
