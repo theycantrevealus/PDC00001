@@ -210,7 +210,7 @@
                         returnedData = response.response_package.response_data;
                     }
 
-                    console.log(returnedData);
+                    console.log(response);
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
