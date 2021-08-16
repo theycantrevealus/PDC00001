@@ -287,10 +287,10 @@
                 </td>
                 <td>
                     <h1 class="text-center" style="font-size: 14pt !important;">
-                        <?php echo (isset($_POST['__PC_CUSTOMER_GROUP__'])) ? $_POST['__PC_CUSTOMER_GROUP__'] : 'CUSTOMER GROUP NAME'; ?>
+                        <?php echo (isset($_POST['__PC_CUSTOMER_GROUP__'])) ? strtoupper($_POST['__PC_CUSTOMER_GROUP__']) : 'CUSTOMER GROUP NAME'; ?>
                     </h1>
                     <h1 class="text-center" style="font-size: 18pt !important; letter-spacing: -1px">
-                        <?php echo (isset($_POST['__PC_CUSTOMER__'])) ? $_POST['__PC_CUSTOMER__'] : 'CUSTOMER COMPANY FULL NAME'; ?>
+                        <?php echo (isset($_POST['__PC_CUSTOMER__'])) ? strtoupper($_POST['__PC_CUSTOMER__']) : 'CUSTOMER COMPANY FULL NAME'; ?>
                     </h1>
                     <small class="header-information text-center">
                         <center>
@@ -364,6 +364,24 @@
                         </table>
                         <hr />
                         <?php print_r($_POST['rad_item']); ?>
+                        <br /><br />
+                        <div style="page-break-inside:avoid;">
+                            <table class="form-mode largeDataType">
+                                <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td colspan="5" class="text-mode text-center wrap_content special-type-padding signing-panel">
+                                        <?php echo $_POST['__PC_CUSTOMER_ADDRESS_SHORT__']; ?>, <?php echo date('d F Y, H:i'); ?><br />
+                                        <b>Ka. Instalasi Radiologi</b>
+                                        <br /><br /><br /><br /><br />
+                                        <b>dr. Hendra F. Saragih, Sp.Rad</b><br />
+                                        NIP. 19680312 2009604 1 001
+                                        <hr />
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <?php echo $_POST['rad_lampiran']; ?>
                     </div>
                 </td>

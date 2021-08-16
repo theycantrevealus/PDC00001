@@ -188,19 +188,25 @@
                     $("#pengamprah").html(data.pegawai.nama);
                     $("#pelaksana").html(data.amprah.pegawai_detail.nama + " <b class=\"text-info\">[" + data.amprah.pegawai_detail.unit_detail.nama + "]</b>");
                     $("#tanggal-amprah").html(data.amprah.tanggal);
+                    $("#nama_gudang_pegawai").html(data.pegawai.nama);
+                    $("#divisi_peminta").html(data.amprah.pegawai_detail.unit_detail.nama);
+                    $("#nama_peminta").html(data.amprah.pegawai_detail.nama);
 
                     $("#detail_amprah tbody").html("");
                     var autonum = 1;
                     for(var a in data.detail) {
                         if(parseFloat(data.detail[a].qty) > 0) {
                             $("#detail_amprah tbody").append("<tr>" +
-                                "<td>" + autonum + "</td>" +
+                                "<td class=\"autonum\">" + autonum + "</td>" +
                                 "<td>" + data.detail[a].item.nama + "</td>" +
                                 "<td>" + data.detail[a].item.satuan_terkecil_info.nama + "</td>" +
                                 "<td>" + data.detail[a].batch.batch + "</td>" +
                                 "<td class=\"number_style\">" + number_format(parseFloat(data.detail[a].qty), 2, ".", ",") + "</td>" +
                                 "<td>" + data.detail[a].batch.expired_date + "</td>" +
-                                "<td>" + data.detail[a].keterangan + "</td>" +
+                                "</tr>" +
+                                "<tr>" +
+                                "<td></td>" +
+                                "<td colspan=\"5\" style=\"color: #000 !important;\"><b>Keterangan:</b><br />" + data.detail[a].keterangan + "<br /><br /><br /></td>" +
                                 "</tr>");
                             autonum++;
                         }
@@ -282,10 +288,6 @@
                         <td>Tanggal Amprah</td>
                         <td class="wrap_content">:</td>
                         <td id="tanggal-amprah"></td>
-
-                        <td>Diproses Oleh</td>
-                        <td class="wrap_content">:</td>
-                        <td id="pengamprah"></td>
                     </tr>
                     <tr>
                         <td>Pengamprah</td>
@@ -308,10 +310,49 @@
                         <th class="wrap_content">Batch</th>
                         <th class="wrap_content">Qty</th>
                         <th>Kedaluarsa</th>
-                        <th>Keterangan</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
+                </table>
+                <br />
+                <br />
+                <br />
+                <table class="form-mode largeDataType">
+                    <tbody>
+                    <tr>
+                        <td class="text-mode text-center wrap_content special-type-padding signing-panel">
+                            Yang Menyerahkan,<br />
+                            <b>Gudang Farmasi</b>
+                            <br /><br /><br /><br /><br />
+                            <b id="nama_gudang_pegawai"></b><br />
+                        </td>
+                        <td class="text-mode text-center wrap_content special-type-padding signing-panel">
+                            Yang Meminta,<br />
+                            <b id="divisi_peminta"></b>
+                            <br /><br /><br /><br /><br />
+                            <b id="nama_peminta"></b><br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><br /><br /></td>
+                    </tr>
+                    <tr>
+                        <td class="text-mode text-center wrap_content special-type-padding signing-panel">
+                            Mengetahui,<br />
+                            <b>Ka. Instalasi Farmasi</b><br />
+                            <br /><br /><br /><br /><br />
+                            <b>Firdaus, S.Si, Apt, M.Farm</b><br />
+                            NIP. 19790412 201012 1 001
+                        </td>
+                        <td class="text-mode text-center wrap_content special-type-padding signing-panel">
+                            Disetujui Oleh,<br />
+                            <b>Koordinator Bidang Pengelolaan Sediaan<br />Farmasi, Alkes, dan BMHP</b>
+                            <br /><br /><br /><br /><br />
+                            <b>Okta Nur Fajri, S.Farm, Apt</b><br />
+                            NIP. 19851007 201001 2 029
+                        </td>
+                    </tr>
+                    </tbody>
                 </table>
             </div>
             <div class="modal-footer">

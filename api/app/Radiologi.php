@@ -651,7 +651,7 @@ class Radiologi extends Utility
                     $data_antrian['kunjungan'],
                     $parameter,
                     $data_antrian['pasien'],
-                    $data_antrian['dokter']
+                    $data_antrian['dokter']['uid']
                 )
             )
             ->execute();
@@ -1816,7 +1816,7 @@ class Radiologi extends Utility
                     $data_antrian['kunjungan'],
                     $parameter['uid_antrian'],
                     $data_antrian['pasien'],
-                    $data_antrian['dokter']
+                    $data_antrian['dokter']['uid']
                 )
             )
             ->execute();

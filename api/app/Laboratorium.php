@@ -3633,10 +3633,11 @@ class Laboratorium extends Utility {
 						$data_antrian['kunjungan'],
 						$parameter['uid_antrian'],
 						$data_antrian['pasien'],
-						$data_antrian['dokter']
+						$data_antrian['dokter']['uid']
 					)
 				)
 				->execute();
+			$result['asesmen_watch'] = $get_asesmen;
 			
 			if ($get_asesmen['response_result'] > 0){
 				$uidAsesmen = $get_asesmen['response_data'][0]['uid'];
@@ -4748,7 +4749,7 @@ class Laboratorium extends Utility {
 						$data_antrian['kunjungan'],
 						$parameter,
 						$data_antrian['pasien'],
-						$data_antrian['dokter']
+						$data_antrian['dokter']['uid']
 					)
 				)
 				->execute();
