@@ -4444,6 +4444,9 @@
                 },
                 type: "POST",
                 success: function(response) {
+                    console.clear();
+                    console.log(response);
+                    dataTableRadOrder.ajax.reload();
                     push_socket(__ME__, "permintaan_radio_baru", __UIDPETUGASRAD__, "Permintaan radiologi dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
                     // if(response.response_package.response_result > 0) {
                     // 	notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
