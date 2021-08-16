@@ -1107,12 +1107,23 @@
             return false;
         });
 
+        function kalkukasiTotalTindakan() {
+            var total = 0;
+            $("#table-tindakan tbody tr").each(function() {
+                var hargaCurrent = $(this).find("td:eq(2)").attr("harga");
+                total += parseFloat(hargaCurrent);
+            });
+
+            $("#total_biaya_tindakan").html(number_format(total, 2, ".", ","));
+        }
+
         $("body").on("click", ".btnDeleteTindakan", function(){
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
             $("#row_tindakan_" + id).remove();
             usedTindakan.splice(usedTindakan.indexOf($(this).val()), 1);
             tindakanMeta = generateTindakan(poliList[0].tindakan, antrianData, usedTindakan);
+            kalkukasiTotalTindakan();
             return false;
         });
 
@@ -1134,7 +1145,9 @@
                 }
             }*/
 
-            $(newCellTindakanPenjamin).addClass("number_style").html(number_format(setTindakan.harga, 2, ".", ","));
+            $(newCellTindakanPenjamin).attr({
+                "harga": setTindakan.harga
+            }).addClass("number_style").html(number_format(setTindakan.harga, 2, ".", ","));
 
 
             var newPenjaminDelete = document.createElement("BUTTON");
@@ -1148,6 +1161,7 @@
 
             $("#table-tindakan").append(newRowTindakan);
             rebaseTindakan();
+            kalkukasiTotalTindakan();
         }
 
         function rebaseTindakan() {
