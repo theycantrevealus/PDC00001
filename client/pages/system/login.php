@@ -87,7 +87,7 @@
 		<div class="layout-login__form" data-simplebar>
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
 				<a href="<?php echo __HOSTNAME__; ?>/" class="navbar-brand" style="min-width: 0">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-white-<?php echo __PC_IDENT__; ?>.png" width="330" height="100" alt="<?php echo __PC_CUSTOMER__; ?>">
+					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-black-<?php echo __PC_IDENT__; ?>.png" width="330" height="100" alt="<?php echo __PC_CUSTOMER__; ?>">
                     <!--<img class="navbar-brand-icon" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-black.png" width="180" height="180" alt="<?php echo __PC_CUSTOMER__; ?>">-->
 				</a>
 			</div>
