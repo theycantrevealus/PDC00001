@@ -452,7 +452,7 @@ class Apotek extends Utility
                             $parameter['antrian']['dokter'],
                             $parameter['antrian']['penjamin']*/
                             $parameter['kunjungan'],
-                            $parameter['dokter'],
+                            $parameter['dokter']['uid'],
                             $parameter['penjamin']
                         ))
                         ->execute();
@@ -565,7 +565,7 @@ class Apotek extends Utility
                     }
 
                     //Ambil informasi nurse station dan gudang tujuan dari rawat inap
-                    $RawatInap = self::$query->select('igd', array(
+                    $IGD = self::$query->select('igd', array(
                         'nurse_station',
                         'pasien',
                         'dokter'
@@ -596,7 +596,7 @@ class Apotek extends Utility
                             'nurse_station.deleted_at' => 'IS NULL'
                         ), array(
                             $parameter['kunjungan'],
-                            $parameter['dokter'],
+                            $parameter['dokter']['uid'],
                             $parameter['penjamin']
                         ))
                         ->execute();
@@ -604,7 +604,7 @@ class Apotek extends Utility
                     $Mutasi = $Inventori->tambah_mutasi(array(
                         'access_token' => $parameter['access_token'],
                         'dari' => $UserData['data']->gudang,
-                        'ke' => $RawatInap['response_data'][0]['gudang'],
+                        'ke' => $IGD['response_data'][0]['gudang'],
                         'keterangan' => 'Kebutuhan Resep Rawat Inap',
                         'status' => 'N',
                         'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
@@ -636,7 +636,7 @@ class Apotek extends Utility
                                         $BarangBatch[0],
                                         $BarangBatch[1],
                                         $parameter['resep'],
-                                        $RawatInap['response_data'][0]['gudang']
+                                        $IGD['response_data'][0]['gudang']
                                     ))
                                     ->execute();
                                 if(count($inapBatch['response_data']) > 0) {
@@ -655,8 +655,8 @@ class Apotek extends Utility
                                 } else {
                                     $updateBatchInap = self::$query->insert('igd_batch', array(
                                         'status' => 'N',
-                                        'gudang' => $RawatInap['response_data'][0]['gudang'],
-                                        'pasien' => $RawatInap['response_data'][0]['pasien'],
+                                        'gudang' => $IGD['response_data'][0]['gudang'],
+                                        'pasien' => $IGD['response_data'][0]['pasien'],
                                         'resep' => $parameter['resep'],
                                         'obat' => $BarangBatch[0],
                                         'batch' => $BarangBatch[1],
@@ -835,6 +835,7 @@ class Apotek extends Utility
             'raw_batch' => $rawBatch,
             'stok_progress' => $updateProgress,
             'informasi_inap' => $RawatInap,
+            'informasi_igd' => $IGD,
             'mutasi' => $Mutasi,
             'batch' => $usedBatch,
             'parse_mutas' => $itemMutasi,
