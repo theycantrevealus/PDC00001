@@ -4749,7 +4749,7 @@ class Laboratorium extends Utility {
 						$data_antrian['kunjungan'],
 						$parameter,
 						$data_antrian['pasien'],
-						$data_antrian['dokter']
+						$data_antrian['dokter']['uid']
 					)
 				)
 				->execute();
