@@ -223,10 +223,14 @@
                 },
                 type: "POST",
                 data: {
-                    __HOSTNAME__: __HOSTNAME__,
+                    __HOSTNAME__ : __HOSTNAME__,
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    __PC_IDENT__: __PC_IDENT__,
+                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
+                    __PC_CUSTOMER_ADDRESS_SHORT__: __PC_CUSTOMER_ADDRESS_SHORT__,
+                    __PC_CUSTOMER_EMAIL__: __PC_CUSTOMER_EMAIL__,
                     __NAMA_SAYA__ : __MY_NAME__,
                     __JUDUL__ : "Surat Bukti Barang Keluar",
                     data: data
