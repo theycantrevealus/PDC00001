@@ -125,7 +125,7 @@
             $("#required_item_list").append("<li>" + requiredItem[requiredItemKey].nama.toUpperCase()/!* + " <b class=\"text-danger\">" + requiredItem[requiredItemKey].counter + " <i class=\"fa fa-receipt\"></i></b>"*!/ + "</li>");
         }*/
 
-        var tableResep= $("#table-resep").DataTable({
+        var tableResep = $("#table-resep").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
@@ -518,7 +518,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = forReturn.length;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
                     return forReturn;
                 }
