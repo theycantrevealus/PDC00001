@@ -403,8 +403,10 @@
                                     "</a>" +
                                     "</td>" +
                                     "</tr>";
+                                $("#list-tindakan-radiologi tbody").append(html);
+                                autonumRadio++;
                             } else {
-                                html = "<tr id=\"tindakan_" + MetaData[i].id + "\">" +
+                                /*html = "<tr id=\"tindakan_" + MetaData[i].id + "\">" +
                                     "<td class=\"autonum\">" + (autonumRadio) +"</td>" +
                                     "<td class=\"text-muted\">" + MetaData[i].tindakan + "</td>" +
                                     "<td class=\"text-muted\">" + MetaData[i].penjamin + "</td>" +
@@ -414,11 +416,11 @@
                                     "<i class=\"fa fa-exclamation-triangle\"></i> Belum Bayar" +
                                     "</span>" +
                                     "</td>" +
-                                    "</tr>";
+                                    "</tr>";*/
                             }
 
-                            $("#list-tindakan-radiologi tbody").append(html);
-                            autonumRadio++;
+                            /*$("#list-tindakan-radiologi tbody").append(html);
+                            autonumRadio++;*/
 						}
 					}
 				},
