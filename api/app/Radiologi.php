@@ -595,6 +595,7 @@ class Radiologi extends Utility
                     'keterangan',
                     'kesimpulan',
                     'gambar',
+                    'invoice',
                     'created_at',
                     'updated_at'
                 )

@@ -386,20 +386,39 @@
 					MetaData = response.response_package.response_data;
 
 					if (MetaData != "") {
+					    var autonumRadio = 1;
 						for(i = 0; i < MetaData.length; i++){
-							html = "<tr id=\"tindakan_" + MetaData[i].id + "\">" +
-										"<td>" + (i + 1) +"</td>" +
-										"<td>" + MetaData[i].tindakan + "</td>" +
-										"<td>" + MetaData[i].penjamin + "</td>" +
-                                        "<td>" + MetaData[i].mitra.nama + "</td>" +
-										"<td>" +
-											"<a href=\"#\" class=\"linkTindakan btn btn-sm btn-info\">" +
-												"<i class=\"fa fa-eye\"></i>" +
-											"</a>" +
-										"</td>" +
-									"</tr>";
+                            //Yang sudah dibayar saja yang di proses
+                            if(MetaData[i].invoice !== null && MetaData[i].invoice !== undefined) {
+                                html = "<tr id=\"tindakan_" + MetaData[i].id + "\">" +
+                                    "<td class=\"autonum\">" + (autonumRadio) +"</td>" +
+                                    "<td>" + MetaData[i].tindakan + "</td>" +
+                                    "<td>" + MetaData[i].penjamin + "</td>" +
+                                    "<td>" + MetaData[i].mitra.nama + "</td>" +
+                                    "<td class=\"wrap_content\">" +
+                                    "<a href=\"#\" class=\"linkTindakan btn btn-sm btn-info\">" +
+                                    "<span>" +
+                                    "<i class=\"fa fa-eye\"></i> Proses" +
+                                    "</span>" +
+                                    "</a>" +
+                                    "</td>" +
+                                    "</tr>";
+                            } else {
+                                html = "<tr id=\"tindakan_" + MetaData[i].id + "\">" +
+                                    "<td class=\"autonum\">" + (autonumRadio) +"</td>" +
+                                    "<td class=\"text-muted\">" + MetaData[i].tindakan + "</td>" +
+                                    "<td class=\"text-muted\">" + MetaData[i].penjamin + "</td>" +
+                                    "<td class=\"text-muted\">" + MetaData[i].mitra.nama + "</td>" +
+                                    "<td>" +
+                                    "<span class=\"text-warning wrap_content\">" +
+                                    "<i class=\"fa fa-exclamation-triangle\"></i> Belum Bayar" +
+                                    "</span>" +
+                                    "</td>" +
+                                    "</tr>";
+                            }
 
-							$("#list-tindakan-radiologi tbody").append(html);
+                            $("#list-tindakan-radiologi tbody").append(html);
+                            autonumRadio++;
 						}
 					}
 				},

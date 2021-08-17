@@ -1229,6 +1229,7 @@ class Invoice extends Utility
                         $TindakanInfo['response_data'][0]['kelompok'] === 'RAD'
                     ) {
                         $chargedItemTindakan = array();
+                        $chargedOrder = array();
                         //Check Terbayar
                         $checkTindakan = self::$query->select(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order', array(
                             'uid'
@@ -1246,6 +1247,7 @@ class Invoice extends Utility
                             ->execute();
                         foreach ($checkTindakan['response_data'] as $chTKey => $chTValue) {
                             $getDetailTindakan = self::$query->select(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail', array(
+                                'id',
                                 'tindakan'
                             ))
                                 ->where(array(
@@ -1261,29 +1263,57 @@ class Invoice extends Utility
                                 ->execute();
 
                             if(count($getDetailTindakan['response_data']) > 0) {
-                                if(!in_array($chTValue['uid'], $chargedItemTindakan)) {
-                                    array_push($chargedItemTindakan, $chTValue['uid']);
-                                }
-
-
-                                $updateTindakan = self::$query->update(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order', array(
-                                    'status' => 'P'
+                                //Update Invoice in Order Detail
+                                $updateInvoice = self::$query->update(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail', array(
+                                    'invoice' => $parameter['invoice']
                                 ))
                                     ->where(array(
-                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.kunjungan' => '= ?',
+                                        (($TindakanInfo['response_data'][0]['kelompok'] === 'LAB') ? strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.lab_order' : strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.radiologi_order') => '= ?',
                                         'AND',
-                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.pasien' => '= ?',
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.tindakan' => '= ?',
                                         'AND',
-                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.deleted_at' => 'IS NULL',
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.id' => '= ?',
                                         'AND',
-                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.uid' => '= ?',
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.deleted_at' => 'IS NULL'
                                     ), array(
-                                        $parameter['kunjungan'],
-                                        $parameter['pasien'],
-                                        $chTValue['uid']
+                                        $chTValue['uid'],
+                                        $getPaymentDetail['response_data'][0]['item'],
+                                        $getDetailTindakan['response_data'][0]['id']
                                     ))
                                     ->execute();
+                                if($updateInvoice['response_result'] > 0) {
+                                    if(!in_array($chTValue['uid'], $chargedItemTindakan)) {
+                                        array_push($chargedItemTindakan, $chTValue['uid']);
+                                    }
+
+                                    if(!isset($chargedOrder[$chTValue['uid']])) {
+                                        $chargedOrder[$chTValue['uid']] = array(
+                                            'type' => $TindakanInfo['response_data'][0]['kelompok']
+                                        );
+                                    }
+                                }
                             }
+                        }
+
+
+                        foreach ($chargedOrder as $chgKey => $chgValue) {
+                            $updateTindakan = self::$query->update(strtolower($chgValue['type']) . '_order', array(
+                                'status' => 'P'
+                            ))
+                                ->where(array(
+                                    strtolower($chgValue['type']) . '_order.kunjungan' => '= ?',
+                                    'AND',
+                                    strtolower($chgValue['type']) . '_order.pasien' => '= ?',
+                                    'AND',
+                                    strtolower($chgValue['type']) . '_order.deleted_at' => 'IS NULL',
+                                    'AND',
+                                    strtolower($chgValue['type']) . '_order.uid' => '= ?',
+                                ), array(
+                                    $parameter['kunjungan'],
+                                    $parameter['pasien'],
+                                    $chgKey
+                                ))
+                                ->execute();
                         }
 
                         if($TindakanInfo['response_data'][0]['kelompok'] === 'LAB') {
