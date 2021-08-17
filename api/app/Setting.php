@@ -33,6 +33,9 @@ class Setting extends Utility
             case 'edit_setting':
                 return self::edit_setting($parameter);
                 break;
+            case 'get_transact_entry':
+                return self::get_transact_entry($parameter);
+                break;
             default:
                 return array();
                 break;
@@ -54,6 +57,62 @@ class Setting extends Utility
                 return self::get_tables_list($parameter);
                 break;
         }
+    }
+
+    private function get_transact_entry($parameter) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'transact_print_setting.deleted_at' => 'IS NULL',
+                'AND',
+                'transact_print_setting.identifier' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'transact_print_setting.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('transact_print_setting', array(
+                'uid', 'identifier', 'target'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('transact_print_setting', array(
+                'uid', 'identifier', 'target'
+            ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('transact_print_setting', array(
+            'uid'
+        ))
+            ->where(array(
+                'transact_print_setting.deleted_at' => 'IS NULL'
+            ))
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
     }
 
     private function get_tables_list($parameter) {

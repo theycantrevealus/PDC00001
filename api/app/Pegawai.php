@@ -110,6 +110,9 @@ class Pegawai extends Utility {
             case 'get-pegawai-jabatan':
                 return self::get_pegawai_jabatan($parameter);
                 break;
+            case 'update_unit_jabatan':
+                return self::update_unit_jabatan($parameter);
+                break;
             default:
                 return array();
                 break;
@@ -350,6 +353,61 @@ class Pegawai extends Utility {
         }
 
         return $responseBuilder;
+    }
+
+    private function update_unit_jabatan($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        if($parameter['unit_switch'] === 'Y') {
+            $checkUnit = self::$query->select('pegawai_jabatan_unit', array(
+                'id'
+            ))
+                ->where(array(
+                    'pegawai_jabatan_unit.unit' => '= ?',
+                    'AND',
+                    'pegawai_jabatan_unit.jabatan' => '= ?'
+                ), array(
+                    $parameter['unit'],
+                    $parameter['uid']
+                ))
+                ->execute();
+            if(count($checkUnit['response_data']) > 0) {
+                $updateUnit = self::$query->update('pegawai_jabatan_unit', array(
+                    'deleted' => NULL
+                ))
+                    ->where(array(
+                        'pegawai_jabatan_unit.unit' => '= ?',
+                        'AND',
+                        'pegawai_jabatan_unit.jabatan' => '= ?'
+                    ), array(
+                        $parameter['unit'],
+                        $parameter['uid']
+                    ))
+                    ->execute();
+            } else {
+                $updateUnit = self::$query->insert('pegawai_jabatan_unit', array(
+                    'unit' => $parameter['unit'],
+                    'jabatan' => $parameter['uid'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+        } else {
+            $updateUnit = self::$query->update('pegawai_jabatan_unit', array(
+                'deleted' => parent::format_date()
+            ))
+                ->where(array(
+                    'pegawai_jabatan_unit.unit' => '= ?',
+                    'AND',
+                    'pegawai_jabatan_unit.jabatan' => '= ?'
+                ), array(
+                    $parameter['unit'],
+                    $parameter['uid']
+                ))
+                ->execute();
+        }
+        return $updateUnit;
     }
 
     private function get_pegawai_jabatan($parameter) {
@@ -639,10 +697,28 @@ class Pegawai extends Utility {
             ->execute();
 
         $autonum = 1;
+        $Unit = new Unit(self::$pdo);
+        $AllUnit = $Unit->get_unit();
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+            $PegawaiUnit = self::$query->select('pegawai_jabatan_unit', array(
+                'id', 'unit', 'jabatan'
+            ))
+                ->where(array(
+                    'pegawai_jabatan_unit.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai_jabatan_unit.jabatan' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($PegawaiUnit['response_data'] as $PJKey => $PJValue) {
+                $PegawaiUnit['response_data'][$PJKey]['unit'] = $Unit->get_unit_detail($PJValue['unit'])['response_data'][0];
+            }
+            $data['response_data'][$key]['unit'] = (count($PegawaiUnit['response_data']) > 0) ? $PegawaiUnit['response_data'] : array();
             $autonum++;
         }
+        $data['all_unit'] = $AllUnit;
         return $data;
     }
 
@@ -657,11 +733,31 @@ class Pegawai extends Utility {
             ->where(array(
                 'pegawai_jabatan.deleted_at' => 'IS NULL'
             ))
+            ->order(array(
+                'created_at' => 'ASC'
+            ))
             ->execute();
 
         $autonum = 1;
+        $Unit = new Unit(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+            $PegawaiUnit = self::$query->select('pegawai_jabatan_unit', array(
+                'id', 'unit', 'jabatan'
+            ))
+                ->where(array(
+                    'pegawai_jabatan_unit.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai_jabatan_unit.jabatan' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($PegawaiUnit['response_data'] as $PJKey => $PJValue) {
+                $PegawaiUnit['response_data'][$PJKey]['unit'] = $Unit->get_unit_detail($PJValue['unit'])['response_data'][0];
+            }
+            $data['response_data'][$key]['unit'] = $PegawaiUnit['response_data'];
+
             $autonum++;
         }
         return $data;
