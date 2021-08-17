@@ -376,7 +376,6 @@
                                         <br /><br /><br /><br /><br />
                                         <b>dr. Hendra F. Saragih, Sp.Rad</b><br />
                                         NIP. 19680312 2009604 1 001
-                                        <hr />
                                     </td>
                                 </tr>
                                 </tbody>
