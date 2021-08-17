@@ -166,15 +166,17 @@
                         html = "<ol>";
                         dataItem = response.response_package.response_data;
                         $.each(dataItem, function(key, item){
-                            html += "<li style=\"border-bottom: dashed 1px #808080; padding: 10px 0;\">" +
-                                "<div style=\"margin-left: 10px\">" +
-                                "<h2 style=\"font-size: 16pt !important;\">" + item.tindakan + "</h2>" +
-                                "<span class=\"text-muted\">Waktu Order: " + item.waktu_order + " [" + item.jam_order + " WIB]</span><br />" +
-                                "<b>Keterangan:</b><br />" + item.keterangan +
-                                "<br />" +
-                                "<b>Kesimpulan:</b><br />" + item.kesimpulan +
-                                "</div>" +
-                                "</li>";
+                            if(item.invoice !== undefined && item.invoice !== null) {
+                                html += "<li style=\"border-bottom: dashed 1px #808080; padding: 10px 0;\">" +
+                                    "<div style=\"margin-left: 10px\">" +
+                                    "<h2 style=\"font-size: 16pt !important;\">" + item.tindakan + "</h2>" +
+                                    "<span class=\"text-muted\">Waktu Order: " + item.waktu_order + " [" + item.jam_order + " WIB]</span><br />" +
+                                    "<b>Keterangan:</b><br />" + item.keterangan +
+                                    "<br />" +
+                                    "<b>Kesimpulan:</b><br />" + item.kesimpulan +
+                                    "</div>" +
+                                    "</li>";
+                            }
                         });
                         html += "</ol>";
                     }

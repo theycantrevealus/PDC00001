@@ -16,10 +16,12 @@
 		var dataLibrary = loadOrder(uid_order);
 
 		for(var datKey in dataLibrary) {
-		    forSave["tindakan_" + dataLibrary[datKey].id] = {
-		        keterangan: (dataLibrary[datKey].keterangan === null) ? "" : dataLibrary[datKey].keterangan,
-                kesimpulan: (dataLibrary[datKey].kesimpulan === null) ? "" : dataLibrary[datKey].kesimpulan
-            };
+		    if(dataLibrary[datKey].invoice !== null && dataLibrary[datKey].invoice !== undefined) {
+                forSave["tindakan_" + dataLibrary[datKey].id] = {
+                    keterangan: (dataLibrary[datKey].keterangan === null) ? "" : dataLibrary[datKey].keterangan,
+                    kesimpulan: (dataLibrary[datKey].kesimpulan === null) ? "" : dataLibrary[datKey].kesimpulan
+                };
+            }
         }
 
 		loadPasien(uid_order);
