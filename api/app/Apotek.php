@@ -3627,11 +3627,13 @@ class Apotek extends Utility
                 'AND',
                 'antrian.departemen' => '= ?',
                 'AND',
+                'resep.status_resep' => '= ?',
+                'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . ((isset($parameter['search']['value'])) ? $parameter['search']['value'] : '') . '%\'',
                 'OR',
                 'pasien.no_rm' => 'ILIKE ' . '\'%' . ((isset($parameter['search']['value'])) ? $parameter['search']['value'] : '') . '%\')'
             ), array(
-                __POLI_IGD__
+                __POLI_IGD__, 'N'
             ))
             ->execute();
 
@@ -3703,7 +3705,8 @@ class Apotek extends Utility
             $data = array(
                 // 'response_data' => array_merge($dataIGD['response_data'], array_splice($dataMixed['response_data'], 0, (count($dataMixed['response_data']) - count($dataIGD['response_data']))))
                 // 'response_data' => $dataMixed['response_data']
-                'response_data' => array_merge($dataIGD['response_data'], $dataMixed['response_data'])
+                'response_data' => array_merge($dataIGD['response_data'], $dataMixed['response_data']),
+                'response_igd' => $dataIGD
             );
         } else {
             if ($parameter['length'] < 0) {
