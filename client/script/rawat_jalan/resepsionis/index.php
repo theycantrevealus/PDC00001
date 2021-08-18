@@ -1291,8 +1291,10 @@
             location.href = __HOSTNAME__ + "/pasien/edit/" + uid + "?antrian=true"
         });
 
-		$("#btnTambahPasien").click(function(){
-			localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
+		$("#btnTambahPasien").click(function() {
+            localStorage.setItem("currentAntrianID", $("#txt_current_antrian").attr("current_queue"));
+            localStorage.setItem("currentAntrianType", currentAntrianType);
+            //location.href = __HOSTNAME__ + "/pasien/edit/" + uid + "?antrian=true";
 		});
 
 		$("#btnTambahAntrian").click(function(){
@@ -2053,8 +2055,10 @@
 			<div class="modal-footer">
 				<!-- <div id="spanBtnTambahPasien" hidden> -->
 				<a href="<?= __HOSTNAME__ ?>/pasien/tambah?antrian=true" class="btn btn-success" id="btnTambahPasien">
-				<!-- <i class="fa fa-plus"></i>  -->Tambah Pasien Baru
-				</a>
+                    Tambah Pasien Baru
+                </a>
+                <!--<button class="btn btn-success" id="btnTambahPasien">Tambah Pasien Baru</button>-->
+				<!-- <i class="fa fa-plus"></i>  -->
 				<!-- </div> -->
 				
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
