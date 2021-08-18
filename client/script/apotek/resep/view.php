@@ -1597,11 +1597,13 @@
             $("#takar_komposisi_" + currentRacikID + "_" + currentKomposisiID).html($("#txt_racikan_kekuatan").val());
             //Tentukan Batch setelah dipilih
             refreshBatch($("#txt_racikan_obat").val(), currentRacikID + "_" + currentKomposisiID, "racikan");
+
             $("#form-editor-racikan").modal("hide");
             var racikanUID = currentRacikanActive;
             verifData = CheckVerifRacikan(verifData, currentRacikID, {
                 uid: racikanUID
             }, currentData, alasanRacikanLib);
+            calculate_racikan();
         });
 
         $("body").on("keyup", ".racikan_signa_a", function() {
@@ -2023,6 +2025,7 @@
                     createRacikanChangeReason(id, alasanLib);
                 }
             }
+            calculate_racikan();
             return newData;
         }
 
