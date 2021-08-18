@@ -3109,7 +3109,7 @@ class Asesmen extends Utility {
 				'kunjungan' => $parameter['dataAntrian']['kunjungan'],
 				'antrian' => $parameter['dataAntrian']['uid'],
 				'pasien' => $parameter['dataAntrian']['uid_pasien'],
-				'dokter' => $parameter['dataAntrian']['dokter'],
+				'dokter' => $parameter['dataAntrian']['dokter']['uid'],
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))
