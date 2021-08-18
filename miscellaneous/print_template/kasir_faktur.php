@@ -334,7 +334,28 @@
                                 </div>
                                 <h1 class="title-name">KWINTANSI</h1>
                                 <br />
-                                <?php echo $_POST['kwitansi_data']; ?>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <?php echo $_POST['kwitansi_data']; ?>
+                                    </div>
+                                    <div class="col-12">
+                                        <br /><br />
+                                        <table class="form-mode largeDataType">
+                                            <tbody>
+                                            <tr>
+                                                <td></td>
+                                                <td colspan="5" class="text-mode text-center wrap_content special-type-padding signing-panel">
+                                                    <?php //echo $_POST['__PC_CUSTOMER_ADDRESS_SHORT__'] . '. ' . date('d F Y, H:i'); ?>
+                                                    <!--<br />-->
+                                                    <b>Petugas Kasir</b>
+                                                    <br /><br /><br /><br /><br />
+                                                    <b><?php echo $_POST['__ME__']; ?></b>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>

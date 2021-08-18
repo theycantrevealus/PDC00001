@@ -42,6 +42,7 @@
 					d.from = getDateRange("#range_kwitansi")[0];
 					d.to = getDateRange("#range_kwitansi")[1];
 					d.column_set = ['created_at', 'nomor_kwitansi', 'created_at', 'metode_bayar', 'pegawai', 'terbayar'];
+					d.jenis = $("#filter_kwitansi_item").val();
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -157,11 +158,15 @@
 			]
 		});
 
+        $("#filter_kwitansi_item").change(function () {
+            tableKwitansi.ajax.reload();
+        });
+
 		$("#btnCetakFaktur").click(function() {
 
             var data = $("#payment-detail-loader").html();
 		    var containerTemp = document.createElement("DIV");
-		    $(containerTemp).html(data);
+		    $(containerTemp).html(data).addClass("col-12");
 
 
             $(containerTemp).find(".row, .card-body, .card-header").css({
@@ -207,6 +212,8 @@
                 "colspan": "3"
             });
 
+            $(containerTemp).find("#biaya-terkini").addClass("row");
+
 		    $(containerTemp).find("#nama-pasien-faktur span").css({
                 "display": "inline"
             });
@@ -228,6 +235,7 @@
                     __PC_CUSTOMER_EMAIL__: __PC_CUSTOMER_EMAIL__,
                     __PC_CUSTOMER_ADDRESS_SHORT__: __PC_CUSTOMER_ADDRESS_SHORT__.toUpperCase(),
                     kwitansi_data: $(containerTemp).html(),
+                    __ME__: __MY_NAME__,
                     pasien: $("#payment-detail-loader .info-kwitansi col-3:eq(1)").html(),
                     pegawai: $("#payment-detail-loader .info-kwitansi col-3:eq(2)").html(),
                     tgl_bayar: $("#payment-detail-loader .info-kwitansi col-3:eq(3)").html(),
