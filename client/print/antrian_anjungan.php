@@ -4,7 +4,7 @@
         @page {
             size: 4.9cm 9.2cm;
             page-break-inside: avoid !important;
-            margin :0;
+            margin: 0 auto;
             padding:0;
         }
         html, body {
@@ -15,12 +15,13 @@
     html, body {
         height: 9.2cm;
         width: 4.9cm;
+        margin: 0 auto;
         /*height: 9.2cm;
         width: 14.9cm;*/
     }
     @page {
         size: 4.9cm 9.2cm;
-        margin :0;
+        margin: 0 auto;
         padding:0;
     }
 </style>
