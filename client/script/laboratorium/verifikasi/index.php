@@ -106,7 +106,7 @@
 
 
                         $(this).select2({
-                            dropdownParent: $("#modal-detail-labor"),
+                            /*dropdownParent: $("#modal-detail-labor"),*/
                             data: loadMitra("penyedia_order_" + thisTindakan, thisTindakan, penjamin),
                             selectOnClose: true,
                             escapeMarkup: function(markup) {
