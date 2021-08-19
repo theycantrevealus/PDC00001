@@ -1061,7 +1061,7 @@
                                 }
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
-                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice form-control\" />";
+                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"bulk_item_" + invoice_detail_item[invKey].item_type + " proceedInvoice form-control\" />";
                                 } else if(invoice_detail_item[invKey].status_bayar == 'V') {
                                     status_bayar = "<h6 class=\"text-info text-center\" style=\"white-space: pre\"><i class=\"fa fa-info-circle\"></i> Verifikasi</h6>";
 								} else {
@@ -1179,8 +1179,6 @@
 			});
 		});
 
-		
-
 		$("body").on("change", "#bulk-all", function() {
 			if($(this).is(":checked")) {
 				$(".proceedInvoice").prop("checked", true);
@@ -1226,6 +1224,18 @@
 			} else {
 				$("#bulk-all").prop("checked", false);
 			}
+
+			if($(this).hasClass("bulk_item_master_inv")) {
+                if(!$(this).is(":checked")) {
+                    $(".bulk_item_master_inv").each(function(){
+                        $(this).prop("checked", false);
+                    });
+                } else {
+                    $(".bulk_item_master_inv").each(function(){
+                        $(this).prop("checked", true);
+                    });
+                }
+            }
 
 			/*var diskonAll = $("#txt_diskon_all").val();
 			var diskonTypeAll = $("#txt_diskon_type_all").val();
