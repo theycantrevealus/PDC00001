@@ -52,7 +52,7 @@
 								<th>Tindakan</th>
 								<th>Penjamin</th>
                                 <th>Mitra</th>
-								<th></th>
+								<th class="wrap_content"></th>
 							</tr>
 						</thead>
 						<tbody>

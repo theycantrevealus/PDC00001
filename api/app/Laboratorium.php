@@ -3106,7 +3106,8 @@ class Laboratorium extends Utility {
 					'request_item',
 					'tgl_ambil_sample',
 					'tindakan',
-                    'mitra'
+                    'mitra',
+                    'invoice'
 				)
 			)
 			->where(array(

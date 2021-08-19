@@ -452,7 +452,6 @@
                                         <br /><br /><br /><br /><br />
                                         <b>dr. Wiwit Nila Sukma, Sp.PK </b><br />
                                         NIP. 19811217 200803 2 001
-                                        <hr />
                                     </td>
                                 </tr>
                                 </tbody>

@@ -348,7 +348,7 @@
                             $("#anjuran").val(MetaData.laboratorium.anjuran);
 	                		$("#no_rm").html(MetaData.pasien.no_rm);
 	                		$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir_parsed);
-	                		$("#panggilan").html(MetaData.pasien.panggilan);
+	                		$("#panggilan").html(MetaData.pasien.panggilan_name.nama);
 	                		$("#nama").html(MetaData.pasien.nama);
 	                		$("#jenkel").html(MetaData.pasien.jenkel_detail.nama);
 	                	}
@@ -377,7 +377,8 @@
                     if (response.response_package.response_result > 0) {
                         var allow_save = [];
                         dataItem = response.response_package.response_data;
-                        console.log(dataItem);
+
+                        var autonumLab = 1;
                         $.each(dataItem, function(key, item) {
                             if(item.allow) {
                                 allow_save.push(1);
@@ -385,74 +386,75 @@
                                 allow_save.push(0);
                             }
 
-                            html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
-                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + " <strong class=\"pull-right badge badge-custom-caption badge-info\"><i class=\"material-icons\">verified_user</i><h5 class=\"text-white\">&nbsp;" + item.mitra.nama + "</h5></strong></h5>" +
-                                "</div><div class=\"card-body\">" +
-                                "<div class=\"row\">" +
-                                "<div class=\"col-12\">" +
-                                "Tanggal Ambil Sample : <b class=\"" + ((!item.allow) ? "text-danger" : "text-success") + "\">" + ((!item.allow) ? "<i class=\"fa fa-ban\"></i>" : "<i class=\"fa fa-check\"></i>") + " " + item.tgl_ambil_sample_parse + "</b><hr />" +
-                                "</div>" +
-                                "<div class=\"col-12\">" +
-                                "<table class=\"table table-bordered table-striped largeDataType\">" +
-                                "<thead class=\"thead-dark\">" +
+                            if(item.invoice !== null && item.invoice !== undefined) {
+                                html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
+                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (autonumLab) + ". "+ item.nama + " <strong class=\"pull-right badge badge-custom-caption badge-info\"><i class=\"material-icons\">verified_user</i><h5 class=\"text-white\">&nbsp;" + item.mitra.nama + "</h5></strong></h5>" +
+                                    "</div><div class=\"card-body\">" +
+                                    "<div class=\"row\">" +
+                                    "<div class=\"col-12\">" +
+                                    "Tanggal Ambil Sample : <b class=\"" + ((!item.allow) ? "text-danger" : "text-success") + "\">" + ((!item.allow) ? "<i class=\"fa fa-ban\"></i>" : "<i class=\"fa fa-check\"></i>") + " " + item.tgl_ambil_sample_parse + "</b><hr />" +
+                                    "</div>" +
+                                    "<div class=\"col-12\">" +
+                                    "<table class=\"table table-bordered table-striped largeDataType\">" +
+                                    "<thead class=\"thead-dark\">" +
                                     "<tr>" +
-                                        "<th class=\"wrap_content\">No</th>" +
-                                        "<th>Item</th>" +
-                                        "<th>Nilai</th>" +
-                                        "<th class=\"wrap_content\">Satuan</td>" +
-                                        "<th class=\"wrap_content\">Nilai Min.</td>" +
-                                        "<th class=\"wrap_content\">Nilai Maks.</td>" +
+                                    "<th class=\"wrap_content\">No</th>" +
+                                    "<th>Item</th>" +
+                                    "<th>Nilai</th>" +
+                                    "<th class=\"wrap_content\">Satuan</td>" +
+                                    "<th class=\"wrap_content\">Nilai Min.</td>" +
+                                    "<th class=\"wrap_content\">Nilai Maks.</td>" +
                                     "</tr>" +
-                                "</thead>" +
-                                "<tbody>";
-
-
-                            var requestedItem = item.request_item.split(",").map(function(intItem) {
-                                return parseInt(intItem, 10);
-                            });
-
-                            if (item.nilai_item.length > 0){
-                                let nomor = 1;
-                                $.each(item.nilai_item, function(key, items){
-                                    let nilai = items.nilai;
-
-                                    if (nilai == null){
-                                        nilai = "";
-                                    }
-
-                                    var naratifMode =  "";
-
-                                    if(item.naratif === 'N' || item.naratif === undefined || item.naratif === null) {
-                                        naratifMode = "<input " + ((!item.allow) ? "disabled=\"disabled\"" : ((__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) ? "disabled=\"disabled\"" : "")) + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" />";
-                                    } else {
-                                        naratifMode = "<textarea " + ((!item.allow) ? "disabled=\"disabled\"" : ((__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) ? "disabled=\"disabled\"" : "")) + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" class=\"form-control inputItemTindakan\">" + nilai + "</textarea>";
-                                    }
-                                    // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0) {
-                                        /*html += "<tr class=\"strikethrough\">" +
-                                            "<td>"+ nomor +"</td>" +
-                                            "<td>" + items.keterangan + "</td>" +
-                                            "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + " value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
-                                            "<td>" + items.satuan + "</td>" +
-                                            "<td>" + items.nilai_min + "</td>" +
-                                            "<td>" + items.nilai_maks + "</td>" +
-                                            "</tr>";*/
-                                    } else {
-                                        html += "<tr>" +
-                                            "<td>"+ nomor +"</td>" +
-                                            "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
-                                            "<td>" + naratifMode + "</td>" +
-                                            "<td>" + items.satuan + "</td>" +
-                                            "<td>" + items.nilai_min + "</td>" +
-                                            "<td>" + items.nilai_maks + "</td>" +
-                                            "</tr>";
-                                        nomor++;
-                                    }
+                                    "</thead>" +
+                                    "<tbody>";
+                                var requestedItem = item.request_item.split(",").map(function(intItem) {
+                                    return parseInt(intItem, 10);
                                 });
-                            }
 
-                            html += "</tbody></table></div></div></div>";
-                            $("#hasil_pemeriksaan").append(html);
+                                if (item.nilai_item.length > 0){
+                                    let nomor = 1;
+                                    $.each(item.nilai_item, function(key, items){
+                                        let nilai = items.nilai;
+
+                                        if (nilai == null){
+                                            nilai = "";
+                                        }
+
+                                        var naratifMode =  "";
+
+                                        if(item.naratif === 'N' || item.naratif === undefined || item.naratif === null) {
+                                            naratifMode = "<input " + ((!item.allow) ? "disabled=\"disabled\"" : ((__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) ? "disabled=\"disabled\"" : "")) + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" />";
+                                        } else {
+                                            naratifMode = "<textarea " + ((!item.allow) ? "disabled=\"disabled\"" : ((__MY_PRIVILEGES__.response_data[0].uid === __UIDDOKTER__) ? "disabled=\"disabled\"" : "")) + " id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + "\" class=\"form-control inputItemTindakan\">" + nilai + "</textarea>";
+                                        }
+                                        // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
+                                        if(requestedItem.indexOf(items.id_lab_nilai) < 0) {
+                                            /*html += "<tr class=\"strikethrough\">" +
+                                                "<td>"+ nomor +"</td>" +
+                                                "<td>" + items.keterangan + "</td>" +
+                                                "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + " value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                                "<td>" + items.satuan + "</td>" +
+                                                "<td>" + items.nilai_min + "</td>" +
+                                                "<td>" + items.nilai_maks + "</td>" +
+                                                "</tr>";*/
+                                        } else {
+                                            html += "<tr>" +
+                                                "<td>"+ nomor +"</td>" +
+                                                "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
+                                                "<td>" + naratifMode + "</td>" +
+                                                "<td>" + items.satuan + "</td>" +
+                                                "<td>" + items.nilai_min + "</td>" +
+                                                "<td>" + items.nilai_maks + "</td>" +
+                                                "</tr>";
+                                            nomor++;
+                                        }
+                                    });
+                                }
+
+                                html += "</tbody></table></div></div></div>";
+                                $("#hasil_pemeriksaan").append(html);
+                                autonumLab++;
+                            }
                         });
 
                         if(allow_save.indexOf(1) < 0) {

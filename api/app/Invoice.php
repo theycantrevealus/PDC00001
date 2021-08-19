@@ -146,7 +146,7 @@ class Invoice extends Utility
 
     private function get_kwitansi($parameter)
     {
-        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+        /*if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
                 'invoice_payment.deleted_at' => 'IS NULL',
                 'AND',
@@ -170,6 +170,128 @@ class Invoice extends Utility
             $paramValue = array(
                 $parameter['from'], $parameter['to']
             );
+        }*/
+
+        if($parameter['jenis'] === '*') {
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'invoice_payment.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
+                    'AND',
+                    '(invoice_payment.nomor_kwitansi' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                );
+
+                $paramValue = array(
+                    $parameter['from'], $parameter['to']
+                );
+            } else {
+                $paramData = array(
+                    'invoice_payment.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?'
+                );
+
+                $paramValue = array(
+                    $parameter['from'], $parameter['to']
+                );
+            }
+        } else if($parameter['jenis'] === 'RAJAL') {
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'invoice_payment.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
+                    'AND',
+                    '(antrian.departemen' => '!= ?',
+                    'AND',
+                    'antrian.departemen' => '!= ?)',
+                    'AND',
+                    '(invoice_payment.nomor_kwitansi' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                );
+
+                $paramValue = array(
+                    $parameter['from'], $parameter['to'], __POLI_IGD__, __POLI_INAP__
+                );
+            } else {
+                $paramData = array(
+                    'invoice_payment.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
+                    'AND',
+                    '(antrian.departemen' => '!= ?',
+                    'AND',
+                    'antrian.departemen' => '!= ?)'
+                );
+
+                $paramValue = array(
+                    $parameter['from'], $parameter['to'], __POLI_IGD__, __POLI_INAP__
+                );
+            }
+        } else if($parameter['jenis'] === 'RANAP') {
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'invoice_payment.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
+                    'AND',
+                    '(invoice_payment.nomor_kwitansi' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                    'AND',
+                    'antrian.departemen' => '= ?'
+                );
+
+                $paramValue = array(
+                    $parameter['from'], $parameter['to'], __POLI_INAP__
+                );
+            } else {
+                $paramData = array(
+                    'invoice_payment.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
+                    'AND',
+                    'antrian.departemen' => '= ?'
+                );
+
+                $paramValue = array(
+                    $parameter['from'], $parameter['to'], __POLI_INAP__
+                );
+            }
+        } else if($parameter['jenis'] === 'IGD') {
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'invoice_payment.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
+                    'AND',
+                    '(invoice_payment.nomor_kwitansi' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                    'AND',
+                    'antrian.departemen' => '= ?'
+                );
+
+                $paramValue = array(
+                    $parameter['from'], $parameter['to'], __POLI_IGD__
+                );
+            } else {
+                $paramData = array(
+                    'invoice_payment.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice_payment.tanggal_bayar' => 'BETWEEN ? AND ?',
+                    'AND',
+                    'antrian.departemen' => '= ?'
+                );
+
+                $paramValue = array(
+                    $parameter['from'], $parameter['to'], __POLI_IGD__
+                );
+            }
         }
 
         if ($parameter['length'] < 0) {
@@ -188,10 +310,18 @@ class Invoice extends Utility
                 ->order(array(
                     $parameter['column_set'][$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
                 ))
+                ->join('invoice', array(
+                    'kunjungan'
+                ))
+                ->join('antrian', array(
+                    'departemen'
+                ))
                 ->join('pasien', array(
                     'nama as nama_pasien'
                 ))
                 ->on(array(
+                    array('invoice_payment.invoice', '=', 'invoice.uid'),
+                    array('invoice.kunjungan', '=', 'antrian.kunjungan'),
                     array('invoice_payment.pasien', '=', 'pasien.uid')
                 ))
                 ->where($paramData, $paramValue)
@@ -212,10 +342,18 @@ class Invoice extends Utility
                 ->order(array(
                     $parameter['column_set'][$parameter['order'][0]['column']] => $parameter['order'][0]['dir']
                 ))
+                ->join('invoice', array(
+                    'kunjungan'
+                ))
+                ->join('antrian', array(
+                    'departemen'
+                ))
                 ->join('pasien', array(
                     'nama as nama_pasien'
                 ))
                 ->on(array(
+                    array('invoice_payment.invoice', '=', 'invoice.uid'),
+                    array('invoice.kunjungan', '=', 'antrian.kunjungan'),
                     array('invoice_payment.pasien', '=', 'pasien.uid')
                 ))
                 ->where($paramData, $paramValue)
@@ -225,7 +363,7 @@ class Invoice extends Utility
         }
 
         $payment['response_draw'] = $parameter['draw'];
-        $autonum = 1;
+        $autonum = intval($parameter['start']) + 1;
         $Pegawai = new Pegawai(self::$pdo);
         $Pasien = new Pasien(self::$pdo);
 
@@ -1229,6 +1367,7 @@ class Invoice extends Utility
                         $TindakanInfo['response_data'][0]['kelompok'] === 'RAD'
                     ) {
                         $chargedItemTindakan = array();
+                        $chargedOrder = array();
                         //Check Terbayar
                         $checkTindakan = self::$query->select(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order', array(
                             'uid'
@@ -1246,6 +1385,7 @@ class Invoice extends Utility
                             ->execute();
                         foreach ($checkTindakan['response_data'] as $chTKey => $chTValue) {
                             $getDetailTindakan = self::$query->select(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail', array(
+                                'id',
                                 'tindakan'
                             ))
                                 ->where(array(
@@ -1261,29 +1401,57 @@ class Invoice extends Utility
                                 ->execute();
 
                             if(count($getDetailTindakan['response_data']) > 0) {
-                                if(!in_array($chTValue['uid'], $chargedItemTindakan)) {
-                                    array_push($chargedItemTindakan, $chTValue['uid']);
-                                }
-
-
-                                $updateTindakan = self::$query->update(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order', array(
-                                    'status' => 'P'
+                                //Update Invoice in Order Detail
+                                $updateInvoice = self::$query->update(strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail', array(
+                                    'invoice' => $parameter['invoice']
                                 ))
                                     ->where(array(
-                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.kunjungan' => '= ?',
+                                        (($TindakanInfo['response_data'][0]['kelompok'] === 'LAB') ? strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.lab_order' : strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.radiologi_order') => '= ?',
                                         'AND',
-                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.pasien' => '= ?',
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.tindakan' => '= ?',
                                         'AND',
-                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.deleted_at' => 'IS NULL',
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.id' => '= ?',
                                         'AND',
-                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order.uid' => '= ?',
+                                        strtolower($TindakanInfo['response_data'][0]['kelompok']) . '_order_detail.deleted_at' => 'IS NULL'
                                     ), array(
-                                        $parameter['kunjungan'],
-                                        $parameter['pasien'],
-                                        $chTValue['uid']
+                                        $chTValue['uid'],
+                                        $getPaymentDetail['response_data'][0]['item'],
+                                        $getDetailTindakan['response_data'][0]['id']
                                     ))
                                     ->execute();
+                                if($updateInvoice['response_result'] > 0) {
+                                    if(!in_array($chTValue['uid'], $chargedItemTindakan)) {
+                                        array_push($chargedItemTindakan, $chTValue['uid']);
+                                    }
+
+                                    if(!isset($chargedOrder[$chTValue['uid']])) {
+                                        $chargedOrder[$chTValue['uid']] = array(
+                                            'type' => $TindakanInfo['response_data'][0]['kelompok']
+                                        );
+                                    }
+                                }
                             }
+                        }
+
+
+                        foreach ($chargedOrder as $chgKey => $chgValue) {
+                            $updateTindakan = self::$query->update(strtolower($chgValue['type']) . '_order', array(
+                                'status' => 'P'
+                            ))
+                                ->where(array(
+                                    strtolower($chgValue['type']) . '_order.kunjungan' => '= ?',
+                                    'AND',
+                                    strtolower($chgValue['type']) . '_order.pasien' => '= ?',
+                                    'AND',
+                                    strtolower($chgValue['type']) . '_order.deleted_at' => 'IS NULL',
+                                    'AND',
+                                    strtolower($chgValue['type']) . '_order.uid' => '= ?',
+                                ), array(
+                                    $parameter['kunjungan'],
+                                    $parameter['pasien'],
+                                    $chgKey
+                                ))
+                                ->execute();
                         }
 
                         if($TindakanInfo['response_data'][0]['kelompok'] === 'LAB') {

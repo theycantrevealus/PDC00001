@@ -366,7 +366,9 @@ class CPPT extends Utility {
                             ->where(array(
                                 'lab_order_detail.lab_order' => '= ?',
                                 'AND',
-                                'lab_order_detail.deleted_at' => 'IS NULL'
+                                'lab_order_detail.deleted_at' => 'IS NULL',
+                                'AND',
+                                'lab_order_detail.invoice' => 'IS NOT NULL',
                             ), array(
                                 $LabValue['uid']
                             ))
@@ -442,7 +444,9 @@ class CPPT extends Utility {
                         ->where(array(
                             'rad_order_detail.radiologi_order' => '= ?',
                             'AND',
-                            'rad_order_detail.deleted_at' => 'IS NULL'
+                            'rad_order_detail.deleted_at' => 'IS NULL',
+                            'AND',
+                            'rad_order_detail.invoice' => 'IS NOT NULL'
                         ), array(
                             $RadValue['uid']
                         ))
