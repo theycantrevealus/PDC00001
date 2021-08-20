@@ -828,6 +828,9 @@
 			var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
 			var sideMenu3 = <?php echo json_encode($sideMenu3); ?>;
 
+            $(".dataTables_filter .form-control").removeClass("form-control-sm");
+            $(".dataTables_length .custom-select").removeClass("custom-select-sm");
+
 			if(sideMenu1 > 0) {
 				$("#sidemenu_1").show();
 			} else {

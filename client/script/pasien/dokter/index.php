@@ -88,7 +88,7 @@
                         if(row.lab_order.length > 0) {
                             for(var labKey in row.lab_order) {
                                 if(row.lab_order[labKey].no_order !== null) {
-                                    listTunjang += "<div style=\"margin: 1px;\" class=\"badge badge-" + ((row.lab_order[labKey].status === "D") ? "success" : "info") + " badge-custom-caption\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + row.lab_order[labKey].no_order + "</div>";
+                                    listTunjang += "<div style=\"margin: 1px;\" class=\"badge badge-outline-" + ((row.lab_order[labKey].status === "D") ? "success" : "info") + " badge-custom-caption\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + row.lab_order[labKey].no_order + "</div>";
                                 }
                             }
                         }
@@ -96,7 +96,7 @@
                         if(row.rad_order.length > 0) {
                             for(var radKey in row.rad_order) {
                                 if(row.rad_order[radKey].no_order !== null) {
-                                    listTunjang += "<div style=\"margin: 1px;\"  class=\"badge badge-" + ((row.rad_order[radKey].selesai === true) ? "success" : "purple") + " badge-custom-caption\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + row.rad_order[radKey].no_order + "</div>";
+                                    listTunjang += "<div style=\"margin: 1px;\"  class=\"badge badge-outline-" + ((row.rad_order[radKey].selesai === true) ? "success" : "purple") + " badge-custom-caption\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + row.rad_order[radKey].no_order + "</div>";
                                 }
                             }
                         }

@@ -124,7 +124,7 @@
 					    var parsedPenjaminList = "";
 
 					    for(var b in uniquePenjamin) {
-					        parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+					        parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
                         }
 
 						return row.metode_bayar + "<br />" + parsedPenjaminList;
@@ -497,7 +497,7 @@
                         var parsedPenjaminList = "";
 
                         for(var b in uniquePenjamin) {
-                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                            parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
                         }
 
 						return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
@@ -542,13 +542,13 @@
                             }
 					        if(uniquePoliList.indexOf(targetPoli.uid) < 0) {
 					            uniquePoliList.push(targetPoli.uid);
-                                poliList.push("<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + targetPoli.nama + "</span>");
+                                poliList.push("<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + targetPoli.nama + "</span>");
                             }
                         }
 					    if(poliList.length > 0) {
                             return poliList.join(" ");
                         } else {
-                            return "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli.nama + "</span>";
+                            return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli.nama + "</span>";
                         }
 					}
 				},
@@ -677,7 +677,7 @@
                         var parsedPenjaminList = "";
 
                         for(var b in uniquePenjamin) {
-                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                            parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
                         }
 
                         return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
@@ -702,7 +702,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> Rawat Inap</span>";
+                        return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> Rawat Inap</span>";
                     }
                 },
                 {
@@ -830,7 +830,7 @@
                         var parsedPenjaminList = "";
 
                         for(var b in uniquePenjamin) {
-                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                            parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
                         }
 
                         return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
@@ -855,7 +855,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> IGD</span>";
+                        return "<span class=\"badge badge-custom-caption badge-outline-danger\"><i class=\"fa fa-tags\"></i> IGD</span>";
                     }
                 },
                 {
@@ -1132,17 +1132,17 @@
                                         "<tr>" +
                                         "<td>" + detailData[itemDetailKey].status_bayar + "</td>" +
                                         "<td>" + detailData[itemDetailKey].autonum + "</td>" +
-                                        "<td>" + detailData[itemDetailKey].nama + "<br /><label class=\"text-info\">[" + detailData[itemDetailKey].departemen_info.nama + "]</label><br /><b class=\"text-muted\">" + detailData[itemDetailKey].keterangan + "</b>" + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + detailData[itemDetailKey].penjamin + "</span></td>" +
+                                        "<td>" + detailData[itemDetailKey].nama + "<br /><label class=\"text-info\">[" + detailData[itemDetailKey].departemen_info.nama + "]</label><br /><b class=\"text-muted\">" + detailData[itemDetailKey].keterangan + "</b>" + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-outline-info\">" + detailData[itemDetailKey].penjamin + "</span></td>" +
                                         "<td>" + detailData[itemDetailKey].qty + "</td>" +
-                                        "<td class=\"text-right\">" + detailData[itemDetailKey].harga + "</td>" +
-                                        "<td class=\"text-right\">" + detailData[itemDetailKey].total + "</td>" +
+                                        "<td class=\"number_style\">" + detailData[itemDetailKey].harga + "</td>" +
+                                        "<td class=\"number_style\">" + detailData[itemDetailKey].total + "</td>" +
                                         "</tr>"
                                     );
                                     /*$("#invoice_detail_item").append(
                                     "<tr>" +
                                     "<td>" + status_bayar + "</td>" +
                                     "<td>" + invoice_detail_item[invKey].autonum + "</td>" +
-                                    "<td>" + invoice_detail_item[invKey].item.nama.toUpperCase() + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
+                                    "<td>" + invoice_detail_item[invKey].item.nama.toUpperCase() + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-outline-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
                                     "<td>" + invoice_detail_item[invKey].qty + "</td>" +
                                     "<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].harga, 2, ".", ",") + "</td>" +
                                     "<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",") + "</td>" +

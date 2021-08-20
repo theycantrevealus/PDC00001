@@ -37,13 +37,14 @@
 
 					</div>
 				</div>
-				<div class="card-body">
+				<div class="card-body custom-padding">
 					<div class="row">
-                        <div class="col-lg-2" style="border-right: solid 1px #cccc;">
+                        <div class="col-lg-2">
+                            <br />
 							<center>Antrian terkini</center>
 							<h1 class="text-center" id="txt_current_antrian">0</h1>
 						</div>
-						<div class="col-lg-3" style="border-right: solid 1px #cccc;">
+						<div class="col-lg-3">
                             <div class="col-lg-12">
                                 <br />
                             </div>
@@ -57,15 +58,18 @@
 								<i class="fa fa-plus"></i> DAFTAR PASIEN
 							</button>
 						</div>
-						<div class="col-lg-2" style="border-right: solid 1px #cccc;">
+						<div class="col-lg-2">
                             <center>
+                                <br />
                                 <span class="text-secondary">Sisa Antrian</span><br />
                                 <h5><b id="sisa_antrian">0</b></h5>
                             </center>
 						</div>
-                        <div class="col-lg-3">
-                            <span class="text-secondary">Antrian Terlewat</span>
+                        <div class="col-lg-4">
                             <div class="row">
+                                <div class="col-lg-12">
+                                    <span class="text-secondary">Antrian Terlewat</span>
+                                </div>
                                 <div class="col-lg-6">
                                     <select id="antrian_terlewat" class="form-control"></select>
                                 </div>
@@ -109,7 +113,7 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="card card-body tab-content">
+                    <div class="tab-content">
                         <div class="tab-pane show fade active" id="tab-antrian-1">
                             <div class="card">
                                 <div class="card-header card-header-large bg-white">

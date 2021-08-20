@@ -2,10 +2,10 @@
     <div class="card">
         <div class="card-header card-header-large bg-white">
             <div class="row">
-                <div class="col-2">
+                <div class="col-3">
                     <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> <span class="lab_nomor_order"><?php echo $_POST['no_order']; ?></span></h5>
                 </div>
-                <div class="col-10">
+                <div class="col-9">
                     <table class="table form-mode">
                         <tr>
                             <td class="wrap_content">Dokter Penanggung Jawab</td>
@@ -64,7 +64,11 @@
                                 <td class="wrap_content">Penyedia</td>
                                 <td class="wrap_content">:</td>
                                 <td id="container_mitra_<?php echo $_POST['uid']; ?>_<?php echo $value['tindakan']['uid']; ?>">
-                                    <select asesmen="<?php echo $_POST['asesmen']; ?>" target="<?php echo $_POST['uid']; ?>" id="penyedia_order_<?php echo $value['tindakan']['uid']; ?>" class="form-control penyedia_order_lab"></select>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <select asesmen="<?php echo $_POST['asesmen']; ?>" target="<?php echo $_POST['uid']; ?>" id="penyedia_order_<?php echo $value['tindakan']['uid']; ?>" class="form-control penyedia_order_lab"></select>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         </table>

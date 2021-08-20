@@ -332,7 +332,7 @@
                                 <div class="print-date">
                                     <span>Tanggal Cetak:<br /><b><?php echo date('d F Y, H:i'); ?></b></span>
                                 </div>
-                                <h1 class="title-name">KWINTANSI</h1>
+                                <h1 class="title-name">KWITANSI</h1>
                                 <br />
                                 <div class="row">
                                     <div class="col-12">

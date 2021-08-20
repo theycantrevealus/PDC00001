@@ -107,7 +107,7 @@
 				);
 
 				$(newModuleName).html("<span style=\"" + ((dataMeta[key].level > 1) ? "" : "font-weight: bolder") + "\" class=\"" + ((dataMeta[key].level > 1) ? "" : "text-info") + "\">" + dataMeta[key].nama + "</span>")
-				$(newModulePages).html("<a href=\"" + __HOSTNAME__ + "/" + dataMeta[key].identifier + "\"><span class=\"badge badge-success\"><i style=\"margin-right: 8px;\" class=\"fa fa-link\"></i>" + __HOSTNAME__ + "</span><span class=\"badge badge-warning\">/" + dataMeta[key].identifier + "</span>");
+				$(newModulePages).html("<a href=\"" + __HOSTNAME__ + "/" + dataMeta[key].identifier + "\"><span class=\"badge badge-custom-caption badge-outline-success\"><i style=\"margin-right: 8px;\" class=\"fa fa-link\"></i>" + __HOSTNAME__ + "</span><span class=\"badge badge-custom-caption badge-outline-warning\">/" + dataMeta[key].identifier + "</span>");
 
 				$(newModuleRow).append(newModuleName);
 				$(newModuleRow).append(newModulePages);

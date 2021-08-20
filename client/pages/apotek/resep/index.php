@@ -56,7 +56,7 @@
 				</div>
 			</div-->
 			<div class="card">
-				<div class="card-header card-header-large bg-white d-flex align-items-center">
+				<div class="card-header card-header-large d-flex align-items-center">
 					<h5 class="card-header__title flex m-0">Apotek</h5>
 				</div>
 				<div class="card-body tab-content">

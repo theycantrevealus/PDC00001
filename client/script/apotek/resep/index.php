@@ -181,9 +181,7 @@
             ],
             "rowCallback": function ( row, data, index ) {
                 if(data.departemen.uid === __POLI_IGD__) {
-                    $("td", row).addClass("bg-danger").css({
-                        "color": "#fff"
-                    });
+                    $("td", row).addClass("bg-danger-custom text-danger");
                 }
             },
             "columns" : [

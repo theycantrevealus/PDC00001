@@ -1,21 +1,42 @@
 <script type="text/javascript">
 	$(function(){
 		var tablePegawai = $("#table-pegawai").DataTable({
-			"ajax":{
-				url: __HOSTAPI__ + "/Pegawai",
-				type: "GET",
-				headers:{
-					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
-				},
-				dataSrc:function(response) {
-					return response.response_package;
-				}
-			},
-			autoWidth: false,
-			aaSorting: [[0, "asc"]],
-			"columnDefs":[
-				{"targets":0, "className":"dt-body-left"}
-			],
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Pegawai",
+                type: "POST",
+                data: function(d) {
+                    d.request = "get_pegawai_backend";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var finalData = response.response_package.response_data;
+
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsTotal;
+
+                    return finalData;
+                }
+            },
+            language: {
+                search: "",
+                searchPlaceholder: "No.RM/Nama Pasien"
+            },
+            autoWidth: false,
+            "bInfo" : false,
+            aaSorting: [[2, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {

@@ -41,7 +41,7 @@
 					</li>
 				</ul>
 			</div>
-			<div class="card card-body tab-content">
+			<div class="tab-content">
 				<div class="tab-pane active show fade" id="tab-awal-1">
 					<div class="card">
 						<div class="card-header card-header-large bg-white d-flex align-items-center">

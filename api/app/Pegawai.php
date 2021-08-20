@@ -74,6 +74,9 @@ class Pegawai extends Utility {
             case 'login':
                 return self::login($parameter);
                 break;
+            case 'get_pegawai_backend':
+                return self::get_pegawai_backend($parameter);
+                break;
             case 'tambah_pegawai':
                 return self::tambah_pegawai($parameter);
                 break;
@@ -353,6 +356,95 @@ class Pegawai extends Utility {
         }
 
         return $responseBuilder;
+    }
+
+    private function get_pegawai_backend($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'pegawai.deleted_at' => 'IS NULL',
+                'AND',
+                '(pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pegawai.email' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'pegawai.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('pegawai', array(
+                'uid',
+                'email',
+                'nama',
+                'password',
+                'jabatan',
+                'editable',
+                'unit',
+                'kontak',
+                'created_at',
+                'updated_at',
+                'deleted_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('pegawai', array(
+                'uid',
+                'email',
+                'nama',
+                'password',
+                'jabatan',
+                'editable',
+                'unit',
+                'kontak',
+                'created_at',
+                'updated_at',
+                'deleted_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            if(file_exists('../images/pegawai/' . $value['uid'] . '.png')) {
+                $profile_pic = '/images/pegawai/' . $value['uid'] . '.png';
+            } else {
+                $profile_pic = '/client/template/assets/images/avatar/demi.png';
+            }
+            $data['response_data'][$key]['profile_pic'] = $profile_pic;
+
+            $Jabatan = self::get_jabatan_detail($value['jabatan'])['response_data'][0];
+            $data['response_data'][$key]['jabatan'] = $Jabatan;
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('pegawai', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
     }
 
     private function update_unit_jabatan($parameter) {
