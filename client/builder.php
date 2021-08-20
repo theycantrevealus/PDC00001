@@ -148,6 +148,18 @@
 	<?php require 'script.php'; ?>
 	<script type="text/javascript">
 		$(function() {
+		    var currentPageURL = document.URL;
+		    var currentMenuCheck = $("a[href=\"" + currentPageURL + "\"]").parent();
+		    while(parseInt(currentMenuCheck.attr("parent-child")) > 0) {
+                var parentID = currentMenuCheck.attr("parent-child");
+                $("#menu-" + parentID).addClass("show");
+                $("a[href=\"#menu-" + parentID + "\"]").removeClass("collapsed");
+                $("a[href=\"#menu-" + parentID + "\"]").parent().addClass("open");
+
+                currentMenuCheck = $("a[href=\"#menu-" + parentID + "\"]").parent();
+
+            }
+
 			$(".txt_tanggal").datepicker({
 				dateFormat: 'DD, dd MM yy',
 				autoclose: true

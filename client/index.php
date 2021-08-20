@@ -51,6 +51,7 @@
     var __UIDPETUGASRAD__ = <?php echo json_encode(__UIDPETUGASRAD__); ?>;
     var __UIDAPOTEKER__ = <?php echo json_encode(__UIDAPOTEKER__); ?>;
     var __UIDKARUAPOTEKER__ = <?php echo json_encode(__UIDKARUAPOTEKER__); ?>;
+    var __UIDPETUGASGUDANGFARMASI__ = <?php echo json_encode(__UIDPETUGASGUDANGFARMASI__); ?>;
     var __POLI_GIGI__ = <?php echo json_encode(__POLI_GIGI__); ?>;
     var __POLI_MATA__ = <?php echo json_encode(__POLI_MATA__); ?>;
     var __POLI_INAP__ = <?php echo json_encode(__POLI_INAP__); ?>;
