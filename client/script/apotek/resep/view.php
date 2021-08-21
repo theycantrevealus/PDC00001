@@ -18,6 +18,36 @@
 
         var isChanged = false;
 
+        $(".verifikator-tab a").click(function() {
+            var targetID = $(this).attr("href");
+            checkEachTab();
+        });
+
+        function checkEachTab(){
+            //Check Resep
+            $("#identifier_jumlah_resep").html($("#table-resep tbody tr").length);
+            $("#identifier_jumlah_racikan").html($("#table-resep-racikan tbody tr.racikan-master").length);
+            var kajianCheck = false;
+            var kajian = populateAllKajian();
+
+            for(var  zz in kajian) {
+                if(kajian[zz] === "" || kajian[zz] === "") {
+                    kajianCheck = false;
+                    break;
+                } else {
+                    kajianCheck = true;
+                }
+            }
+            if(kajianCheck) {
+                $("#identifier_kajian").html("<i class=\"fa fa-check-circle\"></i>").addClass("badge-success").removeClass("badge-danger");
+            } else {
+                $("#identifier_kajian").html("<i class=\"fa fa-exclamation-circle\"></i>").addClass("badge-danger").removeClass("badge-success");
+            }
+            //Check Racikan
+
+            //Check Kajian
+        }
+
 
         $("input[type=\"radio\"][name=\"kajian_all\"][value=\"y\"]").change(function() {
             $(this).parent().parent().addClass("active");
@@ -25,6 +55,7 @@
             $(".kajian_sel[value=\"y\"]").parent().addClass("active");
             $(".kajian_sel[value=\"n\"]").prop("checked", false).removeAttr("checked");
             $(".kajian_sel[value=\"n\"]").parent().removeClass("active");
+            checkEachTab();
             return false;
         });
 
@@ -34,6 +65,7 @@
             $(".kajian_sel[value=\"n\"]").parent().addClass("active");
             $(".kajian_sel[value=\"y\"]").prop("checked", false).removeAttr("checked");
             $(".kajian_sel[value=\"y\"]").parent().removeClass("active");
+            checkEachTab();
             return false;
         });
 
@@ -47,6 +79,7 @@
                 $("input[type=\"radio\"][name=\"kajian_all\"][value=\"n\"]").removeAttr("checked");
                 $("input[type=\"radio\"][name=\"kajian_all\"][value=\"n\"]").parent().removeClass("active");
             }
+            checkEachTab();
         });
 
         function populateAllKajian() {
@@ -267,6 +300,8 @@
 
                     $("#total_biaya_obat").html("Rp. " + number_format((totalResep + totalRacikan), 2, ".", ","));
                 }
+
+                checkEachTab();
             },
             error: function(response) {
                 console.log(response);

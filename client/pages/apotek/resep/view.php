@@ -123,10 +123,10 @@
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
                     <h5 class="card-header__title flex m-0">Resep</h5>
                 </div>
-                <div class="card-header card-header-tabs-basic nav" role="tablist">
-                    <a href="#resep-biasa" class="active" data-toggle="tab" role="tab" aria-controls="asesmen-kerja" aria-selected="true">Resep Biasa</a>
-                    <a href="#resep-racikan" data-toggle="tab" role="tab" aria-selected="false">Resep Racikan</a>
-                    <a href="#resep-kajian" data-toggle="tab" role="tab" aria-selected="false">Pengkajian Resep</a>
+                <div class="card-header card-header-tabs-basic nav verifikator-tab" role="tablist">
+                    <a href="#resep-biasa" class="active" data-toggle="tab" role="tab" aria-controls="asesmen-kerja" aria-selected="true">Resep Biasa <span id="identifier_jumlah_resep" style="position: absolute; top: -20px; right: -5px;" class="badge badge-info badge-custom-caption"></span></a>
+                    <a href="#resep-racikan" data-toggle="tab" role="tab" aria-selected="false">Resep Racikan <span id="identifier_jumlah_racikan" style="position: absolute; top: -20px; right: -5px;" class="badge badge-info badge-custom-caption"></span></a>
+                    <a href="#resep-kajian" data-toggle="tab" role="tab" aria-selected="false">Pengkajian Resep <span id="identifier_kajian" style="position: absolute; top: -20px; right: -5px;" class="badge badge-danger badge-custom-caption"></span></a>
                 </div>
                 <div class="card-body tab-content">
                     <div class="tab-pane active show fade" id="resep-biasa">
