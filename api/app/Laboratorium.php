@@ -4626,8 +4626,10 @@ class Laboratorium extends Utility {
                 ))
                 ->execute();
             $dataTindakan['response_data'][$key]['detail'] = $Nilai['response_data'];
-			$harga = $tindakan::get_harga_tindakan($value['uid']);
-			$dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
+			//$harga = $tindakan->get_harga_tindakan($value['uid']);
+			//$dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
+            $rangeHarga = $tindakan->get_tindakan_detail($value['uid']);
+            $dataTindakan['response_data'][$key]['harga_range'] = $rangeHarga['response_data'];
 		}
 			
 		return $dataTindakan;

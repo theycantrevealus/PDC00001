@@ -3487,14 +3487,33 @@
                             {
                                 "data" : null, render: function(data, type, row, meta) {
                                     var detailOrder = row.detail;
-                                    var parseDetail = "";
+                                    var parseDetail = "<table class=\"table table-bordered table-striped\"><tbody>";
+                                    for(var dK in detailOrder) {
+                                        if(detailOrder[dK].tindakan.harga_minimum === detailOrder[dK].tindakan.harga_maksimum) {
+                                            parseDetail += "<tr>" +
+                                                "<td style=\"width: 50%\">" + detailOrder[dK].tindakan.nama + "</td>" +
+                                                "<td style=\"width:50%\">" +
+                                                "<span class=\"badge badge-outline-purple badge-custom-caption\">Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span>" +
+                                                "</td>" +
+                                                "</tr>";
+                                        } else {
+                                            parseDetail += "<tr>" +
+                                                "<td style=\"width: 50%\">" + detailOrder[dK].tindakan.nama + "</td>" +
+                                                "<td style=\"width: 50%\">" +
+                                                "<span class=\"badge badge-outline-purple badge-custom-caption\">Rp. " + number_format(detailOrder[dK].tindakan.harga_minimum, 2, ".", ",") + "&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span>" +
+                                                "</td>" +
+                                                "</tr>";
+                                        }
+                                    }
+                                    parseDetail += "</tbody></table>";
+                                    /*var parseDetail = "";
                                     for(var dK in detailOrder) {
                                         if(detailOrder[dK].tindakan.harga_minimum === detailOrder[dK].tindakan.harga_maksimum) {
                                             parseDetail += "<li style=\"padding-bottom: 10px\">" + detailOrder[dK].tindakan.nama + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span></li>";
                                         } else {
                                             parseDetail += "<li style=\"padding-bottom: 10px\">" + detailOrder[dK].tindakan.nama + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan.harga_minimum, 2, ".", ",") + " - Rp. " + number_format(detailOrder[dK].tindakan.harga_maksimum, 2, ".", ",") + "</span></li>";
                                         }
-                                    }
+                                    }*/
                                     return parseDetail;
                                 }
                             }
@@ -3543,14 +3562,25 @@
                             {
                                 "data" : null, render: function(data, type, row, meta) {
                                     var detailOrder = row.detail;
-                                    var parseDetail = "";
+                                    var parseDetail = "<table class=\"table table-bordered table-striped\"><tbody>";
                                     for(var dK in detailOrder) {
                                         if(detailOrder[dK].tindakan_detail.harga_minimum === detailOrder[dK].tindakan_detail.harga_maksimum) {
-                                            parseDetail += "<li>" + detailOrder[dK].tindakan + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span></li>";
+                                            parseDetail += "<tr>" +
+                                                "<td style=\"width: 50%\">" + detailOrder[dK].tindakan + "</td>" +
+                                                "<td style=\"width: 50%\">" +
+                                                "<span class=\"badge badge-outline-purple badge-custom-caption\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span>" +
+                                                "</td>" +
+                                                "</tr>";
                                         } else {
-                                            parseDetail += "<li>" + detailOrder[dK].tindakan + "<span class=\"badge badge-info badge-custom-caption pull-right\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_minimum, 2, ".", ",") + " - Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span></li>";
+                                            parseDetail += "<tr>" +
+                                                "<td style=\"width: 50%\">" + detailOrder[dK].tindakan + "</td>" +
+                                                "<td style=\"width: 50%\">" +
+                                                "<span class=\"badge badge-outline-purple badge-custom-caption\">Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_minimum, 2, ".", ",") + "&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;Rp. " + number_format(detailOrder[dK].tindakan_detail.harga_maksimum, 2, ".", ",") + "</span>" +
+                                                "</td>" +
+                                                "</tr>";
                                         }
                                     }
+                                    parseDetail += "</tbody></table>";
                                     return parseDetail;
                                 }
                             }
@@ -3959,13 +3989,21 @@
                                 text: item.nama,
                                 id: item.uid,
                                 detail:item.detail,
-                                harga:item.harga
+                                harga:item.harga,
+                                harga_range:item.harga_range
                             }
                         })
                     };
                 }
             }
         }).addClass("form-control").on("select2:select", function(e) {
+            var data = e.params.data;
+            var hargaRangeMin = data.harga_range[0].harga_minimum;
+            var hargaRangeMax = data.harga_range[0].harga_maksimum;
+            $("#tindakan_radiologi").attr({
+                "harga_minimum": hargaRangeMin,
+                "harga_maksimum": hargaRangeMax
+            });
             let uidTindakanRad = $(this).val();
 
             $("#radiologi_tindakan_notifier").html("");
@@ -4268,7 +4306,7 @@
 									<td class='no_urut_rad'>"+ no_urut +"</td>\
 									<td>"+ item_order.tindakan +"</td>\
 									<td>"+ item_order.penjamin +"</td>\
-									<td><button class='btn btn-danger btn-sm btnHapusTindakanRad' 					data-uid='"+ item_order.uid_tindakan +"' \
+									<td><button id=\"delete_radio_" + item_order.tindakan + "\" class='btn btn-danger btn-sm btnHapusTindakanRad' data-uid='"+ item_order.uid_tindakan +"' \
 										data-nama='" + item_order.tindakan +"' "+ status_disabled +">\
 										<i class='fa fa-trash'></button></td>\
 								</tr>";
@@ -4393,6 +4431,15 @@
                 let dataTindakan = $("#tindakan_radiologi").select2('data');
                 let namaPenjamin;
 
+                var hargaMinimum = parseFloat($("#tindakan_radiologi").attr("harga_minimum"));
+                var hargaMaximum = parseFloat($("#tindakan_radiologi").attr("harga_maksimum"));
+                var hargaFinal = "";
+                if(hargaMinimum === hargaMaximum) {
+                    hargaFinal = "<span class=\"badge badge-custom-caption badge-outline-purple\">Rp. " + (number_format(hargaMaximum, 2, ".", ",")) + "</span>";
+                } else {
+                    hargaFinal = "<span class=\"badge badge-custom-caption badge-outline-purple\">Rp. " + (number_format(hargaMinimum, 2, ".", ",")) + "</span> - <span class=\"badge badge-custom-caption badge-outline-purple\">Rp. " + (number_format(hargaMaximum, 2, ".", ",")) + "</span>";
+                }
+
                 $.each(listPenjamin, function(key, item){
                     if (item.uid === uid_penjamin_tindakan_rad){
                         namaPenjamin = item.nama;
@@ -4403,8 +4450,8 @@
                 let html = "<tr>" +
                     "<td class='no_urut_rad'></td>" +
                     "<td>"+ dataTindakan[0].text +"</td>" +
-                    "<td>"+ namaPenjamin +"</td>" +
-                    "<td><button class='btn btn-danger btn-sm btnHapusTindakanRad'><i class='fa fa-trash'></button></td>" +
+                    "<td>"+ hargaFinal +"</td>" +
+                    "<td><button id=\"delete_radio_" + $("#tindakan_radiologi option:selected").val() + "\" class='btn btn-danger btn-sm btnHapusTindakanRad'><i class='fa fa-trash'></button></td>" +
                     "</tr>";
 
                 $("#table_tindakan_radiologi tbody").append(html);
@@ -4427,12 +4474,16 @@
         });
 
         $("#table_tindakan_radiologi").on('click', '.btnHapusTindakanRad', function(){
-            let uid_tindakan = $(this).data("uid");
+            var uid_tindakan = $(this).attr("id").split("_");
+            uid_tindakan = uid_tindakan[uid_tindakan.length - 1];
             let nama_tindakan = $(this).data("nama");
 
             delete listTindakanRadiologiTerpilih[uid_tindakan];
             listTindakanRadiologiDihapus.push(uid_tindakan);
             $(this).parent().parent().remove();
+
+            console.clear();
+            console.log(listTindakanRadiologiTerpilih);
 
             //set back to list
             //$("#tindakan_radiologi").append("<option value='"+ uid_tindakan +"'>"+ nama_tindakan +"</option>");
@@ -4458,8 +4509,6 @@
                 },
                 type: "POST",
                 success: function(response) {
-                    console.clear();
-                    console.log(response);
                     dataTableRadOrder.ajax.reload();
                     push_socket(__ME__, "permintaan_radio_baru", __UIDPETUGASRAD__, "Permintaan radiologi dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning");
                     // if(response.response_package.response_result > 0) {
@@ -4726,7 +4775,8 @@
                                     text: item.nama,
                                     id: item.uid,
                                     detail:item.detail,
-                                    harga:item.harga
+                                    harga:item.harga,
+                                    harga_range: item.harga_range
                                 }
                             })
                         };
@@ -4734,8 +4784,14 @@
                 }
             }).addClass("form-control").on("select2:select", function(e) {
                 var data = e.params.data;
+                var rangeHargaMinimum = data.harga_range[0].harga_minimum;
+                var rangeHargaMaksimum = data.harga_range[0].harga_maksimum;
+                $("#tindakan_lab").attr({
+                    "harga_minimum": parseFloat(rangeHargaMinimum),
+                    "harga_maksimum": parseFloat(rangeHargaMaksimum)
+                });
 
-                for(var hargaKey in data.harga)
+                /*for(var hargaKey in data.harga)
                 {
                     if(pasien_penjamin_uid === data.harga[hargaKey].penjamin)
                     {
@@ -4743,7 +4799,7 @@
                             "harga": parseFloat(data.harga[hargaKey].harga)
                         });
                     }
-                }
+                }*/
                 $("#lab_nilai_order").html("");
 
 
@@ -5082,7 +5138,14 @@
 
         $("#btnTambahTindakanLab").click(function(){
             let uidTindakanLab = $("#tindakan_lab").val();
-            let hargaPenjamin = number_format($("#tindakan_lab").attr("harga"), 2, ".", ",");
+            let hargaPenjamin1 = "<span class=\"badge badge-custom-caption badge-outline-purple\">Rp. " + number_format($("#tindakan_lab").attr("harga_minimum"), 2, ".", ",") + "</span>";
+            let hargaPenjamin2 = "<span class=\"badge badge-custom-caption badge-outline-purple\">Rp. " + number_format($("#tindakan_lab").attr("harga_maksimum"), 2, ".", ",") + "</span>";
+            var hargaPenjamin = "";
+            if(hargaPenjamin1 === hargaPenjamin2) {
+                hargaPenjamin = hargaPenjamin1;
+            } else {
+                hargaPenjamin = hargaPenjamin1 + " - " + hargaPenjamin2;
+            }
 
             if(listTindakanLabTerpilih[uidTindakanLab] === undefined)
             {
@@ -6838,8 +6901,8 @@
                             <thead class="thead-dark">
                             <tr>
                                 <th class="wrap_content">No</th>
-                                <th width='25%'>Tindakan Radiologi</th>
-                                <th width='25%'>Penjamin</th>
+                                <th style="width: 25%">Tindakan Radiologi</th>
+                                <th style="width: 15%">Harga</th>
                                 <th class="wrap_content">Aksi</th>
                             </tr>
                             </thead>

@@ -885,8 +885,11 @@ class Radiologi extends Utility
         $tindakan = new Tindakan(self::$pdo);
         foreach ($dataTindakan['response_data'] as $key => $value){
 
-            $harga = $tindakan::get_harga_tindakan($value['uid']);
+            $harga = $tindakan->get_harga_tindakan($value['uid']);
             $dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
+
+            $harga_range = $tindakan->get_tindakan_detail($value['uid']);
+            $dataTindakan['response_data'][$key]['harga_range'] = $harga_range['response_data'];
         }
 
         return $dataTindakan;
