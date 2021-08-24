@@ -30,7 +30,7 @@ assignees: theycantrevealus
 
 ...................................isian disini.....................................
 
-**Additional context (OPTIONAL)**
+**Keterangan Tambahan (OPTIONAL)**
 >Keterangan tambahan.
 
 ...................................isian disini.....................................
