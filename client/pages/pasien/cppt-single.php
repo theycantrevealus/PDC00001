@@ -1,3 +1,7 @@
+<?php
+$isVerifApotek = true;
+$keteranganRacikan = '';
+?>
 <div class="row align-items-center projects-item mb-1 cppt-single">
     <div class="col-sm-auto mb-1 mb-sm-0">
         <div class="text-dark-gray"><?php echo $_POST['waktu_masuk']; ?></div>
@@ -224,177 +228,189 @@
                             <div class="tab-pane show fade" id="resep_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
                                 <?php
                                     $autoResep = 1;
-                                    foreach ($_POST['resep'] as $resKey => $resValue) {
-                                ?>
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <?Php
-                                        if(isset($resValue['alasan_ubah']) && !empty($resValue['alasan_ubah']) && $resValue['alasan_ubah'] !== '') {
-                                        ?>
-                                            <div class="alert alert-soft-warning card-margin" role="alert">
-                                                <strong>Keterangan Alasan Ubah Keseluruhan:</strong><br />
-                                                <?php echo $resValue['alasan_ubah'] ?>
-                                            </div>
-                                        <?php
-                                        }
-                                        ?>
-                                        <div class="alert alert-soft-info card-margin" role="alert">
-                                            <strong>Keterangan:</strong><br />
-                                            <?php echo $resValue['keterangan'] ?>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <div class="col-auto d-flex align-items-center">
-                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Resep Dokter</h5>
-                                        </div>
-                                        <br />
-                                        <table class="table table-bordered largeDataType">
-                                            <thead class="thead-dark">
-                                                <tr>
-                                                    <th class="wrap_content">No</th>
-                                                    <th>Obat</th>
-                                                    <th class="wrap_content">Signa</th>
-                                                    <th class="wrap_content">Jumlah</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td rowspan="<?php echo count($resValue['detail']); ?>"><?php echo $autoResep; ?></td>
-                                                    <td>
-                                                        <strong class="text-info">
-                                                            <?php echo $resValue['detail'][0]['obat']['nama']; ?>
-                                                        </strong><br /><br /><b>Keterangan:</b><br />
-                                                        <?php echo $resValue['detail'][0]['keterangan']; ?>
-                                                    </td>
-                                                    <td>
-                                                        <span class="wrap_content"><?php echo $resValue['detail'][0]['signa_qty']; ?> &times; <?php echo $resValue['detail'][0]['signa_pakai']; ?></span>
-                                                    </td>
-                                                    <td>
-                                                        <?php echo $resValue['detail'][0]['qty']; ?>
-                                                    </td>
-                                                </tr>
-                                                <?php
-                                                for ($a = 1; $a < (count($resValue['detail'])); $a++) {
-                                                    ?>
-                                                    <tr>
-                                                        <td>
-                                                            <strong class="text-info">
-                                                                <?php echo $resValue['detail'][$a]['obat']['nama']; ?>
-                                                            </strong><br /><br /><b>Keterangan:</b><br />
-                                                            <?php echo $resValue['detail'][$a]['keterangan']; ?>
-                                                        </td>
-                                                        <td>
-                                                            <span class="wrap_content"><?php echo $resValue['detail'][$a]['signa_qty']; ?> &times; <?php echo $resValue['detail'][$a]['signa_pakai']; ?></span>
-                                                        </td>
-                                                        <td>
-                                                            <?php echo $resValue['detail'][$a]['qty']; ?>
-                                                        </td>
-                                                    </tr>
-                                                    <?php
-                                                }
+                                    if(count($_POST['resep']) > 0 && count($_POST['resep'][0]['detail']) > 0) {
+                                        foreach ($_POST['resep'] as $resKey => $resValue) {
                                             ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <?php
-                                    if($resValue['status_resep'] === 'N') {
-                                        ?>
-                                        <div class="col-lg-6">
-                                            <div class="col-auto d-flex align-items-center">
-                                                <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Resep Apotek</h5>
-                                            </div>
-                                            <br />
-                                            <h3 class="text-center text-muted">
-                                                <br /><br />
-                                                Belum Verifikasi
-                                            </h3>
-                                        </div>
-
-                                        <?php
-                                    } else {
-                                        ?>
-                                        <div class="col-lg-6">
-                                            <div class="col-auto d-flex align-items-center">
-                                                <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Resep Apotek</h5>
-                                            </div>
-                                            <br />
-                                            <table class="table table-bordered largeDataType">
-                                                <thead class="thead-dark">
-                                                <tr>
-                                                    <th class="wrap_content">No</th>
-                                                    <th>Obat</th>
-                                                    <th class="wrap_content">Signa</th>
-                                                    <th class="wrap_content">Jumlah</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                <tr>
-                                                    <td rowspan="<?php echo count($resValue['detail']); ?>"><?php echo $autoResep; ?></td>
-                                                    <td>
-                                                        <strong class="text-info">
-                                                            <?php echo $resValue['detail_apotek'][0]['item']['nama']; ?>
-                                                        </strong><br /><br /><b>Keterangan:</b><br />
-                                                        <?php echo $resValue['detail_apotek'][0]['keterangan']; ?>
-                                                        <br /><br />
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <?Php
+                                                    if(isset($resValue['alasan_ubah']) && !empty($resValue['alasan_ubah']) && $resValue['alasan_ubah'] !== '') {
+                                                        ?>
+                                                        <div class="alert alert-soft-warning card-margin" role="alert">
+                                                            <strong>Keterangan Alasan Ubah Keseluruhan:</strong><br />
+                                                            <?php echo $resValue['alasan_ubah'] ?>
+                                                        </div>
                                                         <?php
-                                                        if(isset($resValue['detail_apotek'][0]['alasan_ubah']) && !empty($resValue['detail_apotek'][0]['alasan_ubah']) && $resValue['detail_apotek'][0]['alasan_ubah'] !== '') {
+                                                    }
+                                                    ?>
+                                                    <div class="alert alert-soft-info card-margin" role="alert">
+                                                        <strong>Keterangan:</strong><br />
+                                                        <?php echo $resValue['keterangan']; $keteranganRacikan = $resValue['keterangan_racikan']; ?>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="col-auto d-flex align-items-center">
+                                                        <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Resep Dokter</h5>
+                                                    </div>
+                                                    <br />
+                                                    <table class="table table-bordered largeDataType">
+                                                        <thead class="thead-dark">
+                                                        <tr>
+                                                            <th class="wrap_content">No</th>
+                                                            <th>Obat</th>
+                                                            <th class="wrap_content">Signa</th>
+                                                            <th class="wrap_content">Jumlah</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr>
+                                                            <td rowspan="<?php echo count($resValue['detail']); ?>"><?php echo $autoResep; ?></td>
+                                                            <td>
+                                                                <strong class="text-info">
+                                                                    <?php echo $resValue['detail'][0]['obat']['nama']; ?>
+                                                                </strong><br /><br /><b>Keterangan:</b><br />
+                                                                <?php echo $resValue['detail'][0]['keterangan']; ?>
+                                                            </td>
+                                                            <td>
+                                                                <span class="wrap_content"><?php echo $resValue['detail'][0]['signa_qty']; ?> &times; <?php echo $resValue['detail'][0]['signa_pakai']; ?></span>
+                                                            </td>
+                                                            <td>
+                                                                <?php echo $resValue['detail'][0]['qty']; ?>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                                        for ($a = 1; $a < (count($resValue['detail'])); $a++) {
                                                             ?>
-                                                            <div class="alert alert-soft-danger card-margin" role="alert">
-                                                                <strong>Alasan Ubah:</strong><br />
-                                                                <?php echo $resValue['detail_apotek'][0]['alasan_ubah']; ?>
-                                                            </div>
+                                                            <tr>
+                                                                <td>
+                                                                    <strong class="text-info">
+                                                                        <?php echo $resValue['detail'][$a]['obat']['nama']; ?>
+                                                                    </strong><br /><br /><b>Keterangan:</b><br />
+                                                                    <?php echo $resValue['detail'][$a]['keterangan']; ?>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="wrap_content"><?php echo $resValue['detail'][$a]['signa_qty']; ?> &times; <?php echo $resValue['detail'][$a]['signa_pakai']; ?></span>
+                                                                </td>
+                                                                <td>
+                                                                    <?php echo $resValue['detail'][$a]['qty']; ?>
+                                                                </td>
+                                                            </tr>
                                                             <?php
                                                         }
                                                         ?>
-                                                    </td>
-                                                    <td>
-                                                        <span class="wrap_content"><?php echo $resValue['detail_apotek'][0]['signa_qty']; ?> &times; <?php echo $resValue['detail_apotek'][0]['signa_pakai']; ?></span>
-                                                    </td>
-                                                    <td>
-                                                        <?php echo $resValue['detail_apotek'][0]['qty']; ?>
-                                                    </td>
-                                                </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                                 <?php
-                                                for ($a = 1; $a < (count($resValue['detail_apotek'])); $a++) {
+                                                if($resValue['status_resep'] === 'N') {
+                                                    $isVerifApotek = true;
                                                     ?>
-                                                    <tr>
-                                                        <td>
-                                                            <strong class="text-info">
-                                                                <?php echo $resValue['detail_apotek'][$a]['item']['nama']; ?>
-                                                            </strong><br /><br /><b>Keterangan:</b><br />
-                                                            <?php echo $resValue['detail_apotek'][$a]['keterangan']; ?>
+                                                    <div class="col-lg-6">
+                                                        <div class="col-auto d-flex align-items-center">
+                                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Resep Apotek</h5>
+                                                        </div>
+                                                        <br />
+                                                        <h3 class="text-center text-muted">
                                                             <br /><br />
+                                                            Belum Verifikasi
+                                                        </h3>
+                                                    </div>
+
+                                                    <?php
+                                                } else {
+                                                    $isVerifApotek = false;
+                                                    ?>
+                                                    <div class="col-lg-6">
+                                                        <div class="col-auto d-flex align-items-center">
+                                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Resep Apotek</h5>
+                                                        </div>
+                                                        <br />
+                                                        <table class="table table-bordered largeDataType">
+                                                            <thead class="thead-dark">
+                                                            <tr>
+                                                                <th class="wrap_content">No</th>
+                                                                <th>Obat</th>
+                                                                <th class="wrap_content">Signa</th>
+                                                                <th class="wrap_content">Jumlah</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr>
+                                                                <td rowspan="<?php echo count($resValue['detail']); ?>"><?php echo $autoResep; ?></td>
+                                                                <td>
+                                                                    <strong class="text-info">
+                                                                        <?php echo $resValue['detail_apotek'][0]['item']['nama']; ?>
+                                                                    </strong><br /><br /><b>Keterangan:</b><br />
+                                                                    <?php echo $resValue['detail_apotek'][0]['keterangan']; ?>
+                                                                    <br /><br />
+                                                                    <?php
+                                                                    if(isset($resValue['detail_apotek'][0]['alasan_ubah']) && !empty($resValue['detail_apotek'][0]['alasan_ubah']) && $resValue['detail_apotek'][0]['alasan_ubah'] !== '') {
+                                                                        ?>
+                                                                        <div class="alert alert-soft-danger card-margin" role="alert">
+                                                                            <strong>Alasan Ubah:</strong><br />
+                                                                            <?php echo $resValue['detail_apotek'][0]['alasan_ubah']; ?>
+                                                                        </div>
+                                                                        <?php
+                                                                    }
+                                                                    ?>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="wrap_content"><?php echo $resValue['detail_apotek'][0]['signa_qty']; ?> &times; <?php echo $resValue['detail_apotek'][0]['signa_pakai']; ?></span>
+                                                                </td>
+                                                                <td>
+                                                                    <?php echo $resValue['detail_apotek'][0]['qty']; ?>
+                                                                </td>
+                                                            </tr>
                                                             <?php
-                                                            if(isset($resValue['detail_apotek'][$a]['alasan_ubah']) && !empty($resValue['detail_apotek'][$a]['alasan_ubah']) && $resValue['detail_apotek'][$a]['alasan_ubah'] !== '') {
+                                                            for ($a = 1; $a < (count($resValue['detail_apotek'])); $a++) {
                                                                 ?>
-                                                                <div class="alert alert-soft-danger card-margin" role="alert">
-                                                                    <strong>Alasan Ubah:</strong><br />
-                                                                    <?php echo $resValue['detail_apotek'][$a]['alasan_ubah']; ?>
-                                                                </div>
+                                                                <tr>
+                                                                    <td>
+                                                                        <strong class="text-info">
+                                                                            <?php echo $resValue['detail_apotek'][$a]['item']['nama']; ?>
+                                                                        </strong><br /><br /><b>Keterangan:</b><br />
+                                                                        <?php echo $resValue['detail_apotek'][$a]['keterangan']; ?>
+                                                                        <br /><br />
+                                                                        <?php
+                                                                        if(isset($resValue['detail_apotek'][$a]['alasan_ubah']) && !empty($resValue['detail_apotek'][$a]['alasan_ubah']) && $resValue['detail_apotek'][$a]['alasan_ubah'] !== '') {
+                                                                            ?>
+                                                                            <div class="alert alert-soft-danger card-margin" role="alert">
+                                                                                <strong>Alasan Ubah:</strong><br />
+                                                                                <?php echo $resValue['detail_apotek'][$a]['alasan_ubah']; ?>
+                                                                            </div>
+                                                                            <?php
+                                                                        }
+                                                                        ?>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span class="wrap_content"><?php echo $resValue['detail_apotek'][$a]['signa_qty']; ?> &times; <?php echo $resValue['detail_apotek'][$a]['signa_pakai']; ?></span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <?php echo $resValue['detail_apotek'][$a]['qty']; ?>
+                                                                    </td>
+                                                                </tr>
                                                                 <?php
                                                             }
                                                             ?>
-                                                        </td>
-                                                        <td>
-                                                            <span class="wrap_content"><?php echo $resValue['detail_apotek'][$a]['signa_qty']; ?> &times; <?php echo $resValue['detail_apotek'][$a]['signa_pakai']; ?></span>
-                                                        </td>
-                                                        <td>
-                                                            <?php echo $resValue['detail_apotek'][$a]['qty']; ?>
-                                                        </td>
-                                                    </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                     <?php
                                                 }
                                                 ?>
-                                                </tbody>
-                                            </table>
+                                            </div>
+                                            <?php
+                                            $autoResep++;
+                                        }
+                                    } else {
+                                        ?>
+                                        <div class="panel-image">
+                                            <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_medicine_b1ol.png" alt="no-data" />
+                                            <h3 class="text-center">Tidak Ada Data</h3>
                                         </div>
                                         <?php
                                     }
-                                    ?>
-                                </div>
-                                        <?php
-                                        $autoResep++;
-                                    }
+
                                 ?>
                             </div>
                             <div class="tab-pane show fade" id="racikan_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">
@@ -407,39 +423,45 @@
                                     </div>
                                     <?php
                                 }
-                                ?>
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="col-auto d-flex align-items-center">
-                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Racikan Dokter</h5>
-                                        </div>
-                                        <br />
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <div class="col-auto d-flex align-items-center">
-                                            <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Racikan Apotek</h5>
-                                        </div>
-                                        <br />
-                                    </div>
-                                </div>
-                                <?php
-                                $autoRacikan = 1;
-                                foreach ($_POST['racikan'] as $racKey => $racValue) {
+
+                                if(count($_POST['racikan']) > 0) {
                                     ?>
+                                    <div class="alert alert-soft-info card-margin" role="alert">
+                                        <strong>Keterangan:</strong><br />
+                                        <?php echo $keteranganRacikan; ?>
+                                    </div>
                                     <div class="row">
                                         <div class="col-lg-6">
-                                            <table class="table table-bordered largeDataType">
-                                                <thead class="thead-dark">
-                                                <tr>
-                                                    <th class="wrap_content">No</th>
-                                                    <th>Racikan</th>
-                                                    <th class="wrap_content">Signa</th>
-                                                    <th class="wrap_content">Jumlah</th>
-                                                    <th>Komposisi</th>
-                                                    <th class="wrap_content">Kekuatan</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
+                                            <div class="col-auto d-flex align-items-center">
+                                                <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Racikan Dokter</h5>
+                                            </div>
+                                            <br />
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="col-auto d-flex align-items-center">
+                                                <i class="material-icons text-warning icon-20pt ml-2">folder</i><h5 class="text-info">&nbsp;&nbsp;Racikan Apotek</h5>
+                                            </div>
+                                            <br />
+                                        </div>
+                                    </div>
+                                    <?php
+                                    $autoRacikan = 1;
+                                    foreach ($_POST['racikan'] as $racKey => $racValue) {
+                                        ?>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <table class="table table-bordered largeDataType">
+                                                    <thead class="thead-dark">
+                                                    <tr>
+                                                        <th class="wrap_content">No</th>
+                                                        <th>Racikan</th>
+                                                        <th class="wrap_content">Signa</th>
+                                                        <th class="wrap_content">Jumlah</th>
+                                                        <th>Komposisi</th>
+                                                        <th class="wrap_content">Kekuatan</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
                                                     <tr>
                                                         <td rowspan="<?php echo count($racValue['detail']); ?>"><?php echo $autoRacikan; ?></td>
                                                         <td rowspan="<?php echo count($racValue['detail']); ?>">
@@ -462,124 +484,14 @@
                                                             <?php echo $racValue['detail'][0]['kekuatan']; ?>
                                                         </td>
                                                     </tr>
-                                                <?php
-                                                for ($a = 1; $a < (count($racValue['detail'])); $a++) {
-                                                    ?>
-                                                    <tr>
-                                                        <td>
-                                                            <strong class="text-info">
-                                                                <?php echo $racValue['detail'][$a]['obat']['nama']; ?>
-                                                            </strong>
-                                                        </td>
-                                                        <td>
-                                                            <?php echo $racValue['detail'][$a]['kekuatan']; ?>
-                                                        </td>
-                                                    </tr>
                                                     <?php
-                                                }
-                                                ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <table class="table table-bordered largeDataType">
-                                                <thead class="thead-dark">
-                                                <tr>
-                                                    <th class="wrap_content">No</th>
-                                                    <th>Racikan</th>
-                                                    <th class="wrap_content">Signa</th>
-                                                    <th class="wrap_content">Jumlah</th>
-                                                    <th>Komposisi</th>
-                                                    <th class="wrap_content">Kekuatan</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                <tr>
-                                                    <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>"><?php echo $autoRacikan; ?></td>
-                                                    <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>">
-                                                        <?php echo $racValue['kode']; ?>
-                                                        <br /><br /><b>Keterangan:</b><br />
-                                                        <?php echo $racValue['keterangan']; ?>
-                                                        <?php
-                                                        if(isset($racValue['racikan_apotek'][0]['alasan_ubah']) && !empty($racValue['racikan_apotek'][0]['alasan_ubah']) && $racValue['racikan_apotek'][0]['alasan_ubah'] !== '') {
-                                                            ?>
-                                                            <div class="alert alert-soft-danger card-margin" role="alert">
-                                                                <strong>Alasan Ubah:</strong><br />
-                                                                <?php echo $racValue['racikan_apotek'][0]['alasan_ubah']; ?>
-                                                            </div>
-                                                            <?php
-                                                        }
-                                                        ?>
-                                                    </td>
-                                                    <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>">
-                                                        <?php
-                                                        if(count($racValue['racikan_apotek']) > 0) {
-                                                        ?>
-                                                            <span class="wrap_content"><?php echo $racValue['racikan_apotek'][0]['signa_qty']; ?> &times; <?php echo $racValue['racikan_apotek'][0]['signa_pakai']; ?></span>
-                                                        <?php
-                                                        } else {
-                                                        ?>
-                                                            <span class="wrap_content"><?php echo $racValue['signa_qty']; ?> &times; <?php echo $racValue['signa_pakai']; ?></span>
-                                                        <?php
-                                                        }
-                                                        ?>
-                                                    </td>
-                                                    <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>">
-                                                        <?php
-                                                        if(count($racValue['racikan_apotek']) > 0) {
-                                                            echo $racValue['racikan_apotek'][0]['jumlah'];
-                                                        } else {
-                                                            echo $racValue['qty'];
-                                                        }
-                                                        ?>
-                                                    </td>
-                                                    <td>
-                                                        <strong class="text-info">
-                                                            <?php
-                                                                if(count($racValue['racikan_apotek']) > 0) {
-                                                                    echo $racValue['racikan_apotek'][0]['detail'][0]['obat']['nama'];
-                                                                } else {
-                                                                    echo $racValue['detail'][0]['obat']['nama'];
-                                                                }
-                                                                ?>
-                                                        </strong>
-                                                    </td>
-                                                    <td>
-                                                        <strong class="text-info">
-                                                            <?php
-                                                                if(count($racValue['racikan_apotek']) > 0) {
-                                                                    echo $racValue['racikan_apotek'][0]['detail'][0]['kekuatan'];
-                                                                } else {
-                                                                    echo $racValue['detail'][0]['kekuatan'];
-                                                                }
-                                                            ?>
-                                                        </strong>
-                                                    </td>
-                                                </tr>
-                                                <?php
-                                                if(count($racValue['racikan_apotek']) > 0) {
-                                                    for ($a = 1; $a < (count($racValue['racikan_apotek'][0]['detail'])); $a++) {
-                                                        ?>
-                                                        <tr>
-                                                            <td>
-                                                                <strong class="text-info">
-                                                                    <?php echo $racValue['racikan_apotek'][0]['detail'][$a]['obat']['nama']; ?>
-                                                                </strong><br />
-                                                            </td>
-                                                            <td>
-                                                                <?php echo $racValue['racikan_apotek'][0]['detail'][$a]['kekuatan']; ?>
-                                                            </td>
-                                                        </tr>
-                                                        <?php
-                                                    }
-                                                } else {
                                                     for ($a = 1; $a < (count($racValue['detail'])); $a++) {
                                                         ?>
                                                         <tr>
                                                             <td>
                                                                 <strong class="text-info">
                                                                     <?php echo $racValue['detail'][$a]['obat']['nama']; ?>
-                                                                </strong><br />
+                                                                </strong>
                                                             </td>
                                                             <td>
                                                                 <?php echo $racValue['detail'][$a]['kekuatan']; ?>
@@ -587,15 +499,147 @@
                                                         </tr>
                                                         <?php
                                                     }
-                                                }
-
+                                                    ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <?php
+                                            if($isVerifApotek) {
                                                 ?>
-                                                </tbody>
-                                            </table>
+                                                <div class="col-lg-6">
+                                                    <h3 class="text-center text-muted">
+                                                        <br /><br />
+                                                        Belum Verifikasi
+                                                    </h3>
+                                                </div>
+                                                <?php
+                                            } else {
+                                                ?>
+                                                <div class="col-lg-6">
+                                                    <table class="table table-bordered largeDataType">
+                                                        <thead class="thead-dark">
+                                                        <tr>
+                                                            <th class="wrap_content">No</th>
+                                                            <th>Racikan</th>
+                                                            <th class="wrap_content">Signa</th>
+                                                            <th class="wrap_content">Jumlah</th>
+                                                            <th>Komposisi</th>
+                                                            <th class="wrap_content">Kekuatan</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr>
+                                                            <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>"><?php echo $autoRacikan; ?></td>
+                                                            <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>">
+                                                                <?php echo $racValue['kode']; ?>
+                                                                <br /><br /><b>Keterangan:</b><br />
+                                                                <?php echo $racValue['keterangan']; ?>
+                                                                <?php
+                                                                if(isset($racValue['racikan_apotek'][0]['alasan_ubah']) && !empty($racValue['racikan_apotek'][0]['alasan_ubah']) && $racValue['racikan_apotek'][0]['alasan_ubah'] !== '') {
+                                                                    ?>
+                                                                    <div class="alert alert-soft-danger card-margin" role="alert">
+                                                                        <strong>Alasan Ubah:</strong><br />
+                                                                        <?php echo $racValue['racikan_apotek'][0]['alasan_ubah']; ?>
+                                                                    </div>
+                                                                    <?php
+                                                                }
+                                                                ?>
+                                                            </td>
+                                                            <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>">
+                                                                <?php
+                                                                if(count($racValue['racikan_apotek']) > 0) {
+                                                                    ?>
+                                                                    <span class="wrap_content"><?php echo $racValue['racikan_apotek'][0]['signa_qty']; ?> &times; <?php echo $racValue['racikan_apotek'][0]['signa_pakai']; ?></span>
+                                                                    <?php
+                                                                } else {
+                                                                    ?>
+                                                                    <span class="wrap_content"><?php echo $racValue['signa_qty']; ?> &times; <?php echo $racValue['signa_pakai']; ?></span>
+                                                                    <?php
+                                                                }
+                                                                ?>
+                                                            </td>
+                                                            <td rowspan="<?php echo (count($racValue['racikan_apotek']) > 0) ? count($racValue['racikan_apotek'][0]['detail']) : count($racValue['detail']); ?>">
+                                                                <?php
+                                                                if(count($racValue['racikan_apotek']) > 0) {
+                                                                    echo $racValue['racikan_apotek'][0]['jumlah'];
+                                                                } else {
+                                                                    echo $racValue['qty'];
+                                                                }
+                                                                ?>
+                                                            </td>
+                                                            <td>
+                                                                <strong class="text-info">
+                                                                    <?php
+                                                                    if(count($racValue['racikan_apotek']) > 0) {
+                                                                        echo $racValue['racikan_apotek'][0]['detail'][0]['obat']['nama'];
+                                                                    } else {
+                                                                        echo $racValue['detail'][0]['obat']['nama'];
+                                                                    }
+                                                                    ?>
+                                                                </strong>
+                                                            </td>
+                                                            <td>
+                                                                <?php
+                                                                if(count($racValue['racikan_apotek']) > 0) {
+                                                                    echo $racValue['racikan_apotek'][0]['detail'][0]['kekuatan'];
+                                                                } else {
+                                                                    echo $racValue['detail'][0]['kekuatan'];
+                                                                }
+                                                                ?>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                                        if(count($racValue['racikan_apotek']) > 0) {
+                                                            for ($a = 1; $a < (count($racValue['racikan_apotek'][0]['detail'])); $a++) {
+                                                                ?>
+                                                                <tr>
+                                                                    <td>
+                                                                        <strong class="text-info">
+                                                                            <?php echo $racValue['racikan_apotek'][0]['detail'][$a]['obat']['nama']; ?>
+                                                                        </strong><br />
+                                                                    </td>
+                                                                    <td>
+                                                                        <?php echo $racValue['racikan_apotek'][0]['detail'][$a]['kekuatan']; ?>
+                                                                    </td>
+                                                                </tr>
+                                                                <?php
+                                                            }
+                                                        } else {
+                                                            for ($a = 1; $a < (count($racValue['detail'])); $a++) {
+                                                                ?>
+                                                                <tr>
+                                                                    <td>
+                                                                        <strong class="text-info">
+                                                                            <?php echo $racValue['detail'][$a]['obat']['nama']; ?>
+                                                                        </strong><br />
+                                                                    </td>
+                                                                    <td>
+                                                                        <?php echo $racValue['detail'][$a]['kekuatan']; ?>
+                                                                    </td>
+                                                                </tr>
+                                                                <?php
+                                                            }
+                                                        }
+
+                                                        ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <?php
+                                            }
+                                            ?>
+
                                         </div>
+                                        <?php
+                                        $autoRacikan++;
+                                    }
+                                } else {
+                                    ?>
+                                    <div class="panel-image">
+                                        <img src="<?php echo $_POST['__HOST__']; ?>/client/template/assets/images/illustration/undraw_medicine_b1ol.png" alt="no-data" />
+                                        <h3 class="text-center">Tidak Ada Data</h3>
                                     </div>
                                     <?php
-                                    $autoRacikan++;
                                 }
                                 ?>
                             </div>
