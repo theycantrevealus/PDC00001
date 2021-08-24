@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea or feature to this project
+about: Permintaan Fitur Baru / Perubahan UI dan UX
 title: "[FEATURE REQUEST] - Judul Fitur"
 labels: enhancement, new feature
 assignees: theycantrevealus
