@@ -22,7 +22,7 @@ assignees: theycantrevealus
 
 ...................................isian disini.....................................
 
-**Keterangan Tambahan (OPTIONAL) **
+**Keterangan Tambahan (OPTIONAL)**
 >Keterangan tambahan untuk fitur yang diminta.
 
 ...................................isian disini.....................................
