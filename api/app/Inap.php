@@ -557,19 +557,7 @@ class Inap extends Utility
             }
         }
 
-        //Dulu dimutasikan, sekarangn dianggurin aja dikipas kipas pake sampul majalah bobo
-        $Mutasi = $Inventori->tambah_mutasi(array(
-            'access_token' => $parameter['access_token'],
-            'dari' => $parameter['gudang'],
-            'status' => $parameter['status'],
-            'ke' => __GUDANG_APOTEK__,
-            'keterangan' => 'Retur Obat Inap. ' . $parameter['remark'],
-            'inap' => true,
-            'item' => $parsedItem
-        ));
-
-
-        $Invoice = new Invoice(self::$pdo);
+        // $Invoice = new Invoice(self::$pdo);
         $InvoiceCheck = self::$query->select('invoice', array(
             'uid'
         ))
@@ -584,48 +572,40 @@ class Inap extends Utility
 
         $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
 
-        if($Mutasi['response_result'] > 0) {
+        if(count($parsedItem) > 0) {
+            //Dulu dimutasikan, sekarangn dianggurin aja dikipas kipas pake sampul majalah bobo
+            $Mutasi = $Inventori->tambah_mutasi(array(
+                'access_token' => $parameter['access_token'],
+                'dari' => $parameter['gudang'],
+                'status' => $parameter['status'],
+                'ke' => __GUDANG_APOTEK__,
+                'keterangan' => 'Retur Obat Inap. ' . $parameter['remark'],
+                'inap' => true,
+                'item' => $parsedItem
+            ));
 
-            $mutasi_uid = $Mutasi['response_unique'];
-            foreach ($usedBatchInap as $bKey => $bValue) {
-                if(floatval($bValue['aktual']) > 0) {
-                    $proceed_catat = self::$query->insert('rawat_inap_retur_obat', array(
-                        'uid_ranap' => $parameter['uid'],
-                        'mutasi' => $mutasi_uid,
-                        'petugas' => $UserData['data']->uid,
-                        'obat' => $bValue['obat'],
-                        'batch' => $bValue['batch'],
-                        'sisa' => $bValue['sisa'],
-                        'aktual' => $bValue['aktual'],
-                        'keterangan' => $bValue['keterangan'],
-                        'logged_at' => parent::format_date()
-                    ))
-                        ->execute();
+            if($Mutasi['response_result'] > 0) {
 
-                    if($proceed_catat['response_result'] > 0) {
-                        //Check apakah sudah dicharge atau belum
-                        $InvDetail = self::$query->select('invoice_detail', array(
-                            'qty', 'harga'
+                $mutasi_uid = $Mutasi['response_unique'];
+                foreach ($usedBatchInap as $bKey => $bValue) {
+                    if(floatval($bValue['aktual']) > 0) {
+                        $proceed_catat = self::$query->insert('rawat_inap_retur_obat', array(
+                            'uid_ranap' => $parameter['uid'],
+                            'mutasi' => $mutasi_uid,
+                            'petugas' => $UserData['data']->uid,
+                            'obat' => $bValue['obat'],
+                            'batch' => $bValue['batch'],
+                            'sisa' => $bValue['sisa'],
+                            'aktual' => $bValue['aktual'],
+                            'keterangan' => $bValue['keterangan'],
+                            'logged_at' => parent::format_date()
                         ))
-                            ->where(array(
-                                'invoice_detail.invoice' => '= ?',
-                                'AND',
-                                'invoice_detail.item_type' => '= ?',
-                                'AND',
-                                'invoice_detail.item' => '= ?',
-                                'AND',
-                                'invoice_detail.status_bayar' => '= ?'
-                            ), array(
-                                $TargetInvoice,
-                                'master_inv',
-                                $bValue['obat'],
-                                'N'
-                            ))
                             ->execute();
-                        if(count($InvDetail['response_data']) > 0) {
-                            $invItemUpdate = self::$query->update('invoice_detail', array(
-                                'qty' => floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual']),
-                                'subtotal' => (floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual'])) * floatval($InvDetail['response_data'][0]['harga'])
+
+                        if($proceed_catat['response_result'] > 0) {
+                            //Check apakah sudah dicharge atau belum
+                            $InvDetail = self::$query->select('invoice_detail', array(
+                                'qty', 'harga'
                             ))
                                 ->where(array(
                                     'invoice_detail.invoice' => '= ?',
@@ -642,7 +622,95 @@ class Inap extends Utility
                                     'N'
                                 ))
                                 ->execute();
+                            if(count($InvDetail['response_data']) > 0) {
+                                $invItemUpdate = self::$query->update('invoice_detail', array(
+                                    'qty' => floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual']),
+                                    'subtotal' => (floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual'])) * floatval($InvDetail['response_data'][0]['harga'])
+                                ))
+                                    ->where(array(
+                                        'invoice_detail.invoice' => '= ?',
+                                        'AND',
+                                        'invoice_detail.item_type' => '= ?',
+                                        'AND',
+                                        'invoice_detail.item' => '= ?',
+                                        'AND',
+                                        'invoice_detail.status_bayar' => '= ?'
+                                    ), array(
+                                        $TargetInvoice,
+                                        'master_inv',
+                                        $bValue['obat'],
+                                        'N'
+                                    ))
+                                    ->execute();
+                            }
                         }
+                    }
+                }
+
+                //Pulangkan Pasien
+                $Kunjungan = self::$query->update('kunjungan', array(
+                    'waktu_keluar' => parent::format_date()
+                ))
+                    ->where(array(
+                        'kunjungan.uid' => '= ?',
+                        'AND',
+                        'kunjungan.deleted_at' => 'IS NULL'
+                    ), array(
+                        $parameter['kunjungan']
+                    ))
+                    ->execute();
+
+                if($Kunjungan['response_result'] > 0) {
+                    $Pulang = self::pulangkan_pasien(array(
+                        'access_token' => $parameter['access_token'],
+                        'uid' => $parameter['pasien'],
+                        'jenis' => $parameter['jenis'],
+                        'keterangan' => $parameter['keterangan']
+                    ));
+                }
+            }
+        } else { //Jika tidak ada mutasi
+            foreach ($usedBatchInap as $bKey => $bValue) {
+                if(floatval($bValue['aktual']) > 0) {
+                    //Check apakah sudah dicharge atau belum
+                    $InvDetail = self::$query->select('invoice_detail', array(
+                        'qty', 'harga'
+                    ))
+                        ->where(array(
+                            'invoice_detail.invoice' => '= ?',
+                            'AND',
+                            'invoice_detail.item_type' => '= ?',
+                            'AND',
+                            'invoice_detail.item' => '= ?',
+                            'AND',
+                            'invoice_detail.status_bayar' => '= ?'
+                        ), array(
+                            $TargetInvoice,
+                            'master_inv',
+                            $bValue['obat'],
+                            'N'
+                        ))
+                        ->execute();
+                    if(count($InvDetail['response_data']) > 0) {
+                        $invItemUpdate = self::$query->update('invoice_detail', array(
+                            'qty' => floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual']),
+                            'subtotal' => (floatval($InvDetail['response_data'][0]['qty']) - floatval($bValue['aktual'])) * floatval($InvDetail['response_data'][0]['harga'])
+                        ))
+                            ->where(array(
+                                'invoice_detail.invoice' => '= ?',
+                                'AND',
+                                'invoice_detail.item_type' => '= ?',
+                                'AND',
+                                'invoice_detail.item' => '= ?',
+                                'AND',
+                                'invoice_detail.status_bayar' => '= ?'
+                            ), array(
+                                $TargetInvoice,
+                                'master_inv',
+                                $bValue['obat'],
+                                'N'
+                            ))
+                            ->execute();
                     }
                 }
             }
