@@ -51,7 +51,8 @@
 								<th width="5%">No.</th>
 								<th>Tindakan</th>
 								<th>Penjamin</th>
-								<th></th>
+                                <th>Mitra</th>
+								<th class="wrap_content"></th>
 							</tr>
 						</thead>
 						<tbody>

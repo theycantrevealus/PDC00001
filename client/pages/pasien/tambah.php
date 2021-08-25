@@ -212,11 +212,19 @@
 			<div class="col-lg-8 card-form__body card-body">
 				<div class="form-row">
 					<!-- <div class="col-12 col-md-4 mb-3"> -->
-						<button type="submit" class="btn btn-success" id="btnSubmit">Simpan Data</button>
+						<button type="submit" class="btn btn-success" id="btnSubmit">
+                            <span>
+                                <i class="fa fa-plus-circle"></i> Simpan Data
+                            </span>
+                        </button>
 						&nbsp;
 					<!-- </div>
 					<div class="col-12 col-md-4 mb-3"> -->
-						<a href="<?php echo __HOSTNAME__; ?>/pasien" class="btn btn-danger">Batal</a>
+						<a href="<?php echo __HOSTNAME__; ?>/pasien" class="btn btn-danger" id="btnBatal">
+                            <span>
+                                <i class="fa fa-ban"></i> Batal
+                            </span>
+                        </a>
 				   <!--  </div> -->
 				</div>
 			</div>

@@ -8,6 +8,7 @@ use PondokCoder\QueryException as QueryException;
 use PondokCoder\Utility as Utility;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\Terminologi as Terminologi;
+use function Sodium\library_version_minor;
 
 class Pasien extends Utility
 {
@@ -37,12 +38,20 @@ class Pasien extends Utility
                     return self::get_pasien_detail('pasien', $parameter[2]);
                     break;
 
+                case 'pasien-info':
+                    return self::get_pasien_info('pasien', $parameter[2]);
+                    break;
+
                 case 'cek-nik':
                     return self::cekNIK($parameter[2]);
                     break;
 
                 case 'cek-no-rm':
                     return self::cekNoRM($parameter[2]);
+                    break;
+
+                case 'asesmen_resep_lupa':
+                    return self::asesmen_resep_lupa($parameter);
                     break;
 
                 default:
@@ -135,6 +144,83 @@ class Pasien extends Utility
         return $data;
     }
 
+    public function get_pasien_info($table, $parameter)
+    {
+        $data = self::$query
+            ->select($table, array(
+                    'uid',
+                    'no_rm',
+                    'nik',
+                    'nama',
+                    'panggilan',
+                    'tanggal_lahir',
+                    'tempat_lahir',
+                    'jenkel',
+                    'agama',
+                    'suku',
+                    'pendidikan',
+                    'goldar',
+                    'pekerjaan',
+                    'nama_ayah',
+                    'nama_ibu',
+                    'status_pernikahan',
+                    'nama_suami_istri',
+                    //'status_suami_istri',
+                    'alamat',
+                    'alamat_rt',
+                    'alamat_rw',
+                    'alamat_provinsi',
+                    'alamat_kabupaten',
+                    'alamat_kecamatan',
+                    'alamat_kelurahan',
+                    'warganegara',
+                    'no_telp',
+                    'email',
+                    'created_at',
+                    'updated_at'
+                )
+            )
+            ->where(array(
+                $table . '.deleted_at' => 'IS NULL',
+                'AND',
+                $table . '.uid' => '= ?'
+            ),
+                array(
+                    $parameter
+                )
+            )
+            ->execute();
+
+        $autonum = 1;
+        $Terminologi = new Terminologi(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            //Panggilan
+            $TerminologiInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['panggilan']);
+            $data['response_data'][$key]['panggilan_name'] = $TerminologiInfo['response_data'][0];
+
+
+            //Jenkel
+            $JenkelInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['jenkel']);
+            $data['response_data'][$key]['jenkel_detail'] = $JenkelInfo['response_data'][0];
+
+            //Agama
+            $AgamaInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['agama']);
+            $data['response_data'][$key]['agama_detail'] = $AgamaInfo['response_data'][0];
+
+            $data['response_data'][$key]['tanggal_lahir_parsed'] = date('d F Y', strtotime($value['tanggal_lahir']));
+
+            $data['response_data'][$key]['usia'] = date("Y") - date("Y", strtotime($value['tanggal_lahir']));
+            $data['response_data'][$key]['periode'] = date('m/y', strtotime($value['created_at']));
+
+
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        return $data;
+    }
+
     public function get_pasien_detail($table, $parameter)
     {
         $data = self::$query
@@ -183,9 +269,10 @@ class Pasien extends Utility
             ->execute();
 
         $autonum = 1;
+        $Terminologi = new Terminologi(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             //Panggilan
-            $Terminologi = new Terminologi(self::$pdo);
             $TerminologiInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['panggilan']);
             $data['response_data'][$key]['panggilan_name'] = $TerminologiInfo['response_data'][0];
 
@@ -291,7 +378,6 @@ class Pasien extends Utility
             foreach ($Detail['response_data'] as $DKey => $DValue)
             {
                 //Detail Penjamin
-                $Penjamin = new Penjamin(self::$pdo);
                 $PenjaminDetail = $Penjamin->get_penjamin_detail($DValue['penjamin']);
                 $Detail['response_data'][$DKey]['penjamin_detail'] = $PenjaminDetail['response_data'][0];
 
@@ -379,7 +465,7 @@ class Pasien extends Utility
     private function edit_pasien($table, $parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $dataObj = $parameter['dataObj'];
         $old = self::get_pasien_detail($table, $parameter['uid']);
         $allData = [];
@@ -715,7 +801,7 @@ class Pasien extends Utility
 
     private function get_pasien_back_end($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -801,6 +887,35 @@ class Pasien extends Utility
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
 
+        return $data;
+    }
+
+    private function asesmen_resep_lupa($parameter) {
+        $data = self::$query->select('asesmen', array(
+            'uid', 'pasien', 'poli', 'kunjungan', 'antrian'
+        ))
+            ->join('pasien', array(
+                'nama', 'no_rm'
+            ))
+            ->join('antrian', array(
+                'penjamin'
+            ))
+            ->on(array(
+                array('asesmen.pasien', '=', 'pasien.uid'),
+                array('asesmen.antrian', '=', 'antrian.uid')
+            ))
+            ->where(array(
+                'asesmen.created_at' => '>= now()::date + interval \'1h\'',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
+            ), array())
+            /*->order(array(
+                'created_at' => 'DESC'
+            ))
+            ->limit(1)*/
+            ->execute();
         return $data;
     }
 

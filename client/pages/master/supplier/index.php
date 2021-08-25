@@ -23,9 +23,9 @@
 					<thead class="thead-dark">
 						<tr>
 							<th class="wrap_content">No</th>
-							<th>Nama</th>
+							<th style="width: 30%">Nama</th>
 							<th>Kontak</th>
-							<th>PO Link</th>
+							<th style="width: 15%">PO Link</th>
 							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>

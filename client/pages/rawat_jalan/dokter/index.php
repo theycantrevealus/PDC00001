@@ -21,7 +21,7 @@
 					<div class="d-flex flex-row">
 						<div class="col-md-2">
                             <center>
-                                <img src="<?php echo __HOST__ . $_SESSION['profile_pic']; ?>" class="img-responsive img-circle panel-image" />
+                                <img src="<?php echo __HOST__ . $_SESSION['profile_pic']; ?>" class="img-responsive img-circle panel-avatar" />
                             </center>
 						</div>
 						<div class="col-md-10">
@@ -45,25 +45,27 @@
 					</div>
 				</div>
 			</div>
-			<div class="card card-body">
-				<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
-					<thead class="thead-dark">
-						<tr>
-							<th class="wrap_content">No</th>
-							<th>Waktu Masuk</th>
-							<th>No. RM</th>
-							<th>Pasien</th>
-							<th>Poliklinik</th>
-							<th>Dokter</th>
-							<th>Penjamin</th>
-							<th>Oleh</th>
-							<th class="wrap_content">Aksi</th>
-						</tr>
-					</thead>
-					<tbody>
-						
-					</tbody>
-				</table>
+			<div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th class="wrap_content">No</th>
+                            <th>Waktu Masuk</th>
+                            <th>No. RM</th>
+                            <th>Pasien</th>
+                            <th>Poliklinik</th>
+                            <th>Dokter</th>
+                            <th>Penjamin</th>
+                            <th>Oleh</th>
+                            <th class="wrap_content">Aksi</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
 			</div>
 		</div>
 	</div>

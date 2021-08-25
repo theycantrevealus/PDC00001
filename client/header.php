@@ -1,4 +1,3 @@
-
 <div id="header" class="mdk-header js-mdk-header m-0" data-fixed>
 	<div class="mdk-header__content">
 
@@ -14,7 +13,7 @@
 
 				<!-- Navbar Brand -->
 				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand">
-                    <img class="navbar-brand-icon" style="position: absolute; margin-top: 0px;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-white.png" width="80" alt="<?php echo __PC_CUSTOMER__; ?>">
+                    <img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-white-<?php echo __PC_IDENT__; ?>.svg" width="200" height="60" alt="<?php echo __PC_CUSTOMER__; ?>">
                     <!--h3 style="padding-left: 60px !important; color: #fff;"><?php echo __PC_CUSTOMER__; ?></h3-->
 				</a>
 				<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
@@ -58,9 +57,8 @@
 								<div><?php echo $_SESSION['email']; ?></div>
 							</div>
 							<div class="dropdown-divider"></div>
-							<a class="dropdown-item active" href="<?php echo __HOSTNAME__; ?>/template/index.html">Dashboard</a>
+							<a class="dropdown-item active" href="<?php echo __HOSTNAME__; ?>">Dashboard</a>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/profile">My profile</a>
-							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/template/edit-account.html">Edit account</a>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/system/logout">Logout</a>
 						</div>
