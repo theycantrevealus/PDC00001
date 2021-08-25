@@ -1506,8 +1506,8 @@
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
-				success: function(response){
-					var dataCheck = response.response_package;
+				success: function(response) {
+				    var dataCheck = response.response_package;
 					$("#sisa_antrian").html(dataCheck.response_standby);
 					if(dataCheck.response_data.length > 0) {
 						//Belum terproses
@@ -1592,6 +1592,7 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response){
+				    console.log(response);
 					if(response.response_package !== undefined && response.response_package !== null) {
 						currentQueue = response.response_package;
 						$("#sisa_antrian").html(currentQueue.response_standby);

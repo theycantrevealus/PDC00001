@@ -64,6 +64,20 @@
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = response.response_package.recordsFiltered;
+
+					for(var a in dataResponse) {
+					    var totalTerbayar = 0;
+					    var detailCheck = dataResponse[a].status.detail;
+					    for(var b in detailCheck) {
+                            if (detailCheck[b].status === "R" && detailCheck[b].allow_retur) {
+                                totalTerbayar += 0;
+                            } else {
+                                totalTerbayar += detailCheck[b].harga;
+                            }
+                        }
+					    dataResponse[a].terbayar = number_format(totalTerbayar, 2, ".", ",");
+                    }
+
 					return dataResponse;
 				}
 			},
@@ -261,7 +275,8 @@
 						success:function(response_data) {
 
                             $("#form-payment-detail").modal("show");
-                            me.html(oldCaption).addClass("btn-info").removeClass("btn-warning");
+                            me.html(oldCaption).addClass("btn-info").removeClass("btn-warning" +
+                                "");
 
 							var pasienInfo = response_data.response_package.response_data[0].pasien;
 
@@ -342,10 +357,10 @@
                                     "<td colspan=\"5\" class=\"bg-info\" style=\"color: #fff\">" + groupKey.toUpperCase() + "</td>" +
                                     "</tr>");
                                 for(var itemKey in billing_group[groupKey]) {
-                                    var returned = (billing_group[groupKey][itemKey].status == "R" && billing_group[groupKey][itemKey].allow_retur);
+                                    var returned = (billing_group[groupKey][itemKey].status === "R" && billing_group[groupKey][itemKey].allow_retur);
                                     $("#invoice_detail_history tbody").append(
                                         "<tr>" +
-                                        "<td>" + ((billing_group[groupKey][itemKey].status == "P") ? ((billing_group[groupKey][itemKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + billing_group[groupKey][itemKey].uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
+                                        "<td>" + ((billing_group[groupKey][itemKey].status === "P") ? ((billing_group[groupKey][itemKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + billing_group[groupKey][itemKey].uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
                                         "<td style=\"width: 50px !important;\">" + (parseInt(itemKey) + 1)+ "</td>" +
                                         "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\">" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
                                         "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style\">" + billing_group[groupKey][itemKey].qty + "</td>" +
@@ -380,6 +395,7 @@
 					d.request = "biaya_pasien";
 					d.from = getDateRange("#range_invoice")[0];
 					d.to = getDateRange("#range_invoice")[1];
+					d.filter_poli = "rajal";
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -389,6 +405,8 @@
 					if(returnedData == undefined || returnedData.response_package == undefined) {
 						returnedData = [];
 					}
+
+					console.log(response);
 
 
 					for(var InvKeyData in response.response_package.response_data) {
@@ -569,6 +587,7 @@
                     d.request = "biaya_pasien";
                     d.from = getDateRange("#range_invoice")[0];
                     d.to = getDateRange("#range_invoice")[1];
+                    d.filter_poli = "ranap";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -727,6 +746,7 @@
                     d.request = "biaya_pasien";
                     d.from = getDateRange("#range_invoice")[0];
                     d.to = getDateRange("#range_invoice")[1];
+                    d.filter_poli = "IGD";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>

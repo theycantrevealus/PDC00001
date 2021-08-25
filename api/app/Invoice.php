@@ -228,10 +228,14 @@ class Invoice extends Utility
         $autonum = 1;
         $Pegawai = new Pegawai(self::$pdo);
         $Pasien = new Pasien(self::$pdo);
+
         foreach ($payment['response_data'] as $key => $value) {
             if (!isset($value['pasien']) || !isset($value['pegawai'])) {
                 unset($payment['response_data'][$key]);
             } else {
+
+                $PaymentStatus = self::get_payment($value['uid']);
+                $payment['response_data'][$key]['status'] = $PaymentStatus['response_data'][0];
 
                 $PegawaiInfo = $Pegawai->get_detail($value['pegawai']);
                 $payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
@@ -243,7 +247,7 @@ class Invoice extends Utility
                 $payment['response_data'][$key]['terbayar'] = number_format($value['terbayar'], 2, '.', ',');
 
                 $Detail = self::$query->select('invoice_payment_detail', array(
-                    'penjamin'
+                    'penjamin', 'status'
                 ))
                     ->join('master_penjamin', array(
                         'nama as nama_penjamin'
@@ -295,31 +299,117 @@ class Invoice extends Utility
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-            $paramData = array(
-                'invoice.deleted_at' => 'IS NULL',
-                'AND',
-                'invoice.created_at' => 'BETWEEN ? AND ?',
-                'AND',
-                '(invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                'OR',
-                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                'OR',
-                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
-            );
+            if(isset($parameter['filter_poli'])) {
+                if($parameter['filter_poli'] === 'rajal') {
+                    $paramData = array(
+                        'invoice.deleted_at' => 'IS NULL',
+                        'AND',
+                        'invoice.created_at' => 'BETWEEN ? AND ?',
+                        'AND',
+                        '(invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        '(antrian_nomor.poli' => '!= ?',
+                        'AND',
+                        'antrian_nomor.poli' => '!= ?)'
+                    );
 
-            $paramValue = array(
-                $parameter['from'], $parameter['to']
-            );
+                    $paramValue = array(
+                        $parameter['from'], $parameter['to'], __POLI_INAP__, __POLI_IGD__
+                    );
+                } else if($parameter['filter_poli'] === 'ranap') {
+                    $paramData = array(
+                        'invoice.deleted_at' => 'IS NULL',
+                        'AND',
+                        'invoice.created_at' => 'BETWEEN ? AND ?',
+                        'AND',
+                        '(invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'antrian_nomor.poli' => '= ?'
+                    );
+
+                    $paramValue = array(
+                        $parameter['from'], $parameter['to'], __POLI_INAP__
+                    );
+                }
+            } else {
+                $paramData = array(
+                    'invoice.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice.created_at' => 'BETWEEN ? AND ?',
+                    'AND',
+                    '(invoice.nomor_invoice' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                    'AND',
+                    'antrian_nomor.poli' => '= ?'
+                );
+
+                $paramValue = array(
+                    $parameter['from'], $parameter['to'], __POLI_IGD__
+                );
+            }
         } else {
-            $paramData = array(
-                'invoice.deleted_at' => 'IS NULL',
-                'AND',
-                'invoice.created_at' => 'BETWEEN ? AND ?'
-            );
+            if(isset($parameter['filter_poli'])) {
+                if($parameter['filter_poli'] === 'rajal') {
+                    $paramData = array(
+                        'invoice.deleted_at' => 'IS NULL',
+                        'AND',
+                        'invoice.created_at' => 'BETWEEN ? AND ?',
+                        'AND',
+                        '(antrian_nomor.poli' => '!= ?',
+                        'AND',
+                        'antrian_nomor.poli' => '!= ?)'
+                    );
 
-            $paramValue = array(
-                date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day'))
-            );
+                    $paramValue = array(
+                        date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day')), __POLI_INAP__, __POLI_IGD__
+                    );
+                } else if($parameter['filter_poli'] === 'ranap') {
+                    $paramData = array(
+                        'invoice.deleted_at' => 'IS NULL',
+                        'AND',
+                        'invoice.created_at' => 'BETWEEN ? AND ?',
+                        'AND',
+                        'antrian_nomor.poli' => '= ?'
+                    );
+
+                    $paramValue = array(
+                        date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day')), __POLI_INAP__
+                    );
+                } else {
+                    $paramData = array(
+                        'invoice.deleted_at' => 'IS NULL',
+                        'AND',
+                        'invoice.created_at' => 'BETWEEN ? AND ?',
+                        'AND',
+                        'antrian_nomor.poli' => '= ?'
+                    );
+
+                    $paramValue = array(
+                        date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day')), __POLI_IGD__
+                    );
+                }
+            } else {
+                $paramData = array(
+                    'invoice.deleted_at' => 'IS NULL',
+                    'AND',
+                    'invoice.created_at' => 'BETWEEN ? AND ?'
+                );
+
+                $paramValue = array(
+                    date('Y-m-d', strtotime($parameter['from'] . ' -1 day')), date('Y-m-d', strtotime($parameter['to'] . ' +1 day'))
+                );
+            }
         }
 
         if (intval($parameter['length']) < 0) {
@@ -338,7 +428,7 @@ class Invoice extends Utility
             ))
                 ->where($paramData, $paramValue)
                 ->join('antrian_nomor', array(
-                    'id'
+                    'id', 'poli'
                 ))
                 ->join('pasien', array(
                     'nama'
@@ -366,7 +456,7 @@ class Invoice extends Utility
                 ->limit(intval($parameter['length']))
                 ->where($paramData, $paramValue)
                 ->join('antrian_nomor', array(
-                    'id'
+                    'id', 'poli'
                 ))
                 ->join('pasien', array(
                     'nama'
