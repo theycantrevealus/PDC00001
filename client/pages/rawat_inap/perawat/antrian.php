@@ -135,10 +135,6 @@ foreach ($_SESSION['poli']['response_data'] as $key => $value)
                     <?php require 'halaman2.php'; ?>
                     <?php //require 'action_panel.php'; ?>
                 </div>
-                <div class="tab-pane show fade tab-irm" id="tab-assesment-terapis">
-                    <?php require 'fisioterapi.php'; ?>
-                    <?php //require 'action_panel.php'; ?>
-                </div>
                 <div class="tab-pane show fade tab-igd" id="tab-assesment-awal-igd-1">
                     <?php require 'igd_1.php'; ?>
                 </div>

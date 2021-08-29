@@ -32,7 +32,7 @@ class Mitra extends Utility {
                     break;
 
 				default:
-					return self::get_mitra();
+					return self::get_mitra($parameter);
 			}
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
@@ -52,7 +52,7 @@ class Mitra extends Utility {
                     return self::check_target($parameter);
                     break;
 				default:
-					return self::get_mitra();
+					return self::get_mitra($parameter);
 			}
 		} catch (QueryException $e) {
 			return 'Error => ' . $e;
@@ -173,20 +173,47 @@ class Mitra extends Utility {
 	    return $data;
     }
 
-	public function get_mitra() {
-		$data = self::$query->select('master_mitra', array(
-			'uid',
-			'nama',
-			'jenis',
-			'kontak',
-			'alamat',
-			'created_at',
-			'updated_at'
-		))
-		->where(array(
-			'master_mitra.deleted_at' => 'IS NULL'
-		), array())
-		->execute();
+	public function get_mitra($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        if($UserData['data']->jabatan === __UIDPETUGASGUDANGFARMASI__) {
+            $data = self::$query->select('master_mitra', array(
+                'uid',
+                'nama',
+                'jenis',
+                'kontak',
+                'alamat',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'master_mitra.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_mitra.jenis' => '= ?'
+                ), array(
+                    'FAR'
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('master_mitra', array(
+                'uid',
+                'nama',
+                'jenis',
+                'kontak',
+                'alamat',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'master_mitra.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_mitra.jenis' => '!= ?'
+                ), array(
+                    'FAR'
+                ))
+                ->execute();
+        }
+
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
@@ -198,7 +225,7 @@ class Mitra extends Utility {
 
 	private function tambah_mitra($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$uid = parent::gen_uuid();
 		$worker = self::$query->insert('master_mitra', array(
 			'uid'=> $uid,
@@ -264,7 +291,7 @@ class Mitra extends Utility {
 
 	private function edit_mitra($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$old = self::get_mitra_detail($parameter['uid']);
 		$worker = self::$query->update('master_mitra', array(
 			'nama' => $parameter['nama'],

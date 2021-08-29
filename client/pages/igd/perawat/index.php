@@ -43,14 +43,14 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-row" data-toggle="dragula">
-                                <div class="col-md col-lg-3 handy print_manager" id="gelang">
+                                <div class="col-md col-lg-4 handy print_manager" id="gelang">
                                     <div class="card form-row__card text-white bg-primary">
                                         <div class="card-body">
                                             <h6 class="text-white"><i class="fa fa-band-aid"></i>&nbsp;&nbsp;&nbsp;Gelang Pasien</h6>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md col-lg-3 handy print_manager" id="kartu">
+                                <div class="col-md col-lg-4 handy print_manager" id="kartu">
                                     <div class="card form-row__card bg-success text-white">
                                         <div class="card-body">
                                             <h6 class="text-white"><i class="fa fa-credit-card"></i>&nbsp;&nbsp;&nbsp;Kartu Pasien</h6>
@@ -64,13 +64,13 @@
             </div>
             <div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">List Asesmen</h5>
+                    <h5 class="card-header__title flex m-0">Rekam Medis</h5>
                     <button class="btn btn-info pull-right" id="btnTambahAsesmen">
                         <i class="fa fa-plus"></i> Tambah Asesmen
                     </button>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+                    <!--table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
                         <thead class="thead-dark">
                         <tr>
                             <th class="wrap_content">No</th>
@@ -82,7 +82,10 @@
                         <tbody>
 
                         </tbody>
-                    </table>
+                    </table-->
+                    <div id="cppt_loader">
+
+                    </div>
                 </div>
             </div>
         </div>

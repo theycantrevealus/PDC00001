@@ -22,7 +22,7 @@
 			columns : [
 				{
 					"data" : "autonum", render: function(data, type, row, meta) {
-						return "<i class=\"fa fa-arrows-alt\"></i> " + row["autonum"];
+					    return "<h5 class=\"autonum\"><i class=\"fa fa-arrows-alt\"></i> " + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -103,7 +103,7 @@
 			columns : [
 				{
 					"data" : "autonum", render: function(data, type, row, meta) {
-						return "<i class=\"fa fa-arrows-alt\"></i> " + row["autonum"];
+                        return "<h5 class=\"autonum\"><i class=\"fa fa-arrows-alt\"></i> " + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -186,7 +186,7 @@
 			columns : [
 				{
 					"data" : "autonum", render: function(data, type, row, meta) {
-						return "<i class=\"fa fa-arrows-alt\"></i> " + row["autonum"];
+                        return "<h5 class=\"autonum\"><i class=\"fa fa-arrows-alt\"></i> " + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -281,7 +281,7 @@
 			columns : [
 				{
 					"data" : "autonum", render: function(data, type, row, meta) {
-						return "<i class=\"fa fa-arrows-alt\"></i> " + row["autonum"];
+                        return "<h5 class=\"autonum\"><i class=\"fa fa-arrows-alt\"></i> " + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -364,7 +364,7 @@
 			columns : [
 				{
 					"data" : "autonum", render: function(data, type, row, meta) {
-						return "<i class=\"fa fa-arrows-alt\"></i> " + row["autonum"];
+                        return "<h5 class=\"autonum\"><i class=\"fa fa-arrows-alt\"></i> " + row.autonum + "</h5>";
 					}
 				},
 				{

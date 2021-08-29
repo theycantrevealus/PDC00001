@@ -1,14 +1,13 @@
 <script type="text/javascript">
 	$(function() {
 
-
 		//Monitoring
 		$("#txt_tanggal").change(function() {
 			check_page_1();
 		});
 
 		function check_page_1() {
-			if($("#txt_tanggal").val() != "" && $("#table-detail-po tbody tr").not(".last-row").length > 1) {
+            if($.datepicker.formatDate('yy-mm-dd', new Date($("#txt_tanggal").datepicker("getDate"))) !== "" && $("#table-detail-po tbody tr").not(".last-row").length > 1) {
 				$("#status-utama").fadeIn();
 			} else {
 				$("#status-utama").fadeOut();
@@ -638,7 +637,7 @@
 
 		$("#submitPO").submit(function() {
 			var supplier = $("#txt_supplier").val();
-			var tanggal = $("#txt_tanggal").val();
+			var tanggal = $.datepicker.formatDate('yy-mm-dd', new Date($("#txt_tanggal").datepicker("getDate")));
 			var diskonAll = $("#txt_diskon_all").inputmask("unmaskedvalue");
 			var diskonJenisAll = $("#txt_jenis_diskon_all").val();
 			var keteranganAll = $("#txt_keterangan").val();

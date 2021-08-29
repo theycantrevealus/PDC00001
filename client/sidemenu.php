@@ -55,34 +55,29 @@
 ?>
 <div class="mdk-drawer  js-mdk-drawer" id="default-drawer" data-align="start">
 	<div class="mdk-drawer__content">
-		<div class="sidebar sidebar-light sidebar-left simplebar" style="padding-top:20px" data-simplebar>
-			<!-- <div class="d-flex align-items-center sidebar-p-a border-bottom sidebar-account">
-				<a href="<?php echo __HOSTNAME__; ?>/template/profile.html" class="flex d-flex align-items-center text-underline-0 text-body">
-					<span class="avatar mr-3">
-						<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/avatar/demi.png" alt="avatar" class="avatar-img rounded-circle">
-					</span>
-					<span class="flex d-flex flex-column">
-						<strong><?php echo $_SESSION['nama']; ?></strong>
-						<small class="text-muted text-uppercase">Account Manager</small>
-					</span>
-				</a>
-				<div class="dropdown ml-auto">
-					<a href="<?php echo __HOSTNAME__; ?>/template/#" data-toggle="dropdown" data-caret="false" class="text-muted"><i class="material-icons">more_vert</i></a>
-					<div class="dropdown-menu dropdown-menu-right">
-						<div class="dropdown-item-text dropdown-item-text--lh">
-							<div><strong>Adrian Demian</strong></div>
-							<div>@adriandemian</div>
-						</div>
-						<div class="dropdown-divider"></div>
-						<a class="dropdown-item active" href="<?php echo __HOSTNAME__; ?>/template/index.html">Dashboard</a>
-						<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/template/profile.html">My profile</a>
-						<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/template/edit-account.html">Edit account</a>
-						<div class="dropdown-divider"></div>
-						<a class="dropdown-item" href="<?php echo __HOSTNAME__; ?>/template/login.html">Logout</a>
-					</div>
-				</div>
-			</div> -->
-			<div class="sidebar-heading sidebar-m-t" id="sidemenu_1">Menu</div>
+        <div class="sidebar sidebar-light sidebar-left simplebar" style="padding-top:10px" data-simplebar>
+            <!--<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
+                <li class="nav-item dropdown">
+                    <a href="<?php /*echo __HOSTNAME__; */?>/template/#account_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
+                        <img src="<?php /*echo __HOST__; */?>images/pegawai/<?php /*echo $_SESSION['uid']; */?>.png?d=<?php /*echo date('H:i:s'); */?>" class="rounded-circle" width="32" alt="Frontted" />
+                        <span class="ml-1 d-flex-inline">
+                            <span class="text-info"><?php /*echo $_SESSION['nama']; */?></span>
+                        </span>
+                    </a>
+                    <div id="account_menu" class="dropdown-menu dropdown-menu-right" style="overflow: auto;">
+                        <div class="dropdown-item-text dropdown-item-text--lh">
+                            <div><strong><?php /*echo $_SESSION['nama']; */?></strong></div>
+                            <div><?php /*echo $_SESSION['email']; */?></div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item active" href="<?php /*echo __HOSTNAME__; */?>">Dashboard</a>
+                        <a class="dropdown-item" href="<?php /*echo __HOSTNAME__; */?>/system/profile">My profile</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="<?php /*echo __HOSTNAME__; */?>/system/logout">Logout</a>
+                    </div>
+                </li>
+            </ul>-->
+            <div class="sidebar-heading sidebar-m-t" id="sidemenu_1">Menu</div>
 			<ul class="sidebar-menu">
 				<?php
 					$sideMenu1 = reloadModul($pdo, 0, 1, $_SESSION['akses_halaman']);

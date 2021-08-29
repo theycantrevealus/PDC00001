@@ -2,7 +2,138 @@
 <script type="text/javascript">
 	$(function() {
 	    var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "";
-		var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
+
+        $("#btnInap").click(function() {
+            loadPenjamin("inap", __PAGES__[5]);
+            //loadPoli("igd");
+            //loadKamar("inap");
+            //loadBangsal("inap", $("#inap_kamar").val());
+            $("#form-inap").modal("show");
+        });
+
+        $("#inap_dokter").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function(){
+                    return "Dokter tidak ditemukan";
+                }
+            },
+            placeholder:"Cari Dokter",
+            dropdownParent: $("#form-inap"),
+            ajax: {
+                dataType: "json",
+                headers:{
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/Pegawai/get_all_dokter_select2",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.response_data;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.nama_dokter,
+                                id: item.uid
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            var data = e.params.data;
+
+        });
+
+        $("#btnProsesInap").click(function() {
+            Swal.fire({
+                title: "Daftar untuk rawat inap?",
+                text: "Arahkan pasien / keluarga pasien untuk menyelesaikan administrasi inap",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Belum",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Inap",
+                        type: "POST",
+                        data: {
+                            request: "tambah_inap",
+                            pasien: __PAGES__[3],
+                            penjamin: $("#inap_penjamin").val(),
+                            dokter: $("#inap_dokter").val(),
+                            kunjungan: __PAGES__[4],
+                            keterangan: $("#inap_keterangan").val(),
+                            asal: "igd",
+                            poli_asal: __POLI_IGD__
+                        },
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function (response) {
+                            if(response.response_package.response_result > 0) {
+                                location.href = __HOSTNAME__ + "/igd";
+                            } else {
+                                console.log(response);
+                            }
+                        },
+                        error: function (response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            });
+        });
+
+
+        loadCPPT("2021-01-01", "2021-08-01", __PAGES__[3]);
+
+        function resetSelectBox(selector, name){
+            $("#"+ selector +" option").remove();
+            var opti_null = "<option value='' selected disabled>Pilih "+ name +" </option>";
+            $("#" + selector).append(opti_null);
+        }
+
+        function loadPenjamin(target_ui, selected = "") {
+            var dataPenjamin = null;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Penjamin/penjamin",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = response.response_package.response_data;
+
+                    if (MetaData != ""){
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            if(MetaData[i].uid === selected) {
+                                $(selection).attr("selected", "selected");
+                            }
+                            $("#" + target_ui + "_penjamin").append(selection);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataPenjamin;
+        }
+
+		/*var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis/igd",
 				type: "GET",
@@ -97,7 +228,119 @@
 					}
 				}
 			]
-		});
+		});*/
+
+        function loadCPPT(from, to, pasien) {
+            $("#cppt_loader").html("");
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Pasien/pasien-detail/" + pasien,
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function (response) {
+                    var pasienData = response.response_package.response_data;
+                    $("#target_pasien").html(pasienData[0].nama);
+                    $("#rm_pasien").html(pasienData[0].no_rm).attr({
+                        "uid": pasienData[0].uid
+                    });
+                    $("#nama_pasien").html((pasienData[0].panggilan_name === null) ? pasienData[0].nama : pasienData[0].panggilan_name.nama + " " +  pasienData[0].nama);
+                    $("#usia_pasien").html(pasienData[0].usia);
+                    $("#jenkel_pasien").html(pasienData[0].jenkel_detail.nama);
+                    $("#tanggal_lahir_pasien").html(pasienData[0].tanggal_lahir_parsed);
+                    $("#tempat_lahir_pasien").html(pasienData[0].tempat_lahir);
+                    $("#alamat_pasien").html(pasienData[0].alamat);
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+            $.ajax({
+                url: __HOSTAPI__ + "/CPPT",
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"POST",
+                data: {
+                    request: "group_tanggal",
+                    pasien: pasien,
+                    from: from,
+                    to: to
+                },
+                success:function(response) {
+                    var data = response.response_package;
+                    for(var a in data) {
+                        $.ajax({
+                            url: __HOSTNAME__ + "/pages/pasien/cppt-grouper.php",
+                            async:false,
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type:"POST",
+                            data: {
+                                group_tanggal_caption: data[a].parsed,
+                                group_tanggal_name: a
+                            },
+                            success:function(responseGrouper) {
+                                $("#cppt_loader").append(responseGrouper);
+                                var listData = data[a].data;
+                                for(var b in listData) {
+                                    var currentData = listData[b].data[0];
+                                    //if(currentData.uid !== UID) {
+                                    $.ajax({
+                                        url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
+                                        async:false,
+                                        beforeSend: function(request) {
+                                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                        },
+                                        type:"POST",
+                                        data: {
+                                            __HOST__: __HOST__,
+                                            __ME__: __ME__,
+                                            group_tanggal_name: a,
+                                            waktu_masuk: listData[b].parsed,
+                                            waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),
+                                            departemen: currentData.departemen.nama,
+                                            dokter_uid: currentData.dokter.uid,
+                                            dokter: currentData.dokter.nama,
+                                            dokter_pic: __HOST__ + currentData.dokter.profile_pic,
+                                            icd10_kerja: currentData.asesmen.icd10_kerja,
+                                            icd10_banding: currentData.asesmen.icd10_banding,
+                                            keluhan_utama:currentData.asesmen.keluhan_utama,
+                                            keluhan_tambahan:currentData.asesmen.keluhan_tambahan,
+                                            diagnosa_kerja:currentData.asesmen.diagnosa_kerja,
+                                            diagnosa_banding:currentData.asesmen.diagnosa_banding,
+                                            pemeriksaan_fisik:currentData.asesmen.pemeriksaan_fisik,
+                                            planning:currentData.asesmen.planning,
+                                            tindakan: currentData.asesmen.tindakan,
+                                            resep: currentData.asesmen.resep,
+                                            racikan: currentData.asesmen.racikan,
+                                            laboratorium: currentData.asesmen.laboratorium,
+                                            radiologi: currentData.asesmen.radiologi
+                                        },
+                                        success:function(responseSingle) {
+                                            $("#group_cppt_" + a).append(responseSingle);
+                                        },
+                                        error: function(responseSingleError) {
+                                            console.log(responseSingleError);
+                                        }
+                                    });
+                                    //}
+                                }
+                            },
+                            error: function(responseGrouperError) {
+                                console.log(responseGrouperError);
+                            }
+                        });
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
 
 		$("#btnTambahAsesmen").click(function() {
 		    $(this).attr({
@@ -170,3 +413,65 @@
         });
 	});
 </script>
+
+<div id="form-inap" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Pindah Rawat Inap</h5>
+            </div>
+            <div class="modal-body" id="inap-container">
+                <div class="card card-form">
+                    <div class="row no-gutters">
+                        <div class="col-lg-12 card-body">
+                            <div class="form-row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Pembayaran <span class="red">*</span></label>
+                                    <select id="inap_penjamin" class="form-control select2 inputan_inap" required disabled>
+                                        <option value="" disabled selected>Pilih Jenis Pembayaran</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Dokter <span class="red">*</span></label>
+                                    <select id="inap_dokter" class="form-control select2 inputan_inap"></select>
+                                </div>
+                                <!--div class="col-12 col-md-6 mb-3">
+                                    <label>Kamar <span class="red">*</span></label>
+                                    <select id="inap_kamar" class="form-control select2 inputan_inap" required>
+                                        <option value="" disabled selected>Pilih Kamar</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label>Ranjang <span class="red">*</span></label>
+                                    <select id="inap_bed" class="form-control select2 inputan_inap" required>
+                                        <option value="" disabled selected>Pilih Ranjang</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6 mb-3" id="group_inap_tanggal_masuk">
+                                    <label>Tanggal Masuk <span class="red">*</span></label>
+                                    <input type="date" id="inap_tanggal_masuk" class="form-control input-group" required />
+                                </div-->
+                                <div class="col-12 col-md-12 mb-12">
+                                    <label>Keterangan <span class="red">*</span></label>
+                                    <textarea type="text" id="inap_keterangan" class="form-control" placeholder="Keterangan"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnProsesInap">
+                    <span>
+                        <i class="fa fa-check"></i> Pindah Rawat Inap
+                    </span>
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

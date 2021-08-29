@@ -2,6 +2,12 @@
 	$(function(){
 		var MODE = "tambah", selectedUID;
 		var dataLibrary = {};
+		if(__MY_PRIVILEGES__.response_data[0].uid === __UIDPETUGASGUDANGFARMASI__) {
+		    $("#txt_jenis option[value=\"RAD\"]").remove();
+            $("#txt_jenis option[value=\"LAB\"]").remove();
+        } else {
+            $("#txt_jenis option[value=\"FAR\"]").remove();
+        }
 		var tableMitra = $("#table-mitra").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/Mitra",
@@ -13,14 +19,17 @@
 					var data = response.response_package.response_data;
 					var parsedData = [];
 					for(var key in data) {
-						if(dataLibrary[data[key].uid] !== undefined) {
-							dataLibrary[data[key].uid] = data[key];
-						}
-
-						if(data[key].jenis != "GEN") {
+                        if(data[key].jenis !== "GEN") {
                             parsedData.push(data[key]);
+
+                            if(dataLibrary[data[key].uid] !== undefined) {
+                                dataLibrary[data[key].uid] = data[key];
+                            }
+
+                            dataLibrary[data[key].uid] = data[key];
                         }
 					}
+
 					return parsedData;
 				}
 			},
@@ -32,7 +41,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -44,7 +53,8 @@
 					"data" : null, render: function(data, type, row, meta) {
 						var type = {
 							RAD: "Radiologi",
-							LAB: "Laboratorium"
+							LAB: "Laboratorium",
+                            FAR: "Farmasi"
 						}
 						return "<span id=\"jenis_" + row.uid + "\">" + type[row.jenis] + "</span>";
 					}
@@ -86,7 +96,7 @@
 			}
 		});
 
-		$('#txt_kontak').inputmask('0999 9999 9999');
+		$('#txt_kontak').inputmask("9999999999999");
 
 		$("body").on("click", ".btn-edit-mitra", function() {
 			var uid = $(this).attr("id").split("_");
@@ -119,6 +129,10 @@
 			var nama = $("#txt_nama").val();
 			var jenis = $("#txt_jenis").val();
 			var kontak = $("#txt_kontak").inputmask("unmaskedvalue");
+			/*if(kontak.length < 13) {
+			    kontak.substr(1, (kontak.length - 1));
+            }
+			alert(kontak);*/
 			var alamat = $("#txt_alamat").val();
 
 			if(nama != "" && jenis != "none") {
@@ -128,7 +142,7 @@
 						"request": "tambah_mitra",
 						"nama": nama,
 						"jenis": jenis,
-						"kontak": "0" + kontak,
+						"kontak": kontak,
 						"alamat": alamat
 					};
 				} else {
@@ -137,7 +151,7 @@
 						"uid": selectedUID,
 						"nama": nama,
 						"jenis": jenis,
-						"kontak": "0" + kontak,
+						"kontak": kontak,
 						"alamat": alamat
 					};
 				}
@@ -197,11 +211,12 @@
 						<option value="none">Pilih Jenis Kemitraan</option>
 						<option value="LAB">Laboratorium</option>
 						<option value="RAD">Radiologi</option>
+                        <option value="FAR">Farmasi</option>
 					</select>
 				</div>
 				<div class="form-group col-md-12">
 					<label for="txt_kontak">Kontak Mitra:</label>
-					<input type="text" class="form-control" id="txt_kontak" placeholder="08xxxxx" />
+					<input type="text" class="form-control" id="txt_kontak" placeholder="____" />
 				</div>
 				<div class="form-group col-md-12">
 					<label for="txt_alamat">Alamat Mitra:</label>

@@ -29,7 +29,7 @@
 		<div class="col-lg-12 col-md-12">
 			<div class="z-0">
 				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-dokter">
-					<li class="nav-item">
+					<!--<li class="nav-item">
 						<a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								<i class="fa fa-address-book"></i>
@@ -60,7 +60,7 @@
 							</span>
 							Asesmen Medis 03
 						</a>
-					</li>
+					</li>-->
                     <?php
                     if(in_array(__UIDFISIOTERAPI__, $PoliList)) {
                     ?>
@@ -75,14 +75,14 @@
                     <?php
                     }
                     ?>
-                    <li class="nav-item">
+                    <!--<li class="nav-item">
 						<a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-child"></i>
 							</span>
 							Tindakan
 						</a>
-					</li>
+					</li>-->
 					<li class="nav-item">
 						<a href="#tab-poli-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
@@ -91,7 +91,7 @@
 							Resep
 						</a>
 					</li>
-					<li class="nav-item">
+					<!--<li class="nav-item">
 						<a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-flask"></i>
@@ -106,8 +106,8 @@
 							</span>
 							Radiologi
 						</a>
-					</li>
-					<li class="nav-item">
+					</li>-->
+					<!--<li class="nav-item">
 						<a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-tasks"></i>
@@ -122,7 +122,7 @@
 							</span>
 							Dokumen
 						</a>
-					</li>
+					</li>-->
 				</ul>
 			</div>
 			<div class="card card-body tab-content">
@@ -130,7 +130,7 @@
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'perawat/form.php'; ?>
 				</div>
-                <div class="tab-pane show fade active" id="tab-poli-10">
+                <div class="tab-pane show fade" id="tab-poli-10">
                     <?php require 'info-pasien.php'; ?>
                     <?php require 'triase-1.php'; ?>
                 </div>
@@ -157,7 +157,7 @@
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'tindakan.php'; ?>
 				</div>
-				<div class="tab-pane show fade" id="tab-poli-4">
+				<div class="tab-pane show fade active" id="tab-poli-4">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'resep.php'; ?>
 				</div>

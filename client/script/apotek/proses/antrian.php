@@ -11,13 +11,20 @@
             },
             type:"GET",
             success:function(response) {
+
                 targettedData = response.response_package.response_data[0];
+                // $("#verifikator").html(targettedData.detail[0].verifikator.nama);
+                $("#verifikator").html(targettedData.verifikator.nama);
+                $("#txt_keterangan_resep").html(targettedData.keterangan);
+                $("#txt_keterangan_racikan").html(targettedData.keterangan_racikan);
                 $("#nama-pasien").attr({
                     "set-penjamin": targettedData.antrian.penjamin_data.uid
                 }).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
                 $("#jk-pasien").html(targettedData.antrian.pasien_info.jenkel_nama);
                 $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
                 //$("#verifikator").html(targettedData.verifikator.nama);
+                console.clear();
+                console.log(targettedData);
                 loadDetailResep(targettedData);
 
             },
@@ -72,6 +79,9 @@
 
 
         function loadDetailResep(data) {
+            console.clear();
+            console.log(data);
+            $("#txt_alasan_ubah").html((data.alasan_ubah !== undefined && data.alasan_ubah !== null && data.alasan_ubah !== "") ? data.alasan_ubah : "-");
             $("#load-detail-resep tbody tr").remove();
             for(var a = 0; a < data.detail.length; a++) {
                 if(data.detail[a].detail !== null) {
@@ -138,7 +148,7 @@
                         });
 
                         var newDetailCellID = document.createElement("TD");
-                        $(newDetailCellID).addClass("text-center").html((a + 1));
+                        $(newDetailCellID).addClass("text-center").html("<h5 class=\"autonum\">" + (a + 1) + "</h5>");
 
                         var newDetailCellObat = document.createElement("TD");
                         var newObat = document.createElement("SELECT");
@@ -161,9 +171,8 @@
                             harga: harga_tertinggi
                         });
 
-
                         var newDetailCellSigna = document.createElement("TD");
-                        $(newDetailCellSigna).html("<h5 class=\"text_center\">" + data.detail[a].signa_qty + " &times; " + data.detail[a].signa_pakai + "</h5>");
+                        $(newDetailCellSigna).html("<h5 class=\"text_center wrap_content\">" + data.detail[a].signa_qty + " &times; " + data.detail[a].signa_pakai + "</h5>");
 
                         $(newDetailCellSigna).find("input").inputmask({
                             alias: 'decimal',
@@ -232,12 +241,16 @@
 
                         var newDetailCellKeterangan = document.createElement("TD");
                         $(newDetailCellKeterangan).html(data.detail[a].keterangan);
+
+                        var newDetailCellAlasan = document.createElement("TD");
+                        $(newDetailCellAlasan).html((data.detail[a].alasan_ubah !== undefined && data.detail[a].alasan_ubah !== null && data.detail[a].alasan_ubah !== "") ? data.detail[a].alasan_ubah : "-");
                         //=======================================
                         $(newDetailRow).append(newDetailCellID);
                         $(newDetailRow).append(newDetailCellObat);
                         $(newDetailRow).append(newDetailCellSigna);
                         $(newDetailRow).append(newDetailCellQty);
                         $(newDetailRow).append(newDetailCellKeterangan);
+                        $(newDetailRow).append(newDetailCellAlasan);
 
                         $("#load-detail-resep tbody").append(newDetailRow);
                     }
@@ -268,10 +281,6 @@
                                 butuh_amprah += selectedBatchRacikan[bKey].stok_terkini;
                             }
                         }
-                        /*console.log(racikanDetail[racDetailKey]);
-
-                        console.log(jlh_sedia);
-                        console.log(butuh_amprah);*/
                     }
                 }
             }
@@ -348,10 +357,16 @@
                         var newCellRacikanObat = document.createElement("TD");
                         var newCellRacikanJlh = document.createElement("TD");
                         var newCellRacikanKeterangan = document.createElement("TD");
+                        var newCellRacikanAlasan = document.createElement("TD");
 
-                        $(newCellRacikanID).attr("rowspan", racikanDetail.length).html((b + 1));
+                        $(newCellRacikanID).attr("rowspan", racikanDetail.length).html("<h5 class=\"autonum\">" + (b + 1) + "</h5>");
                         $(newCellRacikanNama).attr("rowspan", racikanDetail.length).html("<h5 style=\"margin-bottom: 20px;\">" + data.racikan[b].kode + "</h5>");
-                        $(newCellRacikanSigna).addClass("text-center").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
+                        if(data.racikan[b].change.length > 0) {
+                            $(newCellRacikanSigna).addClass("text-center wrap_content").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].change[0].signa_qty + " &times " + data.racikan[b].change[0].signa_pakai + "</h5>");
+                        } else {
+                            $(newCellRacikanSigna).addClass("text-center wrap_content").attr("rowspan", racikanDetail.length).html("<h5>" + data.racikan[b].signa_qty + " &times " + data.racikan[b].signa_pakai + "</h5>");
+                        }
+
                         $(newCellRacikanJlh).addClass("text-center").attr("rowspan", racikanDetail.length);
 
                         var RacikanObatData = load_product_resep(newRacikanObat, racikanDetail[racDetailKey].obat, false);
@@ -437,8 +452,15 @@
                             harga: harga_tertinggi_racikan
                         });
 
-                        $(newCellRacikanJlh).html("<h5>" + data.racikan[b].qty + "<h5>");
+                        if(data.racikan[b].change.length > 0) {
+                            $(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[0].jumlah + "<h5>");
+                        } else {
+                            $(newCellRacikanJlh).html("<h5>" + data.racikan[b].qty + "<h5>");
+                        }
+
+                        //$(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[b].jumlah + "<h5>");
                         $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
+                        $(newCellRacikanAlasan).html((data.racikan[b].change.length > 0) ? ((data.racikan[b].change[0].alasan_ubah !== undefined && data.racikan[b].change[0].alasan_ubah !== null && data.racikan[b].change[0].alasan_ubah !== "") ? data.racikan[b].change[0].alasan_ubah : "-") : "-");
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
                             $(newRacikanRow).append(newCellRacikanID);
@@ -448,11 +470,13 @@
 
                             $(newRacikanRow).append(newCellRacikanObat);
                             $(newRacikanRow).append(newCellRacikanKeterangan);
+                            $(newRacikanRow).append(newCellRacikanAlasan);
                         } else {
                             $(newRacikanRow).append(newCellRacikanObat);
                         }
 
                         $(newCellRacikanKeterangan).attr("rowspan", racikanDetail.length);
+                        $(newCellRacikanAlasan).attr("rowspan", racikanDetail.length);
                         $("#load-detail-racikan tbody").append(newRacikanRow);
                     } else {
                         console.log("No Batch");

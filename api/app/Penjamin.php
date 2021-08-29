@@ -251,7 +251,7 @@ class Penjamin extends Utility {
 
 	private function edit_penjamin($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$old = self::get_penjamin_detail($parameter['uid']);
 

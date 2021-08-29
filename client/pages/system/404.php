@@ -18,7 +18,7 @@
 			<div class="card card-body text-center">
 				<center>
 					<h1 style="margin: 50px auto;">404 Page Not Found</h1>
-					<img width="25%" style="margin: 50px auto;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-text-black.png" alt="<?php echo __APPS_NAME__; ?>">
+					<img width="25%" style="margin: 50px auto;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-black-<?php echo __PC_IDENT__; ?>.svg" alt="<?php echo __APPS_NAME__; ?>">
 					<p>Halaman yang anda cari tidak ditemukan. Sistem tidak menemukan apa yang Anda cari.</p>
 					<a href="<?php echo __HOSTNAME__; ?>">Kembali ke Halaman Utama</a>
 				</center>
