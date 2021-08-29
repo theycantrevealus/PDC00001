@@ -21,7 +21,7 @@
     <div class="row">
         <div class="col-lg">
         	<div class="z-0">
-				<ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tutor_filter_type">
 					<li class="nav-item">
 						<a href="#tab-tagihan" class="active nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-tagihan" >
 							<span class="nav-link__count">
@@ -45,7 +45,7 @@
                     <div class="row">
                         <div class="col-lg">
                             <div class="z-0">
-                                <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                                <ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tutor_filter_jenis_pelayanan">
                                     <li class="nav-item">
                                         <a href="#tab-rawat_jalan" class="active nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-tagihan" >
                                             <span class="nav-link__count">

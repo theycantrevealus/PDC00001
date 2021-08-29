@@ -55,6 +55,7 @@
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/jqvmap.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/croppie-master/croppie.css" rel="stylesheet">
+    <link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/intro/introjs.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/css/rSlider.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet">
