@@ -16,7 +16,7 @@
 
 			if(in_array($value['id'], $access)) {
 				?>
-				<li class="sidebar-menu-item <?php echo ($activeCheck == true) ? "active" : ""; ?>" parent-child="<?php echo $parent; ?>">
+				<li target_modul="<?php echo $value['id']; ?>" class="sidebar-menu-item <?php echo ($activeCheck == true) ? "active" : ""; ?>" parent-child="<?php echo $parent; ?>">
 					<a class="sidebar-menu-button" <?php echo ($child->rowCount() > 0) ? "data-toggle=\"collapse\"" : ""; ?> href="<?php echo $LinkManager; ?>">
 						<?php
 							if($parent == 0) {
