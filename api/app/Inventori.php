@@ -1799,6 +1799,9 @@ class Inventori extends Utility
                     date('Y-m-d', strtotime($dari . '-1 days')),
                     date('Y-m-d', strtotime($sampai . '+1 days'))
                 ))
+                ->order(array(
+                    'logged_at' => 'ASC'
+                ))
                 ->execute();
         } else {
             $data = self::$query->select('inventori_stok_log', array(
@@ -1820,6 +1823,9 @@ class Inventori extends Utility
                 ), array(
                     $gudang,
                     $parameter
+                ))
+                ->order(array(
+                    'logged_at' => 'ASC'
                 ))
                 ->execute();
         }
@@ -4776,6 +4782,22 @@ class Inventori extends Utility
                                     'rawat_inap_batch.batch' => '= ?',
                                     'AND',
                                     'rawat_inap_batch.mutasi' => '= ?'
+                                ), array(
+                                    $MutValue['item'],
+                                    $MutValue['batch'],
+                                    $parameter['uid']
+                                ))
+                                ->execute();
+                        } else if(isset($parameter['igd'])) {
+                            $CheckNS = self::$query->update('igd_batch', array(
+                                'status' => 'Y'
+                            ))
+                                ->where(array(
+                                    'igd_batch.obat' => '= ?',
+                                    'AND',
+                                    'igd_batch.batch' => '= ?',
+                                    'AND',
+                                    'igd_batch.mutasi' => '= ?'
                                 ), array(
                                     $MutValue['item'],
                                     $MutValue['batch'],

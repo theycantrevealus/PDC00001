@@ -20,8 +20,6 @@
         }
 
         function refresh_kartu() {
-            console.clear();
-            console.log(__UNIT__.gudang);
             $("#loadResult").html("<center>Memuat Data...</center>");
             //Get Item Detail
             $.ajax({
@@ -33,8 +31,6 @@
                 success:function(resp) {
                     $("#loadResult").html("");
                     var data = resp.response_package.response_data[0];
-                    console.log(resp);
-
 
                     $("#nama_barang").html(data.nama);
                     $("#item_name").html(data.nama.toUpperCase());
@@ -153,6 +149,9 @@
 
 
                         $("#loadResult").append(batchIdentifierInfo).append("<br />").append(batchTable);
+                        if($(batchTable).find("tbody tr").length === 0) {
+                            $(batchTable).find("tbody").append("<tr><td colspan=\"6\"><center><i>Tidak ada dapa</i></center></td></tr>")
+                        }
                         /*var newRow = document.createElement("TR");
                         var newTgl = document.createElement("TD");
                         var newDoc = document.createElement("TD");

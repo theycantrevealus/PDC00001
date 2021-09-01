@@ -149,6 +149,7 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+                    console.log(response);
                     var returnedData = [];
                     if(response.response_package === undefined || response.response_package.response_data === undefined) {
                         returnedData = [];
@@ -742,7 +743,12 @@
             });
 
 
-
+            /*console.log({
+                request: "tambah_riwayat_resep_igd",
+                nurse_station: nurse_station,
+                gudang: nurse_station_info.gudang,
+                item: item
+            });*/
             if(item.length > 0) {
                 Swal.fire({
                     title: "Riwayat Pemberian Obat",

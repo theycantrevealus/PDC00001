@@ -2431,11 +2431,14 @@ class Apotek extends Utility
                         'AND',
                         'igd_batch.obat' => '= ?',
                         'AND',
-                        'igd_batch.resep' => '= ?'
+                        'igd_batch.resep' => '= ?',
+                        'AND',
+                        'igd_batch.status' => '!= ?'
                     ), array(
                         $UnitDetail['uid_gudang'],
                         $ResValue['obat'],
-                        $value['uid']
+                        $value['uid'],
+                        'N'
                     ))
                     ->execute();
                 $resep_detail['response_data'][$ResKey]['stok_ns'] = $NSInap['response_data'];
