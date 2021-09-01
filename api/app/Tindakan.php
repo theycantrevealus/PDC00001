@@ -1374,7 +1374,7 @@ class Tindakan extends Utility {
 
 	private function edit_tindakan_rawat_jalan($parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$result = [];
 
 		$old = self::get_tindakan_detail($parameter['uid']);
