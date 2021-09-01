@@ -3998,12 +3998,36 @@
             }
         }).addClass("form-control").on("select2:select", function(e) {
             var data = e.params.data;
-            var hargaRangeMin = data.harga_range[0].harga_minimum;
+            /*var hargaRangeMin = data.harga_range[0].harga_minimum;
             var hargaRangeMax = data.harga_range[0].harga_maksimum;
             $("#tindakan_radiologi").attr({
                 "harga_minimum": hargaRangeMin,
                 "harga_maksimum": hargaRangeMax
+            });*/
+
+            //Get Detail Price
+            $.ajax({
+                url: __HOSTAPI__ + "/Tindakan/tindakan-detail/" + data.id,
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    var dataDetail = response.response_package.response_data[0];
+                    var rangeHargaMinimum = dataDetail.harga_minimum;
+                    var rangeHargaMaksimum = dataDetail.harga_maksimum;
+                    $("#tindakan_radiologi").attr({
+                        "harga_minimum": parseFloat(rangeHargaMinimum),
+                        "harga_maksimum": parseFloat(rangeHargaMaksimum)
+                    });
+                },
+                error: function(response) {
+                    console.log(response);
+                }
             });
+
+
             let uidTindakanRad = $(this).val();
 
             $("#radiologi_tindakan_notifier").html("");
@@ -4784,12 +4808,29 @@
                 }
             }).addClass("form-control").on("select2:select", function(e) {
                 var data = e.params.data;
-                var rangeHargaMinimum = data.harga_range[0].harga_minimum;
-                var rangeHargaMaksimum = data.harga_range[0].harga_maksimum;
-                $("#tindakan_lab").attr({
-                    "harga_minimum": parseFloat(rangeHargaMinimum),
-                    "harga_maksimum": parseFloat(rangeHargaMaksimum)
+                //Get Detail Price
+                $.ajax({
+                    url: __HOSTAPI__ + "/Tindakan/tindakan-detail/" + data.id,
+                    async:false,
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    type:"GET",
+                    success:function(response) {
+                        var dataDetail = response.response_package.response_data[0];
+                        var rangeHargaMinimum = dataDetail.harga_minimum;
+                        var rangeHargaMaksimum = dataDetail.harga_maksimum;
+                        $("#tindakan_lab").attr({
+                            "harga_minimum": parseFloat(rangeHargaMinimum),
+                            "harga_maksimum": parseFloat(rangeHargaMaksimum)
+                        });
+                    },
+                    error: function(response) {
+                        console.log(response);
+                    }
                 });
+
+
 
                 /*for(var hargaKey in data.harga)
                 {

@@ -978,19 +978,43 @@ class Tindakan extends Utility {
 
 
     public function get_tindakan_info($parameter){
+        /*$data = self::$query
+            ->select('master_tindakan', array(
+                'uid',
+                'nama',
+                'kelompok',
+                'created_at',
+                'updated_at'
+            ))
+            ->join('master_tindakan_kelas_harga', array('harga'))
+            ->on(array(
+                array('master_tindakan_kelas_harga.tindakan', '=', 'master_tindakan.uid')
+            ))
+            ->order(array(
+                'master_tindakan_kelas_harga.harga' => 'ASC'
+            ))
+            ->where(array(
+                'master_tindakan.uid' => '= ?',
+                'AND',
+                'master_tindakan_kelas_harga.deleted_at' => 'IS NULL',
+                'AND',
+                'master_tindakan.deleted_at' => 'IS NULL',
+            ),
+                array($parameter)
+            )
+            ->execute();*/
         $data = self::$query
             ->select('master_tindakan', array(
-                    'uid',
-                    'nama',
-                    'kelompok',
-                    'created_at',
-                    'updated_at'
-                )
-            )
+                'uid',
+                'nama',
+                'kelompok',
+                'created_at',
+                'updated_at'
+            ))
             ->where(array(
-                'master_tindakan.deleted_at' => 'IS NULL',
+                'master_tindakan.uid' => '= ?',
                 'AND',
-                'master_tindakan.uid' => '= ?'
+                'master_tindakan.deleted_at' => 'IS NULL',
             ),
                 array($parameter)
             )
@@ -1006,7 +1030,7 @@ class Tindakan extends Utility {
         return $data;
     }
 
-	public function get_tindakan_detail($parameter){
+	public function get_tindakan_detail($parameter) {
 		$data = self::$query
 				->select('master_tindakan', array(
 						'uid',
@@ -1017,13 +1041,12 @@ class Tindakan extends Utility {
 					)
 				)
 				->where(array(
-							'master_tindakan.deleted_at' => 'IS NULL',
-							'AND',
-							'master_tindakan.uid' => '= ?'
-						),
-						array($parameter)
-					)
-					->execute();
+                        'master_tindakan.deleted_at' => 'IS NULL',
+                        'AND',
+                        'master_tindakan.uid' => '= ?'
+                    ),
+                    array($parameter))
+                ->execute();
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
@@ -1039,6 +1062,9 @@ class Tindakan extends Utility {
             $harga = self::$query->select('master_tindakan_kelas_harga', array(
                 'harga'
             ))
+                ->order(array(
+                    'harga' => 'ASC'
+                ))
                 ->where(array(
                     'master_tindakan_kelas_harga.tindakan' => '= ?',
                     'AND',
@@ -1051,7 +1077,6 @@ class Tindakan extends Utility {
             foreach ($harga['response_data'] as $HKey => $HValue) {
                 array_push($harga_list, $HValue['harga']);
             }
-            sort($harga_list);
             $data['response_data'][$key]['harga_minimum'] = floatval($harga_list[0]);
             $data['response_data'][$key]['harga_maksimum'] = floatval($harga_list[count($harga_list) - 1]);
 
@@ -1597,7 +1622,7 @@ class Tindakan extends Utility {
 
 	private function edit_tindakan_rawat_inap($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$result = [];
 
 		$old = self::get_tindakan_detail($parameter['uid']);

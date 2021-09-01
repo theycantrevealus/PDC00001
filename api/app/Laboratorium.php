@@ -4610,7 +4610,6 @@ class Laboratorium extends Utility {
 		    //Master Lab Item
             $Nilai = self::$query->select('master_lab_nilai', array(
                 'id',
-                'lab',
                 'satuan',
                 'nilai_min',
                 'nilai_maks',
