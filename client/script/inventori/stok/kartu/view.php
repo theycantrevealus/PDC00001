@@ -20,6 +20,8 @@
         }
 
         function refresh_kartu() {
+            console.clear();
+            console.log(__UNIT__.gudang);
             $("#loadResult").html("<center>Memuat Data...</center>");
             //Get Item Detail
             $.ajax({
