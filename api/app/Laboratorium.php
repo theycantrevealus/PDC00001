@@ -1510,7 +1510,7 @@ class Laboratorium extends Utility {
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
 
-            $mitra_all_raw = $mitra_list->get_mitra()['response_data'];
+            $mitra_all_raw = $mitra_list->get_mitra($parameter)['response_data'];
             $mitra_all_parse = array();
             foreach($mitra_all_raw as $MAK => $MAV) {
                 if($MAV['jenis'] === 'LAB') {

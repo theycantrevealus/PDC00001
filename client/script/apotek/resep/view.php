@@ -376,7 +376,7 @@
             }
 
             var keteranganPerObat = document.createElement("TEXTAREA");
-            $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span><p>" + setter.keterangan + "</p>")/*.append(keteranganPerObat)*/;
+            $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span><p>" + ((setter.keterangan !== "") ? setter.keterangan : "-") + "</p>")/*.append(keteranganPerObat)*/;
             /*$(keteranganPerObat).addClass("form-control").attr({
                 "placeholder": "Keterangan per Obat",
                 "disabled": "disabled"

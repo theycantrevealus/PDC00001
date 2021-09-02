@@ -33,7 +33,6 @@
                         rawData = response.response_package.response_data;
                     }
 
-                    console.log(rawData);
                     for(var dataKey in rawData) {
                         if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
                             if(uniqueData[rawData[dataKey].barang] === undefined) {
@@ -67,6 +66,8 @@
                             }
                         }
                     }
+
+                    console.log(uniqueData);
 
                     var autonum = 1;
                     for(var pKey in uniqueData) {
