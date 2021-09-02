@@ -2367,6 +2367,23 @@
                         }
 
                         if(allowSave) {
+                            console.log({
+                                request: "verifikasi_resep_2",
+                                uid: __PAGES__[3],
+                                alasan_ubah: $("#alasan-ubah-resep").val(),
+                                alasan_resep: alasanLib,
+                                alasan_racikan: alasanRacikanLib,
+                                asesmen:currentAsesmen,
+                                kunjungan: currentMetaData.kunjungan,
+                                antrian:currentMetaData.uid,
+                                pasien:currentMetaData.pasien.uid,
+                                penjamin: currentMetaData.penjamin.uid,
+                                resep: resepItem,
+                                racikan: racikanItem,
+                                departemen: currentMetaData.departemen.uid,
+                                kajian: kajian
+                            });
+
                             $.ajax({
                                 url:__HOSTAPI__ + "/Apotek",
                                 async:false,
@@ -2374,7 +2391,7 @@
                                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                                 },
                                 type:"POST",
-                                data:{
+                                data: {
                                     request: "verifikasi_resep_2",
                                     uid: __PAGES__[3],
                                     alasan_ubah: $("#alasan-ubah-resep").val(),
@@ -2391,6 +2408,7 @@
                                     kajian: kajian
                                 },
                                 success:function(response) {
+                                    console.log(response);
                                     if(response.response_package.antrian.response_result > 0) {
                                         if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
                                             Swal.fire(
@@ -2399,7 +2417,7 @@
                                                 "success"
                                             ).then((result) => {
                                                 push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya obat baru", "warning").then(function() {
-                                                    location.href = __HOSTNAME__ + "/apotek/resep/";
+                                                    //location.href = __HOSTNAME__ + "/apotek/resep/";
                                                 });
                                             });
                                         } else {
@@ -2409,7 +2427,7 @@
                                                 "success"
                                             ).then((result) => {
                                                 push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru BPJS", "warning").then(function() {
-                                                    location.href = __HOSTNAME__ + "/apotek/resep/";
+                                                    //location.href = __HOSTNAME__ + "/apotek/resep/";
                                                 });
                                             });
                                         }

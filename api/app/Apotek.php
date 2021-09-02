@@ -4771,7 +4771,7 @@ class Apotek extends Utility
                 'aturan_pakai' => intval($value['aturan_pakai']),
                 'signa_qty' => $value['signa_qty'],
                 'signa_pakai' => $value['signa_pakai'],
-                'keterangan' => $value['keterangan'],
+                'keterangan' => (isset($value['keterangan'])) ? $value['keterangan'] : '',
                 'alasan_ubah' => $value['alasan_ubah'],
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date(),

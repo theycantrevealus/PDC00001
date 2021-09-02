@@ -11,7 +11,6 @@
             },
             type:"GET",
             success:function(response) {
-
                 targettedData = response.response_package.response_data[0];
                 // $("#verifikator").html(targettedData.detail[0].verifikator.nama);
                 $("#verifikator").html(targettedData.verifikator.nama);
@@ -23,8 +22,6 @@
                 $("#jk-pasien").html(targettedData.antrian.pasien_info.jenkel_nama);
                 $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
                 //$("#verifikator").html(targettedData.verifikator.nama);
-                console.clear();
-                console.log(targettedData);
                 loadDetailResep(targettedData);
 
             },
@@ -79,7 +76,6 @@
 
 
         function loadDetailResep(data) {
-            console.clear();
             console.log(data);
             $("#txt_alasan_ubah").html((data.alasan_ubah !== undefined && data.alasan_ubah !== null && data.alasan_ubah !== "") ? data.alasan_ubah : "-");
             $("#load-detail-resep tbody tr").remove();
@@ -544,8 +540,6 @@
                         },
                         type:"POST",
                         success:function(response) {
-                            console.clear();
-                            console.log(response);
                             if(response.response_package.stok_result > 0) {
                                 push_socket(__ME__, "resep_selesai_proses", "*", "Resep pasien a/n. " + $("#nama-pasien").html() + " selesai diproses!", "info").then(function() {
                                     Swal.fire(
