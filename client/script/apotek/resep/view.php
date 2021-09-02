@@ -2417,7 +2417,7 @@
                                                 "success"
                                             ).then((result) => {
                                                 push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya obat baru", "warning").then(function() {
-                                                    //location.href = __HOSTNAME__ + "/apotek/resep/";
+                                                    location.href = __HOSTNAME__ + "/apotek/resep/";
                                                 });
                                             });
                                         } else {
@@ -2427,7 +2427,7 @@
                                                 "success"
                                             ).then((result) => {
                                                 push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru BPJS", "warning").then(function() {
-                                                    //location.href = __HOSTNAME__ + "/apotek/resep/";
+                                                    location.href = __HOSTNAME__ + "/apotek/resep/";
                                                 });
                                             });
                                         }
