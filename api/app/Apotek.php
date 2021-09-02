@@ -2143,6 +2143,9 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->order(array(
+                    'created_at' => 'ASC'
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -2158,6 +2161,9 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->order(array(
+                    'created_at' => 'ASC'
+                ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))
@@ -2178,7 +2184,7 @@ class Apotek extends Utility
             $data['response_data'][$key]['dokter_detail'] = $PegawaiDetail['response_data'][0];
 
             //Get resep detail
-            $resep_detail = self::$query->select('resep_detail', array(
+            /*$resep_detail = self::$query->select('resep_detail', array(
                 'id',
                 'resep',
                 'obat',
@@ -2194,6 +2200,22 @@ class Apotek extends Utility
                     'resep_detail.resep' => '= ?',
                     'AND',
                     'resep_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();*/
+
+            $resep_detail = self::$query->select('resep_change_log', array(
+                'resep',
+                'item as obat',
+                'signa_qty',
+                'signa_pakai',
+                'qty'
+            ))
+                ->where(array(
+                    'resep_change_log.resep' => '= ?',
+                    'AND',
+                    'resep_change_log.deleted_at' => 'IS NULL'
                 ), array(
                     $value['uid']
                 ))
@@ -2231,7 +2253,6 @@ class Apotek extends Utility
             $racikan = self::$query->select('racikan', array(
                 'uid',
                 'asesmen',
-                //'resep',
                 'kode',
                 'total',
                 'keterangan',
@@ -2241,6 +2262,14 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                /*->join('racikan_change_log', array(
+                    'jumlah as qty',
+                    'signa_qty',
+                    'signa_pakai',
+                ))
+                ->on(array(
+                    array('racikan_change_log.racikan', '=', 'racikan.uid')
+                ))*/
                 ->where(array(
                     'racikan.asesmen' => '= ?',
                     'AND',
@@ -2268,7 +2297,6 @@ class Apotek extends Utility
                 $racikan_detail = self::$query->select('racikan_detail', array(
                     'id',
                     'asesmen',
-                    //'resep',
                     'obat',
                     'ratio',
                     'pembulatan',
@@ -2280,14 +2308,20 @@ class Apotek extends Utility
                     'created_at',
                     'updated_at'
                 ))
+                    /*->join('racikan_detail_change_log', array(
+                        'obat',
+                        'obat',
+                        'kekuatan',
+                        'jumlah'
+                    ))
+                    ->on(array(
+                        array('racikan_detail_change_log.racikan', '=', 'racikan_detail.racikan')
+                    ))*/
                     ->where(array(
                         'racikan_detail.deleted_at' => 'IS NULL',
-                        /*'AND',
-                        'racikan_detail.resep' => '= ?',*/
                         'AND',
                         'racikan_detail.racikan' => '= ?'
                     ), array(
-                        //$value['uid'],
                         $RDValue['uid']
                     ))
                     ->execute();
@@ -2297,9 +2331,39 @@ class Apotek extends Utility
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }
                 $racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];
+
+
+
+                // BillingApotek
+                $racikan_change = self::$query->select('racikan_change_log', array(
+                    'jumlah', 'keterangan', 'signa_qty', 'signa_pakai', 'aturan_pakai', 'alasan_ubah'
+                ))
+                    ->where(array(
+                        'racikan_change_log.racikan' => '= ?'
+                    ), array(
+                        $RDValue['uid']
+                    ))
+                    ->execute();
+                foreach ($racikan_change['response_data'] as $RacApKey => $RacApValue) {
+                    $DetailApRac = self::$query->select('racikan_detail_change_log', array(
+                        'obat', 'kekuatan', 'jumlah'
+                    ))
+                        ->where(array(
+                            'racikan_detail_change_log.racikan' => '= ?'
+                        ), array(
+                            $RDValue['uid']
+                        ))
+                        ->execute();
+                    foreach ($DetailApRac['response_data'] as $RApoDIKey => $RApoDIValue) {
+                        $InventoriInfo = $Inventori->get_item_detail($RApoDIValue['obat']);
+                        $DetailApRac['response_data'][$RApoDIKey]['detail'] = $InventoriInfo['response_data'][0];
+                    }
+                    $racikan_change['response_data'][$RacApKey]['detail'] = $DetailApRac['response_data'];
+                }
+                $racikan['response_data'][$RDKey]['racikan_apotek'] = $racikan_change['response_data'];
             }
             $data['response_data'][$key]['racikan'] = $racikan['response_data'];
-            $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+            $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at'])) . '<br />' . date('H:i:s', strtotime($value['created_at']));
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
         }
@@ -2394,7 +2458,7 @@ class Apotek extends Utility
             $data['response_data'][$key]['dokter_detail'] = $PegawaiDetail['response_data'][0];
 
             //Get resep detail
-            $resep_detail = self::$query->select('resep_detail', array(
+            /*$resep_detail = self::$query->select('resep_detail', array(
                 'id',
                 'resep',
                 'obat',
@@ -2413,6 +2477,21 @@ class Apotek extends Utility
                 ), array(
                     $value['uid']
                 ))
+                ->execute();*/
+            $resep_detail = self::$query->select('resep_change_log', array(
+                'resep',
+                'item as obat',
+                'signa_qty',
+                'signa_pakai',
+                'qty'
+            ))
+                ->where(array(
+                    'resep_change_log.resep' => '= ?',
+                    'AND',
+                    'resep_change_log.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
                 ->execute();
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 //Batch Info
@@ -2424,7 +2503,7 @@ class Apotek extends Utility
 
                 //Check Ketersediaan Obat pada NS
                 $NSInap = self::$query->select('igd_batch', array(
-                    'qty'
+                    'qty', 'status'
                 ))
                     ->where(array(
                         'igd_batch.gudang' => '= ?',
@@ -2516,6 +2595,34 @@ class Apotek extends Utility
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }
                 $racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];
+
+                // BillingApotek
+                $racikan_change = self::$query->select('racikan_change_log', array(
+                    'jumlah', 'keterangan', 'signa_qty', 'signa_pakai', 'aturan_pakai', 'alasan_ubah'
+                ))
+                    ->where(array(
+                        'racikan_change_log.racikan' => '= ?'
+                    ), array(
+                        $RDValue['uid']
+                    ))
+                    ->execute();
+                foreach ($racikan_change['response_data'] as $RacApKey => $RacApValue) {
+                    $DetailApRac = self::$query->select('racikan_detail_change_log', array(
+                        'obat', 'kekuatan', 'jumlah'
+                    ))
+                        ->where(array(
+                            'racikan_detail_change_log.racikan' => '= ?'
+                        ), array(
+                            $RDValue['uid']
+                        ))
+                        ->execute();
+                    foreach ($DetailApRac['response_data'] as $RApoDIKey => $RApoDIValue) {
+                        $InventoriInfo = $Inventori->get_item_detail($RApoDIValue['obat']);
+                        $DetailApRac['response_data'][$RApoDIKey]['detail'] = $InventoriInfo['response_data'][0];
+                    }
+                    $racikan_change['response_data'][$RacApKey]['detail'] = $DetailApRac['response_data'];
+                }
+                $racikan['response_data'][$RDKey]['racikan_apotek'] = $racikan_change['response_data'];
             }
             $data['response_data'][$key]['racikan'] = $racikan['response_data'];
             $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));

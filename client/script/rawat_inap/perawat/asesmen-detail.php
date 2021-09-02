@@ -245,6 +245,7 @@
                 },
                 dataSrc:function(response) {
                     var returnedData = [];
+
                     if(response.response_package === undefined || response.response_package.response_data === undefined) {
                         returnedData = [];
                     } else {
@@ -254,8 +255,6 @@
                     var filteredData = [];
 
                     console.clear();
-                    console.log(response);
-
 
                     for(var a in returnedData) {
                         var currentResepQty = 0;
@@ -267,7 +266,6 @@
                         var listMutasi = [];
 
                         var habis = true;
-
                         for(var b in returnedData[a].detail) { //Resep
                             currentResepQty = parseFloat(returnedData[a].detail[b].qty);
                             for(var c in returnedData[a].detail[b].stok_ns) {
@@ -293,7 +291,7 @@
                             returnedData[a].detail.length > 0
                         ) {
                             habis = (((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0) && (currentRacikanQty === RacikanStokTerpakai));
-                            //habis = ((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0);
+                            habis = ((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0);
                         } else {
                             if(
                                 returnedData[a].racikan.length > 0 &&
@@ -359,7 +357,7 @@
                             for(var a in detail) {
                                 if(detail[a].detail.nama !== "") {
                                     parsedDetail += "<div class=\"col-md-12\">" +
-                                        "<span class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-tablets\"></i> " + detail[a].detail.nama + "</span><br />" +
+                                        "<span class=\"badge badge-outline-purple badge-custom-caption\"><i class=\"fa fa-tablets\"></i> " + detail[a].detail.nama + "</span><br />" +
                                         "<div style=\"padding-left: 20px;\">" + detail[a].signa_qty + " &times; " + detail[a].signa_pakai + " <label class=\"text-info\">[" + detail[a].qty + "]</label></div>" +
                                         "</div>";
                                 }
@@ -377,15 +375,28 @@
                         if(racikan.length > 0) {
                             parsedDetail = "<div class=\"row\">";
                             for(var a in racikan) {
-                                var detailRacikan = racikan[a].detail;
-                                parsedDetail += "<div class=\"col-md-12\">" +
-                                    "<span class=\"badge badge-success badge-custom-caption\">" + racikan[a].kode + "</span><br />" +
-                                    "<div style=\"padding-left: 20px;\">" + racikan[a].signa_qty + " &times; " + racikan[a].signa_pakai + " <label class=\"text-info\">[" + racikan[a].qty + "]</label></div>" +
-                                    "<ol>";
-                                for(var b in detailRacikan) {
-                                    parsedDetail += "<span style=\"margin-bottom: 5px;\" class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-tablets\"></i> " + detailRacikan[b].detail.nama + "</span>";
+                                var detailRacikan = [];
+                                if(racikan[a].racikan_apotek.length > 0) {
+                                    detailRacikan = racikan[a].racikan_apotek[a].detail;
+                                    parsedDetail += "<div class=\"col-md-12\">" +
+                                        "<span class=\"badge badge-outline-success badge-custom-caption\">" + racikan[a].kode + "</span><br />" +
+                                        "<div style=\"padding-left: 20px;\">" + racikan[a].racikan_apotek[a].signa_qty + " &times; " + racikan[a].racikan_apotek[a].signa_pakai + " <label class=\"text-info\">[" + racikan[a].racikan_apotek[a].jumlah + "]</label></div>" +
+                                        "<ul>";
+                                    for(var b in detailRacikan) {
+                                        parsedDetail += "<li style=\"margin-bottom: 5px;\"> " + detailRacikan[b].detail.nama + "</li>";
+                                    }
+                                    parsedDetail += "</ul></div>";
+                                } else {
+                                    detailRacikan = racikan[a].detail;
+                                    parsedDetail += "<div class=\"col-md-12\">" +
+                                        "<span class=\"badge badge-outline-success badge-custom-caption\">" + racikan[a].kode + "</span><br />" +
+                                        "<div style=\"padding-left: 20px;\">" + racikan[a].signa_qty + " &times; " + racikan[a].signa_pakai + " <label class=\"text-info\">[" + racikan[a].qty + "]</label></div>" +
+                                        "<ul>";
+                                    for(var b in detailRacikan) {
+                                        parsedDetail += "<li style=\"margin-bottom: 5px;\"> " + detailRacikan[b].detail.nama + "</li>";
+                                    }
+                                    parsedDetail += "</ul></div>";
                                 }
-                                parsedDetail += "</ul></div>";
                             }
                             parsedDetail += "</div>";
                         }
@@ -573,7 +584,6 @@
                         }
                     }
 
-                    console.log(filteredData[0].uid_kunjungan);
                     if(filteredData.length > 0) {
                         selectedKunjungan = filteredData[0].uid_kunjungan;
                         selectedPenjamin = filteredData[0].uid_penjamin;
@@ -1392,7 +1402,6 @@
                             nurse_station: nurse_station
                         },
                         success: function (response) {
-                            console.log(response);
                             var data = [];
                             if(response.response_package !== undefined) {
                                 data = response.response_package.response_data;

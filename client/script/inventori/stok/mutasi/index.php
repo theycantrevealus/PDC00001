@@ -146,6 +146,7 @@
                             request: "proses_mutasi",
                             status: "R",
                             igd: "Y",
+                            inap: "Y",
                             uid: targettedUID
                         },
                         success: function(resp) {

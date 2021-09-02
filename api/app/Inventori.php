@@ -4771,8 +4771,22 @@ class Inventori extends Utility
                         }
 
 
-                        if(isset($parameter['inap'])) {
-                            //Check Semua Permintaan Resep NS
+                        //Checker Batch
+                        $CheckBatchInap = self::$query->select('rawat_inap_batch', array(
+                            'id'
+                        ))->where(array(
+                            'rawat_inap_batch.obat' => '= ?',
+                            'AND',
+                            'rawat_inap_batch.batch' => '= ?',
+                            'AND',
+                            'rawat_inap_batch.mutasi' => '= ?'
+                        ), array(
+                            $MutValue['item'],
+                            $MutValue['batch'],
+                            $parameter['uid']
+                        ))
+                            ->execute();
+                        if(count($CheckBatchInap['response_data']) > 0) {
                             $CheckNS = self::$query->update('rawat_inap_batch', array(
                                 'status' => 'Y'
                             ))
@@ -4788,7 +4802,25 @@ class Inventori extends Utility
                                     $parameter['uid']
                                 ))
                                 ->execute();
-                        } else if(isset($parameter['igd'])) {
+                        }
+
+
+
+                        $CheckBatchIGD = self::$query->select('igd_batch', array(
+                            'id'
+                        ))->where(array(
+                            'igd_batch.obat' => '= ?',
+                            'AND',
+                            'igd_batch.batch' => '= ?',
+                            'AND',
+                            'igd_batch.mutasi' => '= ?'
+                        ), array(
+                            $MutValue['item'],
+                            $MutValue['batch'],
+                            $parameter['uid']
+                        ))
+                            ->execute();
+                        if(count($CheckBatchIGD['response_data']) > 0) {
                             $CheckNS = self::$query->update('igd_batch', array(
                                 'status' => 'Y'
                             ))
