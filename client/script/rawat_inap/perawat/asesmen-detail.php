@@ -283,7 +283,8 @@
                             returnedData[a].racikan.length > 0 &&
                             returnedData[a].detail.length > 0
                         ) {
-                            habis = (((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0) && (currentRacikanQty === RacikanStokTerpakai));
+                            //habis = (((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0) && (currentRacikanQty === RacikanStokTerpakai));
+                            habis = ((currentRacikanQty === RacikanStokTerpakai));
                         } else {
                             if(
                                 returnedData[a].racikan.length > 0 &&
