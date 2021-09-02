@@ -201,6 +201,7 @@
                         keterangan_racikan = data.resep[0].keterangan_racikan;
 
                         for(var resepKey in resep_obat_detail) {
+                            console.log(resep_obat_detail[resepKey]);
                             totalResep = autoResep({
                                 "obat": resep_obat_detail[resepKey].obat,
                                 "obat_detail": resep_obat_detail[resepKey].obat_detail,
@@ -210,7 +211,8 @@
                                 "signaTakar": resep_obat_detail[resepKey].signa_pakai,
                                 "signaHari": resep_obat_detail[resepKey].qty,
                                 "iterasi": resep_obat_detail[resepKey].iterasi,
-                                "qty_roman": resep_obat_detail[resepKey].qty_roman
+                                "qty_roman": resep_obat_detail[resepKey].qty_roman,
+                                "sat_konsumsi": resep_obat_detail[resepKey].satuan_konsumsi,
                             });
                             if(currentData.resep[resep_obat_detail[resepKey].obat] === undefined) {
                                 currentData.resep[resep_obat_detail[resepKey].obat] = {
@@ -325,7 +327,8 @@
             "signaHari": 0,
             "pasien_penjamin_uid": "",
             "iterasi": 0,
-            "qty_roman": ""
+            "qty_roman": "",
+            "sat_konsumsi": ""
         }) {
             $("#table-resep tbody tr").removeClass("last-resep");
             var newRowResep = document.createElement("TR");
@@ -385,7 +388,7 @@
             }).val(setter.keterangan);*/
 
             if(parseInt(setter.iterasi) > 0) {
-                $(newCellResepObat).append("<br /><h3 class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times;</h3>");
+                $(newCellResepObat).append("<br /><h3 sath=\"" + setter.sat_konsumsi + "\" class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times;</h3>");
             }
 
             var itemData = [];
@@ -2507,6 +2510,7 @@
                 var keterangan = $("#keterangan_resep_obat_" + id).val();
                 var iterasi = $("#iterasi_resep_obat_" + id).attr("data");
                 var roman = $("#resep_obat_" + id).attr("roman");
+                var sath = $("#iterasi_resep_obat_" + id).attr("sath");
                 itemP.push({
                     obat: [obat],
                     signa: "<b class=\"resep_script\"><span class=\"integral_sign\">&int;</span> " + signaA + " dd. " + signaB + "</b>",
@@ -2515,7 +2519,8 @@
                     jumlah: jumlah,
                     iterasi: iterasi,
                     detOrig: (me.is(":checked")) ? "Y" : "N",
-                    roman: roman
+                    roman: roman,
+                    sath: sath
                 });
             });
 
@@ -2554,7 +2559,8 @@
                     jumlah: jumlah,
                     roman: roman,
                     iterasi: iterasi,
-                    detOrig: (me.is(":checked")) ? "Y" : "N"
+                    detOrig: (me.is(":checked")) ? "Y" : "N",
+                    sath: ""
                 });
             });
             //Ambil Semua Racikan yang dicentang
@@ -2579,7 +2585,7 @@
                     "<td style=\"padding-bottom: 1cm !important; position: relative; color: #000 !important;\">" +
                     obatList +
                     "<h5 class=\"text-right resep_script\">" + " <b>" + itemP[a].roman + "</b><br />" +((parseInt(itemP[a].iterasi) > 0) ? ("Iter " + itemP[a].iterasi + " &times;") : "") + "</h5>" +
-                    "<h4>" + itemP[a].signa + "</h4>" +
+                    "<h4>" + itemP[a].signa + ((itemP[a].sath !== "") ? (" <b class=\"resep_script\">da. In " + itemP[a].sath.toLowerCase()) + "</b>" : "") + "</h4>" +
                     "<h6 class=\"text-right resep_script\" style=\"border-bottom: dashed 1px #000; margin-bottom: 10px\">" + ((parseInt(itemP[a].jumlah) > 0) ? ("det orig") : "ne det") + "</h6>" +
                     "</td>" +
                     "</tr>");
