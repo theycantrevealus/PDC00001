@@ -284,7 +284,7 @@
                             returnedData[a].detail.length > 0
                         ) {
                             //habis = (((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0) && (currentRacikanQty === RacikanStokTerpakai));
-                            habis = ((currentRacikanQty === RacikanStokTerpakai));
+                            habis = ((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0);
                         } else {
                             if(
                                 returnedData[a].racikan.length > 0 &&
