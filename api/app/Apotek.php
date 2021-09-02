@@ -3714,6 +3714,8 @@ class Apotek extends Utility
             'pasien',
             'total',
             'status_resep',
+            'waktu_panggil',
+            'waktu_terima',
             'created_at',
             'updated_at'
         ))
@@ -3759,6 +3761,8 @@ class Apotek extends Utility
                     'pasien',
                     'total',
                     'status_resep',
+                    'waktu_panggil',
+                    'waktu_terima',
                     'created_at',
                     'updated_at'
                 ))
@@ -3789,6 +3793,8 @@ class Apotek extends Utility
                     'pasien',
                     'total',
                     'status_resep',
+                    'waktu_panggil',
+                    'waktu_terima',
                     'created_at',
                     'updated_at'
                 ))
@@ -3829,6 +3835,8 @@ class Apotek extends Utility
                     'pasien',
                     'total',
                     'status_resep',
+                    'waktu_panggil',
+                    'waktu_terima',
                     'created_at',
                     'updated_at'
                 ))
@@ -3859,6 +3867,8 @@ class Apotek extends Utility
                     'pasien',
                     'total',
                     'status_resep',
+                    'waktu_panggil',
+                    'waktu_terima',
                     'created_at',
                     'updated_at'
                 ))
@@ -3921,6 +3931,24 @@ class Apotek extends Utility
 
             $PasienData = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
+
+            if($value['departemen'] === __POLI_INAP__ || $value['departemen'] === __POLI_IGD__) {
+                $start_date = new \DateTime($value['created_at']);
+                $since_start = $start_date->diff(new \DateTime($value['waktu_terima']));
+                $data['response_data'][$key]['response_time'] = (isset($value['waktu_terima']) && $value['waktu_terima'] !== '' && !empty($value['waktu_terima'])) ? str_pad($since_start->h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->i, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->s, 2, '0', STR_PAD_LEFT) : '-';
+                $data['response_data'][$key]['response_to'] = $value['waktu_terima'];
+            } else {
+                $start_date = new \DateTime($value['created_at']);
+                $since_start = $start_date->diff(new \DateTime($value['waktu_panggil']));
+                $data['response_data'][$key]['response_time'] = (isset($value['waktu_panggil']) && $value['waktu_panggil'] !== '' && !empty($value['waktu_panggil'])) ? str_pad($since_start->h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->i, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->s, 2, '0', STR_PAD_LEFT) : '-';
+                $data['response_data'][$key]['response_to'] = $value['waktu_panggil'];
+            }
+
+            $minutes = $since_start->days * 24 * 60;
+            $minutes += $since_start->h * 60;
+            $minutes += $since_start->i;
+            $data['response_data'][$key]['response_min'] = $minutes;
+
 
             //Departemen Info
             if($value['departemen'] === __POLI_INAP__) {

@@ -25,6 +25,7 @@
                     var uniqueData = {};
 
                     console.clear();
+                    console.log(response);
 
 
                     if(response === undefined || response.response_package === undefined) {
@@ -113,7 +114,7 @@
                         var kategoriObat = "";
                         for(var kategoriObatKey in row.kategori_obat) {
                             if(row["kategori_obat"][kategoriObatKey].kategori != null) {
-                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-info\">" + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
+                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-outline-purple badge-custom-caption\">" + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
                             }
                         }
 
@@ -122,7 +123,7 @@
                             "<center><img style=\"border-radius: 5px;\" src=\"" + __HOST__ + row.image + "\" width=\"60\" height=\"60\" /></center>" +
                             "</div>" +
                             "<div class=\"col-md-10\">" +
-                            "<b><i>" + ((row.kode_barang == undefined) ? "[KODE_BARANG]" : row.kode_barang.toUpperCase()) + "</i></b><br />" +
+                            "<b><i class=\"text-info\">" + ((row.kode_barang == undefined) ? "[KODE_BARANG]" : row.kode_barang.toUpperCase()) + "</i></b><br />" +
                             "<h5>" + ((row.detail !== null) ? row.detail.nama.toUpperCase() : "") + "</h5>" +
                             kategoriObat +
                             "</div>" +
@@ -136,7 +137,12 @@
                         for(var az in row.batch) {
                             counter+= parseFloat(row.batch[az]);
                         }
-                        return "<h5 class=\"number_style wrap_content\">" + counter + "</h5>";
+                        return "<h5 class=\"number_style text-right\">" + counter + "</h5>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<h6 class=\"wrap_content\">" + row.detail.satuan_terkecil_info.nama + "</h6>";
                     }
                 },
                 {

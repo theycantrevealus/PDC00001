@@ -1602,13 +1602,24 @@
 
             var racikanUID = $(this).attr("uid-racikan");
             currentRacikanActive = racikanUID;
-            verifData = CheckVerifRacikan(verifData, Pid, {
-                uid: racikanUID
-            }, currentData, alasanRacikanLib);
 
-            $("#single_komposisi_" + Pid + "_" + thisID).remove();
-            rebaseKomposisi(Pid);
-            refreshBatch($("#obat_komposisi_" + Pid + "_" + thisID + " h6").attr("uid-obat"), Pid + "_" + thisID, "racikan");
+            Swal.fire({
+                title: "Verfikasi Resep",
+                text: "Hapus item komposisi?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Tidak",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    verifData = CheckVerifRacikan(verifData, Pid, {
+                        uid: racikanUID
+                    }, currentData, alasanRacikanLib);
+
+                    $("#single_komposisi_" + Pid + "_" + thisID).remove();
+                    rebaseKomposisi(Pid);
+                    refreshBatch($("#obat_komposisi_" + Pid + "_" + thisID + " h6").attr("uid-obat"), Pid + "_" + thisID, "racikan");
+                }
+            });
 
             return false;
         });
@@ -2483,7 +2494,10 @@
                 id = id[id.length - 1];
                 var me = $(this);
 
-                var obat = $("#resep_obat_" + id + " option:selected").html();
+                var regX = /(<([^>]+)>)/ig;
+                var el = document.createElement("DIV");
+                $(el).html($("#resep_obat_" + id + " option:selected").text());
+                var obat = isHTML($("#resep_obat_" + id + " option:selected").text()) ? $(el).find("div").html() : $("#resep_obat_" + id + " option:selected").text();
                 /*var signaA = $("#resep_signa_konsumsi_" + id).inputmask("unmaskedvalue");
                 var signaB = $("#resep_signa_takar_" + id).inputmask("unmaskedvalue");*/
                 var signaA = $("#resep_signa_konsumsi_" + id).val();
@@ -2557,12 +2571,12 @@
             for(var a in itemP) {
                 var obatList = "";
                 for(var b in itemP[a].obat) {
-                    obatList += "<h5>" + itemP[a].obat[b] + "</h5>";
+                    obatList += "<h5 style=\"color: #000 !important\">" + itemP[a].obat[b] + "</h5>";
                 }
 
                 $("#copy-resep-report").append("<tr>" +
                     "<td class=\"resep_script\">R/</td>" +
-                    "<td style=\"padding-bottom: 1cm !important; position: relative\">" +
+                    "<td style=\"padding-bottom: 1cm !important; position: relative; color: #000 !important;\">" +
                     obatList +
                     "<h5 class=\"text-right resep_script\">" + " <b>" + itemP[a].roman + "</b><br />" +((parseInt(itemP[a].iterasi) > 0) ? ("Iter " + itemP[a].iterasi + " &times;") : "") + "</h5>" +
                     "<h4>" + itemP[a].signa + "</h4>" +

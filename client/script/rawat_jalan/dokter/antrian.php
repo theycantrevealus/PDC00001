@@ -3965,7 +3965,7 @@
                     return "Radiologi";
                 }
             },
-            placeholder:"Cari Radiologi",
+            placeholder:"Cari Pemeriksaan",
             ajax: {
                 dataType: "json",
                 headers:{
@@ -4775,7 +4775,7 @@
                         return "Laboratorium";
                     }
                 },
-                placeholder:"Cari Laboratorium",
+                placeholder:"Cari Pemeriksaan",
                 ajax: {
                     dataType: "json",
                     headers:{
