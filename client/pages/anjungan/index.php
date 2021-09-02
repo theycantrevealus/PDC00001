@@ -10,8 +10,8 @@
 						<center>
 							<table style="margin-top: 50px;">
 								<tr>
-									<td>
-										<img width="120" height="120" src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.png" />
+									<td style="padding-right: 100px;">
+										<img width="200" height="60" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-black-<?php echo __PC_IDENT__; ?>.png" />
 									</td>
 									<td>
 										<h3><?php echo __PC_CUSTOMER__; ?></h3>

@@ -4,6 +4,7 @@
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "", targettedDataResep = {};
         var kelompokObat = {};
         var nurse_station = __PAGES__[6];
+        var uid_ranap = __PAGES__[7];
         var nurse_station_info = {};
 
         $.ajax({
@@ -65,7 +66,6 @@
 
                 var autonum = 1;
                 for(var a in filteredLunas) {
-                    console.log(filteredLunas[a]);
                     var newRow = document.createElement("TR");
                     var newNo = document.createElement("TD");
                     var newItem = document.createElement("TD");
@@ -266,7 +266,9 @@
                         for(var b in returnedData[a].detail) { //Resep
                             currentResepQty = parseFloat(returnedData[a].detail[b].qty);
                             for(var c in returnedData[a].detail[b].stok_ns) {
-                                ResepStokTersedia += parseFloat(returnedData[a].detail[b].stok_ns[c].qty);
+                                if(returnedData[a].detail[b].stok_ns[c].status === "Y") {
+                                    ResepStokTersedia += parseFloat(returnedData[a].detail[b].stok_ns[c].qty);
+                                }
                             }
                         }
 
@@ -387,7 +389,7 @@
                             return "<span class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-info-circle\"></i> Belum Diserahkan</span>";
                         } else {
                             if(row.habis) {
-                                return "<span class=\"badge badge-danger badge-custom-caption\"><i class=\"fa fa-times-circle\"></i> Stok Habis</span>";
+                                return "<span class=\"badge badge-danger badge-custom-caption\"><i class=\"fa fa-times-circle\"></i> Tidak Tersedia</span>";
                             } else {
                                 return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                     "<button class=\"btn btn-success btn-sm berikanObat\" id=\"resep_" + row.uid + "\">" +
@@ -399,6 +401,141 @@
                     }
                 }
             ]
+        });
+
+
+
+        var tableAntrianRawat = $("#table-antrian-rawat-jalan-perawat").DataTable({
+            "ajax":{
+                url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-rawat/inap",
+                type: "GET",
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var filteredData = [];
+                    var data = response.response_package;
+
+                    if(data !== undefined) {
+                        for(var a = 0; a < data.length; a++) {
+                            if(
+                                data[a].uid_pasien === __PAGES__[3] &&
+                                data[a].uid_kunjungan === __PAGES__[4] &&
+                                data[a].uid_poli === __POLI_INAP__
+                            ) {
+                                filteredData.push(data[a]);
+                            }
+                        }
+
+                        /*if(filteredData.length > 0) {
+                            selectedKunjungan = filteredData[0].uid_kunjungan;
+                            selectedPenjamin = filteredData[0].uid_penjamin;
+                            selected_waktu_masuk = filteredData[0].waktu_masuk;
+                            //console.log(filteredData[0].pasien_detail);
+                            $("#target_pasien").html(filteredData[0].pasien);
+                            $("#rm_pasien").html(filteredData[0].no_rm);
+                            $("#nama_pasien").html((filteredData[0].pasien_detail.panggilan_name === null) ? filteredData[0].pasien_detail.nama : filteredData[0].pasien_detail.panggilan_name.nama + " " +  filteredData[0].pasien_detail.nama);
+                            $("#jenkel_pasien").html(filteredData[0].pasien_detail.jenkel_detail.nama);
+                            $("#tempat_lahir_pasien").html(filteredData[0].pasien_detail.tempat_lahir);
+                            $("#alamat_pasien").html(filteredData[0].pasien_detail.alamat);
+                            $("#usia_pasien").html(filteredData[0].pasien_detail.usia);
+                            $("#tanggal_lahir_pasien").html(filteredData[0].pasien_detail.tanggal_lahir_parsed);
+                            $("#dokter_pasien").html(filteredData[0].dokter);
+                        } else {
+                            //Pasien Detail
+
+                            $.ajax({
+                                url: __HOSTAPI__ + "/Pasien/pasien-detail/" + __PAGES__[3],
+                                async:false,
+                                beforeSend: function(request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                type:"GET",
+                                success:function(response) {
+                                    var pasienData = response.response_package.response_data;
+                                    $("#target_pasien").html(pasienData[0].nama);
+                                    $("#rm_pasien").html(pasienData[0].no_rm);
+                                    $("#nama_pasien").html((pasienData[0].panggilan_name === null) ? pasienData[0].nama : pasienData[0].panggilan_name.nama + " " +  pasienData[0].nama);
+                                    $("#usia_pasien").html(pasienData[0].usia);
+                                    $("#jenkel_pasien").html(pasienData[0].jenkel_detail.nama);
+                                    $("#tanggal_lahir_pasien").html(pasienData[0].tanggal_lahir_parsed);
+                                    $("#tempat_lahir_pasien").html(pasienData[0].tempat_lahir);
+                                    $("#alamat_pasien").html(pasienData[0].alamat);
+                                },
+                                error: function(response) {
+                                    console.log(response);
+                                }
+                            });
+                        }*/
+
+                        return filteredData;
+                    } else {
+                        return [];
+                    }
+                }
+            },
+            autoWidth: false,
+            "bInfo" : false,
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.waktu_masuk;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.perawat.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/igd/perawat/antrian/" + row.uid + "/" + row.uid_pasien + "/" + row.uid_kunjungan + "\" class=\"btn btn-success btn-sm\">" +
+                            "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                            "</a>" +
+                            "</div>";
+                    }
+                }
+            ]
+        });
+
+        $("#btnTambahAsesmenRawat").click(function() {
+            $(this).attr({
+                "disabled": "disabled"
+            }).removeClass("btn-info").addClass("btn-warning").html("<i class=\"fa fa-sync\"></i> Menambahkan Asesmen");
+
+            var formData = {
+                request: "tambah_asesmen",
+                penjamin: __PAGES__[5],
+                kunjungan: __PAGES__[4],
+                pasien: __PAGES__[3],
+                poli: __POLI_INAP__
+            };
+
+            $.ajax({
+                url: __HOSTAPI__ + "/Inap",
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"POST",
+                data: formData,
+                success:function(response) {
+                    location.href = __HOSTNAME__ + "/rawat_inap/perawat/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4];
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
         });
 
 
@@ -424,6 +561,7 @@
                         }
                     }
 
+                    console.log(filteredData[0].uid_kunjungan);
                     if(filteredData.length > 0) {
                         selectedKunjungan = filteredData[0].uid_kunjungan;
                         selectedPenjamin = filteredData[0].uid_penjamin;
@@ -514,7 +652,6 @@
                 },
                 success:function(response) {
                     targettedDataResep = response.response_package.response_data[0];
-                    console.log(targettedDataResep);
                     $("#form-berikan-resep").modal("show");
                     $("#resep_dokter").html(targettedDataResep.dokter.nama);
                     $("#resep_tanggal").html(targettedDataResep.created_at_parsed);
@@ -554,11 +691,14 @@
 
                 $(newResepRemark).addClass("form-control").attr({
                     "placeholder": "Keterangan Tambahan"
+                }).css({
+                    "min-height": "100px"
                 });
 
-                var kebutuhan = parseFloat(targettedDataResep.detail[a].signa_pakai);
+                // var kebutuhan = parseFloat(targettedDataResep.detail[a].signa_pakai);
+                var kebutuhan = parseFloat(eval(targettedDataResep.detail[a].signa_pakai));
 
-                $(newResepNo).html(autonum);
+                $(newResepNo).html("<h5 class=\"autonum\">" + autonum + "</h5>");
 
                 var currentTotal = 0;
 
@@ -608,7 +748,7 @@
 
                         currentTotal = totalItem;
 
-                        $(newResepQtyCount).val(parseFloat(targettedDataResep.detail[a].signa_pakai)).inputmask({
+                        /*$(newResepQtyCount).val(parseFloat(targettedDataResep.detail[a].signa_pakai)).inputmask({
                             alias: 'decimal',
                             rightAlign: true,
                             placeholder: "0.00",
@@ -619,6 +759,12 @@
                             "max-width": "50px",
                             "float": "right"
                         }).attr({
+                            "disabled": "disabled"
+                        });*/
+                        $(newResepQtyCount).val(targettedDataResep.detail[a].signa_pakai).css({
+                            "max-width": "50px",
+                            "float": "right"
+                        }).addClass("form-control").attr({
                             "disabled": "disabled"
                         });
 
@@ -727,7 +873,8 @@
                         }
 
                     });
-                    var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                    // var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                    var qty = parseFloat(eval($(this).find("td:eq(2) input").val()));
                     var keterangan = $(this).find("td:eq(1) textarea").val();
                     if(obat !== "" && qty > 0) {
                         item.push({
@@ -744,7 +891,6 @@
 
 
 
-            console.log(item);
             if(item.length > 0) {
                 Swal.fire({
                     title: "Riwayat Pemberian Obat",
@@ -768,7 +914,6 @@
                                 item: item
                             },
                             success:function(response) {
-                                console.log(response);
                                 $("#form-berikan-resep").modal("hide");
                                 $("#form-konfirmasi-berikan-resep").modal("hide");
                                 tableRiwayatObat.ajax.reload();
@@ -1219,7 +1364,7 @@
                 denyButtonText: "Belum",
             }).then((result) => {
                 if (result.isConfirmed) {
-                                        //Get Riwayat Pemberian Obat
+                    //Get Riwayat Pemberian Obat
                     $.ajax({
                         async: false,
                         url: __HOSTAPI__ + "/Inap",
@@ -1229,18 +1374,17 @@
                         type: "POST",
                         data: {
                             request: "kalkulasi_sisa_obat_2",
-                            kunjungan: selectedKunjungan,
+                            kunjungan: __PAGES__[4],
                             pasien: __PAGES__[3],
                             gudang: nurse_station_info.gudang,
                             nurse_station: nurse_station
                         },
                         success: function (response) {
+                            console.log(response);
                             var data = [];
                             if(response.response_package !== undefined) {
                                 data = response.response_package.response_data;
                             }
-
-                            console.log(data);
 
                             var kebutuhan = 0;
 
@@ -1424,6 +1568,8 @@
                         type: "POST",
                         data: {
                             request: "konfirmasi_retur_obat",
+                            uid: uid_ranap,
+                            status: "N",
                             gudang: nurse_station_info.gudang,
                             pasien: __PAGES__[3],
                             item: parsedData,

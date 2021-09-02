@@ -3,20 +3,26 @@
 		<div class="card">
 			<div class="card-header card-header-large bg-white align-items-center">
                 <div class="row info-kwitansi">
-                    <div class="col-6">
-                        <span class="card-header__title" id="nama-pasien-faktur"></span>
+                    <div class="col-4">
+                        <span class="nomor-faktur"></span>
                     </div>
-                    <div class="col-6">
-                        <span class="card-header__title" id="pegawai-faktur"></span>
+                    <div class="col-4">
+                        <span id="nama-pasien-faktur"></span>
                     </div>
-                </div>
-                <br />
-                <div class="row info-kwitansi">
-                    <div class="col-6">
-                        <span class="card-header__title" id="tanggal-faktur"></span>
+                    <div class="col-4">
+                        <span id="pegawai-faktur"></span>
                     </div>
-                    <div class="col-6">
-                        <span class="card-header__title" id="poli"></span>
+                    <div class="col-12">
+                        <br />
+                    </div>
+                    <div class="col-4">
+                        <span id="tanggal-faktur"></span>
+                    </div>
+                    <div class="col-4">
+                        <span id="poli"></span>
+                    </div>
+                    <div class="col-12">
+                        <br />
                     </div>
                 </div>
 			</div>
@@ -39,12 +45,12 @@
 						<tbody></tbody>
 						<tfoot>
 							<tr>
-								<td colspan="4" rowspan="3" id="keterangan-faktur">
+								<td colspan="4" rowspan="2" id="keterangan-faktur">
 								</td>
 								<td class="text-right">
 									Total
 								</td>
-								<td id="total-faktur" class="text-right">0.00</td>
+								<td id="total-faktur" class="number_style">0.00</td>
 							</tr>
 							<!--tr>
 								<td class="text-right">Diskon</td>
@@ -56,7 +62,7 @@
 								<td class="text-right">
 									Grand Total
 								</td>
-								<td id="grand-total-faktur" class="text-right">0.00</td>
+								<td id="grand-total-faktur" class="number_style">0.00</td>
 							</tr>
 						</tfoot>
 					</table>

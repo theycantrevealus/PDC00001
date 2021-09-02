@@ -11,86 +11,46 @@
 							
 
 							<div class="card card-form d-flex flex-column flex-sm-row">
-								<div class="card-form__body card-body-form-group flex">
-									<div class="row">
-										<div class="col-sm-auto">
-											<div class="form-group" style="width: 200px;">
-												<label for="filter_date">Dari - Sampai</label>
-												<input id="filter_date" type="text" class="form-control" placeholder="Select date ..." value="13/03/2018 to 20/03/2018" data-toggle="flatpickr" data-flatpickr-mode="range" data-flatpickr-alt-format="d/m/Y" data-flatpickr-date-format="d/m/Y">
-											</div>
-										</div>
-									</div>
+								<div class="card-body-form-group flex">
+                                    <div class="row">
+                                        <div class="col-md-auto">
+                                            <div class="form-group" style="width: 400px;">
+                                                <label for="filter_date">Dari - Sampai</label>
+                                                <input id="filter_date" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                            </div>
+                                        </div>
+                                    </div>
 								</div>
 								<button class="btn bg-white border-left border-top border-top-sm-0 rounded-top-0 rounded-top-sm rounded-left-sm-0"><i class="material-icons text-primary">refresh</i></button>
 							</div>
 
 
                             <div id="cppt_pagination">
+
                             </div>
-                            <div id="cppt_loader">
-							</div>
+                            <div class="card">
+                                <div id="cppt_loader" class="card-body">
+                                    <div class="no-data-panel">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div style="padding: 50px;">
+                                                    <h1 class="text-muted">Tidak ada Data Ditemukan</h1>
+                                                    <p style="padding: 10px;">Silahkan ubah filter pencarian untuk mendapatkan data lain.</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <img style="width: 100%;" alt="no-data" src="<?php echo __HOSTNAME__; ?>/template/assets/images/illustration/undraw_startled_8p0r.png" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
 
 							<div class="mt-4">
-
                                 <ul class="pagination justify-content-center" id="pagin">
-
+                                    awdawd
                                 </ul>
-
-								<!--<ul class="pagination justify-content-center">
-
-									<li class="page-item disabled">
-										<a class="page-link" href="#" aria-label="Previous">
-											<span aria-hidden="true" class="material-icons">first_page</span>
-											<span class="sr-only">First</span>
-										</a>
-									</li>
-
-									<li class="page-item disabled">
-										<a class="page-link" href="#" aria-label="Previous">
-											<span aria-hidden="true" class="material-icons">chevron_left</span>
-											<span class="sr-only">Prev</span>
-										</a>
-									</li>
-
-									<li class="page-item active">
-										<a class="page-link" href="#" aria-label="1">
-											<span>1</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="2">
-											<span>2</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="3">
-											<span>3</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="4">
-											<span>4</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="Next">
-											<span class="sr-only">Next</span>
-											<span aria-hidden="true" class="material-icons">chevron_right</span>
-										</a>
-									</li>
-
-									<li class="page-item">
-										<a class="page-link" href="#" aria-label="Next">
-											<span class="sr-only">Last</span>
-											<span aria-hidden="true" class="material-icons">last_page</span>
-										</a>
-									</li>
-								</ul>-->
 							</div>
 						</div>
 					</div>

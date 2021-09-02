@@ -33,8 +33,7 @@
                         rawData = response.response_package.response_data;
                     }
 
-                    for(var dataKey in rawData)
-                    {
+                    for(var dataKey in rawData) {
                         if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
                             if(uniqueData[rawData[dataKey].barang] === undefined) {
                                 uniqueData[rawData[dataKey].barang] = {
@@ -53,21 +52,14 @@
                             var uniqueBatch = {};
                             if(Array.isArray(rawData[dataKey].batch)) {
                                 var batchData = rawData[dataKey].batch;
-
-
                                 for(var bKey in batchData) {
-                                    if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
+                                    if(batchData[bKey].gudang.uid === __UNIT__.gudang && batchData[bKey].barang === rawData[dataKey].barang) {
                                         if(uniqueBatch[batchData[bKey].batch] === undefined && uniqueBatch[batchData[bKey].batch] === null) {
                                             uniqueBatch[batchData[bKey].batch] = 0;
                                         }
                                         uniqueBatch[batchData[bKey].batch] = parseFloat(batchData[bKey].stok_terkini);
-                                    }
-
-
-
-                                    /*if(batchData[bKey].gudang.uid === __UNIT__.gudang) {
                                         uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
-                                    }*/
+                                    }
                                 }
 
                                 uniqueData[rawData[dataKey].barang].batch = uniqueBatch;
@@ -75,11 +67,13 @@
                         }
                     }
 
+                    console.log(uniqueData);
+
                     var autonum = 1;
                     for(var pKey in uniqueData) {
 
                         for(var bza in uniqueData[pKey].batch) {
-                            uniqueData[rawData[dataKey].barang].stok_batch += uniqueBatch[bza];
+                            //uniqueData[rawData[dataKey].barang].stok_batch += uniqueBatch[bza];
                         }
 
                         returnedData.push({
@@ -90,7 +84,8 @@
                             image: uniqueData[pKey].image,
                             kategori_obat: rawData[dataKey].kategori_obat,
                             kode_barang: rawData[dataKey].kode_barang,
-                            stok_batch: uniqueData[pKey].stok_batch
+                            stok_batch: uniqueData[pKey].stok_batch,
+                            batch: uniqueData[pKey].batch
                         });
                         autonum++;
                     }
@@ -110,7 +105,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -136,7 +131,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"number_style\">" + row.stok_batch + "</h5>";
+                        //return "<h5 class=\"number_style wrap_content\">" + row.stok_terkini + "</h5>";
+                        var counter = 0;
+                        for(var az in row.batch) {
+                            counter+= parseFloat(row.batch[az]);
+                        }
+                        return "<h5 class=\"number_style wrap_content\">" + counter + "</h5>";
                     }
                 },
                 {

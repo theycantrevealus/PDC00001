@@ -24,6 +24,13 @@
                                 <td class="wrap_content"> : </td>
 								<td><b><span id="jenkel"></span></b></td>
 							</tr>
+                            <tr>
+                                <td>Waktu Sampling</td>
+                                <td class="wrap_content"> : </td>
+                                <td>
+                                    <input id="tanggal_sampling" type="time" class="form-control" />
+                                </td>
+                            </tr>
 						</tbody>
 					</table>
 				</div>
@@ -32,13 +39,15 @@
         <div id="hasil_pemeriksaan" class="hasil_pemeriksaan">
 
         </div>
-        <div class="col-md-12 form-group">
-            <label>Kesan:</label>
-            <textarea style="min-height: 200px" type="text" name="kesan" id="kesan" class="form-control informasi"></textarea>
-        </div>
-        <div class="col-md-12 form-group">
-            <label>Anjuran:</label>
-            <textarea style="min-height: 200px" type="text" name="anjuran" id="anjuran" class="form-control informasi"></textarea>
+        <div class="tab-dokter row">
+            <div class="col-md-12 form-group">
+                <label>Kesan:</label>
+                <textarea style="min-height: 200px" type="text" name="kesan" id="kesan" class="form-control informasi"></textarea>
+            </div>
+            <div class="col-md-12 form-group">
+                <label>Anjuran:</label>
+                <textarea style="min-height: 200px" type="text" name="anjuran" id="anjuran" class="form-control informasi"></textarea>
+            </div>
         </div>
 	</div>
 </div>

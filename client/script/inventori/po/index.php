@@ -34,7 +34,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -49,7 +49,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<h6 class=\"text-right\">" + number_format (row.total_after_disc, 2, ".", ",") + "</h6>";
+						return "<h6 class=\"number_style\">" + number_format (row.total_after_disc, 2, ".", ",") + "</h6>";
 					}
 				},
 				{

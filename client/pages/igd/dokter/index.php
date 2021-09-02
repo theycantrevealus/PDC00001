@@ -46,6 +46,11 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-lg-12">
+                                    <button type="button" class="btn btn-purple" id="btnInap">
+                                        <i class="fa fa-bed"></i> Pindah Rawat Inap
+                                    </button>
+                                </div>
                                 <!--divclass="col-md col-lg-3 handy print_manager" id="kartu">
                                     <div class="card form-row__card bg-purple text-white">
                                         <div class="card-body">
@@ -60,13 +65,13 @@
 			</div>
 			<div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">List Asesmen</h5>
+                    <h5 class="card-header__title flex m-0">Rekam Medis</h5>
                     <button class="btn btn-info pull-right" id="btnTambahAsesmen">
                         <i class="fa fa-plus"></i> Tambah Asesmen
                     </button>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+                    <!--<table class="table table-bordered table-striped" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
                         <thead class="thead-dark">
                         <tr>
                             <th class="wrap_content">No</th>
@@ -78,7 +83,10 @@
                         <tbody>
 
                         </tbody>
-                    </table>
+                    </table>-->
+                    <div id="cppt_loader">
+
+                    </div>
                 </div>
 			</div>
 		</div>

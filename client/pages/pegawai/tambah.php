@@ -41,7 +41,7 @@ $targetID = __PAGES__[count(__PAGES__) - 1];
                     </li>
                 </ul>
             </div>
-            <div class="card card-body tab-content">
+            <div class="tab-content">
                 <div class="tab-pane active show fade" id="tab-awal-1">
                     <div class="card">
                         <div class="card-header card-header-large bg-white d-flex align-items-center">
@@ -102,7 +102,7 @@ $targetID = __PAGES__[count(__PAGES__) - 1];
                             <div class="tab-pane active show fade" id="pegawai-modul">
                                 <h5>Module</h5>
                                 <table class="table table-bordered largeDataType" id="module-table">
-                                    <thead>
+                                    <thead class="thead-dark">
                                     <tr>
                                         <th>Module</th>
                                         <th>Pages</th>
@@ -115,7 +115,7 @@ $targetID = __PAGES__[count(__PAGES__) - 1];
                             <div class="tab-pane show fade" id="pegawai-akses">
                                 <h5>Access Manager</h5>
                                 <table class="table table-bordered largeDataType" id="access-table">
-                                    <thead>
+                                    <thead class="thead-dark">
                                     <tr>
                                         <th>Class</th>
                                         <th>Methods</th>

@@ -97,9 +97,9 @@
 				</div>
 			</div>
 			<button class="btn btn-success" id="btnSubmitAmprah">
-				<i class="fa fa-cubes"></i> Amprah
+				<i class="fa fa-cubes"></i> Mutasi
 			</button>
-			<a href="<?php echo __HOSTNAME__; ?>/inventori/amprah" class="btn btn-danger">
+			<a href="<?php echo __HOSTNAME__; ?>/inventori/stok/mutasi" class="btn btn-danger">
 				<i class="fa fa-ban"></i> Batal
 			</a>
 		</div>
