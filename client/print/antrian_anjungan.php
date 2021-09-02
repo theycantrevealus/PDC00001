@@ -28,7 +28,7 @@
 <body>
 <div style="margin: 0 auto; width: 100%;">
     <center>
-        <img alt="icon" src="<?php echo $_POST['__HOSTNAME__']; ?>/template/assets/images/clients/logo-icon-<?php echo $_POST['__PC_IDENT__']; ?>.png" width="100" height="100" />
+        <img alt="icon" src="<?php echo $_POST['__HOSTNAME__']; ?>/template/assets/images/clients/logo-text-black-<?php echo $_POST['__PC_IDENT__']; ?>.png" width="200" height="60" />
         <h5>SELAMAT DATANG DI <br /><?php echo $_POST['__PC_CUSTOMER__']; ?></h5>
         <H6>NOMOR ANTRIAN ANDA</H6>
         <h1 style="font-size: 40pt; font-family: Courier; margin: 0; padding: 0"><?php echo $_POST['antrian']; ?></h1>
