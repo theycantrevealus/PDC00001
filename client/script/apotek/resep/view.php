@@ -126,14 +126,14 @@
                     $("#no-data-alergi-obat").show();
                 }
 
-                if(data.asesmen.diagnosa_kerja !== undefined && data.asesmen.diagnosa_kerja !== "" && data.asesmen.diagnosa_kerja !== null) {
+                if((data.asesmen.diagnosa_kerja !== undefined && data.asesmen.diagnosa_kerja !== "" && data.asesmen.diagnosa_kerja !== null) || data.asesmen.icd_kerja.length > 0) {
                     $("#diagnosa_utama").html(data.asesmen.diagnosa_kerja);
                     $("#no-data-diagnosa-utama").hide();
                 } else {
                     $("#no-data-diagnosa-utama").show();
                 }
 
-                if(data.asesmen.diagnosa_banding !== undefined && data.asesmen.diagnosa_banding !== "" && data.asesmen.diagnosa_banding !== null) {
+                if((data.asesmen.diagnosa_banding !== undefined && data.asesmen.diagnosa_banding !== "" && data.asesmen.diagnosa_banding !== null) || data.asesmen.icd_banding.length > 0) {
                     $("#diagnosa_banding").html(data.asesmen.diagnosa_banding);
                     $("#no-data-diagnosa-banding").hide();
                 } else {
@@ -352,7 +352,8 @@
             var newObat = document.createElement("SELECT");
             $(newObat).attr({
                 "roman": setter.qty_roman
-            })
+            });
+
             $(newCellResepObat).append(newObat).append("<ol></ol>");
 
             $(newCellResepObat).append(
@@ -375,13 +376,13 @@
             }
 
             var keteranganPerObat = document.createElement("TEXTAREA");
-            $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span>").append(keteranganPerObat);
-            $(keteranganPerObat).addClass("form-control").attr({
+            $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span><p>" + setter.keterangan + "</p>")/*.append(keteranganPerObat)*/;
+            /*$(keteranganPerObat).addClass("form-control").attr({
                 "placeholder": "Keterangan per Obat",
                 "disabled": "disabled"
             }).css({
                 "min-height": "200px"
-            }).val(setter.keterangan);
+            }).val(setter.keterangan);*/
 
             if(parseInt(setter.iterasi) > 0) {
                 $(newCellResepObat).append("<br /><h3 class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times;</h3>");
@@ -1554,6 +1555,7 @@
         }
 
         $("#txt_racikan_obat").select2();
+
         /*$("#txt_racikan_jlh").inputmask({
             alias: 'decimal',
             rightAlign: true,

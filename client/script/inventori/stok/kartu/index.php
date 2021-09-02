@@ -135,7 +135,7 @@
                         for(var az in row.batch) {
                             counter+= parseFloat(row.batch[az]);
                         }
-                        return "<h5 class=\"number_style wrap_content\">" + row.stok_terkini + "</h5>";
+                        return "<h5 class=\"number_style wrap_content\">" + counter + "</h5>";
                     }
                 },
                 {
