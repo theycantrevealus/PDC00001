@@ -253,6 +253,9 @@
 
                     var filteredData = [];
 
+                    console.clear();
+                    console.log(response);
+
 
                     for(var a in returnedData) {
                         var currentResepQty = 0;
@@ -261,11 +264,17 @@
                         var currentRacikanQty = 0;
                         var RacikanStokTerpakai = 0;
 
+                        var listMutasi = [];
+
                         var habis = true;
 
                         for(var b in returnedData[a].detail) { //Resep
                             currentResepQty = parseFloat(returnedData[a].detail[b].qty);
                             for(var c in returnedData[a].detail[b].stok_ns) {
+                                if(returnedData[a].detail[b].stok_ns[c].mutasi !== undefined && returnedData[a].detail[b].stok_ns[c].mutasi !== null && returnedData[a].detail[b].stok_ns[c].mutasi !== "") {
+                                    listMutasi.push(returnedData[a].detail[b].stok_ns[c].mutasi);
+                                }
+
                                 if(returnedData[a].detail[b].stok_ns[c].status === "Y") {
                                     ResepStokTersedia += parseFloat(returnedData[a].detail[b].stok_ns[c].qty);
                                 }
@@ -283,8 +292,8 @@
                             returnedData[a].racikan.length > 0 &&
                             returnedData[a].detail.length > 0
                         ) {
-                            //habis = (((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0) && (currentRacikanQty === RacikanStokTerpakai));
-                            habis = ((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0);
+                            habis = (((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0) && (currentRacikanQty === RacikanStokTerpakai));
+                            //habis = ((currentResepQty > ResepStokTersedia) && ResepStokTersedia === 0);
                         } else {
                             if(
                                 returnedData[a].racikan.length > 0 &&
@@ -302,6 +311,7 @@
                         }
 
                         returnedData[a].habis = habis;
+                        returnedData[a].mutasi_status = listMutasi;
 
                         filteredData.push(returnedData[a]);
                     }
@@ -390,7 +400,8 @@
                             return "<span class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-info-circle\"></i> Belum Diserahkan</span>";
                         } else {
                             if(row.habis) {
-                                return "<span class=\"badge badge-danger badge-custom-caption\"><i class=\"fa fa-times-circle\"></i> Tidak Tersedia</span>";
+                                var isMutasi = (row.mutasi_status.length > 0) ? "<br /><br /><b class=\"text-info\"><i class=\"fa fa-info-circle\"></i> Harap Terima Mutasi</b>" : "";
+                                return "<span class=\"badge badge-danger badge-custom-caption\"><i class=\"fa fa-times-circle\"></i> Tidak Tersedia</span>" + isMutasi;
                             } else {
                                 return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                     "<button class=\"btn btn-success btn-sm berikanObat\" id=\"resep_" + row.uid + "\">" +

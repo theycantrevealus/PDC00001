@@ -2208,7 +2208,7 @@ class Apotek extends Utility
 
                 //Check Ketersediaan Obat pada NS
                 $NSInap = self::$query->select('rawat_inap_batch', array(
-                    'qty', 'status'
+                    'qty', 'status', 'mutasi'
                 ))
                     ->where(array(
                         'rawat_inap_batch.gudang' => '= ?',
