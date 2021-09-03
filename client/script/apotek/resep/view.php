@@ -1893,7 +1893,7 @@
 
                 $(reasonText).css({
                     "position": "absolute",
-                    "bottom": "150px",
+                    "bottom": "50px",
                     "left": "1rem",
                     "right": "1rem",
                     "top": "auto",

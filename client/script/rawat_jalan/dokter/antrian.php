@@ -926,7 +926,7 @@
             } else {
                 allowAdd = true;
             }
-            
+
             if(allowAdd && !isNaN(parseInt($("#txt_icd_10_banding").val()))) {
                 $("#txt_diagnosa_banding_list tbody").append(
                     "<tr targetICD=\"" + parseInt($("#txt_icd_10_banding").val()) + "\">" +
