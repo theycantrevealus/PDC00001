@@ -2507,7 +2507,7 @@
                 var signaB = $("#resep_signa_takar_" + id).val();
                 var jumlah = $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue");
                 var konsumsi = $("#resep_obat_aturan_pakai_" + id + " option:selected").html();
-                var keterangan = $("#keterangan_resep_obat_" + id).val();
+                var keterangan = $("#keterangan_resep_obat_" + id).text();
                 var iterasi = $("#iterasi_resep_obat_" + id).attr("data");
                 var roman = $("#resep_obat_" + id).attr("roman");
                 var sath = ($("#iterasi_resep_obat_" + id).attr("sath") !== undefined) ? $("#iterasi_resep_obat_" + id).attr("sath") : "";
