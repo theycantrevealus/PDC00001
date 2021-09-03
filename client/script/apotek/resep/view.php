@@ -2510,7 +2510,7 @@
                 var keterangan = $("#keterangan_resep_obat_" + id).val();
                 var iterasi = $("#iterasi_resep_obat_" + id).attr("data");
                 var roman = $("#resep_obat_" + id).attr("roman");
-                var sath = $("#iterasi_resep_obat_" + id).attr("sath");
+                var sath = ($("#iterasi_resep_obat_" + id).attr("sath") !== undefined) ? $("#iterasi_resep_obat_" + id).attr("sath") : "";
                 itemP.push({
                     obat: [obat],
                     signa: "<b class=\"resep_script\"><span class=\"integral_sign\">&int;</span> " + signaA + " dd. " + signaB + "</b>",
