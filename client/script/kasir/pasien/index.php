@@ -71,9 +71,12 @@
 					    var totalTerbayar = 0;
 					    var detailCheck = dataResponse[a].status.detail;
 					    for(var b in detailCheck) {
-                            if (detailCheck[b].status === "R" && detailCheck[b].allow_retur) {
+                            /*if (detailCheck[b].status === "R" && detailCheck[b].allow_retur) {
                                 totalTerbayar += 0;
                             } else {
+                                totalTerbayar += detailCheck[b].harga;
+                            }*/
+                            if (detailCheck[b].status !== "R") {
                                 totalTerbayar += detailCheck[b].harga;
                             }
                         }
