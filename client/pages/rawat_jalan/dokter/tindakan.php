@@ -3,6 +3,7 @@
 		<div class="card">
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
 				<h5 class="card-header__title flex m-0">Tindakan</h5>
+                <span>Total Biaya : <code class="text-success" id="total_biaya_tindakan">0.00</code></span>
 			</div>
 			<div class="card-body">
 				<div class="row">

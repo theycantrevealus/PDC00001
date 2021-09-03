@@ -19,27 +19,29 @@
 
 <div class="container-fluid page__container">
 	<div class="row card-group-row">
-		<div class="col-lg-12 col-md-12 card-group-row__col">
-			<div class="card card-group-row__card card-body card-body-x-lg flex-row align-items-center">
-				<table class="table table-bordered" id="table-ruangan">
-					<thead class="thead-dark">
-						<tr>
-							<th class="wrap_content">No</th>
-							<th>Kode Ruangan</th>
-							<th>Nama Ruangan</th>
-							<th>Kelas</th>
-							<th>Kapasitas</th>
-							<th>Tersedia</th>
-							<th>Tersedia Pria</th>
-							<th>Tersedia Wanita</th>
-							<th>Tersedia Pria dan Wanita</th>
-							<th class="wrap_content">Aksi</th>
-						</tr>
-					</thead>
-					<tbody>
-						
-					</tbody>
-				</table>
+		<div class="col-lg-12 col-md-12">
+			<div class="card">
+				<div class="card-body">
+                    <table class="table table-bordered" id="table-ruangan">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th class="wrap_content">No</th>
+                            <th>Kode Ruangan</th>
+                            <th>Nama Ruangan</th>
+                            <th>Kelas</th>
+                            <th>Kapasitas</th>
+                            <th>Tersedia</th>
+                            <th>Tersedia Pria</th>
+                            <th>Tersedia Wanita</th>
+                            <th>Tersedia Pria dan Wanita</th>
+                            <th class="wrap_content">Aksi</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
 			</div>
 		</div>
 	</div>

@@ -92,6 +92,8 @@
 
 					} else {
 
+					    console.log(dataObj);
+
 					    $.ajax({
 							async: false,
 							url: __HOSTAPI__ + "/Antrian",
@@ -104,9 +106,7 @@
 							},
 							type: "POST",
 							success: function(response){
-							    console.clear();
-                                console.log(response);
-                                localStorage.getItem("currentPasien");
+							    localStorage.getItem("currentPasien");
                                 localStorage.getItem("currentAntrianID");
 
                                 if(response.response_package.response_notif == 'K') {
@@ -201,7 +201,7 @@
                 dataObj.valid_end = penjaminMetaData.response.peserta.tglTAT;
                 dataObj.penjaminMeta = JSON.stringify(penjaminMetaData);
             }
-			console.log(dataObj);
+
 			if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 			    $.ajax({
 					async: false,
@@ -284,7 +284,7 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             type: "POST",
-            success: function(response){
+            success: function(response) {
                 var data = response.response_package.content;
 
                 console.log(data);
@@ -391,8 +391,8 @@
             success: function(response){
                 var MetaData = response.response_package.response_data;
 
-                if (MetaData != ""){ 
-                	for(i = 0; i < MetaData.length; i++){
+                if (MetaData !== undefined && MetaData !== null){
+                	for(var i in MetaData){
 	                    var selection = document.createElement("OPTION");
 
 	                    $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);

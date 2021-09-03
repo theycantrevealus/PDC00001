@@ -99,13 +99,14 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 25, -1], [20, 25, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d){
-                    d.request = "get_resep_lunas_backend";
+                    d.request = "get_resep_backend_v3";
+                    d.request_type = "lunas";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -113,23 +114,23 @@
                 dataSrc:function(response) {
                     var forReturn = [];
                     var dataSet = response.response_package.response_data;
+                    console.log(dataSet);
                     if(dataSet == undefined) {
                         dataSet = [];
                     }
 
                     for(var dKey in dataSet) {
-                        if(dataSet[dKey].departemen !== undefined) {
-                            if(dataSet[dKey].departemen.uid !== __POLI_IGD__ && dataSet[dKey].departemen.uid !== __POLI_INAP__) {
-                                forReturn.push(dataSet[dKey]);
-                            }
+                        if(dataSet[dKey].departemen !== undefined && dataSet[dKey].departemen !== null) {
+                            forReturn.push(dataSet[dKey]);
                         }
                     }
+                    console.log(forReturn);
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
-                    return dataSet;
+                    return forReturn;
                 }
             },
             autoWidth: false,
@@ -140,7 +141,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -150,18 +151,18 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.departemen.nama;
+                        return row.departemen.nama;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(
-                            row.antrian.pasien_info.panggilan_name !== undefined &&
-                            row.antrian.pasien_info.panggilan_name !== null
+                            row.pasien_info.panggilan_name !== undefined &&
+                            row.pasien_info.panggilan_name !== null
                         ) {
-                            return row.antrian.pasien_info.panggilan_name.nama + " " + row.antrian.pasien_info.nama;
+                            return row.pasien_info.panggilan_name.nama + " " + row.pasien_info.nama;
                         } else {
-                            return row.antrian.pasien_info.nama;
+                            return row.pasien_info.nama;
                         }
                     }
                 },
@@ -172,7 +173,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.penjamin_data.nama;
+                        return row.penjamin.nama;
                     }
                 },
                 {
@@ -195,21 +196,19 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[20, 15, -1], [20, 15, "All"]],
+            lengthMenu: [[20, 25, -1], [20, 25, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d){
-                    d.request = "get_resep_igd";
-                    d.request_type = "igd_inap";
+                    d.request = "get_resep_backend_v3";
+                    d.request_type = "igd";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-
-                    console.log(response);
                     var forReturn = [];
                     var forReturnSelesai = [];
                     var dataSet = response.response_package.response_data;
@@ -220,12 +219,14 @@
 
 
                     var autonum = 1;
+
                     for(var dKey in dataSet) {
                         if(
-                            dataSet[dKey].antrian.departemen !== undefined &&
-                            dataSet[dKey].antrian.departemen !== null
+                            dataSet[dKey].departemen !== undefined &&
+                            dataSet[dKey].departemen !== null
                         ) {
-                            if(dataSet[dKey].antrian.departemen.uid === __POLI_IGD__ || dataSet[dKey].antrian.departemen.uid === __POLI_INAP__) {
+                            if(dataSet[dKey].departemen.uid === __POLI_IGD__ || dataSet[dKey].departemen.uid === __POLI_INAP__) {
+
                                 dataSet[dKey].autonum = autonum;
                                 if(dataSet[dKey].status_resep === "D") {
                                     forReturnSelesai.push(dataSet[dKey]);
@@ -239,7 +240,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
                     return forReturn.concat(forReturnSelesai);
                 }
@@ -262,22 +263,24 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        if(row.antrian.departemen.uid === __POLI_INAP__) {
-                            return row.antrian.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.antrian.ns_detail.kode_ns + "]</span>" + row.antrian.ns_detail.nama_ns;
-                        } else {
-                            return row.antrian.departemen.nama;
+                        if(row.departemen !== null && row.departemen !== undefined) {
+                            if(row.departemen.uid === __POLI_INAP__) {
+                                return row.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.ns_detail.kode_ns + "]</span>" + row.ns_detail.nama_ns;
+                            } else {
+                                return row.departemen.nama;
+                            }
                         }
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(
-                            row.antrian.pasien_info.panggilan_name !== undefined &&
-                            row.antrian.pasien_info.panggilan_name !== null
+                            row.pasien_info.panggilan_name !== undefined &&
+                            row.pasien_info.panggilan_name !== null
                         ) {
-                            return row.antrian.pasien_info.panggilan_name.nama + " " + row.antrian.pasien_info.nama;
+                            return row.pasien_info.panggilan_name.nama + " " + row.pasien_info.nama;
                         } else {
-                            return row.antrian.pasien_info.nama;
+                            return row.pasien_info.nama;
                         }
                     }
                 },
@@ -288,7 +291,129 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.antrian.penjamin_data.nama;
+                        return row.penjamin.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.status_resep !== "D") {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                "<a href=\"" + __HOSTNAME__ + "/apotek/proses/antrian/" + row.uid + "\" class=\"btn btn-info btn-sm\">" +
+                                "<span><i class=\"fa fa-check\"></i>Proses</span>" +
+                                "</a>" +
+                                "</div>";
+                        } else {
+                            return "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Selesai</span>";
+                        }
+                    }
+                }
+            ]
+        });
+
+
+
+
+        var tableResep3 = $("#table-resep-3").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 25, -1], [20, 25, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Apotek",
+                type: "POST",
+                data: function(d){
+                    d.request = "get_resep_backend_v3";
+                    d.request_type = "inap";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var forReturn = [];
+                    var forReturnSelesai = [];
+                    var dataSet = response.response_package.response_data;
+                    if(dataSet === undefined) {
+                        dataSet = [];
+                    }
+
+
+
+                    var autonum = 1;
+
+                    for(var dKey in dataSet) {
+                        if(
+                            dataSet[dKey].departemen !== undefined &&
+                            dataSet[dKey].departemen !== null
+                        ) {
+                            if(dataSet[dKey].departemen.uid === __POLI_IGD__ || dataSet[dKey].departemen.uid === __POLI_INAP__) {
+
+                                dataSet[dKey].autonum = autonum;
+                                if(dataSet[dKey].status_resep === "D") {
+                                    forReturnSelesai.push(dataSet[dKey]);
+                                } else {
+                                    forReturn.push(dataSet[dKey]);
+                                }
+                                autonum++;
+                            }
+                        }
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsTotal;
+
+                    return forReturn.concat(forReturnSelesai);
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Kode Amprah"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.created_at_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.departemen !== null && row.departemen !== undefined) {
+                            if (row.departemen.uid === __POLI_INAP__) {
+                                return row.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.ns_detail.kode_ns + "]</span>" + row.ns_detail.nama_ns;
+                            } else {
+                                return row.departemen.nama;
+                            }
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(
+                            row.pasien_info.panggilan_name !== undefined &&
+                            row.pasien_info.panggilan_name !== null
+                        ) {
+                            return row.pasien_info.panggilan_name.nama + " " + row.pasien_info.nama;
+                        } else {
+                            return row.pasien_info.nama;
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.dokter.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.penjamin.nama;
                     }
                 },
                 {
@@ -343,8 +468,6 @@
         });
 
         function loadDetailResep(data) {
-            console.clear();
-            console.log(data);
             $("#load-detail-resep tbody tr").remove();
 
             //==================================================================================== RESEP
@@ -817,7 +940,6 @@
         $("#btnProsesResep").click(function() {
             //console.clear();
             var conf = confirm("Pastikan resep sudah benar sekali lagi. Anda yakin?");
-            console.log(targettedData);
             if(conf) {
                 var UIDResep = targettedData.uid;
                 var detail = [];
@@ -944,7 +1066,6 @@
                         racikan: racikan
                     },
                     success:function(response) {
-                        console.log(response);
                         if(response.response_package.response_result > 0) {
                             //tableResep.ajax.reload();
                             tableResep.clear();

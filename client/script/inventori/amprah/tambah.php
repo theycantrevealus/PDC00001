@@ -204,7 +204,7 @@
 
 					metaData[item].nama = $(this).find("td:eq(1) select option:selected").text();
 					metaData[item].satuan = $(this).find("td:eq(2)").text();
-					metaData[item].qty += parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
+					metaData[item].qty = parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
 				}
 			});
 

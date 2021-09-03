@@ -31,8 +31,6 @@
                 success:function(resp) {
                     $("#loadResult").html("");
                     var data = resp.response_package.response_data[0];
-                    console.log(resp);
-
 
                     $("#nama_barang").html(data.nama);
                     $("#item_name").html(data.nama.toUpperCase());
@@ -149,8 +147,13 @@
                             "margin-bottom": "30px"
                         });
 
+                        if(batchGroup[a].log.length > 0) {
+                            $("#loadResult").append(batchIdentifierInfo).append("<br />").append(batchTable);
+                        }
 
-                        $("#loadResult").append(batchIdentifierInfo).append("<br />").append(batchTable);
+                        if($(batchTable).find("tbody tr").length === 0) {
+                            $(batchTable).find("tbody").append("<tr><td colspan=\"6\"><center><i>Tidak ada data</i></center></td></tr>")
+                        }
                         /*var newRow = document.createElement("TR");
                         var newTgl = document.createElement("TD");
                         var newDoc = document.createElement("TD");

@@ -22,7 +22,7 @@
 						var newLoketJalur = document.createElement("TD");
 
 						//var allowJalur = data[key].allow_jalur.split(",");
-						$(newLoketNum).html(autonum);
+						$(newLoketNum).html("<h5 class=\"autonum\">" + autonum + "</h5>");
 						$(newLoketName).html(data[key].nama_loket);
 						$(newLoketJalur).html("<input value=\"" + data[key].uid + "\" " + ((currentLoket.indexOf(data[key].uid) < 0) ? "" : "checked=\"checked\"") + " type=\"checkbox\" class=\"form-control allow-jalur\" />");
 
@@ -83,7 +83,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{

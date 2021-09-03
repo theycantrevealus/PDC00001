@@ -48,7 +48,7 @@
 							<button type="submit" class="btn btn-info" id="btnSimpan">
 								<i class="fa fa-save"></i> Simpan
 							</button>
-                            <a href="<?php echo __HOSTNAME__; ?>/laboratorium" class="btn btn-danger">
+                            <a href="<?php echo __HOSTNAME__; ?>/laboratorium/proses" class="btn btn-danger">
 								<i class="fa fa-ban"></i> Kembali
 							</a>
                             <button type="submit" class="btn btn-success pull-right" id="btnSelesai">

@@ -456,6 +456,7 @@
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    __PC_CUSTOMER_EMAIL__: __PC_CUSTOMER_EMAIL__,
                     lab_pasien: labPasien,
                     lab_item: labItem,
                     lab_lampiran: labLampiran,
