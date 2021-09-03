@@ -158,6 +158,75 @@
             return false;
         }
 
+        Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(8)); };
+
+        function penyebut(nilai) {
+            nilai = Math.abs(nilai);
+            var huruf = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+            var temp = "";
+            if (nilai < 12) {
+                temp = " " + ((huruf[Math.floor(nilai)] !== undefined) ? huruf[Math.floor(nilai)] : "");
+            } else if (nilai < 20) {
+                temp = penyebut(nilai - 10) + " belas";
+            } else if (nilai < 100) {
+                temp = penyebut(nilai/10) + " puluh" + penyebut(nilai % 10);
+            } else if (nilai < 200) {
+                temp = " seratus" + penyebut(nilai - 100);
+            } else if (nilai < 1000) {
+                temp = penyebut(nilai/100) + " ratus" + penyebut(nilai % 100);
+            } else if (nilai < 2000) {
+                temp = " seribu" + penyebut(nilai - 1000);
+            } else if (nilai < 1000000) {
+                temp = penyebut(nilai/1000) + " ribu" + penyebut(nilai % 1000);
+            } else if (nilai < 1000000000) {
+                temp = penyebut(nilai/1000000) + " juta" + penyebut(nilai % 1000000);
+            } else if (nilai < 1000000000000) {
+                temp = penyebut(nilai/1000000000) + " milyar" + penyebut(Math.fmod(nilai,1000000000));
+            } else if (nilai < 1000000000000000) {
+                temp = penyebut(nilai/1000000000000) + " trilyun" + penyebut(Math.fmod(nilai,1000000000000));
+            }
+            return temp;
+        }
+
+        function stristr (haystack, needle, bool) {
+            var pos = 0;
+
+            haystack += '';
+            pos = haystack.toLowerCase().indexOf((needle + '').toLowerCase());
+            if (pos == -1) {
+                return haystack;
+            } else {
+                if (bool) {
+                    return haystack.substr(0, pos);
+                } else {
+                    return haystack.slice(pos);
+                }
+            }
+        }
+
+        function terbilang(nilai) {
+            var x = stristr(nilai, '.') + "";
+
+            if(nilai < 0) {
+                hasil = "minus " + penyebut(nilai).trim();
+            } else {
+                hasil = penyebut(nilai).trim();
+            }
+
+            sen = x.split(".");
+
+
+            if(sen.length > 0) {
+                var str = "" + sen[sen.length - 1];
+                var pad = "00"
+                sen = str + pad.substring(0, pad.length - str.length);
+                //return hasil + " " + penyebut(parseFloat(sen)).trim() + " sen";
+                return hasil
+            } else {
+                return hasil;
+            }
+        }
+
         $(function() {
 		    var currentPageURL = document.URL;
 		    var currentMenuCheck = $("a[href=\"" + currentPageURL + "\"]").parent();

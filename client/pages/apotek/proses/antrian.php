@@ -132,6 +132,9 @@
                             <button class="btn btn-success" id="btnSelesai">
                                 <i class="fa fa-check"></i> Selesai
                             </button>
+                            <button class="btn btn-info btn-apotek-cetak">
+                                <i class="fa fa-print"></i> Cetak
+                            </button>
                             <a href="<?php echo __HOSTNAME__; ?>/apotek/proses" class="btn btn-danger">
                                 <i class="fa fa-ban"></i> Kembali
                             </a>

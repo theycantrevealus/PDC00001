@@ -147,15 +147,15 @@
 					        parsedActual += terbayarAktual[a].terbayar;
                         }
                         return number_format(parsedActual, 2, ".", ",");*/
-						return number_format(row.terbayar, 2, ".", ",");
+						return number_format(row.sisa_bayar, 2, ".", ",");
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-info btn-sm btnDetailKwitansi\" invoice_payment=\"" + row.uid + "\" invoice=\"" + row.invoice + "\" id=\"invoice_" + row.uid + "\">" +
-                            "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
-                            "</button>" +
+                                "<button class=\"btn btn-info btn-sm btnDetailKwitansi\" invoice_payment=\"" + row.uid + "\" invoice=\"" + row.invoice + "\" id=\"invoice_" + row.uid + "\">" +
+                                    "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                                "</button>" +
                             "</div>";
 					}
 				}
@@ -317,14 +317,14 @@
 
 							$("#pegawai-faktur").html("Diterima Oleh :<br /><b>" + historyData.pegawai.nama + "</b>");
 							$("#tanggal-faktur").html("Tanggal Bayar :<br /><b>" + historyData.tanggal_bayar + "</b>");
-                            $(".nomor-faktur").html("Nomor Faktur :<br /><b>" + historyData.nomor_kwitansi + "</b>");
+                            $(".nomor-faktur").html("Nomor :<br /><b>" + historyData.nomor_kwitansi + "</b>");
 							var deptList = [];
 							for(var depKey in historyData.antrian) {
 							    if(deptList.indexOf(historyData.antrian[depKey].nama) < 0) {
                                     deptList.push(historyData.antrian[depKey].nama);
                                 }
                             }
-							$("#poli").html("Departemen/Poli :<br /><b>" + deptList.join(", ") + "</b>");
+							$("#poli").html("Poliklinik/Bangsal :<br /><b>" + deptList.join(", ") + "</b>");
 							$("#keterangan-faktur").html(historyData.keterangan);
 
 
