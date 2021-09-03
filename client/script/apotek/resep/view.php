@@ -379,7 +379,7 @@
             }
 
             var keteranganPerObat = document.createElement("TEXTAREA");
-            $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span><p>" + ((setter.keterangan !== "") ? setter.keterangan : "-") + "</p>")/*.append(keteranganPerObat)*/;
+            $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span><p class=\"keterangan_resep_dokter\">" + ((setter.keterangan !== "") ? setter.keterangan : "-") + "</p>")/*.append(keteranganPerObat)*/;
             /*$(keteranganPerObat).addClass("form-control").attr({
                 "placeholder": "Keterangan per Obat",
                 "disabled": "disabled"
@@ -673,7 +673,7 @@
                     "id": "resep_obat_" + id
                 });
 
-                $(this).find("td:eq(1) textarea").attr({
+                $(this).find("td:eq(1) .keterangan_resep_dokter").attr({
                     "id": "keterangan_resep_obat_" + id
                 });
 
