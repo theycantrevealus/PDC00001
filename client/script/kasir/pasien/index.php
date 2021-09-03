@@ -137,13 +137,14 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-					    var terbayarAktual = row.record_terbayar;
+					    /*var terbayarAktual = row.record_terbayar;
 					    var parsedActual = 0;
 					    for(var a in terbayarAktual); {
+					        console.log(terbayarAktual[a]);
 					        parsedActual += terbayarAktual[a].terbayar;
                         }
-                        return number_format(parsedActual, 2, ".", ",");
-						//return row.terbayar;
+                        return number_format(parsedActual, 2, ".", ",");*/
+						return number_format(row.terbayar, 2, ".", ",");
 					}
 				},
 				{
