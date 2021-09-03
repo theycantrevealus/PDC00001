@@ -561,7 +561,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"number_style " + ((row.response_min >= 30) ? "text-danger" : "text-success") + "\">" + row.response_time + "</h5>";
+                        return "<h5 class=\"number_style " + ((row.response_min >= __APOTEK_SERVICE_RESPONSE_TIME_TOLERATE__) ? "text-danger" : "text-success") + "\">" + row.response_time + "</h5>";
                     }
                 },
                 {
