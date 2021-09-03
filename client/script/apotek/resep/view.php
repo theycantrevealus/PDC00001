@@ -475,7 +475,7 @@
                     return data.text;
                 }
             }).on("select2:select", function(e) {
-                var data = e.params.data;autoResep
+                var data = e.params.data;
                 var id = $(this).attr("id").split("_");
                 id = id[id.length - 1];
 
