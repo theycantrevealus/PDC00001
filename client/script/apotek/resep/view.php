@@ -475,7 +475,7 @@
                     return data.text;
                 }
             }).on("select2:select", function(e) {
-                var data = e.params.data;
+                var data = e.params.data;autoResep
                 var id = $(this).attr("id").split("_");
                 id = id[id.length - 1];
 
@@ -510,6 +510,8 @@
                 refreshBatch(data.id, id);
 
                 $(newCellResepSatuan).html(data["satuan-caption"]);
+
+                $("#total_biaya_obat").html("Rp. " + number_format((calculate_resep() + calculate_racikan()), 2, ".", ","));
             });
 
             $(newCellResepSatuan).html(setter.obat_detail.satuan_terkecil_info.nama);
@@ -1004,6 +1006,7 @@
 
             refreshBatch($("#resep_obat_" + id).val(), id);
             totalResep = calculate_resep();
+            totalRacikan = calculate_racikan();
             $("#total_biaya_obat").html("Rp. " + number_format((totalResep + totalRacikan), 2, ".", ","));
         });
 
@@ -1655,6 +1658,7 @@
                 uid: racikanUID
             }, currentData, alasanRacikanLib);
             calculate_racikan();
+            $("#total_biaya_obat").html("Rp. " + number_format((calculate_resep() + calculate_racikan()), 2, ".", ","));
         });
 
         $("body").on("keyup", ".racikan_signa_a", function() {
@@ -1705,6 +1709,7 @@
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
             var racikanUID = $(this).attr("uid-racikan");
+            $("#total_biaya_obat").html("Rp. " + number_format((calculate_resep() + calculate_racikan()), 2, ".", ","));
             verifData = CheckVerifRacikan(verifData, id, {
                 uid: racikanUID
             }, currentData, alasanRacikanLib);
