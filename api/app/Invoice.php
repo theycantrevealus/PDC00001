@@ -1031,6 +1031,8 @@ class Invoice extends Utility
 
     public function get_payment($parameter)
     {
+        $Pegawai = new Pegawai(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
         $payment = self::$query->select('invoice_payment', array(
             'uid',
             'nomor_kwitansi',
@@ -1174,14 +1176,12 @@ class Invoice extends Utility
             $payment['response_data'][$key]['detail'] = $payment_detail['response_data'];
 
             //Info Pegawai
-            $Pegawai = new Pegawai(self::$pdo);
             $PegawaiInfo = $Pegawai->get_detail($value['pegawai']);
             $payment['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
             $payment['response_data'][$key]['tanggal_bayar'] = date("d F Y", strtotime($value['tanggal_bayar']));
             $payment['response_data'][$key]['terbayar'] = floatval($value['terbayar']);
             $payment['response_data'][$key]['sisa_bayar'] = floatval($value['sisa_bayar']);
             $payment['response_data'][$key]['antrian'] = $Antrian['response_data'];
-            $Pasien = new Pasien(self::$pdo);
             $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $payment['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
         }

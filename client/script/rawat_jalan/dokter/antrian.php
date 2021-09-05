@@ -926,8 +926,8 @@
             } else {
                 allowAdd = true;
             }
-
-            if(allowAdd) {
+            
+            if(allowAdd && !isNaN(parseInt($("#txt_icd_10_banding").val()))) {
                 $("#txt_diagnosa_banding_list tbody").append(
                     "<tr targetICD=\"" + parseInt($("#txt_icd_10_banding").val()) + "\">" +
                     "<td>" + ($("#txt_diagnosa_banding_list tbody tr").length + 1) + "</td>" +
@@ -3965,7 +3965,7 @@
                     return "Radiologi";
                 }
             },
-            placeholder:"Cari Radiologi",
+            placeholder:"Cari Pemeriksaan",
             ajax: {
                 dataType: "json",
                 headers:{
@@ -4775,7 +4775,7 @@
                         return "Laboratorium";
                     }
                 },
-                placeholder:"Cari Laboratorium",
+                placeholder:"Cari Pemeriksaan",
                 ajax: {
                     dataType: "json",
                     headers:{

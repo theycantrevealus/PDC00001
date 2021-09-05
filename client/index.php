@@ -13,7 +13,6 @@
     var __PC_CUSTOMER_ADDRESS_SHORT__ = <?php echo json_encode(__PC_CUSTOMER_ADDRESS_SHORT__); ?>;
     var __PC_CUSTOMER_EMAIL__ = <?php echo json_encode(__PC_CUSTOMER_EMAIL__); ?>;
     var __PC_CUSTOMER_ADDRESS__ = <?php echo json_encode(__PC_CUSTOMER_ADDRESS__); ?>;
-    var __PC_CUSTOMER_ADDRESS_SHORT__ = <?php echo json_encode(__PC_CUSTOMER_ADDRESS_SHORT__); ?>;
     var __PC_CUSTOMER_CONTACT__ = <?php echo json_encode(__PC_CUSTOMER_CONTACT__); ?>;
     var __PC_IDENT__ = <?php echo json_encode(__PC_IDENT__); ?>;
 	var __SYNC__ = <?php echo json_encode(__SYNC__); ?>;
@@ -59,6 +58,8 @@
     var __POLI_IGD__ = <?php echo json_encode(__POLI_IGD__); ?>;
     var __POLI_LAB__ = <?php echo json_encode(__POLI_LAB__); ?>;
     var __POLI_ORTODONTIE__ = <?php echo json_encode(__POLI_ORTODONTIE__); ?>;
+
+    var __APOTEK_SERVICE_RESPONSE_TIME_TOLERATE__ = <?php echo json_encode(__APOTEK_SERVICE_RESPONSE_TIME_TOLERATE__); ?>;
 
     var __PRIORITY_HIGH__ = <?php echo json_encode(__PRIORITY_HIGH__); ?>;
     var __ANTRIAN_KHUSUS__ = <?php echo json_encode(__ANTRIAN_KHUSUS__); ?>;
