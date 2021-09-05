@@ -2,6 +2,8 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
 	$(function(){
+
+
 		var params;
 		var MODE = false;
 		var currentAntrianType = "DEFAULT";
