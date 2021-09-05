@@ -34,3 +34,4 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.rowgroup.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.all.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/intro/intro.js"></script>

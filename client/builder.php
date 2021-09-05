@@ -147,7 +147,9 @@
 	</div> -->
 	<?php require 'script.php'; ?>
 	<script type="text/javascript">
-        function isHTML(str) {
+var targetModule = 0;
+        var tutorList = {};
+		$(function() {
             var a = document.createElement('div');
             a.innerHTML = str;
 
@@ -252,6 +254,7 @@
 				var activeMenu = $(this).attr("parent-child");
 				$("a[href=\"#menu-" + activeMenu + "\"]").removeClass("collapsed").parent().addClass("open");
 				$("ul#menu-" + activeMenu).addClass("show");
+                targetModule = $(this).attr("target_modul");
 			});
 
 			$("ul.sidebar-submenu").each(function() {
@@ -263,6 +266,116 @@
 
 				}
 			});
+
+			//Load Module Tutorial
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Tutorial/get_tutorial/" + targetModule,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response) {
+                    var data = response.response_package.response_data;
+                    $("#tutor-loader").html("");
+                    for(var a in data) {
+                        $("#tutor-loader").append("<div item=\"" + data[a].uid + "\" class=\"dropdown-item tutor_run\" style=\"position:relative; padding: 0px 5px; cursor: pointer; cursor: hand;\">" +
+                            "<i style=\"position:absolute; left: 5px; top: 2.5px\" class=\"material-icons nav-icon\">help_outline</i>" +
+                            "<span style=\"padding-left: 25px\">" + data[a].nama + "</span>" +
+                        "</div>");
+
+                        if(tutorList[data[a].uid] === undefined) {
+                            tutorList[data[a].uid] = {
+                                name: data[a].nama,
+                                step: []
+                            }
+                        }
+
+                        var step = data[a].step;
+
+                        for(var b in step) {
+                            var currentTutor = {};
+                            if(step[b].type === "B") {
+                                currentTutor = {
+                                    intro: step[b].remark,
+                                    expectDOM: step[b].trigger_dom,
+                                    expectDOMType: step[b].trigger_dom_type,
+                                }
+                            } else {
+                                currentTutor = {
+                                    element: document.querySelector(step[b].element_target),
+                                    intro: step[b].remark,
+                                    position: step[b].tooltip_pos,
+                                    expectDOM: step[b].trigger_dom,
+                                    expectDOMType: step[b].trigger_dom_type,
+                                }
+                            }
+                            tutorList[data[a].uid].step.push(currentTutor);
+                        }
+                    }
+
+                    console.log(tutorList);
+
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            var tutorStart;
+            $("body").on("click", ".tutor_run", function () {
+                var tutorGroup = $(this).attr("item");
+                tutorStart = introJs().setOptions({
+                    steps:tutorList[tutorGroup].step,
+                    showStepNumbers: true,
+                    scrollToElement:true,
+                    tooltipClass: "SOLOMON",
+                    showProgress: false,
+                    showBullets: true
+                }).oncomplete(() => {
+                    $(".modal.show").modal("hide");
+                }).start();
+
+                var needDOM = [];
+                var needDOMProc = {};
+
+                tutorStart.onchange(function(targetElement) {
+                    if(needDOM.indexOf($(targetElement).attr("id")) > -1) {
+                        console.log(needDOMProc[$(targetElement).attr("id")].type);
+                        if(needDOMProc[$(targetElement).attr("id")].type === "modal") {
+                            $(needDOMProc[$(targetElement).attr("id")].dom).modal("show");
+                        } else if (needDOMProc[$(targetElement).attr("id")].type === "tab") {
+                            console.log(needDOMProc[$(targetElement).attr("id")].dom);
+                            $(needDOMProc[$(targetElement).attr("id")].dom).tab("show");
+                        }
+                    }
+                });
+
+                tutorStart._options.steps.forEach(function(value, key) {
+                    if(value.expectDOMType !== "" && value.expectDOMType !== undefined && value.expectDOMType !== null) {
+                        if(needDOM.indexOf($(value.element).attr("id")) < 0) {
+                            needDOM.push($(value.element).attr("id"));
+                        }
+
+                        if(needDOMProc[$(value.element).attr("id")] === undefined) {
+                            needDOMProc[$(value.element).attr("id")] = {
+                                dom: value.expectDOM,
+                                type: value.expectDOMType
+                            }
+                        } else {
+                            needDOMProc[$(value.element).attr("id")] = {
+                                dom: value.expectDOM,
+                                type: value.expectDOMType
+                            }
+                        }
+                    }
+                });
+
+                tutorStart.onbeforechange(function(targetElement) {
+
+
+                });
+            })
 
 			//$("ul[master-child=\"" + activeMenu + "\"").addClass("open");
 
