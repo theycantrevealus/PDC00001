@@ -30,6 +30,24 @@
                         }
                     ?>
                     <li class="nav-item dropdown">
+                        <a href="#tutorial_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
+                            <i class="material-icons nav-icon">help_outline</i>
+                        </a>
+                        <div id="tutorial_menu" class="dropdown-menu dropdown-menu-right navbar-notifications-menu">
+                            <div class="dropdown-item d-flex align-items-center py-2">
+                                <span class="flex navbar-notifications-menu__title m-0">Tutorial</span>
+                            </div>
+                            <div class="navbar-menu__content" data-simplebar>
+                                <div class="py-2" id="tutor-loader">
+                                    <div class="dropdown-item" style="position:relative; padding: 0px 5px">
+                                        <i style="position:absolute; left: 5px; top: 2.5px" class="material-icons nav-icon">help_outline</i>
+                                        <span style="padding-left: 25px">Hello</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
 						<a href="#notifications_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
 							<i class="material-icons nav-icon" id="counter-notif-identifier">notifications</i>
 						</a>

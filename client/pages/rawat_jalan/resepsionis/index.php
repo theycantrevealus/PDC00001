@@ -23,7 +23,7 @@
 								Antrian Kunjungan
 							</h4>
 						</div>
-						<div class="col-lg-3">
+						<div class="col-lg-3" id="tutor_container_loket">
 							<select id="txt_loket" class="form-control"></select>
 						</div>
 						<div class="col-lg-3">
@@ -39,7 +39,7 @@
 				</div>
 				<div class="card-body custom-padding">
 					<div class="row">
-                        <div class="col-lg-2">
+                        <div class="col-lg-2" id="tutor_container_current_antrian_number">
                             <br />
 							<center>Antrian terkini</center>
 							<h1 class="text-center" id="txt_current_antrian">0</h1>
@@ -70,7 +70,7 @@
                                 <div class="col-lg-12">
                                     <span class="text-secondary">Antrian Terlewat</span>
                                 </div>
-                                <div class="col-lg-6">
+                                <div class="col-lg-6" id="tutor_antrian_terlewat_container">
                                     <select id="antrian_terlewat" class="form-control"></select>
                                 </div>
                                 <div class="col-lg-6">
