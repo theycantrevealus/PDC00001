@@ -229,6 +229,10 @@ class Inventori extends Utility
                 return self::reset_stok_log();
                 break;
 
+            case 'opname_warehouse':
+                return self::opname_warehouse($parameter);
+                break;
+
             default:
                 return array('Unknown');
                 break;
@@ -1182,6 +1186,8 @@ class Inventori extends Utility
             ->select('master_inv_gudang', array(
                 'uid',
                 'nama',
+                'status',
+                'opname_rule',
                 'created_at',
                 'updated_at'
             ))
@@ -3428,7 +3434,7 @@ class Inventori extends Utility
     private function proses_amprah($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $uid = parent::gen_uuid();
 
         //Get Last AI tahun ini
@@ -3741,6 +3747,24 @@ class Inventori extends Utility
             $autonum++;
         }
         return $data;
+    }
+
+    private function opname_warehouse($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $worker = self::$query
+            ->update('master_inv_gudang', array(
+                'status' => 'O'
+            ))
+            ->where(array(
+                'master_inv_gudang.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv_gudang.uid' => '= ?'
+            ), array(
+                $UserData['data']->gudang
+            ))
+            ->execute();
+        return $worker;
     }
 
     private function reset_stok_log() {

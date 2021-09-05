@@ -172,7 +172,38 @@
 		});
 
 		$("#tambahStokAwal").click(function() {
-			$("#form-tambah").modal("show");
+            Swal.fire({
+                title: "Mulai Penyesuaian Stok?",
+                html: "Prosedur ini akan menghentikan semua jalur barang masuk dan barang keluar dari dan ke gudang ini.",
+                showDenyButton: true,
+                type: "warning",
+                confirmButtonText: "Ya",
+                confirmButtonColor: "#1297fb",
+                denyButtonText: "Tidak",
+                denyButtonColor: "#ff2a2a"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Inventori",
+                        async: false,
+                        data: {
+                            request: "opname_warehouse",
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        success:function(response) {
+                            if(response.response_package.response_result > 0) {
+                                $("#form-tambah").modal("show");
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            });
 		});
 
 		$("body").on("click", ".detail_opname", function() {
@@ -319,40 +350,49 @@
 		});
 
 		$("#btnSubmitStokOpname").click(function() {
-			var conf = confirm("Data sudah benar?");
-			if(conf) {
-				var rawAwal = $("#txt_periode_awal").datepicker("getDate");
-				var awal =  rawAwal.getFullYear() + "-" + str_pad(2, rawAwal.getMonth()+1) + "-" + str_pad(2, rawAwal.getDate());
+            Swal.fire({
+                title: "Data Sudah Benar?",
+                showDenyButton: true,
+                type: "warning",
+                confirmButtonText: "Ya",
+                confirmButtonColor: "#1297fb",
+                denyButtonText: "Tidak",
+                denyButtonColor: "#ff2a2a"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var rawAwal = $("#txt_periode_awal").datepicker("getDate");
+                    var awal =  rawAwal.getFullYear() + "-" + str_pad(2, rawAwal.getMonth()+1) + "-" + str_pad(2, rawAwal.getDate());
 
-				var rawAkhir = $("#txt_periode_akhir").datepicker("getDate");
-				var akhir =  rawAkhir.getFullYear() + "-" + str_pad(2, rawAkhir.getMonth()+1) + "-" + str_pad(2, rawAkhir.getDate());
+                    var rawAkhir = $("#txt_periode_akhir").datepicker("getDate");
+                    var akhir =  rawAkhir.getFullYear() + "-" + str_pad(2, rawAkhir.getMonth()+1) + "-" + str_pad(2, rawAkhir.getDate());
 
-				$.ajax({
-					url:__HOSTAPI__ + "/Inventori",
-					async: false,
-					data: {
-						request: "tambah_opname",
-						dari:awal,
-						sampai:akhir,
-						keterangan:$("#txt_keterangan").val(),
-						item:metaDataOpname
-					},
-					beforeSend: function(request) {
-						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-					},
-					type:"POST",
-					success:function(response) {
-						if(response.response_package.response_result > 0) {
-							$("#form-tambah").modal("hide");
-							tableHistoryOpname.ajax.reload();
-							tableCurrentStock.ajax.reload();
-						}
-					},
-					error: function(response) {
-						console.log(response);
-					}
-				});
-			}
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Inventori",
+                        async: false,
+                        data: {
+                            request: "tambah_opname",
+                            dari:awal,
+                            sampai:akhir,
+                            keterangan:$("#txt_keterangan").val(),
+                            item:metaDataOpname
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        success:function(response) {
+                            if(response.response_package.response_result > 0) {
+                                $("#form-tambah").modal("hide");
+                                tableHistoryOpname.ajax.reload();
+                                tableCurrentStock.ajax.reload();
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            });
 		});
 
 		

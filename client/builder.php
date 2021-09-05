@@ -147,9 +147,9 @@
 	</div> -->
 	<?php require 'script.php'; ?>
 	<script type="text/javascript">
-var targetModule = 0;
+        var targetModule = 0;
         var tutorList = {};
-		$(function() {
+        function isHTML(str) {
             var a = document.createElement('div');
             a.innerHTML = str;
 
