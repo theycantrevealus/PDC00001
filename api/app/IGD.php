@@ -744,7 +744,7 @@ class IGD extends Utility
     private function riwayat_obat_igd($parameter) {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
-                'igd_riwayat_obat.pasien' => '= ?',
+                'resep.pasien' => '= ?',
                 'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
@@ -756,7 +756,7 @@ class IGD extends Utility
             );
         } else {
             $paramData = array(
-                'igd_riwayat_obat.pasien' => '= ?'
+                'resep.pasien' => '= ?'
             );
 
             $paramValue = array(

@@ -199,8 +199,13 @@
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.departemen !== undefined && row.departemen !== null) {
                             if(row.departemen.uid === __POLI_INAP__) {
-                                return row.departemen.nama + "<br />" +
-                                    "<span class=\"text-info\">" + row.ns_detail.kode_ns + "</span> - " + row.ns_detail.nama_ns;
+                                console.log(row.ns_detail);
+                                if(row.ns_detail !== undefined && row.ns_detail !== null) {
+                                    return row.departemen.nama + "<br />" +
+                                        "<span class=\"text-info\">" + ((row.ns_detail.kode_ns !== undefined && row.ns_detail.kode_ns !== null) ? row.ns_detail.kode_ns : "-") + "</span> - " + row.ns_detail.nama_ns;
+                                } else {
+                                    return "-";
+                                }
                             } else {
                                 return row.departemen.nama;
                             }

@@ -888,7 +888,7 @@ class Radiologi extends Utility
             $harga = $tindakan->get_harga_tindakan($value['uid']);
             $dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
 
-            $harga_range = $tindakan->get_tindakan_detail($value['uid']);
+            $harga_range = $tindakan->get_tindakan_info($value['uid']);
             $dataTindakan['response_data'][$key]['harga_range'] = $harga_range['response_data'];
         }
 

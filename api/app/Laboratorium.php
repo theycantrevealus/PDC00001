@@ -1510,7 +1510,7 @@ class Laboratorium extends Utility {
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
 
-            $mitra_all_raw = $mitra_list->get_mitra()['response_data'];
+            $mitra_all_raw = $mitra_list->get_mitra($parameter)['response_data'];
             $mitra_all_parse = array();
             foreach($mitra_all_raw as $MAK => $MAV) {
                 if($MAV['jenis'] === 'LAB') {
@@ -4610,7 +4610,6 @@ class Laboratorium extends Utility {
 		    //Master Lab Item
             $Nilai = self::$query->select('master_lab_nilai', array(
                 'id',
-                'lab',
                 'satuan',
                 'nilai_min',
                 'nilai_maks',
@@ -4628,7 +4627,7 @@ class Laboratorium extends Utility {
             $dataTindakan['response_data'][$key]['detail'] = $Nilai['response_data'];
 			//$harga = $tindakan->get_harga_tindakan($value['uid']);
 			//$dataTindakan['response_data'][$key]['harga'] = $harga['response_data'];
-            $rangeHarga = $tindakan->get_tindakan_detail($value['uid']);
+            $rangeHarga = $tindakan->get_tindakan_info($value['uid']);
             $dataTindakan['response_data'][$key]['harga_range'] = $rangeHarga['response_data'];
 		}
 			

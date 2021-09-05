@@ -125,6 +125,9 @@
                         mode_selesai = "N";
                         form_data.append("selesai", "N");
                         $("#formHasilLab").submit();
+                        push_socket(__ME__, "labor_petugas_selesai", "*", "Pemeriksaan Laboratorium Telah Diisi oleh Petugas Laboratorium", "info").then(function () {
+
+                        });
                     } else if (result.isDenied) {
                         //
                     }

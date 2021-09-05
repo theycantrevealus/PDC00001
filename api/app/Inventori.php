@@ -225,6 +225,10 @@ class Inventori extends Utility
                 return self::get_stok_batch_unit($parameter);
                 break;
 
+            case 'reset_stok_log':
+                return self::reset_stok_log();
+                break;
+
             default:
                 return array('Unknown');
                 break;
@@ -1795,6 +1799,9 @@ class Inventori extends Utility
                     date('Y-m-d', strtotime($dari . '-1 days')),
                     date('Y-m-d', strtotime($sampai . '+1 days'))
                 ))
+                ->order(array(
+                    'logged_at' => 'ASC'
+                ))
                 ->execute();
         } else {
             $data = self::$query->select('inventori_stok_log', array(
@@ -1817,10 +1824,14 @@ class Inventori extends Utility
                     $gudang,
                     $parameter
                 ))
+                ->order(array(
+                    'logged_at' => 'ASC'
+                ))
                 ->execute();
         }
 
         $DO = new DeliveryOrder(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
 
         foreach ($data['response_data'] as $key => $value) {
             //Terminologi Item
@@ -1859,8 +1870,8 @@ class Inventori extends Utility
                         ))
                         ->execute();
                     //get pasien
-                    $Pasien = new Pasien(self::$pdo);
-                    $PasienInfo = $Pasien::get_pasien_detail('pasien', $Resep['response_data'][0]['pasien']);
+
+                    $PasienInfo = $Pasien->get_pasien_detail('pasien', $Resep['response_data'][0]['pasien']);
 
                     $data['response_data'][$key]['dokumen'] = 'Resep Asesmen ' . $PasienInfo['response_data'][0]['nama'];
                 } elseif ($value['jenis_transaksi'] === 'inventori_do') {
@@ -3732,9 +3743,37 @@ class Inventori extends Utility
         return $data;
     }
 
+    private function reset_stok_log() {
+        //Drop all stok log
+        $Delete = self::$query->hard_delete('inventori_stok_log')
+            ->execute();
+        if($Delete['response_result'] > 0) {
+            //Get all stok
+            $AllStok = self::$query->select('inventori_stok', array(
+                'barang', 'batch', 'gudang', 'stok_terkini'
+            ))
+                ->execute();
+            foreach ($AllStok['response_data'] as $key => $value) {
+                //First Log
+                $Log = self::$query->insert('inventori_stok_log', array(
+                    'barang' => $value['barang'],
+                    'batch' => $value['batch'],
+                    'gudang' => $value['gudang'],
+                    'masuk' => $value['stok_terkini'],
+                    'keluar' => 0,
+                    'saldo' => $value['stok_terkini'],
+                    'logged_at' => parent::format_date(),
+                    'keterangan' => 'Stok terkini'
+                ))
+                    ->execute();
+            }
+        }
+        return $Delete;
+    }
+
     private function get_stok_batch_unit($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -4732,8 +4771,22 @@ class Inventori extends Utility
                         }
 
 
-                        if(isset($parameter['inap'])) {
-                            //Check Semua Permintaan Resep NS
+                        //Checker Batch
+                        $CheckBatchInap = self::$query->select('rawat_inap_batch', array(
+                            'id'
+                        ))->where(array(
+                            'rawat_inap_batch.obat' => '= ?',
+                            'AND',
+                            'rawat_inap_batch.batch' => '= ?',
+                            'AND',
+                            'rawat_inap_batch.mutasi' => '= ?'
+                        ), array(
+                            $MutValue['item'],
+                            $MutValue['batch'],
+                            $parameter['uid']
+                        ))
+                            ->execute();
+                        if(count($CheckBatchInap['response_data']) > 0) {
                             $CheckNS = self::$query->update('rawat_inap_batch', array(
                                 'status' => 'Y'
                             ))
@@ -4743,6 +4796,40 @@ class Inventori extends Utility
                                     'rawat_inap_batch.batch' => '= ?',
                                     'AND',
                                     'rawat_inap_batch.mutasi' => '= ?'
+                                ), array(
+                                    $MutValue['item'],
+                                    $MutValue['batch'],
+                                    $parameter['uid']
+                                ))
+                                ->execute();
+                        }
+
+
+
+                        $CheckBatchIGD = self::$query->select('igd_batch', array(
+                            'id'
+                        ))->where(array(
+                            'igd_batch.obat' => '= ?',
+                            'AND',
+                            'igd_batch.batch' => '= ?',
+                            'AND',
+                            'igd_batch.mutasi' => '= ?'
+                        ), array(
+                            $MutValue['item'],
+                            $MutValue['batch'],
+                            $parameter['uid']
+                        ))
+                            ->execute();
+                        if(count($CheckBatchIGD['response_data']) > 0) {
+                            $CheckNS = self::$query->update('igd_batch', array(
+                                'status' => 'Y'
+                            ))
+                                ->where(array(
+                                    'igd_batch.obat' => '= ?',
+                                    'AND',
+                                    'igd_batch.batch' => '= ?',
+                                    'AND',
+                                    'igd_batch.mutasi' => '= ?'
                                 ), array(
                                     $MutValue['item'],
                                     $MutValue['batch'],
@@ -5380,6 +5467,7 @@ class Inventori extends Utility
         }
 
         $data['response_draw'] = $parameter['draw'];
+        $PenjaminObat = new Penjamin(self::$pdo);
         $autonum = intval($parameter['start']) + 1;
         foreach ($data['response_data'] as $key => $value) {
 
@@ -5402,8 +5490,7 @@ class Inventori extends Utility
             $data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
 
             //Data Penjamin
-            $PenjaminObat = new Penjamin(self::$pdo);
-            $ListPenjaminObat = $PenjaminObat::get_penjamin_obat($value['uid'])['response_data'];
+            $ListPenjaminObat = $PenjaminObat->get_penjamin_obat($value['uid'])['response_data'];
             foreach ($ListPenjaminObat as $PenjaminKey => $PenjaminValue) {
                 $ListPenjaminObat[$PenjaminKey]['profit'] = floatval($PenjaminValue['profit']);
             }
@@ -5498,6 +5585,7 @@ class Inventori extends Utility
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $PenjaminObat = new Penjamin(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             if($value['gudang'] === $UserData['data']->gudang) {
                 $data['response_data'][$key]['autonum'] = $autonum;
@@ -5521,7 +5609,6 @@ class Inventori extends Utility
                 $data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
 
                 //Data Penjamin
-                $PenjaminObat = new Penjamin(self::$pdo);
                 $ListPenjaminObat = $PenjaminObat->get_penjamin_obat($value['barang'])['response_data'];
                 foreach ($ListPenjaminObat as $PenjaminKey => $PenjaminValue) {
                     $ListPenjaminObat[$PenjaminKey]['profit'] = floatval($PenjaminValue['profit']);
@@ -5534,10 +5621,12 @@ class Inventori extends Utility
                 if (count($InventoriStockPopulator['response_data']) > 0) {
                     foreach ($InventoriStockPopulator['response_data'] as $TotalKey => $TotalValue) {
                         if($TotalValue['gudang'] === $UserData['data']->gudang) {
+                            //Sini
                             $TotalStock += floatval($TotalValue['stok_terkini']);
                         }
                     }
-                    $data['response_data'][$key]['stok'] = $TotalStock;
+                    //$data['response_data'][$key]['stok'] = $TotalStock;
+                    $data['response_data'][$key]['stok'] = $value['stok_terkini'];
                     $data['response_data'][$key]['batch'] = $InventoriStockPopulator['response_data'];
                 } else {
                     $data['response_data'][$key]['stok'] = 0;

@@ -25,6 +25,7 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+                    console.log(response);
                     var returnedData = [];
                     var parsedData = [];
                     if(response == undefined || response.response_package == undefined) {

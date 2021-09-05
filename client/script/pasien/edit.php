@@ -45,11 +45,11 @@
 			loadWilayah('alamat_kelurahan', 'kelurahan', id, "Kelurahan");
 		});
 
-		$("#btnSubmit").click(function(){
+		$("#btnSubmit").click(function() {
 			var no_rm = $("#no_rm").inputmask('unmaskedvalue');
 			allData.no_rm = no_rm;
 
-			var jenkel = $("input[name='jenkel']:checked").val();
+			var jenkel = $("input[name='jenkel']:checked").inputmask('unmaskedvalue').replaceAll('-', '');
 			allData.jenkel = jenkel;
 
             if(parseInt($("#warganegara option:selected").val()) === __WNI__) {
