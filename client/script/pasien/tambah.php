@@ -89,7 +89,7 @@
 			var jenkel = $("input[name='jenkel']:checked").val();
 			var goldar = $("input[name='goldar']:checked").val();*/
 
-			var no_rm = $("#no_rm").inputmask('unmaskedvalue');
+			var no_rm = $("#no_rm").inputmask('unmaskedvalue').replaceAll('-', '');
 			allData.no_rm = no_rm;
 
 			var jenkel = $("input[name='jenkel']:checked").val();

@@ -30,6 +30,10 @@ class Pasien extends Utility
     {
         try {
             switch ($parameter[1]) {
+                case 'format_rm':
+                    return self::reformat_rm();
+                    break;
+
                 case 'pasien':
                     return self::get_pasien('pasien');
                     break;
@@ -460,6 +464,33 @@ class Pasien extends Utility
 
             return $pasien;
         }
+    }
+
+    private function reformat_rm() {
+        $data = self::$query->select('pasien', array(
+            'uid', 'no_rm'
+        ))
+            ->execute();
+        $formatted = array();
+        $pattern = '/(-)/i';
+        foreach ($data['response_data'] as $key => $value) {
+            $newRM = preg_replace($pattern, '', $value['no_rm']);
+            if($newRM !== '') {
+                $update = self::$query->update('pasien', array(
+                    'no_rm' => $newRM
+                ))
+                    ->where(array(
+                        'pasien.uid' => '= ?'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+                if($update['response_result'] > 0) {
+                    array_push($formatted, $value['uid'] . '  |   ' . $newRM);
+                }
+            }
+        }
+        return $formatted;
     }
 
     private function edit_pasien($table, $parameter)

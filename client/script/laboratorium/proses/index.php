@@ -1085,6 +1085,10 @@
             permintaan_laboratorium_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", parameter, 3000, "hasil_order_labor");
                 tableVerifikasiLabor.ajax.reload();
+            },
+            labor_petugas_selesai: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", "Update hasil labor baru", 3000, "notif_update_order_baru");
+                tableAntrianLabor.ajax.reload();
             }
         };
 
