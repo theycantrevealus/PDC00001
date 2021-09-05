@@ -627,16 +627,6 @@ class Invoice extends Utility
         $RekapBiayaKamar = array();
 
 
-
-
-
-
-
-
-
-
-
-
         $Ranap = self::$query->select('rawat_inap', array(
             'uid',
             'bed',
