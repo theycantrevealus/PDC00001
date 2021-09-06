@@ -29,9 +29,12 @@
 						<select disabled class="form-control" id="txt_gudang"></select>
 					</div>
 					<div class="col-12 col-md-6 mb-3" style="padding-top: 22.5px;">
-						<button class="btn btn-info" id="tambahStokAwal">
+						<button class="btn btn-warning" id="tambahStokAwal">
 							<i class="fa fa-clipboard-check"></i> Penyesuaian Stok
 						</button>
+                        <button class="btn btn-success" id="tambahAktifkanGudang">
+                            <i class="fa fa-check-circle"></i> Aktifkan Gudang
+                        </button>
 					</div>
 				</div>
 			</div>

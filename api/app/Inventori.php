@@ -233,6 +233,10 @@ class Inventori extends Utility
                 return self::opname_warehouse($parameter);
                 break;
 
+            case 'post_opname_warehouse':
+                return self::post_opname_warehouse($parameter);
+                break;
+
             default:
                 return array('Unknown');
                 break;
@@ -3747,6 +3751,24 @@ class Inventori extends Utility
             $autonum++;
         }
         return $data;
+    }
+
+    private function post_opname_warehouse($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $worker = self::$query
+            ->update('master_inv_gudang', array(
+                'status' => 'A'
+            ))
+            ->where(array(
+                'master_inv_gudang.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv_gudang.uid' => '= ?'
+            ), array(
+                $UserData['data']->gudang
+            ))
+            ->execute();
+        return $worker;
     }
 
     private function opname_warehouse($parameter) {

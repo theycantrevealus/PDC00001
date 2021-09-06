@@ -637,6 +637,16 @@
                     //
                 }
             },
+            opname_warehouse: function(protocols, type, parameter, sender, receiver, time) {
+                if(sender !== __ME__) {
+                    notification (type, parameter, 3000, "opname_notifier");
+                }
+            },
+            opname_warehouse_finish: function(protocols, type, parameter, sender, receiver, time) {
+                if(sender !== __ME__) {
+                    notification (type, parameter, 3000, "opname_notifier");
+                }
+            },
             reset_password: function(protocols, type, parameter, sender, receiver, time) {
                 location.href = __HOSTNAME__ + "/system/logout";
             },

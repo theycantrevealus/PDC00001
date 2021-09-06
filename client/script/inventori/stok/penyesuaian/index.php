@@ -16,9 +16,10 @@
 					$(target + " option").remove();
 					gudangData = response.response_package.response_data;
 					for(var a in gudangData) {
-						var newOption = document.createElement("OPTION");
+					    var newOption = document.createElement("OPTION");
 						$(newOption).html(gudangData[a].nama).attr({
-							"value":gudangData[a].uid
+							"value":gudangData[a].uid,
+                            "status": gudangData[a].status
 						});
 						if(gudangData[a].uid == selected) {
 							$(newOption).attr({
@@ -79,6 +80,55 @@
 
 		load_product_resep("#txt_obat_tambah");
 		load_gudang("#txt_gudang_tambah");
+		var currentStatus = $("#txt_gudang option:selected").attr("status");
+		reCheckStatus(currentStatus);
+		function reCheckStatus(currentStatus) {
+            if(currentStatus === "A") {
+                $("#tambahAktifkanGudang").hide();
+            } else {
+                $("#tambahAktifkanGudang").show();
+            }
+        }
+
+        $("#tambahAktifkanGudang").click(function () {
+            Swal.fire({
+                title: "Aktifkan Gudang?",
+                html: "Prosedur ini akan mengaktifkan semua jalur barang masuk dan barang keluar dari dan ke gudang ini.",
+                showDenyButton: true,
+                type: "warning",
+                confirmButtonText: "Ya",
+                confirmButtonColor: "#1297fb",
+                denyButtonText: "Tidak",
+                denyButtonColor: "#ff2a2a"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Inventori",
+                        async: false,
+                        data: {
+                            request: "post_opname_warehouse",
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        success:function(response) {
+                            if(response.response_package.response_result > 0) {
+                                push_socket(__ME__, "opname_warehouse_finish", "*", "" + __UNIT__.nama + " selesai stok opname. Transaksi gudang dapat diproses.", "success").then(function () {
+                                    load_gudang("#txt_gudang", __UNIT__.gudang);
+                                    currentStatus = $("#txt_gudang option:selected").attr("status");
+                                    reCheckStatus(currentStatus);
+                                });
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            });
+        });
+
 		$('#txt_periode_awal').datepicker("setDate", $.datepicker.parseDate( "yy-mm-dd", $('#txt_periode_awal').attr("setTanggal")));
 		$('#txt_periode_akhir').datepicker("setDate", $.datepicker.parseDate( "yy-mm-dd", $('#txt_periode_akhir').attr("setTanggal")));
 
@@ -172,38 +222,47 @@
 		});
 
 		$("#tambahStokAwal").click(function() {
-            Swal.fire({
-                title: "Mulai Penyesuaian Stok?",
-                html: "Prosedur ini akan menghentikan semua jalur barang masuk dan barang keluar dari dan ke gudang ini.",
-                showDenyButton: true,
-                type: "warning",
-                confirmButtonText: "Ya",
-                confirmButtonColor: "#1297fb",
-                denyButtonText: "Tidak",
-                denyButtonColor: "#ff2a2a"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url:__HOSTAPI__ + "/Inventori",
-                        async: false,
-                        data: {
-                            request: "opname_warehouse",
-                        },
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        type:"POST",
-                        success:function(response) {
-                            if(response.response_package.response_result > 0) {
-                                $("#form-tambah").modal("show");
+		    if(currentStatus === "A") {
+                Swal.fire({
+                    title: "Mulai Penyesuaian Stok?",
+                    html: "Prosedur ini akan menghentikan semua jalur barang masuk dan barang keluar dari dan ke gudang ini.",
+                    showDenyButton: true,
+                    type: "warning",
+                    confirmButtonText: "Ya",
+                    confirmButtonColor: "#1297fb",
+                    denyButtonText: "Tidak",
+                    denyButtonColor: "#ff2a2a"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url:__HOSTAPI__ + "/Inventori",
+                            async: false,
+                            data: {
+                                request: "opname_warehouse",
+                            },
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type:"POST",
+                            success:function(response) {
+                                if(response.response_package.response_result > 0) {
+                                    push_socket(__ME__, "opname_warehouse", "*", "" + __UNIT__.nama + " mengadakan stok opname. Transaksi gudang dihentikan sementara.", "info").then(function () {
+                                        load_gudang("#txt_gudang", __UNIT__.gudang);
+                                        currentStatus = $("#txt_gudang option:selected").attr("status");
+                                        reCheckStatus(currentStatus);
+                                        $("#form-tambah").modal("show");
+                                    });
+                                }
+                            },
+                            error: function(response) {
+                                console.log(response);
                             }
-                        },
-                        error: function(response) {
-                            console.log(response);
-                        }
-                    });
-                }
-            });
+                        });
+                    }
+                });
+            } else {
+                $("#form-tambah").modal("show");
+            }
 		});
 
 		$("body").on("click", ".detail_opname", function() {
@@ -279,12 +338,12 @@
 								},
 								{
 									"data" : null, render: function(data, type, row, meta) {
-										return "<h6 class=\"number_style\">" + row.qty_awal + "</h6>";
+										return "<h6 class=\"number_style text-right\">" + number_format(row.qty_awal, 2, ".", ",") + "</h6>";
 									}
 								},
 								{
 									"data" : null, render: function(data, type, row, meta) {
-										return "<h6 class=\"number_style\">" + row.qty_akhir + "</h6>";
+                                        return "<h6 class=\"number_style text-right\">" + number_format(row.qty_akhir, 2, ".", ",") + "</h6>";
 									}
 								},
 								{
@@ -403,7 +462,7 @@
 			serverSide: true,
 			sPaginationType: "full_numbers",
 			bPaginate: true,
-			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+			lengthMenu: [[10, 50, -1], [10, 50, "All"]],
 			serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Inventori",
@@ -451,14 +510,19 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<b>" + row.nama + "</b><span class=\"pull-right text-info\" style=\"font-size: 14pt;\">[" + row.batch.batch + "]</span>" + "<br />" + row.batch.expired_date;
+						return "<b>" + row.nama + "</b><span class=\"pull-right text-info\" style=\"font-size: 12pt;\">[" + row.batch.batch + "]</span>" + "<br /><small>ED: " + row.batch.expired_date + "</small>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.stok_terkini;
+                        return "<h6 class=\"number_style text-right\">" + number_format(row.stok_terkini, 2, ".", ",") + "</h6>";
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.satuan_terkecil.nama;
+                    }
+                },
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<input type=\"text\" class=\"form-control aktual_qty\" id=\"item_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"0.00\" />";
@@ -618,12 +682,13 @@
 						<div class="col-lg-12 card-body">
 							<div class="row">
 								<div class="form-group col-md-12">
-									<table class="table table-bordered" id="current-stok">
+									<table class="table table-bordered table-striped" id="current-stok">
 										<thead class="thead-dark">
 											<tr>
 												<th class="wrap_content">No</th>
-												<th>Barang</th>
+												<th style="width: 50%">Barang</th>
 												<th class="wrap_content">Stok</th>
+                                                <th>Satuan</th>
 												<th style="width: 10%;">Aktual</th>
 												<th>Keterangan</th>
 											</tr>
