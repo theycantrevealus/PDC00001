@@ -57,7 +57,10 @@
 			</div-->
 			<div class="card">
 				<div class="card-header card-header-large d-flex align-items-center">
-					<h5 class="card-header__title flex m-0">Apotek</h5>
+					<h5 class="card-header__title flex m-0">
+                        Apotek
+                        <span class="pull-right" id="status_gudang_apotek"></span>
+                    </h5>
 				</div>
 				<div class="card-body tab-content">
 					<div class="tab-pane active show fade" id="list-resep">

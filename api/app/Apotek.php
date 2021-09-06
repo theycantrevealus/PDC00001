@@ -4866,6 +4866,8 @@ class Apotek extends Utility
         $invoice_detail = array();
 
         $Invoice = new Invoice(self::$pdo);
+        $Inventori = new Inventori(self::$pdo);
+        $virtual = array();
 
         $InvoiceCheck = self::$query->select('invoice', array(
             'uid'
@@ -4932,6 +4934,64 @@ class Apotek extends Utility
             ));
             array_push($invoice_detail, $AppendInvoice);
 
+            $usedBatch = array();
+            $InventoriBatch = $Inventori->get_item_batch($value['obat']);
+            $kebutuhan = floatval($value['jumlah']);
+            foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
+                if($kebutuhan >= $bValue['stok_terkini']) {
+                    if($bValue['stok_terkini'] > 0) {
+                        array_push($usedBatch, array(
+                            'batch' => $bValue['batch'],
+                            'barang' => $bValue['barang'],
+                            'gudang' => $bValue['gudang']['uid'],
+                            'qty' => $bValue['stok_terkini']
+                        ));
+                        $kebutuhan -= $bValue['stok_terkini'];
+                    }
+                } else {
+                    if($kebutuhan > 0) {
+                        array_push($usedBatch, array(
+                            'batch' => $bValue['batch'],
+                            'barang' => $bValue['barang'],
+                            'gudang' => $bValue['gudang']['uid'],
+                            'qty' => $kebutuhan
+                        ));
+                        $kebutuhan = 0;
+                    }
+                }
+                /*if($bValue['gudang']['uid'] === $UserData['data']->gudang) {
+
+                }*/
+            }
+
+            foreach ($usedBatch as $BatchKey => $BatchValue) {
+                //Potong Stok Virtual
+                if($UserData['data']->gudang === $BatchValue['gudang']) {
+                    $Virtual = $Inventori->virtual_stok(array(
+                        'transact_table' => 'resep',
+                        'transact_iden' => $parameter['uid'],
+                        'gudang_asal' => $UserData['data']->gudang,
+                        'barang' => $BatchValue['barang'],
+                        'batch' => $BatchValue['batch'],
+                        'qty' => $BatchValue['qty'],
+                        'remark' => 'Reserved stok resep'
+                    ));
+                } else {
+                    $Virtual = $Inventori->virtual_stok(array(
+                        'transact_table' => 'resep',
+                        'transact_iden' => $parameter['uid'],
+                        'gudang_asal' => $BatchValue['gudang'],
+                        'gudang_tujuan' => $UserData['data']->gudang,
+                        'barang' => $BatchValue['barang'],
+                        'batch' => $BatchValue['batch'],
+                        'qty' => $BatchValue['qty'],
+                        'remark' => 'Reserved stok resep'
+                    ));
+                }
+                array_push($virtual, $Virtual);
+            }
+
+
         }
 
         foreach ($parameter['racikan'] as $key => $value) {
@@ -4984,6 +5044,62 @@ class Apotek extends Utility
                     'departemen' => $parameter['departemen']
                 ));
                 array_push($invoice_detail, $AppendInvoice);
+                $usedBatch = array();
+                $InventoriBatch = $Inventori->get_item_batch($KValue['obat']);
+                $kebutuhanRacikan = floatval($KValue['jumlah']);
+                foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
+                    if($kebutuhanRacikan >= $bValue['stok_terkini']) {
+                        if($bValue['stok_terkini'] > 0) {
+                            array_push($usedBatch, array(
+                                'batch' => $bValue['batch'],
+                                'barang' => $bValue['barang'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'qty' => $bValue['stok_terkini']
+                            ));
+                            $kebutuhanRacikan -= $bValue['stok_terkini'];
+                        }
+                    } else {
+                        if($kebutuhanRacikan > 0) {
+                            array_push($usedBatch, array(
+                                'batch' => $bValue['batch'],
+                                'barang' => $bValue['barang'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'qty' => $kebutuhanRacikan
+                            ));
+                            $kebutuhanRacikan = 0;
+                        }
+                    }
+                    /*if($bValue['gudang']['uid'] === $UserData['data']->gudang) {
+
+                    }*/
+                }
+
+                foreach ($usedBatch as $BatchKey => $BatchValue) {
+                    //Potong Stok Virtual
+                    if($UserData['data']->gudang === $BatchValue['gudang']) {
+                        $Virtual = $Inventori->virtual_stok(array(
+                            'transact_table' => 'racikan',
+                            'transact_iden' => $value['racikan_uid'],
+                            'gudang_asal' => $UserData['data']->gudang,
+                            'barang' => $BatchValue['barang'],
+                            'batch' => $BatchValue['batch'],
+                            'qty' => $BatchValue['qty'],
+                            'remark' => 'Reserved stok racikan'
+                        ));
+                    } else {
+                        $Virtual = $Inventori->virtual_stok(array(
+                            'transact_table' => 'racikan',
+                            'transact_iden' => $value['racikan_uid'],
+                            'gudang_asal' => $BatchValue['gudang'],
+                            'gudang_tujuan' => $UserData['data']->gudang,
+                            'barang' => $BatchValue['barang'],
+                            'batch' => $BatchValue['batch'],
+                            'qty' => $BatchValue['qty'],
+                            'remark' => 'Reserved stok racikan'
+                        ));
+                    }
+                    array_push($virtual, $Virtual);
+                }
             }
 
             array_push($racikanChangedRecord, $racikanChange);
@@ -5142,7 +5258,9 @@ class Apotek extends Utility
             'antrian' => $AntrianNomor,
             'invoice' => $TargetInvoice,
             'invoice_detail' => $invoice_detail,
-            'kajian' => $kajian_data
+            'kajian' => $kajian_data,
+            'virtual' => $virtual,
+            'batch' => $usedBatch
         );
     }
 

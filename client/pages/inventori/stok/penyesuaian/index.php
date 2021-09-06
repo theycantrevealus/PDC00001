@@ -20,7 +20,18 @@
 		<div class="row no-gutters">
 			<div class="col-lg-4 card-body">
 				<p><strong class="headings-color">Informasi Gudang</strong></p>
-				<p style="font-size: 0.9rem;" class="text-muted"></p>
+                <div id="opname_running_status">
+                    <div class="alert alert-soft-warning d-flex align-items-center card-margin custom">
+                        <i class="material-icons mr-3 alert-sider">error_outline</i>
+                        <div class="text-body"><strong>Status Gudang.</strong> <p>Gudang ini sedang dalam masa <code>penyesuaian stok</code>. Segala aktifitas barang masuk dan keluar dihentikan</p></div>
+                    </div>
+                </div>
+                <div id="opname_ready_status">
+                    <div class="alert alert-soft-success d-flex align-items-center card-margin custom">
+                        <i class="material-icons mr-3 alert-sider">check_circle</i>
+                        <div class="text-body"><strong>Status Gudang.</strong> <p>Gudang aktif</p></div>
+                    </div>
+                </div>
 			</div>
 			<div class="col-lg-8 card-form__body card-body">
 				<div class="form-row">

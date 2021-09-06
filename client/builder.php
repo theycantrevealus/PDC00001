@@ -637,16 +637,6 @@
                     //
                 }
             },
-            opname_warehouse: function(protocols, type, parameter, sender, receiver, time) {
-                if(sender !== __ME__) {
-                    notification (type, parameter, 3000, "opname_notifier");
-                }
-            },
-            opname_warehouse_finish: function(protocols, type, parameter, sender, receiver, time) {
-                if(sender !== __ME__) {
-                    notification (type, parameter, 3000, "opname_notifier");
-                }
-            },
             reset_password: function(protocols, type, parameter, sender, receiver, time) {
                 location.href = __HOSTNAME__ + "/system/logout";
             },
@@ -654,6 +644,31 @@
                 location.reload();
             }
         };
+
+        function checkStatusGudang(gudang, target_gudang) {
+            var currentStatus = "";
+            $.ajax({
+                url:__HOSTAPI__ + "/Inventori/gudang_detail/" + gudang,
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    var gudangInfo = response.response_package.response_data[0];
+                    currentStatus = gudangInfo.status;
+                    if(gudangInfo.status === "A") {
+                        $(target_gudang).html("<b class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Gudang Aktif</b>");
+                    } else {
+                        $(target_gudang).html("<b class=\"text-warning\"><i class=\"fa fa-exclamation-circle\"></i> Gudang Opname</b>");
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return currentStatus;
+        }
 
 	</script>
 	<?php

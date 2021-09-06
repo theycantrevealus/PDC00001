@@ -85,8 +85,12 @@
 		function reCheckStatus(currentStatus) {
             if(currentStatus === "A") {
                 $("#tambahAktifkanGudang").hide();
+                $("#opname_ready_status").show();
+                $("#opname_running_status").hide();
             } else {
                 $("#tambahAktifkanGudang").show();
+                $("#opname_ready_status").hide();
+                $("#opname_running_status").show();
             }
         }
 
