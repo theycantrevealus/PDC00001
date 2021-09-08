@@ -44,7 +44,7 @@
 							<i class="fa fa-clipboard-check"></i> Penyesuaian Stok
 						</button>
                         <button class="btn btn-success" id="tambahAktifkanGudang">
-                            <i class="fa fa-check-circle"></i> Aktifkan Gudang
+                            <i class="fa fa-check-circle"></i> Selesai Penyesuaian
                         </button>
 					</div>
                     <div class="col-12 col-md-6 mb-3" style="padding-top: 22.5px;">
@@ -178,6 +178,7 @@
                                     <th class="wrap_content">No</th>
                                     <th>Dari</th>
                                     <th>Sampai</th>
+                                    <th>Gudang</th>
                                     <th>Pegawai</th>
                                     <th>Tanggal Pengerjaan</th>
                                     <th class="wrap_content">Aksi</th>

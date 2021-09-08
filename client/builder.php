@@ -333,8 +333,6 @@
                         }
                     }
 
-                    console.log(tutorList);
-
                 },
                 error: function(response) {
                     console.log(response);

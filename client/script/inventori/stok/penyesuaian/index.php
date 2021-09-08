@@ -128,6 +128,7 @@
                 type:"GET",
                 success:function(response) {
                     console.clear();
+                    console.log(response);
                     $("#strategi-amprah tbody").html("");
                     var amprah = response.response_package.amprah;
                     var autoAmprah = 1;
@@ -151,6 +152,30 @@
                         }
                         autoAmprah++;
                     }
+
+
+                    var potong = response.response_package.potong;
+                    var autoPotong = 1;
+                    for(var a in potong) {
+                        for(var aa in potong[a].detail) {
+                            if(aa < 1) {
+                                $("#strategi-potong tbody").append("<tr>" +
+                                    "<td rowspan=\"" + potong[a].detail.length + "\">" + autoPotong + "</td>" +
+                                    "<td rowspan=\"" + potong[a].detail.length + "\">" + potong[a].info.nama + "</td>" +
+                                    "<td>" + potong[a].detail[aa].batch.batch + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(potong[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(potong[a].total, 2, ".", ",") + "</td>" +
+                                    "</tr>");
+                            } else {
+                                $("#strategi-potong").append("<tr>" +
+                                    "<td>" + potong[a].detail[aa].batch.batch + "</td>" +
+                                    "<td> class=\"number_style\"" + number_format(potong[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(potong[a].total, 2, ".", ",") + "</td>" +
+                                    "</tr>");
+                            }
+                        }
+                        autoPotong++;
+                    }
                 },
                 error: function(response) {
                     console.log(response);
@@ -158,10 +183,80 @@
             });
         });
 
+        function calculate_post_opname() {
+            $("#form-rekap-post-opname").modal("show");
+            $.ajax({
+                url:__HOSTAPI__ + "/Inventori/post_opname_strategy_load",
+                async: false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    console.clear();
+                    console.log(response);
+                    $("#strategi-amprah tbody").html("");
+                    var amprah = response.response_package.amprah;
+                    var autoAmprah = 1;
+                    for(var a in amprah) {
+                        for(var aa in amprah[a].detail) {
+                            if(aa < 1) {
+                                $("#strategi-amprah tbody").append("<tr>" +
+                                    "<td rowspan=\"" + amprah[a].detail.length + "\">" + autoAmprah + "</td>" +
+                                    "<td rowspan=\"" + amprah[a].detail.length + "\">" + amprah[a].info.nama + "</td>" +
+                                    "<td>" + amprah[a].detail[aa].batch.batch + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(amprah[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(amprah[a].total, 2, ".", ",") + "</td>" +
+                                    "</tr>");
+                            } else {
+                                $("#strategi-amprah").append("<tr>" +
+                                    "<td>" + amprah[a].detail[aa].batch.batch + "</td>" +
+                                    "<td> class=\"number_style\"" + number_format(amprah[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(amprah[a].total, 2, ".", ",") + "</td>" +
+                                    "</tr>");
+                            }
+                        }
+                        autoAmprah++;
+                    }
+
+
+                    var potong = response.response_package.potong;
+                    var autoPotong = 1;
+                    for(var a in potong) {
+                        for(var aa in potong[a].detail) {
+                            if(aa < 1) {
+                                $("#strategi-potong tbody").append("<tr>" +
+                                    "<td rowspan=\"" + potong[a].detail.length + "\">" + autoPotong + "</td>" +
+                                    "<td rowspan=\"" + potong[a].detail.length + "\">" + potong[a].info.nama + "</td>" +
+                                    "<td>" + potong[a].detail[aa].batch.batch + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(potong[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(potong[a].total, 2, ".", ",") + "</td>" +
+                                    "</tr>");
+                            } else {
+                                $("#strategi-potong").append("<tr>" +
+                                    "<td>" + potong[a].detail[aa].batch.batch + "</td>" +
+                                    "<td> class=\"number_style\"" + number_format(potong[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(potong[a].total, 2, ".", ",") + "</td>" +
+                                    "</tr>");
+                            }
+                        }
+                        autoPotong++;
+                    }
+
+                    load_gudang("#txt_gudang", __UNIT__.gudang);
+                    currentStatus = $("#txt_gudang option:selected").attr("status");
+                    reCheckStatus(currentStatus);
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        }
+
         $("#tambahAktifkanGudang").click(function () {
             Swal.fire({
-                title: "Aktifkan Gudang?",
-                html: "Prosedur ini akan mengaktifkan semua jalur barang masuk dan barang keluar dari dan ke gudang ini.",
+                title: "Selesai Penyesuaian?",
+                html: "Prosedur ini akan mengaktifkan semua jalur barang masuk dan barang keluar dari dan ke gudang ini. Jika Anda ada di gudang utama maka semua gudang akan dibuka.",
                 showDenyButton: true,
                 type: "warning",
                 confirmButtonText: "Ya",
@@ -181,12 +276,35 @@
                         },
                         type:"POST",
                         success:function(response) {
+                            console.log(response);
                             if(response.response_package.response_result > 0) {
-                                push_socket(__ME__, "opname_warehouse_finish", "*", "" + __UNIT__.nama + " selesai stok opname. Transaksi gudang dapat diproses.", "success").then(function () {
+
+
+                                calculate_post_opname();
+                                //Todo : Ingat Notifnya boss
+                                /*push_socket(__ME__, "opname_warehouse_finish", "*", "" + __UNIT__.nama + " selesai stok opname. Transaksi gudang dapat diproses.", "success").then(function () {
                                     load_gudang("#txt_gudang", __UNIT__.gudang);
                                     currentStatus = $("#txt_gudang option:selected").attr("status");
                                     reCheckStatus(currentStatus);
-                                });
+                                });*/
+                            } else {
+                                if(response.response_package.response_result === -1) {
+                                    calculate_post_opname();
+                                } else {
+                                    var gudangProgressPendingList = response.response_package.gudang_progress;
+                                    var getListGudangPending = [];
+                                    for(var aPGud in gudangProgressPendingList) {
+                                        getListGudangPending.push("<span class=\"badge badge-custom-caption badge-outline-info\">" + gudangProgressPendingList[aPGud].gudang.nama + "</span>");
+                                    }
+
+                                    Swal.fire(
+                                        'Penyesuaian Stok',
+                                        response.response_package.response_message + "<br /><span>" + getListGudangPending.join(", ") + "</span>",
+                                        'warning'
+                                    ).then((result) => {
+                                        //
+                                    });
+                                }
                             }
                         },
                         error: function(response) {
@@ -245,6 +363,13 @@
 				}
 			},
 			autoWidth: false,
+            "rowCallback": function ( row, data, index ) {
+                if(data.status === "D") {
+                    $("td", row).addClass("bg-success-custom");
+                } else if(data.status === "A") {
+                    $("td", row).addClass("bg-purple-custom");
+                }
+            },
 			language: {
 				search: "",
 				searchPlaceholder: "Cari Barang"
@@ -265,7 +390,12 @@
 						return row.sampai;
 					}
 				},
-				{
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.gudang_detail.nama;
+                    }
+                },
+                {
 					"data" : null, render: function(data, type, row, meta) {
 						return row.pegawai.nama;
 					}
@@ -347,7 +477,8 @@
                     }
                 });
             } else {
-                $.ajax({
+                $("#form-tambah").modal("show");
+		        /*$.ajax({
                     url:__HOSTAPI__ + "/Inventori/check_temp_transact",
                     async: false,
                     beforeSend: function(request) {
@@ -364,13 +495,13 @@
                                 //
                             });
                         } else {
-                            $("#form-tambah").modal("show");
+
                         }
                     },
                     error: function(response) {
                         console.log(response);
                     }
-                });
+                });*/
             }
 		});
 
@@ -517,6 +648,15 @@
 			});
 		});
 
+		$("#btnProsesStrategi").click(function() {
+		    /*
+		    1. Jalankan Strategi
+		    2. Aktifkan Gudang Setelah Selesai
+		    3. Update Opname Menjadi Close
+		    */
+
+        });
+
 		$("#btnSubmitStokOpname").click(function() {
             Swal.fire({
                 title: "Data Sudah Benar?",
@@ -553,6 +693,14 @@
                                 $("#form-tambah").modal("hide");
                                 tableHistoryOpname.ajax.reload();
                                 tableCurrentStock.ajax.reload();
+                            } else {
+                                Swal.fire(
+                                    'Penyesuaian Stok',
+                                    response.response_package,
+                                    'warning'
+                                ).then((result) => {
+                                    //
+                                });
                             }
                         },
                         error: function(response) {
@@ -594,11 +742,13 @@
 							metaDataOpname[dataSet[a].uid] = {
 								qty_awal: dataSet[a].stok_terkini,
 								batch: dataSet[a].batch.uid,
-								nilai: 0,
-								keterangan: ""
+								nilai: ((dataSet[a].old_value !== undefined) ? dataSet[a].old_value : 0),
+								keterangan: dataSet[a].keterangan
 							};
 						}
 					}
+
+					$("#txt_keterangan").val(response.response_package.keterangan);
 
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = response.response_package.recordsTotal;
@@ -634,12 +784,13 @@
                 },
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<input type=\"text\" class=\"form-control aktual_qty\" id=\"item_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"0.00\" />";
+
+						return "<input type=\"text\" class=\"form-control aktual_qty\" id=\"item_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"0.00\" value=\"" + parseFloat((row.old_value !== undefined) ? row.old_value : 0) + "\" />";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<input type=\"text\" class=\"form-control keterangan_item\" id=\"keterangan_" + row.uid + "\" placeholder=\"Keterangan per Item\" />";
+						return "<input type=\"text\" class=\"form-control keterangan_item\" id=\"keterangan_" + row.uid + "\" placeholder=\"Keterangan per Item\" value=\"" + ((row.keterangan !== null && row.keterangan !== undefined) ? row.keterangan : "") + "\" />";
 					}
 				}
 			]
@@ -856,10 +1007,14 @@
                                 solution = "undefined";
                             }
                         } else {
-                            if((row.transact_table === "resep" || row.transact_table === "racikan") && row.gudang_asal.uid === __UNIT__.gudang) {
+                            if(row.gudang_tujuan === undefined || row.gudang_tujuan === null) {
                                 solution = "general";
                             } else {
-                                solution = "undefined";
+                                if((row.transact_table === "resep" || row.transact_table === "racikan") && row.gudang_asal.uid === __UNIT__.gudang) {
+                                    solution = "general";
+                                } else {
+                                    solution = "undefined";
+                                }
                             }
                         }
                         return "<span class=\"badge badge-custom-caption badge-outline-info\">" + solution.toUpperCase() + "</span>";
@@ -920,15 +1075,15 @@
                                         <br />
                                     </div>
                                     <div class="col-lg-1">
-                                        <span class="badge badge-custom-caption badge-outline-info">AMPRAH</span>
+                                        <span class="badge badge-custom-caption badge-outline-purple">AMPRAH</span>
                                     </div>
                                     <div class="col-lg-11">
                                         <p>
-                                            Sistem mendeteksi stok pada gudang ini <b class="text-danger">habis</b> dan setelah penyesuaian, gudang akan membuat amprah untuk menutupi kebutuhan transaksi.<br />
-                                            <b class="text-info">Kemungkinan Setelah Opname:</b> Jika stok tersedia, sistem akan mengamprah jumlah kekurangan saja.
+                                            <b class="text-danger">Pengambilan Manual</b> dari gudang farmasi. Lengkapi informasi <b class="text-info">[Nama Pengamprah]</b>
                                         </p>
                                     </div>
                                     <div class="col-lg-12">
+                                        <br />
                                         <div class="row">
                                             <div class="form-group col-md-12">
                                                 <table class="table table-bordered table-striped" id="strategi-amprah">
@@ -953,21 +1108,36 @@
                     <div class="tab-pane show fade" id="tab-post-2">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="badge badge-custom-caption badge-outline-purple">Potong Langsung</h4>
                                 <div class="row">
-                                    <div class="form-group col-md-12">
-                                        <table class="table table-bordered table-striped" id="strategi-potong">
-                                            <thead class="thead-dark">
-                                            <tr>
-                                                <th class="wrap_content">No</th>
-                                                <th style="width: 50%">Barang</th>
-                                                <th class="wrap_content">Batch</th>
-                                                <th class="wrap_content">Jumlah</th>
-                                                <th class="wrap_content">Total</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
+                                    <div class="col-lg-12">
+                                        <br />
+                                    </div>
+                                    <div class="col-lg-1">
+                                        <h4 class="badge badge-custom-caption badge-outline-purple">POTONG</h4>
+                                    </div>
+                                    <div class="col-lg-11">
+                                        <p>
+                                            Memotong langsung pada stok gudang terkait karena pada saat transaksi, barang tersedia.
+                                        </p>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <br />
+                                        <div class="row">
+                                            <div class="form-group col-md-12">
+                                                <table class="table table-bordered table-striped" id="strategi-potong">
+                                                    <thead class="thead-dark">
+                                                    <tr>
+                                                        <th class="wrap_content">No</th>
+                                                        <th style="width: 50%">Barang</th>
+                                                        <th class="wrap_content">Batch</th>
+                                                        <th class="wrap_content">Jumlah</th>
+                                                        <th class="wrap_content">Total</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1148,7 +1318,6 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-				<button type="button" class="btn btn-primary" id="btnSubmitStokOpname">Simpan</button>
 			</div>
 		</div>
 	</div>
