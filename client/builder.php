@@ -230,9 +230,28 @@
         }
 
         $(function() {
+            console.clear();
 		    var currentPageURL = document.URL;
-		    var currentMenuCheck = $("a[href=\"" + currentPageURL + "\"]").parent();
-		    while(parseInt(currentMenuCheck.attr("parent-child")) > 0) {
+		    //Check Child
+            var checkerChild = currentPageURL.split("/");
+            var childLibList = ["tambah", "edit", "view", "detail", "antrian"];
+            var targettedChildWow = 0;
+            var isChildMenuWow = false;
+            for(var abczz in checkerChild) {
+                if(childLibList.indexOf(checkerChild[abczz]) >= 0) {
+                    targettedChildWow = abczz;
+                    isChildMenuWow = true;
+                    break;
+                }
+            }
+
+            if(isChildMenuWow) {
+                checkerChild.splice(targettedChildWow, (checkerChild.length - targettedChildWow));
+                currentPageURL = checkerChild.join("/");
+            }
+
+            var currentMenuCheck = $("a.sidebar-menu-button[href=\"" + currentPageURL + "\"]").parent();
+            while(parseInt(currentMenuCheck.attr("parent-child")) > 0) {
                 var parentID = currentMenuCheck.attr("parent-child");
                 $("#menu-" + parentID).addClass("show");
                 $("a[href=\"#menu-" + parentID + "\"]").removeClass("collapsed");
