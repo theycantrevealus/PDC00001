@@ -67,21 +67,27 @@ class Unit extends Utility {
 			'created_at',
 			'updated_at'
 		))
-		->where(array(
-			'master_unit.deleted_at' => 'IS NULL'
-		), array())
-		->order(array(
-			'created_at' => 'DESC'
-		))
-		->execute();
+            ->join('master_inv_gudang', array(
+                'nama as nama_gudang', 'status'
+            ))
+            ->on(array(
+                array('master_unit.gudang', '=', 'master_inv_gudang.uid')
+            ))
+            ->where(array(
+                'master_unit.deleted_at' => 'IS NULL'
+            ), array())
+            ->order(array(
+                'created_at' => 'DESC'
+            ))
+            ->execute();
 
 		$autonum = 1;
+        $Inventori = new Inventori(self::$pdo);
 		foreach ($data['response_data'] as $key => $value) {
-			$Inventori = new Inventori(self::$pdo);
 			$InventoriDetail = $Inventori->get_gudang_detail($value['gudang'])['response_data'][0];
-			$data['response_data'][$key]['gudang'] = $InventoriDetail;
-			$data['response_data'][$key]['autonum'] = $autonum;
-			$autonum++;
+            $data['response_data'][$key]['gudang'] = $InventoriDetail;
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
 		}
 
 		return $data;

@@ -38,7 +38,7 @@
                                             <th style="width: 50%;">Item</th>
                                             <th class="wrap_content">Jumlah</th>
                                             <th class="wrap_content">Satuan</th>
-                                            <th class="wrap_content">Solusi</th>
+                                            <th class="wrap_content">Strategi</th>
                                         </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -57,8 +57,7 @@
                                                 <br /><br />
                                             </div>
                                             <div class="col-lg-12" id="allow_transact_opname">
-                                                <button class="btn btn-info">Amprah Semua Kebutuhan</button>
-                                                <button class="btn btn-info">Potong Semua Stok</button>
+                                                <button class="btn btn-info">Proses Strategi</button>
                                             </div>
                                         </div>
                                     </div>
@@ -107,7 +106,7 @@
                                                     </div>
                                                     <div class="col-lg-10">
                                                         <p>
-                                                            Sistem <b class="text-danger">tidak menemukan</b> stok pada gudang utama (amprah) maupun gudang terkait. Sistem mengajukan gudang asal yang memiliki stok. Gudang tujuan harus melakukan mutasi untuk memenuhi kebutuhan stok gudang asal.
+                                                            Sistem <b class="text-danger">tidak menemukan</b> stok pada gudang utama (amprah) maupun gudang terkait. Sistem merekomendasikan gudang asal yang memiliki stok. Gudang tujuan harus melakukan mutasi untuk memenuhi kebutuhan stok gudang asal.
                                                         </p>
                                                     </div>
                                                     <div class="col-lg-12">

@@ -10,6 +10,15 @@
 			}
 		}
 
+
+        function reCheckStatus(currentStatus) {
+            if(currentStatus === "A") {
+                $("#btnTerimaMutasi").hide();
+            } else {
+                $("#btnTerimaMutasi").show();
+            }
+        }
+
 		var tableAmprah = $("#table-list-amprah").DataTable({
 			processing: true,
 			serverSide: true,
@@ -128,6 +137,7 @@
             });
         });
 
+		//Todo: Disable tombol ini saat sedang opname
         $("#btnTerimaMutasi").click(function() {
             Swal.fire({
                 title: "Terima Mutasi?",
@@ -176,6 +186,9 @@
 		    uid = uid[uid.length - 1];
 
             targettedUID = uid;
+
+            currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
+            reCheckStatus(currentStatus);
 
             $("#kode_mutasi").html($("#kode_" + uid).html());
 		    $("#unit_asal").html($("#unit_asal_" + uid).html());

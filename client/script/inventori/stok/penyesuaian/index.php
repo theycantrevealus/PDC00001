@@ -81,18 +81,82 @@
 		load_product_resep("#txt_obat_tambah");
 		load_gudang("#txt_gudang_tambah");
 		var currentStatus = $("#txt_gudang option:selected").attr("status");
+        currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
 		reCheckStatus(currentStatus);
 		function reCheckStatus(currentStatus) {
             if(currentStatus === "A") {
+                $("#allow_transact_opname button").removeAttr("disabled");
                 $("#tambahAktifkanGudang").hide();
                 $("#opname_ready_status").show();
                 $("#opname_running_status").hide();
             } else {
+                $("#warning_allow_transact_opname").append(" Harap <a href=\"" + __HOSTNAME__ + "/inventori/stok/penyesuaian\"><i class=\"fa fa-link\"></i> selesaikan opname</a> dahulu agar dapat melanjutkan proses transaksi");
+                $("#allow_transact_opname button").attr({
+                    "disabled": "disabled"
+                });
                 $("#tambahAktifkanGudang").show();
                 $("#opname_ready_status").hide();
                 $("#opname_running_status").show();
             }
         }
+
+        protocolLib = {
+            opname_warehouse: function(protocols, type, parameter, sender, receiver, time) {
+                if(sender !== __ME__) {
+                    notification (type, parameter, 3000, "opname_notifier");
+                }
+                currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
+                reCheckStatus(currentStatus);
+            },
+            opname_warehouse_finish: function(protocols, type, parameter, sender, receiver, time) {
+                if(sender !== __ME__) {
+                    notification (type, parameter, 3000, "opname_notifier");
+                }
+                currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
+                reCheckStatus(currentStatus);
+            },
+        };
+
+        $("#prosesStrategi").click(function() {
+            $("#form-rekap-post-opname").modal("show");
+            $.ajax({
+                url:__HOSTAPI__ + "/Inventori/post_opname_strategy_load",
+                async: false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    console.clear();
+                    $("#strategi-amprah tbody").html("");
+                    var amprah = response.response_package.amprah;
+                    var autoAmprah = 1;
+                    for(var a in amprah) {
+                        for(var aa in amprah[a].detail) {
+                            if(aa < 1) {
+                                $("#strategi-amprah tbody").append("<tr>" +
+                                    "<td rowspan=\"" + amprah[a].detail.length + "\">" + autoAmprah + "</td>" +
+                                    "<td rowspan=\"" + amprah[a].detail.length + "\">" + amprah[a].info.nama + "</td>" +
+                                    "<td>" + amprah[a].detail[aa].batch.batch + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(amprah[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(amprah[a].total, 2, ".", ",") + "</td>" +
+                                    "</tr>");
+                            } else {
+                                $("#strategi-amprah").append("<tr>" +
+                                    "<td>" + amprah[a].detail[aa].batch.batch + "</td>" +
+                                    "<td> class=\"number_style\"" + number_format(amprah[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(amprah[a].total, 2, ".", ",") + "</td>" +
+                                    "</tr>");
+                            }
+                        }
+                        autoAmprah++;
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+        });
 
         $("#tambahAktifkanGudang").click(function () {
             Swal.fire({
@@ -250,11 +314,29 @@
                             type:"POST",
                             success:function(response) {
                                 if(response.response_package.response_result > 0) {
-                                    push_socket(__ME__, "opname_warehouse", "*", "" + __UNIT__.nama + " mengadakan stok opname. Transaksi gudang dihentikan sementara.", "info").then(function () {
+                                    push_socket(__ME__, "opname_warehouse", "*", "" + __UNIT__.nama + " mengadakan stok opname. Transaksi gudang dihentikan sementara. Harap selesaikan semua transaksi yang sedang berjalan", "info").then(function () {
                                         load_gudang("#txt_gudang", __UNIT__.gudang);
                                         currentStatus = $("#txt_gudang option:selected").attr("status");
                                         reCheckStatus(currentStatus);
-                                        $("#form-tambah").modal("show");
+                                        if(response.response_package.temp_stok.length === 0) {
+                                            $("#form-tambah").modal("show");
+                                        } else {
+                                            Swal.fire(
+                                                'Penyesuaian Stok',
+                                                'Sedang ada transaksi yang sedang berjalan. Harap informasikan semua unit untuk menyelesaikan transaksi kemudian menghentikan transaksi baru',
+                                                'warning'
+                                            ).then((result) => {
+                                                //
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'Penyesuaian Stok',
+                                        'Sedang ada transaksi yang sedang berjalan. Harap informasikan semua unit untuk menyelesaikan transaksi kemudian menghentikan transaksi baru',
+                                        'warning'
+                                    ).then((result) => {
+                                        //
                                     });
                                 }
                             },
@@ -265,7 +347,30 @@
                     }
                 });
             } else {
-                $("#form-tambah").modal("show");
+                $.ajax({
+                    url:__HOSTAPI__ + "/Inventori/check_temp_transact",
+                    async: false,
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    type:"GET",
+                    success:function(response) {
+                        if(response.response_package.response_data.length > 0) {
+                            Swal.fire(
+                                'Penyesuaian Stok',
+                                'Sedang ada transaksi yang sedang berjalan. Harap informasikan semua unit untuk menyelesaikan transaksi kemudian menghentikan transaksi baru',
+                                'warning'
+                            ).then((result) => {
+                                //
+                            });
+                        } else {
+                            $("#form-tambah").modal("show");
+                        }
+                    },
+                    error: function(response) {
+                        console.log(response);
+                    }
+                });
             }
 		});
 
@@ -369,7 +474,7 @@
 								},
 								{
 									"data" : null, render: function(data, type, row, meta) {
-										return row.keterangan;
+										return (row.keterangan === "") ? "-" : row.keterangan;
 									}
 								},
 							]
@@ -645,10 +750,254 @@
 
 			metaDataOpname[uid].keterangan = $(this).val();
 		});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        var tempTransact = $("#table-temp").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Inventori",
+                type: "POST",
+                data: function(d) {
+                    d.request = "get_temp_transact";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var rawData = [];
+
+                    if(response === undefined || response.response_package === undefined) {
+                        rawData = [];
+                    } else {
+                        rawData = response.response_package.response_data;
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return rawData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Nama Barang"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span style=\"display: block\" class=\"text-right " + ((__UNIT__.gudang === row.gudang_asal.uid) ? "text-info" : "") + "\">" + row.gudang_asal.nama + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.gudang_tujuan !== undefined && row.gudang_tujuan !== null) {
+                            return "<span style=\"display: block\" class=\"" + ((__UNIT__.gudang === row.gudang_tujuan.uid) ? "text-info" : "") + "\">" + row.gudang_tujuan.nama + "</span>";
+                        } else {
+                            return "-";
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span style=\"display: block\" class=\"number_style\">" + number_format(row.qty, 2, ".", ",") + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.item.satuan_terkecil_info.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        var solution = "";
+                        if(row.gudang_tujuan !== undefined && row.gudang_tujuan !== null) {
+                            if((row.transact_table === "resep" || row.transact_table === "racikan") && row.gudang_tujuan.uid === __UNIT__.gudang) {
+                                if(row.gudang_asal.uid === __GUDANG_UTAMA__) {
+                                    solution = "amprah";
+                                } else {
+                                    solution = "mutasi";
+                                }
+                            } else if((row.transact_table === "resep" || row.transact_table === "racikan") && row.gudang_asal.uid === __UNIT__.gudang && row.gudang_tujuan.uid === null) {
+                                solution = "general";
+                            } else {
+                                solution = "undefined";
+                            }
+                        } else {
+                            if((row.transact_table === "resep" || row.transact_table === "racikan") && row.gudang_asal.uid === __UNIT__.gudang) {
+                                solution = "general";
+                            } else {
+                                solution = "undefined";
+                            }
+                        }
+                        return "<span class=\"badge badge-custom-caption badge-outline-info\">" + solution.toUpperCase() + "</span>";
+                    }
+                }
+            ]
+        });
 		
 	});
 
 </script>
+
+
+
+
+
+
+
+
+
+
+<div id="form-rekap-post-opname" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Penyesuaian Transaksi Post Opname</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="z-0">
+                    <ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-dokter">
+                        <li class="nav-item">
+                            <a href="#tab-post-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true">
+							<span class="nav-link__count">
+								01
+							</span>
+                                Amprah Kekurangan Stok
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#tab-post-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" >
+							<span class="nav-link__count">
+								02
+							</span>
+                                Potong Stok
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane show fade active" id="tab-post-1">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <br />
+                                    </div>
+                                    <div class="col-lg-1">
+                                        <span class="badge badge-custom-caption badge-outline-info">AMPRAH</span>
+                                    </div>
+                                    <div class="col-lg-11">
+                                        <p>
+                                            Sistem mendeteksi stok pada gudang ini <b class="text-danger">habis</b> dan setelah penyesuaian, gudang akan membuat amprah untuk menutupi kebutuhan transaksi.<br />
+                                            <b class="text-info">Kemungkinan Setelah Opname:</b> Jika stok tersedia, sistem akan mengamprah jumlah kekurangan saja.
+                                        </p>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="row">
+                                            <div class="form-group col-md-12">
+                                                <table class="table table-bordered table-striped" id="strategi-amprah">
+                                                    <thead class="thead-dark">
+                                                    <tr>
+                                                        <th class="wrap_content">No</th>
+                                                        <th style="width: 50%">Barang</th>
+                                                        <th class="wrap_content">Batch</th>
+                                                        <th class="wrap_content">Jumlah</th>
+                                                        <th class="wrap_content">Total</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane show fade" id="tab-post-2">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="badge badge-custom-caption badge-outline-purple">Potong Langsung</h4>
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <table class="table table-bordered table-striped" id="strategi-potong">
+                                            <thead class="thead-dark">
+                                            <tr>
+                                                <th class="wrap_content">No</th>
+                                                <th style="width: 50%">Barang</th>
+                                                <th class="wrap_content">Batch</th>
+                                                <th class="wrap_content">Jumlah</th>
+                                                <th class="wrap_content">Total</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
+                <button type="button" class="btn btn-primary" id="btnProsesStrategi">Proses</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 <div id="form-tambah" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -779,7 +1128,7 @@
 												<th class="wrap_content">Batch</th>
 												<th class="wrap_content">Awal</th>
 												<th class="wrap_content">Akhir</th>
-												<th>Rate</th>
+												<th>Selisih</th>
 												<th>Keterangan</th>
 											</tr>
 										</thead>

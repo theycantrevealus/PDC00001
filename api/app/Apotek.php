@@ -763,6 +763,56 @@ class Apotek extends Utility
                             'keterangan' => ''
                         ))
                             ->execute();
+                        if($stokLog['response_result'] > 0) {
+
+                            $targetRacikan = self::$query->select('racikan', array(
+                                'uid'
+                            ))
+                                ->where(array(
+                                    'racikan.asesmen' => '= ?',
+                                    'AND',
+                                    'racikan.status' => '= ?',
+                                    'AND',
+                                    'racikan.deleted_at' => 'IS NULL'
+                                ), array(
+                                    $parameter['asesmen'],
+                                    'L'
+                                ))
+                                ->execute();
+
+                            //Update Temp Stok Status
+                            $TempStokResep = self::$query->update('inventori_temp_stok', array(
+                                'status' => 'D'
+                            ))
+                                ->where(array(
+                                    'inventori_temp_stok.transact_table' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.transact_iden' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.barang' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.batch' => '= ?'
+                                ), array(
+                                    'resep', $parameter['resep'], $bValue['barang'], $bValue['batch']
+                                ))
+                                ->execute();
+
+                            $TempStokRacikan = self::$query->update('inventori_temp_stok', array(
+                                'status' => 'D'
+                            ))
+                                ->where(array(
+                                    'inventori_temp_stok.transact_table' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.transact_iden' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.barang' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.batch' => '= ?'
+                                ), array(
+                                    'racikan', $targetRacikan['response_data'][0]['uid'], $bValue['barang'], $bValue['batch']
+                                ))
+                                ->execute();
+                        }
                         $updateResult += $stokLog['response_result'];
                     }
                     array_push($updateProgress, $updateStok);

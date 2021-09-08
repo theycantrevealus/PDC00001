@@ -24,15 +24,14 @@
                     var returnedData = [];
                     var uniqueData = {};
 
-                    console.clear();
-                    console.log(response);
-
-
                     if(response === undefined || response.response_package === undefined) {
                         rawData = [];
                     } else {
                         rawData = response.response_package.response_data;
                     }
+
+                    console.clear();
+                    console.log(rawData);
 
                     for(var dataKey in rawData) {
                         if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
@@ -45,7 +44,9 @@
                                     detail : rawData[dataKey].detail,
                                     image: rawData[dataKey].image,
                                     kategori_obat: rawData[dataKey].kategori_obat,
-                                    kode_barang: rawData[dataKey].kode_barang
+                                    kode_barang: rawData[dataKey].kode_barang,
+                                    in: rawData[dataKey].in,
+                                    out: rawData[dataKey].out
                                 };
                             }
 
@@ -68,8 +69,6 @@
                         }
                     }
 
-                    console.log(uniqueData);
-
                     var autonum = 1;
                     for(var pKey in uniqueData) {
 
@@ -86,6 +85,8 @@
                             kategori_obat: rawData[dataKey].kategori_obat,
                             kode_barang: rawData[dataKey].kode_barang,
                             stok_batch: uniqueData[pKey].stok_batch,
+                            in: uniqueData[pKey].in,
+                            out: uniqueData[pKey].out,
                             batch: uniqueData[pKey].batch
                         });
                         autonum++;
@@ -132,12 +133,22 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        return "<h5 class=\"number_style text-right\">" + number_format(row.in, 2, ".", ",") + "</h5>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<h5 class=\"number_style text-right\">" + number_format(row.out, 2, ".", ",") + "</h5>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         //return "<h5 class=\"number_style wrap_content\">" + row.stok_terkini + "</h5>";
                         var counter = 0;
                         for(var az in row.batch) {
                             counter+= parseFloat(row.batch[az]);
                         }
-                        return "<h5 class=\"number_style text-right\">" + counter + "</h5>";
+                        return "<h5 class=\"number_style text-right\">" + row.stok_terkini + "</h5>";
                     }
                 },
                 {
