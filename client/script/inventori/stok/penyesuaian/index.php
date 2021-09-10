@@ -202,7 +202,7 @@
                         for(var aa in amprah[a].detail) {
                             if(aa < 1) {
                                 $("#strategi-amprah tbody").append("<tr>" +
-                                    "<td rowspan=\"" + amprah[a].detail.length + "\">" + autoAmprah + "</td>" +
+                                    "<td rowspan=\"" + amprah[a].detail.length + "\" class=\"autonum\">" + autoAmprah + "</td>" +
                                     "<td rowspan=\"" + amprah[a].detail.length + "\">" + amprah[a].info.nama + "</td>" +
                                     "<td>" + amprah[a].detail[aa].batch.batch + "</td>" +
                                     "<td class=\"number_style\">" + number_format(amprah[a].detail[aa].qty, 2, ".", ",") + "</td>" +
@@ -219,14 +219,19 @@
                         autoAmprah++;
                     }
 
+                    if($("#strategi-amprah tbody tr").length === 0) {
+                        $("#strategi-amprah tbody").append("<tr><td colspan=\"5\" class=\"text-center\">Tidak ada transaksi</td></tr>");
+                    }
 
+
+                    $("#strategi-potong tbody").html("");
                     var potong = response.response_package.potong;
                     var autoPotong = 1;
                     for(var a in potong) {
                         for(var aa in potong[a].detail) {
                             if(aa < 1) {
                                 $("#strategi-potong tbody").append("<tr>" +
-                                    "<td rowspan=\"" + potong[a].detail.length + "\">" + autoPotong + "</td>" +
+                                    "<td rowspan=\"" + potong[a].detail.length + "\" class=\"autonum\">" + autoPotong + "</td>" +
                                     "<td rowspan=\"" + potong[a].detail.length + "\">" + potong[a].info.nama + "</td>" +
                                     "<td>" + potong[a].detail[aa].batch.batch + "</td>" +
                                     "<td class=\"number_style\">" + number_format(potong[a].detail[aa].qty, 2, ".", ",") + "</td>" +
@@ -241,6 +246,10 @@
                             }
                         }
                         autoPotong++;
+                    }
+
+                    if($("#strategi-potong tbody tr").length === 0) {
+                        $("#strategi-potong tbody").append("<tr><td colspan=\"5\" class=\"text-center\">Tidak ada transaksi</td></tr>");
                     }
 
                     load_gudang("#txt_gudang", __UNIT__.gudang);
@@ -653,8 +662,50 @@
 		    1. Jalankan Strategi
 		    2. Aktifkan Gudang Setelah Selesai
 		    3. Update Opname Menjadi Close
+		    SINI
 		    */
 
+            Swal.fire({
+                title: "Proses Transaksi Tertunda?",
+                showDenyButton: true,
+                type: "warning",
+                confirmButtonText: "Ya",
+                confirmButtonColor: "#1297fb",
+                denyButtonText: "Tidak",
+                denyButtonColor: "#ff2a2a"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Inventori",
+                        async: false,
+                        data: {
+                            request: "post_opname_strategy"
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        success:function(response) {
+                            if(response.response_package.response_result > 0) {
+                                $("#form-tambah").modal("hide");
+                                tableHistoryOpname.ajax.reload();
+                                tableCurrentStock.ajax.reload();
+                            } else {
+                                Swal.fire(
+                                    'Penyesuaian Stok',
+                                    response.response_package,
+                                    'warning'
+                                ).then((result) => {
+                                    //
+                                });
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            });
         });
 
 		$("#btnSubmitStokOpname").click(function() {
@@ -689,6 +740,7 @@
                         },
                         type:"POST",
                         success:function(response) {
+                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 $("#form-tambah").modal("hide");
                                 tableHistoryOpname.ajax.reload();
