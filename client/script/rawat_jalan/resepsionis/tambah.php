@@ -37,6 +37,11 @@
 		});
 		
 		$("#btnSubmit").click(function(){
+            var me = $(this);
+            var lastCap = me.html();
+            me.attr({
+                "disabled" : "disabled"
+            }).addClass("btn-warning").removeClass("btn-success").html("Processing...");
 			var dataObj = {};
 			if(currentAntrianID != undefined || currentAntrianID != null) {
 				$('.inputan').each(function(){
@@ -83,6 +88,10 @@
                                 } else {
                                     $("#txt_no_bpjs").focus();
                                 }
+
+                                me.attr({
+                                    "disabled" : "disabled"
+                                }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
                             },
                             error: function (response) {
                                 console.log(response);
@@ -139,6 +148,10 @@
 								} else {
 									console.log("command not found");
 								}
+
+                                me.attr({
+                                    "disabled" : "disabled"
+                                }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
 
 							},
 							error: function(response) {

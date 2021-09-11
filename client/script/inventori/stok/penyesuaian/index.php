@@ -3,6 +3,9 @@
 	$(function(){
 		var metaDataOpname = {};
 		var tableDetailOpname;
+        if(__UNIT__.gudang !== __GUDANG_UTAMA__) {
+            $("#btnProsesStrategi").remove();
+        }
 		function load_gudang(target,selected = "") {
 			var gudangData;
 			$.ajax({
@@ -80,8 +83,9 @@
 
 		load_product_resep("#txt_obat_tambah");
 		load_gudang("#txt_gudang_tambah");
-		var currentStatus = $("#txt_gudang option:selected").attr("status");
-        currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
+
+        //var currentStatus = $("#txt_gudang option:selected").attr("status");
+        var currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
 		reCheckStatus(currentStatus);
 		function reCheckStatus(currentStatus) {
             if(currentStatus === "A") {
@@ -290,12 +294,7 @@
 
 
                                 calculate_post_opname();
-                                //Todo : Ingat Notifnya boss
-                                /*push_socket(__ME__, "opname_warehouse_finish", "*", "" + __UNIT__.nama + " selesai stok opname. Transaksi gudang dapat diproses.", "success").then(function () {
-                                    load_gudang("#txt_gudang", __UNIT__.gudang);
-                                    currentStatus = $("#txt_gudang option:selected").attr("status");
-                                    reCheckStatus(currentStatus);
-                                });*/
+                                tableHistoryOpname.ajax.reload();
                             } else {
                                 if(response.response_package.response_result === -1) {
                                     calculate_post_opname();
@@ -658,13 +657,6 @@
 		});
 
 		$("#btnProsesStrategi").click(function() {
-		    /*
-		    1. Jalankan Strategi
-		    2. Aktifkan Gudang Setelah Selesai
-		    3. Update Opname Menjadi Close
-		    SINI
-		    */
-
             Swal.fire({
                 title: "Proses Transaksi Tertunda?",
                 showDenyButton: true,
@@ -686,19 +678,13 @@
                         },
                         type:"POST",
                         success:function(response) {
-                            if(response.response_package.response_result > 0) {
-                                $("#form-tambah").modal("hide");
+                            push_socket(__ME__, "opname_warehouse_finish", "*", "" + __UNIT__.nama + " selesai stok opname. Transaksi gudang dapat diproses.", "success").then(function () {
                                 tableHistoryOpname.ajax.reload();
                                 tableCurrentStock.ajax.reload();
-                            } else {
-                                Swal.fire(
-                                    'Penyesuaian Stok',
-                                    response.response_package,
-                                    'warning'
-                                ).then((result) => {
-                                    //
-                                });
-                            }
+                                $("#form-rekap-post-opname").modal("hide");
+                                currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
+                                reCheckStatus(currentStatus);
+                            });
                         },
                         error: function(response) {
                             console.log(response);

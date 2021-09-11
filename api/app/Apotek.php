@@ -5128,6 +5128,22 @@ class Apotek extends Utility
                 }
 
                 foreach ($usedBatch as $BatchKey => $BatchValue) {
+                    //Todo : Disini kayaknya wooooooooooiiiiyyyyy
+                    //Check Qty Stok terkini dahulu
+                    $OldStok = self::$query->select('inventori_stok', array(
+                        'stok_terkini'
+                    ))
+                        ->where(array(
+                            'inventori_stok.gudang' => '= ?',
+                            'AND',
+                            'inventori_stok.barang' => '= ?',
+                            'AND',
+                            'inventori_stok.batch' => '= ?'
+                        ), array(
+                            $UserData['data']->gudang, $BatchValue['barang'], $BatchValue['batch']
+                        ))
+                        ->execute();
+
                     //Potong Stok Virtual
                     if($UserData['data']->gudang === $BatchValue['gudang']) {
                         $Virtual = $Inventori->virtual_stok(array(

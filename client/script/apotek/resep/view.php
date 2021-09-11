@@ -1,7 +1,7 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
     $(function () {
-        var currentMetaData, currentAsesmen, currentRacikanActive, targetKodeResep;
+        var currentMetaData, currentAsesmen, currentRacikanActive, targetKodeResep, currentStatusOpname = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");;
         var alasanUbah = "";
         var totalResep = 0;
         var totalRacikan = 0;
@@ -880,14 +880,16 @@
                                                 batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
                                                 kebutuhan -= parseFloat(batchData[bKey].stok_terkini);
                                                 if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
-                                                    alternatedBatchList.push(batchData[bKey]);
+                                                    //alternatedBatchList.push(batchData[bKey]);
+                                                    selectedBatchList.push(batchData[bKey]);
                                                     uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
                                                 }
                                             } else {
                                                 batchData[bKey].used = parseFloat(kebutuhan);
                                                 kebutuhan = 0;
                                                 if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
-                                                    alternatedBatchList.push(batchData[bKey]);
+                                                    //alternatedBatchList.push(batchData[bKey]);
+                                                    selectedBatchList.push(batchData[bKey]);
                                                     uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
                                                 }
                                             }
@@ -903,6 +905,8 @@
                                 } else {
                                     targettedBatch = alternatedBatchList;
                                 }
+
+                                //targettedBatch = selectedBatchList;
 
 
 
@@ -931,6 +935,14 @@
                                             $("#batch_obat_" + rowTarget).append("<li style=\"color:" + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#12a500") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
                                         } else {
                                             $("#batch_obat_" + rowTarget).append("<li style=\"color:" + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#F58D00") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                        }
+                                    }
+
+                                    for(var batchSelKey in alternatedBatchList) {
+                                        if(alternatedBatchList[batchSelKey].gudang.uid === __UNIT__.gudang) {
+                                            $("#batch_obat_" + rowTarget).append("<li style=\"color:" + ((alternatedBatchList[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#12a500") + "\" batch=\"" + alternatedBatchList[batchSelKey].batch + "\"><b>[" + alternatedBatchList[batchSelKey].kode + "]</b> " + alternatedBatchList[batchSelKey].expired + " (" + alternatedBatchList[batchSelKey].used + ") - " + alternatedBatchList[batchSelKey].gudang.nama + ((alternatedBatchList[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                        } else {
+                                            $("#batch_obat_" + rowTarget).append("<li style=\"color:" + ((alternatedBatchList[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#F58D00") + "\" batch=\"" + alternatedBatchList[batchSelKey].batch + "\"><b>[" + alternatedBatchList[batchSelKey].kode + "]</b> " + alternatedBatchList[batchSelKey].expired + " (" + alternatedBatchList[batchSelKey].used + ") - " + alternatedBatchList[batchSelKey].gudang.nama + ((alternatedBatchList[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
                                         }
                                     }
 
@@ -2423,8 +2435,12 @@
                                         } else {
                                             $(this).find("td:eq(1) ol li").each(function() {
                                                 if($(this).find("i").hasClass("text-danger")) {
-                                                    allowSave = false;
-                                                    return false;
+                                                    if(currentStatusOpname === "O") {
+                                                        allowSave = true;
+                                                    } else {
+                                                        allowSave = false;
+                                                        return false;
+                                                    }
                                                 } else {
                                                     allowSave = true;
                                                 }
@@ -2464,11 +2480,15 @@
                                                     return false;
                                                 } else {
                                                     $(this).find("td:eq(1) ol li").each(function() {
-                                                        if($(this).find("i").hasClass("text-danger")) {
-                                                            allowSave = false;
-                                                            return false;
-                                                        } else {
+                                                        if(currentStatusOpname === "O") {
                                                             allowSave = true;
+                                                        } else {
+                                                            if($(this).find("i").hasClass("text-danger")) {
+                                                                allowSave = false;
+                                                                return false;
+                                                            } else {
+                                                                allowSave = true;
+                                                            }
                                                         }
                                                     });
                                                 }

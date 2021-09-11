@@ -737,6 +737,7 @@ class Pegawai extends Utility {
     }
 
     public function get_detail($parameter) {
+        $Unit = new Unit(self::$pdo);
         $data = self::$query
             ->select('pegawai', array(
                 'uid',
@@ -764,6 +765,7 @@ class Pegawai extends Utility {
         } else {
             $profile_pic = '/client/template/assets/images/avatar/demi.png';
         }
+        $data['response_data'][0]['unit_detail'] = $Unit->get_unit_detail($data['response_data'][0]['unit'])['response_data'][0];
         $data['response_data'][0]['profile_pic'] = $profile_pic;
         $data['response_selected'] = $modulDataMeta['selected'];
 

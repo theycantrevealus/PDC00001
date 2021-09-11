@@ -5,6 +5,7 @@
         var resepUID = __PAGES__[3];
         var resepJenis = __PAGES__[4];
         var targettedData = {};
+        var currentStatusOpname = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
         var allowProcess = false;
         $.ajax({
             url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + resepUID,
@@ -200,9 +201,15 @@
 
                         if((parseFloat(data.detail[a].qty) - parseFloat(jlh_sedia)) > 0) {
                             statusSedia += "<br /><b class=\"text-warning\"><i class=\"fa fa-exclamation-circle\"></i>Butuh Amprah : " + number_format(parseFloat(data.detail[a].qty) - parseFloat(jlh_sedia), 2, ".", ",") + "</b>";
-                            $("#btnSelesai").attr({
-                                "disabled": "disabled"
-                            }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
+
+                            if(currentStatusOpname === "A") {
+                                $("#btnSelesai").attr({
+                                    "disabled": "disabled"
+                                }).removeClass("btn-success").addClass("btn-danger").html("<i class=\"fa fa-ban\"></i> Selesai");
+                            } else {
+                                $("#btnSelesai").removeAttr("disabled").removeClass("btn-danger").addClass("btn-success").html("<i class=\"fa fa-check\"></i> Selesai");
+                            }
+
                         } else {
                             var disabledStatus = $("#btnSelesai").attr('name');
                             if (typeof attr !== typeof undefined && attr !== false) {

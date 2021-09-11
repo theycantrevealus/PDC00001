@@ -1649,6 +1649,7 @@ class Inventori extends Utility
                 ))
                 ->execute();
             foreach ($Data['response_data'] as $key => $value) {
+                //Todo: Recalculate Strategy
 
                 if($value['gudang_asal'] === __GUDANG_UTAMA__ && $value['gudang_tujuan'] === $UserData['data']->gudang) {
                     if(!isset($Amprah[$value['barang']])) {
@@ -3202,7 +3203,7 @@ class Inventori extends Utility
     private function tambah_amprah($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         //Get Last AI tahun ini
         $lastID = self::$query->select('inventori_amprah', array(
@@ -3536,10 +3537,10 @@ class Inventori extends Utility
         if (count($data['response_data']) > 0) {
             $data['response_data'][0]['tanggal'] = date('d F Y  [H:i]', strtotime($data['response_data'][0]['created_at']));
             $Pegawai = new Pegawai(self::$pdo);
-            $data['response_data'][0]['pegawai_detail'] = $Pegawai::get_detail($data['response_data'][0]['pegawai'])['response_data'][0];
+            $data['response_data'][0]['pegawai_detail'] = $Pegawai->get_detail($data['response_data'][0]['pegawai'])['response_data'][0];
             $Unit = new Unit(self::$pdo);
-            $data['response_data'][0]['pegawai_detail']['unit_detail'] = $Unit::get_unit_detail($data['response_data'][0]['pegawai_detail']['unit'])['response_data'][0];
-            $data['response_data'][0]['diproses_detail'] = $Pegawai::get_detail($data['response_data'][0]['diproses'])['response_data'][0];
+            $data['response_data'][0]['pegawai_detail']['unit_detail'] = $Unit->get_unit_detail($data['response_data'][0]['pegawai_detail']['unit'])['response_data'][0];
+            $data['response_data'][0]['diproses_detail'] = $Pegawai->get_detail($data['response_data'][0]['diproses'])['response_data'][0];
 
             $data_detail = self::$query->select('inventori_amprah_detail', array(
                 'id',
@@ -4008,6 +4009,15 @@ class Inventori extends Utility
     private function post_opname_strategy($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $Pegawai = new Pegawai(self::$pdo);
+
+        $forAmprah = array();
+        $forMutasi = array();
+        $forCut = array();
+
+        $forAmprahProcess = array();
+        $forMutasiProcess = array();
+        $forCutProcess = array();
 
         $TempStrategy = self::$query->select('inventori_temp_stok', array(
             'id', 'transact_table', 'transact_iden', 'gudang_asal', 'gudang_tujuan', 'barang', 'batch', 'qty', 'remark', 'pegawai'
@@ -4021,9 +4031,357 @@ class Inventori extends Utility
             ))
             ->execute();
 
+        //Todo: Check Jika stok berubah pasca opname approve
+        /*foreach ($TempStrategy['response_data'] as $key => $value) {
+            //Akktual Stok
+            $postOpnameStok = self::$query->select('inventori_stok', array(
+                'stok_terkini'
+            ))
+                ->where(array(
+                    'inventori_stok.gudang' => '= ?',
+                    'AND',
+                    'inventori_stok.barang' => '= ?',
+                    'AND',
+                    'inventori_stok.batch' => '= ?'
+                ), array(
+                    $value['gudang_asal'], $value['barang'], $value['batch']
+                ))
+                ->execute();
+            if()
+        }*/
+
         foreach ($TempStrategy['response_data'] as $key => $value) {
             if(!isset($value['gudang_tujuan'])) {
                 //Potong Stok Sendiri
+                if(!isset($forCut[$value['gudang_asal']])) {
+                    $forCut[$value['gudang_asal']] = array(
+                        'item' => array(),
+                        'pegawai' => $Pegawai->get_detail($value['pegawai'])['response_data'][0]
+                    );
+                }
+
+                array_push($forCut[$value['gudang_asal']]['item'], $value);
+            } else {
+                if($value['gudang_asal'] === __GUDANG_UTAMA__) {
+                    // Amprah
+                    if(!isset($forAmprah[$value['gudang_tujuan']])) {
+                        $forAmprah[$value['gudang_tujuan']] = array(
+                            'item' => array(),
+                            'pegawai' => $Pegawai->get_detail($value['pegawai'])['response_data'][0]
+                        );
+                    }
+
+                    array_push($forAmprah[$value['gudang_tujuan']]['item'], $value);
+                } else {
+                    // Mutasi
+                    if(!isset($forMutasi[$value['gudang_tujuan']])) {
+                        $forMutasi[$value['gudang_tujuan']] = array(
+                            'item' => array(),
+                            'pegawai' => $Pegawai->get_detail($value['pegawai'])['response_data'][0]
+                        );
+                    }
+
+                    array_push($forMutasi[$value['gudang_tujuan']]['item'], $value);
+                }
+            }
+        }
+
+
+
+        //Grouper Amprah
+        foreach ($forAmprah as $amprahGud => $amprahDetail) {
+            $uidAmprah = parent::gen_uuid();
+            $lastIDAmprah = self::$query->select('inventori_amprah', array(
+                'uid'
+            ))
+                ->where(array(
+                    'EXTRACT(year FROM inventori_amprah.created_at)' => '= ?'
+                ), array(
+                    date('Y')
+                ))
+                ->execute();
+            $amprahAuto = self::$query->insert('inventori_amprah', array(
+                'uid' => $uidAmprah,
+                'kode_amprah' => str_pad(count($lastIDAmprah['response_data']) + 1, 5, '0', STR_PAD_LEFT) . '/' . $amprahDetail['pegawai']['unit']['kode'] . '/AMP/' . date('m') . '/' . date('Y'),
+                'unit' => $amprahDetail['pegawai']['unit'],
+                'pegawai' => $amprahDetail['pegawai']['uid'],
+                'tanggal' => parent::format_date(),
+                'status' => 'S', //Auto Selesai
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date(),
+                'keterangan' => 'Amprah AUTO karena kekurangan stok pada saat masa opname.'
+            ))
+                ->execute();
+
+            if ($amprahAuto['response_result'] > 0) {
+                $amprahAuto['amprah_detail'] = array();
+                $log = parent::log(array(
+                    'type' => 'activity',
+                    'column' => array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'new_value',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value' => array(
+                        $uidAmprah,
+                        $amprahDetail['pegawai']['uid'],
+                        'inventori_amprah',
+                        'I',
+                        json_encode($parameter),
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class' => __CLASS__
+                ));
+
+                //Amprah Proses
+                $AmprahProsesUID = parent::gen_uuid();
+                $lastAmprahProsesID = self::$query->select('inventori_amprah_proses', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'EXTRACT(year FROM inventori_amprah_proses.created_at)' => '= ?'
+                    ), array(
+                        date('Y')
+                    ))
+                    ->execute();
+
+                $AmprahProses = self::$query->insert('inventori_amprah_proses', array(
+                    'uid' => $AmprahProsesUID,
+                    'kode' => str_pad(count($lastAmprahProsesID['response_data']) + 1, 5, '0', STR_PAD_LEFT) . '/' . $UserData['data']->unit_kode . '/AMP-OUT/' . date('m') . '/' . date('Y'),
+                    'amprah' => $uidAmprah,
+                    'tanggal' => parent::format_date(),
+                    'pegawai' => $UserData['data']->uid,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+
+
+                foreach ($amprahDetail['item'] as $AmpDkey => $AmpDvalue) {
+                    //Amprah Detail
+                    $amprahAutoDetail = self::$query->insert('inventori_amprah_detail', array(
+                        'amprah' => $uidAmprah,
+                        'item' => $AmpDvalue['barang'],
+                        'jumlah' => floatval($AmpDvalue['qty']),
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->returning('id')
+                        ->execute();
+
+                    if ($amprahAutoDetail['response_result'] > 0) {
+                        $log = parent::log(array(
+                            'type' => 'activity',
+                            'column' => array(
+                                'unique_target',
+                                'user_uid',
+                                'table_name',
+                                'action',
+                                'new_value',
+                                'logged_at',
+                                'status',
+                                'login_id'
+                            ),
+                            'value' => array(
+                                $amprahAutoDetail['response_unique'],
+                                $amprahDetail['pegawai']['uid'],
+                                'inventori_amprah_detail',
+                                'I',
+                                json_encode($parameter['item']),
+                                parent::format_date(),
+                                'N',
+                                $UserData['data']->log_id
+                            ),
+                            'class' => __CLASS__
+                        ));
+
+                        if($AmprahProses['response_result'] > 0) {
+                            $amprahAutoDetailProses = self::$query->insert('inventori_amprah_proses_detail', array(
+                                'amprah_proses' => $AmprahProsesUID,
+                                'item' => $AmpDvalue['barang'],
+                                'batch' => $AmpDvalue['batch'],
+                                'qty' => floatval($AmpDvalue['qty']),
+                                'keterangan' => 'Amprah AUTO karena kekurangan stok pada saat masa opname.',
+                                'created_at' => parent::format_date(),
+                                'updated_at' => parent::format_date(),
+                            ))
+                                ->execute();
+
+                            if($amprahAutoDetailProses['response_result'] > 0) {
+                                //Stok Log
+                                $OldStok = self::$query->select('inventori_stok', array(
+                                    'stok_terkini'
+                                ))
+                                    ->where(array(
+                                        'inventori_stok.gudang' => '= ?',
+                                        'AND',
+                                        'inventori_stok.barang' => '= ?',
+                                        'AND',
+                                        'inventori_stok.batch' => '= ?'
+                                    ), array(
+                                        __GUDANG_UTAMA__, $AmpDvalue['barang'], $AmpDvalue['batch']
+                                    ))
+                                    ->execute();
+
+                                //UpdateStok
+                                $OldStokUpdate = self::$query->update('inventori_stok', array(
+                                    'stok_terkini' => floatval($OldStok['response_data'][0]['stok_terkini']) - floatval($AmpDvalue['qty'])
+                                ))
+                                    ->where(array(
+                                        'inventori_stok.gudang' => '= ?',
+                                        'AND',
+                                        'inventori_stok.barang' => '= ?',
+                                        'AND',
+                                        'inventori_stok.batch' => '= ?'
+                                    ), array(
+                                        __GUDANG_UTAMA__, $AmpDvalue['barang'], $AmpDvalue['batch']
+                                    ))
+                                    ->execute();
+
+                                if($OldStokUpdate['response_result'] > 0) {
+                                    $OldLog = self::$query->insert('inventori_stok_log', array(
+                                        'barang' => $AmpDvalue['barang'],
+                                        'batch' => $AmpDvalue['batch'],
+                                        'gudang' => __GUDANG_UTAMA__,
+                                        'masuk' => 0,
+                                        'keluar' => floatval($AmpDvalue['qty']),
+                                        'saldo' => floatval($OldStok['response_data'][0]['stok_terkini']) - floatval($AmpDvalue['qty']),
+                                        'type' => __AMPRAH_OPNAME_OUT__,
+                                        'jenis_transaksi' => $AmpDvalue['transact_table'],
+                                        'uid_foreign' => $AmpDvalue['transact_iden'],
+                                        'keterangan' => 'Auto Amprah Pasca Opname'
+                                    ))
+                                        ->execute();
+                                }
+
+                                $DestStok = self::$query->select('inventori_stok', array(
+                                    'stok_terkini'
+                                ))
+                                    ->where(array(
+                                        'inventori_stok.gudang' => '= ?',
+                                        'AND',
+                                        'inventori_stok.barang' => '= ?',
+                                        'AND',
+                                        'inventori_stok.batch' => '= ?'
+                                    ), array(
+                                        $AmpDvalue['gudang_tujuan'], $AmpDvalue['barang'], $AmpDvalue['batch']
+                                    ))
+                                    ->execute();
+
+                                $DestStokUpdate = self::$query->update('inventori_stok', array(
+                                    'stok_terkini' => floatval($DestStok['response_data'][0]['stok_terkini']) + floatval($AmpDvalue['qty'])
+                                ))
+                                    ->where(array(
+                                        'inventori_stok.gudang' => '= ?',
+                                        'AND',
+                                        'inventori_stok.barang' => '= ?',
+                                        'AND',
+                                        'inventori_stok.batch' => '= ?'
+                                    ), array(
+                                        $AmpDvalue['gudang_tujuan'], $AmpDvalue['barang'], $AmpDvalue['batch']
+                                    ))
+                                    ->execute();
+
+                                if($DestStokUpdate['response_result'] > 0) {
+                                    $NewLog = self::$query->insert('inventori_stok_log', array(
+                                        'barang' => $AmpDvalue['barang'],
+                                        'batch' => $AmpDvalue['batch'],
+                                        'gudang' => $AmpDvalue['gudang_tujuan'],
+                                        'masuk' => floatval($AmpDvalue['qty']),
+                                        'keluar' => 0,
+                                        'saldo' => floatval($DestStok['response_data'][0]['stok_terkini']) + floatval($AmpDvalue['qty']),
+                                        'type' => __AMPRAH_OPNAME_IN__,
+                                        'jenis_transaksi' => $AmpDvalue['transact_table'],
+                                        'uid_foreign' => $AmpDvalue['transact_iden'],
+                                        'keterangan' => 'Auto Amprah Pasca Opname'
+                                    ))
+                                        ->execute();
+
+                                    $DestStokPostAmprahProcess = self::$query->select('inventori_stok', array(
+                                        'stok_terkini'
+                                    ))
+                                        ->where(array(
+                                            'inventori_stok.gudang' => '= ?',
+                                            'AND',
+                                            'inventori_stok.barang' => '= ?',
+                                            'AND',
+                                            'inventori_stok.batch' => '= ?'
+                                        ), array(
+                                            $AmpDvalue['gudang_tujuan'], $AmpDvalue['barang'], $AmpDvalue['batch']
+                                        ))
+                                        ->execute();
+
+                                    //Potong Stok tujuan untuk peminjaman barang gudang
+                                    $DestStokUpdatePostAmprah = self::$query->update('inventori_stok', array(
+                                        'stok_terkini' => floatval($DestStokPostAmprahProcess['response_data'][0]['stok_terkini']) - floatval($AmpDvalue['qty'])
+                                    ))
+                                        ->where(array(
+                                            'inventori_stok.gudang' => '= ?',
+                                            'AND',
+                                            'inventori_stok.barang' => '= ?',
+                                            'AND',
+                                            'inventori_stok.batch' => '= ?'
+                                        ), array(
+                                            $AmpDvalue['gudang_tujuan'], $AmpDvalue['barang'], $AmpDvalue['batch']
+                                        ))
+                                        ->execute();
+                                    if($DestStokUpdatePostAmprah['response_result'] > 0) {
+                                        $NewPostAmprahLog = self::$query->insert('inventori_stok_log', array(
+                                            'barang' => $AmpDvalue['barang'],
+                                            'batch' => $AmpDvalue['batch'],
+                                            'gudang' => $AmpDvalue['gudang_tujuan'],
+                                            'masuk' => 0,
+                                            'keluar' => floatval($AmpDvalue['qty']),
+                                            'saldo' => floatval($DestStokPostAmprahProcess['response_data'][0]['stok_terkini']) - floatval($AmpDvalue['qty']),
+                                            'type' => __STATUS_BARANG_KELUAR_OPNAME__,
+                                            'jenis_transaksi' => $AmpDvalue['transact_table'],
+                                            'uid_foreign' => $AmpDvalue['transact_iden'],
+                                            'keterangan' => 'Auto Amprah Pasca Opname'
+                                        ))
+                                            ->execute();
+                                    }
+                                }
+
+                                array_push($forAmprahProcess, array(
+                                    'new' => $NewLog,
+                                    'old' => $OldLog
+                                ));
+
+                                if($OldLog['response_result'] > 0 && $NewLog['response_result'] > 0) {
+                                    $TempFinish = self::$query->update('inventori_temp_stok', array(
+                                        'status' => 'D'
+                                    ))
+                                        ->where(array(
+                                            'inventori_temp_stok.id' => '= ?',
+                                            'AND',
+                                            'inventori_temp_stok.status' => '= ?'
+                                        ), array(
+                                            $AmpDvalue['id'], 'P'
+                                        ))
+                                        ->execute();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        //Grouper Mutasi
+
+
+        //Grouper Cut Single
+        foreach ($forCut as $cutGud => $cutDetail) {
+
+            foreach ($cutDetail['item'] as $cutDkey => $cutDvalue) {
                 //Check Stok Pasca
                 $OldStok = self::$query->select('inventori_stok', array(
                     'stok_terkini'
@@ -4035,48 +4393,175 @@ class Inventori extends Utility
                         'AND',
                         'inventori_stok.batch' => '= ?'
                     ), array(
-                        $value['gudang_asal'], $value['barang'], $value['batch']
+                        $cutDvalue['gudang_asal'], $cutDvalue['barang'], $cutDvalue['batch']
                     ))
                     ->execute();
 
-                $Log = self::$query->insert('inventori_stok_log', array(
-                    'barang' => $value['barang'],
-                    'batch' => $value['batch'],
-                    'gudang' => $value['gudang_asal'],
-                    'masuk' => 0,
-                    'keluar' => $value['qty'],
-                    'saldo' => floatval($OldStok['response_data'][0]['stok_terkini']) - floatval($value['qty']),
-                    'type' => 666,
-                    'jenis_transaksi' => $value['transact_table'],
-                    'uid_foreign' => $value['transact_iden'],
-                    'keterangan' => 'Auto Stok Pasca Opname'
+                $OldStokUpdate = self::$query->update('inventori_stok', array(
+                    'stok_terkini' => floatval($OldStok['response_data'][0]['stok_terkini']) - floatval($cutDvalue['qty'])
                 ))
-                    ->execute();
-                
-                if($Log['response_result'] > 0) {
-                    //Update Finish Auto
-                    $TempFinish = self::$query->update('inventori_temp_stok', array(
-                        'status' => 'D'
+                    ->where(array(
+                        'inventori_stok.gudang' => '= ?',
+                        'AND',
+                        'inventori_stok.barang' => '= ?',
+                        'AND',
+                        'inventori_stok.batch' => '= ?'
+                    ), array(
+                        $cutDvalue['gudang_asal'], $cutDvalue['barang'], $cutDvalue['batch']
                     ))
-                        ->where(array(
-                            'inventori_temp_stok.id' => '= ?',
-                            'AND',
-                            'inventori_temp_stok.status' => '= ?'
-                        ), array(
-                            $value['id'], 'P'
-                        ))
+                    ->execute();
+
+                array_push($forCutProcess, $OldStokUpdate);
+
+                if($OldStokUpdate['response_result'] > 0) {
+                    $Log = self::$query->insert('inventori_stok_log', array(
+                        'barang' => $cutDvalue['barang'],
+                        'batch' => $cutDvalue['batch'],
+                        'gudang' => $cutDvalue['gudang_asal'],
+                        'masuk' => 0,
+                        'keluar' => $cutDvalue['qty'],
+                        'saldo' => floatval($OldStok['response_data'][0]['stok_terkini']) - floatval($cutDvalue['qty']),
+                        'type' => __STATUS_BARANG_KELUAR_OPNAME__,
+                        'jenis_transaksi' => $cutDvalue['transact_table'],
+                        'uid_foreign' => $cutDvalue['transact_iden'],
+                        'keterangan' => 'Auto Stok Pasca Opname'
+                    ))
                         ->execute();
-                }
-                
-            } else {
-                if($value['gudang_asal'] === __GUDANG_UTAMA__) {
-                    // Amprah
-                    //Todo : Next Rule
-                } else {
-                    // Mutasi
+
+                    if($Log['response_result'] > 0) {
+                        //Update Finish Auto
+                        $TempFinish = self::$query->update('inventori_temp_stok', array(
+                            'status' => 'D'
+                        ))
+                            ->where(array(
+                                'inventori_temp_stok.id' => '= ?',
+                                'AND',
+                                'inventori_temp_stok.status' => '= ?'
+                            ), array(
+                                $cutDvalue['id'], 'P'
+                            ))
+                            ->execute();
+                    }
                 }
             }
         }
+
+        //After Amprah dan Mutasi
+
+
+        //Aktifkan Gudang Kembali
+        $GudangActivate = self::$query
+            ->update('master_inv_gudang', array(
+                'status' => 'A'
+            ))
+            ->where(array(
+                'master_inv_gudang.deleted_at' => 'IS NULL'
+            ), array())
+            ->execute();
+
+        $DataOpname = self::$query->select('inventori_stok_opname', array(
+            'uid', 'gudang'
+        ))
+            ->where(array(
+                'inventori_stok_opname.deleted_at' => 'IS NULL',
+                'AND',
+                'inventori_stok_opname.status' => '= ?'
+            ), array(
+                'A'
+            ))
+            ->execute();
+        foreach ($DataOpname['response_data'] as $OpKey => $OpValue) {
+            $OpDetail = self::$query->select('inventori_stok_opname_detail', array(
+                'id', 'item', 'batch', 'qty_awal', 'qty_akhir', 'keterangan'
+            ))
+                ->where(array(
+                    'inventori_stok_opname_detail.opname' => '= ?'
+                ), array(
+                    $OpValue['uid']
+                ))
+                ->execute();
+            foreach ($OpDetail['response_data'] as $OpDetailKey => $OpDetailValue) {
+                /*$CurrentSaldo = self::$query->select('inventori_stok', array(
+                    'stok_terkini'
+                ))
+                    ->where(array(
+                        'inventori_stok.gudang' => '= ?',
+                        'AND',
+                        'inventori_stok.barang' => '= ?',
+                        'AND',
+                        'inventori_stok.batch' => '= ?'
+                    ), array(
+                        $OpValue['gudang'], $OpDetailValue['item'], $OpDetailValue['batch']
+                    ))
+                    ->execute();*/
+
+                /*
+                 *
+                 * Ini dulu ada. Tapi dinonaktifkan karena masuk log opname di awal approve data opname. Lagian Raja Api Ozai nyerang tiba"
+                 *
+                 * if(floatval($OpDetailValue['qty_awal']) > floatval($OpDetailValue['qty_akhir'])) {
+                    $LogOpname = self::$query->insert('inventori_stok_log', array(
+                        'barang' => $OpDetailValue['item'],
+                        'batch' => $OpDetailValue['batch'],
+                        'gudang' => $OpValue['gudang'],
+                        'masuk' => 0,
+                        'keluar' => (floatval($OpDetailValue['qty_awal']) - floatval($OpDetailValue['qty_akhir'])),
+                        'saldo' => floatval($OpDetailValue['qty_akhir']),
+                        'type' => __STATUS_OPNAME__,
+                        'jenis_transaksi' => 'inventori_stok_opname',
+                        'uid_foreign' => $OpValue['uid'],
+                        'keterangan' => 'Stok Opname Selesai'
+                    ))
+                        ->execute();
+                } elseif (floatval($OpDetailValue['qty_awal']) < floatval($OpDetailValue['qty_akhir'])) {
+                    $LogOpname = self::$query->insert('inventori_stok_log', array(
+                        'barang' => $OpDetailValue['item'],
+                        'batch' => $OpDetailValue['batch'],
+                        'gudang' => $OpValue['gudang'],
+                        'masuk' => (floatval($OpDetailValue['qty_akhir']) - floatval($OpDetailValue['qty_awal'])),
+                        'keluar' => 0,
+                        'saldo' => floatval($OpDetailValue['qty_akhir']),
+                        'type' => __STATUS_OPNAME__,
+                        'jenis_transaksi' => 'inventori_stok_opname',
+                        'uid_foreign' => $OpValue['uid'],
+                        'keterangan' => 'Stok Opname Selesai'
+                    ))
+                        ->execute();
+                } else {
+                    $LogOpname = self::$query->insert('inventori_stok_log', array(
+                        'barang' => $OpDetailValue['item'],
+                        'batch' => $OpDetailValue['batch'],
+                        'gudang' => $OpValue['gudang'],
+                        'masuk' => 0,
+                        'keluar' => 0,
+                        'saldo' => floatval($OpDetailValue['qty_akhir']),
+                        'type' => __STATUS_OPNAME__,
+                        'jenis_transaksi' => 'inventori_stok_opname',
+                        'uid_foreign' => $OpValue['uid'],
+                        'keterangan' => 'Stok Opname Selesai'
+                    ))
+                        ->execute();
+                }*/
+
+            }
+        }
+
+        //Tutup Semua Opname
+        $CloseOpname = self::$query->update('inventori_stok_opname', array(
+            'status' => 'C'
+        ))
+            ->where(array(
+                'inventori_stok_opname.status' => '= ?'
+            ), array(
+                'A'
+            ))
+            ->execute();
+
+        return array(
+            'forCut' => $forCut,
+            'forAmprah' => $forAmprah,
+            'forMutasi' => $forMutasi,
+        );
     }
 
     private function post_opname_warehouse($parameter) {
@@ -4153,7 +4638,6 @@ class Inventori extends Utility
                             ->execute();
 
                         if ($updateStok['response_result'] > 0) {
-                            //Todo : Sini Belom Siap. Susah kale pn ngingat masa lalu
                             if (floatval($OptStokValue['qty_akhir']) > floatval($OptStokValue['qty_awal'])) {
                                 $stok_log = self::$query->insert('inventori_stok_log', array(
                                     'barang' => $OptStokValue['item'],
@@ -4217,12 +4701,95 @@ class Inventori extends Utility
                     ))
                     ->execute();
 
-                //Todo : Jalankan semua strategi transaksi tertunda
-
-
-
-
                 if($UpdateAllOpname['response_result'] > 0) {
+
+
+                    //Todo: Log Opname Semua gudang yang melakukan opname
+                    $DataOpname = self::$query->select('inventori_stok_opname', array(
+                        'uid', 'gudang'
+                    ))
+                        ->where(array(
+                            'inventori_stok_opname.deleted_at' => 'IS NULL',
+                            'AND',
+                            'inventori_stok_opname.status' => '= ?'
+                        ), array(
+                            'A'
+                        ))
+                        ->execute();
+                    foreach ($DataOpname['response_data'] as $OpKey => $OpValue) {
+                        $OpDetail = self::$query->select('inventori_stok_opname_detail', array(
+                            'id', 'item', 'batch', 'qty_awal', 'qty_akhir', 'keterangan'
+                        ))
+                            ->where(array(
+                                'inventori_stok_opname_detail.opname' => '= ?'
+                            ), array(
+                                $OpValue['uid']
+                            ))
+                            ->execute();
+                        foreach ($OpDetail['response_data'] as $OpDetailKey => $OpDetailValue) {
+                            $updateStokAllGudang = self::$query->update('inventori_stok', array(
+                                'stok_terkini' => floatval($OpDetailValue['qty_akhir'])
+                            ))
+                                ->where(array(
+                                    'inventori_stok.barang' => '= ?',
+                                    'AND',
+                                    'inventori_stok.batch' => '= ?',
+                                    'AND',
+                                    'inventori_stok.gudang' => '= ?'
+                                ), array(
+                                    $OpDetailValue['item'], $OpDetailValue['batch'], $OpValue['gudang']
+                                ))
+                                ->execute();
+                            if($updateStokAllGudang['response_result'] > 0) {
+                                if(floatval($OpDetailValue['qty_awal']) > floatval($OpDetailValue['qty_akhir'])) {
+                                    $LogOpname = self::$query->insert('inventori_stok_log', array(
+                                        'barang' => $OpDetailValue['item'],
+                                        'batch' => $OpDetailValue['batch'],
+                                        'gudang' => $OpValue['gudang'],
+                                        'masuk' => 0,
+                                        'keluar' => (floatval($OpDetailValue['qty_awal']) - floatval($OpDetailValue['qty_akhir'])),
+                                        'saldo' => floatval($OpDetailValue['qty_akhir']),
+                                        'type' => __STATUS_OPNAME__,
+                                        'jenis_transaksi' => 'inventori_stok_opname',
+                                        'uid_foreign' => $OpValue['uid'],
+                                        'keterangan' => 'Stok Opname Approved Data. ' . $OpDetailValue['keterangan']
+                                    ))
+                                        ->execute();
+                                } elseif (floatval($OpDetailValue['qty_awal']) < floatval($OpDetailValue['qty_akhir'])) {
+                                    $LogOpname = self::$query->insert('inventori_stok_log', array(
+                                        'barang' => $OpDetailValue['item'],
+                                        'batch' => $OpDetailValue['batch'],
+                                        'gudang' => $OpValue['gudang'],
+                                        'masuk' => (floatval($OpDetailValue['qty_akhir']) - floatval($OpDetailValue['qty_awal'])),
+                                        'keluar' => 0,
+                                        'saldo' => floatval($OpDetailValue['qty_akhir']),
+                                        'type' => __STATUS_OPNAME__,
+                                        'jenis_transaksi' => 'inventori_stok_opname',
+                                        'uid_foreign' => $OpValue['uid'],
+                                        'keterangan' => 'Stok Opname Approved Data. ' . $OpDetailValue['keterangan']
+                                    ))
+                                        ->execute();
+                                } else {
+                                    $LogOpname = self::$query->insert('inventori_stok_log', array(
+                                        'barang' => $OpDetailValue['item'],
+                                        'batch' => $OpDetailValue['batch'],
+                                        'gudang' => $OpValue['gudang'],
+                                        'masuk' => 0,
+                                        'keluar' => 0,
+                                        'saldo' => floatval($OpDetailValue['qty_akhir']),
+                                        'type' => __STATUS_OPNAME__,
+                                        'jenis_transaksi' => 'inventori_stok_opname',
+                                        'uid_foreign' => $OpValue['uid'],
+                                        'keterangan' => 'Stok Opname Approved Data. ' . $OpDetailValue['keterangan']
+                                    ))
+                                        ->execute();
+                                }
+                            }
+
+                        }
+                    }
+
+
 
                     /*$worker = self::$query
                         ->update('master_inv_gudang', array(
