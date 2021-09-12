@@ -150,19 +150,20 @@
                             if(batchGroup[a].log[b].type.id === __STATUS_OPNAME__) {
                                 $(newRow).find("td:eq(5) span").addClass("badge badge-outline-purple badge-custom-caption");
                             } else {
-                                if(
+                                /*if(
                                     batchGroup[a].log[b].type.id === __AMPRAH_OPNAME_IN__ || batchGroup[a].log[b].type.id === __AMPRAH_OPNAME_OUT__ ||
                                     batchGroup[a].log[b].type.id === __STATUS_BARANG_MASUK_OPNAME__ || batchGroup[a].log[b].type.id === __STATUS_BARANG_KELUAR_OPNAME__
                                 ) {
                                     $(newRow).find("td:eq(5) span").addClass("badge badge-outline-purple badge-custom-caption");
                                 } else {
-                                    if(parseFloat(batchGroup[a].log[b].masuk) === 0) {
-                                        $(newRow).find("td:eq(5) span").addClass("badge badge-outline-warning badge-custom-caption");
-                                    } else if(parseFloat(batchGroup[a].log[b].keluar) === 0) {
-                                        $(newRow).find("td:eq(5) span").addClass("badge badge-outline-success badge-custom-caption");
-                                    } else {
-                                        //
-                                    }
+
+                                }*/
+                                if(parseFloat(batchGroup[a].log[b].masuk) === 0) {
+                                    $(newRow).find("td:eq(5) span").addClass("badge badge-outline-warning badge-custom-caption");
+                                } else if(parseFloat(batchGroup[a].log[b].keluar) === 0) {
+                                    $(newRow).find("td:eq(5) span").addClass("badge badge-outline-success badge-custom-caption");
+                                } else {
+                                    //
                                 }
                             }
 
@@ -181,8 +182,8 @@
                             }
 
                             if(
-                                batchGroup[a].log[b].type.id === __AMPRAH_OPNAME_IN__ || batchGroup[a].log[b].type.id === __AMPRAH_OPNAME_OUT__ ||
-                                batchGroup[a].log[b].type.id === __STATUS_BARANG_MASUK_OPNAME__ || batchGroup[a].log[b].type.id === __STATUS_BARANG_KELUAR_OPNAME__ ||
+                                /*batchGroup[a].log[b].type.id === __AMPRAH_OPNAME_IN__ || batchGroup[a].log[b].type.id === __AMPRAH_OPNAME_OUT__ ||
+                                batchGroup[a].log[b].type.id === __STATUS_BARANG_MASUK_OPNAME__ || batchGroup[a].log[b].type.id === __STATUS_BARANG_KELUAR_OPNAME__ ||*/
                                 batchGroup[a].log[b].type.id === __STATUS_OPNAME__
                             ) {
                                 $(newRow).find("td:eq(0)").addClass("opname_card_stock_transact");

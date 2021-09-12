@@ -4661,6 +4661,20 @@ class Inventori extends Utility
                                 ))
                                     ->execute();
                             }
+
+                            /*//Recalculate Temporary Transact. Kasus : Jika pelayanan dulu baru opname
+                            $CheckTempStokGud = self::$query->select('inventori_temp_stok', array(
+                                'id', 'transact_table', 'transact_iden', 'gudang_asal', 'gudang_tujuan', 'barang', 'batch', 'qty', 'remark'
+                            ))
+                                ->where(array(
+                                    'inventori_temp_stok.gudang_asal' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.status' => '= ?'
+                                ), array(
+                                    $LatestOpname['response_data'][0]['gudang'], 'P'
+                                ))
+                                ->execute();
+                            //Sini*/
                         }
                     }
                 }
@@ -4786,6 +4800,10 @@ class Inventori extends Utility
                                 }
                             }
 
+
+
+
+                            //Sini Rupanya
                         }
                     }
 
@@ -4808,7 +4826,9 @@ class Inventori extends Utility
                 }
             }
         } else {
+            $CheckRebase = array();
             if(count($LatestOpname['response_data']) > 0) {
+                $CurrentUIDOpname = $LatestOpname['response_data'][0]['uid'];
                 $UpdateOpname = self::$query->update('inventori_stok_opname', array(
                     'status' => 'D'
                 ))
@@ -4824,6 +4844,119 @@ class Inventori extends Utility
                         $LatestOpname['response_data'][0]['uid'], 'P', $UserData['data']->gudang
                     ))
                     ->execute();
+
+                //Rebase All Temp
+                $CheckTempStokGud = self::$query->select('inventori_temp_stok', array(
+                    'id', 'transact_table', 'transact_iden', 'gudang_asal', 'gudang_tujuan', 'barang', 'batch', 'qty', 'remark', 'pegawai'
+                ))
+                    ->where(array(
+                        'inventori_temp_stok.status' => '= ?'
+                    ), array(
+                        'P'
+                    ))
+                    ->execute();
+                foreach ($CheckTempStokGud['response_data'] as $key => $value) {
+                    $CheckPascaOpname = self::$query->select('inventori_stok_opname_detail', array(
+                        'qty_awal', 'qty_akhir'
+                    ))
+                        ->where(array(
+                            'inventori_stok_opname_detail.item' => '= ?',
+                            'AND',
+                            'inventori_stok_opname_detail.batch' => '= ?',
+                            'AND',
+                            'inventori_stok_opname_detail.opname' => '= ?'
+                        ), array(
+                            $value['barang'],
+                            $value['batch'],
+                            $CurrentUIDOpname
+                        ))
+                        ->execute();
+
+                    /*$CheckPascaOpname = self::$query->select('inventori_stok', array(
+                        'id',
+                        'stok_terkini'
+                    ))
+                        ->where(array(
+                            'inventori_stok.barang' => '= ?',
+                            'AND',
+                            'inventori_stok.batch' => '= ?',
+                            'AND',
+                            'inventori_stok.gudang' => '= ?'
+                        ), array(
+                            $value['barang'],
+                            $value['batch'],
+                            $value['gudang_asal']
+                        ))
+                        ->execute();*/
+
+                    if(count($CheckPascaOpname['response_data']) > 0) {
+                        $currentCheckData = $CheckPascaOpname['response_data'][0];
+
+                        if(floatval($currentCheckData['qty_akhir']) < floatval($value['qty'])) {
+
+                            $SelisihKebutuhan = floatval($value['qty']) - floatval($currentCheckData['qty_akhir']);
+                            $kebutuhanKekurangan = $SelisihKebutuhan;
+
+
+                            //Pecah Permintaan dengan amprah
+                            $UpdateCurrentTransact = self::$query->update('inventori_temp_stok', array(
+                                'qty' => floatval($currentCheckData['qty_akhir'])
+                            ))
+                                ->where(array(
+                                    'inventori_temp_stok.id' => '= ?'
+                                ), array(
+                                    $value['id']
+                                ))
+                                ->execute();
+
+                            //Add Transact Temporary
+                            $AvailResult = array();
+                            $AvailAmprahUtama = self::get_item_batch($value['barang']);
+                            foreach ($AvailAmprahUtama['response_data'] as $AvaKey => $AvaValue) {
+                                if($AvaValue['gudang']['uid'] === __GUDANG_UTAMA__) {
+                                    if($kebutuhanKekurangan >= $AvaValue['stok_terkini']) {
+                                        if($AvaValue['stok_terkini'] > 0) {
+                                            array_push($AvailResult, array(
+                                                'batch' => $AvaValue['batch'],
+                                                'barang' => $AvaValue['barang'],
+                                                'gudang' => $AvaValue['gudang']['uid'],
+                                                'qty' => $AvaValue['qty_akhir']
+                                            ));
+                                            $kebutuhanKekurangan -= floatval($AvaValue['stok_terkini']);
+                                        }
+                                    } else {
+                                        if($AvaValue['stok_terkini'] > 0) {
+                                            array_push($AvailResult, array(
+                                                'batch' => $AvaValue['batch'],
+                                                'barang' => $AvaValue['barang'],
+                                                'gudang' => $AvaValue['gudang']['uid'],
+                                                'qty' => $kebutuhanKekurangan
+                                            ));
+                                            $kebutuhanKekurangan = 0;
+                                        }
+                                    }
+                                }
+                            }
+
+                            foreach ($AvailResult as $AvailKey => $AvailValue) {
+                                $InsertCurrentTransact = self::$query->insert('inventori_temp_stok', array(
+                                    'transact_table' => $value['transact_table'],
+                                    'transact_iden' => $value['transact_iden'],
+                                    'gudang_asal' => __GUDANG_UTAMA__,
+                                    'gudang_tujuan' => $value['gudang_asal'],
+                                    'barang' => $AvailValue['barang'],
+                                    'batch' => $AvailValue['batch'],
+                                    'qty' => $AvailValue['qty'],
+                                    'status' => 'P',
+                                    'remark' => $value['remark'],
+                                    'logged_at' => parent::format_date(),
+                                    'pegawai' => $value['pegawai']
+                                ))
+                                    ->execute();
+                            }
+                        }
+                    }
+                }
 
                 return $UpdateOpname;
             } else {

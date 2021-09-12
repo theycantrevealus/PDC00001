@@ -197,8 +197,6 @@
                 },
                 type:"GET",
                 success:function(response) {
-                    console.clear();
-                    console.log(response);
                     $("#strategi-amprah tbody").html("");
                     var amprah = response.response_package.amprah;
                     var autoAmprah = 1;
@@ -289,12 +287,11 @@
                         },
                         type:"POST",
                         success:function(response) {
-                            console.log(response);
                             if(response.response_package.response_result > 0) {
-
 
                                 calculate_post_opname();
                                 tableHistoryOpname.ajax.reload();
+                                tempTransact.ajax.reload();
                             } else {
                                 if(response.response_package.response_result === -1) {
                                     calculate_post_opname();
