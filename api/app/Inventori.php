@@ -7176,7 +7176,7 @@ class Inventori extends Utility
                 'updated_at'
             ))
                 ->order(array(
-                    'created_at' => 'ASC'
+                    'updated_at' => 'DESC'
                 ))
                 ->where($paramData, $paramValue)
                 ->execute();
@@ -7192,7 +7192,7 @@ class Inventori extends Utility
                 'updated_at'
             ))
                 ->order(array(
-                    'created_at' => 'ASC'
+                    'updated_at' => 'DESC'
                 ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
