@@ -14,8 +14,8 @@
 				<!-- Navbar Brand -->
 				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand">
 
-                    <img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-white-<?php echo __PC_IDENT__; ?>.png" width="60" height="60" alt="<?php echo __PC_CUSTOMER__; ?>">
-                    <h3 style="padding-left: 60px !important; color: #fff;"><?php echo __PC_CUSTOMER__; ?></h3>
+                    <img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-white-<?php echo __PC_IDENT__; ?>.png" width="380" height="60" alt="<?php echo __PC_CUSTOMER__; ?>">
+                    <!--<h3 style="padding-left: 60px !important; color: #fff;"><?php /*echo __PC_CUSTOMER__; */?></h3>-->
 				</a>
 				<ul class="nav navbar-nav d-none d-sm-flex navbar-height align-items-center">
                     <?php

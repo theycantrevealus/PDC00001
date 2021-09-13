@@ -8,7 +8,7 @@
 							<tr>
 								<td>
 									<!--<img style="position: absolute; width: 250px; height: 250px; top: -60px; left: 20px;" width="220" height="220" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-white.png" />-->
-                                    <img style="position: absolute; width: 200px; height: 80px; top: 5px; left: 20px;" width="200" height="80" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-white-<?php echo __PC_IDENT__; ?>.png" />
+                                    <img style="position: absolute; width: 120px; height: 100px; top: 5px; left: 20px;" width="400" height="50" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-icon-<?php echo __PC_IDENT__; ?>.png" />
 								</td>
 								<td style="padding-left: 220px;">
 									<h3 style="color: #fff"><?php echo __PC_CUSTOMER__; ?></h3>
