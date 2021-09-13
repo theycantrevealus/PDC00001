@@ -230,7 +230,8 @@
         }
 
         $(function() {
-            console.clear();
+        var targetModule = 0;
+        var tutorList = {};
 		    var currentPageURL = document.URL;
 		    //Check Child
             var checkerChild = currentPageURL.split("/");
@@ -332,7 +333,6 @@
                             tutorList[data[a].uid].step.push(currentTutor);
                         }
                     }
-
                 },
                 error: function(response) {
                     console.log(response);
