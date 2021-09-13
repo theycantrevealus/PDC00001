@@ -25,9 +25,14 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
+						return "<span id=\"nama_" + row["uid"] + "\">" + row.nama + "</span>";
 					}
 				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<b class=\"" + ((row.status === "A") ? "text-success" : "text-danger") + "\" id=\"status_" + row["uid"] + "\">" + ((row.status === "A") ? "<i class=\"fa fa-check-circle\"></i> Active" : "<i class=\"fa fa-box-open\"></i> Opname") + "</b>";
+                    }
+                },
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +

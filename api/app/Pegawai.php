@@ -49,6 +49,10 @@ class Pegawai extends Utility {
 
             return self::get_module($parameter[2]);
 
+        } else if($parameter[1] == 'get_all_pegawai') {
+
+            return self::get_all_pegawai();
+
         } else if($parameter[1] == 'get_all_dokter') {
 
             return self::get_all_dokter();
@@ -737,6 +741,7 @@ class Pegawai extends Utility {
     }
 
     public function get_detail($parameter) {
+        $Unit = new Unit(self::$pdo);
         $data = self::$query
             ->select('pegawai', array(
                 'uid',
@@ -764,6 +769,7 @@ class Pegawai extends Utility {
         } else {
             $profile_pic = '/client/template/assets/images/avatar/demi.png';
         }
+        $data['response_data'][0]['unit_detail'] = $Unit->get_unit_detail($data['response_data'][0]['unit'])['response_data'][0];
         $data['response_data'][0]['profile_pic'] = $profile_pic;
         $data['response_selected'] = $modulDataMeta['selected'];
 
@@ -1477,6 +1483,41 @@ class Pegawai extends Utility {
 
                     ->execute();
         }
+    }
+
+    private function get_all_pegawai() {
+        $Pegawai = self::$query->select('pegawai', array(
+                'uid',
+                'nama'
+            )
+        )
+            ->join('pegawai_jabatan', array(
+                    'uid AS uid_jabatan',
+                    'nama AS nama_jabatan'
+                )
+            )
+            ->on(
+                array(
+                    array('pegawai.jabatan', '=', 'pegawai_jabatan.uid')
+                )
+            )
+            ->where(
+                array(
+                    'pegawai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\''
+                ), array()
+            )
+            ->execute();
+
+        $allData = array(
+            array(
+                'uid' => 'all',
+                'nama' => 'Any'
+            )
+        );
+        $Pegawai['response_data'] = array_merge($allData, $Pegawai['response_data']);
+        return $Pegawai;
     }
 
     private function get_all_dokter(){

@@ -8,7 +8,7 @@
 
 		<!-- Prevent the demo from appearing in search engines -->
 		<meta name="robots" content="noindex">
-		<link rel="icon" href="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.ico" type="image/ico" sizes="16x16" />
+        <link rel="icon" href="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-icon-<?php echo __PC_IDENT__; ?>.ico" type="image/ico" sizes="16x16" />
 		<!-- Simplebar -->
 		<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/simplebar.min.css" rel="stylesheet">
 

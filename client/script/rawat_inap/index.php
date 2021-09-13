@@ -128,12 +128,12 @@
 
                         if(tagihanAllow > 0) {
                             if(row.bed !== undefined && row.bed !== null) {
-                                return "<span allow-inap=\"" + 1 + "|" + 1 + "|" + 1 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                                return "<h5 class=\"autonum\" allow-inap=\"" + 1 + "|" + 1 + "|" + 1 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
                             } else {
-                                return "<span allow-inap=\"" + apotekAllow + "|" + laborAllow + "|" + radioAllow + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                                return "<h5 class=\"autonum\" allow-inap=\"" + apotekAllow + "|" + laborAllow + "|" + radioAllow + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
                             }
                         } else {
-                            return "<span allow-inap=\"" + 0 + "|" + 0 + "|" + 0 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</span>";
+                            return "<h5 class=\"autonum\" allow-inap=\"" + 0 + "|" + 0 + "|" + 0 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
                         }
 
                     }

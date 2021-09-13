@@ -34,6 +34,8 @@
                                         <tr>
                                             <th class="wrap_content">No</th>
                                             <th style="width: 50%;">Item</th>
+                                            <th class="wrap_content">Reserved Out</th>
+                                            <th class="wrap_content">Reserved In</th>
                                             <th class="wrap_content">Stok Terkini</th>
                                             <th class="wrap_content">Satuan</th>
                                             <th class="wrap_content">Aksi</th>

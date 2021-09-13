@@ -1,7 +1,7 @@
 <div id="header" class="mdk-header js-mdk-header m-0" data-fixed>
 	<div class="mdk-header__content">
 
-		<div class="navbar navbar-expand-sm navbar-main navbar-dark bg-custom  pr-0" id="navbar" data-primary>
+		<div class="navbar navbar-expand-sm navbar-main bg-custom  pr-0" id="navbar" data-primary>
 			<div class="container-fluid p-0">
 
 				<!-- Navbar toggler -->
@@ -13,6 +13,7 @@
 
 				<!-- Navbar Brand -->
 				<a href="<?php echo __HOSTNAME__; ?>" class="navbar-brand">
+
                     <img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-white-<?php echo __PC_IDENT__; ?>.png" width="60" height="60" alt="<?php echo __PC_CUSTOMER__; ?>">
                     <h3 style="padding-left: 60px !important; color: #fff;"><?php echo __PC_CUSTOMER__; ?></h3>
 				</a>
@@ -64,9 +65,9 @@
 					</li>
 					<li class="nav-item dropdown">
 						<a href="<?php echo __HOSTNAME__; ?>/template/#account_menu" class="nav-link dropdown-toggle" data-toggle="dropdown" data-caret="false">
-							<img src="<?php echo __HOST__; ?>images/pegawai/<?php echo $_SESSION['uid']; ?>.png?d=<?php echo date('H:i:s'); ?>" class="rounded-circle" width="32" alt="Frontted" />
+							<img src="<?php echo __HOST__ . $_SESSION['profile_pic']; ?>?d=<?php echo date('H:i:s'); ?>" class="rounded-circle" width="32" alt="Frontted" />
 							<span class="ml-1 d-flex-inline">
-								<span class="text-light"><?php echo $_SESSION['nama']; ?></span>
+								<span class=""><?php echo $_SESSION['nama']; ?></span>
 							</span>
 						</a>
 						<div id="account_menu" class="dropdown-menu dropdown-menu-right" style="overflow: auto;">

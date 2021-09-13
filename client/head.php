@@ -59,6 +59,7 @@
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/css/rSlider.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.min.css" rel="stylesheet">
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet">
+    <link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/json-viewer/json-viewer.css" rel="stylesheet" />
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/custom.css" rel="stylesheet">
     <link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/bintan.css" rel="stylesheet">
 </head>

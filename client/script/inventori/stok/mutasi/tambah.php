@@ -1,12 +1,29 @@
 <script type="text/javascript">
 	$(function() {
+        var currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#opname_notif_amprah");
+        reCheckStatus(currentStatus);
+        function reCheckStatus(currentStatus) {
+            if(currentStatus === "A") {
+                $(".disable-panel-opname").hide();
+                $("#btnSubmitAmprah").show();
+                $("#btnSubmitAmprah").removeAttr("disabled");
+            } else {
+                $(".disable-panel-opname").show();
+                $("#btnSubmitAmprah").hide();
+                $("#btnSubmitAmprah").attr({
+                    "disabled": "disabled"
+                });
+            }
+        }
 		var metaDataOpname = {};
 		$("#txt_tanggal").datepicker({
 			dateFormat: 'DD, dd MM yy',
 			autoclose: true
 		}).datepicker("setDate", new Date());
 
-		$("#txt_unit_asal").val(__UNIT__.nama);
+		$("#txt_unit_asal").val(__UNIT__.nama).attr({
+            "disabled": "disabled"
+        });
 		$("#txt_nama").val(__MY_NAME__);
 		load_unit("#txt_unit_asal", "", __UNIT__.uid);
 		load_unit("#txt_unit_tujuan", __UNIT__.uid);
@@ -103,7 +120,7 @@
 					$(target).find("option").remove();
 					for(var a = 0; a < unitData.length; a++) {
 						if(unitData[a].uid != exclude) {
-							$(target).append("<option " + ((unitData[a].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + unitData[a].gudang.uid + "\">" + unitData[a].nama + "</option>");
+						    $(target).append("<option " + ((unitData[a].status === "A") ? "" : "disabled") + " " + ((unitData[a].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + unitData[a].gudang.uid + "\">" + unitData[a].nama + " " + ((unitData[a].status === "A") ? "" : "(Opname)") + "</option>");
 						}
 					}
 				},
@@ -174,9 +191,7 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-				    console.clear();
-				    console.log(response);
-					var dataSet = response.response_package.response_data;
+				    var dataSet = response.response_package.response_data;
 					if(dataSet == undefined) {
 						dataSet = [];
 					}

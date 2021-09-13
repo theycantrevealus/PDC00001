@@ -27,7 +27,8 @@
 					<thead class="thead-dark">
 						<tr>
 							<th class="wrap_content">No</th>
-							<th>Nama</th>
+                            <th style="width: 30%;">Nama</th>
+                            <th>Status</th>
 							<th class="wrap_content">Aksi</th>
 						</tr>
 					</thead>

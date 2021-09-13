@@ -62,6 +62,13 @@
     var __APOTEK_SERVICE_RESPONSE_TIME_TOLERATE__ = <?php echo json_encode(__APOTEK_SERVICE_RESPONSE_TIME_TOLERATE__); ?>;
 
     var __PRIORITY_HIGH__ = <?php echo json_encode(__PRIORITY_HIGH__); ?>;
+    var __STATUS_OPNAME__ = <?php echo json_encode(__STATUS_OPNAME__); ?>;
+    var __AMPRAH_OPNAME_IN__ = <?php echo json_encode(__AMPRAH_OPNAME_IN__); ?>;
+    var __AMPRAH_OPNAME_OUT__ = <?php echo json_encode(__AMPRAH_OPNAME_OUT__); ?>;
+    var __STATUS_BARANG_MASUK_OPNAME__ = <?php echo json_encode(__STATUS_BARANG_MASUK_OPNAME__); ?>;
+    var __STATUS_BARANG_KELUAR_OPNAME__ = <?php echo json_encode(__STATUS_BARANG_KELUAR_OPNAME__); ?>;
+
+    //Gudang
     var __ANTRIAN_KHUSUS__ = <?php echo json_encode(__ANTRIAN_KHUSUS__); ?>;
 
     var __KAMAR_IGD__ = <?php echo json_encode(__KAMAR_IGD__); ?>;

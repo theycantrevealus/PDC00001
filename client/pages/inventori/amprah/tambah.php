@@ -16,7 +16,13 @@
 
 <div class="container-fluid page__container">
 	<div class="row card-group-row">
-		<div class="col-lg-12 col-md-12">
+		<div class="col-lg-12 col-md-12" style="position: relative">
+            <div class="disable-panel-opname">
+                <div>
+                    <h3 class="text-center" id="opname_notif_amprah"></h3>
+                    <p class="text-center">Gudang ini sedang menjalankan prosedur opname.<br />Sementara tidak dapat melakukan transaksi stok. <a href="<?php echo __HOSTNAME__; ?>/inventori/amprah">Kembali</a></p>
+                </div>
+            </div>
 			<div class="card-header card-header-large bg-white d-flex align-items-center">
 				<h5 class="card-header__title flex m-0">Amprah Baru</h5>
 			</div>
