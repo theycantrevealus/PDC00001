@@ -1,9 +1,12 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script type="text/javascript">
     $(function () {
+        var globalEditor;
         var currentModule;
         var currentGroup = "";
         var currentID = 0;
         var groupMode = "add";
+        var imageResultPopulator = [];
 
         function resetFormTutorGroup() {
             $("#txt_nama_group").val("")
@@ -251,7 +254,7 @@
                 });
             }
         });
-        
+
         $("#btnProsesTutor").click(function () {
             var nama = $("#txt_nama").val();
             var type = $("#txt_type").val();
@@ -640,8 +643,513 @@
             });
         });
         //introJs().addHints();
+
+
+
+
+
+
+
+
+
+
+
+        var FolderMODE = "add";
+        var FolderParent = 0;
+        var FolderEditID = 0;
+        var FolderEditText = "";
+
+        var FileMODE = "add";
+        var FileEditID = 0;
+        var FileEditText = "";
+
+        var EditType = "folder";
+
+
+
+        var jsTreeBuilder = $("#documentation-tree").jstree({
+            "core": {
+                "data":refreshTree(),
+                "check_callback" : true
+            },
+            "themes" : {
+                "responsive": false
+            },
+            "types" : {
+                "default" : {
+                    "icon" : "fa fa-folder text-warning"
+                },
+                "file" : {
+                    "icon" : "fa fa-file  text-warning"
+                }
+            },
+            "plugins" : ["search"]
+        });
+
+        function refreshTree() {
+            var data;
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Documentation/get_structure",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    data = response.response_package;
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return data;
+        }
+
+        $("#btnAddRootFolder").click(function() {
+            FolderMODE = "add";
+            $("#modal-manage-folder").modal("show");
+        });
+
+        $("#btnProsesFolder").click(function () {
+            var name = $("#txt_nama_folder").val();
+            if(name !== "") {
+                Swal.fire({
+                    title: "Proses Folder?",
+                    showDenyButton: true,
+                    confirmButtonText: "Ya",
+                    denyButtonText: "Tidak",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            async: false,
+                            url:__HOSTAPI__ + "/Documentation",
+                            type: "POST",
+                            data: {
+                                request: FolderMODE + "_folder",
+                                id: FolderEditID,
+                                parent: FolderParent,
+                                name: name
+                            },
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            success: function(response){
+                                jsTreeBuilder.jstree("deselect_all");
+                                jsTreeBuilder.jstree(true).settings.core.data = refreshTree();
+                                jsTreeBuilder.jstree(true).refresh();
+                                jsTreeBuilder.jstree("open_all");
+                                $("#txt_nama_folder").val("");
+                                $("#modal-manage-folder").modal("hide");
+                            },
+                            error: function(response) {
+                                console.log(response);
+                            }
+                        });
+                    }
+                });
+            } else {
+                Swal.fire(
+                    "Documentation",
+                    "Nama folder tidak boleh kosong",
+                    "error"
+                ).then((result) => {
+                    //
+                });
+            }
+        });
+
+
+        $("#btnProsesFile").click(function () {
+            var name = $("#txt_nama_file").val();
+            var content = globalEditor.getData();
+            //imageResultPopulator
+            var parsedHTML = $.parseHTML(content);
+
+            for(var az in imageResultPopulator) {
+                $(parsedHTML).find("img:eq(" + az + ")").attr({
+                    "src": __HOST__ + "images/documentation/" + imageResultPopulator
+                });
+            }
+
+            var parsedContent = $('<div>').append($(parsedHTML).clone()).html();
+
+            if(name !== "") {
+                Swal.fire({
+                    title: "Proses File?",
+                    showDenyButton: true,
+                    confirmButtonText: "Ya",
+                    denyButtonText: "Tidak",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            async: false,
+                            url:__HOSTAPI__ + "/Documentation",
+                            type: "POST",
+                            data: {
+                                request: FileMODE + "_file",
+                                id: FileEditID,
+                                folder: FolderParent,
+                                name: name,
+                                content: parsedContent
+                            },
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            success: function(response) {
+                                jsTreeBuilder.jstree("deselect_all");
+                                jsTreeBuilder.jstree(true).settings.core.data = refreshTree();
+                                jsTreeBuilder.jstree(true).refresh();
+                                jsTreeBuilder.jstree("open_all");
+                                //$("#txt_nama_file").val("");
+                                //$("#modal-manage-file").modal("hide");
+                            },
+                            error: function(response) {
+                                console.log(response);
+                            }
+                        });
+                    }
+                });
+            } else {
+                Swal.fire(
+                    "Documentation",
+                    "Nama folder tidak boleh kosong",
+                    "error"
+                ).then((result) => {
+                    //
+                });
+            }
+        });
+
+        $("#documentation-tree").on("select_node.jstree", function (e, data) {
+            FolderParent = data.node.id;
+            EditType = data.node.original.itemType;
+            if(EditType === "folder") {
+                FolderEditID = data.node.original.id;
+                FolderEditText = data.node.original.text;
+
+                $(".custom-menu li[data-action=\"add_file\"]").show();
+            } else {
+                FileEditID = data.node.original.id;
+                FileEditText = data.node.original.text;
+
+                $(".custom-menu li[data-action=\"add_file\"]").hide();
+            }
+            /*selectedID = data.node.id;
+            selectedCheckChild = data.node.data.childCount;
+            selectedParent = data.node.data.parent;
+            selectedNama = data.node.data.nama;
+            selectedIdentifier = data.node.data.identifier;
+            selectedKeterangan = data.node.data.keterangan;
+            selectedIcon = data.node.data.icon;
+            selectedShowOnMenu = data.node.data.show_on_menu;
+            selectedShowOrder = data.node.data.show_order;
+            selectedMenuGroup = data.node.data.menu_group;
+
+            PARENT = selectedID;*/
+            $(".custom-menu").finish().toggle(100).css({
+                top: (event.pageY - $(".navbar-main").height()) + "px",
+                left: (event.pageX - $(".simplebar-mask").width() - $(".jstree-container-ul li").width() + 100) + "px"
+            });
+        });
+
+        $("body").bind("mousedown", function (e) {
+            if (!$(e.target).parents(".custom-menu").length > 0) {
+                $(".custom-menu").hide(100);
+            }
+        });
+
+        $(".custom-menu li").click(function() {
+            $("#txt_nama_folder").val("");
+            $("#txt_nama_file").val("");
+            globalEditor.setData("");
+            switch ($(this).attr("data-action")) {
+                case "add_folder":
+                    FolderMODE = "add";
+                    $("#modal-manage-folder").modal("show");
+                    break;
+                case "add_file":
+                    FileMODE = "add";
+                    //$("#modal-manage-file").modal("show");
+                    break;
+                case "edit_pos":
+                    if(EditType === "folder") {
+                        FolderMODE = "edit";
+                        $("#modal-manage-folder").modal("show");
+                        $("#txt_nama_folder").val(FolderEditText);
+                    } else {
+                        FileMODE = "edit";
+                        //$("#modal-manage-file").modal("show");
+
+                        $.ajax({
+                            async: false,
+                            url:__HOSTAPI__ + "/Documentation/file_detail/" + FileEditID,
+                            type: "GET",
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            success: function(response) {
+                                var data = response.response_package.response_data[0];
+                                $("#txt_nama_file").val(FileEditText);
+                                globalEditor.setData((data.content === undefined || data.content === null) ? "" :  data.content);
+                            },
+                            error: function(response) {
+                                console.log(response);
+                            }
+                        });
+                    }
+                    break;
+                default:
+            }
+            $(".custom-menu").hide(100);
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        class MyUploadAdapter {
+            static loader;
+            constructor( loader ) {
+                // CKEditor 5's FileLoader instance.
+                this.loader = loader;
+
+                // URL where to send files.
+                this.url = __HOSTAPI__ + "/Upload";
+
+                this.imageList = [];
+            }
+
+            // Starts the upload process.
+            upload() {
+                return new Promise( ( resolve, reject ) => {
+                    this._initRequest();
+                    this._initListeners( resolve, reject );
+                    this._sendRequest();
+                } );
+            }
+
+            // Aborts the upload process.
+            abort() {
+                if ( this.xhr ) {
+                    this.xhr.abort();
+                }
+            }
+
+            // Example implementation using XMLHttpRequest.
+            _initRequest() {
+                const xhr = this.xhr = new XMLHttpRequest();
+
+                xhr.open( 'POST', this.url, true );
+                xhr.setRequestHeader("Authorization", 'Bearer ' + <?php echo json_encode($_SESSION["token"]); ?>);
+                xhr.responseType = 'json';
+            }
+
+            // Initializes XMLHttpRequest listeners.
+            _initListeners( resolve, reject ) {
+                const xhr = this.xhr;
+                const loader = this.loader;
+                const genericErrorText = 'Couldn\'t upload file:' + ` ${ loader.file.name }.`;
+
+                xhr.addEventListener( 'error', () => reject( genericErrorText ) );
+                xhr.addEventListener( 'abort', () => reject() );
+                xhr.addEventListener( 'load', () => {
+                    const response = xhr.response;
+
+                    if ( !response || response.error ) {
+                        return reject( response && response.error ? response.error.message : genericErrorText );
+                    }
+
+                    // If the upload is successful, resolve the upload promise with an object containing
+                    // at least the "default" URL, pointing to the image on the server.
+                    resolve( {
+                        default: response.url
+                    } );
+                } );
+
+                if ( xhr.upload ) {
+                    xhr.upload.addEventListener( 'progress', evt => {
+                        if ( evt.lengthComputable ) {
+                            loader.uploadTotal = evt.total;
+                            loader.uploaded = evt.loaded;
+                        }
+                    } );
+                }
+            }
+
+
+            // Prepares the data and sends the request.
+            _sendRequest() {
+                const toBase64 = file => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+                var Axhr = this.xhr;
+
+                async function doSomething(fileTarget) {
+                    fileTarget.then(function(result) {
+                        var ImageName = result.name;
+
+                        toBase64(result).then(function(renderRes) {
+                            const data = new FormData();
+                            data.append( 'upload', renderRes);
+                            data.append( 'name', ImageName);
+                            Axhr.send( data );
+                        });
+                    });
+                }
+
+                var ImageList = this.imageList;
+
+                this.loader.file.then(function(toAddImage) {
+
+                    ImageList.push(toAddImage.name);
+
+                });
+
+                this.imageList = ImageList;
+
+                doSomething(this.loader.file);
+            }
+        }
+
+
+
+        function hiJackImage(toHi) {
+            imageResultPopulator.push(toHi);
+        }
+
+
+        function MyCustomUploadAdapterPlugin( editor ) {
+            editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {
+                var MyCust = new MyUploadAdapter( loader );
+                var dataToPush = MyCust.imageList;
+                hiJackImage(dataToPush);
+                return MyCust;
+            };
+        }
+
+
+
+
+
+
+
+
+
+
+        ClassicEditor
+            .create( document.querySelector( '.editor' ), {
+                extraPlugins: [ MyCustomUploadAdapterPlugin ],
+                placeholder: "Documentation...",
+                removePlugins: ['MediaEmbed']
+            } )
+            .then( editor => {
+                editor.editing.view.change( writer => {
+                    writer.setStyle( 'min-height', '1000px', editor.editing.view.document.getRoot() );
+                } );
+                /*if(asesmen_detail.anamnesa === undefined) {
+                    editor.setData("");
+                } else {
+                    editor.setData(asesmen_detail.anamnesa);
+                }*/
+                globalEditor = editor;
+                window.editor = editor;
+            } )
+            .catch( err => {
+                //console.error( err.stack );
+            } );
     });
 </script>
+
+<div id="modal-manage-folder" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    Manage Folder
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="txt_nama_folder">Nama Folder</label>
+                            <input type="text" class="form-control" id="txt_nama_folder" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnProsesFolder">
+                    <span>
+                        <i class="fa fa-save"></i> Proses
+                    </span>
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Close
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--div id="modal-manage-file" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    Manage File
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="txt_nama_folder">Nama File</label>
+                            <input type="text" class="form-control" id="txt_nama_file" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnProsesFile">
+                    <span>
+                        <i class="fa fa-save"></i> Proses
+                    </span>
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Close
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div-->
 
 <div id="modal-tutor-group" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">

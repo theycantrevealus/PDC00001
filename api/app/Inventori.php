@@ -632,7 +632,7 @@ class Inventori extends Utility
     private function tambah_kategori_obat($parameter)
     {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $check = self::duplicate_check(array(
             'table' => 'master_inv_obat_kategori',
