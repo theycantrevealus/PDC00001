@@ -1718,6 +1718,7 @@ class Inventori extends Utility
             ->execute();
 
         $autonum = 1;
+        $PenjaminObat = new Penjamin(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $kategori_obat = self::get_kategori_obat_item($value['uid']);
@@ -1734,7 +1735,6 @@ class Inventori extends Utility
             $data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
 
             //Data Penjamin
-            $PenjaminObat = new Penjamin(self::$pdo);
             $ListPenjaminObat = $PenjaminObat->get_penjamin_obat($value['uid'])['response_data'];
             foreach ($ListPenjaminObat as $PenjaminKey => $PenjaminValue) {
                 $ListPenjaminObat[$PenjaminKey]['profit'] = floatval($PenjaminValue['profit']);
