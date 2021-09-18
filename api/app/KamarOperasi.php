@@ -46,6 +46,10 @@ class KamarOperasi extends Utility {
                     return self::get_paket_detail($parameter[2]);
                     break;
 
+                case 'get_paket_list_name':
+                    return self::get_paket_list_name($parameter);
+                    break;
+
 				default:
 					# code...
 					break;
@@ -107,6 +111,25 @@ class KamarOperasi extends Utility {
 		return self::delete($parameter);
 	}
 
+    private function get_paket_list_name($parameter) {
+        $data = self::$query->select('kamar_operasi_paket_obat', array(
+            'uid',
+            'nama',
+            'remark',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'kamar_operasi_paket_obat.deleted_at' => 'IS NULL'
+            ), array())
+            ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            //$data['response_data'][$key]['detail'] = self::get_varian_obat($value['uid'])['response_data'];
+        }
+
+        return $data;
+    }
+
     private function get_paket_detail($parameter) {
         $data = self::$query->select('kamar_operasi_paket_obat', array(
             'uid',
@@ -123,8 +146,29 @@ class KamarOperasi extends Utility {
                 $parameter
             ))
             ->execute();
+        $Inventori = new Inventori(self::$pdo);
+
         foreach ($data['response_data'] as $key => $value) {
-            $data['response_data'][$key]['detail'] = self::get_varian_obat($value['uid'])['response_data'];
+            $Detail = self::get_varian_obat($value['uid'])['response_data'];
+
+
+            foreach ($Detail as $DKey => $DValue) {
+                //Check Depo OK
+                $TotalStock = 0;
+                $InventoriStockPopulator = $Inventori->get_item_batch($DValue['obat']['uid']);
+                if (count($InventoriStockPopulator['response_data']) > 0) {
+                    foreach ($InventoriStockPopulator['response_data'] as $TotalKey => $TotalValue) {
+                        if($TotalValue['gudang']['uid'] === __GUDANG_DEPO_OK__) {
+                            $TotalStock += floatval($TotalValue['stok_terkini']);
+                        }
+                    }
+                    $Detail[$DKey]['stok'] = $TotalStock;
+                } else {
+                    $Detail[$DKey]['stok'] = 0;
+                }
+            }
+
+            $data['response_data'][$key]['detail'] = $Detail;
         }
 
         return $data;

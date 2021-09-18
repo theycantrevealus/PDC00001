@@ -24,29 +24,28 @@
 	</div>
 </div>
 
-<div class="container-fluid page__container">
-	<div class="row card-group-row">
-		<div class="col-lg-12 col-md-12">
-			<div class="z-0">
-				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-dokter">
-					<li class="nav-item">
-						<a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+<div class="row card-group-row">
+    <div class="col-lg-12 col-md-12">
+        <div class="z-0">
+            <ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-dokter">
+                <li class="nav-item">
+                    <a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								<i class="fa fa-address-book"></i>
 							</span>
-							Asesmen Rawat
-						</a>
-					</li>
-					<li class="nav-item">
-						<a href="#tab-poli-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                        Asesmen Rawat
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#tab-poli-2" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								<i class="fa fa-briefcase-medical"></i>
 							</span>
-							Asesmen Medis
-						</a>
-					</li>
-                    <?php
-                    if(in_array(__UIDFISIOTERAPI__, $PoliList)) {
+                        Asesmen Medis
+                    </a>
+                </li>
+                <?php
+                if(in_array(__UIDFISIOTERAPI__, $PoliList)) {
                     ?>
                     <li class="nav-item">
                         <a href="#tab-poli-9" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
@@ -57,60 +56,60 @@
                         </a>
                     </li>
                     <?php
-                    }
-                    ?>
-                    <li class="nav-item">
-						<a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+                }
+                ?>
+                <li class="nav-item">
+                    <a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-child"></i>
 							</span>
-							Tindakan
-						</a>
-					</li>
-					<li class="nav-item">
-						<a href="#tab-poli-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+                        Tindakan
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#tab-poli-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-pills"></i>
 							</span>
-							Resep
-						</a>
-					</li>
-					<li class="nav-item">
-						<a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+                        Resep
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-flask"></i>
 							</span>
-							Laboratorium
-						</a>
-					</li>
-					<li class="nav-item">
-						<a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+                        Laboratorium
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-life-ring"></i>
 							</span>
-							Radiologi
-						</a>
-					</li>
-                    <li class="nav-item">
-                        <a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+                        Radiologi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-tasks"></i>
 							</span>
-                            CPPT
-                        </a>
-                    </li>
-					<li class="nav-item ml-auto">
-						<a href="#tab-poli-8" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+                        CPPT
+                    </a>
+                </li>
+                <li class="nav-item ml-auto">
+                    <a href="#tab-poli-8" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
 								<i class="fa fa-print"></i>
 							</span>
-							Dokumen
-						</a>
-					</li>
-				</ul>
-			</div>
-			<div class="card card-body tab-content">
-				<div class="tab-pane show fade perawat" id="tab-poli-1">
+                        Dokumen
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card card-body tab-content">
+            <div class="tab-pane show fade perawat" id="tab-poli-1">
 					<?php require 'info-pasien.php'; ?>
 					<?php require 'perawat/form.php'; ?>
 				</div>

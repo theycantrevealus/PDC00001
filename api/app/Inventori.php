@@ -251,6 +251,10 @@ class Inventori extends Utility
                 return self::get_temp_transact($parameter);
                 break;
 
+            case 'stok_monitoring':
+                return self::stok_monitoring($parameter);
+                break;
+
             default:
                 return array('Unknown');
                 break;
@@ -3891,6 +3895,107 @@ class Inventori extends Utility
 
             $autonum++;
         }
+        return $data;
+    }
+
+    private function stok_monitoring($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'AND',
+                'master_inv_monitoring.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv_monitoring.gudang' => '= ?'
+            );
+
+            $paramValue = array($parameter['gudang']);
+        } else {
+            $paramData = array(
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'AND',
+                'master_inv_monitoring.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv_monitoring.gudang' => '= ?'
+            );
+
+            $paramValue = array($parameter['gudang']);
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('master_inv_monitoring', array(
+                'barang',
+                'gudang',
+                'min',
+                'max'
+            ))
+                ->join('master_inv', array(
+                    'nama', 'kode_barang'
+                ))
+                ->on(array(
+                    array('master_inv_monitoring.barang', '=', 'master_inv.uid')
+                ))
+                ->order(array(
+                    'master_inv.nama' => 'ASC'
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('master_inv_monitoring', array(
+                'barang',
+                'gudang',
+                'min',
+                'max'
+            ))
+                ->order(array(
+                    'master_inv.nama' => 'ASC'
+                ))
+                ->join('master_inv', array(
+                    'nama', 'kode_barang'
+                ))
+                ->on(array(
+                    array('master_inv_monitoring.barang', '=', 'master_inv.uid')
+                ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $TotalCount = 0;
+            $Counter = self::$query->select('inventori_stok', array(
+                'stok_terkini'
+            ))
+                ->where(array(
+                    'inventori_stok.barang' => '= ?'
+                ), array(
+                    $value['barang']
+                ))
+                ->execute();
+            foreach ($Counter['response_data'] as $CKey => $CValue) {
+                $TotalCount += $CValue['stok_terkini'];
+            }
+            $data['response_data'][$key]['total'] = $TotalCount;
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('master_inv_monitoring', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
         return $data;
     }
     
