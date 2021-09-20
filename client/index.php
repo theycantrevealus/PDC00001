@@ -72,6 +72,7 @@
     var __ANTRIAN_KHUSUS__ = <?php echo json_encode(__ANTRIAN_KHUSUS__); ?>;
 
     var __KAMAR_IGD__ = <?php echo json_encode(__KAMAR_IGD__); ?>;
+    var __BPJS_MODE__ = <?php echo json_encode(__BPJS_MODE__); ?>;
 
 	var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');

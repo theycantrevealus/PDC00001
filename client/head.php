@@ -48,19 +48,20 @@
 	<!--<noscript>
 		<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=327167911228268&ev=PageView&noscript=1" />
 	</noscript> -->
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr.css" rel="stylesheet">
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr.rtl.css" rel="stylesheet">
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr-airbnb.css" rel="stylesheet">
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr-airbnb.rtl.css" rel="stylesheet">
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/jqvmap.min.css" rel="stylesheet">
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.css" rel="stylesheet">
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/croppie-master/croppie.css" rel="stylesheet">
-    <link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/intro/introjs.css" rel="stylesheet">
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/css/rSlider.min.css" rel="stylesheet">
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.min.css" rel="stylesheet">
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet">
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr.css" rel="stylesheet" />
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr.rtl.css" rel="stylesheet" />
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr-airbnb.css" rel="stylesheet" />
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/vendor-flatpickr-airbnb.rtl.css" rel="stylesheet" />
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/jqvmap/jqvmap.min.css" rel="stylesheet" />
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.css" rel="stylesheet" />
+    <link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/DataTables/FixedColumns-3.3.1/css/fixedColumns.bootstrap.min.css" rel="stylesheet" />
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/croppie-master/croppie.css" rel="stylesheet" />
+    <link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/intro/introjs.css" rel="stylesheet" />
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/css/rSlider.min.css" rel="stylesheet" />
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.min.css" rel="stylesheet" />
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet" />
     <link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/json-viewer/json-viewer.css" rel="stylesheet" />
     <link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/jstree/themes/default/style.min.css" rel="stylesheet" />
-	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/custom.css" rel="stylesheet">
-    <link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/bintan.css" rel="stylesheet">
+	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/custom.css" rel="stylesheet" />
+    <link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/bintan.css" rel="stylesheet" />
 </head>

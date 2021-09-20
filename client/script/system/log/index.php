@@ -264,6 +264,12 @@
                 search: "",
                 searchPlaceholder: "Cari Log"
             },
+            fixedColumns: {
+                leftColumns: 3
+            },
+            scrollX: "200px",
+            scrollCollapse: true,
+            scrollY: 500,
             "rowCallback": function ( row, data, index ) {
                 if(data.action === "D") {
                     $("td", row).addClass("bg-danger-custom");
@@ -297,33 +303,38 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
 
-                        var oldData = JSON.parse(row.old_value);
-                        var newData = JSON.parse(row.new_value);
+                        try {
+                            var oldData = JSON.parse(row.old_value);
+                            var newData = JSON.parse(row.new_value);
 
-                        var parseCompare = [];
+                            var parseCompare = [];
 
-                        if(oldData !== null && newData !== null) {
-                            for(var ai in oldData) {
-                                if(oldData[ai] != newData[ai]) {
-                                    parseCompare.push("<div class=\"row\">" +
-                                        "<div class=\"col-lg-5 text-danger text-right\">" + ((oldData[ai] === undefined || oldData[ai] === null) ? "-/0" : oldData[ai]) + "</div>" +
-                                        "<div class=\"col-lg-2 text-center\">" +
-                                        "<code><i class=\"fa fa-chevron-right\"></i></code>" +
-                                        "</div>" +
-                                        "<div class=\"col-lg-5 text-success\">" + ((newData[ai] === undefined || newData[ai] === null) ? "-/0" : newData[ai]) + "</div>" +
-                                        "</div>");
-                                } else {
-                                    /*parseCompare.push("<tr>" +
-                                        "<td class=\"text-muted text-right\">" + oldData[ai] + "</td>" +
-                                        "<td class=\"text-muted\">" + newData[ai] + "</td>" +
-                                        "</tr>");*/
+                            if(oldData !== null && newData !== null) {
+                                for(var ai in oldData) {
+                                    if(oldData[ai] != newData[ai]) {
+                                        parseCompare.push("<div class=\"row\">" +
+                                            "<div class=\"col-lg-5 text-danger text-right\">" + ((oldData[ai] === undefined || oldData[ai] === null) ? "-/0" : oldData[ai]) + "</div>" +
+                                            "<div class=\"col-lg-2 text-center\">" +
+                                            "<code><i class=\"fa fa-chevron-right\"></i></code>" +
+                                            "</div>" +
+                                            "<div class=\"col-lg-5 text-success\">" + ((newData[ai] === undefined || newData[ai] === null) ? "-/0" : newData[ai]) + "</div>" +
+                                            "</div>");
+                                    } else {
+                                        /*parseCompare.push("<tr>" +
+                                            "<td class=\"text-muted text-right\">" + oldData[ai] + "</td>" +
+                                            "<td class=\"text-muted\">" + newData[ai] + "</td>" +
+                                            "</tr>");*/
+                                    }
                                 }
-                            }
 
-                            return parseCompare.join("");
-                        } else {
+                                return parseCompare.join("");
+                            } else {
+                                return "";
+                            }
+                        } catch (e) {
                             return "";
                         }
+
 
                         /*return "<p>" +
                             "<a class=\"btn btn-info\" data-toggle=\"collapse\" href=\"#collapseExample" + row.id + "\" role=\"button\" aria-expanded=\"false\" aria-controls=\"collapseExample\">" +
