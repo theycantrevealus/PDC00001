@@ -276,7 +276,7 @@ class Aplicares extends Utility {
 
 	private function tambah_ruangan($table, $parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$dataObj = $forApi = $parameter['dataObj'];
 		$allData = $result = [];

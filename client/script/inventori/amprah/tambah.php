@@ -1,5 +1,18 @@
 <script type="text/javascript">
 	$(function() {
+        var currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#opname_notif_amprah");
+        reCheckStatus(currentStatus);
+        function reCheckStatus(currentStatus) {
+            if(currentStatus === "A") {
+                $(".disable-panel-opname").hide();
+                $("#btnSubmitAmprah").removeAttr("disabled");
+            } else {
+                $(".disable-panel-opname").show();
+                $("#btnSubmitAmprah").attr({
+                    "disabled": "disabled"
+                });
+            }
+        }
 	    $("#txt_tanggal").datepicker({
 			dateFormat: 'DD, dd MM yy',
 			autoclose: true

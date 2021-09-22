@@ -147,6 +147,8 @@
 	</div> -->
 	<?php require 'script.php'; ?>
 	<script type="text/javascript">
+        var targetModule = 0;
+        var tutorList = {};
         function isHTML(str) {
             var a = document.createElement('div');
             a.innerHTML = str;
@@ -231,8 +233,26 @@
         var targetModule = 0;
         var tutorList = {};
 		    var currentPageURL = document.URL;
-		    var currentMenuCheck = $("a[href=\"" + currentPageURL + "\"]").parent();
-		    while(parseInt(currentMenuCheck.attr("parent-child")) > 0) {
+		    //Check Child
+            var checkerChild = currentPageURL.split("/");
+            var childLibList = ["tambah", "edit", "view", "detail", "antrian"];
+            var targettedChildWow = 0;
+            var isChildMenuWow = false;
+            for(var abczz in checkerChild) {
+                if(childLibList.indexOf(checkerChild[abczz]) >= 0) {
+                    targettedChildWow = abczz;
+                    isChildMenuWow = true;
+                    break;
+                }
+            }
+
+            if(isChildMenuWow) {
+                checkerChild.splice(targettedChildWow, (checkerChild.length - targettedChildWow));
+                currentPageURL = checkerChild.join("/");
+            }
+
+            var currentMenuCheck = $("a.sidebar-menu-button[href=\"" + currentPageURL + "\"]").parent();
+            while(parseInt(currentMenuCheck.attr("parent-child")) > 0) {
                 var parentID = currentMenuCheck.attr("parent-child");
                 $("#menu-" + parentID).addClass("show");
                 $("a[href=\"#menu-" + parentID + "\"]").removeClass("collapsed");
@@ -313,9 +333,6 @@
                             tutorList[data[a].uid].step.push(currentTutor);
                         }
                     }
-
-                    console.log(tutorList);
-
                 },
                 error: function(response) {
                     console.log(response);
@@ -644,6 +661,31 @@
                 location.reload();
             }
         };
+
+        function checkStatusGudang(gudang, target_gudang) {
+            var currentStatus = "";
+            $.ajax({
+                url:__HOSTAPI__ + "/Inventori/gudang_detail/" + gudang,
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    var gudangInfo = response.response_package.response_data[0];
+                    currentStatus = gudangInfo.status;
+                    if(gudangInfo.status === "A") {
+                        $(target_gudang).html("<b class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Gudang Aktif</b>");
+                    } else {
+                        $(target_gudang).html("<b class=\"text-warning\"><i class=\"fa fa-exclamation-circle\"></i> Gudang Opname</b>");
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return currentStatus;
+        }
 
 	</script>
 	<?php

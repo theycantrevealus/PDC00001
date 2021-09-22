@@ -10,9 +10,25 @@
 			$child->execute(array($value['id'], 'Y', $group));
 			$LinkManager = ($child->rowCount() > 0) ? "#menu-" . $value['id'] : __HOSTNAME__ . '/' .$value['identifier'];
 			$activeCheck = false;
-			if(__HOSTNAME__ . '/' . implode('/', __PAGES__) == $LinkManager) {
+			if(
+			        __HOSTNAME__ . '/' . implode('/', __PAGES__) == $LinkManager ||
+                    __HOSTNAME__ . '/' . implode('/', __PAGES__) == $LinkManager . '/tambah'
+            ) {
 				$activeCheck = true;
-			}
+			} else {
+			    if(
+                    __PAGES__[2] == 'edit' ||
+                    __PAGES__[2] == 'view' ||
+                    __PAGES__[2] == 'antrian'
+                ) {
+			        $classDefinerTemp = __PAGES__;
+			        array_splice($classDefinerTemp, (count($classDefinerTemp) - 2),2);
+			        $currentCheckMenuTemp = __HOSTNAME__ . '/' . implode('/', $classDefinerTemp);
+			        if($currentCheckMenuTemp == $LinkManager) {
+                        $activeCheck = true;
+                    }
+                }
+            }
 
 			if(in_array($value['id'], $access)) {
 				?>
