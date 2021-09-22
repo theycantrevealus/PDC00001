@@ -90,6 +90,10 @@ class Pasien extends Utility
                 return self::get_pasien_back_end($parameter);
                 break;
 
+            case 'bpjs_sep_add_offline':
+                return self::bpjs_sep_add_offline($parameter);
+                break;
+
             default:
                 # code...
                 break;
@@ -828,7 +832,31 @@ class Pasien extends Utility
         );
     }
 
+    private function bpjs_sep_add_offline($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
+        $uid = parent::gen_uuid();
+        $BPJSAdd = self::$query->insert('bpjs_sep', array(
+            'uid' => $uid,
+            'antrian' => $parameter['antrian'],
+            'pasien' => $parameter['pasien'],
+            'pelayanan_jenis' => '0',
+            'kelas_rawat' => '0',
+            'asal_rujukan_nomor' => '',
+            'diagnosa_kode' => '',
+            'poli_tujuan' => '',
+            'pegawai' => $UserData['data']->uid,
+            'sep_no' => $parameter['sep'],
+            'sep_tanggal' => parent::format_date(),
+            'sep_selesai' => parent::format_date(),
+            'created_at' => parent::format_date(),
+            'updated_at' => parent::format_date()
+        ))
+            ->execute();
+
+        return $BPJSAdd;
+    }
 
     private function get_pasien_back_end($parameter) {
         $Authorization = new Authorization();

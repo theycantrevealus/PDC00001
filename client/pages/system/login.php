@@ -8,7 +8,7 @@
 
 		<!-- Prevent the demo from appearing in search engines -->
 		<meta name="robots" content="noindex">
-		<link rel="icon" href="<?php echo __HOSTNAME__; ?>/template/assets/images/logo-icon.ico" type="image/ico" sizes="16x16" />
+        <link rel="icon" href="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-icon-<?php echo __PC_IDENT__; ?>.ico" type="image/ico" sizes="16x16" />
 		<!-- Simplebar -->
 		<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/vendor/simplebar.min.css" rel="stylesheet">
 
@@ -87,7 +87,7 @@
 		<div class="layout-login__form" data-simplebar>
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
 				<a href="<?php echo __HOSTNAME__; ?>/" class="navbar-brand" style="min-width: 0">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-black-<?php echo __PC_IDENT__; ?>.png" width="330" height="100" alt="<?php echo __PC_CUSTOMER__; ?>">
+					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-icon-<?php echo __PC_IDENT__; ?>.png" width="100" height="100" alt="<?php echo __PC_CUSTOMER__; ?>">
                     <!--<img class="navbar-brand-icon" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-black.png" width="180" height="180" alt="<?php echo __PC_CUSTOMER__; ?>">-->
 				</a>
 			</div>

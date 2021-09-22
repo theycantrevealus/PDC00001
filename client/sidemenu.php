@@ -10,13 +10,29 @@
 			$child->execute(array($value['id'], 'Y', $group));
 			$LinkManager = ($child->rowCount() > 0) ? "#menu-" . $value['id'] : __HOSTNAME__ . '/' .$value['identifier'];
 			$activeCheck = false;
-			if(__HOSTNAME__ . '/' . implode('/', __PAGES__) == $LinkManager) {
+			if(
+			        __HOSTNAME__ . '/' . implode('/', __PAGES__) == $LinkManager ||
+                    __HOSTNAME__ . '/' . implode('/', __PAGES__) == $LinkManager . '/tambah'
+            ) {
 				$activeCheck = true;
-			}
+			} else {
+			    if(
+                    __PAGES__[2] == 'edit' ||
+                    __PAGES__[2] == 'view' ||
+                    __PAGES__[2] == 'antrian'
+                ) {
+			        $classDefinerTemp = __PAGES__;
+			        array_splice($classDefinerTemp, (count($classDefinerTemp) - 2),2);
+			        $currentCheckMenuTemp = __HOSTNAME__ . '/' . implode('/', $classDefinerTemp);
+			        if($currentCheckMenuTemp == $LinkManager) {
+                        $activeCheck = true;
+                    }
+                }
+            }
 
 			if(in_array($value['id'], $access)) {
 				?>
-				<li class="sidebar-menu-item <?php echo ($activeCheck == true) ? "active" : ""; ?>" parent-child="<?php echo $parent; ?>">
+				<li target_modul="<?php echo $value['id']; ?>" class="sidebar-menu-item <?php echo ($activeCheck == true) ? "active" : ""; ?>" parent-child="<?php echo $parent; ?>">
 					<a class="sidebar-menu-button" <?php echo ($child->rowCount() > 0) ? "data-toggle=\"collapse\"" : ""; ?> href="<?php echo $LinkManager; ?>">
 						<?php
 							if($parent == 0) {

@@ -1317,7 +1317,7 @@
                 const xhr = this.xhr = new XMLHttpRequest();
 
                 xhr.open( 'POST', this.url, true );
-                xhr.setRequestHeader("Authorization", 'Bearer ' + <?php echo json_encode($_SESSION["admin_ciscard"]); ?>);
+                xhr.setRequestHeader("Authorization", 'Bearer ' + <?php echo json_encode($_SESSION["token"]); ?>);
                 xhr.responseType = 'json';
             }
 

@@ -7,8 +7,22 @@
             permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", parameter, 3000, "notif_pasien_baru");
                 tableResep.ajax.reload();
-            }
+            },
+            opname_warehouse: function(protocols, type, parameter, sender, receiver, time) {
+                if(sender !== __ME__) {
+                    notification (type, parameter, 3000, "opname_notifier");
+                }
+                checkStatusGudang(__GUDANG_APOTEK__, "#status_gudang_apotek");
+            },
+            opname_warehouse_finish: function(protocols, type, parameter, sender, receiver, time) {
+                if(sender !== __ME__) {
+                    notification (type, parameter, 3000, "opname_notifier");
+                }
+                checkStatusGudang(__GUDANG_APOTEK__, "#status_gudang_apotek");
+            },
         };
+
+        checkStatusGudang(__GUDANG_APOTEK__, "#status_gudang_apotek");
 
         function load_resep() {
             var selected = [];

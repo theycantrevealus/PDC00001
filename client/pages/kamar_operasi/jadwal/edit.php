@@ -89,6 +89,33 @@
 			</div>
 		</div>
 	</div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-4">
+                    <b>Paket Obat:</b>
+                    <select class="form-control" id="paket_obat">
+                        <option value="none">Tanpa Paket</option>
+                    </select>
+                </div>
+                <div class="col-lg-12">
+                    <br />
+                    <table class="table table-bordered largeDataType table-striped" id="autoObat">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th style="width: 50%">Nama Obat / BHP</th>
+                                <th style="width: 10%">Jlh</th>
+                                <th style="width: 10%">Satuan</th>
+                                <th class="wrap_content">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 	<div class="card card-form">
 		<div class="row no-gutters">
 			<div class="col-lg-4 card-body">

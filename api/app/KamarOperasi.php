@@ -42,6 +42,14 @@ class KamarOperasi extends Utility {
                     return self::get_jadwal_pasien_detail($parameter[2]);
                 break;
 
+                case 'get_paket_detail':
+                    return self::get_paket_detail($parameter[2]);
+                    break;
+
+                case 'get_paket_list_name':
+                    return self::get_paket_list_name($parameter);
+                    break;
+
 				default:
 					# code...
 					break;
@@ -81,6 +89,18 @@ class KamarOperasi extends Utility {
                 return self::selesai_jadwal_operasi($parameter);
             break;
 
+            case 'paket_obat_list':
+                return self::paket_obat_list($parameter);
+                break;
+
+            case 'tambah_paket':
+                return self::tambah_paket($parameter);
+                break;
+
+            case 'edit_paket':
+                return self::edit_paket($parameter);
+                break;
+
 			default:
 				# code...
 				break;
@@ -90,6 +110,334 @@ class KamarOperasi extends Utility {
 	public function __DELETE__($parameter = array()){
 		return self::delete($parameter);
 	}
+
+    private function get_paket_list_name($parameter) {
+        $data = self::$query->select('kamar_operasi_paket_obat', array(
+            'uid',
+            'nama',
+            'remark',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'kamar_operasi_paket_obat.deleted_at' => 'IS NULL'
+            ), array())
+            ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            //$data['response_data'][$key]['detail'] = self::get_varian_obat($value['uid'])['response_data'];
+        }
+
+        return $data;
+    }
+
+    private function get_paket_detail($parameter) {
+        $data = self::$query->select('kamar_operasi_paket_obat', array(
+            'uid',
+            'nama',
+            'remark',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'kamar_operasi_paket_obat.deleted_at' => 'IS NULL',
+                'AND',
+                'kamar_operasi_paket_obat.uid' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+        $Inventori = new Inventori(self::$pdo);
+
+        foreach ($data['response_data'] as $key => $value) {
+            $Detail = self::get_varian_obat($value['uid'])['response_data'];
+
+
+            foreach ($Detail as $DKey => $DValue) {
+                //Check Depo OK
+                $TotalStock = 0;
+                $InventoriStockPopulator = $Inventori->get_item_batch($DValue['obat']['uid']);
+                if (count($InventoriStockPopulator['response_data']) > 0) {
+                    foreach ($InventoriStockPopulator['response_data'] as $TotalKey => $TotalValue) {
+                        if($TotalValue['gudang']['uid'] === __GUDANG_DEPO_OK__) {
+                            $TotalStock += floatval($TotalValue['stok_terkini']);
+                        }
+                    }
+                    $Detail[$DKey]['stok'] = $TotalStock;
+                } else {
+                    $Detail[$DKey]['stok'] = 0;
+                }
+            }
+
+            $data['response_data'][$key]['detail'] = $Detail;
+        }
+
+        return $data;
+    }
+
+    private function tambah_paket($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $uid = parent::gen_uuid();
+        $worker = self::$query->insert('kamar_operasi_paket_obat', array(
+            'uid' => $uid,
+            'nama' => $parameter['nama'],
+            'remark' => $parameter['remark'],
+            'created_at' => parent::format_date(),
+            'updated_at' => parent::format_date()
+        ))
+            ->execute();
+
+        if($worker['response_result'] > 0) {
+            parent::log(array(
+                'type'=>'activity',
+                'column'=>array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value'=>array(
+                    $uid,
+                    $UserData['data']->uid,
+                    'kamar_operasi_paket_obat',
+                    'I',
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class'=>__CLASS__
+            ));
+
+            //Detail
+            foreach ($parameter['item'] as $key => $value) {
+                $detail = self::$query->insert('kamar_operasi_paket_obat_detail', array(
+                    'paket' => $uid,
+                    'obat' => $value['obat'],
+                    'qty' => floatval($value['qty']),
+                    'remark' => $value['remark'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->returning('id')
+                    ->execute();
+                if($detail['response_result'] > 0) {
+                    parent::log(array(
+                        'type'=>'activity',
+                        'column'=>array(
+                            'unique_target',
+                            'user_uid',
+                            'table_name',
+                            'action',
+                            'logged_at',
+                            'status',
+                            'login_id'
+                        ),
+                        'value'=>array(
+                            $detail['response_unique'],
+                            $UserData['data']->uid,
+                            'kamar_operasi_paket_obat_detail',
+                            'I',
+                            parent::format_date(),
+                            'N',
+                            $UserData['data']->log_id
+                        ),
+                        'class'=>__CLASS__
+                    ));
+                }
+            }
+        }
+
+        return $worker;
+    }
+
+
+    private function edit_paket($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $old = self::get_paket_detail($parameter['uid']);
+
+        $worker = self::$query->update('kamar_operasi_paket_obat', array(
+            'nama' => $parameter['nama'],
+            'remark' => $parameter['remark'],
+            'updated_at' => parent::format_date()
+        ))
+            ->where(array(
+                'kamar_operasi_paket_obat.uid' => '= ?',
+                'AND',
+                'kamar_operasi_paket_obat.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
+        if($worker['response_result'] > 0) {
+            parent::log(array(
+                'type'=>'activity',
+                'column'=>array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'old_value',
+                    'new_value',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value'=>array(
+                    $parameter['uid'],
+                    $UserData['data']->uid,
+                    'kamar_operasi_paket_obat',
+                    'U',
+                    json_encode($old['response_data'][0]),
+                    json_encode($parameter),
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class'=>__CLASS__
+            ));
+
+            $HarDelete = self::$query->hard_delete('kamar_operasi_paket_obat_detail')
+                ->where(array(
+                    'kamar_operasi_paket_obat_detail.paket' => '= ?'
+                ), array(
+                    $parameter['uid']
+                ))
+                ->execute();
+
+            //Detail
+            foreach ($parameter['item'] as $key => $value) {
+                $detail = self::$query->insert('kamar_operasi_paket_obat_detail', array(
+                    'paket' => $parameter['uid'],
+                    'obat' => $value['obat'],
+                    'qty' => floatval($value['qty']),
+                    'remark' => $value['remark'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->returning('id')
+                    ->execute();
+                if($detail['response_result'] > 0) {
+                    parent::log(array(
+                        'type'=>'activity',
+                        'column'=>array(
+                            'unique_target',
+                            'user_uid',
+                            'table_name',
+                            'action',
+                            'logged_at',
+                            'status',
+                            'login_id'
+                        ),
+                        'value'=>array(
+                            $detail['response_unique'],
+                            $UserData['data']->uid,
+                            'kamar_operasi_paket_obat_detail',
+                            'I',
+                            parent::format_date(),
+                            'N',
+                            $UserData['data']->log_id
+                        ),
+                        'class'=>__CLASS__
+                    ));
+                }
+            }
+        }
+
+        return $worker;
+    }
+
+    private function get_varian_obat($parameter) {
+        $Inventori = new Inventori(self::$pdo);
+        $data = self::$query->select('kamar_operasi_paket_obat_detail', array(
+            'id', 'paket', 'obat', 'qty', 'remark'
+        ))
+            ->where(array(
+                'kamar_operasi_paket_obat_detail.deleted_at' => 'IS NULL',
+                'AND',
+                'kamar_operasi_paket_obat_detail.paket' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['obat'] = $Inventori->get_item_detail($value['obat'])['response_data'][0];
+        }
+        return $data;
+    }
+
+    private function paket_obat_list($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'kamar_operasi_paket_obat.deleted_at' => 'IS NULL',
+                'AND',
+                'kamar_operasi_paket_obat.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'kamar_operasi_paket_obat.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('kamar_operasi_paket_obat', array(
+                'uid',
+                'nama',
+                'remark',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('kamar_operasi_paket_obat', array(
+                'uid',
+                'nama',
+                'remark',
+                'created_at',
+                'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['detail'] = self::get_varian_obat($value['uid'])['response_data'];
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('kamar_operasi_paket_obat', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
 
 
     /*======================= START GET FUNCTION ======================*/
@@ -685,7 +1033,7 @@ class KamarOperasi extends Utility {
 
     private static function delete($parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$delete = self::$query
 			->delete($parameter[6])

@@ -22,7 +22,7 @@
                 { 
 					"data": null,"sortable": false, 
 			    	render: function (data, type, row, meta) {
-			            return meta.row + meta.settings._iDisplayStart + 1;
+			            return "<h5 class=\"autonum\">" + (meta.row + meta.settings._iDisplayStart + 1) + "</h5>";
                 	}  
     			},
 				{
@@ -70,11 +70,11 @@
 						let status = row['status_pelaksanaan'];
 
 						if (status == 'N') {
-							return '<span class="badge badge-info">Akan dilaksakan</span>';
+							return '<span class="badge badge-custom-caption badge-outline-info">Akan dilaksakan</span>';
 						} else if (status == 'P') {
-							return '<span class="badge badge-warning">Sedang proses</span>';
+							return '<span class="badge badge-custom-caption badge-outline-warning">Sedang proses</span>';
 						} else if (status == 'D') {
-							return '<span class="badge badge-success">Sudah selesai</span>';
+							return '<span class="badge badge-custom-caption badge-outline-success">Sudah selesai</span>';
 						}
 						
 					}
@@ -95,11 +95,9 @@
 									`<button data-uid="${row['uid']}" class="btn btn-danger btn-sm btn_delete_jadwal" data-toggle="tooltip" title="Hapus">` +
 										`<i class="fa fa-trash"></i>` +
 									`</button>` +
-								`</div>` + 
-								`<div class="btn-group col-md-12" role="group" aria-label="Basic example">` +
-									`<button class="btn btn-warning btn-sm btn_proses_jadwal" data-uid="${row["uid"]}" data-toggle='tooltip' title='Tandai Sedang Proses'>` +
-										`<i class="fa fa-spinner"></i>` +
-									`</button> ` + 
+                                    `<button class="btn btn-warning btn-sm btn_proses_jadwal" data-uid="${row["uid"]}" data-toggle='tooltip' title='Tandai Sedang Proses'>` +
+                                        `<i class="fa fa-spinner"></i>` +
+                                    `</button> ` +
 								`</div>`;
 						} else if (row['status_pelaksanaan'] == 'P'){
 							btn = `<div><button data-uid="${row['uid']}" class="btn btn-success btn-sm btn_selesai_jadwal" data-toggle="tooltip" title="Tandai Selesai">` +

@@ -147,6 +147,8 @@
 	</div> -->
 	<?php require 'script.php'; ?>
 	<script type="text/javascript">
+        var targetModule = 0;
+        var tutorList = {};
         function isHTML(str) {
             var a = document.createElement('div');
             a.innerHTML = str;
@@ -228,9 +230,29 @@
         }
 
         $(function() {
+        var targetModule = 0;
+        var tutorList = {};
 		    var currentPageURL = document.URL;
-		    var currentMenuCheck = $("a[href=\"" + currentPageURL + "\"]").parent();
-		    while(parseInt(currentMenuCheck.attr("parent-child")) > 0) {
+		    //Check Child
+            var checkerChild = currentPageURL.split("/");
+            var childLibList = ["tambah", "edit", "view", "detail", "antrian"];
+            var targettedChildWow = 0;
+            var isChildMenuWow = false;
+            for(var abczz in checkerChild) {
+                if(childLibList.indexOf(checkerChild[abczz]) >= 0) {
+                    targettedChildWow = abczz;
+                    isChildMenuWow = true;
+                    break;
+                }
+            }
+
+            if(isChildMenuWow) {
+                checkerChild.splice(targettedChildWow, (checkerChild.length - targettedChildWow));
+                currentPageURL = checkerChild.join("/");
+            }
+
+            var currentMenuCheck = $("a.sidebar-menu-button[href=\"" + currentPageURL + "\"]").parent();
+            while(parseInt(currentMenuCheck.attr("parent-child")) > 0) {
                 var parentID = currentMenuCheck.attr("parent-child");
                 $("#menu-" + parentID).addClass("show");
                 $("a[href=\"#menu-" + parentID + "\"]").removeClass("collapsed");
@@ -252,6 +274,7 @@
 				var activeMenu = $(this).attr("parent-child");
 				$("a[href=\"#menu-" + activeMenu + "\"]").removeClass("collapsed").parent().addClass("open");
 				$("ul#menu-" + activeMenu).addClass("show");
+                targetModule = $(this).attr("target_modul");
 			});
 
 			$("ul.sidebar-submenu").each(function() {
@@ -263,6 +286,113 @@
 
 				}
 			});
+
+			//Load Module Tutorial
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Tutorial/get_tutorial/" + targetModule,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response) {
+                    var data = response.response_package.response_data;
+                    $("#tutor-loader").html("");
+                    for(var a in data) {
+                        $("#tutor-loader").append("<div item=\"" + data[a].uid + "\" class=\"dropdown-item tutor_run\" style=\"position:relative; padding: 0px 5px; cursor: pointer; cursor: hand;\">" +
+                            "<i style=\"position:absolute; left: 5px; top: 2.5px\" class=\"material-icons nav-icon\">help_outline</i>" +
+                            "<span style=\"padding-left: 25px\">" + data[a].nama + "</span>" +
+                        "</div>");
+
+                        if(tutorList[data[a].uid] === undefined) {
+                            tutorList[data[a].uid] = {
+                                name: data[a].nama,
+                                step: []
+                            }
+                        }
+
+                        var step = data[a].step;
+
+                        for(var b in step) {
+                            var currentTutor = {};
+                            if(step[b].type === "B") {
+                                currentTutor = {
+                                    intro: step[b].remark,
+                                    expectDOM: step[b].trigger_dom,
+                                    expectDOMType: step[b].trigger_dom_type,
+                                }
+                            } else {
+                                currentTutor = {
+                                    element: document.querySelector(step[b].element_target),
+                                    intro: step[b].remark,
+                                    position: step[b].tooltip_pos,
+                                    expectDOM: step[b].trigger_dom,
+                                    expectDOMType: step[b].trigger_dom_type,
+                                }
+                            }
+                            tutorList[data[a].uid].step.push(currentTutor);
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            var tutorStart;
+            $("body").on("click", ".tutor_run", function () {
+                var tutorGroup = $(this).attr("item");
+                tutorStart = introJs().setOptions({
+                    steps:tutorList[tutorGroup].step,
+                    showStepNumbers: true,
+                    scrollToElement:true,
+                    tooltipClass: "SOLOMON",
+                    showProgress: false,
+                    showBullets: true
+                }).oncomplete(() => {
+                    $(".modal.show").modal("hide");
+                }).start();
+
+                var needDOM = [];
+                var needDOMProc = {};
+
+                tutorStart.onchange(function(targetElement) {
+                    if(needDOM.indexOf($(targetElement).attr("id")) > -1) {
+                        console.log(needDOMProc[$(targetElement).attr("id")].type);
+                        if(needDOMProc[$(targetElement).attr("id")].type === "modal") {
+                            $(needDOMProc[$(targetElement).attr("id")].dom).modal("show");
+                        } else if (needDOMProc[$(targetElement).attr("id")].type === "tab") {
+                            console.log(needDOMProc[$(targetElement).attr("id")].dom);
+                            $(needDOMProc[$(targetElement).attr("id")].dom).tab("show");
+                        }
+                    }
+                });
+
+                tutorStart._options.steps.forEach(function(value, key) {
+                    if(value.expectDOMType !== "" && value.expectDOMType !== undefined && value.expectDOMType !== null) {
+                        if(needDOM.indexOf($(value.element).attr("id")) < 0) {
+                            needDOM.push($(value.element).attr("id"));
+                        }
+
+                        if(needDOMProc[$(value.element).attr("id")] === undefined) {
+                            needDOMProc[$(value.element).attr("id")] = {
+                                dom: value.expectDOM,
+                                type: value.expectDOMType
+                            }
+                        } else {
+                            needDOMProc[$(value.element).attr("id")] = {
+                                dom: value.expectDOM,
+                                type: value.expectDOMType
+                            }
+                        }
+                    }
+                });
+
+                tutorStart.onbeforechange(function(targetElement) {
+
+
+                });
+            })
 
 			//$("ul[master-child=\"" + activeMenu + "\"").addClass("open");
 
@@ -531,6 +661,31 @@
                 location.reload();
             }
         };
+
+        function checkStatusGudang(gudang, target_gudang) {
+            var currentStatus = "";
+            $.ajax({
+                url:__HOSTAPI__ + "/Inventori/gudang_detail/" + gudang,
+                async:false,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    var gudangInfo = response.response_package.response_data[0];
+                    currentStatus = gudangInfo.status;
+                    if(gudangInfo.status === "A") {
+                        $(target_gudang).html("<b class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Gudang Aktif</b>");
+                    } else {
+                        $(target_gudang).html("<b class=\"text-warning\"><i class=\"fa fa-exclamation-circle\"></i> Gudang Opname</b>");
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+            return currentStatus;
+        }
 
 	</script>
 	<?php

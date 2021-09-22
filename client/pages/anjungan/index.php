@@ -11,7 +11,7 @@
 							<table style="margin-top: 50px;">
 								<tr>
 									<td style="padding-right: 100px;">
-										<img width="200" height="60" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-black-<?php echo __PC_IDENT__; ?>.png" />
+										<img width="100" height="100" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-icon-<?php echo __PC_IDENT__; ?>.png" />
 									</td>
 									<td>
 										<h3><?php echo __PC_CUSTOMER__; ?></h3>
