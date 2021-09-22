@@ -54,6 +54,10 @@ class Pasien extends Utility
                     return self::cekNoRM($parameter[2]);
                     break;
 
+                case 'select2':
+                    return self::get_pasien_select2($parameter);
+                    break;
+
                 case 'asesmen_resep_lupa':
                     return self::asesmen_resep_lupa($parameter);
                     break;
@@ -975,6 +979,35 @@ class Pasien extends Utility
             ))
             ->limit(1)*/
             ->execute();
+        return $data;
+    }
+
+    private function get_pasien_select2($parameter) {
+        $data = self::$query->select('pasien', array(
+            'uid',
+            'no_rm',
+            'nama',
+            'panggilan AS id_panggilan',
+            'tanggal_lahir',
+            'jenkel AS id_jenkel',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'pasien.deleted_at' => 'IS NULL',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
+            ))
+            ->limit(50)
+            ->execute();
+
+        $autonum = 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
         return $data;
     }
 

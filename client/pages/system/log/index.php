@@ -82,7 +82,7 @@
             <table class="table table-bordered table-striped largeDataType" id="table-log">
                 <thead class="thead-dark">
                 <tr>
-                    <th>No</th>
+                    <th class="wrap_content">No</th>
                     <th class="wrap_content">Logged</th>
                     <th class="wrap_content">Pegawai</th>
                     <th class="wrap_content">Module</th>
