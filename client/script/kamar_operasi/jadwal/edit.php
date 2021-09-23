@@ -6,65 +6,104 @@
         loadJenis();
         loadDokter();
         loadRuangan();
-        loadJadwalPasien(jadwalUID);
+        var detailObat = loadJadwalPasien(jadwalUID);
+        for(var abz in detailObat) {
+            autoObat({
+                obat: {
+                    uid: detailObat[abz].obat.uid,
+                    nama: detailObat[abz].obat.nama
+                },
+                jlh: detailObat[abz].qty_rencana,
+                satuan: detailObat[abz].obat.satuan_terkecil_info.nama,
+                remark: detailObat[abz].remark
+            });
+        }
 
         //submit data
         $("#form_add_jadwal").submit(function(){
-            $("#btnSubmit").attr("disabled", "disabled");
+            Swal.fire({
+                title: "Informasi Operasi",
+                text: "Update informasi pra-operasi. Pastikan data sudah benar!",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Belum",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $("#btnSubmit").attr("disabled", "disabled");
 
-            var item = [];
-            $("#autoObat tbody tr").each(function (e) {
-                if(!$(this).hasClass("last-row")) {
-                    item.push({
-                        obat: $(this).find("td:eq(1) select").val(),
-                        qty: $(this).find("td:eq(2) input").inputmask("unmaskedvalue"),
-                        remark: $(this).find("td:eq(1) textarea").val()
+
+                    var item = [];
+                    $("#autoObat tbody tr").each(function (e) {
+                        if(!$(this).hasClass("last-row")) {
+                            item.push({
+                                obat: $(this).find("td:eq(1) select").val(),
+                                qty: $(this).find("td:eq(2) input").inputmask("unmaskedvalue"),
+                                remark: $(this).find("td:eq(1) textarea").val()
+                            });
+                        }
+                    });
+
+                    let jenis_operasi = $("#jenis_operasi").val();
+                    let tgl_operasi = $("#tgl_operasi").val();
+                    let jam_mulai = $("#jam_mulai").val();
+                    let jam_selesai = $("#jam_selesai").val();
+                    let ruang_operasi = $("#ruang_operasi").val();
+                    let dokter = $("#dokter").val();
+                    let operasi = $("#operasi").val();
+
+                    let form_data = {
+                        'request': 'edit_jadwal_operasi',
+                        'jenis_operasi' : jenis_operasi,
+                        'tgl_operasi' : tgl_operasi,
+                        'jam_mulai' : jam_mulai,
+                        'jam_selesai' : jam_selesai,
+                        'ruang_operasi' : ruang_operasi,
+                        'dokter' : dokter,
+                        'paket_obat': $("#paket_obat").val(),
+                        'operasi' : operasi,
+                        'item': item,
+                        'uid' : jadwalUID
+                    }
+
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/KamarOperasi",
+                        data: form_data,
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "POST",
+                        success: function(response) {
+                            console.clear();
+                            console.log(response.response_package);
+                            $("#btnSubmit").removeAttr("disabled");
+                            if (response.response_package != null || response.response_package != undefined) {
+                                if (response.response_package.response_result > 0){
+                                    Swal.fire(
+                                        "Informasi Operasi",
+                                        "Berhasil update jadwal operasi",
+                                        "success"
+                                    ).then((result) => {
+                                        location.href = __HOSTNAME__ + '/kamar_operasi/jadwal';
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        "Informasi Operasi",
+                                        "Gagal mengupdate jadwal",
+                                        "error"
+                                    ).then((result) => {
+                                        //
+                                    });
+                                }
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
                     });
                 }
             });
 
-            let jenis_operasi = $("#jenis_operasi").val();
-            let tgl_operasi = $("#tgl_operasi").val();
-            let jam_mulai = $("#jam_mulai").val();
-            let jam_selesai = $("#jam_selesai").val();
-            let ruang_operasi = $("#ruang_operasi").val();
-            let dokter = $("#dokter").val();
-            let operasi = $("#operasi").val();
-
-            let form_data = {
-                'request': 'edit_jadwal_operasi',
-                'jenis_operasi' : jenis_operasi,
-                'tgl_operasi' : tgl_operasi,
-                'jam_mulai' : jam_mulai,
-                'jam_selesai' : jam_selesai,
-                'ruang_operasi' : ruang_operasi,
-                'dokter' : dokter,
-                'operasi' : operasi,
-                'uid' : jadwalUID
-            }
-
-            $.ajax({
-                async: false,
-                url: __HOSTAPI__ + "/KamarOperasi",
-                data: form_data,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                type: "POST",
-                success: function(response){
-                    if (response.response_package != null || response.response_package != undefined)
-                    {
-                        if (response.response_package.response_result > 0){
-                            location.href = __HOSTNAME__ + '/kamar_operasi/jadwal';
-                        } else {
-                            alert('Gagal mengupdate jadwal');
-                        }
-                    }
-                },
-                error: function(response) {
-                    console.log(response);
-                }
-            });
 
             return false;
         });
@@ -92,6 +131,15 @@
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
 
+            $("#bList_" + id + " li").remove();
+            var kebutuhan = parseFloat($(this).inputmask("unmaskedvalue"));
+            var usedBatch = calculateBatch($("#obat_" + id + " option:selected").val(), kebutuhan);
+            for(var ang in usedBatch) {
+                if(usedBatch[ang].kode !== "") {
+                    $("#bList_" + id).append("<li>" + usedBatch[ang].kode + " <i class=\"fa fa-arrow-right\"></i> <b class=\"text-purple\">(" + usedBatch[ang].qty + ")</b></li>");
+                }
+            }
+
             checkAutoObat(id);
         });
 
@@ -105,25 +153,7 @@
             rebaseResep();
         });
 
-        $.ajax({
-            async: false,
-            url:__HOSTAPI__ + "/KamarOperasi/get_paket_list_name",
-            type: "GET",
-            beforeSend: function(request) {
-                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-            },
-            success: function(response){
 
-                var data = response.response_package.response_data;
-                for(var ab in data) {
-                    $("#paket_obat").append("<option value=\"" + data[ab].uid + "\">" + data[ab].nama + "</option>");
-                }
-
-            },
-            error: function(response) {
-                console.log(response);
-            }
-        });
 
         $("#paket_obat").change(function () {
             var target = $(this).val();
@@ -186,10 +216,19 @@
             var newRemark = document.createElement("TEXTAREA");
             var newQty = document.createElement("INPUT");
             var newDelete = document.createElement("BUTTON");
+            var newBatchList = document.createElement("OL");
+
+            var kebutuhan = parseFloat(setter.jlh);
+            var usedBatch = calculateBatch(setter.obat.uid, kebutuhan);
+            for(var ang in usedBatch) {
+                if(usedBatch[ang].kode !== "") {
+                    $(newBatchList).append("<li>" + usedBatch[ang].kode + " <i class=\"fa fa-arrow-right\"></i> <b class=\"text-purple\">(" + usedBatch[ang].qty + ")</b></li>");
+                }
+            }
 
 
             $(newCellObat).append(newObat).append("<br /><br />Keterangan").append(newRemark);
-            $(newCellQty).append(newQty);
+            $(newCellQty).append(newQty).append("<br /><strong>Saran Batch:</strong><br />").append(newBatchList);
             $(newCellAksi).append(newDelete);
 
             $(newObat).select2({
@@ -206,7 +245,7 @@
                         "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
                         "Content-Type" : "application/json",
                     },
-                    url:__HOSTAPI__ + "/Inventori/get_item_select2",
+                    url:__HOSTAPI__ + "/Inventori/get_item_select2/me",
                     type: "GET",
                     data: function (term) {
                         return {
@@ -222,7 +261,9 @@
                                     text: item.nama,
                                     id: item.uid,
                                     penjamin: item.penjamin,
-                                    satuan_terkecil: item.satuan_terkecil
+                                    satuan_terkecil: item.satuan_terkecil,
+                                    stok: item.stok,
+                                    batch: item.batch
                                 }
                             })
                         };
@@ -235,6 +276,36 @@
 
                 $("#satuan_" + id + " h5").html(data.satuan_terkecil.nama);
 
+                $("#bList_" + id + " li").remove();
+                usedBatch = calculateBatch(data.id, kebutuhan);
+                /*
+                for(var anh in data.batch) {
+                    if(data.batch[anh].gudang.uid === __GUDANG_DEPO_OK__ && data.batch[anh].kode !== "") {
+                        if(kebutuhan > 0) {
+                            if(kebutuhan >= data.batch[anh].stok_terkini) {
+                                usedBatch.push({
+                                    kode: data.batch[anh].kode,
+                                    qty: data.batch[anh].stok_terkini
+                                });
+                                kebutuhan -= data.batch[anh].stok_terkini;
+                            } else {
+                                usedBatch.push({
+                                    kode: data.batch[anh].kode,
+                                    qty: kebutuhan
+                                });
+                                kebutuhan = 0;
+                            }
+                        }
+                    }
+                }*/
+
+                for(var ang in usedBatch) {
+                    if(usedBatch[ang].kode !== "") {
+                        $("#bList_" + id).append("<li>" + usedBatch[ang].kode + " <i class=\"fa fa-arrow-right\"></i> <b class=\"text-purple\">(" + usedBatch[ang].qty + ")</b></li>");
+                    }
+                }
+
+
                 checkAutoObat(id);
             });
 
@@ -246,7 +317,9 @@
 
             $(newRemark).addClass("form-control").val((setter.remark !== "") ? setter.remark : "");
 
-            $(newQty).addClass("form-control qty_obat").inputmask({
+            $(newQty).attr({
+                "autocomplete": "off"
+            }).addClass("form-control qty_obat").inputmask({
                 alias: 'decimal',
                 rightAlign: true,
                 placeholder: "0.00",
@@ -271,6 +344,49 @@
             rebaseResep();
         }
 
+        function calculateBatch(item, kebutuhan) {
+            var usedBatch = [];
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Inventori/item_batch/" + item,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var data = response.response_package.response_data;
+                    if(data === undefined || data === null) {
+                        data = []
+                    }
+
+                    for(var anh in data) {
+                        if(data[anh].gudang.uid === __GUDANG_DEPO_OK__ && data[anh].kode !== "") {
+                            if(kebutuhan > 0) {
+                                if(kebutuhan >= data[anh].stok_terkini) {
+                                    usedBatch.push({
+                                        kode: data[anh].kode,
+                                        qty: data[anh].stok_terkini
+                                    });
+                                    kebutuhan -= data[anh].stok_terkini;
+                                } else {
+                                    usedBatch.push({
+                                        kode: data[anh].kode,
+                                        qty: kebutuhan
+                                    });
+                                    kebutuhan = 0;
+                                }
+                            }
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return usedBatch;
+        }
+
         function rebaseResep() {
             $("#autoObat tbody tr").each(function (e) {
                 var id = (e + 1);
@@ -287,6 +403,10 @@
 
                 $(this).find("td:eq(2) input").attr({
                     "id": "qty_" + id
+                });
+
+                $(this).find("td:eq(2) ol").attr({
+                    "id": "bList_" + id
                 });
 
                 $(this).find("td:eq(3)").attr({
@@ -426,16 +546,17 @@
         });
     }
 
-    function loadJadwalPasien(uid)
-    {
+    function loadJadwalPasien(uid) {
+        var detailObat = [];
         $.ajax({
+            async: false,
             url: __HOSTAPI__ + `/KamarOperasi/get_jadwal_pasien_detail/${uid}`,
             type: "GET",
             beforeSend: function(request) {
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             success: function(response){
-                
+
                 if (response.response_package != null || response.response_package != undefined){
                     
                     let MetaData = response.response_package.response_data[0];
@@ -450,6 +571,31 @@
                     $("#ruang_operasi").val(MetaData.ruang_operasi).trigger('change');
                     $("#dokter").val(MetaData.dokter).trigger('change');
                     $("#operasi").val(MetaData.operasi);
+                    detailObat = MetaData.paket;
+
+
+                    $.ajax({
+                        async: false,
+                        url:__HOSTAPI__ + "/KamarOperasi/get_paket_list_name",
+                        type: "GET",
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function(response){
+
+                            var data = response.response_package.response_data;
+                            for(var ab in data) {
+                                $("#paket_obat").append("<option " + ((data[ab].uid === MetaData.paket_obat) ? "selected" : "") + " value=\"" + data[ab].uid + "\">" + data[ab].nama + "</option>");
+                            }
+
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+
+
+
                 
                 }
 
@@ -458,6 +604,8 @@
                 console.log(response);
             }
         });
+
+        return detailObat;
     }
 
 </script>

@@ -118,19 +118,27 @@
         $("#table_jadwal_operasi tbody").on('click', '.btn_delete_jadwal', function(){
             let uid = $(this).data("uid");
 
-			var conf = confirm("Hapus jadwal operasi item?");
-			if(conf) {
-				$.ajax({
-					url:__HOSTAPI__ + "/KamarOperasi/kamar_operasi_jadwal/" + uid,
-					beforeSend: function(request) {
-						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-					},
-					type:"DELETE",
-					success:function(resp) {
-						tableJadwal.ajax.reload();
-					}
-				});
-			} 
+
+            Swal.fire({
+                title: "Informasi Operasi",
+                text: "Hapus jadwal operasi item?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Tidak",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/KamarOperasi/kamar_operasi_jadwal/" + uid,
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"DELETE",
+                        success:function(resp) {
+                            tableJadwal.ajax.reload();
+                        }
+                    });
+                }
+            });
         });
 
 
@@ -142,21 +150,28 @@
 				'uid' : uid
 			};
 
-			var conf = confirm("Tandai operasi sedang berlangsung?");
-			if(conf) {
-				$.ajax({
-					url:__HOSTAPI__ + "/KamarOperasi",
-					beforeSend: function(request) {
-						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-					},
-					type:"POST",
-					data: form_data,
-					success:function(resp) {
-						console.log(resp);
-						tableJadwal.ajax.reload();
-					}
-				});
-			} 
+            Swal.fire({
+                title: "Informasi Operasi",
+                text: "Proses operasi akan berlangsung?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Belum",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/KamarOperasi",
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        data: form_data,
+                        success:function(resp) {
+                            console.log(resp);
+                            tableJadwal.ajax.reload();
+                        }
+                    });
+                }
+            });
         });
 
 
@@ -167,6 +182,8 @@
 				'request' : 'selesai_jadwal_operasi',
 				'uid' : uid
 			};
+
+            //Todo: Masukkan penggunaan obat aktual
 
 			var conf = confirm("Tandai operasi sudah selesai?");
 			if(conf) {
