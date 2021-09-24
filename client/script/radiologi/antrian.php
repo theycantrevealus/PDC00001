@@ -13,6 +13,8 @@
 
 		$("#panel-hasil").hide();
 
+        loadPasien(uid_order);
+
 		var dataLibrary = loadOrder(uid_order);
 
 		for(var datKey in dataLibrary) {
@@ -24,7 +26,7 @@
             }
         }
 
-		loadPasien(uid_order);
+
 		loadLampiran(uid_order);
 
 		$("#list-tindakan-radiologi tbody tr td").on("click", ".linkTindakan", function(e) {
@@ -386,12 +388,11 @@
 				},
 				success: function(response){
 					MetaData = response.response_package.response_data;
-
-					if (MetaData != "") {
+					if (MetaData !== "" && MetaData !== undefined && MetaData !== null) {
 					    var autonumRadio = 1;
 						for(i = 0; i < MetaData.length; i++){
                             //Yang sudah dibayar saja yang di proses
-                            if(MetaData[i].invoice !== null && MetaData[i].invoice !== undefined) {
+                            if((MetaData[i].invoice !== null && MetaData[i].invoice !== undefined) || $("#no_rm").attr("penjamin") === __UIDPENJAMINBPJS__) {
                                 html = "<tr id=\"tindakan_" + MetaData[i].id + "\">" +
                                     "<td class=\"autonum\">" + (autonumRadio) +"</td>" +
                                     "<td>" + MetaData[i].tindakan + "</td>" +
@@ -445,11 +446,12 @@
 				},
 				success: function(response){
 					var MetaData = response.response_package;
-
-					if (MetaData != ""){
+                    if (MetaData !== "" && MetaData !== undefined && MetaData !== null){
 						
-						if (MetaData.pasien != ""){
-							$("#no_rm").html(MetaData.pasien.no_rm);
+						if (MetaData.pasien !== "" && MetaData.pasien !== undefined && MetaData.pasien !== null){
+							$("#no_rm").html(MetaData.pasien.no_rm).attr({
+                                "penjamin": MetaData.antrian.penjamin
+                            });
 							$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir_parsed);
 							$("#panggilan").html(MetaData.pasien.panggilan_name.nama);
 							$("#nama").html(MetaData.pasien.nama);

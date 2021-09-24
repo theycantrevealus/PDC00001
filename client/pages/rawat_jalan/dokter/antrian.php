@@ -110,54 +110,53 @@
         </div>
         <div class="card card-body tab-content">
             <div class="tab-pane show fade perawat" id="tab-poli-1">
-					<?php require 'info-pasien.php'; ?>
-					<?php require 'perawat/form.php'; ?>
-				</div>
-				<div class="tab-pane show fade active" id="tab-poli-2">
-					<?php require 'info-pasien.php'; ?>
-                    <?php
-                    if(in_array(__POLI_GIGI__, $PoliList)) {
-                        require 'asesmen-gigi.php';
-                    } else if(in_array(__POLI_MATA__, $PoliList)) {
-                        require 'asesmen-mata.php';
-                    } else if(in_array(__POLI_ORTODONTIE__, $PoliList)) {
-                        require 'asesmen-gigi.php';
-                    }
-                    require 'asesmen-awal.php';
-                    ?>
-				</div>
-                <div class="tab-pane show fade" id="tab-poli-9">
-                    <?php require 'info-pasien.php'; ?>
-                    <?php require 'fisioterapi.php'; ?>
-                </div>
-                <div class="tab-pane show fade" id="tab-poli-3">
-					<?php require 'info-pasien.php'; ?>
-					<?php require 'tindakan.php'; ?>
-				</div>
-				<div class="tab-pane show fade" id="tab-poli-4">
-					<?php require 'info-pasien.php'; ?>
-					<?php require 'resep.php'; ?>
-				</div>
-				<div class="tab-pane show fade" id="tab-poli-5">
-					<?php require 'info-pasien.php'; ?>
-					<?php require 'laboratorium.php'; ?>
-				</div>
-				<div class="tab-pane show fade" id="tab-poli-6">
-					<?php require 'info-pasien.php'; ?>
-					<?php require 'radiologi.php'; ?>
-				</div>
-				<div class="tab-pane show fade" id="tab-poli-7">
-					<?php require 'info-pasien.php'; ?>
-					<?php require 'cppt.php'; ?>
-				</div>
-                <div class="tab-pane show fade" id="tab-poli-8">
-                    <?php require 'info-pasien.php'; ?>
-                    <?php require 'dokumen.php'; ?>
-                </div>
-			</div>
-            <div class="card card-footer custom-card-footer">
-                <?php require 'action-panel.php'; ?>
+                <?php require 'info-pasien.php'; ?>
+                <?php require 'perawat/form.php'; ?>
             </div>
-		</div>
-	</div>
+            <div class="tab-pane show fade active" id="tab-poli-2">
+                <?php require 'info-pasien.php'; ?>
+                <?php
+                if(in_array(__POLI_GIGI__, $PoliList)) {
+                    require 'asesmen-gigi.php';
+                } else if(in_array(__POLI_MATA__, $PoliList)) {
+                    require 'asesmen-mata.php';
+                } else if(in_array(__POLI_ORTODONTIE__, $PoliList)) {
+                    require 'asesmen-gigi.php';
+                }
+                require 'asesmen-awal.php';
+                ?>
+            </div>
+            <div class="tab-pane show fade" id="tab-poli-9">
+                <?php require 'info-pasien.php'; ?>
+                <?php require 'fisioterapi.php'; ?>
+            </div>
+            <div class="tab-pane show fade" id="tab-poli-3">
+                <?php require 'info-pasien.php'; ?>
+                <?php require 'tindakan.php'; ?>
+            </div>
+            <div class="tab-pane show fade" id="tab-poli-4">
+                <?php require 'info-pasien.php'; ?>
+                <?php require 'resep.php'; ?>
+            </div>
+            <div class="tab-pane show fade" id="tab-poli-5">
+                <?php require 'info-pasien.php'; ?>
+                <?php require 'laboratorium.php'; ?>
+            </div>
+            <div class="tab-pane show fade" id="tab-poli-6">
+                <?php require 'info-pasien.php'; ?>
+                <?php require 'radiologi.php'; ?>
+            </div>
+            <div class="tab-pane show fade" id="tab-poli-7">
+                <?php require 'info-pasien.php'; ?>
+                <?php require 'cppt.php'; ?>
+            </div>
+            <div class="tab-pane show fade" id="tab-poli-8">
+                <?php require 'info-pasien.php'; ?>
+                <?php require 'dokumen.php'; ?>
+            </div>
+        </div>
+        <div class="card card-footer custom-card-footer">
+            <?php require 'action-panel.php'; ?>
+        </div>
+    </div>
 </div>

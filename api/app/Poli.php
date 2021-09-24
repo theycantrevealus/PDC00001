@@ -263,7 +263,7 @@ class Poli extends Utility {
         return $data;
     }
 
-	private function get_poli(){
+	public function get_poli() {
 		$data = self::$query->select('master_poli', array(
 			'uid',
 			'nama',
@@ -282,8 +282,8 @@ class Poli extends Utility {
 		->execute();
 
 		$autonum = 1;
+        $Tindakan = new Tindakan(self::$pdo);
 		foreach ($data['response_data'] as $key => $value) {
-			$Tindakan = new Tindakan(self::$pdo);
 			$TindakanDetail = $Tindakan->get_tindakan_detail($value['tindakan_konsultasi']);
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$data['response_data'][$key]['tindakan_konsultasi'] = $TindakanDetail['response_data'][0]['nama'];

@@ -49,7 +49,7 @@
 						var kategoriObat = "";
 						for(var kategoriObatKey in row["kategori_obat"]) {
 						    if(row["kategori_obat"][kategoriObatKey].kategori != null) {
-                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tag\"></i> " + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
+                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tag\"></i> " + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
                             }
 						}
 
@@ -59,7 +59,7 @@
 										"</div>" +
 										"<div class=\"col-md-10\">" +
 											"<b><i>" + ((row["kode_barang"] == undefined) ? "[KODE_BARANG]" : row["kode_barang"].toUpperCase()) + "</i></b><br />" +
-											"<h5>" + row["nama"].toUpperCase() + "</h5>" +
+											"<strong style=\"display: block\">" + row["nama"].toUpperCase() + "</strong>" +
 											kategoriObat +
 										"</div>" +
 									"</div>";

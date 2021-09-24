@@ -44,14 +44,14 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-lg-4">
-                                                Module
+                                                <label for="txt_module">Module</label>
                                                 <select id="txt_module" class="form-control"></select>
                                             </div>
-                                            <div class="col-lg-4">
-                                                Tutor
+                                            <div class="col-lg-3">
+                                                <label for="txt_tutor_group">Tutor</label>
                                                 <select id="txt_tutor_group" class="form-control"></select>
                                             </div>
-                                            <div class="col-lg-4">
+                                            <div class="col-lg-5">
                                                 <br />
                                                 <div class="col-lg-12">
                                                     <button class="btn btn-info" id="btn-tambah-group">
@@ -97,7 +97,7 @@
                         <div class="tab-pane active" id="tab-2">
                             <div class="row">
                                 <div class="col-lg-2" style="overflow-x: scroll">
-                                    <h4>Documentation<hr /><small id="btnAddRootFolder" style="cursor: pointer; cursor: hand"><i class="fa fa-plus-circle"></i> Add Parent Folder</small></h4>
+                                    <h6>Documentation<hr /><small id="btnAddRootFolder" style="cursor: pointer; cursor: hand"><i class="fa fa-plus-circle"></i> Add Parent Folder</small></h6>
                                     <hr />
                                     <div id="documentation-tree"></div>
                                 </div>
@@ -106,7 +106,7 @@
                                         <div class="card-body">
                                             <div class="row">
                                                 <div class="col-lg-10">
-                                                    <label for="">File Title</label>
+                                                    <label for="txt_nama_file">File Title</label>
                                                     <input type="text" autocomplete="off" class="form-control" id="txt_nama_file" placeholder="Documentation Title" />
                                                 </div>
                                                 <div class="col-lg-2">

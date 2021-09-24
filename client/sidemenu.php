@@ -8,7 +8,7 @@
 			//CHECK Child
 			$child = $pdo->prepare('SELECT * FROM modul WHERE deleted_at IS NULL AND parent = ? AND show_on_menu = ? AND menu_group = ?');
 			$child->execute(array($value['id'], 'Y', $group));
-			$LinkManager = ($child->rowCount() > 0) ? "#menu-" . $value['id'] : __HOSTNAME__ . '/' .$value['identifier'];
+			$LinkManager = ($child->rowCount() > 0) ? "#menu-" . $value['id'] : __HOSTNAME__ . ((isset($value['identifier']) && !empty($value['identifier']) && $value['identifier'] !== '') ? '/' . $value['identifier'] : '');
 			$activeCheck = false;
 			if(
 			        __HOSTNAME__ . '/' . implode('/', __PAGES__) == $LinkManager ||
@@ -17,15 +17,18 @@
 				$activeCheck = true;
 			} else {
 			    if(
-                    __PAGES__[2] == 'edit' ||
-                    __PAGES__[2] == 'view' ||
-                    __PAGES__[2] == 'antrian'
+                    __PAGES__[2] === 'edit' ||
+                    __PAGES__[2] === 'view' ||
+                    __PAGES__[2] === 'antrian'
                 ) {
 			        $classDefinerTemp = __PAGES__;
 			        array_splice($classDefinerTemp, (count($classDefinerTemp) - 2),2);
 			        $currentCheckMenuTemp = __HOSTNAME__ . '/' . implode('/', $classDefinerTemp);
 			        if($currentCheckMenuTemp == $LinkManager) {
+                        //echo '<script type="text/javascript">console.log("sama : ' . $currentCheckMenuTemp . ' - ' . $LinkManager . '");</script>';
                         $activeCheck = true;
+                    } else {
+                        //echo '<script type="text/javascript">console.log("tidak : ' . $currentCheckMenuTemp . ' - ' . $LinkManager . '");</script>';
                     }
                 }
             }
