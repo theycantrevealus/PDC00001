@@ -7,7 +7,7 @@
 					<li class="breadcrumb-item active" aria-current="page">Module</li>
 				</ol>
 			</nav>
-			<h1 class="m-0">Module Manager</h1>
+			<h4 class="m-0">Module Manager</h4>
 		</div>
 	</div>
 </div>

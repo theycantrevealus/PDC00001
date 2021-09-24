@@ -677,12 +677,16 @@ class KamarOperasi extends Utility {
     {
         $jadwal = self::get_jadwal_operasi_detail($parameter);
         $pasien = new Pasien(self::$pdo);
+        $pegawai = new Pegawai(self::$pdo);
+        $ruangan = new Ruangan(self::$pdo);
 
         foreach ($jadwal['response_data'] as $key => $value) {
-            $data_pasien = $pasien->get_pasien_detail('pasien', $value['pasien']);
-
-            $jadwal['response_data'][$key]['pasien'] = 
-                ($data_pasien['response_result'] > 0) ? $data_pasien['response_data'][0] : "-";
+            $data_pasien = $pasien->get_pasien_info('pasien', $value['pasien']);
+            $jadwal['response_data'][$key]['dokter_detail'] = $pegawai->get_detail($value['dokter'])['response_data'][0];
+            $jadwal['response_data'][$key]['jenis_operasi_detail'] = self::get_jenis_operasi_detail($value['jenis_operasi'])['response_data'][0];
+            $jadwal['response_data'][$key]['ruang_operasi_detail'] = $ruangan->get_ruangan_detail('master_unit_ruangan', $value['ruang_operasi'])['response_data'][0];
+            $jadwal['response_data'][$key]['tgl_operasi_parsed'] = date('d F Y', strtotime($value['tgl_operasi']));
+            $jadwal['response_data'][$key]['pasien'] = ($data_pasien['response_result'] > 0) ? $data_pasien['response_data'][0] : "-";
         }
 
 
@@ -696,7 +700,7 @@ class KamarOperasi extends Utility {
     public static function add_jenis_operasi($parameter)
     {
         $Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$check = self::duplicate_check(array(
 			'table'=>'kamar_operasi_jenis_operasi',
@@ -1001,11 +1005,9 @@ class KamarOperasi extends Utility {
 		return $jadwal;
     }
 
-
-    private static function proses_jadwal_operasi($parameter)
-    {   
+    private static function proses_jadwal_operasi($parameter) {
 		$Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
         
         $old = self::get_jadwal_operasi_detail($parameter['uid']);
 
@@ -1060,8 +1062,7 @@ class KamarOperasi extends Utility {
         return $proses;
     }
 
-    private static function selesai_jadwal_operasi($parameter)  //uid_jadwal
-    {
+    private static function selesai_jadwal_operasi($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         
@@ -1113,6 +1114,16 @@ class KamarOperasi extends Utility {
                 ),
                 'class'=>__CLASS__
             ));
+
+            foreach ($parameter['item'] as $item) {
+                //
+            }
+
+            $updateObt = self::$query->update('kamar_operasi_obat', array(
+                ''
+            ))
+                ->execute();
+
         }
         
         return $selesai;

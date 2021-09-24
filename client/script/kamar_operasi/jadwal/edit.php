@@ -339,7 +339,7 @@
             $(newRow).append(newCellAksi);
 
             $(newRow).addClass("last-row");
-            $("#autoObat").append(newRow);
+            $("#autoObat tbody").append(newRow);
 
             rebaseResep();
         }
