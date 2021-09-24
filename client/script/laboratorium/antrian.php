@@ -343,13 +343,14 @@
 	            },
 	            success: function(response){
                     var MetaData = response.response_package;
-                    console.log(MetaData);
-                    if (Object.size(MetaData) > 0){
-	                	if (MetaData.pasien !== ""){
+                    if (Object.size(MetaData) > 0) {
+                        if (MetaData.pasien !== "") {
 	                	    $("#tanggal_sampling").val(MetaData.laboratorium.tanggal_sampling);
                             $("#kesan").val(MetaData.laboratorium.kesan);
                             $("#anjuran").val(MetaData.laboratorium.anjuran);
-	                		$("#no_rm").html(MetaData.pasien.no_rm);
+	                		$("#no_rm").html(MetaData.pasien.no_rm).attr({
+                                "penjamin": MetaData.antrian.penjamin
+                            });
 	                		$("#tanggal_lahir").html(MetaData.pasien.tanggal_lahir_parsed);
 	                		$("#panggilan").html(MetaData.pasien.panggilan_name.nama);
 	                		$("#nama").html(MetaData.pasien.nama);
@@ -389,9 +390,9 @@
                                 allow_save.push(0);
                             }
 
-                            if(item.invoice !== null && item.invoice !== undefined) {
+                            if((item.invoice !== null && item.invoice !== undefined) || $("#no_rm").attr("penjamin") === __UIDPENJAMINBPJS__) {
                                 html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
-                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (autonumLab) + ". "+ item.nama + " <strong class=\"pull-right badge badge-custom-caption badge-info\"><i class=\"material-icons\">verified_user</i><h5 class=\"text-white\">&nbsp;" + item.mitra.nama + "</h5></strong></h5>" +
+                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (autonumLab) + ". "+ item.nama + " <strong class=\"pull-right badge badge-custom-caption badge-outline-info\"><i class=\"material-icons\">verified_user</i><b>&nbsp;" + item.mitra.nama + "</b></strong></h5>" +
                                     "</div><div class=\"card-body\">" +
                                     "<div class=\"row\">" +
                                     "<div class=\"col-12\">" +
@@ -455,6 +456,8 @@
                                 }
 
                                 html += "</tbody></table></div></div></div>";
+
+                                console.log(html);
                                 $("#hasil_pemeriksaan").append(html);
                                 autonumLab++;
                             }
