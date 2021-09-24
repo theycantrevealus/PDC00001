@@ -171,17 +171,12 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"waktu_masuk_" + row.uid + "\">" + row["waktu_masuk"] + "</span>";
+                        return "<span class=\"wrap_content\" id=\"waktu_masuk_" + row.uid + "\">" + row["waktu_masuk"] + "</span>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span class=\"wrap_content\" id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"nama_" + row.uid_pasien + "\">" + row["pasien"] + "<span>";
+						return "<span class=\"wrap_content text-info\" id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span><br /><span class=\"wrap_content\" id=\"nama_" + row.uid_pasien + "\">" + row["pasien"] + "<span>";
 					}
 				},
 				{
@@ -394,17 +389,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["waktu_masuk"];
+                        return "<span class=\"wrap_content\">" + row["waktu_masuk"] + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"wrap_content\" id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"nama_" + row.uid_pasien + "\">" + row["nama_pasien"] + "<span>";
+                        return "<span class=\"wrap_content text-info\" id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span><br /><span class=\"wrap_content\" id=\"nama_" + row.uid_pasien + "\">" + row["nama_pasien"] + "<span>";
                     }
                 },
                 {
@@ -487,17 +477,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"waktu_masuk_" + row.uid + "\">" + row["waktu_masuk"] + "</span>";
+                        return "<span class=\"wrap_content\" id=\"waktu_masuk_" + row.uid + "\">" + row["waktu_masuk"] + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"wrap_content\" id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<span id=\"nama_" + row.uid_pasien + "\">" + row["pasien"] + "<span>";
+                        return "<span class=\"wrap_content\" id=\"rm_" + row.uid_pasien + "\">" + row.no_rm + "</span><br /><span class=\"wrap_content\" id=\"nama_" + row.uid_pasien + "\">" + row["pasien"] + "<span>";
                     }
                 },
                 {

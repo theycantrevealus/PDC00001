@@ -619,6 +619,8 @@ class KamarOperasi extends Utility {
             $detail_ruangan = $ruangan->get_ruangan_detail('master_unit_ruangan', $value['uid_ruang_operasi']);
             $data['response_data'][$key]['ruangan'] = 
                 ($detail_ruangan['response_result'] > 0) ? $detail_ruangan['response_data'][0]['nama'] : "-";
+
+            $data['response_data'][$key]['tgl_operasi_parsed'] = date('d F Y', strtotime($value['tgl_operasi']));
         }
 
         return $data;
@@ -1065,6 +1067,7 @@ class KamarOperasi extends Utility {
     private static function selesai_jadwal_operasi($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $Inventori = new Inventori(self::$pdo);
         
         $old = self::get_jadwal_operasi_detail($parameter['uid']);
 
@@ -1115,14 +1118,103 @@ class KamarOperasi extends Utility {
                 'class'=>__CLASS__
             ));
 
-            foreach ($parameter['item'] as $item) {
-                //
+            $rawBatch = array();
+            $usedBatch = array();
+
+            foreach ($parameter['item'] as $itemKey=> $itemValue) {
+                //Get depo ok batch
+                $kebutuhanKekurangan = floatval($itemValue['qty']);
+                $batchData = $Inventori->get_item_batch($itemValue['obat']);
+                array_push($rawBatch, $batchData['response_data']);
+                foreach ($batchData['response_data'] as $bKey => $bValue) {
+
+                    if($bValue['gudang']['uid'] === __GUDANG_DEPO_OK__) {
+                        if($kebutuhanKekurangan >= $bValue['stok_terkini']) {
+                            array_push($usedBatch, array(
+                                'batch' => $bValue['batch'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'barang' => $itemValue['obat'],
+                                'remark' => $itemValue['remark'],
+                                'qty' => floatval($bValue['stok_terkini'])
+                            ));
+                            $kebutuhanKekurangan -= floatval($bValue['stok_terkini']);
+                        } else {
+                            array_push($usedBatch, array(
+                                'batch' => $bValue['batch'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'barang' => $itemValue['obat'],
+                                'remark' => $itemValue['remark'],
+                                'qty' => $kebutuhanKekurangan
+                            ));
+                            $kebutuhanKekurangan = 0;
+                        }
+                    }
+                }
             }
 
-            $updateObt = self::$query->update('kamar_operasi_obat', array(
-                ''
-            ))
-                ->execute();
+            foreach ($usedBatch as $uBKey => $uBValue) {
+                $obat = self::$query->insert('kamar_operasi_obat_aktual', array(
+                    'operasi' => $parameter['uid'],
+                    'obat' => $uBValue['barang'],
+                    'batch' => $uBValue['batch'],
+                    'remark' => $uBValue['remark'],
+                    'qty' => $uBValue['qty'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+                
+                if($obat['response_result'] > 0) {
+                    $inventoriStok = self::$query->select('inventori_stok', array(
+                        'stok_terkini'
+                    ))
+                        ->where(array(
+                            'inventori_stok.gudang' => '= ?',
+                            'AND',
+                            'inventori_stok.barang' => '= ?',
+                            'AND',
+                            'inventori_stok.batch' => '= ?'
+                        ), array(
+                            __GUDANG_DEPO_OK__,
+                            $uBValue['barang'],
+                            $uBValue['batch']
+                        ))
+                        ->execute();
+
+                    $StokAffect = self::$query->update('inventori_stok', array(
+                        'stok_terkini' => (floatval($inventoriStok['response_data'][0]['stok_terkini']) - floatval($uBValue['qty']))
+                    ))
+                        ->where(array(
+                            'inventori_stok.gudang' => '= ?',
+                            'AND',
+                            'inventori_stok.barang' => '= ?',
+                            'AND',
+                            'inventori_stok.batch' => '= ?'
+                        ), array(
+                            __GUDANG_DEPO_OK__,
+                            $uBValue['barang'],
+                            $uBValue['batch']
+                        ))
+                        ->execute();
+
+                    if($StokAffect['response_result'] > 0) {
+                        $stokLog = self::$query->insert('inventori_stok_log', array(
+                            'barang' => $uBValue['barang'],
+                            'batch' => $uBValue['batch'],
+                            'gudang' => __GUDANG_DEPO_OK__,
+                            'masuk' => 0,
+                            'keluar' => floatval($uBValue['qty']),
+                            'saldo' => (floatval($inventoriStok['response_data'][0]['stok_terkini']) - floatval($uBValue['qty'])),
+                            'type' => __STATUS_BARANG_KELUAR__,
+                            'logged_at' => parent::format_date(),
+                            'jenis_transaksi' => 'kamar_operasi_jadwal',
+                            'uid_foreign' => $parameter['uid'],
+                            'keterangan' => 'Penggunaan Obat/BHP Operasi'
+                        ))
+                            ->execute();
+                    }
+                }
+            }
 
         }
         

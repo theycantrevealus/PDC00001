@@ -135,9 +135,8 @@
                                                 <thead class="thead-dark">
                                                 <tr>
                                                     <th class="wrap_content">No</th>
-                                                    <th>Waktu Masuk</th>
-                                                    <th class="wrap_content">No. RM</th>
-                                                    <th>Pasien</th>
+                                                    <th class="wrap_content">Waktu Masuk</th>
+                                                    <th class="wrap_content">Pasien</th>
                                                     <th>Poliklinik</th>
                                                     <th>Dokter</th>
                                                     <th>Penjamin</th>
@@ -167,9 +166,8 @@
                                         <thead class="thead-dark">
                                         <tr>
                                             <th class="wrap_content">No</th>
-                                            <th>Waktu Masuk</th>
-                                            <th class="wrap_content">No. RM</th>
-                                            <th>Pasien</th>
+                                            <th class="wrap_content">Waktu Masuk</th>
+                                            <th class="wrap_content">Pasien</th>
                                             <th>Dokter</th>
                                             <th>Penjamin</th>
                                             <th class="wrap_content">Aksi</th>
@@ -195,9 +193,8 @@
                                         <thead class="thead-dark">
                                         <tr>
                                             <th class="wrap_content">No</th>
-                                            <th>Waktu Masuk</th>
-                                            <th class="wrap_content">No. RM</th>
-                                            <th>Pasien</th>
+                                            <th class="wrap_content">Waktu Masuk</th>
+                                            <th class="wrap_content">Pasien</th>
                                             <th>Dokter</th>
                                             <th>Penjamin</th>
                                             <th>Oleh</th>

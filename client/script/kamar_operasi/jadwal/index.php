@@ -27,54 +27,54 @@
     			},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row['pasien'];
+						return row.pasien;
 					}
                 },
                 {
 					"data" : null, render: function(data, type, row, meta) {
-						return row['jenis_operasi'];
+						return row.jenis_operasi;
 					}
                 },
                 {
 					"data" : null, render: function(data, type, row, meta) {
-						return row['operasi'];
+						return row.operasi;
 					}
                 },
                 {
 					"data" : null, render: function(data, type, row, meta) {
-						return row['dokter'];
+						return "<span class=\"wrap_content\">" + row['dokter'] + "</span>";
 					}
                 },
                 {
 					"data" : null, render: function(data, type, row, meta) {
-						return row['ruangan'];
+						return row.ruangan;
 					}
                 },
                 {
 					"data" : null, render: function(data, type, row, meta) {
-						return row['tgl_operasi'];
+						return row.tgl_operasi_parsed;
 					}
                 },
                 {
 					"data" : null, render: function(data, type, row, meta) {
-						return row['jam_mulai'];
+						return row.jam_mulai;
 					}
                 },
                 {
 					"data" : null, render: function(data, type, row, meta) {
-						return row['jam_selesai'];
+						return row.jam_selesai;
 					}
                 },
                 {
 					"data" : null, render: function(data, type, row, meta) {
-						let status = row['status_pelaksanaan'];
+						let status = row.status_pelaksanaan;
 
 						if (status == 'N') {
-							return '<span class="badge badge-custom-caption badge-outline-info">Akan dilaksakan</span>';
+							return '<span class="badge badge-custom-caption badge-outline-info">Akan Dilaksakan</span>';
 						} else if (status == 'P') {
-							return '<span class="badge badge-custom-caption badge-outline-warning">Sedang proses</span>';
+							return '<span class="badge badge-custom-caption badge-outline-warning">Sedang Proses</span>';
 						} else if (status == 'D') {
-							return '<span class="badge badge-custom-caption badge-outline-success">Sudah selesai</span>';
+							return '<span class="badge badge-custom-caption badge-outline-success">Selesai</span>';
 						}
 						
 					}
@@ -89,19 +89,19 @@
 							//BUTTON TRANSAKSI (UNTUK EDIT DAN DELETE JADWAL)
 							btn = "" +
 								`<div class="btn-group col-md-12" role="group" aria-label="Basic example">` +
-									`<a class="btn btn-info btn-sm btn_edit_jenis" href="${__HOSTNAME__}/kamar_operasi/jadwal/edit/${row["uid"]}" data-toggle='tooltip' title='Edit'>` +
-										`<i class="fa fa-edit"></i>` +
+									`<a class="btn btn-info btn-sm btn_edit_jenis wrap_content" href="${__HOSTNAME__}/kamar_operasi/jadwal/edit/${row["uid"]}" data-toggle='tooltip' title='Edit'>` +
+										`<span><i class="fa fa-edit"></i> Edit</span>` +
 									`</a> ` +
-									`<button data-uid="${row['uid']}" class="btn btn-danger btn-sm btn_delete_jadwal" data-toggle="tooltip" title="Hapus">` +
-										`<i class="fa fa-trash"></i>` +
+									`<button data-uid="${row['uid']}" class="btn btn-danger btn-sm btn_delete_jadwal wrap_content" data-toggle="tooltip" title="Hapus">` +
+										`<span><i class="fa fa-trash"></i> Hapus</span>` +
 									`</button>` +
-                                    `<button class="btn btn-warning btn-sm btn_proses_jadwal" data-uid="${row["uid"]}" data-toggle='tooltip' title='Tandai Sedang Proses'>` +
-                                        `<i class="fa fa-spinner"></i>` +
+                                    `<button class="btn btn-warning btn-sm btn_proses_jadwal wrap_content" data-uid="${row["uid"]}" data-toggle='tooltip' title='Tandai Sedang Proses'>` +
+                                        `<span><i class="fa fa-spinner"></i> Proses</span>` +
                                     `</button> ` +
 								`</div>`;
 						} else if (row['status_pelaksanaan'] == 'P'){
-							btn = `<div><button data-uid="${row['uid']}" class="btn btn-success btn-sm btn_selesai_jadwal" data-toggle="tooltip" title="Tandai Selesai">` +
-										`<i class="fa fa-check"></i>` +
+							btn = `<div class="btn-group col-md-12" role="group" aria-label="Basic example"><button data-uid="${row['uid']}" class="btn btn-success btn-sm btn_selesai_jadwal wrap_content" data-toggle="tooltip" title="Tandai Selesai">` +
+										`<span><i class="fa fa-check"></i> Selesai</span>` +
 									`</button>` +
 								`</div>`;
 
@@ -529,6 +529,7 @@
                         type: "POST",
                         data: doneFormData,
                         success:function(resp) {
+                            $("#form-post-operation").modal("hide");
                             tableJadwal.ajax.reload();
                         }
                     });
@@ -578,17 +579,15 @@
                                 </table>
                             </div>
                             <div class="col-lg-4">
+                                <div class="alert alert-soft-info d-flex align-items-center card-margin" role="alert">
+                                    <i class="material-icons mr-3">error_outline</i>
+                                    <div class="text-body"><strong>Informasi:</strong> Semua data penggunaan obat/BHP akan <code><b>langsung memproses stok</b></code> pada Depo OK. Harap cek kembali dengan teliti entry penggunaan obat/BHP dibawah ini.</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-6">
-                                <div class="alert alert-soft-info d-flex align-items-center card-margin" role="alert">
-                                    <i class="material-icons mr-3">error_outline</i>
-                                    <div class="text-body"><strong>Informasi:</strong> Semua data penggunaan obat/BHP akan langsung memproses stok pada Depo OK. Harap cek kembali dengan teliti entry penggunaan obat/BHP dibawah ini.</div>
-                                </div>
-                            </div>
                             <div class="col-lg-12">
                                 <table id="penggunaan_obat" class="table table-striped table-bordered largeDataType">
                                     <thead class="thead-dark">
