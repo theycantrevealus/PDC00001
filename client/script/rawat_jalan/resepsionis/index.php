@@ -1003,6 +1003,9 @@
                             if(response.response_package.response_result > 0) {
                                 $("#modal-sep-offline").modal("hide");
                                 $("#txt_bpjs_offline_sep").val("");
+                                tableAntrian.ajax.reload();
+                                tableAntrianIGD.ajax.reload();
+                                tableAntrianRI.ajax.reload();
                             }
                         },
                         error: function(response) {
