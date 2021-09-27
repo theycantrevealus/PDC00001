@@ -18,9 +18,10 @@
 			<div class="card card-body text-center">
 				<center>
 					<h1 style="margin: 50px auto;">403 Forbidden Access</h1>
-					<!-- <img width="25%" style="margin: 50px auto;" src="<?php echo __HOSTNAME__; ?>/template/assets/images/stack-logo-blue.svg" alt="<?php echo __APPS_NAME__; ?>"> -->
-					<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-black-<?php echo __PC_IDENT__; ?>.png" alt="<?php echo __APPS_NAME__; ?>">
-					<p>Anda tidak memiliki akses untuk halaman ini. Silahkan hubungi tim EDP</p>
+                    <img width="500" src="<?php echo __HOSTNAME__; ?>/template/assets/images/undraw_secure_login_pdn4.png" />
+                    <br />
+					<img src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-text-black-<?php echo __PC_IDENT__; ?>.png" alt="<?php echo __APPS_NAME__; ?>" />
+					<p>Anda tidak memiliki akses untuk halaman ini. Silahkan hubungi administrator sistem</p>
 					<a href="<?php echo __HOSTNAME__; ?>">Kembali ke Halaman Utama</a>
 				</center>
 			</div>

@@ -1,9 +1,103 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/chartjs/chart.min.js"></script>
 <script type="text/javascript">
     $(function () {
         let targetID = __PAGES__[4];
 
+        var actLib = {
+            "D": "<i class=\"fa fa-trash text-danger\"></i>",
+            "U": "<i class=\"fa fa-edit text-warning\"></i>",
+            "I": "<i class=\"fa fa-plus-circle text-success\"></i>"
+        };
+
+        var configOption = {
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scale: {
+                ticks: {
+                    display: false,
+                    maxTicksLimit: 0
+                }
+            }
+        };
+
+        var ctx = document.getElementById("currentStokGraph").getContext("2d");
+
+        var myNewChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: [],
+                datasets: []
+            },
+            options: configOption
+        });
+
+        refreshData(myNewChart);
+
+        function refreshData(myNewChart) {
+            var forReturn;
+            $.ajax({
+                url: __HOSTAPI__ + "/Inventori",
+                async: false,
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    request: "stok_activity",
+                    item: targetID,
+                    from: getDateRange("#range_stok")[0],
+                    to: getDateRange("#range_stok")[1]
+                },
+                success: function (response) {
+                    var data = response.response_package;
+                    console.clear();
+                    console.log(data);
+                    if(data !== undefined && data !== null) {
+                        forReturn = data;
+                        myNewChart.data = forReturn;
+                        myNewChart.update();
+                    }
+                },
+                error: function (response) {
+                    //
+                }
+            });
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         $("#range_stok").change(function() {
             refresh_kartu();
+            refreshData(myNewChart);
         });
 
         refresh_kartu();
@@ -110,9 +204,9 @@
                             $(newTgl).html("<b>" + batchGroup[a].log[b].logged_at + "</b>").addClass("text-right");
                             $(newDoc).html("<span class=\"wrap_content\">" + batchGroup[a].log[b].dokumen + "</span>");
                             //$(newUraian).html(batchGroup[a].log[b].batch.batch);
-                            $(newMasuk).html("<h5 class=\"" + ((parseFloat(batchGroup[a].log[b].masuk) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].masuk, 2, ",", ".") + "</h5>").addClass("number_style");
-                            $(newKeluar).html("<h5 class=\"" + ((parseFloat(batchGroup[a].log[b].keluar) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].keluar, 2, ",", ".") + "</h5>").addClass("number_style");
-                            $(newSaldo).html("<h5 class=\"text-orange\">" + number_format(batchGroup[a].log[b].saldo, 2, ",", ".") + "</h5>").addClass("number_style");
+                            $(newMasuk).html("<h5 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].masuk) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].masuk, 2, ",", ".") + "</h5>").addClass("number_style");
+                            $(newKeluar).html("<h5 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].keluar) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].keluar, 2, ",", ".") + "</h5>").addClass("number_style");
+                            $(newSaldo).html("<h5 class=\"number_style text-orange\">" + number_format(batchGroup[a].log[b].saldo, 2, ",", ".") + "</h5>").addClass("number_style");
                             if(batchGroup[a].log[b].type.id === __STATUS_OPNAME__) {
                                 $(newKeterangan).html("<div class=\"row\">" +
                                     "<div class=\"col-lg-2\">" +
