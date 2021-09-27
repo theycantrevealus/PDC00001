@@ -122,7 +122,7 @@ class Aplicares extends Utility {
 			$ruangan = new Ruangan(self::$pdo);
 			/*$params = ['','ruangan-detail', $value['uid']];
 			$get_ruangan = $ruangan->__GET__($params);*/
-			$RuanganDetail = $ruangan::get_ruangan_detail('master_unit_ruangan', $value['uid']);
+			$RuanganDetail = $ruangan->get_ruangan_detail('master_unit_ruangan', $value['uid']);
 			$data['response_data'][$key]['uid_ruangan'] = $RuanganDetail['response_data'][0]['uid'];
 			$data['response_data'][$key]['nama'] = $RuanganDetail['response_data'][0]['nama'];
 			$data['response_data'][$key]['kode_ruangan'] = $RuanganDetail['response_data'][0]['kode_ruangan']; 
@@ -203,9 +203,56 @@ class Aplicares extends Utility {
 
 		$crossCheckData = array();
 
+        $Lantai = new Lantai(self::$pdo);
+        $kelas = new Terminologi(self::$pdo);
+
 		foreach ($result['content']['response']['list'] as $key => $value) {
 			$Ruangan = new Ruangan(self::$pdo);
 			$KodeRuangan = $Ruangan->get_ruangan_detail_by_code($value['koderuang']);
+
+
+            //Check Kelas
+            $DetailKelas = self::$query->select('terminologi_item', array(
+                'id'
+            ))
+                ->where(array(
+                    'terminologi_item.nama' => '= ?',
+                    'AND',
+                    'terminologi_item.terminologi' => '= ?'
+                ), array(
+                    strval($value['kodekelas']), 14
+                ))
+                ->execute();
+
+            if(count($DetailKelas['response_data']) > 0) {
+                $targetKelas = $DetailKelas['response_data'][0]['id'];
+            } else {
+                $NewKelas = self::$query->insert('terminologi_item', array(
+                    'nama' => strval($value['kodekelas']),
+                    'terminologi' => 14,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->returning('id')
+                    ->execute();
+                $targetKelas = $NewKelas['response_unique'];
+            }
+
+
+            if(!isset($KodeRuangan['uid'])) {
+
+                //Tidak tercatat di sistem
+                $Ruangan->tambah_ruangan('master_unit_ruangan', array(
+                    'nama' => strval($value['kodekelas']),
+                    'kode_ruangan' => strval($value['koderuang']),
+                    'kelas' => $targetKelas,
+                    'kapasitas' => (!is_null($value['kapasitas']) ? $value['kapasitas'] : 0),
+                    'lantai' => $Lantai->get_lantai()['response_data'][0]['uid']
+                ));
+
+                $KodeRuangan = $Ruangan->get_ruangan_detail_by_code($value['koderuang']);
+
+            }
 
 			if(isset($KodeRuangan['uid'])) {
 
@@ -227,7 +274,7 @@ class Aplicares extends Utility {
 
 					$logDataRuangan = self::$query->insert('aplicares_kamar_log', array(
 						'ruangan' => $KodeRuangan['uid'],
-						'kodekelas' => $value['kodekelas'],
+						'kodekelas' => strval($value['kodekelas']),
 						'kapasitas' => !is_null($value['kapasitas']) ? $value['kapasitas'] : 0,
 						'tersedia' => !is_null($value['tersedia']) ? $value['tersedia'] : 0,
 						'tersediapria' => !is_null($value['tersediapria']) ? $value['tersediapria'] : 0,
@@ -430,12 +477,12 @@ class Aplicares extends Utility {
 
 	private function hapus_ruangan($table, $parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$dataRuangan = new Ruangan(self::$pdo);
 		$params = ['','ruangan-detail', $parameter[6]];
 		$get_ruangan = $dataRuangan->__GET__($params);
-		$kodeRuangan = $get_ruangan['response_data'][0]['kode_ruangan'];
+		$kodeRuangan = strval($get_ruangan['response_data'][0]['kode_ruangan']);
 
 		$ruangan_log = self::get_ruangan_log_detail('aplicares_kamar_log', $parameter[6]);
 		$kodeKelas = $ruangan_log['response_data'][0]['kodekelas'];
@@ -629,6 +676,7 @@ class Aplicares extends Utility {
 
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'DEFAULT@SECLEVEL=1');
 		curl_setopt($ch, CURLOPT_TIMEOUT, 3); 
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
@@ -646,7 +694,7 @@ class Aplicares extends Utility {
 
 		curl_close($ch);
 
-		return $arr_data;
+		return $result;
 	}
 
 	private function objectToList($obj, $key_obj, $value_obj){

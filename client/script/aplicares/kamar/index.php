@@ -199,6 +199,8 @@
 					},
 					type:"DELETE",
 					success:function(response) {
+                        console.clear();
+                        console.log(response);
 						tableRuangan.ajax.reload();
 					},
 					error: function(response) {
