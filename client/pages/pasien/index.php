@@ -24,26 +24,23 @@
                                 <i class="fa fa-plus"></i> Tambah Pasien
                             </a>
                         </div>
-                        <div class="card-header card-header-tabs-basic nav d-flex align-items-center" role="tablist">
-                            <!--<a style="width: auto;">
-                                <span class="inline-header-caption">
-                                    Kunjungan
-                                </span>
-                            </a>-->
-                            <a style="width: 400px;">
-                                <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
-                            </a>
-                            <a style="width: 200px;">
-                                <select class="form-control" id="filter-kunjungan">
-                                    <option value="all">Semua</option>
-                                    <option value="data_kurang">Data Belum Lengkap</option>
-                                </select>
-                            </a>
-                            <a style="width: 200px;">
-                                <button class="btn btn-info" id="btn-import">
-                                    <i class="fa fa-download"></i> Import
-                                </button>
-                            </a>
+                        <div class="card-header align-items-center" role="tablist">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                </div>
+                                <div class="col-lg-3">
+                                    <select class="form-control" id="filter-kunjungan">
+                                        <option value="all">Semua</option>
+                                        <option value="data_kurang">Data Belum Lengkap</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-3">
+                                    <button class="btn btn-info" id="btn-import">
+                                        <i class="fa fa-download"></i> Import
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body tab-content">
                             <div class="row card-group-row">

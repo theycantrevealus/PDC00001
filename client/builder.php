@@ -56,7 +56,7 @@
 									if($allowAccess) {
 										require 'pages/' . implode('/', __PAGES__) . '/index.php';
 									} else {
-										if(!$allowAccess) {
+                                        if(!$allowAccess) {
 											require 'pages/system/403.php';
 										} else {
 											require 'pages/system/404.php';
@@ -97,14 +97,15 @@
 										}
 
 										if(isset($lastExist) && $allowAccess) {
-											//echo $allowAccess;
 											require $lastExist;
 										} else {
-											if(!$allowAccess) {
-												require 'pages/system/403.php';
-											} else {
-												require 'pages/system/404.php';
-											}
+                                            if(!isset($lastExist)) {
+                                                require 'pages/system/404.php';
+                                            } else {
+                                                if(!$allowAccess) {
+                                                    require 'pages/system/403.php';
+                                                }
+                                            }
 										}
 									}
 								}

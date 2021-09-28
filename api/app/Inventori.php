@@ -255,6 +255,10 @@ class Inventori extends Utility
                 return self::stok_monitoring($parameter);
                 break;
 
+            case 'stok_activity':
+                return self::stok_activity($parameter);
+                break;
+
             default:
                 return array('Unknown');
                 break;
@@ -3896,6 +3900,95 @@ class Inventori extends Utility
             $autonum++;
         }
         return $data;
+    }
+
+    private function stok_activity($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+
+        $begin = new \DateTime($parameter['from']);
+        $end = new \DateTime($parameter['to']);
+
+        $interval = \DateInterval::createFromDateString('1 day');
+        $period = new \DatePeriod($begin, $interval, $end);
+
+        $dataSet = array(
+            array(
+                'backgroundColor' => array('rgba(63, 198, 0, 1)'),
+                'borderColor' => array('rgba(120, 255, 58, 1)'),
+                'label' => 'Stok Masuk',
+                'fill' => false,
+                'cubicInterpolationMode' => 'monotone',
+                'tension' => 0.4,
+                'data' => array()
+            ),
+            array(
+                'backgroundColor' => array('rgba(239, 243, 0, 1)'),
+                'borderColor' => array('rgba(255, 206, 86, 1)'),
+                'label' => 'Stok Keluar',
+                'fill' => false,
+                'cubicInterpolationMode' => 'monotone',
+                'tension' => 0.4,
+                'data' => array()
+            ),
+            array(
+                'backgroundColor' => array('rgba(0, 141, 250, 1)'),
+                'borderColor' => array('rgba(0, 118, 210, 1)'),
+                'label' => 'Saldo',
+                'fill' => false,
+                'cubicInterpolationMode' => 'monotone',
+                'tension' => 0.4,
+                'data' => array()
+            ),
+        );
+
+        $labels = array();
+
+        $dataQuery = array();
+
+        foreach ($period as $dt) {
+            array_push($labels, $dt->format('d-m-Y'));
+
+            $dataIn = 0;
+            $dataOut = 0;
+            $dataSaldo = 0;
+
+
+            $data = self::$query->select('inventori_stok_log', array(
+                'barang', 'batch', 'gudang', 'masuk', 'keluar', 'saldo', 'type'
+            ))
+                ->where(array(
+                    'inventori_stok_log.gudang' => '= ?',
+                    'AND',
+                    'inventori_stok_log.barang' => '= ?',
+                    'AND',
+                    'inventori_stok_log.logged_at::date' => '= date \'' . $dt->format('Y-m-d') . '\''
+                ), array(
+                    $UserData['data']->gudang,
+                    $parameter['item']
+                ))
+                ->execute();
+
+            array_push($dataQuery, $data);
+
+
+            foreach ($data['response_data'] as $key => $value) {
+                $dataIn += floatval($value['masuk']);
+                $dataOut += floatval($value['keluar']);
+                $dataSaldo += floatval($value['saldo']);
+            }
+
+            array_push($dataSet[0]['data'], $dataIn);
+            array_push($dataSet[1]['data'], $dataOut);
+            array_push($dataSet[2]['data'], $dataSaldo);
+        }
+
+        return array(
+            'query' => $dataQuery,
+            'labels' => $labels,
+            'datasets' => $dataSet
+        );
     }
 
     private function stok_monitoring($parameter) {
