@@ -56,7 +56,6 @@ class Mock extends Utility
                 'status',
                 'created_at'
             ))
-                ->where($paramData, $paramValue)
                 ->execute();
         }
 

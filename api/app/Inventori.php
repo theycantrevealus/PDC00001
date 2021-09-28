@@ -2039,6 +2039,9 @@ class Inventori extends Utility
                 } elseif ($value['jenis_transaksi'] === 'inventori_mutasi') {
                     $Mutasi = self::get_mutasi_detail($value['uid_foreign'])['response_data'][0];
                     $data['response_data'][$key]['dokumen'] = $Mutasi['kode'];
+                } elseif ($value['jenis_transaksi'] === 'inventori_amprah_proses') {
+                    $Amprah = self::get_amprah_proses_detail_uid($value['uid_foreign'])['response_data'][0];
+                    $data['response_data'][$key]['dokumen'] = $Amprah['kode'];
                 } else {
                     $data['response_data'][$key]['dokumen'] = '-';
                 }
@@ -3589,6 +3592,7 @@ class Inventori extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $uid = parent::gen_uuid();
+        $Unit = new Unit(self::$pdo);
 
         //Get Last AI tahun ini
         $lastID = self::$query->select('inventori_amprah_proses', array(
@@ -3601,9 +3605,11 @@ class Inventori extends Utility
             ))
             ->execute();
 
+        $kodeAmprah = str_pad(count($lastID['response_data']) + 1, 5, '0', STR_PAD_LEFT) . '/' . $UserData['data']->unit_kode . '/AMP-OUT/' . date('m') . '/' . date('Y');
+
         $worker = self::$query->insert('inventori_amprah_proses', array(
             'uid' => $uid,
-            'kode' => str_pad(count($lastID['response_data']) + 1, 5, '0', STR_PAD_LEFT) . '/' . $UserData['data']->unit_kode . '/AMP-OUT/' . date('m') . '/' . date('Y'),
+            'kode' => $kodeAmprah,
             'amprah' => $parameter['amprah'],
             'pegawai' => $UserData['data']->uid,
             'tanggal' => parent::format_date(),
@@ -3720,15 +3726,15 @@ class Inventori extends Utility
                                     'type' => __STATUS_AMPRAH__,
                                     'jenis_transaksi' => 'inventori_amprah_proses',
                                     'uid_foreign' => $uid,
-                                    'keterangan' => 'Proses amprah'
+                                    'keterangan' => 'Barang keluar karena proses amprah [' . $kodeAmprah . ']'
                                 ))
                                     ->execute();
                             }
 
                             //Proses Tambah Stok
                             //Dapatkan stok point
-                            $Unit = new Unit(self::$pdo);
-                            $UnitDetail = $Unit::get_unit_detail($parameter['dari_unit']);
+
+                            $UnitDetail = $Unit->get_unit_detail($parameter['dari_unit']);
 
                             $lastStockPlus = self::$query->select('inventori_stok', array(
                                 'stok_terkini'
@@ -3794,7 +3800,7 @@ class Inventori extends Utility
                                     'type' => __STATUS_AMPRAH__,
                                     'jenis_transaksi' => 'inventori_amprah_proses',
                                     'uid_foreign' => $uid,
-                                    'keterangan' => 'Proses amprah'
+                                    'keterangan' => 'Barang masuk karena proses amprah [' . $kodeAmprah . ']'
                                 ))
                                     ->execute();
                             }
@@ -3824,8 +3830,64 @@ class Inventori extends Utility
         return $worker;
     }
 
-    private function get_amprah_proses_detail($parameter)
-    {
+
+    private function get_amprah_proses_detail_uid($parameter) {
+        $data = self::$query->select('inventori_amprah_proses', array(
+            'uid',
+            'kode',
+            'amprah',
+            'pegawai',
+            'tanggal',
+            'created_at'
+        ))
+            ->where(array(
+                'inventori_amprah_proses.deleted_at' => 'IS NULL',
+                'AND',
+                'inventori_amprah_proses.uid' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+
+        //$Inventori = new Inventori(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+
+        foreach ($data['response_data'] as $key => $value) {
+            $amprah_detail = self::get_amprah_detail($value['amprah']);
+            $data['response_data'][$key]['amprah'] = $amprah_detail['response_data'][0];
+            $data['response_data'][$key]['tanggal'] = date('d F Y [H:i]', strtotime($value['created_at']));
+            $PegawaiDetail = $Pegawai->get_detail($value['pegawai']);
+            $data['response_data'][$key]['pegawai'] = $PegawaiDetail['response_data'][0];
+            $detail_proses = self::$query->select('inventori_amprah_proses_detail', array(
+                'id',
+                'item',
+                'batch',
+                'keterangan',
+                'qty'
+            ))
+                ->where(array(
+                    'inventori_amprah_proses_detail.deleted_at' => 'IS NULL',
+                    'AND',
+                    'inventori_amprah_proses_detail.amprah_proses' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $autonum = 1;
+            foreach ($detail_proses['response_data'] as $DKey => $DValue) {
+                $detail_proses['response_data'][$DKey]['item'] = self::get_item_detail($DValue['item'])['response_data'][0];
+                $detail_proses['response_data'][$DKey]['batch'] = self::get_batch_detail($DValue['batch'])['response_data'][0];
+                $detail_proses['response_data'][$DKey]['autonum'] = $autonum;
+                $autonum++;
+            }
+            $data['response_data'][$key]['detail'] = $detail_proses['response_data'];
+        }
+
+        return $data;
+    }
+
+
+    private function get_amprah_proses_detail($parameter) {
         $data = self::$query->select('inventori_amprah_proses', array(
             'uid',
             'kode',
@@ -4007,8 +4069,6 @@ class Inventori extends Utility
             $paramValue = array($parameter['gudang']);
         } else {
             $paramData = array(
-                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                'AND',
                 'master_inv_monitoring.deleted_at' => 'IS NULL',
                 'AND',
                 'master_inv_monitoring.gudang' => '= ?'
@@ -6420,7 +6480,7 @@ class Inventori extends Utility
 
                         if ($update_stok_old_dari['response_result'] > 0) {
 
-                            //Update Temp Status
+                            //Update Temp Status SINI
                             $TempStatus = self::$query->update('inventori_temp_stok', array(
                                 'status' => 'D'
                             ))
@@ -6874,7 +6934,8 @@ class Inventori extends Utility
                             'qty' => $value['mutasi'],
                             'status' => 'P',
                             'remark' => $parameter['keterangan'],
-                            'logged_at' => parent::format_date()
+                            'logged_at' => parent::format_date(),
+                            'pegawai' => $UserData['data']->uid
                         ))
                             ->execute();
 
@@ -7406,7 +7467,7 @@ class Inventori extends Utility
 
             $data['response_data'][$key]['autonum'] = $autonum;
             if(file_exists('../images/produk/' . $value['uid'] . '.png')) {
-                $data['response_data'][$key]['image'] = 'images/produk/' . $value['uid'] . '.png';
+                $data['response_data'][$key]['image'] = 'images/produk/' . $value['uid'] . '.png?d=' . date('H:i:s');
             } else {
                 $data['response_data'][$key]['image'] = 'images/product.png';
             }

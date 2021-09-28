@@ -137,8 +137,7 @@
                                                     <th class="wrap_content">No</th>
                                                     <th class="wrap_content">Waktu Masuk</th>
                                                     <th class="wrap_content">Pasien</th>
-                                                    <th>Poliklinik</th>
-                                                    <th>Dokter</th>
+                                                    <th>Poliklinik/Dokter</th>
                                                     <th>Penjamin</th>
                                                     <th>Oleh</th>
                                                     <th class="wrap_content">Aksi</th>
