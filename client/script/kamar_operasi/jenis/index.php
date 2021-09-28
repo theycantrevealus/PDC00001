@@ -5,7 +5,7 @@
         let selectedUID = "";
         
         var tableJenis = $("#table_jenis_operasi").DataTable({
-			"ajax":{
+			"ajax": {
 				url: __HOSTAPI__ + "/KamarOperasi/jenis_operasi",
 				type: "GET",
 				headers:{

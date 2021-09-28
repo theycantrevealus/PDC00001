@@ -3,6 +3,12 @@
 	$(function(){
 		var status_antrian = '<?= $_GET['antrian']; ?>';
 
+		if(status_antrian === "true") {
+		    $("#btnBatal").attr({
+                "href": __HOSTNAME__ + "/rawat_jalan/resepsionis"
+            });
+        }
+
 		var allData = {};
 		loadTermSelectBox('panggilan', 3);
 		loadTermSelectBox('suku', 6);
@@ -83,7 +89,7 @@
 			var jenkel = $("input[name='jenkel']:checked").val();
 			var goldar = $("input[name='goldar']:checked").val();*/
 
-			var no_rm = $("#no_rm").inputmask('unmaskedvalue');
+			var no_rm = $("#no_rm").inputmask('unmaskedvalue').replaceAll('-', '');
 			allData.no_rm = no_rm;
 
 			var jenkel = $("input[name='jenkel']:checked").val();
@@ -123,7 +129,7 @@
 				}
 			});
 
-			if(requiredItem.length == 0) {
+			if(requiredItem.length === 0) {
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Pasien",

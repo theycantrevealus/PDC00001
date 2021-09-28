@@ -92,7 +92,7 @@
 				load_kategori_obat(selectedKategoriObat);
 				$(".load-kategori-obat-badge").html("");
 				for(var b = 0; b < selectedKategoriObat.length; b++) {
-					$(".load-kategori-obat-badge").append("<div style=\"margin:5px;\" class=\"badge badge-info\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + $("#label_kategori_obat_" + selectedKategoriObat[b]).html() + "</div>");
+					$(".load-kategori-obat-badge").append("<span style=\"margin:5px;\" class=\"badge badge-custom-caption badge-outline-success\"><i class=\"fa fa-tag\"></i>&nbsp;&nbsp;" + $("#label_kategori_obat_" + selectedKategoriObat[b]).html() + "</span>");
 				}
 
 				autoGudang(invData.lokasi, invData.monitoring);

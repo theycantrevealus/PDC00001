@@ -63,7 +63,7 @@ class Lantai extends Utility {
 
 
 	/*====================== GET FUNCTION =====================*/
-	private function get_lantai(){
+	public function get_lantai(){
 		$data = self::$query
 					->select('master_unit_lantai', 
 						array(
@@ -121,7 +121,7 @@ class Lantai extends Utility {
 	/*====================== CRUD ========================*/
 	private function tambah_lantai($table, $parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$check = self::duplicate_check(array(
 			'table'=>$table,

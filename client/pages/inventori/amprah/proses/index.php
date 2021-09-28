@@ -46,7 +46,7 @@
 							<div class="col-md-2 text-right" style="padding: 10px">
 								Filter Tanggal:
 							</div>
-							<div class="col-md-6" style="border: solid 1px #ccc">
+							<div class="col-md-6">
 								<input id="range_amprah" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
 							</div>
 							<div class="col-md-4">
@@ -64,7 +64,7 @@
 									<th>Kode Amprah</th>
 									<th>Diminta Oleh</th>
 									<th>Status</th>
-									<th>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody></tbody>
@@ -75,7 +75,7 @@
 							<div class="col-md-2 text-right" style="padding: 10px">
 								Filter Tanggal:
 							</div>
-							<div class="col-md-6" style="border: solid 1px #ccc">
+							<div class="col-md-6">
 								<input id="range_amprah_selesai" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
 							</div>
 							<div class="col-md-4">
@@ -93,7 +93,7 @@
 									<th>Kode Amprah</th>
 									<th>Diminta Oleh</th>
 									<th>Status</th>
-									<th>Aksi</th>
+									<th class="wrap_content">Aksi</th>
 								</tr>
 							</thead>
 							<tbody></tbody>

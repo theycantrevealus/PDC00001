@@ -127,7 +127,7 @@ class Terminologi extends Utility {
 		return $data;
 	}
 
-	private function get_terminologi_items($table, $parameter){
+	public function get_terminologi_items($table, $parameter){
 		$data = self::$query
 					->select($table, array(
 						'id',

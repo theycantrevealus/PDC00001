@@ -98,6 +98,17 @@
                 success: function(response){
                     var MetaData = response.response_package;
 
+                    $("#kesan").val(MetaData.laboratorium.kesan).attr({
+                        "disabled": "disabled"
+                    });
+                    $("#anjuran").val(MetaData.laboratorium.anjuran).attr({
+                        "disabled": "disabled"
+                    });
+
+                    $("#tanggal_sampling").val(MetaData.laboratorium.tanggal_sampling).attr({
+                        "disabled": "disabled"
+                    });
+
                     if (Object.size(MetaData) > 0){
                         if (MetaData.pasien != ""){
                             $("#no_rm").html(MetaData.pasien.no_rm);
@@ -131,64 +142,66 @@
                     let html = "";
                     if (response.response_package.response_result > 0){
                         dataItem = response.response_package.response_data;
-                        $.each(dataItem, function(key, item){
-                            html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
-                                "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
-                                "</div><div class=\"card-body\">" +
-                                "<table class=\"table table-bordered table-striped largeDataType\">" +
-                                "<thead class=\"thead-dark\">" +
-                                "<tr>" +
-                                "<th class=\"wrap_content\">No</th>" +
-                                "<th>Item</th>" +
-                                "<th>Nilai</th>" +
-                                "<th class=\"wrap_content\">Satuan</td>" +
-                                "<th class=\"wrap_content\">Nilai Min.</td>" +
-                                "<th class=\"wrap_content\">Nilai Maks.</td>" +
-                                "</tr>" +
-                                "</thead>" +
-                                "<tbody>";
+                        $.each(dataItem, function(key, item) {
+                            if(item.invoice !== null && item.invoice !== undefined) {
+                                html = "<div class=\"card\"><div class=\"card-header bg-white\">" +
+                                    "<h5 class=\"card-header__title flex m-0\"><i class=\"fa fa-hashtag\"></i> " + (key + 1) + ". "+ item.nama + "</h5>" +
+                                    "</div><div class=\"card-body\">" +
+                                    "<table class=\"table table-bordered table-striped largeDataType\">" +
+                                    "<thead class=\"thead-dark\">" +
+                                    "<tr>" +
+                                    "<th class=\"wrap_content\">No</th>" +
+                                    "<th>Item</th>" +
+                                    "<th>Nilai</th>" +
+                                    "<th class=\"wrap_content\">Satuan</td>" +
+                                    "<th class=\"wrap_content\">Nilai Min.</td>" +
+                                    "<th class=\"wrap_content\">Nilai Maks.</td>" +
+                                    "</tr>" +
+                                    "</thead>" +
+                                    "<tbody>";
 
 
-                            var requestedItem = item.request_item.split(",").map(function(intItem) {
-                                return parseInt(intItem, 10);
-                            });
-
-                            if (item.nilai_item.length > 0){
-                                let nomor = 1;
-                                $.each(item.nilai_item, function(key, items){
-                                    let nilai = items.nilai;
-
-                                    if (nilai == null){
-                                        nilai = "";
-                                    }
-
-                                    // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
-                                    if(requestedItem.indexOf(items.id_lab_nilai) < 0)
-                                    {
-                                        /*html += "<tr class=\"strikethrough\">" +
-                                            "<td>"+ nomor +"</td>" +
-                                            "<td>" + items.keterangan + "</td>" +
-                                            "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + " value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
-                                            "<td>" + items.satuan + "</td>" +
-                                            "<td>" + items.nilai_min + "</td>" +
-                                            "<td>" + items.nilai_maks + "</td>" +
-                                            "</tr>";*/
-                                    } else {
-                                        html += "<tr>" +
-                                            "<td>"+ nomor +"</td>" +
-                                            "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
-                                            "<td>" + nilai + "</td>" +
-                                            "<td>" + items.satuan + "</td>" +
-                                            "<td>" + items.nilai_min + "</td>" +
-                                            "<td>" + items.nilai_maks + "</td>" +
-                                            "</tr>";
-                                        nomor++;
-                                    }
+                                var requestedItem = item.request_item.split(",").map(function(intItem) {
+                                    return parseInt(intItem, 10);
                                 });
-                            }
 
-                            html += "</tbody></table></div></div>";
-                            $("#hasil_pemeriksaan").append(html);
+                                if (item.nilai_item.length > 0){
+                                    let nomor = 1;
+                                    $.each(item.nilai_item, function(key, items){
+                                        let nilai = items.nilai;
+
+                                        if (nilai == null){
+                                            nilai = "";
+                                        }
+
+                                        // id untuk input nilai formatnya: nilai_<uid tindakan>_<id nilai lab>
+                                        if(requestedItem.indexOf(items.id_lab_nilai) < 0)
+                                        {
+                                            /*html += "<tr class=\"strikethrough\">" +
+                                                "<td>"+ nomor +"</td>" +
+                                                "<td>" + items.keterangan + "</td>" +
+                                                "<td><input id=\"nilai_" + items.uid_tindakan + "_" + items.id_lab_nilai + " value=\"" + nilai + "\" class=\"form-control inputItemTindakan\" /></td>" +
+                                                "<td>" + items.satuan + "</td>" +
+                                                "<td>" + items.nilai_min + "</td>" +
+                                                "<td>" + items.nilai_maks + "</td>" +
+                                                "</tr>";*/
+                                        } else {
+                                            html += "<tr>" +
+                                                "<td>"+ nomor +"</td>" +
+                                                "<td style=\"width: 40%;\">" + items.keterangan + "</td>" +
+                                                "<td>" + nilai + "</td>" +
+                                                "<td>" + items.satuan + "</td>" +
+                                                "<td>" + items.nilai_min + "</td>" +
+                                                "<td>" + items.nilai_maks + "</td>" +
+                                                "</tr>";
+                                            nomor++;
+                                        }
+                                    });
+                                }
+
+                                html += "</tbody></table></div></div>";
+                                $("#hasil_pemeriksaan").append(html);
+                            }
                         });
 
                     }

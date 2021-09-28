@@ -23,7 +23,7 @@
 								Antrian Kunjungan
 							</h4>
 						</div>
-						<div class="col-lg-3">
+						<div class="col-lg-3" id="tutor_container_loket">
 							<select id="txt_loket" class="form-control"></select>
 						</div>
 						<div class="col-lg-3">
@@ -37,13 +37,17 @@
 
 					</div>
 				</div>
-				<div class="card-body">
+				<div class="card-body custom-padding">
 					<div class="row">
-						<div class="col-lg-2" style="border-right: solid 1px #cccc;">
+                        <div class="col-lg-2" id="tutor_container_current_antrian_number">
+                            <br />
 							<center>Antrian terkini</center>
 							<h1 class="text-center" id="txt_current_antrian">0</h1>
 						</div>
-						<div class="col-lg-5">
+						<div class="col-lg-3">
+                            <div class="col-lg-12">
+                                <br />
+                            </div>
 							<button class="btn btn-info" id="btnPanggil">
 								<i class="fa fa-bullhorn"></i> PANGGIL
 							</button>
@@ -54,10 +58,28 @@
 								<i class="fa fa-plus"></i> DAFTAR PASIEN
 							</button>
 						</div>
-						<div class="col-lg-5">
-							<span class="text-secondary">Sisa Antrian</span><br />
-							<h5><b id="sisa_antrian">0</b></h5>
+						<div class="col-lg-2">
+                            <center>
+                                <br />
+                                <span class="text-secondary">Sisa Antrian</span><br />
+                                <h5><b id="sisa_antrian">0</b></h5>
+                            </center>
 						</div>
+                        <div class="col-lg-4">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <span class="text-secondary">Antrian Terlewat</span>
+                                </div>
+                                <div class="col-lg-6" id="tutor_antrian_terlewat_container">
+                                    <select id="antrian_terlewat" class="form-control"></select>
+                                </div>
+                                <div class="col-lg-6">
+                                    <button class="btn btn-purple" id="btnSetLewat">
+                                        <i class="fa fa-check"></i> AKTIFKAN
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
 					</div>
 				</div>
 			</div>
@@ -91,7 +113,7 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="card card-body tab-content">
+                    <div class="tab-content">
                         <div class="tab-pane show fade active" id="tab-antrian-1">
                             <div class="card">
                                 <div class="card-header card-header-large bg-white">
@@ -113,14 +135,13 @@
                                                 <thead class="thead-dark">
                                                 <tr>
                                                     <th class="wrap_content">No</th>
-                                                    <th>Waktu Masuk</th>
-                                                    <th class="wrap_content">No. RM</th>
-                                                    <th>Pasien</th>
+                                                    <th class="wrap_content">Waktu Masuk</th>
+                                                    <th class="wrap_content">Pasien</th>
                                                     <th>Poliklinik</th>
                                                     <th>Dokter</th>
                                                     <th>Penjamin</th>
                                                     <th>Oleh</th>
-                                                    <th>Aksi</th>
+                                                    <th class="wrap_content">Aksi</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -145,12 +166,11 @@
                                         <thead class="thead-dark">
                                         <tr>
                                             <th class="wrap_content">No</th>
-                                            <th>Waktu Masuk</th>
-                                            <th class="wrap_content">No. RM</th>
-                                            <th>Pasien</th>
+                                            <th class="wrap_content">Waktu Masuk</th>
+                                            <th class="wrap_content">Pasien</th>
                                             <th>Dokter</th>
                                             <th>Penjamin</th>
-                                            <th>Aksi</th>
+                                            <th class="wrap_content">Aksi</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -173,13 +193,12 @@
                                         <thead class="thead-dark">
                                         <tr>
                                             <th class="wrap_content">No</th>
-                                            <th>Waktu Masuk</th>
-                                            <th class="wrap_content">No. RM</th>
-                                            <th>Pasien</th>
+                                            <th class="wrap_content">Waktu Masuk</th>
+                                            <th class="wrap_content">Pasien</th>
                                             <th>Dokter</th>
                                             <th>Penjamin</th>
                                             <th>Oleh</th>
-                                            <th>Aksi</th>
+                                            <th class="wrap_content">Aksi</th>
                                         </tr>
                                         </thead>
                                         <tbody>

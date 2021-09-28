@@ -1,5 +1,18 @@
 <script type="text/javascript">
 	$(function() {
+        var currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#opname_notif_amprah");
+        reCheckStatus(currentStatus);
+        function reCheckStatus(currentStatus) {
+            if(currentStatus === "A") {
+                $(".disable-panel-opname").hide();
+                $("#btnSubmitAmprah").removeAttr("disabled");
+            } else {
+                $(".disable-panel-opname").show();
+                $("#btnSubmitAmprah").attr({
+                    "disabled": "disabled"
+                });
+            }
+        }
 	    $("#txt_tanggal").datepicker({
 			dateFormat: 'DD, dd MM yy',
 			autoclose: true
@@ -204,7 +217,7 @@
 
 					metaData[item].nama = $(this).find("td:eq(1) select option:selected").text();
 					metaData[item].satuan = $(this).find("td:eq(2)").text();
-					metaData[item].qty += parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
+					metaData[item].qty = parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
 				}
 			});
 

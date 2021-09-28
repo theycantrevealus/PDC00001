@@ -16,7 +16,7 @@
 					<div class="col-md-4">
 						<div class="form-group">
 							<label for="txt_kategori">Tanggal:</label>
-							<input type="date" class="form-control" id="txt_tanggal" />
+							<input autocomplete="off" class="form-control txt_tanggal" id="txt_tanggal" />
 						</div>
 					</div>
 				</div>

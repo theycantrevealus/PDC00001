@@ -61,7 +61,8 @@
 				</div>
 				<div class="card-header card-header-tabs-basic nav" role="tablist">
 					<a href="#list-resep" class="active" data-toggle="tab" role="tab" aria-controls="keluhan-utama" aria-selected="true">Poliklinik</a>
-                    <a href="#list-resep_2" data-toggle="tab" role="tab" aria-selected="true">IGD / Inap</a>
+                    <a href="#list-resep_2" data-toggle="tab" role="tab" aria-selected="true">IGD</a>
+                    <a href="#list-resep_3" data-toggle="tab" role="tab" aria-selected="true">Inap</a>
 				</div>
 				<div class="card-body tab-content">
 					<div class="tab-pane active show fade" id="list-resep">
@@ -82,6 +83,22 @@
 					</div>
                     <div class="tab-pane show fade" id="list-resep_2">
                         <table class="table table-bordered table-striped largeDataType" id="table-resep-2">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th width="2%">No</th>
+                                <th>Tanggal</th>
+                                <th>Poliklinik</th>
+                                <th>Pasien</th>
+                                <th>Dokter</th>
+                                <th>Penjamin</th>
+                                <th>Aksi</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane show fade" id="list-resep_3">
+                        <table class="table table-bordered table-striped largeDataType" id="table-resep-3">
                             <thead class="thead-dark">
                             <tr>
                                 <th width="2%">No</th>

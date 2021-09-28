@@ -185,18 +185,22 @@ class Poli extends Utility {
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
+                'master_poli.editable' => '= ?',
+                'AND',
                 'master_poli.deleted_at' => 'IS NULL',
                 'AND',
                 'master_poli.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
             );
 
-            $paramValue = array();
+            $paramValue = array('TRUE');
         } else {
             $paramData = array(
+                'master_poli.editable' => '= ?',
+                'AND',
                 'master_poli.deleted_at' => 'IS NULL'
             );
 
-            $paramValue = array();
+            $paramValue = array('TRUE');
         }
 
         if ($parameter['length'] < 0) {
@@ -259,7 +263,7 @@ class Poli extends Utility {
         return $data;
     }
 
-	private function get_poli(){
+	public function get_poli() {
 		$data = self::$query->select('master_poli', array(
 			'uid',
 			'nama',
@@ -278,8 +282,8 @@ class Poli extends Utility {
 		->execute();
 
 		$autonum = 1;
+        $Tindakan = new Tindakan(self::$pdo);
 		foreach ($data['response_data'] as $key => $value) {
-			$Tindakan = new Tindakan(self::$pdo);
 			$TindakanDetail = $Tindakan->get_tindakan_detail($value['tindakan_konsultasi']);
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$data['response_data'][$key]['tindakan_konsultasi'] = $TindakanDetail['response_data'][0]['nama'];
@@ -318,6 +322,31 @@ class Poli extends Utility {
 
 		return $data;
 	}
+
+	public function get_poli_info($parameter) {
+        $data = self::$query->select('master_poli', array(
+            'uid',
+            'nama',
+            'tindakan_konsultasi',
+            'poli_asesmen',
+            'kode_bpjs',
+            'nama_bpjs',
+            'created_at',
+            'updated_at'
+        ))
+            ->where(array(
+                'master_poli.deleted_at' => 'IS NULL',
+                'AND',
+                'master_poli.uid' => '= ?'
+            ), array($parameter))
+            ->execute();
+
+        $autonum = 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+        }
+        return $data;
+    }
 
 	public function get_poli_detail($parameter) {
 		$data = self::$query->select('master_poli', array(
@@ -1371,7 +1400,7 @@ class Poli extends Utility {
 
 	private function poli_perawat($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		
 		$readPerawat = self::$query->select('master_poli_perawat', array(
 			'poli',
@@ -1387,7 +1416,7 @@ class Poli extends Utility {
 		))
 		->execute();
 
-		if(count($readDokter['response_data']) > 0) {
+		if(count($readPerawat['response_data']) > 0) {
 			$worker = self::$query->update('master_poli_perawat', array(
 				'updated_at' => parent::format_date(),
 				'deleted_at' => NULL
@@ -1415,7 +1444,7 @@ class Poli extends Utility {
 						'login_id'
 					),
 					'value'=>array(
-						$readDokter['response_data'][0]['id'],
+                        $readPerawat['response_data'][0]['id'],
 						$UserData['data']->uid,
 						'master_poli_perawat',
 						'U',
@@ -1466,6 +1495,8 @@ class Poli extends Utility {
 	}
 
 	private function poli_perawat_buang($parameter){
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$worker = self::$query->update('master_poli_perawat', array(
 			'updated_at' => parent::format_date(),
 			'deleted_at' => parent::format_date()
@@ -1513,6 +1544,8 @@ class Poli extends Utility {
 	/*====================== CRUD ========================*/
 
 	private function poli_dokter_buang($parameter){
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$worker = self::$query->update('master_poli_dokter', array(
 			'updated_at' => parent::format_date(),
 			'deleted_at' => parent::format_date()
@@ -1682,7 +1715,7 @@ class Poli extends Utility {
 
 	private function edit_poli($parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		
 		$old = self::get_poli_detail($parameter['uid']);
@@ -1831,11 +1864,11 @@ class Poli extends Utility {
 						'login_id'
 					),
 					'value'=>array(
-						$uid_poli,
+						$parameter['uid'],
 						$UserData['data']->uid,
 						'master_poli',
 						'U',
-						json_encode($old_data),
+						json_encode($old),
 						json_encode($parameter),
 						parent::format_date(),
 						'N',

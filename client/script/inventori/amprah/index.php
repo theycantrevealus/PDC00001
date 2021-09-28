@@ -29,7 +29,6 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.log(response);
 					var dataSet = response.response_package.response_data;
 					if(dataSet == undefined) {
 						dataSet = [];
@@ -195,7 +194,10 @@
                                 "<td>" + data.detail[a].batch.batch + "</td>" +
                                 "<td class=\"number_style\">" + number_format(parseFloat(data.detail[a].qty), 2, ".", ",") + "</td>" +
                                 "<td>" + data.detail[a].batch.expired_date + "</td>" +
-                                "<td>" + data.detail[a].keterangan + "</td>" +
+                                "</tr>" +
+                                "<tr>" +
+                                "<td></td>" +
+                                "<td colspan=\"5\">" + data.detail[a].keterangan + "</td>" +
                                 "</tr>");
                             autonum++;
                         }
@@ -297,7 +299,6 @@
                         <th class="wrap_content">Batch</th>
                         <th class="wrap_content">Qty</th>
                         <th>Kedaluarsa</th>
-                        <th>Keterangan</th>
                     </tr>
                     </thead>
                     <tbody></tbody>

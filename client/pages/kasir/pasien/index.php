@@ -21,7 +21,7 @@
     <div class="row">
         <div class="col-lg">
         	<div class="z-0">
-				<ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tutor_filter_type">
 					<li class="nav-item">
 						<a href="#tab-tagihan" class="active nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-tagihan" >
 							<span class="nav-link__count">
@@ -45,7 +45,7 @@
                     <div class="row">
                         <div class="col-lg">
                             <div class="z-0">
-                                <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                                <ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tutor_filter_jenis_pelayanan">
                                     <li class="nav-item">
                                         <a href="#tab-rawat_jalan" class="active nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-tagihan" >
                                             <span class="nav-link__count">
@@ -161,24 +161,39 @@
 				<div class="tab-pane show fade" id="tab-kwitansi">
                     <div class="row">
 						<div class="col-lg">
-							<input id="range_kwitansi" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
 							<div class="row">
-								<div class="col-lg" style="margin-top: 25px">
-									<table class="table table-bordered table-striped largeDataType" id="table-kwitansi">
-										<thead class="thead-dark">
-											<tr>
-												<th class="wrap_content">No</th>
-												<th>Kwitansi</th>
-												<th>Tanggal Bayar</th>
-												<th>Metode Bayar</th>
-												<th>Petugas Kasir</th>
-												<th>Total</th>
-												<th>Rincian</th>
-											</tr>
-										</thead>
-										<tbody></tbody>
-									</table>
-								</div>
+                                <div class="col-lg-6">
+                                    <b>Filter Tanggal:</b>
+                                    <input id="range_kwitansi" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                </div>
+                                <div class="col-lg-3"></div>
+                                <div class="col-lg-3">
+                                    <b>Filter Jenis Pelayanan:</b>
+                                    <select id="filter_kwitansi_item" class="form-control">
+                                        <option value="*">Semua</option>
+                                        <option value="RAJAL">Rawat Jalan</option>
+                                        <option value="RANAP">Rawat Inap</option>
+                                        <option value="IGD">IGD</option>
+                                    </select>
+                                    <br />
+                                </div>
+                                <div class="col-lg-12">
+                                    <br />
+                                    <table class="table table-bordered table-striped largeDataType" id="table-kwitansi">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th>Kwitansi</th>
+                                            <th>Tanggal Bayar</th>
+                                            <th>Metode Bayar</th>
+                                            <th>Petugas Kasir</th>
+                                            <th>Total</th>
+                                            <th>Rincian</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
 							</div>
 						</div>
 					</div>

@@ -7,7 +7,7 @@
 					<li class="breadcrumb-item active" aria-current="page">Module</li>
 				</ol>
 			</nav>
-			<h1 class="m-0">Module Manager</h1>
+			<h4 class="m-0">Module Manager</h4>
 		</div>
 	</div>
 </div>
@@ -33,8 +33,8 @@
 						</a>
 					</small>
 				</h5>
-				<table class="table table-bordered" id="methods-loader">
-					<thead>
+				<table class="table table-bordered largeDataType" id="methods-loader">
+					<thead class="thead-dark">
 						<tr>
 							<th style="width: 20px;"><i class="fa fa-hashtag"></i></th>
 							<th>Methods</th>
