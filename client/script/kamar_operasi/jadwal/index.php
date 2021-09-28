@@ -2,22 +2,6 @@
     
     $(function () {
 
-        $.ajax({
-            url:__HOSTAPI__ + "/KamarOperasi/jadwal_operasi",
-            beforeSend: function(request) {
-                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-            },
-            type:"GET",
-            success:function(response) {
-                console.clear();
-                console.log(response);
-            },
-            error:function(response) {
-                console.clear();
-                console.log(response);
-            }
-        });
-
         let tableJadwal = $("#table_jadwal_operasi").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/KamarOperasi/jadwal_operasi",
@@ -30,6 +14,7 @@
 
                     console.clear();
                     console.log(response);
+                    
 					return (data !== undefined && data !== null) ? data : [];
 				}
 			},
