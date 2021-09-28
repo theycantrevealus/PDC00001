@@ -181,12 +181,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"poli_" + row.uid_pasien + "\">" + row["departemen"] + "</span>";
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"dokter_" + row.uid + "\">" + row.dokter + "</span>";
+						return "<strong id=\"poli_" + row.uid_pasien + "\">" + row["departemen"] + "</strong><br /><span id=\"dokter_" + row.uid + "\">" + row.dokter + "</span>";
 					}
 				},
 				{
@@ -234,7 +229,7 @@
                                 "<i class=\"fa fa-check\"></i> Selesai" +
                                 "</button>" +
                                 "<button id=\"batalkan_kunjungan_" + row.uid + "\" class=\"btn btn-danger btn-sm btn-pasien-batal\">" +
-                                "<i class=\"fa fa-times-circle\"></i>" +
+                                "<span><i class=\"fa fa-times-circle\"></i> Hapus</span>" +
                                 "</button>" +
                                 "<div class=\"btn-group\">" +
                                 "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
@@ -259,7 +254,7 @@
                                 "<i class=\"fa fa-check\"></i> Selesai" +
                                 "</button>" +
                                 "<button id=\"batalkan_kunjungan_" + row.uid + "\" class=\"btn btn-danger btn-sm btn-pasien-batal\">" +
-                                "<i class=\"fa fa-times-circle\"></i>" +
+                                "<span><i class=\"fa fa-times-circle\"></i> Hapus</span>" +
                                 "</button>" +
                                 "<div class=\"btn-group\">" +
                                 "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +

@@ -24,12 +24,15 @@
                             <i class="fa fa-plus"></i> Tambah Setting
                         </span>
                     </button>
+                    <button class="btn btn-info" id="btnManageGroup">
+                        <span>
+                            <i class="fa fa-plus"></i> Manage Group
+                        </span>
+                    </button>
                 </div>
                 <div class="card-body tab-content">
                     <div class="tab-pane active show fade" id="list-resep">
-                        <div class="row" id="setting-loader">
-
-                        </div>
+                        <table class="table form-mode" id="setting-loader"></table>
                     </div>
                     <div class="tab-pane active show fade" id="list-revisi">
                     </div>
