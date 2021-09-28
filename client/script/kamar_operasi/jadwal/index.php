@@ -10,9 +10,12 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+                    var data = response.response_package.response_data;
+
                     console.clear();
                     console.log(response);
-					return response.response_package.response_data;
+                    
+					return (data !== undefined && data !== null) ? data : [];
 				}
 			},
 			autoWidth: false,
