@@ -913,6 +913,9 @@ class Antrian extends Utility
 
                     if($parameter['dataObj']['departemen'] === __POLI_IGD__) {
 
+                        $Pasien = new Pasien(self::$pdo);
+                        $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
+
                         //KHUSUS AUTO ANTRIAN
                         $antrianKunjungan = self::$query->insert('antrian_nomor', array(
                             'nomor_urut' => 'IGD',
