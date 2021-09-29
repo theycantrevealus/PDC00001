@@ -3,9 +3,7 @@
 		var currentPasien = localStorage.getItem("currentPasien");
 		var currentAntrianID = localStorage.getItem("currentAntrianID");
 		var curremtAntrianType = localStorage.getItem("currentAntrianType");
-
-        alert(currentAntrianID);
-
+        
 
 		var penjaminMetaData;
 
