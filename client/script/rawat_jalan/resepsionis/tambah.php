@@ -111,7 +111,8 @@
                                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                                 },
                                 type: "POST",
-                                success: function(response){
+                                success: function(response) {
+                                    console.log(response);
                                     localStorage.getItem("currentPasien");
                                     localStorage.getItem("currentAntrianID");
 
