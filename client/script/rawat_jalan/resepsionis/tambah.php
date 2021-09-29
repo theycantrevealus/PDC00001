@@ -4,6 +4,9 @@
 		var currentAntrianID = localStorage.getItem("currentAntrianID");
 		var curremtAntrianType = localStorage.getItem("currentAntrianType");
 
+        alert(currentAntrianID);
+
+
 		var penjaminMetaData;
 
 		/*alert(currentPasien);
@@ -97,6 +100,9 @@
                                 },
                                 error: function (response) {
                                     console.log(response);
+                                    me.attr({
+                                        "disabled" : "disabled"
+                                    }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
                                 }
                             });
                         } else {
@@ -112,7 +118,9 @@
                                 },
                                 type: "POST",
                                 success: function(response) {
+
                                     console.log(response);
+
                                     localStorage.getItem("currentPasien");
                                     localStorage.getItem("currentAntrianID");
 
@@ -155,6 +163,9 @@
                                 error: function(response) {
                                     console.log("Error : ");
                                     console.log(response);
+                                    me.attr({
+                                        "disabled" : "disabled"
+                                    }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
                                 }
                             });
                         }
