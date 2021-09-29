@@ -69,7 +69,7 @@
                                 type: "GET",
                                 success: function (response) {
 
-                                    (response);
+                                    console.log(response);
                                     $("#modal-sep").modal("show");
                                     $("#btnProsesPasien").hide();
                                     $("#btnProsesSEP").hide();
