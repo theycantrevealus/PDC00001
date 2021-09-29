@@ -222,7 +222,7 @@ class Antrian extends Utility
 
     private function tambah_igd($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $worker = '';
     }
