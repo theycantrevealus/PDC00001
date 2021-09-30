@@ -4,6 +4,7 @@
 		var currentAntrianID = localStorage.getItem("currentAntrianID");
 		var curremtAntrianType = localStorage.getItem("currentAntrianType");
 
+
 		var penjaminMetaData;
 
 		/*alert(currentPasien);
@@ -68,8 +69,6 @@
                                 },
                                 type: "GET",
                                 success: function (response) {
-
-                                    //(response);
                                     $("#modal-sep").modal("show");
                                     $("#btnProsesPasien").hide();
                                     $("#btnProsesSEP").hide();
@@ -113,7 +112,10 @@
                                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                                 },
                                 type: "POST",
-                                success: function(response){
+                                success: function(response) {
+
+                                    console.log(response);
+
                                     localStorage.getItem("currentPasien");
                                     localStorage.getItem("currentAntrianID");
 
@@ -156,6 +158,9 @@
                                 error: function(response) {
                                     console.log("Error : ");
                                     console.log(response);
+                                    me.attr({
+                                        "disabled" : "disabled"
+                                    }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
                                 }
                             });
                         }

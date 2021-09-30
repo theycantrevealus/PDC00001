@@ -1904,6 +1904,7 @@ class Apotek extends Utility
                 $racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];
             }
             $resep_dokter['response_data'][$key]['racikan'] = $racikan['response_data'];
+            $resep_dokter['response_data'][$key]['total_all'] = $totalAll;
             $resep_dokter['response_data'][$key]['terbilang'] = parent::terbilang($totalAll);
         }
 
