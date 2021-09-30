@@ -89,7 +89,8 @@
 												<tfoot>
 													<tr>
 														<td colspan="7">
-															<b>Keterangan</b>
+                                                            <br />
+															<b>Keterangan <strong class="text-danger">*wajib</strong></b>
 															<textarea class="form-control" style="min-height: 200px;" id="txt_keterangan" placeholder="Tambahkan keterangan tambahan disini"></textarea>
 														</td>
 													</tr>
