@@ -204,8 +204,8 @@
                             $(newTgl).html("<b>" + batchGroup[a].log[b].logged_at + "</b>").addClass("text-right");
                             $(newDoc).html("<span class=\"wrap_content\">" + batchGroup[a].log[b].dokumen + "</span>");
                             //$(newUraian).html(batchGroup[a].log[b].batch.batch);
-                            $(newMasuk).html("<h5 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].masuk) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].masuk, 2, ",", ".") + "</h5>").addClass("number_style");
-                            $(newKeluar).html("<h5 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].keluar) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].keluar, 2, ",", ".") + "</h5>").addClass("number_style");
+                            $(newMasuk).html("<h6 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].masuk) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].masuk, 2, ",", ".") + "</h6>").addClass("number_style");
+                            $(newKeluar).html("<h6 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].keluar) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].keluar, 2, ",", ".") + "</h6>").addClass("number_style");
                             $(newSaldo).html("<h5 class=\"number_style text-orange\">" + number_format(batchGroup[a].log[b].saldo, 2, ",", ".") + "</h5>").addClass("number_style");
                             if(batchGroup[a].log[b].type.id === __STATUS_OPNAME__) {
                                 $(newKeterangan).html("<div class=\"row\">" +
@@ -222,7 +222,7 @@
                             } else {
                                 $(newKeterangan).html("<div class=\"row\">" +
                                     "<div class=\"col-lg-2\">" +
-                                    "<span>" + ((parseFloat(batchGroup[a].log[b].masuk) === 0) ? "<i data-v-da9425c4=\"\" class=\"material-icons\">arrow_upward</i> Stok Keluar" : "<i data-v-da9425c4=\"\" class=\"material-icons\">arrow_downward</i> Stok Masuk") + "</span>" +
+                                    "<span><strong>" + ((parseFloat(batchGroup[a].log[b].masuk) === 0) ? "<i data-v-da9425c4=\"\" class=\"material-icons\">arrow_upward</i> Stok Keluar" : "<i data-v-da9425c4=\"\" class=\"material-icons\">arrow_downward</i> Stok Masuk") + "</strong></span>" +
                                     "</div>" +
                                     "<div class=\"col-lg-8\">" +
                                     "<p style=\"padding: 10px 5px\"><b class=\"text-muted\">Keterangan:</b><br />" + batchGroup[a].log[b].keterangan + "</p>" +
@@ -253,9 +253,9 @@
 
                                 }*/
                                 if(parseFloat(batchGroup[a].log[b].masuk) === 0) {
-                                    $(newRow).find("td:eq(5) span").addClass("badge badge-outline-warning badge-custom-caption");
+                                    $(newRow).find("td:eq(5) span").addClass("text-warning");
                                 } else if(parseFloat(batchGroup[a].log[b].keluar) === 0) {
-                                    $(newRow).find("td:eq(5) span").addClass("badge badge-outline-success badge-custom-caption");
+                                    $(newRow).find("td:eq(5) span").addClass("text-success");
                                 } else {
                                     //
                                 }

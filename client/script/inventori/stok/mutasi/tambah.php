@@ -41,6 +41,8 @@
 			var row = document.createElement("TR");
 			$(row).addClass("new-row");
 			var num = document.createElement("TD");
+
+            $(num).addClass("autonum");
 			
 			var item = document.createElement("TD");
 			var itemSelector = document.createElement("SELECT");
@@ -225,7 +227,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+						return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
