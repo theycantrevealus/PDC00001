@@ -19,6 +19,34 @@
             });
         }
 
+        /*$.ajax({
+            async: false,
+            url:__HOSTAPI__ + "/KamarOperasi/get_paket_detail/" + $("#paket_obat option:selected").val(),
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response) {
+
+                var data = response.response_package.response_data[0];
+                for(var a in data.detail) {
+                    autoObat({
+                        obat: {
+                            uid: data.detail[a].obat.uid,
+                            nama: data.detail[a].obat.nama
+                        },
+                        jlh: data.detail[a].qty,
+                        satuan: data.detail[a].obat.satuan_terkecil_info.nama,
+                        remark: data.detail[a].remark
+                    });
+                }
+
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });*/
+
         //submit data
         $("#form_add_jadwal").submit(function(){
             Swal.fire({
@@ -43,12 +71,15 @@
                         }
                     });
 
+                    console.log(item);
+
                     let jenis_operasi = $("#jenis_operasi").val();
                     let tgl_operasi = $("#tgl_operasi").val();
                     let jam_mulai = $("#jam_mulai").val();
                     let jam_selesai = $("#jam_selesai").val();
                     let ruang_operasi = $("#ruang_operasi").val();
                     let dokter = $("#dokter").val();
+                    let penjamin = $("#penjamin option:selected").val();
                     let operasi = $("#operasi").val();
 
                     let form_data = {
@@ -58,12 +89,15 @@
                         'jam_mulai' : jam_mulai,
                         'jam_selesai' : jam_selesai,
                         'ruang_operasi' : ruang_operasi,
+                        'penjamin': penjamin,
                         'dokter' : dokter,
                         'paket_obat': $("#paket_obat").val(),
                         'operasi' : operasi,
                         'item': item,
                         'uid' : jadwalUID
                     }
+
+                    console.log(form_data);
 
                     $.ajax({
                         async: false,
@@ -74,7 +108,6 @@
                         },
                         type: "POST",
                         success: function(response) {
-                            console.clear();
                             console.log(response.response_package);
                             $("#btnSubmit").removeAttr("disabled");
                             if (response.response_package != null || response.response_package != undefined) {
@@ -555,9 +588,9 @@
             beforeSend: function(request) {
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
-            success: function(response){
+            success: function(response) {
 
-                if (response.response_package != null || response.response_package != undefined){
+                if (response.response_package != null || response.response_package != undefined) {
                     
                     let MetaData = response.response_package.response_data[0];
                     
@@ -572,6 +605,40 @@
                     $("#dokter").val(MetaData.dokter).trigger('change');
                     $("#operasi").val(MetaData.operasi);
                     detailObat = MetaData.paket;
+
+                    console.log(MetaData);
+
+                    $.ajax({
+                        async: false,
+                        url:__HOSTAPI__ + "/Penjamin/penjamin",
+                        type: "GET",
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function(response){
+                            var MetaDataPenjamin = response.response_package.response_data;
+
+                            if (MetaDataPenjamin !== undefined && MetaDataPenjamin !== null){
+                                for(var i in MetaDataPenjamin) {
+                                    var selection = document.createElement("OPTION");
+
+                                    $(selection).attr("value", MetaDataPenjamin[i].uid).html(MetaDataPenjamin[i].nama);
+                                    if(MetaDataPenjamin[i].uid === MetaData.penjamin) {
+                                        $(selection).attr({
+                                            "selected": "selected"
+                                        });
+                                    }
+
+                                    $("#penjamin").append(selection);
+                                }
+
+                                $("#penjamin").select2();
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
 
 
                     $.ajax({

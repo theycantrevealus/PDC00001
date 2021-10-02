@@ -36,6 +36,11 @@ class Setting extends Utility
             case 'get_transact_entry':
                 return self::get_transact_entry($parameter);
                 break;
+
+            case 'get_setting_group_backend':
+                return self::get_setting_group_backend($parameter);
+                break;
+
             default:
                 return array();
                 break;
@@ -56,7 +61,71 @@ class Setting extends Utility
             case 'get_tables_list':
                 return self::get_tables_list($parameter);
                 break;
+
+            case 'get_setting_group':
+                return self::get_setting_group($parameter);
+                break;
         }
+    }
+
+    private function get_setting_group_backend($parameter) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'setting_group.deleted_at' => 'IS NULL',
+                'AND',
+                'setting_group.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'setting_group.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('setting_group', array(
+                'uid', 'nama'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('setting_group', array(
+                'uid', 'nama'
+            ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('setting_group', array(
+            'uid'
+        ))
+            ->where(array(
+                'setting_group.deleted_at' => 'IS NULL'
+            ))
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+
+
     }
 
     private function get_transact_entry($parameter) {
@@ -111,6 +180,18 @@ class Setting extends Utility
         $data['recordsFiltered'] = count($itemTotal['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
+    private function get_setting_group($parameter) {
+        $data = self::$query->select('setting_group', array(
+            'uid', 'nama'
+        ))
+            ->where(array(
+                'setting_group.deleted_at' => 'IS NULL'
+            ), array())
+            ->execute();
 
         return $data;
     }
@@ -246,7 +327,9 @@ class Setting extends Utility
             'created_at', 'updated_at',
             'param_table_link',
             'param_table_column',
-            'param_table_caption'
+            'param_table_caption',
+            'description',
+            'setting_group'
         ))
             ->where(array(
                 'setting.deleted_at' => ' IS NULL',
@@ -256,6 +339,7 @@ class Setting extends Utility
                 $parameter[2]
             ))
             ->execute();
+
         foreach ($data['response_data'] as $key => $value) {
             if(!empty($value['param_table_link']) && isset($value['param_table_link']) && $value['param_table_link'] !== '') {
                 //Check

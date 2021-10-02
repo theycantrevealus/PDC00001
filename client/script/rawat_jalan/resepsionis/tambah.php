@@ -69,8 +69,6 @@
                                 },
                                 type: "GET",
                                 success: function (response) {
-
-                                    console.log(response);
                                     $("#modal-sep").modal("show");
                                     $("#btnProsesPasien").hide();
                                     $("#btnProsesSEP").hide();
@@ -86,21 +84,20 @@
                                     }
 
                                     if(restMeta !== undefined) {
-                                        $("#txt_no_bpjs").val(restMeta.response.peserta.noKartu);
-                                        penjaminMetaData = cekPasienBPJS(loadPasien(__PAGES__[3]), restMeta.response.peserta.noKartu);
+                                        if(restMeta !== undefined && restMeta !== null) {
+                                            $("#txt_no_bpjs").val(restMeta.response.peserta.noKartu);
+                                            penjaminMetaData = cekPasienBPJS(loadPasien(__PAGES__[3]), restMeta.response.peserta.noKartu);
+                                        }
+
                                     } else {
                                         $("#txt_no_bpjs").focus();
                                     }
 
-                                    me.attr({
-                                        "disabled" : "disabled"
-                                    }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
+                                    me.removeAttr("disabled").addClass("btn-success").removeClass("btn-warning").html(lastCap);
                                 },
                                 error: function (response) {
                                     console.log(response);
-                                    me.attr({
-                                        "disabled" : "disabled"
-                                    }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
+                                    me.removeAttr("disabled").addClass("btn-success").removeClass("btn-warning").html(lastCap);
                                 }
                             });
                         } else {

@@ -23,6 +23,35 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function (response) {
+
+                    var data = response.response_package.response_data[0];
+
+                    $("#form-setting").modal("show");
+                    $("#txt_param_caption").val(data.param_table_caption);
+                    $("#txt_param_remark").val(data.description);
+                    $("#txt_param_column").val(data.setting_group);
+                },
+                error: function (response) {
+                    //
+                }
+            });
+            return false;
+        });
+
+        /*$("body").on("click", ".edit_setting", function () {
+            MODE = "edit";
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+            currentID = id;
+
+            $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Setting/admin_load_setting_detail/" + id,
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function (response) {
                     var data = response.response_package.response_data[0];
                     $("#form-tambah-setting").modal("show");
                     $("#txt_param_iden").val(data.param_iden);
@@ -47,7 +76,7 @@
                 }
             });
             return false;
-        });
+        });*/
 
         $("#btnSubmitSetting").click(function () {
             var identifier = $("#txt_param_iden").val();
@@ -103,6 +132,60 @@
             }
         });
 
+        $("#btnManageGroup").click(function () {
+            $("#form-setting-group").modal("show");
+        });
+
+        var dataGroupSetting = $("#settingGroup").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax": {
+                url: __HOSTAPI__ + "/Setting",
+                type: "POST",
+                data: function (d) {
+                    d.request = "get_setting_group_backend";
+                },
+                headers: {
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc: function (response) {
+
+                    var returnedData = response.response_package.response_data;
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return returnedData;
+                },
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Group"
+            },
+            "columns": [
+                {
+                    "data": null, render: function (data, type, row, meta) {
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+                    }
+                },
+                {
+                    "data": null, render: function (data, type, row, meta) {
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+                    }
+                },
+                {
+                    "data": null, render: function (data, type, row, meta) {
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+                    }
+                },
+            ]
+        });
+
         function checkData() {
             $.ajax({
                 url: __HOSTAPI__ + "/Setting",
@@ -125,6 +208,25 @@
                 }
             });
         }
+
+        $.ajax({
+            url: __HOSTAPI__ + "/Setting/get_setting_group",
+            async: false,
+            beforeSend: function (request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type: "GET",
+            success: function (response) {
+                var data = response.response_package.response_data;
+                for(var azd in data) {
+                    $("#txt_param_group").append("<option value=\"" + data[azd].uid + "\">" + data[azd].nama + "</option>");
+                }
+            },
+            error: function (response) {
+                console.log(response);
+            }
+        });
+
 
         $("#txt_param_table").select2({
             minimumInputLength: 2,
@@ -193,18 +295,25 @@
                             valueBuilder = "<input type=\"text\" id=\"identifier_value_" + data[a].id + "\" value=\"\" />";
                         }*/
                         $("#setting-loader").append(
-                            "<div class=\"col-lg-6\">" +
-                            "<div class=\"card row\" style=\"margin: 20px;\">" +
+                            "<tr>" +
+                                "<td class=\"text-right wrap_content\">" +
+                                    "<strong class=\"wrap_content\">" + ((data[a].caption !== undefined && data[a].caption !== null) ? data[a].caption : "[UNSET]") + " &nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#\" class=\"edit_setting\" id=\"edit_" + data[a].id + "\"><i class=\"fa fa-pencil-alt\"></i> Edit</a></strong>" +
+                                "</td>" +
+                                "<td>" + valueBuilder + "</td>" +
+                            "</tr>");
+
+
+                            /*"<div class=\"row\" style=\"margin: 20px;\">" +
                             "<div class=\"col-12\">" +
                             "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + data[a].param_iden + "</span><br />" +
                             "<h6 class=\"text-right\">" +
                             "<a href=\"#\" class=\"edit_setting\" id=\"edit_" + data[a].id + "\"><i class=\"fa fa-pencil-alt\"></i> Edit</a>" +
                             "</h6>" +
                             "<br />" +
-                            valueBuilder + validation_data +
+                             + validation_data +
                             "<br /><br /><br /></div>" +
                             "" +
-                            "</div></div>");
+                            "</div></tr>");*/
                     }
 
                 },
@@ -218,6 +327,106 @@
 
     });
 </script>
+
+
+<div id="form-setting" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Manage Setting</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-10">
+                        <label for="txt_param_caption">Caption:</label>
+                        <input type="text" class="form-control" id="txt_param_caption" />
+                        <br />
+                    </div>
+                    <div class="col-lg-12">
+                        <label for="txt_param_remark">Information:</label>
+                        <textarea style="min-height: 200px" class="form-control" id="txt_param_remark"></textarea>
+                        <br />
+                    </div>
+                    <div class="col-lg-8">
+                        <label for="txt_param_group">Setting Group:</label>
+                        <select class="form-control" id="txt_param_group"></select>
+                        <br />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSubmitSettingItem">
+                    <span>
+                        <i class="fa fa-save"></i> Submit
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="form-setting-group" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Manage Group Setting</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <table class="table table-bordered largeDataType" id="settingGroup">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th>Nama</th>
+                                <th class="wrap_content">Aksi</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-6">
+                        <h5>Manage Group</h5>
+                        <table class="table largeDataType form-mode">
+                            <tr>
+                                <td>Nama</td>
+                                <td>
+                                    <input type="text" class="form-control" id="txt_edit_group_name" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <button class="btn btn-info" id="btn_save_group">
+                                        <span>
+                                            <i class="fa fa-check-circle"></i> Simpan
+                                        </span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    <span>
+                        <i class="fa fa-ban"></i> Kembali
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 <div id="form-tambah-setting" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">

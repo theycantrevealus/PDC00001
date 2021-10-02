@@ -222,7 +222,7 @@ class Antrian extends Utility
 
     private function tambah_igd($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $worker = '';
     }
@@ -1870,15 +1870,15 @@ class Antrian extends Utility
                     )
                 )
                 ->where(array(
-                        $table . '.departemen' => '= ?',
-                        'AND',
-                        /*$table . '.waktu_keluar' => 'IS NULL',
-                        'AND',*/
+                    $table . '.departemen' => '= ?',
+                    'AND',
+                    /*$table . '.waktu_keluar' => 'IS NULL',
+                    'AND',*/
 
-                        $table . '.deleted_at' => 'IS NULL',
-                        'AND',
-                        'kunjungan.waktu_keluar' => 'IS NULL'
-                    ), array(
+                    $table . '.deleted_at' => 'IS NULL',
+                    'AND',
+                    'kunjungan.waktu_keluar' => 'IS NULL'
+                ), array(
                         $target
                     )
                 )
