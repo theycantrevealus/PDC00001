@@ -2603,6 +2603,8 @@
 
                         if(allowSave) {
 
+                            console.log("Saving Data...");
+
                             $.ajax({
                                 url:__HOSTAPI__ + "/Apotek",
                                 async:false,
@@ -2659,6 +2661,7 @@
                             });
                         } else {
                             if(!kajianCheck) {
+                                console.log("Kajian");
                                 Swal.fire(
                                     "Verifikasi Gagal!",
                                     "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong. Harap isi kajian resep",
@@ -2667,6 +2670,7 @@
                                     $("#form-alasan-ubah").modal("hide");
                                 });
                             } else {
+                                console.log(allowSave);
                                 Swal.fire(
                                     "Verifikasi Gagal!",
                                     "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong",
