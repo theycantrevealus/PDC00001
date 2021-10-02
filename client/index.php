@@ -90,7 +90,9 @@
 </script>
 
 <?php
-
+    require '../api/vendor/autoload.php';
+    use \Sentry;
+    Sentry\init(['dsn' => 'https://9754244694444cccaf869914e1e4f5a3@o412931.ingest.sentry.io/5294475' ]);
 
 	if(
 		isset($_SESSION['token']) ||

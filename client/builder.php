@@ -3,7 +3,7 @@
 
 
 <?php
-	$lastExist;
+	$lastExist = '';
 ?>
 <?php require 'head.php'; ?>
 <body class="layout-default">
