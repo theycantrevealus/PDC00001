@@ -2429,6 +2429,7 @@
                                     var resepVerifIDSave = (e + 1);
                                     var obat = $(this).find("td:eq(1) select:eq(0)").val();
                                     if(obat !== null) {
+                                        console.log($(this).find("td:eq(1) ol li").length);
                                         if($(this).find("td:eq(1) ol li").length === 0) {
                                             allowSave = false;
                                             return false;
@@ -2463,7 +2464,10 @@
                                 }
                             });
 
+                            console.log("Check Allow : " + allowSave);
+
                             if(allowSave) {
+                                console.log("Allow Save Resep");
                                 var racikanItem = [];
                                 $("#table-resep-racikan > tbody > tr").each(function(e) {
                                     var racikanVerifIDSave = (e + 1);
@@ -2523,6 +2527,8 @@
                                         });
                                     }
                                 });
+                            } else {
+                                console.log("Disallow Save Resep");
                             }
                         }
 
