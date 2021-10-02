@@ -1072,10 +1072,14 @@
                                                 batchData[bKey].used = parseFloat(kebutuhan);
                                             }
                                             kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
-                                            if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
+                                            if(uniqueBatch[batchData[bKey].batch + "-" + batchData[bKey].gudang.uid]  === undefined) {
+                                                selectedBatchList.push(batchData[bKey]);
+                                                uniqueBatch[batchData[bKey].batch + "-" + batchData[bKey].gudang.uid] = 1;
+                                            }
+                                            /*if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
                                                 selectedBatchList.push(batchData[bKey]);
                                                 uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
-                                            }
+                                            }*/
 
                                         }
                                     } else {
@@ -1088,10 +1092,14 @@
                                                 batchData[bKey].used = parseFloat(kebutuhan);
                                             }
                                             kebutuhan = kebutuhan - batchData[bKey].stok_terkini;
-                                            if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
+                                            if(uniqueBatch[batchData[bKey].batch + "-" + batchData[bKey].gudang.uid]  === undefined) {
+                                                selectedBatchList.push(batchData[bKey]);
+                                                uniqueBatch[batchData[bKey].batch + "-" + batchData[bKey].gudang.uid] = 1;
+                                            }
+                                            /*if(uniqueBatch.indexOf(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid) < 0) {
                                                 alternatedBatchList.push(batchData[bKey]);
                                                 uniqueBatch.push(batchData[bKey].batch + "-" + batchData[bKey].gudang.uid);
-                                            }
+                                            }*/
 
                                         }
                                     }
@@ -1630,6 +1638,7 @@
                 });
 
                 var komposisiRacikan = refreshBatch($(this).find("td:eq(1) h6").attr("uid-obat"), id + "_" + cid, "racikan");
+                console.log(komposisiRacikan);
                 totalRacikan += komposisiRacikan.harga;
             });
             return totalRacikan

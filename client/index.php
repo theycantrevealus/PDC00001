@@ -91,7 +91,6 @@
 
 <?php
 
-
 	if(
 		isset($_SESSION['token']) ||
 		__PAGES__[0] == 'anjungan' ||
