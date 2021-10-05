@@ -85,7 +85,7 @@
                     </div>
 
                     <div class="col-12 col-md-6 mb-3 poli_igd">
-                        <label>Cara Datang <span class="red">*</span></label>
+                        <label>Cara Datang</label>
                         <select id="cara_datang" class="form-control select2 inputan" required>
                             <option value="" disabled selected>Pilih Cara Datang</option>
                         </select>
