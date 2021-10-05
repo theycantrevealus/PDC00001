@@ -7,6 +7,7 @@
         loadDokter();
         loadRuangan();
         var detailObat = loadJadwalPasien(jadwalUID);
+        console.log(detailObat);
         for(var abz in detailObat) {
             autoObat({
                 obat: {
@@ -71,8 +72,6 @@
                         }
                     });
 
-                    console.log(item);
-
                     let jenis_operasi = $("#jenis_operasi").val();
                     let tgl_operasi = $("#tgl_operasi").val();
                     let jam_mulai = $("#jam_mulai").val();
@@ -108,7 +107,6 @@
                         },
                         type: "POST",
                         success: function(response) {
-                            console.log(response.response_package);
                             $("#btnSubmit").removeAttr("disabled");
                             if (response.response_package != null || response.response_package != undefined) {
                                 if (response.response_package.response_result > 0){
@@ -593,6 +591,8 @@
                 if (response.response_package != null || response.response_package != undefined) {
                     
                     let MetaData = response.response_package.response_data[0];
+
+                    console.log(MetaData);
                     
                     $("#pasien").val(MetaData.pasien.nama);
                     $("#no_rm_pasien").val(MetaData.pasien.no_rm);
@@ -605,8 +605,6 @@
                     $("#dokter").val(MetaData.dokter).trigger('change');
                     $("#operasi").val(MetaData.operasi);
                     detailObat = MetaData.paket;
-
-                    console.log(MetaData);
 
                     $.ajax({
                         async: false,

@@ -18,7 +18,7 @@
 		loadTermSelectBox('goldar', 4);
 		loadTermSelectBox('agama', 5);
 		loadTermSelectBox('warganegara', 7);
-		loadTermSelectBox('status_pernikahan', 16);
+		loadTermSelectBox('status_suami_istri', 10);
 		loadRadio('parent_jenkel','col-md-6', 'jenkel', 2);
 
 		var uid_pasien = __PAGES__[2];
