@@ -268,7 +268,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"text-info\">[" + row.kode + "]</h5>" + row.nama;
+                        return "<h5 class=\"text-info\">[" + ((row.kode !== undefined || row.kode !== null) ? row.kode : "") + "]</h5>" + ((row.nama !== undefined || row.nama !== null) ? row.nama : "-");
                     }
                 },
                 {
