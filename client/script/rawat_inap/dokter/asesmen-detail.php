@@ -4,6 +4,29 @@
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "";
 
         $.ajax({
+            url: __HOSTAPI__ + "/Pasien/pasien-info/" + __PAGES__[3],
+            async:false,
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type:"GET",
+            success: function (response) {
+                var filteredData = response.response_package.response_data;
+                $("#target_pasien").html(filteredData[0].uid);
+                $("#rm_pasien").html(filteredData[0].no_rm);
+                $("#nama_pasien").html((filteredData[0].panggilan_name === null) ? filteredData[0].nama : filteredData[0].panggilan_name.nama + " " +  filteredData[0].nama);
+                $("#jenkel_pasien").html(filteredData[0].jenkel_detail.nama);
+                $("#tempat_lahir_pasien").html(filteredData[0].tempat_lahir);
+                $("#alamat_pasien").html(filteredData[0].alamat);
+                $("#usia_pasien").html(filteredData[0].usia);
+                $("#tanggal_lahir_pasien").html(filteredData[0].tanggal_lahir_parsed);
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+
+        $.ajax({
             url: __HOSTAPI__ + "/Invoice/biaya_pasien_total/" + __PAGES__[3],
             async:false,
             beforeSend: function(request) {
