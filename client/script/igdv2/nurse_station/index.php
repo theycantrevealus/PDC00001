@@ -284,7 +284,7 @@
                                 status_ranjang = "<b>" + dataRanjang[a].status.nama_pasien + "</b><br />" + dataRanjang[a].status.nama_dokter;
                             }
                             parseRanjang += "<div class=\"col-lg-3\">" +
-                                "<i class=\"fa fa-bed\"></i> " + ((dataRanjang[a].detail.nama !== undefined && dataRanjang[a].detail.nama !== null) ? dataRanjang[a].detail.nama : "???") +
+                                "<i class=\"fa fa-bed\"></i> " + ((dataRanjang[a] !== undefined && dataRanjang[a] !== null && dataRanjang[a].detail !== undefined && dataRanjang[a].detail !== null && dataRanjang[a].detail.nama !== undefined && dataRanjang[a].detail.nama !== null) ? dataRanjang[a].detail.nama : "???") +
                                 "</div>" +
                                 "<div class=\"col-lg-9\">" + status_ranjang +
                                 "</div>";
