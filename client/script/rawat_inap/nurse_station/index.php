@@ -252,6 +252,8 @@
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = returnedData.length;
 
+                    console.log(returnedData);
+
                     return returnedData;
                 }
             },
@@ -313,15 +315,18 @@
                     "data" : null, render: function(data, type, row, meta) {
                         var checkRanjang = row.ranjang;
                         var allowManageRanjang = false;
-                        for(var a in checkRanjang) {
-                            if(!checkRanjang[a].allow_manage) {
-                                allowManageRanjang = false;
-                                break;
-                            } else {
-                                allowManageRanjang = true;
+                        if(checkRanjang.length > 0) {
+                            for(var a in checkRanjang) {
+                                if(!checkRanjang[a].allow_manage) {
+                                    allowManageRanjang = false;
+                                    break;
+                                } else {
+                                    allowManageRanjang = true;
+                                }
                             }
+                        } else {
+                            allowManageRanjang = true;
                         }
-                        console.log(row);
 
                         if(allowManageRanjang) {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
