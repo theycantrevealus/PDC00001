@@ -59,6 +59,7 @@
     var __POLI_IGD__ = <?php echo json_encode(__POLI_IGD__); ?>;
     var __POLI_LAB__ = <?php echo json_encode(__POLI_LAB__); ?>;
     var __POLI_ORTODONTIE__ = <?php echo json_encode(__POLI_ORTODONTIE__); ?>;
+    var __POLI_OPERASI__ = <?php echo json_encode(__POLI_OPERASI__); ?>;
 
     var __APOTEK_SERVICE_RESPONSE_TIME_TOLERATE__ = <?php echo json_encode(__APOTEK_SERVICE_RESPONSE_TIME_TOLERATE__); ?>;
 
@@ -89,7 +90,6 @@
 </script>
 
 <?php
-
 
 	if(
 		isset($_SESSION['token']) ||

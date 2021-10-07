@@ -3,7 +3,7 @@
 
 
 <?php
-	$lastExist;
+	$lastExist = '';
 ?>
 <?php require 'head.php'; ?>
 <body class="layout-default">
@@ -120,9 +120,9 @@
 			<div class="sidemenu-shimmer">
 				<?php
 					/*for($sh = 1; $sh <= 10; $sh++) {
-				?>
-				<div class="shine"></div>
-				<?php
+                    ?>
+                    <div class="shine"></div>
+                    <?php
 					}*/
 				?>
 			</div>

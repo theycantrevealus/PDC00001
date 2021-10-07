@@ -297,6 +297,7 @@
 
 		$("#btnSubmitAmprah").click(function() {
 			//Prepare Verifikasi
+            var allowSave = false;
 			$("#table-detail-mutasi tbody tr").each(function(e) {
 				if(!$(this).hasClass("new-row")) {
 					var item_uid = $(this).find("td:eq(1) b").attr("id").split("_");
@@ -359,13 +360,18 @@
 				}
 
 				if(totalMutasi > 0) {
-					$("#verif_unit_asal").html($("#txt_unit_asal option:selected").text());
-					$("#verif_unit_tujuan").html($("#txt_unit_tujuan option:selected").text());
-					$("#verif_tanggal").html($("#txt_tanggal").val());
-					$("#verif_nama").html($("#txt_nama").val());
-					$("#verif_keterangan").html($("#txt_keterangan").val());
+                    if($("#txt_keterangan").val() !== "") {
+                        $("#verif_unit_asal").html($("#txt_unit_asal option:selected").text());
+                        $("#verif_unit_tujuan").html($("#txt_unit_tujuan option:selected").text());
+                        $("#verif_tanggal").html($("#txt_tanggal").val());
+                        $("#verif_nama").html($("#txt_nama").val());
+                        $("#verif_keterangan").html($("#txt_keterangan").val());
 
-					$("#form-verifikasi-amprah").modal("show");
+                        $("#form-verifikasi-amprah").modal("show");
+                    } else {
+                        notification ("danger", "Keterangan mutasi wajib diisi", 3000, "detail_mutasi");
+                        $("#txt_keterangan").focus();
+                    }
 				} else {
 					notification ("danger", "Isi data permintaan mutasi", 3000, "detail_mutasi");
 				}

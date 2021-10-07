@@ -1,6 +1,6 @@
 <script type="text/javascript">
     
-    $(function (){
+    $(function () {
 
         let tableJadwal = $("#table_jadwal_operasi").DataTable({
 			"ajax":{
@@ -10,7 +10,12 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					return response.response_package.response_data;
+                    var data = response.response_package.response_data;
+
+                    console.clear();
+                    console.log(response);
+                    
+					return (data !== undefined && data !== null) ? data : [];
 				}
 			},
 			autoWidth: false,

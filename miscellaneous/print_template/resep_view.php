@@ -84,9 +84,15 @@
                     </td>
                     <td>
                         <span class="wrap_content"><h5 class="text-info"><?php echo $value['obat']; ?></h5></span>
-                        <br />
-                        <b>Keterangan:</b>
-                        <p><?php echo $value['keterangan']; ?></p>
+                        <?php
+                        if(!empty($value['keterangan'])) {
+                            ?>
+                            <br />
+                            <b>Keterangan:</b>
+                            <p><?php echo $value['keterangan']; ?></p>
+                            <?php
+                        }
+                        ?>
                     </td>
                     <td><?php echo $value['satuan']; ?></td>
                     <td><?php echo $value['kuantitas']; ?></td>
@@ -134,11 +140,15 @@
                                 </li>
                                 <?php
                             }
+                            if(!empty($value['keterangan'])) {
+                                ?>
+                                <br />
+                                <b>Keterangan:</b>
+                                <p><?php echo $value['keterangan']; ?></p>
+                                <br />
+                                <?php
+                            }
                         ?>
-                        <br />
-                        <b>Keterangan:</b>
-                        <p><?php echo $value['keterangan']; ?></p>
-                        <br />
                     </td>
                     <td><?php echo $value['kuantitas']; ?></td>
                     <td><?php echo $value['signa']; ?></td>
@@ -194,15 +204,25 @@
                 <tr>
                     <td></td>
                     <td colspan="8" class="text-mode" style="padding-bottom: 20px;">
-                        <b>Keterangan:</b>
-                        <p>
-                            <?php echo $value['keterangan']; ?>
-                        </p>
-                        <br />
-                        <b>Alasan Ubah:</b>
-                        <p>
-                            <?php echo $value['alasan_ubah']; ?>
-                        </p>
+                        <?php
+                        if(!empty($value['keterangan'])) {
+                            ?>
+                            <b>Keterangan:</b>
+                            <p>
+                                <?php echo $value['keterangan']; ?>
+                            </p>
+                            <br />
+                            <?php
+                        }
+                        if(!empty($value['alasan_ubah'])) {
+                            ?>
+                            <b>Alasan Ubah:</b>
+                            <p>
+                                <?php echo $value['alasan_ubah']; ?>
+                            </p>
+                            <?php
+                        }
+                        ?>
                     </td>
                 </tr>
                 <?php
@@ -211,39 +231,42 @@
             ?>
             </tbody>
         </table>
-        <br />
-        <h5>Racikan</h5>
-        <table class="table table-bordered largeDataType">
-            <thead class="thead-dark">
-            <tr>
-                <th class="wrap_content">No</th>
-                <th style="max-width: 50%; width: 50%">Nama Racikan</th>
-                <th class="wrap_content">Kuantitas</th>
-                <th colspan="2" style="max-width: 15%; width: 10%">Harga</th>
-                <th colspan="2" style="max-width: 15%; width: 10%">Subtotal</th>
-                <th class="wrap_content">Aturan Pakai</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            $autonum = 1;
-            foreach ($_POST['racikan_apotek'] as $key => $value) {
-                $detailRacikanApotek = $value['detail'];
-                ?>
+        <?php
+        if(count($_POST['racikan_apotek']) > 0) {
+            ?>
+            <br />
+            <h5>Racikan</h5>
+            <table class="table table-bordered largeDataType">
+                <thead class="thead-dark">
                 <tr>
-                    <td rowspan="<?php echo count($detailRacikanApotek) + 1; ?>">
-                        <h5 class="autonum">
-                            <?php echo $autonum; ?>
-                        </h5>
-                    </td>
-                    <td>
-                        <h5 class="text-info"><?php echo $value['kode']; ?></h5>
-                    </td>
-                    <td><?php echo $value['kuantitas']; ?></td>
-                    <td colspan="4"></td>
-                    <td class="text-center" rowspan="<?php echo count($detailRacikanApotek) + 1; ?>"><span class="wrap_content"><?php echo $value['signa']; ?></span></td>
+                    <th class="wrap_content">No</th>
+                    <th style="max-width: 50%; width: 50%">Nama Racikan</th>
+                    <th class="wrap_content">Kuantitas</th>
+                    <th colspan="2" style="max-width: 15%; width: 10%">Harga</th>
+                    <th colspan="2" style="max-width: 15%; width: 10%">Subtotal</th>
+                    <th class="wrap_content">Aturan Pakai</th>
                 </tr>
+                </thead>
+                <tbody>
                 <?php
+                $autonum = 1;
+                foreach ($_POST['racikan_apotek'] as $key => $value) {
+                    $detailRacikanApotek = $value['detail'];
+                    ?>
+                    <tr>
+                        <td rowspan="<?php echo count($detailRacikanApotek) + 1; ?>">
+                            <h5 class="autonum">
+                                <?php echo $autonum; ?>
+                            </h5>
+                        </td>
+                        <td>
+                            <h5 class="text-info"><?php echo $value['kode']; ?></h5>
+                        </td>
+                        <td><?php echo $value['kuantitas']; ?></td>
+                        <td colspan="4"></td>
+                        <td class="text-center" rowspan="<?php echo count($detailRacikanApotek) + 1; ?>"><span class="wrap_content"><?php echo $value['signa']; ?></span></td>
+                    </tr>
+                    <?php
                     for($a = 0; $a < count($detailRacikanApotek); $a++) {
                         ?>
                         <tr>
@@ -258,23 +281,36 @@
                     }
                     $autonum++;
                 }
-            ?>
+                ?>
                 <tr>
                     <td></td>
                     <td colspan="6" class="text-mode" style="padding-bottom: 20px;">
-                        <b>Keterangan:</b>
-                        <p>
-                            <?php echo $value['keterangan']; ?>
-                        </p>
-                        <br />
-                        <b>Alasan Ubah:</b>
-                        <p>
-                            <?php echo (isset($value['alasan_ubah']) && !empty($value['alasan_ubah']) && $value['alasan_ubah'] !== '') ? $value['alasan_ubah'] : '-'; ?>
-                        </p>
+                        <?php
+                            if(!empty($value['keterangan'])) {
+                                ?>
+                                <b>Keterangan:</b>
+                                <p>
+                                    <?php echo $value['keterangan']; ?>
+                                </p>
+                                <br />
+                                <?php
+                            }
+                            if(!empty($value['alasan_ubah'])) {
+                                ?>
+                                <b>Alasan Ubah:</b>
+                                <p>
+                                    <?php echo (isset($value['alasan_ubah']) && !empty($value['alasan_ubah']) && $value['alasan_ubah'] !== '') ? $value['alasan_ubah'] : '-'; ?>
+                                </p>
+                                <?php
+                            }
+                        ?>
                     </td>
                 </tr>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+            <?php
+        }
+        ?>
         <br />
         <strong>Alasan Ubah Keseluruhan :</strong>
         <p><?php echo (!empty($_POST['alasan_ubah']) && isset($_POST['alasan_ubah']) && $_POST['alasan_ubah'] !== '') ? $_POST['alasan_ubah'] : '-'; ?></p>

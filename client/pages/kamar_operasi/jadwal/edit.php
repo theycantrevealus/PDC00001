@@ -36,6 +36,10 @@
 						<label for="nik_pasien">NIK</label>
 						<input disabled type="text" id="nik_pasien" class="form-control" value="">
 					</div>
+                    <div class="col-6 col-md-6 mb-3">
+                        <label for="penjamin">Penjamin</label>
+                        <select id="penjamin" class="form-control"></select>
+                    </div>
 				</div>
 			</div>
 		</div>

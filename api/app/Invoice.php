@@ -627,16 +627,6 @@ class Invoice extends Utility
         $RekapBiayaKamar = array();
 
 
-
-
-
-
-
-
-
-
-
-
         $Ranap = self::$query->select('rawat_inap', array(
             'uid',
             'bed',
@@ -2176,12 +2166,10 @@ class Invoice extends Utility
                 $AntrianKunjungan['response_data'][$AKKey]['poli'] = $PoliInfo['response_data'][0];
 
                 //Info Pegawai
-
                 $PegawaiInfo = $Pegawai->get_info($AKValue['pegawai']);
                 $AntrianKunjungan['response_data'][$AKKey]['pegawai'] = $PegawaiInfo['response_data'][0];
 
                 //Info Loket
-
                 $AnjunganInfo = $Anjungan->get_loket_detail($AKValue['loket']);
                 $AntrianKunjungan['response_data'][$AKKey]['loket'] = $AnjunganInfo['response_data'][0];
             }
@@ -2340,8 +2328,9 @@ class Invoice extends Utility
                 ),
                 'class' => __CLASS__
             ));
+            $Invoice['response_unique'] = $InvoiceUID;
         }
-        $Invoice['response_unique'] = $InvoiceUID;
+
         return $Invoice;
     }
 

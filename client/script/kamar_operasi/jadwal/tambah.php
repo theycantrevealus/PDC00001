@@ -19,18 +19,45 @@
                 type: "GET",
                 dataType: 'json',
                 processResults: function (data, page) {
-                    console.log(data['response_package']['response_data']);
+                    console.log(data);
                     return {
                         results: data['response_package']['response_data']
                     }
                 }
             }
         });
+
+        $.ajax({
+            async: false,
+            url:__HOSTAPI__ + "/Penjamin/penjamin",
+            type: "GET",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            success: function(response){
+                var MetaData = response.response_package.response_data;
+
+                if (MetaData !== undefined && MetaData !== null){
+                    for(var i in MetaData){
+                        var selection = document.createElement("OPTION");
+
+                        $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                        $("#penjamin").append(selection);
+                    }
+
+                    $("#penjamin").select2();
+                }
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
         
         $('#pasien').on('select2:select', function (e) {
             let data = e.params.data;
-            
-            $("#nik_pasien").val(data.nik);
+            $("#nik_pasien").val(data.nik).attr({
+                "kunjungan": data.uid_kunjungan
+            });
             $("#no_rm_pasien").val(data.no_rm);
         });
 
@@ -45,17 +72,21 @@
             let jam_selesai = $("#jam_selesai").val();
             let ruang_operasi = $("#ruang_operasi").val();
             let dokter = $("#dokter").val();
+            let penjamin = $("#penjamin").val();
             let operasi = $("#operasi").val();
+            let kunjungan = $("#nik_pasien").attr("kunjungan");
 
             let form_data = {
                 'request': 'add_jadwal_operasi',
                 'pasien' : pasien,
+                'penjamin': penjamin,
                 'jenis_operasi' : jenis_operasi,
                 'tgl_operasi' : tgl_operasi,
                 'jam_mulai' : jam_mulai,
                 'jam_selesai' : jam_selesai,
                 'ruang_operasi' : ruang_operasi,
                 'dokter' : dokter,
+                'kunjungan': kunjungan,
                 'operasi' : operasi
             }
 

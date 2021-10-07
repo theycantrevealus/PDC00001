@@ -8,6 +8,7 @@ use PondokCoder\Utility as Utility;
 use PondokCoder\Authorization as Authorization;
 use PondokCoder\Pegawai as Pegawai;
 use PondokCoder\Pasien as Pasien;
+use PondokCoder\Invoice as Invoice;
 use PondokCoder\Ruangan as Ruangan;
 
 class KamarOperasi extends Utility {
@@ -518,7 +519,41 @@ class KamarOperasi extends Utility {
             
             //$params = implode(', ', $init_params);
 
-            $data = self::$query
+            $data = self::$query->select('kunjungan', array(
+                'uid as uid_kunjungan'
+            ))
+                ->join('antrian', array(
+                    'uid as uid_antrian',
+                    'pasien'
+                ))
+                ->join('pasien', array(
+                    'uid',
+                    'no_rm',
+                    'nik',
+                    'nama'
+                ))
+                ->on(array(
+                    array('antrian.kunjungan', '=', 'kunjungan.uid'),
+                    array('antrian.pasien', '=', 'pasien.uid')
+                ))
+                ->where(array(
+                    'kunjungan.waktu_keluar' => 'IS NULL',
+                    'AND',
+                    'antrian.waktu_keluar' => 'IS NULL',
+                    'AND',
+                    '(pasien.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pasien.uid'    => 'NOT IN '. $params,
+                    'AND',
+                    'pasien.nik'    => 'LIKE \'%' . $parameter . '%\'',
+                    'OR',
+                    'pasien.no_rm'  => 'LIKE \'%' . $parameter . '%\'',
+                    'OR',
+                    'LOWER(pasien.nama)'   => 'LIKE LOWER(\'%' . $parameter . '%\'))'
+                ), array())
+                ->execute();
+
+            /*$data = self::$query
                 ->select('pasien', 
                     array(
                         'uid',
@@ -540,30 +575,40 @@ class KamarOperasi extends Utility {
                         'LOWER(pasien.nama)'   => 'LIKE LOWER(\'%' . $parameter . '%\')'
                     )
                 )
-                ->execute();
+                ->execute();*/
 
         } else {
-            
-            $data = self::$query
-                ->select('pasien', 
-                    array(
-                        'uid',
-                        'no_rm',
-                        'nik',
-                        'nama'
-                    )
-                )
-                ->where(
-                    array(
-                        'pasien.deleted_at' => 'IS NULL',
-                        'AND',
-                        'pasien.nik'    => 'LIKE \'%' . $parameter . '%\'',
-                        'OR',
-                        'pasien.no_rm'  => 'LIKE \'%' . $parameter . '%\'',
-                        'OR',
-                        'LOWER(pasien.nama)'   => 'LIKE LOWER(\'%' . $parameter . '%\')'
-                    )
-                )
+
+            $data = self::$query->select('kunjungan', array(
+                'uid as uid_kunjungan'
+            ))
+                ->join('antrian', array(
+                    'uid as uid_antrian',
+                    'pasien'
+                ))
+                ->join('pasien', array(
+                    'uid',
+                    'no_rm',
+                    'nik',
+                    'nama'
+                ))
+                ->on(array(
+                    array('antrian.kunjungan', '=', 'kunjungan.uid'),
+                    array('antrian.pasien', '=', 'pasien.uid')
+                ))
+                ->where(array(
+                    'kunjungan.waktu_keluar' => 'IS NULL',
+                    'AND',
+                    'antrian.waktu_keluar' => 'IS NULL',
+                    'AND',
+                    '(pasien.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pasien.nik'    => 'LIKE \'%' . $parameter . '%\'',
+                    'OR',
+                    'pasien.no_rm'  => 'LIKE \'%' . $parameter . '%\'',
+                    'OR',
+                    'LOWER(pasien.nama)'   => 'LIKE LOWER(\'%' . $parameter . '%\'))'
+                ), array())
                 ->execute();
         }
 
@@ -641,6 +686,8 @@ class KamarOperasi extends Utility {
                     'operasi',
                     'dokter',
                     'paket_obat',
+                    'penjamin',
+                    'kunjungan',
                     'status_pelaksanaan'
                 )
             )
@@ -759,8 +806,7 @@ class KamarOperasi extends Utility {
 
     }
 
-    public static function edit_jenis_operasi($parameter)
-    {
+    public static function edit_jenis_operasi($parameter) {
         $Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -822,13 +868,15 @@ class KamarOperasi extends Utility {
     private static function add_jadwal_operasi($parameter)
     {
         $Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
         
         $uid = parent::gen_uuid();
         $jadwal = self::$query
             ->insert('kamar_operasi_jadwal', array(
                     'uid'               => $uid,
                     'pasien'            => $parameter['pasien'],
+                    'penjamin'          => $parameter['penjamin'],
+                    'kunjungan'          => $parameter['kunjungan'],
                     'ruang_operasi'     => $parameter['ruang_operasi'],
                     'tgl_operasi'       => $parameter['tgl_operasi'],
                     'jam_mulai'         => $parameter['jam_mulai'],
@@ -880,29 +928,56 @@ class KamarOperasi extends Utility {
 		$old = self::get_jadwal_operasi_detail($parameter['uid']);
         $Inventori = new Inventori(self::$pdo);
 
-		$jadwal = self::$query
-            ->update('kamar_operasi_jadwal', array(
-                    'ruang_operasi'     => $parameter['ruang_operasi'],
-                    'tgl_operasi'       => $parameter['tgl_operasi'],
-                    'jam_mulai'         => $parameter['jam_mulai'],
-                    'jam_selesai'       => $parameter['jam_selesai'],
-                    'jenis_operasi'     => $parameter['jenis_operasi'],
-                    'operasi'           => $parameter['operasi'],
-                    'dokter'            => $parameter['dokter'],
-                    'updated_at'        => parent::format_date(),
-                    'paket_obat' => $parameter['paket_obat']
+        if(!isset($parameter['paket_obat'])) {
+            $jadwal = self::$query
+                ->update('kamar_operasi_jadwal', array(
+                        'ruang_operasi'     => $parameter['ruang_operasi'],
+                        'tgl_operasi'       => $parameter['tgl_operasi'],
+                        'jam_mulai'         => $parameter['jam_mulai'],
+                        'jam_selesai'       => $parameter['jam_selesai'],
+                        'jenis_operasi'     => $parameter['jenis_operasi'],
+                        'operasi'           => $parameter['operasi'],
+                        'dokter'            => $parameter['dokter'],
+                        'penjamin'          => $parameter['penjamin'],
+                        'updated_at'        => parent::format_date()
+                    )
                 )
-            )
-            ->where(array(
-                'kamar_operasi_jadwal.deleted_at' => 'IS NULL',
-                'AND',
-                'kamar_operasi_jadwal.uid'        => '= ?'
+                ->where(array(
+                    'kamar_operasi_jadwal.deleted_at' => 'IS NULL',
+                    'AND',
+                    'kamar_operasi_jadwal.uid'        => '= ?'
                 ),
-                array(
-                    $parameter['uid']
+                    array(
+                        $parameter['uid']
+                    )
                 )
-            )
-            ->execute();
+                ->execute();
+        } else {
+            $jadwal = self::$query
+                ->update('kamar_operasi_jadwal', array(
+                        'ruang_operasi'     => $parameter['ruang_operasi'],
+                        'tgl_operasi'       => $parameter['tgl_operasi'],
+                        'jam_mulai'         => $parameter['jam_mulai'],
+                        'jam_selesai'       => $parameter['jam_selesai'],
+                        'jenis_operasi'     => $parameter['jenis_operasi'],
+                        'operasi'           => $parameter['operasi'],
+                        'dokter'            => $parameter['dokter'],
+                        'penjamin'          => $parameter['penjamin'],
+                        'updated_at'        => parent::format_date(),
+                        'paket_obat'        => $parameter['paket_obat']
+                    )
+                )
+                ->where(array(
+                    'kamar_operasi_jadwal.deleted_at' => 'IS NULL',
+                    'AND',
+                    'kamar_operasi_jadwal.uid'        => '= ?'
+                ),
+                    array(
+                        $parameter['uid']
+                    )
+                )
+                ->execute();
+        }
 
         $detailObatResponse = array();
         $usedBatch = array();
@@ -951,7 +1026,7 @@ class KamarOperasi extends Utility {
 
             //Paket Obat
 
-            foreach ($parameter['item'] as $itemKey=> $itemValue) {
+            foreach ($parameter['item'] as $itemKey => $itemValue) {
                 //Get depo ok batch
                 $kebutuhanKekurangan = floatval($itemValue['qty']);
                 $batchData = $Inventori->get_item_batch($itemValue['obat']);
@@ -1068,8 +1143,37 @@ class KamarOperasi extends Utility {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
         $Inventori = new Inventori(self::$pdo);
-        
+        $SInvoice = new Invoice(self::$pdo);
         $old = self::get_jadwal_operasi_detail($parameter['uid']);
+        $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
+            'uid'
+        ))
+            ->where(array(
+                'invoice.deleted_at' => 'IS NULL',
+                'AND',
+                'invoice.kunjungan' => '= ?'
+            ), array(
+                $old['response_data'][0]['kunjungan'],
+            ))
+            ->execute();
+
+        if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
+
+            $InvoiceUID = $InvoiceCheck['response_data'][0]['uid'];
+
+        } else { //Belum ada Invoice Master
+
+            $Invoice = $SInvoice->create_invoice(array(
+                'access_token' => $parameter['access_token'],
+                'kunjungan' => $old['response_data'][0]['kunjungan'],
+                'pasien' => $old['response_data'][0]['pasien'],
+                'keterangan' => 'Kunjungan Operasi'
+            ));
+
+            $InvoiceUID = $Invoice['response_unique'];
+        }
+        
+
 
         $selesai = self::$query
             ->update('kamar_operasi_jadwal', array(
@@ -1212,6 +1316,57 @@ class KamarOperasi extends Utility {
                             'keterangan' => 'Penggunaan Obat/BHP Operasi'
                         ))
                             ->execute();
+
+
+                        //Charge Biaya Obat Operasi
+                        $BatchInfo = $Inventori->get_batch_detail($uBValue['batch'])['response_data'][0];
+
+                        $Profit = self::$query->select('master_inv_harga', array(
+                            'id',
+                            'barang',
+                            'penjamin',
+                            'profit',
+                            'profit_type'
+                        ))
+                            ->where(array(
+                                'master_inv_harga.deleted_at' => 'IS NULL',
+                                'AND',
+                                'master_inv_harga.barang' => '= ?',
+                                'AND',
+                                'master_inv_harga.penjamin' => '= ?'
+                            ), array(
+                                $uBValue['barang'], $parameter['penjamin']
+                            ))
+                            ->execute();
+                        if(count($Profit['response_data']) > 0) {
+                            if($Profit['response_data'][0]['profit_type'] === 'P') {
+                                $finalHarga = floatval($BatchInfo['harga']) + (floatval($BatchInfo['harga']) * floatval($Profit['response_data'][0]['profit']) / 100);
+                            } else if($Profit['response_data'][0]['profit_type'] === 'P') {
+                                $finalHarga = floatval($BatchInfo['harga']) + floatval($Profit['response_data'][0]['profit']);
+                            } else {
+                                $finalHarga = floatval($BatchInfo['harga']);
+                            }
+                        } else {
+                            $finalHarga = floatval($BatchInfo['harga']);
+                        }
+
+                        $Invoice = $SInvoice->append_invoice(array(
+                            'invoice' => $InvoiceUID,
+                            'item' => $uBValue['barang'],
+                            'item_origin' => 'master_inv',
+                            'qty' => floatval($uBValue['qty']),
+                            'harga' => $finalHarga,
+                            'subtotal' => (floatval($uBValue['qty']) * $finalHarga),
+                            'status_bayar' => 'N',
+                            'discount' => 0,
+                            'discount_type' => 'N',
+                            'pasien' => $old['response_data'][0]['pasien'],
+                            'penjamin' => $old['response_data'][0]['penjamin'],
+                            'billing_group' => 'obat',
+                            'keterangan' => 'Obat/BHP Operasi',
+                            'departemen' => __POLI_OPERASI__
+                        ));
+
                     }
                 }
             }

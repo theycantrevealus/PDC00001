@@ -251,6 +251,7 @@
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = returnedData.length;
+                    console.log(returnedData);
 
                     return returnedData;
                 }
@@ -268,7 +269,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"text-info\">[" + row.kode + "]</h5>" + row.nama;
+                        return "<h5 class=\"text-info\">[" + ((row.kode !== undefined || row.kode !== null) ? row.kode : "") + "]</h5>" + ((row.nama !== undefined || row.nama !== null) ? row.nama : "-");
                     }
                 },
                 {
@@ -284,7 +285,7 @@
                                 status_ranjang = "<b>" + dataRanjang[a].status.nama_pasien + "</b><br />" + dataRanjang[a].status.nama_dokter;
                             }
                             parseRanjang += "<div class=\"col-lg-3\">" +
-                                "<i class=\"fa fa-bed\"></i> " + dataRanjang[a].detail.nama +
+                                "<i class=\"fa fa-bed\"></i> " + ((dataRanjang[a] !== undefined && dataRanjang[a] !== null && dataRanjang[a].detail !== undefined && dataRanjang[a].detail !== null && dataRanjang[a].detail.nama !== undefined && dataRanjang[a].detail.nama !== null) ? dataRanjang[a].detail.nama : "???") +
                                 "</div>" +
                                 "<div class=\"col-lg-9\">" + status_ranjang +
                                 "</div>";
@@ -313,15 +314,18 @@
                     "data" : null, render: function(data, type, row, meta) {
                         var checkRanjang = row.ranjang;
                         var allowManageRanjang = false;
-                        for(var a in checkRanjang) {
-                            if(!checkRanjang[a].allow_manage) {
-                                allowManageRanjang = false;
-                                break;
-                            } else {
-                                allowManageRanjang = true;
+                        if(checkRanjang.length > 0) {
+                            for(var a in checkRanjang) {
+                                if(!checkRanjang[a].allow_manage) {
+                                    allowManageRanjang = false;
+                                    break;
+                                } else {
+                                    allowManageRanjang = true;
+                                }
                             }
+                        } else {
+                            allowManageRanjang = true;
                         }
-                        console.log(row);
 
                         if(allowManageRanjang) {
                             return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
