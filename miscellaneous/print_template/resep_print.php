@@ -90,13 +90,13 @@
         .header {
             left: 1cm; top: 1cm;
             right: 1cm;
-            position: fixed;
+            position: absolute;
             text-align:left;
             font-family: GreyCLiff;
         }
 
         .header-space {
-            height: 210px;
+            height: 10px;
         }
 
         h1.title-name {
@@ -164,6 +164,7 @@
 
 
         .report_content {
+            margin-top: 200px;
             font-size: 10pt;
             page-break-after: always;
         }
