@@ -63,5 +63,5 @@
     <link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/json-viewer/json-viewer.css" rel="stylesheet" />
     <link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/jstree/themes/default/style.min.css" rel="stylesheet" />
 	<link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/custom.css" rel="stylesheet" />
-<!--    <link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/bintan.css" rel="stylesheet" />-->
+    <link type="text/css" href="<?php echo __HOSTNAME__; ?>/template/assets/css/bintan.css" rel="stylesheet" />
 </head>
