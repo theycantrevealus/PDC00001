@@ -18,6 +18,7 @@
     <div class="card">
         <div class="card-header bg-white">
             <h5 class="card-header__title flex m-0">
+                Pengembalian Barang
                 <a href="<?php echo __HOSTNAME__; ?>/inventori/return/tambah" class="btn btn-info pull-right" id="tambah-gudang">
                     <i class="fa fa-plus"></i> Tambah
                 </a>
@@ -28,6 +29,7 @@
                 <thead class="thead-dark">
                 <tr>
                     <th class="wrap_content">No</th>
+                    <th>Kode</th>
                     <th>Pemasok</th>
                     <th>Tanggal</th>
                     <th>Oleh</th>

@@ -126,7 +126,8 @@ class PO extends Utility {
 		return $data;
 	}
 
-	public function get_po_detail($parameter){
+	public function get_po_detail($parameter) {
+        $Inventori = new Inventori(self::$pdo);
 		$data = self::$query
 			->select('inventori_po_detail', array(
 					'id',
@@ -152,6 +153,14 @@ class PO extends Utility {
         $Inventori = new Inventori(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['barang_detail'] = $Inventori->get_item_detail($value['uid_barang'])['response_data'][0];
+            $batchAvail = $Inventori->get_item_batch($value['uid_barang'])['response_data'];
+            $parsedBatch = array();
+            foreach ($batchAvail as $BKey => $BValue) {
+                if($BValue['gudang']['uid'] === __GUDANG_UTAMA__) {
+                    array_push($parsedBatch, $BValue);
+                }
+            }
+            $data['response_data'][$key]['batch_avail'] = $parsedBatch;
         }
 
 		return $data;
@@ -213,7 +222,7 @@ class PO extends Utility {
         $po = self::$query->select('inventori_po', array(
             'uid',
             'nomor_po',
-            'supplier',
+            'supplier as uid_supplier',
             'pegawai',
             'total',
             'disc',
@@ -227,8 +236,12 @@ class PO extends Utility {
             ->join('master_supplier', array(
                 'nama as nama_supplier'
             ))
+            ->join('inventori_do', array(
+                'uid as uid_do'
+            ))
             ->on(array(
-                array('inventori_po.supplier', '=', 'master_supplier.uid')
+                array('inventori_po.supplier', '=', 'master_supplier.uid'),
+                array('inventori_do.po', '=', 'inventori_po.uid'),
             ))
             ->where(array(
                 'inventori_po.deleted_at' => 'IS NULL',

@@ -32,7 +32,7 @@
                             <tr>
                                 <th class="wrap_content">No</th>
                                 <th>Item</th>
-                                <th class="wrap_content">Qty Order</th>
+                                <th class="wrap_content">Batch</th>
                                 <th style="width: 10%">Qty</th>
                                 <th class="wrap_content">Satuan</th>
                             </tr>
