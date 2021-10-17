@@ -5,7 +5,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax": {
                 url: __HOSTAPI__ + "/Inventori",
@@ -76,7 +76,46 @@
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
 
-            $("#form-detail-retur").modal("show");
+            $.ajax({
+                url: __HOSTAPI__ + "/Inventori/return_detail/" + id,
+                async: false,
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "GET",
+                success: function (response) {
+                    var data = response.response_package.response_data[0];
+                    if(data !== undefined) {
+                        $("#form-detail-retur").modal("show");
+                        var detail = data.detail;
+
+                        $("#retur_kode_retur").html("<b>" + data.kode + "</b>");
+                        $("#retur_tanggal_retur").html("<b>" + data.created_at_parsed + "</b>");
+                        $("#retur_pemasok").html("<b>" + data.supplier.nama + "</b>");
+                        $("#retur_pegawai").html("<b>" + data.pegawai.nama + "</b>");
+
+                        for(var a in detail) {
+                            var autonum = (parseInt(a) + 1);
+                            $("#detail_retur tbody").append("<tr>" +
+                                "<td><h5 class=\"autonum\">" + autonum + "</h5></td>" +
+                                "<td>" + detail[a].barang.nama + "</td>" +
+                                "<td>" + detail[a].batch.batch + "</td>" +
+                                "<td>" + detail[a].barang.satuan_terkecil_info.nama + "</td>" +
+                                "<td>" + number_format(parseFloat(detail[a].qty), 2, ".", ",") + "</td>" +
+                                "</tr>");
+                        }
+
+                    }
+
+
+                    console.clear();
+                    console.log(data);
+
+                },
+                error: function (response) {
+                    //
+                }
+            });
         });
     });
 </script>
@@ -128,7 +167,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
-                <button type="button" class="btn btn-primary" id="btn_cetak_retur">Cetak</button>
+                <!--button type="button" class="btn btn-primary" id="btn_cetak_retur">Cetak</button-->
             </div>
         </div>
     </div>

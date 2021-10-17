@@ -41,6 +41,9 @@ class Inventori extends Utility
                 case 'satuan':
                     return self::get_satuan();
                     break;
+                case 'return_detail':
+                    return self::get_return_detail($parameter[2]);
+                    break;
                 case 'satuan_detail':
                     return self::get_satuan_detail($parameter[2]);
                     break;
@@ -712,7 +715,7 @@ class Inventori extends Utility
                             if($StokLog['response_result'] > 0) {
                                 //Insert Into Inventori Return Detail
                                 $InventoriReturnDetail = self::$query->insert('inventori_return_detail', array(
-                                    'barang' => $value['barang'],
+                                    'barang' => $value['item'],
                                     'batch' => $value['batch'],
                                     'qty' => floatval($value['qty']),
                                     'inventori_return' => $ReturnUID,
@@ -2020,10 +2023,10 @@ class Inventori extends Utility
                 $parameter
             ))
             ->execute();
+        $PO = new PO(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             //Get Harga dari PO
             if (isset($value['po'])) {
-                $PO = new PO(self::$pdo);
                 $Price = $PO->get_po_item_price(array(
                     'po' => $value['po'],
                     'barang' => $value['barang']
@@ -4083,6 +4086,9 @@ class Inventori extends Utility
     }
 
     private function get_return_detail($parameter) {
+        $Pegawai = new Pegawai(self::$pdo);
+        $Supplier = new Supplier(self::$pdo);
+
         $data = self::$query->select('inventori_return', array(
             'uid',
             'kode',
@@ -4115,9 +4121,16 @@ class Inventori extends Utility
                 ))
                 ->execute();
             foreach ($detail['response_data'] as $DKey => $DValue) {
-                
+                $detail['response_data'][$DKey]['barang'] = self::get_item_detail($DValue['barang'])['response_data'][0];
+                $detail['response_data'][$DKey]['batch'] = self::get_batch_detail($DValue['batch'])['response_data'][0];
             }
+            $data['response_data'][$key]['pegawai'] = $Pegawai->get_info($value['pegawai'])['response_data'][0];
+            $data['response_data'][$key]['supplier'] = $Supplier->get_detail($value['supplier']);
+            $data['response_data'][$key]['detail'] = $detail['response_data'];
+            $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
         }
+
+        return $data;
     }
 
     private function get_return_entry($parameter) {
