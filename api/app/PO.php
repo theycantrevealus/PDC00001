@@ -33,6 +33,9 @@ class PO extends Utility {
 				case 'view':
 					return self::get_po_info($parameter[2]);
 					break;
+                case 'select2':
+                    return self::get_po_select($parameter);
+                    break;
 				default:
 					return self::get_po();
 					break;
@@ -71,6 +74,9 @@ class PO extends Utility {
 		))
 		->execute();
 		$autonum = 1;
+        $Supplier = new Supplier(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+
 		foreach ($data['response_data'] as $key => $value) {
 			//Check Barang sudah sampai atau belum
 			$PODetail = self::get_po_detail($value['uid'])['response_data'];
@@ -103,12 +109,12 @@ class PO extends Utility {
 			}
 			$data['response_data'][$key]['detail'] = $PODetail;
 
-			$Supplier = new Supplier(self::$pdo);
-			$InfoSupplier = $Supplier::get_detail($value['supplier']);
+
+			$InfoSupplier = $Supplier->get_detail($value['supplier']);
 			$data['response_data'][$key]['supplier'] = $InfoSupplier;
 
-			$Pegawai = new Pegawai(self::$pdo);
-			$InfoPegawai = $Pegawai::get_detail($value['pegawai']);
+
+			$InfoPegawai = $Pegawai->get_detail($value['pegawai']);
 
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$data['response_data'][$key]['tanggal_po'] = date("d F Y", strtotime($value['tanggal_po']));
@@ -120,7 +126,8 @@ class PO extends Utility {
 		return $data;
 	}
 
-	public function get_po_detail($parameter){
+	public function get_po_detail($parameter) {
+        $Inventori = new Inventori(self::$pdo);
 		$data = self::$query
 			->select('inventori_po_detail', array(
 					'id',
@@ -142,6 +149,19 @@ class PO extends Utility {
 				)
 			)
 			->execute();
+
+        $Inventori = new Inventori(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['barang_detail'] = $Inventori->get_item_detail($value['uid_barang'])['response_data'][0];
+            $batchAvail = $Inventori->get_item_batch($value['uid_barang'])['response_data'];
+            $parsedBatch = array();
+            foreach ($batchAvail as $BKey => $BValue) {
+                if($BValue['gudang']['uid'] === __GUDANG_UTAMA__) {
+                    array_push($parsedBatch, $BValue);
+                }
+            }
+            $data['response_data'][$key]['batch_avail'] = $parsedBatch;
+        }
 
 		return $data;
 	}
@@ -197,6 +217,47 @@ class PO extends Utility {
 
 		return $data;
 	}
+
+    private function get_po_select($parameter) {
+        $po = self::$query->select('inventori_po', array(
+            'uid',
+            'nomor_po',
+            'supplier as uid_supplier',
+            'pegawai',
+            'total',
+            'disc',
+            'disc_type',
+            'total_after_disc',
+            'tanggal_po',
+            'keterangan',
+            'created_at',
+            'updated_at'
+        ))
+            ->join('master_supplier', array(
+                'nama as nama_supplier'
+            ))
+            ->join('inventori_do', array(
+                'uid as uid_do'
+            ))
+            ->on(array(
+                array('inventori_po.supplier', '=', 'master_supplier.uid'),
+                array('inventori_do.po', '=', 'inventori_po.uid'),
+            ))
+            ->where(array(
+                'inventori_po.deleted_at' => 'IS NULL',
+                'AND',
+                '(inventori_po.nomor_po' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                'OR',
+                'master_supplier.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
+            ))
+            ->limit(10)
+            ->execute();
+        foreach ($po['response_data'] as $key => $value) {
+            $po['response_data'][$key]['nomor_po'] = $value['nomor_po'] . ' - ' . $value['nama_supplier'];
+            $po['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+        }
+        return $po;
+    }
 
 	public function get_po_info($parameter) {
 		$po = self::$query->select('inventori_po', array(
