@@ -164,6 +164,8 @@
 
             $("#bList_" + id + " li").remove();
             var kebutuhan = parseFloat($(this).inputmask("unmaskedvalue"));
+            var harga = $("#obat_" + id).attr("harga");
+            //$("#hg_" + id).html(number_format((kebutuhan * harga), 2, ".", ","));
             var usedBatch = calculateBatch($("#obat_" + id + " option:selected").val(), kebutuhan);
             for(var ang in usedBatch) {
                 if(usedBatch[ang].kode !== "") {
@@ -202,17 +204,26 @@
                     success: function(response) {
 
                         var data = response.response_package.response_data[0];
+                        var totalHarga = 0;
                         for(var a in data.detail) {
+                            if(data.detail[a].harga !== undefined && data.detail[a].qty !== undefined) {
+                                totalHarga += (parseFloat(data.detail[a].harga) * parseFloat(data.detail[a].qty));
+                            }
+
+                            //console.log(totalHarga);
                             autoObat({
                                 obat: {
                                     uid: data.detail[a].obat.uid,
                                     nama: data.detail[a].obat.nama
                                 },
+                                harga: (data.detail[a].harga !== undefined) ? parseFloat(data.detail[a].harga) : 0,
                                 jlh: data.detail[a].qty,
                                 satuan: data.detail[a].obat.satuan_terkecil_info.nama,
                                 remark: data.detail[a].remark
                             });
                         }
+
+                        $("#totalBiayaObatOK").html(number_format(totalHarga, 2, '.', ','));
                         autoObat();
 
                     },
@@ -232,6 +243,7 @@
                 nama: ""
             },
             jlh: 0,
+            harga: 0,
             satuan: "",
             remark: ""
         }) {
@@ -257,12 +269,16 @@
                 }
             }
 
+            $(newBatchList).append("<hr />Rp. <hg harga=\"" + setter.harga + "\">" + number_format(setter.harga, 2, ".", ",") + "</hg>");
+
 
             $(newCellObat).append(newObat).append("<br /><br />Keterangan").append(newRemark);
             $(newCellQty).append(newQty).append("<br /><strong>Saran Batch:</strong><br />").append(newBatchList);
             $(newCellAksi).append(newDelete);
 
-            $(newObat).select2({
+            $(newObat).attr({
+                harga: setter.harga
+            }).select2({
                 minimumInputLength: 2,
                 "language": {
                     "noResults": function(){
@@ -293,6 +309,7 @@
                                     id: item.uid,
                                     penjamin: item.penjamin,
                                     satuan_terkecil: item.satuan_terkecil,
+                                    harga: item.harga,
                                     stok: item.stok,
                                     batch: item.batch
                                 }
@@ -331,6 +348,7 @@
                 }*/
 
                 for(var ang in usedBatch) {
+                    console.log(usedBatch[ang]);
                     if(usedBatch[ang].kode !== "") {
                         $("#bList_" + id).append("<li>" + usedBatch[ang].kode + " <i class=\"fa fa-arrow-right\"></i> <b class=\"text-purple\">(" + usedBatch[ang].qty + ")</b></li>");
                     }
@@ -438,6 +456,10 @@
 
                 $(this).find("td:eq(2) ol").attr({
                     "id": "bList_" + id
+                });
+
+                $(this).find("td:eq(2) hg").attr({
+                    "id": "hg_" + id
                 });
 
                 $(this).find("td:eq(3)").attr({

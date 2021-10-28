@@ -154,6 +154,7 @@ class KamarOperasi extends Utility {
 
 
             foreach ($Detail as $DKey => $DValue) {
+                $Harga = 0;
                 //Check Depo OK
                 $TotalStock = 0;
                 $InventoriStockPopulator = $Inventori->get_item_batch($DValue['obat']['uid']);
@@ -161,8 +162,10 @@ class KamarOperasi extends Utility {
                     foreach ($InventoriStockPopulator['response_data'] as $TotalKey => $TotalValue) {
                         if($TotalValue['gudang']['uid'] === __GUDANG_DEPO_OK__) {
                             $TotalStock += floatval($TotalValue['stok_terkini']);
+                            $Harga += floatval($TotalValue['harga']);
                         }
                     }
+                    $Detail[$DKey]['harga'] = $Harga;
                     $Detail[$DKey]['stok'] = $TotalStock;
                 } else {
                     $Detail[$DKey]['stok'] = 0;

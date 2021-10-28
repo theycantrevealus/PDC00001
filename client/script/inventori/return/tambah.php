@@ -31,6 +31,7 @@
                                 text: item.nomor_po,
                                 id: item.uid,
                                 uid_supplier: item.uid_supplier,
+                                sup_type: item.supplier_type,
                                 supplier: item.supplier,
                                 nama_supplier: item.nama_supplier,
                                 created_at: item.created_at_parsed
@@ -55,7 +56,7 @@
                     $("#nomor_po").html(data.text).attr({
                         "uid": data.id
                     });
-                    $("#nama_supplier").html(data.nama_supplier).attr({
+                    $("#nama_supplier").html(data.nama_supplier + " <b>[" + ((data.sup_type === 'B') ? "Rumah Sakit" : "Supplier Biasa") + "]</b>").attr({
                         "uid": data.uid_supplier
                     });
                     $("#tanggal_po").html(data.created_at);

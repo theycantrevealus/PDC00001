@@ -1903,6 +1903,7 @@ class Inventori extends Utility
                 }
                 $data['response_data'][$key]['stok'] = $TotalStock;
                 $data['response_data'][$key]['batch'] = $InventoriStockPopulator['response_data'];
+                $data['response_data'][$key]['harga'] = 0;
             } else {
                 $data['response_data'][$key]['stok'] = 0;
             }
@@ -3388,7 +3389,8 @@ class Inventori extends Utility
             'kode_amprah' => str_pad(count($lastID['response_data']) + 1, 5, '0', STR_PAD_LEFT) . '/' . $UserData['data']->unit_kode . '/AMP/' . date('m') . '/' . date('Y'),
             'unit' => $UserData['data']->unit,
             'pegawai' => $UserData['data']->uid,
-            'tanggal' => $parameter['tanggal'],
+            //'tanggal' => $parameter['tanggal'],
+            'tanggal' => parent::format_date(),
             'status' => 'N',
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date(),

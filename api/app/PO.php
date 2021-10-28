@@ -234,7 +234,7 @@ class PO extends Utility {
             'updated_at'
         ))
             ->join('master_supplier', array(
-                'nama as nama_supplier'
+                'nama as nama_supplier', 'supplier_type'
             ))
             ->join('inventori_do', array(
                 'uid as uid_do'

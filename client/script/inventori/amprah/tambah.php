@@ -36,7 +36,7 @@
 			var item = document.createElement("TD");
 			var itemSelector = document.createElement("SELECT");
 			//load_product(itemSelector);
-			$(item).append(itemSelector);
+			$(item).append(itemSelector).append("<br /><br /><span class=\"kentut\"></span>");
 			$(itemSelector).select2({
                 minimumInputLength: 2,
                 "language": {
@@ -61,12 +61,13 @@
                     cache: true,
                     processResults: function (response) {
                         var data = response.response_package.response_data;
-                        console.log(data);
+
                         return {
                             results: $.map(data, function (item) {
                                 return {
                                     text: item.nama,
                                     id: item.uid,
+                                    stok: item.batch,
                                     satuan_terkecil: item.satuan_terkecil.nama
                                 }
                             })
@@ -75,9 +76,20 @@
                 }
             }).addClass("form-control item-amprah").on("select2:select", function(e) {
                 var data = e.params.data;
+                var totalStok = 0;
+                for(var a in data.stok) {
+                    console.log(data.stok[a]);
+                    if(data.stok[a].gudang.uid === __GUDANG_UTAMA__) {
+                        totalStok += data.stok[a].stok_terkini
+                    }
+                }
+
+                console.log(totalStok);
+
                 if(data.satuan_terkecil != undefined) {
                     $(this).children("[value=\""+ data.id + "\"]").attr({
-                        "satuan-caption": data.satuan_terkecil
+                        "satuan-caption": data.satuan_terkecil,
+                        "stok": totalStok
                     });
                 } else {
                     return false;
@@ -113,6 +125,7 @@
 				$(this).attr("id", "row_" + (e + 1));
 				$(this).find("td:eq(0)").html((e + 1));
 				$(this).find("td:eq(1) select").attr("id", "item_" + (e + 1));
+                $(this).find("td:eq(1) span.kentut").attr("id", "stok_" + (e + 1));
 				$(this).find("td:eq(2)").attr("id", "satuan_" + (e + 1));
 				$(this).find("td:eq(3) input").attr("id", "qty_" + (e + 1));
 			});
@@ -185,7 +198,7 @@
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
 			$("#satuan_" + id).html($(this).find("option:selected").attr("satuan-caption"));
-
+            $("#stok_" + id).html("Stok gudang : " + $(this).find("option:selected").attr("stok"));
 			if($("#qty_" + id).inputmask("unmaskedvalue") > 0 && $("#row_" + id).hasClass("new-row") && $("#item_" + id).val() != "none") {
 				autoTable("#table-detail-amprah");
 			}			

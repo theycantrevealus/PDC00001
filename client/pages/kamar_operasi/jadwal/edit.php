@@ -102,6 +102,10 @@
                         <option value="none">Tanpa Paket</option>
                     </select>
                 </div>
+                <div class="col-lg-8 text-right">
+                    <small>Total Biaya Obat:</small><br />
+                    <h4 class="text-danger" id="totalBiayaObatOK">0.00</h4>
+                </div>
                 <div class="col-lg-12">
                     <br />
                     <table class="table table-bordered largeDataType table-striped" id="autoObat">
