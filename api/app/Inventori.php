@@ -1825,6 +1825,8 @@ class Inventori extends Utility
 
     private function get_item_select2($parameter)
     {
+        $dupCheck = array();
+        $dataResult = array();
         $data = self::$query
             ->select('master_inv', array(
                 'uid',
@@ -1836,10 +1838,18 @@ class Inventori extends Utility
                 'created_at',
                 'updated_at'
             ))
+            ->join('master_inv_obat_kandungan', array(
+                'id', 'kandungan'
+            ))
+            ->on(array(
+                array('master_inv.uid', '=', 'master_inv_obat_kandungan.uid_obat')
+            ))
             ->where(array(
                 'master_inv.deleted_at' => 'IS NULL',
                 'AND',
                 '(master_inv.kode_barang' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                'OR',
+                '(master_inv_obat_kandungan.kandungan' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')',
                 'OR',
                 'master_inv.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
             ))
@@ -1850,6 +1860,20 @@ class Inventori extends Utility
         $PenjaminObat = new Penjamin(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+            $kandunganList = array();
+            $Kandungan = self::$query->select('master_inv_obat_kandungan', array(
+                'kandungan'
+            ))
+                ->where(array(
+                    'master_inv_obat_kandungan.uid_obat' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach($Kandungan['response_data'] as $kKK => $kKV) {
+                array_push($kandunganList, $kKV['kandungan']);
+            }
+            $data['response_data'][$key]['nama'] = $value['nama'] . ' [' . implode(', ', $kandunganList) . ']';
             $kategori_obat = self::get_kategori_obat_item($value['uid']);
             foreach ($kategori_obat as $KOKey => $KOValue) {
                 $KategoriCaption = self::get_kategori_obat_detail($KOValue['kategori'])['response_data'][0]['nama'];
@@ -1883,8 +1907,15 @@ class Inventori extends Utility
                 $data['response_data'][$key]['stok'] = 0;
             }
 
-            $autonum++;
+            if(!isset($dupCheck[$value['uid']])) {
+                $dupCheck[$value['uid']] = 1;
+                array_push($dataResult, $data['response_data'][$key]);
+                $autonum++;
+            }
+
+
         }
+        $data['response_data'] = $dataResult;
         return $data;
     }
 
