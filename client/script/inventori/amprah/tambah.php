@@ -293,8 +293,29 @@
 					type:"POST",
 					success:function(response) {
 						if(response.response_package.response_result > 0) {
-							notification ("success", "Amprah berhasil di proses", 3000, "hasil_amprah");
-							location.href = __HOSTNAME__ + "/inventori/amprah";
+							//Notif Amprah Untuk Apotek
+							if(__MY_PRIVILEGES__.response_data[0].uid === __UIDAPOTEKER__) {
+								push_socket(
+									__ME__,
+									"amprah_new_approval_request",
+									__UIDKARUAPOTEKER__,
+									"Permohonan Amprah Baru",
+									"info").then(function() {
+									notification ("success", "Amprah berhasil di ajukan kepada karu apotek", 3000, "hasil_amprah");
+									location.href = __HOSTNAME__ + "/inventori/amprah";
+								});
+							} else {
+								push_socket(
+									__ME__,
+									"amprah_new_approved",
+									__UIDKARUAPOTEKER__,
+									"Permohonan Amprah Baru",
+									"info"
+								).then(function() {
+									notification ("success", "Amprah berhasil di ajukan", 3000, "hasil_amprah");
+									location.href = __HOSTNAME__ + "/inventori/amprah";
+								});
+							}
 						} else {
 							notification ("danger", "Amprah gagal di proses", 3000, "hasil_amprah");
 							$("#btnSubmitVerifikasi").removeAttr("disabled");

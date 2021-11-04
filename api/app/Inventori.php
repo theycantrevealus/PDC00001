@@ -125,6 +125,9 @@ class Inventori extends Utility
     public function __POST__($parameter = array())
     {
         switch ($parameter['request']) {
+            case 'approve_permintaan_amprah':
+                return self::approve_permintaan_amprah($parameter);
+                break;
             case 'retur_po':
                 return self::retur_po($parameter);
                 break;
@@ -622,7 +625,23 @@ class Inventori extends Utility
 
 
 
+    private function approve_permintaan_amprah($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
+        $UpdateAmprahStatus = self::$query->update('inventori_amprah', array(
+            'status' => 'B',
+            'approved_by' => $UserData['data']->uid,
+            'updated_at' => parent::format_date()
+        ))
+            ->where(array(
+                'inventori_amprah.uid' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+        return $UpdateAmprahStatus;
+    }
 
 
 
@@ -3391,7 +3410,7 @@ class Inventori extends Utility
             'pegawai' => $UserData['data']->uid,
             //'tanggal' => $parameter['tanggal'],
             'tanggal' => parent::format_date(),
-            'status' => 'N',
+            'status' => ($UserData['data']->jabatan === __UIDAPOTEKER__) ? 'A' : 'N',
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date(),
             'keterangan' => $parameter['keterangan']
@@ -3495,13 +3514,15 @@ class Inventori extends Utility
                         'AND',
                         'inventori_amprah.tanggal' => 'BETWEEN ? AND ?',
                         'AND',
-                        'NOT inventori_amprah.status' => '= ?',
+                        '(NOT inventori_amprah.status' => '= ?',
+                        'AND',
+                        'NOT inventori_amprah.status' => '= ?)',
                         'AND',
                         'inventori_amprah.kode_amprah' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
                     );
 
                     $paramValue = array(
-                        $parameter['from'], $parameter['to'], 'S'
+                        $parameter['from'], $parameter['to'], 'S', 'A'
                     );
                 }
             } else {
@@ -3557,13 +3578,15 @@ class Inventori extends Utility
                     $paramData = array(
                         'inventori_amprah.deleted_at' => 'IS NULL',
                         'AND',
-                        'NOT inventori_amprah.status' => '= ?',
+                        '(NOT inventori_amprah.status' => '= ?',
+                        'AND',
+                        'NOT inventori_amprah.status' => '= ?)',
                         'AND',
                         'inventori_amprah.tanggal' => 'BETWEEN ? AND ?'
                     );
 
                     $paramValue = array(
-                        'S', $parameter['from'], $parameter['to']
+                        'S', 'A', $parameter['from'], $parameter['to']
                     );
                 }
             } else {
@@ -3649,6 +3672,10 @@ class Inventori extends Utility
                 $statusParse = 'Baru';
             } else if ($value['status'] == 'S') {
                 $statusParse = 'Selesai';
+            } else if ($value['status'] == 'A') {
+                $statusParse = 'Butuh Approval';
+            } else if ($value['status'] == 'B') {
+                $statusParse = 'Sudah Approve';
             } else {
                 $statusParse = 'Ditolak';
             }

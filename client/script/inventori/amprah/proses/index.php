@@ -10,6 +10,13 @@
 			}
 		}
 
+		protocolLib = {
+            amprah_new_approved: function(protocols, type, parameter, sender, receiver, time) {
+                notification ("info", "Permintaan Amprah Baru!", 3000, "amprah_new");
+                tableAmprah.ajax.reload();
+            }
+        };
+
 		var tableAmprah = $("#table-list-amprah").DataTable({
 			processing: true,
 			serverSide: true,

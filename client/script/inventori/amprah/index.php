@@ -10,6 +10,15 @@
 			}
 		}
 
+        protocolLib = {
+            amprah_new_approval_request: function(protocols, type, parameter, sender, receiver, time) {
+                if(__MY_PRIVILEGES__.response_data[0].uid === __UIDKARUAPOTEKER__) {
+                    notification ("info", "Amprah butuh approval!", 3000, "approval_amprah");
+                    tableAmprah.ajax.reload();
+                }
+            }
+        };
+
 		var tableAmprah = $("#table-list-amprah").DataTable({
 			processing: true,
 			serverSide: true,
@@ -20,7 +29,7 @@
 			"ajax":{
 				url: __HOSTAPI__ + "/Inventori",
 				type: "POST",
-				data: function(d){
+				data: function(d) {
 					d.request = "get_amprah_request";
 					d.from = getDateRange("#range_amprah")[0];
 					d.to = getDateRange("#range_amprah")[1];
@@ -48,7 +57,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+						return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -73,11 +82,68 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<a href=\"" + __HOSTNAME__ + "/inventori/amprah/view/" + row.uid + "\" class=\"btn btn-sm btn-info\"><i class=\"fa fa-eye\"></i></a>";
+                        if(row.status === "A") {
+                            if(__MY_PRIVILEGES__.response_data[0].uid === __UIDKARUAPOTEKER__) {
+                                return "<a href=\"" + __HOSTNAME__ + "/inventori/amprah/view/" + row.uid + "\" class=\"btn btn-sm btn-info\"><i class=\"fa fa-eye\"></i> Info</a>" +
+                                "<button class=\"btn btn-sm btn-success btnApproveAmprah\" id=\"approve_" + row.uid + "\"><i class=\"fa fa-check\"></i> Approve</button>";
+                            } else {
+                                return "<a href=\"" + __HOSTNAME__ + "/inventori/amprah/view/" + row.uid + "\" class=\"btn btn-sm btn-info\"><i class=\"fa fa-eye\"></i> Info</a>";
+                            }
+                        } else {
+                            return "<a href=\"" + __HOSTNAME__ + "/inventori/amprah/view/" + row.uid + "\" class=\"btn btn-sm btn-info\"><i class=\"fa fa-eye\"></i> Info</a>";
+                        }
 					}
 				}
 			]
 		});
+
+        $("body").on("click", ".btnApproveAmprah", function() {
+            var uid = $(this).attr("id").split("_");
+            uid = uid[uid.length - 1];
+            Swal.fire({
+                title: "Amprah Approval",
+                text: "Approve permohonan?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Tidak",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Inventori",
+                        async:false,
+                        data: {
+                            request: "approve_permintaan_amprah",
+                            uid: uid
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        success:function(response) {
+                            if(response.response_package.response_result > 0) {
+                                push_socket(
+									__ME__,
+									"amprah_new_approved",
+									__UIDKARUAPOTEKER__,
+									"Permohonan Amprah Baru",
+									"info"
+                                ).then(function() {
+                                    Swal.fire(
+                                        "Amprah Approval",
+                                        "Amprah telah disetujui",
+                                        "success"
+                                    ).then((result) => {
+                                        tableAmprah.ajax.reload();
+                                    });
+								});
+                            }
+                        },
+                        error:function(response) {
+                        }
+                    });
+                }
+            });
+        });
 
 		$("#range_amprah").change(function() {
 			tableAmprah.ajax.reload();
