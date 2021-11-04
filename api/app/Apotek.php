@@ -255,8 +255,7 @@ class Apotek extends Utility
                 $parameter['resep']
             ))
             ->execute();
-        foreach ($resepItem['response_data'] as $key => $value)
-        {
+        foreach ($resepItem['response_data'] as $key => $value) {
             //Potong Batch terdekat
             $InventoriBatch = $Inventori->get_item_batch($value['item']);
 
@@ -365,8 +364,7 @@ class Apotek extends Utility
 
             $racikan['detail'] = $racikanItem['response_data'];
 
-            foreach ($racikanItem['response_data'] as $rIKey => $rIValue)
-            {
+            foreach ($racikanItem['response_data'] as $rIKey => $rIValue) {
                 //Potong Batch terdekat
                 $InventoriBatch = $Inventori->get_item_batch($rIValue['obat']);
 

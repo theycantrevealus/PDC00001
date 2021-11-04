@@ -49,7 +49,7 @@
         });*/
 
         //submit data
-        $("#form_add_jadwal").submit(function(){
+        $("#form_add_jadwal").submit(function() {
             Swal.fire({
                 title: "Informasi Operasi",
                 text: "Update informasi pra-operasi. Pastikan data sudah benar!",
@@ -172,6 +172,18 @@
                     $("#bList_" + id).append("<li>" + usedBatch[ang].kode + " <i class=\"fa fa-arrow-right\"></i> <b class=\"text-purple\">(" + usedBatch[ang].qty + ")</b></li>");
                 }
             }
+
+            var totalHarga = 0;
+
+            $("#autoObat tbody tr").each(function() {
+                var harga = parseFloat($(this).find("td:eq(2) hg").attr("harga"));
+                var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                if(harga > 0) {
+                    totalHarga += (harga * qty);
+                }
+            });
+
+            $("#totalBiayaObatOK").html(number_format(totalHarga, 2, '.', ','));
 
             checkAutoObat(id);
         });
@@ -402,7 +414,7 @@
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                success: function(response){
+                success: function(response) {
                     var data = response.response_package.response_data;
                     if(data === undefined || data === null) {
                         data = []
