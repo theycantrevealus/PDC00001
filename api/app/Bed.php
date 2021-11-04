@@ -31,7 +31,7 @@ class Bed extends Utility {
 					break;
 
 				case 'bed-detail':
-					return self::get_ruangan_detail('master_unit_ruangan', $parameter[2]);
+					// return self::get_ruangan_detail('master_unit_ruangan', $parameter[2]);
 					break;
 
 				/*case 'ruangan-lantai':

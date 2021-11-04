@@ -423,6 +423,14 @@
                             }
                         }
                     }
+
+                    if(kebutuhan > 0) {
+                        $("#btn-selesai-operasi").attr({
+                            "disabled": "disabled"
+                        })
+                    } else {
+                        $("#btn-selesai-operasi").removeAttr("disabled");
+                    }
                 },
                 error: function(response) {
                     console.log(response);
