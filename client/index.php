@@ -7,7 +7,9 @@
 ?>
 
 <script type="text/javascript">
+    var currentLoggedInState = localStorage.getItem("currentLoggedInState");
     var __CURRENT_DATE__ = <?php echo json_encode(date('Y-m-d')); ?>;
+    var __AD_DOKTER_COUNT__ = <?php echo json_encode(__AD_DOKTER_COUNT__); ?>;
     var __PC_CUSTOMER__ = <?php echo json_encode(__PC_CUSTOMER__); ?>;
     var __PC_CUSTOMER_GROUP__ = <?php echo json_encode(__PC_CUSTOMER_GROUP__); ?>;
     var __PC_CUSTOMER_ADDRESS_SHORT__ = <?php echo json_encode(__PC_CUSTOMER_ADDRESS_SHORT__); ?>;
@@ -94,7 +96,8 @@
 	if(
 		isset($_SESSION['token']) ||
 		__PAGES__[0] == 'anjungan' ||
-		__PAGES__[0] == 'display'
+		__PAGES__[0] == 'display' ||
+        __PAGES__[0] == 'display_dokter'
 	) {
 		$params = parse_ini_file('../api/app/database.ini');
 		$conStr = sprintf("pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",

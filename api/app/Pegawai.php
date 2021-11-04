@@ -12,7 +12,7 @@ use \Firebase\JWT\JWT;
 class Pegawai extends Utility {
     static $pdo, $query;
 
-    protected static function getConn(){
+    protected static function getConn() {
         return self::$pdo;
     }
 
@@ -26,6 +26,8 @@ class Pegawai extends Utility {
             //__HOST__/Pegawai/detail/{uid}
             return self::get_detail($parameter[2]);
 
+        } else if($parameter[1] == 'kehadiran_dokter') {
+            return self::kehadiran_dokter();
         } else if($parameter[1] == 'jabatan_modul') {
 
             return self::get_jabatan_module($parameter[2]);
@@ -75,6 +77,9 @@ class Pegawai extends Utility {
 
     public function __POST__($parameter = array()) {
         switch ($parameter['request']) {
+            case 'logged_out':
+                return self::logged_out($parameter);
+                break;
             case 'login':
                 return self::login($parameter);
                 break;
@@ -174,7 +179,22 @@ class Pegawai extends Utility {
     }
 
 //=====================================================================================
-
+    private function logged_out($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        
+        $LoginState = self::$query->update('pegawai_kehadiran_real_time', array(
+            'status' => 'U'
+        ))
+            ->where(array(
+                'pegawai_kehadiran_real_time.pegawai' => '= ?'
+            ), array(
+                $UserData['data']->uid
+            ))
+            ->execute();
+            session_destroy();
+        return $LoginState;
+    }
 
     //LOGIN
     private function login($parameter) {
@@ -298,6 +318,38 @@ class Pegawai extends Utility {
                         'nama' => $read[0]['nama'],
                         'log_id' => $log
                     );
+                }
+
+                //Update Login Status
+                $LoginStatus = self::$query->select('pegawai_kehadiran_real_time', array(
+                    'pegawai'
+                ))
+                    ->where(array(
+                        'pegawai_kehadiran_real_time.pegawai' => '= ?'
+                    ), array(
+                        $read[0]['uid']
+                    ))
+                    ->execute();
+
+                if(count($LoginStatus['response_data']) > 0) {
+                    // Update
+                    $LoginState = self::$query->update('pegawai_kehadiran_real_time', array(
+                        'status' => 'A'
+                    ))
+                        ->where(array(
+                            'pegawai_kehadiran_real_time.pegawai' => '= ?'
+                        ), array(
+                            $read[0]['uid']
+                        ))
+                        ->execute();
+                } else {
+                    // New
+                    $LoginState = self::$query->insert('pegawai_kehadiran_real_time', array(
+                        'pegawai' => $read[0]['uid'],
+                        'jabatan' => $read[0]['jabatan'],
+                        'status' => 'A'
+                    ))
+                        ->execute();
                 }
 
 
@@ -1030,6 +1082,49 @@ class Pegawai extends Utility {
                 ))
 
                 ->execute();
+    }
+
+    private function kehadiran_dokter() {
+        $DokterList = self::$query->select('pegawai', array(
+            'uid', 'nama'
+        ))
+            ->where(array(
+                'pegawai.jabatan' => '= ?'
+            ), array(
+                __UIDDOKTER__
+            ))
+            ->execute();
+        $Poli = new Poli(self::$pdo);
+        foreach($DokterList['response_data'] as $key => $value) {
+            $LoginStatus = self::$query->select('pegawai_kehadiran_real_time', array(
+                'pegawai', 'status'
+            ))
+                ->where(array(
+                    'pegawai_kehadiran_real_time.pegawai' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $DokterList['response_data'][$key]['logged_in'] = (isset($LoginStatus['response_data']) && count($LoginStatus['response_data']) > 0) ? $LoginStatus['response_data'][0]['status'] : 'U';
+
+            //Poli
+            $DokterPoli = self::$query->select('master_poli_dokter', array(
+                'poli'
+            ))
+                ->where(array(
+                    'master_poli_dokter.dokter' => '= ?',
+                    'AND',
+                    'master_poli_dokter.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach($DokterPoli['response_data'] as $DPK => $DPV) {
+                $DokterPoli['response_data'][$DPK]['poli'] = $Poli->get_poli_info($DPV['poli'])['response_data'][0]['nama'];
+            }
+            $DokterList['response_data'][$key]['poli'] = $DokterPoli['response_data'];
+        }
+        return $DokterList;
     }
 
     public function get_jabatan_module($parameter) {

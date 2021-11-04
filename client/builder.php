@@ -13,6 +13,8 @@
 			require 'pages/anjungan/index.php';
 		} else if(__PAGES__[0] == 'display') {
             require 'pages/display/index.php';
+        } else if(__PAGES__[0] == 'display_dokter') {
+            require 'pages/display_dokter/index.php';
         } else if(__PAGES__[0] == 'display_jadwal_operasi') {
 			require 'pages/display_jadwal_operasi/index.php';
 		}
@@ -659,6 +661,7 @@
                 location.href = __HOSTNAME__ + "/system/logout";
             },
             refresh: function(protocols, type, parameter, sender, receiver, time) {
+                alert();
                 location.reload();
             }
         };
@@ -778,7 +781,11 @@
             Sync.onopen = function() {
                 clearInterval(tm);
                 //console.log("connected");
-
+                if(!currentLoggedInState) {
+                    push_socket("system", "loggedIn", "*", "User logged in", "info").then(function() {
+                        localStorage.setItem("currentLoggedInState", true);
+                    });
+                }
                 /*setInterval(function() {
                     //if (Sync.bufferedAmount == 0)
 
@@ -1124,6 +1131,29 @@
 			monthName[9]="Oktober";
 			monthName[10]="November";
 			monthName[11]="Desember";
+
+            $("#logoutButton").click(function() {
+                push_socket("system", "loggedOut", "*", "User logged out", "info").then(function() {
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Pegawai",
+                        type: "POST",
+                        data: {
+                            request: "logged_out"
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function(response) {
+                            localStorage.removeItem("currentLoggedInState");
+                            location.href = __HOSTNAME__;
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                });
+                return false;
+            });
 		});
 	</script>
 	<div class="notification-container"></div>
