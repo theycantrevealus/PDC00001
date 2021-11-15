@@ -402,10 +402,32 @@
 
 			var idleCheck;
 			function reloadSession() {
-				window.clearTimeout(idleCheck);
+                var excludedPages = ['display_dokter','display','anjungan'];
+
+                if(excludedPages.indexOf(__PAGES__[0]) < 0) {
+                    window.clearTimeout(idleCheck);
 				idleCheck = window.setTimeout(function(){
-					location.href = __HOSTNAME__ + "/system/logout";
+					
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Pegawai",
+                        type: "POST",
+                        data: {
+                            request: "logged_out"
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function(response) {
+                            localStorage.removeItem("currentLoggedInState");
+                            location.href = __HOSTNAME__;
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                    
 				},30 * 60 * 1000);
+                }
 			}
 
 			$("body").on("click", function() {
