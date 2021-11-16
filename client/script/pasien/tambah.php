@@ -118,12 +118,24 @@
                     },
                     type: "POST",
                     success: function(response) {
-                        if (status_antrian === "true"){
-                            localStorage.setItem("currentPasien", uid_pasien);
-                            location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + uid_pasien;
-                        } else {
-                            location.href = __HOSTNAME__ + '/pasien';
-                        }
+                        if (status_antrian === "true"){ 		//redirect to tambah kunjungan
+							if (
+							    response.response_package.response_unique !== "" &&
+                                response.response_package.response_unique !== undefined &&
+                                response.response_package.response_unique !== null
+                            ){	//check returning uid
+								//Set Current Pasien dan Antrian Data
+								localStorage.setItem("currentPasien", response.response_package.response_unique);
+								//Notif loket lain yang sedang aktif pemanggilan yang sama?? Back Log??
+								location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis/tambah/' + response.response_package.response_unique;
+							}
+						} else {
+						    if(response.response_package.response_result > 0) {
+                                location.href = __HOSTNAME__ + "/pasien";
+                            } else {
+						        console.log(response);
+                            }
+						}
                     },
                     error: function(response) {
                         console.log("Error : ");
