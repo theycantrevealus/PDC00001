@@ -4,6 +4,8 @@
             antrian_apotek_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", "<i class=\"fa fa-info\"></i> " + parameter, 3000, "request_resep");
                 tableResep.ajax.reload();
+                tableResep2.ajax.reload();
+                tableResep3.ajax.reload();
             },
             permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
                 console.clear();

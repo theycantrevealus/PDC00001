@@ -803,12 +803,15 @@
                 type:"GET",
                 success:function(response) {
                     batchData = response.response_package.response_data;
+                    console.clear();
+                    console.log(batchData);
 
 
                     if(batchData !== null) {
                         if(rowTarget !== "") {
 
                             var selectedBatchList = [];
+                            var selectedProfitValue = 0;
                             var alternatedBatchList = [];
                             var uniqueBatch = {};
                             var harga_tertinggi = 0;
@@ -829,6 +832,7 @@
                                 $("#batch_obat_" + rowTarget + " li").remove();
 
                                 total_kebutuhan = parseFloat($("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue"));
+                                console.log(total_kebutuhan);
                                 kebutuhan = $("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue");
 
                                 if(total_kebutuhan === 0 || isNaN(total_kebutuhan)) {
@@ -969,7 +973,8 @@
 
                                     var finalTotal = 0;
                                     var rawTotal = harga_tertinggi;
-
+                                     
+                                    
                                     if(selectedProfitType === "N") {
                                         finalTotal = rawTotal;
                                     } else if(selectedProfitType === "P") {
@@ -993,7 +998,7 @@
                                             $("#batch_obat_" + rowTarget).append("<li style=\"color:" + ((alternatedBatchList[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#F58D00") + "\" batch=\"" + alternatedBatchList[batchSelKey].batch + "\"><b>[" + alternatedBatchList[batchSelKey].kode + "]</b> " + alternatedBatchList[batchSelKey].expired + " (" + alternatedBatchList[batchSelKey].used + ") - " + alternatedBatchList[batchSelKey].gudang.nama + ((alternatedBatchList[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
                                         }
                                     }
-
+                                    
                                     $("#batch_obat_" + rowTarget).attr("harga", finalTotal);
 
                                     //Calculate harga
@@ -2637,26 +2642,38 @@
                                 },
                                 success:function(response) {
                                     if(response.response_package.antrian.response_result > 0) {
-                                        if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
-                                            Swal.fire(
-                                                "Verifikasi Berhasil!",
-                                                "Silahkan pasien menuju kasir",
-                                                "success"
-                                            ).then((result) => {
-                                                push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya obat baru", "warning").then(function() {
-                                                    location.href = __HOSTNAME__ + "/apotek/resep/";
-                                                });
-                                            });
-                                        } else {
+                                        if(currentMetaData.departemen.uid === __POLI_IGD__) {
                                             Swal.fire(
                                                 "Verifikasi Berhasil!",
                                                 "Silahkan minta pasien menunggu proses persiapan obat",
                                                 "success"
                                             ).then((result) => {
-                                                push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru BPJS", "warning").then(function() {
+                                                push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru IGD", "warning").then(function() {
                                                     location.href = __HOSTNAME__ + "/apotek/resep/";
                                                 });
                                             });
+                                        } else {
+                                            if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
+                                                Swal.fire(
+                                                    "Verifikasi Berhasil!",
+                                                    "Silahkan pasien menuju kasir",
+                                                    "success"
+                                                ).then((result) => {
+                                                    push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya obat baru", "warning").then(function() {
+                                                        location.href = __HOSTNAME__ + "/apotek/resep/";
+                                                    });
+                                                });
+                                            } else {
+                                                Swal.fire(
+                                                    "Verifikasi Berhasil!",
+                                                    "Silahkan minta pasien menunggu proses persiapan obat",
+                                                    "success"
+                                                ).then((result) => {
+                                                    push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru BPJS", "warning").then(function() {
+                                                        location.href = __HOSTNAME__ + "/apotek/resep/";
+                                                    });
+                                                });
+                                            }
                                         }
                                     } else {
                                         console.log(response);

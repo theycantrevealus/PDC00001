@@ -1297,7 +1297,7 @@ class Invoice extends Utility
 
                 //Jika Resep maka ubah status jadi lunas agar apotek bisa proses obat
                 if (
-                    count($ResepMaster['response_data']) > 0 &&
+                    // count($ResepMaster['response_data']) > 0 &&
                     $getPaymentDetail['response_data'][0]['item_type'] == 'master_inv'
                 ) { //Obat
 
@@ -1800,21 +1800,24 @@ class Invoice extends Utility
                     'protocol' => 'antrian_poli_baru'
                 ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju antrian poli';
-            } else if($goto_lab) {
+            }
+            if($goto_lab) {
                 array_push($notifier_target, array(
                     'target' => __UIDPETUGASLAB__,
                     'message' => 'Permintaan pemeriksaan laboratorium',
                     'protocol' => 'antrian_laboratorium_baru'
                 ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju laboratorium';
-            } else if($goto_rad) {
+            }
+            if($goto_rad) {
                 array_push($notifier_target, array(
                     'target' => __UIDPETUGASRAD__,
                     'message' => 'Permintaan pemeriksaan radiologi',
                     'protocol' => 'antrian_radiologi_baru'
                 ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi';
-            } else if($goto_rad && $goto_lab) {
+            }
+            if($goto_rad && $goto_lab) {
                 array_push($notifier_target, array(
                     'target' => __UIDPETUGASLAB__,
                     'message' => 'Permintaan pemeriksaan laboratorium',
@@ -1826,7 +1829,8 @@ class Invoice extends Utility
                     'protocol' => 'antrian_radiologi_baru'
                 ));
                 $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi lalu laboratorium';
-            } else if($goto_apotek) {
+            }
+            if($goto_apotek) {
                 array_push($notifier_target, array(
                     'target' => __UIDAPOTEKER__,
                     'message' => 'Antrian apotek baru',
@@ -2221,8 +2225,8 @@ class Invoice extends Utility
                 $InvoiceDetail['response_data'][$IDKey]['penjamin'] = $PenjaminInfo['response_data'][0];
                 $InvoiceDetailPoliInfo = $Poli->get_poli_info($IDValue['departemen']);
                 $InvoiceDetail['response_data'][$IDKey]['departemen_info'] = count($InvoiceDetailPoliInfo['response_data']) > 0 ? $InvoiceDetailPoliInfo['response_data'][0] : array(
-                    'uid' => __POLI_INAP__,
-                    'nama' => 'Rawat Inap'
+                    'uid' => $IDValue['departemen'],
+                    'nama' => ($IDValue['departemen'] === __POLI_INAP__) ? 'Rawat Inap' : 'IGD'
                 );
                 $InvoiceDetail['response_data'][$IDKey]['item'] = $Item['response_data'][0];
                 $InvoiceDetail['response_data'][$IDKey]['item']['allow_retur'] = ($IDValue['item'] == __UID_KARTU__) ? false : true;

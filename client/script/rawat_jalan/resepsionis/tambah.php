@@ -308,7 +308,13 @@
                         }
 					}
 				} else {
-					alert("Data belum lengkap");
+					Swal.fire(
+                        'Pendaftaran IGD',
+                        'Data Belum Lengkap',
+                        'error'
+                    ).then((result) => {
+                        me.removeAttr("disabled").addClass("btn-success").removeClass("btn-warning").html(lastCap);
+                    });
 				}
 			} else {
 			    console.log(currentAntrianID);

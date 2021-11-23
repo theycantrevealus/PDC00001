@@ -775,8 +775,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.clear();
-                    console.log(response);
                     var returnedData = [];
                     if(returnedData == undefined || returnedData.response_package == undefined) {
                         returnedData = [];
@@ -1413,6 +1411,8 @@
                             keterangan:$("#keterangan-faktur").val()
                         },
                         success:function(response) {
+                            var notifier_target = response.response_package.response_notifier;
+                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 Swal.fire({
                                     title: "Pembayaran Berhasil!",
@@ -1439,7 +1439,9 @@
                                     $("#form-invoice").modal("hide");
                                     $("#form-payment").modal("hide");
 
-                                    var notifier_target = response.response_package.response_notifier;
+                                    
+                                    console.clear();
+                                    console.log(notifier_target);
                                     for(var notifKey in notifier_target)
                                     {
                                         push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info").then(function() {

@@ -825,6 +825,15 @@
                 var time = signalData.time;
                 var parameter = signalData.parameter;
 
+                console.log({
+                    command: command,
+                    type:type,
+                    sender: sender,
+                    receiver: receiver,
+                    time: time,
+                    parameter: parameter
+                });
+
 
                 if(command !== undefined && command !== null && command !== "") {
 

@@ -228,10 +228,6 @@ class Inventori extends Utility
                 return self::get_stok_log_backend($parameter);
                 break;
 
-            case 'get_gudang_back_end':
-                return self::get_gudang_back_end();
-                break;
-
             case 'proses_mutasi':
                 return self::proses_mutasi($parameter);
                 break;

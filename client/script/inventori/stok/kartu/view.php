@@ -53,8 +53,6 @@
                 },
                 success: function (response) {
                     var data = response.response_package;
-                    console.clear();
-                    console.log(data);
                     if(data !== undefined && data !== null) {
                         forReturn = data;
                         myNewChart.data = forReturn;

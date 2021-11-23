@@ -3837,7 +3837,7 @@
                                     requestList.push({
                                         sender: __ME__,
                                         protocol: "permintaan_resep_baru",
-                                        receiver: "*",
+                                        receiver: __UIDAPOTEKER__,
                                         message: "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(),
                                         type: "warning"
                                     });
@@ -3845,9 +3845,9 @@
 
 
 
-                                    push_socket(__ME__, "permintaan_resep_baru", __UIDAPOTEKER__, "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
-                                        location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
-                                    });
+                                    // push_socket(__ME__, "permintaan_resep_baru", __UIDAPOTEKER__, "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
+                                    //     location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                    // });
                                 }
                             }
 
@@ -5483,6 +5483,7 @@
 
 
         $("#btnProsesInap").click(function() {
+            //Sini Inap
             Swal.fire({
                 title: 'Daftar untuk rawat inap?',
                 text: "Asesmen akan otomatis tertutup. Silahkan pastikan asesmen sudah selesai diisi dengan benar",
@@ -5491,68 +5492,166 @@
                 denyButtonText: "Belum",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        async: false,
-                        url:__HOSTAPI__ + "/Inap",
-                        type: "POST",
-                        data: {
-                            request: "tambah_inap",
-                            pasien: pasien_uid,
-                            //waktu_masuk: $("#inap_tanggal_masuk").val(),
-                            //kamar: $("#inap_kamar").val(),
-                            penjamin: $("#inap_penjamin").val(),
-                            //bed: $("#inap_bed").val(),
-                            poli_asal: $("#heading_nama_poli").attr("uid"),
-                            dokter: $("#inap_dokter").val(),
-                            kunjungan: kunjungan.uid,
-                            keterangan: $("#inap_keterangan").val()
-                        },
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        success: function(response){
-                            if(response.response_package.response_result > 0) {
-                                var alergiObat = $("#alergi_obat").val();
-                                const simpanDataProcess = new Promise(function(resolve, rejector) {
-                                    resolve(simpanAsesmen(
-                                        antrianData,
-                                        UID,
-                                        metaSwitchEdit.txt_keluhan_utama.editor,
-                                        metaSwitchEdit.txt_keluhan_tambahan.editor,
-                                        metaSwitchEdit.txt_pemeriksaan_fisik.editor,
-                                        editorTerapisAnamnesa,
-                                        editorTerapisTataLaksana,
-                                        editorTerapisEvaluasi,
-                                        editorTerapisHasil,
-                                        editorTerapisKesimpulan,
-                                        editorTerapisRekomendasi,
-                                        metaSwitchEdit.txt_diagnosa_kerja.editor,
-                                        metaSwitchEdit.txt_diagnosa_banding.editor,
-                                        metaSwitchEdit.txt_planning.editor,
-                                        alergiObat,
-                                        metaSwitchEdit.txt_keterangan_resep.editor,
-                                        metaSwitchEdit.txt_keterangan_resep_racikan.editor,
-                                        $("#iterasi_resep").inputmask("unmaskedvalue"),
-                                        metaSwitchEdit,
-                                        "Y"));
-                                }).then(function(AssesmenResult) {
-                                    if(AssesmenResult.response_package.response_result > 0) {
-                                        Swal.fire(
-                                            "Rawat Inap",
-                                            "Pasien berhasil didaftarkan untuk rawat inap",
-                                            "success"
-                                        ).then((result) => {
-                                            //$("#form-inap").modal("hide");
-                                            location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
-                                        });
+                    var alergiObat = $("#alergi_obat").val();
+                    const simpanDataProcess = new Promise(function(resolve, reject) {
+                        resolve(simpanAsesmen(
+                            antrianData,
+                            UID,
+                            metaSwitchEdit.txt_keluhan_utama.editor,
+                            metaSwitchEdit.txt_keluhan_tambahan.editor,
+                            metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                            editorTerapisAnamnesa,
+                            editorTerapisTataLaksana,
+                            editorTerapisEvaluasi,
+                            editorTerapisHasil,
+                            editorTerapisKesimpulan,
+                            editorTerapisRekomendasi,
+                            metaSwitchEdit.txt_diagnosa_kerja.editor,
+                            metaSwitchEdit.txt_diagnosa_banding.editor,
+                            metaSwitchEdit.txt_planning.editor,
+                            alergiObat,
+                            metaSwitchEdit.txt_keterangan_resep.editor,
+                            metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                            $("#iterasi_resep").inputmask("unmaskedvalue"),
+                            metaSwitchEdit,
+                            "Y"));
+                    }).then(function(result) {
+                        if(result.response_package.response_result > 0) {
+                            notification ("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
+
+
+                            //Build request list
+                            var requestList = [];
+
+
+                            if(result.response_package.resep_response !== undefined && result.response_package.resep_response !== null) {
+                                if(result.response_package.resep_response.resep.length > 0 || result.response_package.resep_response.racikan.length) {
+                                    requestList.push({
+                                        sender: __ME__,
+                                        protocol: "permintaan_resep_baru",
+                                        receiver: __UIDAPOTEKER__,
+                                        message: "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(),
+                                        type: "warning"
+                                    });
+
+
+
+
+                                    // push_socket(__ME__, "permintaan_resep_baru", __UIDAPOTEKER__, "Permintaan resep dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
+                                    //     location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                    // });
+                                }
+                            }
+
+                            if(result.response_package.radiologi !== undefined && result.response_package.radiologi !== null) {
+                                if(result.response_package.radiologi.response_result > 0 && result.response_package.radiologi.response_data[0]["status"] === "V") {
+                                    requestList.push({
+                                        sender: __ME__,
+                                        protocol: "permintaan_radio_baru",
+                                        receiver: "*",
+                                        message: "Permintaan radiologi dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(),
+                                        type: "warning"
+                                    });
+
+                                    /*push_socket(__ME__, "permintaan_radio_baru", "*", "Permintaan radiologi dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
+                                        location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                    });*/
+                                }
+                            }
+
+                            if(result.response_package.laboratorium !== undefined && result.response_package.laboratorium !== null) {
+                                if(result.response_package.laboratorium.response_result > 0 && result.response_package.laboratorium.response_data[0]["status"] === "V") {
+                                    requestList.push({
+                                        sender: __ME__,
+                                        protocol: "permintaan_laboratorium_baru",
+                                        receiver: "*",
+                                        message: "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(),
+                                        type: "warning"
+                                    });
+
+                                    /*push_socket(__ME__, "permintaan_laboratorium_baru", "*", "Permintaan laboratorium dari dokter " + __MY_NAME__ + " untuk pasien a/n " + $(".nama_pasien").html(), "warning").then(function() {
+                                        location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                    });*/
+                                }
+                            }
+
+                            resend_socket(requestList, function() {
+                                $.ajax({
+                                    async: false,
+                                    url:__HOSTAPI__ + "/Inap",
+                                    type: "POST",
+                                    data: {
+                                        request: "tambah_inap",
+                                        pasien: pasien_uid,
+                                        //waktu_masuk: $("#inap_tanggal_masuk").val(),
+                                        //kamar: $("#inap_kamar").val(),
+                                        penjamin: $("#inap_penjamin").val(),
+                                        //bed: $("#inap_bed").val(),
+                                        poli_asal: $("#heading_nama_poli").attr("uid"),
+                                        dokter: $("#inap_dokter").val(),
+                                        kunjungan: kunjungan.uid,
+                                        keterangan: $("#inap_keterangan").val()
+                                    },
+                                    beforeSend: function(request) {
+                                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                    },
+                                    success: function(response){
+                                        if(response.response_package.response_result > 0) {
+                                            var alergiObat = $("#alergi_obat").val();
+                                            const simpanDataProcess = new Promise(function(resolve, rejector) {
+                                                resolve(simpanAsesmen(
+                                                    antrianData,
+                                                    UID,
+                                                    metaSwitchEdit.txt_keluhan_utama.editor,
+                                                    metaSwitchEdit.txt_keluhan_tambahan.editor,
+                                                    metaSwitchEdit.txt_pemeriksaan_fisik.editor,
+                                                    editorTerapisAnamnesa,
+                                                    editorTerapisTataLaksana,
+                                                    editorTerapisEvaluasi,
+                                                    editorTerapisHasil,
+                                                    editorTerapisKesimpulan,
+                                                    editorTerapisRekomendasi,
+                                                    metaSwitchEdit.txt_diagnosa_kerja.editor,
+                                                    metaSwitchEdit.txt_diagnosa_banding.editor,
+                                                    metaSwitchEdit.txt_planning.editor,
+                                                    alergiObat,
+                                                    metaSwitchEdit.txt_keterangan_resep.editor,
+                                                    metaSwitchEdit.txt_keterangan_resep_racikan.editor,
+                                                    $("#iterasi_resep").inputmask("unmaskedvalue"),
+                                                    metaSwitchEdit,
+                                                    "Y"));
+                                            }).then(function(AssesmenResult) {
+                                                if(AssesmenResult.response_package.response_result > 0) {
+                                                    Swal.fire(
+                                                        "Rawat Inap",
+                                                        "Pasien berhasil didaftarkan untuk rawat inap",
+                                                        "success"
+                                                    ).then((result) => {
+                                                        //$("#form-inap").modal("hide");
+                                                        location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    },
+                                    error: function(response) {
+                                        console.log(response);
                                     }
                                 });
-                            }
-                        },
-                        error: function(response) {
-                            console.log(response);
+                            });
+                            //location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
+
+                        } else {
+                            notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                         }
                     });
+
+
+
+
+
+
+                    
                 } else if (result.isDenied) {
 
                 }

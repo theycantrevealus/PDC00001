@@ -32,7 +32,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
                     return returnedData;
                 }
@@ -133,7 +133,7 @@
                                 return "<h5 class=\"autonum\" allow-inap=\"" + apotekAllow + "|" + laborAllow + "|" + radioAllow + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
                             }
                         } else {
-                            return "<h5 class=\"autonum\" allow-inap=\"" + 0 + "|" + 0 + "|" + 0 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
+                            return "<h5 class=\"autonum\" allowTagihan=\"" + tagihanAllow + "\" allow-inap=\"" + 0 + "|" + 0 + "|" + 0 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
                         }
 
                     }
