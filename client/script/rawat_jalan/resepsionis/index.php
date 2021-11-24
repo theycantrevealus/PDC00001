@@ -1631,6 +1631,12 @@
 			userlogin: function(protocols, type, parameter, sender, receiver, time) {
 				//
 			},
+            isCalling: function(protocols, type, parameter, sender, receiver, time) {
+                $("#btnPanggil").attr("disabled", "disabled");
+            },
+            doneCalling: function(protocols, type, parameter, sender, receiver, time) {
+                $("#btnPanggil").removeAttr("disabled");
+            },
 			anjungan_kunjungan_baru: function(protocols, type, parameter, sender, receiver, time) {
 			    refresh_notification();
 				reinitAntrianSync($("#txt_loket").val());
@@ -1846,6 +1852,7 @@
 		});
 
 		$("#btnPanggil").click(function() {
+            push_socket("display", "isCalling", "*", "", "info");
 			push_socket($("#txt_loket").val(), "anjungan_kunjungan_panggil", "display_machine", {
 				loket: $("#txt_loket").val(),
 				nomor: $("#txt_current_antrian").html()
