@@ -104,7 +104,9 @@
         });
 
         loadRuangan("#filterRuangan");
-        $("#filterRuangan").select2().on("select2:select", function(e) {
+        $("#filterRuangan").select2({
+            dropdownParent: $("#form-nurse-station")
+        }).on("select2:select", function(e) {
             loadRanjang("#filterRanjang", $("#filterRuangan option:selected").val());
         });
 

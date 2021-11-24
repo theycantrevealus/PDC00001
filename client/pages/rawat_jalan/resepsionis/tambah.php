@@ -92,9 +92,9 @@
                     </div>
 
                     <div class="col-12 col-md-6 mb-3 poli_igd">
-                        <label>Bangsal <span class="red">*</span></label>
+                        <label>Ranjang <span class="red">*</span></label>
                         <select id="bangsal" class="form-control select2 inputan" required>
-                            <option value="" disabled selected>Pilih Bangsal</option>
+                            <option value="" disabled selected>Pilih Ranjang</option>
                         </select>
                     </div>
 

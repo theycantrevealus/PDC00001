@@ -323,7 +323,7 @@
 			return false;
 		});
 
-        function loadBed(ruangan){
+        function loadBed(ruangan) {
             $.ajax({
                 url:__HOSTAPI__ + "/Bed/bed-ruangan/" + ruangan,
                 type: "GET",

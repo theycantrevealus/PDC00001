@@ -104,7 +104,9 @@
         });
 
         loadRuangan("#filterRuangan");
-        $("#filterRuangan").select2().on("select2:select", function(e) {
+        $("#filterRuangan").select2({
+            dropdownParent: $("#form-nurse-station")
+        }).on("select2:select", function(e) {
             loadRanjang("#filterRanjang", $("#filterRuangan option:selected").val());
         });
 
@@ -577,7 +579,7 @@
                     if(MODE === "NEW") {
                         $.ajax({
                             async: false,
-                            url: __HOSTAPI__ + "/IGD",
+                            url: __HOSTAPI__ + "/Inap",
                             beforeSend: function(request) {
                                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                             },
@@ -603,9 +605,19 @@
                             }
                         });
                     } else {
+                        console.clear();
+                        console.log({
+                            request: "edit_nurse_station",
+                            uid: currentNS,
+                            nama: nama,
+                            kode: kode,
+                            unit: unit,
+                            petugas: getPetugas,
+                            ranjang: getRanjang
+                        });
                         $.ajax({
                             async: false,
-                            url: __HOSTAPI__ + "/Inap",
+                            url: __HOSTAPI__ + "/IGD",
                             beforeSend: function(request) {
                                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                             },
@@ -620,6 +632,7 @@
                             },
                             type: "POST",
                             success: function(response) {
+                                console.log(response);
                                 var result = response.response_package.response_result;
                                 if(result > 0) {
                                     $("#form-nurse-station").modal("hide");

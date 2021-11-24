@@ -72,6 +72,12 @@ class IGD extends Utility
             case 'tambah_riwayat_resep_igd':
                 return self::tambah_riwayat_resep_igd($parameter);
                 break;
+            case 'tambah_nurse_station':
+                return self::tambah_nurse_station($parameter);
+                break;
+            case 'edit_nurse_station':
+                return self::edit_nurse_station($parameter);
+                break;
             case 'kalkulasi_sisa_obat_2':
                 return self::kalkulasi_sisa_obat_2($parameter);
                 break;
@@ -85,6 +91,167 @@ class IGD extends Utility
 
     private function get_detail() {
         //
+    }
+
+    private function duplicate_check($parameter)
+    {
+        return self::$query
+            ->select($parameter['table'], array(
+                'uid',
+                'nama'
+            ))
+            ->where(array(
+                $parameter['table'] . '.deleted_at' => 'IS NULL',
+                'AND',
+                $parameter['table'] . '.nama' => '= ?'
+            ), array(
+                $parameter['check']
+            ))
+            ->execute();
+    }
+
+    private function edit_nurse_station($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $ranjangProc = array();
+
+        $uid = $parameter['uid'];
+        $old = self::get_ns_detail($uid);
+
+        $process = self::$query->update('nurse_station', array(
+            'nama' => $parameter['nama'],
+            'kode' => $parameter['kode'],
+            'unit' => $parameter['unit'],
+            'updated_at' => parent::format_date()
+        ))
+            ->where(array(
+                'nurse_station.deleted_at' => 'IS NULL',
+                'AND',
+                'nurse_station.uid' => '= ?'
+            ), array(
+                $uid
+            ))
+            ->execute();
+        if($process['response_result'] > 0) {
+            $log = parent::log(array(
+                'type' => 'activity',
+                'column' => array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'old_value',
+                    'new_value',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value' => array(
+                    $parameter['uid'],
+                    $UserData['data']->uid,
+                    'master_inv_obat_kategori',
+                    'U',
+                    json_encode($old['response_data'][0]),
+                    json_encode($parameter),
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class' => __CLASS__
+            ));
+
+            //Hard Reset Detail Item
+            //Petugas
+            $deletePetugas = self::$query->hard_delete('nurse_station_ranjang')
+                ->where(array(
+                    'nurse_station_ranjang.nurse_station' => '= ?'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+
+            //Asuhan
+            $deleteAsuhan = self::$query->hard_delete('nurse_station_petugas')
+                ->where(array(
+                    'nurse_station_petugas.nurse_station' => '= ?'
+                ), array(
+                    $uid
+                ))
+                ->execute();
+
+
+
+            foreach ($parameter['petugas'] as $key => $value) {
+                $entry_petugas = self::$query->insert('nurse_station_petugas', array(
+                    'nurse_station' => $uid,
+                    'petugas' => $value,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+                if($entry_petugas['response_result'] > 0) {
+                    $log = parent::log(array(
+                        'type' => 'activity',
+                        'column' => array(
+                            'unique_target',
+                            'user_uid',
+                            'table_name',
+                            'action',
+                            'logged_at',
+                            'status',
+                            'login_id'
+                        ),
+                        'value' => array(
+                            $entry_petugas['response_unique'],
+                            $UserData['data']->uid,
+                            'nurse_station_petugas',
+                            'I',
+                            parent::format_date(),
+                            'N',
+                            $UserData['data']->log_id
+                        ),
+                        'class' => __CLASS__
+                    ));
+                }
+            }
+
+            foreach ($parameter['ranjang'] as $key => $value) {
+                $entry_ranjang = self::$query->insert('nurse_station_ranjang', array(
+                    'nurse_station' => $uid,
+                    'ranjang' => $value,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+                array_push($ranjangProc, $entry_ranjang);
+                if($entry_ranjang['response_result'] > 0) {
+                    $log = parent::log(array(
+                        'type' => 'activity',
+                        'column' => array(
+                            'unique_target',
+                            'user_uid',
+                            'table_name',
+                            'action',
+                            'logged_at',
+                            'status',
+                            'login_id'
+                        ),
+                        'value' => array(
+                            $entry_ranjang['response_unique'],
+                            $UserData['data']->uid,
+                            'nurse_station_petugas',
+                            'I',
+                            parent::format_date(),
+                            'N',
+                            $UserData['data']->log_id
+                        ),
+                        'class' => __CLASS__
+                    ));
+                }
+            }
+        }
+        $process['ranjang'] = $ranjangProc;
+        return $process;
     }
 
     private function tambah_nurse_station($parameter) {
