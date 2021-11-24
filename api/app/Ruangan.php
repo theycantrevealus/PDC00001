@@ -372,10 +372,10 @@ class Ruangan extends Utility {
 
 		$check = self::duplicate_check(array(
 			'table'=>$table,
-			'check'=>$parameter['nama']
+			'check'=>$parameter['kode_ruangan']
 		));
 
-		if (count($check['response_data']) > 0){
+		if (count($check['response_data']) > 0) {
 			$check['response_message'] = 'Duplicate data detected';
 			$check['response_result'] = 0;
 			unset($check['response_data']);

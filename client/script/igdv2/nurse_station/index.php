@@ -438,7 +438,7 @@
 
                             var composeRanjang = [
                                 (dataSetRanjang.length + 1),
-                                ranjang[a].detail.ruangan_detail.nama,
+                                (ranjang[a].detail.ruangan_detail !== null && ranjang[a].detail.ruangan_detail !== undefined) ? ranjang[a].detail.ruangan_detail.nama : "",
                                 ranjang[a].detail.nama,
                                 "<button uid=\"" + ranjang[a].detail.uid + "\" class=\"btn btn-sm btn-danger btnDeleteRanjang\" id=\"target_ranjang_" + (dataSetRanjang.length + 1) + "\">" +
                                 "<span>" +
