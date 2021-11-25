@@ -579,7 +579,7 @@
                     if(MODE === "NEW") {
                         $.ajax({
                             async: false,
-                            url: __HOSTAPI__ + "/Inap",
+                            url: __HOSTAPI__ + "/IGD",
                             beforeSend: function(request) {
                                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                             },
