@@ -23,7 +23,9 @@
                     } else {
                         var data = response.response_package.response_data;
                         var autonum = 1;
+                        console.log(__NURSE_STATION__);
                         for(var key in data) {
+                            console.log(data[key].nurse_station.nurse_station);
                             if(
                                 data[key].pasien !== null && data[key].pasien !== undefined && data[key].nurse_station !== undefined && data[key].nurse_station !== null &&
                                 __NURSE_STATION__.indexOf(data[key].nurse_station.nurse_station) >= 0

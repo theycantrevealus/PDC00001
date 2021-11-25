@@ -26,6 +26,65 @@ class IGD extends Utility
         self::$query = new Query(self::$pdo);
     }
 
+    public function __DELETE__($parameter = array())
+    {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if($parameter[6] === 'nurse_station') {
+            $process = self::$query->delete('nurse_station')
+                ->where(array(
+                    'nurse_station.uid' => '= ?'
+                ), array(
+                    $parameter[7]
+                ))
+                ->execute();
+            if($process['response_result'] > 0) {
+                //Delete Ranjang NS dan Petugas
+                $Ranjang = self::$query->delete('nurse_station_ranjang')
+                    ->where(array(
+                        'nurse_station_ranjang.nurse_station' => '= ?'
+                    ), array(
+                        $parameter[7]
+                    ))
+                    ->execute();
+
+                $Petugas = self::$query->delete('nurse_station_petugas')
+                    ->where(array(
+                        'nurse_station_petugas.nurse_station' => '= ?'
+                    ), array(
+                        $parameter[7]
+                    ))
+                    ->execute();
+                $log = parent::log(array(
+                    'type' => 'activity',
+                    'column' => array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value' => array(
+                        $parameter[7],
+                        $UserData['data']->uid,
+                        'nurse_station',
+                        'D',
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class' => __CLASS__
+                ));
+            }
+            return $process;
+        } else {
+            return array();
+        }
+    }
+
     public function __GET__ ($parameter = array())
     {
         switch ($parameter[1])
@@ -1452,22 +1511,27 @@ class IGD extends Utility
         }
 
         $data['response_draw'] = $parameter['draw'];
+        $Pasien = new Pasien(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        $Ruangan = new Ruangan(self::$pdo);
+        $Bed = new Bed(self::$pdo);
         $autonum = intval($parameter['start']) + 1;
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
 
             //Pasien
-            $Pasien = new Pasien(self::$pdo);
+            
             $PasienDetail = $Pasien::get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienDetail['response_data'][0];
 
             //Dokter
-            $Pegawai = new Pegawai(self::$pdo);
+            
             $PegawaiDetail = $Pegawai->get_detail($value['dokter']);
             $data['response_data'][$key]['dokter'] = $PegawaiDetail['response_data'][0];
 
             //Penjamin
-            $Penjamin = new Penjamin(self::$pdo);
+            
             $PenjaminDetail = $Penjamin->get_penjamin_detail($value['penjamin']);
             $data['response_data'][$key]['penjamin'] = $PenjaminDetail['response_data'][0];
 
@@ -1485,20 +1549,22 @@ class IGD extends Utility
                 ->where(array(
                     'nurse_station_ranjang.ranjang' => '= ?',
                     'AND',
-                    'nurse_station_ranjang.deleted_at' => 'IS NULL'
+                    'nurse_station_ranjang.deleted_at' => 'IS NULL',
+                    'AND',
+                    'nurse_station.uid' => '= ?'
                 ), array(
-                    $value['bed']
+                    $value['bed'], $value['nurse_station']
                 ))
                 ->execute();
             $data['response_data'][$key]['nurse_station'] = $NurseStation['response_data'][0];
 
             //Ruangan
-            $Ruangan = new Ruangan(self::$pdo);
+            
             $RuanganDetail = $Ruangan->get_ruangan_detail('master_unit_ruangan', $value['kamar']);
             $data['response_data'][$key]['kamar'] = $RuanganDetail['response_data'][0];
 
             //Bed
-            $Bed = new Bed(self::$pdo);
+            
             $BedDetail = $Bed->get_bed_detail('master_unit_bed', $value['bed']);
             $data['response_data'][$key]['bed'] = $BedDetail['response_data'][0];
 

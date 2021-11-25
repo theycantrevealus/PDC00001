@@ -63,6 +63,22 @@ class Inap extends Utility
                 ))
                 ->execute();
             if($process['response_result'] > 0) {
+                $Ranjang = self::$query->delete('nurse_station_ranjang')
+                    ->where(array(
+                        'nurse_station_ranjang.nurse_station' => '= ?'
+                    ), array(
+                        $parameter[7]
+                    ))
+                    ->execute();
+
+                $Petugas = self::$query->delete('nurse_station_petugas')
+                    ->where(array(
+                        'nurse_station_petugas.nurse_station' => '= ?'
+                    ), array(
+                        $parameter[7]
+                    ))
+                    ->execute();
+                    
                 $log = parent::log(array(
                     'type' => 'activity',
                     'column' => array(
@@ -2174,9 +2190,11 @@ class Inap extends Utility
                 ->where(array(
                     'nurse_station_ranjang.ranjang' => '= ?',
                     'AND',
-                    'nurse_station_ranjang.deleted_at' => 'IS NULL'
+                    'nurse_station_ranjang.deleted_at' => 'IS NULL',
+                    'AND',
+                    'nurse_station.uid' => '= ?'
                 ), array(
-                    $value['bed']
+                    $value['bed'], $value['nurse_station']
                 ))
                 ->execute();
             $data['response_data'][$key]['nurse_station'] = $NurseStation['response_data'][0];

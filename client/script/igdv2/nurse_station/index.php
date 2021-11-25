@@ -360,7 +360,7 @@
                 if (result.isConfirmed) {
                     $.ajax({
                         async: false,
-                        url: __HOSTAPI__ + "/Inap/nurse_station/" + uid,
+                        url: __HOSTAPI__ + "/IGD/nurse_station/" + uid,
                         beforeSend: function (request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
