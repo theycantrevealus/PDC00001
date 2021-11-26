@@ -2190,11 +2190,9 @@ class Inap extends Utility
                 ->where(array(
                     'nurse_station_ranjang.ranjang' => '= ?',
                     'AND',
-                    'nurse_station_ranjang.deleted_at' => 'IS NULL',
-                    'AND',
-                    'nurse_station.uid' => '= ?'
+                    'nurse_station_ranjang.deleted_at' => 'IS NULL'
                 ), array(
-                    $value['bed'], $value['nurse_station']
+                    $value['bed']
                 ))
                 ->execute();
             $data['response_data'][$key]['nurse_station'] = $NurseStation['response_data'][0];
