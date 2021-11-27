@@ -56,6 +56,14 @@ class IGD extends Utility
                         $parameter[7]
                     ))
                     ->execute();
+                //Pasien Aktif
+                $IGDNS = self::$query->delete('igd')
+                        ->where(array(
+                            'igd.nurse_station' => '= ?'
+                        ), array(
+                            $parameter[7]
+                        ))
+                        ->execute();
                 $log = parent::log(array(
                     'type' => 'activity',
                     'column' => array(
