@@ -490,8 +490,16 @@ class Antrian extends Utility
                             $NSRanjang = self::$query->select('nurse_station_ranjang', array(
                                 'nurse_station'
                             ))
+                                ->join('nurse_station', array(
+                                    'uid'
+                                ))
+                                ->on(array(
+                                    array('nurse_station_ranjang.nurse_station', '=', 'nurse_station.uid')
+                                ))
                                 ->where(array(
                                     'nurse_station_ranjang.ranjang' => '= ?',
+                                    'AND',
+                                    'nurse_station_ranjang.deleted_at' => 'IS NULL',
                                     'AND',
                                     'nurse_station_ranjang.deleted_at' => 'IS NULL'
                                 ), array(
@@ -2246,7 +2254,7 @@ class Antrian extends Utility
             $data['response_draw'] = $parameter['draw'];
             $data['recordsTotal'] = $itemTotal;
             $data['recordsFiltered'] = $itemTotal;
-            $data['length'] = intval($parameter['length']);2376c2c2-b62e2376c2c2-b62e-4631-a0b6-096d3c094df4-4631-a0b6-096d3c094df4
+            $data['length'] = intval($parameter['length']);
             $data['start'] = intval($parameter['start']);
 
             return $data;
