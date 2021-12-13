@@ -490,16 +490,8 @@ class Antrian extends Utility
                             $NSRanjang = self::$query->select('nurse_station_ranjang', array(
                                 'nurse_station'
                             ))
-                                ->join('nurse_station', array(
-                                    'uid'
-                                ))
-                                ->on(array(
-                                    array('nurse_station_ranjang.nurse_station', '=', 'nurse_station.uid')
-                                ))
                                 ->where(array(
                                     'nurse_station_ranjang.ranjang' => '= ?',
-                                    'AND',
-                                    'nurse_station_ranjang.deleted_at' => 'IS NULL',
                                     'AND',
                                     'nurse_station_ranjang.deleted_at' => 'IS NULL'
                                 ), array(
