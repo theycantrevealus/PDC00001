@@ -803,33 +803,35 @@ class Apotek extends Utility
                     array_push($updateProgress, $getStok);
                 }
             }
-            if($updateResult === (count($usedBatch) + count($usedBatchInap))) {
-                $updateResep = self::$query->update('resep', array(
-                    'status_resep' => 'D'
-                ))
-                    ->where(array(
-                        'resep.uid' => '= ?'
-                    ), array(
-                        $parameter['resep']
-                    ))
-                    ->execute();
+            // if($updateResult === (count($usedBatch) + count($usedBatchInap))) {
+                
+            // }
 
-                //Update Racikan
-                $updateRacikan = self::$query->update('racikan', array(
-                    'status' => 'D'
+            $updateResep = self::$query->update('resep', array(
+                'status_resep' => 'D'
+            ))
+                ->where(array(
+                    'resep.uid' => '= ?'
+                ), array(
+                    $parameter['resep']
                 ))
-                    ->where(array(
-                        'racikan.asesmen' => '= ?',
-                        'AND',
-                        'racikan.status' => '= ?',
-                        'AND',
-                        'racikan.deleted_at' => 'IS NULL'
-                    ), array(
-                        $parameter['asesmen'],
-                        'L'
-                    ))
-                    ->execute();
-            }
+                ->execute();
+
+            //Update Racikan
+            $updateRacikan = self::$query->update('racikan', array(
+                'status' => 'D'
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?',
+                    'AND',
+                    'racikan.status' => '= ?',
+                    'AND',
+                    'racikan.deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['asesmen'],
+                    'L'
+                ))
+                ->execute();
         } else {
             //Jika bukan Rawat Inap / IGD potong seperti biasa
             $updateResult = 0;
