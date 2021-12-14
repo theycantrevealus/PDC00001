@@ -364,7 +364,7 @@
 						<div class="col-6">
 							<label for="">Riwayat Transfusi Darah: </label>
 							<select  class="form-control inputan select2" id="riwayat_transfusi_golongan_darah" name="riwayat_transfusi_golongan_darah">
-								<option value="">Pilih</option>
+								<option value="">Tidak Pernah</option>
 							</select>
 	                    </div>
 	                </div>

@@ -116,7 +116,8 @@
         }
 
         .header h1 small {
-            color: #0e8900;
+            /*color: #0e8900;*/
+            color: #000;
             letter-spacing: 0;
         }
 
