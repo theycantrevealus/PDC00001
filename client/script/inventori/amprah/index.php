@@ -82,8 +82,8 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-                        console.log(__MY_PRIVILEGES__.response_data[0].uid);
-                        console.log(__UIDKARUAPOTEKER__);
+                        console.log("Saya : " + __MY_PRIVILEGES__.response_data[0].uid);
+                        console.log("Karu : " + __UIDKARUAPOTEKER__);
                         if(row.status === "A") {
                             
                             if(__MY_PRIVILEGES__.response_data[0].uid === __UIDKARUAPOTEKER__) {
