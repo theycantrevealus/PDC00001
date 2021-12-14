@@ -22,21 +22,21 @@
 			</div>
 		</div>
 	</div>
-	<div class="container-fluid" style="overflow: hidden; margin-top: -30px; height: 100%;">
+	<div class="container-fluid" style="overflow: hidden; height: 100%;">
 		<div class="row">
-			<div class="col-md-4" style="position: absolute; height: 100%;">
+			<div class="col-md-6" style="position: absolute; height: 100%;">
 				<center>
 					<h1 style="padding: 10px !important; color: yellow; font-weight: bold;">ANTRIAN</h1>
 
-					<div style="background: #000; border-radius: 10px;">
-						<h1 class="blink_me" id="current_antrian" style="font-size: 80pt; color: #fff">0</h1>
+					<div style="background: #000; border-radius: 10px; padding: 40px 20px">
+						<h1 class="blink_me" id="current_antrian" style="font-size: 80pt !important; color: #fff">0</h1>
 					</div>
 				</center>
 				<div class="row" id="loket-loader">
 					
 				</div>
 			</div>
-			<div class="col-md-8" style="left: 33.333%; height: 100%; position: absolute; padding-bottom: 100px;">
+			<div class="col-md-6" style="left: 50%; height: 100%; position: absolute; padding-bottom: 100px;">
 				<div class="row">
 					<div class="col-md-12 bg-white" style="height: 100%; position: absolute; padding-top: 20px; overflow-y: scroll;">
 						<div class="col-md-12">
@@ -96,3 +96,9 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.carousel-item {
+		min-height: 500px !important;
+	}
+</style>

@@ -1186,7 +1186,6 @@
                 return false;
             });
 		});
-        document.body.style.zoom = "80%";
 	</script>
 	<div class="notification-container"></div>
 </body>
