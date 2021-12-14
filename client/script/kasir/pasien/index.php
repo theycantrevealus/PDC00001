@@ -147,7 +147,7 @@
 					        parsedActual += terbayarAktual[a].terbayar;
                         }
                         return number_format(parsedActual, 2, ".", ",");*/
-						return number_format(row.sisa_bayar, 2, ".", ",");
+						return "Wew" + number_format(row.record_terbayar, 2, ".", ",");
 					}
 				},
 				{

@@ -3792,7 +3792,7 @@
                 $("#iterasi_resep").inputmask("unmaskedvalue"),
                 metaSwitchEdit);
             Swal.fire({
-                title: 'Selesai isi asesmen rawat?',
+                title: 'Selesai isi asesmen medis?',
                 text: 'Jika sudah selesai maka asesmen akan hilang dari antrian dan biaya tindakan serta obat akan langsung ditagihkan pada pasien.',
                 showDenyButton: true,
                 //showCancelButton: true,
