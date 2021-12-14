@@ -147,7 +147,15 @@
 					        parsedActual += terbayarAktual[a].terbayar;
                         }
                         return number_format(parsedActual, 2, ".", ",");*/
-						return number_format(row.terbayar, 2, ".", ",");
+                        var totalSet = 0;
+                        var rowDataPay = row.record_terbayar;
+                        for(var a in rowDataPay) {
+                            var detPay = rowDataPay[a].detail; 
+                            for(var b in detPay) {
+                                totalSet += detPay[b].harga;
+                            }
+                        }
+						return number_format(totalSet, 2, ".", ",");
 					}
 				},
 				{
