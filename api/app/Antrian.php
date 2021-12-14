@@ -1758,14 +1758,54 @@ class Antrian extends Utility
             $autonum++;
         }
 
-        $AntrianTotal = self::$query->select('antrian', array(
-            'uid'
+        $AntrianTotal = self::$query->select('antrian',
+            array(
+                'uid',
+                'pasien as uid_pasien',
+                'dokter as uid_dokter',
+                'departemen as uid_poli',
+                'penjamin as uid_penjamin',
+                'waktu_masuk',
+                'waktu_keluar'
+            )
+        )
+        ->join('pasien', array(
+                'nama as pasien',
+                'no_rm'
+            )
+        )
+        ->join('master_poli', array(
+                'nama as departemen'
+            )
+        )
+        ->join('pegawai', array(
+                'nama as dokter'
+            )
+        )
+        ->join('master_penjamin', array(
+                'nama as penjamin'
+            )
+        )
+        ->join('kunjungan', array(
+                'pegawai as uid_resepsionis'
+            )
+        )
+        ->on(array(
+                array('pasien.uid', '=', 'antrian.pasien'),
+                array('master_poli.uid', '=', 'antrian.departemen'),
+                array('pegawai.uid', '=', 'antrian.dokter'),
+                array('master_penjamin.uid', '=', 'antrian.penjamin'),
+                array('kunjungan.uid', '=', 'antrian.kunjungan')
+            )
+        )
+        ->where($paramData, $paramValue)
+        ->order(array(
+            'antrian.waktu_masuk' => 'DESC'
         ))
-            ->where($paramData, $paramValue)
-            ->execute();
+        ->execute();
 
         $data['recordsTotal'] = count($AntrianTotal['response_data']);
-        $data['recordsFiltered'] = count($AntrianTotal['response_data']);
+        $data['recordsFiltered'] = count($data['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
 
