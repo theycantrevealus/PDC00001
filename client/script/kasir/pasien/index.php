@@ -147,13 +147,11 @@
 					        parsedActual += terbayarAktual[a].terbayar;
                         }
                         return number_format(parsedActual, 2, ".", ",");*/
+                        console.log(row.detail_item);
                         var totalSet = 0;
-                        var rowDataPay = row.record_terbayar;
+                        var rowDataPay = row.detail_item;
                         for(var a in rowDataPay) {
-                            var detPay = rowDataPay[a].detail; 
-                            for(var b in detPay) {
-                                totalSet += detPay[b].harga;
-                            }
+                            totalSet += parseFloat(rowDataPay[a].subtotal);
                         }
 						return number_format(totalSet, 2, ".", ",");
 					}
