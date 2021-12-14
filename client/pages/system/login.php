@@ -143,7 +143,7 @@
                         <img src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/icon.jpg" width="60" />
                     </div>-->
                     <div class="col-6" style="padding-top: 10px;">
-                        <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/logo.png" width="120" />
+					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-icon-<?php echo __PC_IDENT__; ?>.png" width="80" height="80" alt="<?php echo __PC_CUSTOMER__; ?>">
                     </div>
                 </div>
 			</div>
