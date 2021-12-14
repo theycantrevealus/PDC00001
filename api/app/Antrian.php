@@ -1552,16 +1552,20 @@ class Antrian extends Utility
                     'AND',
                     'antrian.deleted_at' => 'IS NULL',
                     'AND',
+                    'NOT antrian.departemen' => '= ?',
+                    'AND',
                     'kunjungan.waktu_keluar' => 'IS NULL'
                 );
-                $paramValue = array();
+                $paramValue = array(__POLI_IGD__);
             } else {
                 $paramData = array(
                     'antrian.deleted_at' => 'IS NULL',
                     'AND',
+                    'NOT antrian.departemen' => '= ?',
+                    'AND',
                     'kunjungan.waktu_keluar' => 'IS NULL'
                 );
-                $paramValue = array();
+                $paramValue = array(__POLI_IGD__);
             }
         } else {
             if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
@@ -1572,23 +1576,27 @@ class Antrian extends Utility
                     'AND',
                     'antrian.deleted_at' => 'IS NULL',
                     'AND',
+                    'NOT antrian.departemen' => '= ?',
+                    'AND',
                     'kunjungan.waktu_keluar' => 'IS NULL',
                     'AND',
                     'master_poli.uid' => '= ?'
                 );
                 $paramValue = array(
-                    $parameter['poli']
+                    __POLI_IGD__, $parameter['poli']
                 );
             } else {
                 $paramData = array(
                     'antrian.deleted_at' => 'IS NULL',
                     'AND',
+                    'NOT antrian.departemen' => '= ?',
+                    'AND',
                     'kunjungan.waktu_keluar' => 'IS NULL',
                     'AND',
                     'master_poli.uid' => '= ?'
                 );
                 $paramValue = array(
-                    $parameter['poli']
+                    __POLI_IGD__, $parameter['poli']
                 );
             }
         }
@@ -1759,50 +1767,47 @@ class Antrian extends Utility
         }
 
         $AntrianTotal = self::$query->select('antrian',
-            array(
-                'uid',
-                'pasien as uid_pasien',
-                'dokter as uid_dokter',
-                'departemen as uid_poli',
-                'penjamin as uid_penjamin',
-                'waktu_masuk',
-                'waktu_keluar'
-            )
-        )
-        ->join('pasien', array(
-                'nama as pasien',
-                'no_rm'
-            )
-        )
-        ->join('master_poli', array(
-                'nama as departemen'
-            )
-        )
-        ->join('pegawai', array(
-                'nama as dokter'
-            )
-        )
-        ->join('master_penjamin', array(
-                'nama as penjamin'
-            )
-        )
-        ->join('kunjungan', array(
-                'pegawai as uid_resepsionis'
-            )
-        )
-        ->on(array(
-                array('pasien.uid', '=', 'antrian.pasien'),
-                array('master_poli.uid', '=', 'antrian.departemen'),
-                array('pegawai.uid', '=', 'antrian.dokter'),
-                array('master_penjamin.uid', '=', 'antrian.penjamin'),
-                array('kunjungan.uid', '=', 'antrian.kunjungan')
-            )
-        )
-        ->where($paramData, $paramValue)
-        ->order(array(
-            'antrian.waktu_masuk' => 'DESC'
-        ))
-        ->execute();
+                                            array(
+                                                'uid',
+                                                'pasien as uid_pasien',
+                                                'dokter as uid_dokter',
+                                                'departemen as uid_poli',
+                                                'penjamin as uid_penjamin',
+                                                'waktu_masuk',
+                                                'waktu_keluar'
+                                            )
+                                        )
+                                        ->join('pasien', array(
+                                                'nama as pasien',
+                                                'no_rm'
+                                            )
+                                        )
+                                        ->join('master_poli', array(
+                                                'nama as departemen'
+                                            )
+                                        )
+                                        ->join('pegawai', array(
+                                                'nama as dokter'
+                                            )
+                                        )
+                                        ->join('master_penjamin', array(
+                                                'nama as penjamin'
+                                            )
+                                        )
+                                        ->join('kunjungan', array(
+                                                'pegawai as uid_resepsionis'
+                                            )
+                                        )
+                                        ->on(array(
+                                                array('pasien.uid', '=', 'antrian.pasien'),
+                                                array('master_poli.uid', '=', 'antrian.departemen'),
+                                                array('pegawai.uid', '=', 'antrian.dokter'),
+                                                array('master_penjamin.uid', '=', 'antrian.penjamin'),
+                                                array('kunjungan.uid', '=', 'antrian.kunjungan')
+                                            )
+                                        )
+                                        ->where($paramData, $paramValue)
+                                        ->execute();
 
         $data['recordsTotal'] = count($AntrianTotal['response_data']);
         $data['recordsFiltered'] = count($data['response_data']);

@@ -152,6 +152,8 @@
 				    for(var key in data) {
 				        if(data[key].departemen !== "IGD") {
 				            filtered.push(data[key])
+                        } else {
+                            filtered.push(data[key])
                         }
                     }
 					return filtered;
