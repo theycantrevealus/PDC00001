@@ -82,9 +82,10 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
+                        console.log(__MY_PRIVILEGES__.response_data[0].uid);
+                        console.log(__UIDKARUAPOTEKER__);
                         if(row.status === "A") {
-                            console.log(__MY_PRIVILEGES__.response_data[0].uid);
-                            console.log(__UIDKARUAPOTEKER__);
+                            
                             if(__MY_PRIVILEGES__.response_data[0].uid === __UIDKARUAPOTEKER__) {
                                 return "<a href=\"" + __HOSTNAME__ + "/inventori/amprah/view/" + row.uid + "\" class=\"btn btn-sm btn-info\"><i class=\"fa fa-eye\"></i> Info</a>" +
                                 "<button class=\"btn btn-sm btn-success btnApproveAmprah\" id=\"approve_" + row.uid + "\"><i class=\"fa fa-check\"></i> Approve</button>";
