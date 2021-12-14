@@ -1552,20 +1552,24 @@ class Antrian extends Utility
                     'AND',
                     'antrian.deleted_at' => 'IS NULL',
                     'AND',
-                    'NOT antrian.departemen' => '= ?',
+                    '(NOT antrian.departemen' => '= ?',
+                    'AND',
+                    'NOT antrian.departemen' => '= ?)',
                     'AND',
                     'kunjungan.waktu_keluar' => 'IS NULL'
                 );
-                $paramValue = array(__POLI_IGD__);
+                $paramValue = array(__POLI_IGD__, __POLI_INAP__);
             } else {
                 $paramData = array(
                     'antrian.deleted_at' => 'IS NULL',
                     'AND',
-                    'NOT antrian.departemen' => '= ?',
+                    '(NOT antrian.departemen' => '= ?',
+                    'AND',
+                    'NOT antrian.departemen' => '= ?)',
                     'AND',
                     'kunjungan.waktu_keluar' => 'IS NULL'
                 );
-                $paramValue = array(__POLI_IGD__);
+                $paramValue = array(__POLI_IGD__, __POLI_INAP__);
             }
         } else {
             if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
@@ -1576,27 +1580,31 @@ class Antrian extends Utility
                     'AND',
                     'antrian.deleted_at' => 'IS NULL',
                     'AND',
-                    'NOT antrian.departemen' => '= ?',
+                    '(NOT antrian.departemen' => '= ?',
+                    'AND',
+                    'NOT antrian.departemen' => '= ?)',
                     'AND',
                     'kunjungan.waktu_keluar' => 'IS NULL',
                     'AND',
                     'master_poli.uid' => '= ?'
                 );
                 $paramValue = array(
-                    __POLI_IGD__, $parameter['poli']
+                    __POLI_IGD__, __POLI_INAP__, $parameter['poli']
                 );
             } else {
                 $paramData = array(
                     'antrian.deleted_at' => 'IS NULL',
                     'AND',
-                    'NOT antrian.departemen' => '= ?',
+                    '(NOT antrian.departemen' => '= ?',
+                    'AND',
+                    'NOT antrian.departemen' => '= ?)',
                     'AND',
                     'kunjungan.waktu_keluar' => 'IS NULL',
                     'AND',
                     'master_poli.uid' => '= ?'
                 );
                 $paramValue = array(
-                    __POLI_IGD__, $parameter['poli']
+                    __POLI_IGD__, __POLI_INAP__, $parameter['poli']
                 );
             }
         }
