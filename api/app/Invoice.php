@@ -386,7 +386,7 @@ class Invoice extends Utility
                 $payment['response_data'][$key]['record_terbayar'] = self::get_payment($value['uid'])['response_data'];
 
                 $Detail = self::$query->select('invoice_payment_detail', array(
-                    'penjamin', 'status'
+                    'penjamin', 'status', 'subtotal'
                 ))
                     ->join('master_penjamin', array(
                         'nama as nama_penjamin'

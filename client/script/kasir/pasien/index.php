@@ -147,7 +147,7 @@
 					        parsedActual += terbayarAktual[a].terbayar;
                         }
                         return number_format(parsedActual, 2, ".", ",");*/
-                        console.log(row.detail_item);
+                        
                         var totalSet = 0;
                         var rowDataPay = row.detail_item;
                         for(var a in rowDataPay) {
@@ -1418,7 +1418,6 @@
                         },
                         success:function(response) {
                             var notifier_target = response.response_package.response_notifier;
-                            console.log(response);
                             if(response.response_package.response_result > 0) {
                                 Swal.fire({
                                     title: "Pembayaran Berhasil!",
@@ -1444,10 +1443,6 @@
                                     tableKwitansi.ajax.reload();
                                     $("#form-invoice").modal("hide");
                                     $("#form-payment").modal("hide");
-
-                                    
-                                    console.clear();
-                                    console.log(notifier_target);
                                     for(var notifKey in notifier_target)
                                     {
                                         push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info").then(function() {
