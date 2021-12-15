@@ -32,6 +32,9 @@ class Inventori extends Utility
     {
         try {
             switch ($parameter[1]) {
+                case 'lend_detail':
+                    return self::lend_detail($parameter[2]);
+                    break;
                 case 'kategori':
                     return self::get_kategori();
                     break;
@@ -125,6 +128,24 @@ class Inventori extends Utility
     public function __POST__($parameter = array())
     {
         switch ($parameter['request']) {
+            case 'hapus_pinjam_keluar':
+                return self::hapus_pinjam_keluar($parameter);
+                break;
+            case 'approve_pinjam_keluar':
+                return self::approve_pinjam_keluar($parameter);
+                break;
+            case 'lend_data':
+                return self::lend_data($parameter);
+                break;
+            case 'pinjam_keluar':
+                return self::pinjam_keluar($parameter);
+                break;
+            case 'pinjam_keluar_edit':
+                return self::pinjam_keluar_edit($parameter);
+                break;
+            case 'pinjam_approve':
+                return self::pinjam_approve($parameter);
+                break;
             case 'approve_permintaan_amprah':
                 return self::approve_permintaan_amprah($parameter);
                 break;
@@ -269,7 +290,7 @@ class Inventori extends Utility
                 break;
 
             default:
-                return array('Unknown');
+                return $parameter;
                 break;
         }
     }
@@ -617,6 +638,401 @@ class Inventori extends Utility
             'po_detail' => $PODetailResult,
             'proceed' => $proceed_data
         );
+    }
+
+    private function pinjam_approve($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+    }
+
+    private function lend_detail($parameter) {
+        $data = self::$query->select('inventori_lend', array(
+            'uid', 'kode', 'diajukan', 'disetujui', 'penerima', 'keterangan', 'created_at', 'updated_at'
+        ))
+            ->where(array(
+                'deleted_at' => 'IS NULL',
+                'AND',
+                'uid' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+
+        $Supplier = new Supplier(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+        $Inventori = new Inventori(self::$pdo);
+
+        foreach($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['penerima'] = $Supplier->get_detail($value['penerima']);
+            $data['response_data'][$key]['diajukan'] = $Pegawai->get_detail($value['diajukan'])['response_data'][0];
+            $data['response_data'][$key]['disetujui'] = (isset($value['disetujui'])) ? $Pegawai->get_detail($value['disetujui'])['response_data'][0] : '-';
+            $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+            $Detail = self::$query->select('inventori_lend_detail', array(
+                'item', 'batch', 'qty'
+            ))
+                ->where(array(
+                    'lend' => '= ?',
+                    'AND',
+                    'deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach($Detail['response_data'] as $DKey => $DValue) {
+                $Detail['response_data'][$DKey]['item'] = $Inventori->get_item_detail($DValue['item'])['response_data'][0];
+                $Detail['response_data'][$DKey]['batch'] = $Inventori->get_batch_detail($DValue['batch'])['response_data'][0];
+            }
+            $data['response_data'][$key]['detail'] = $Detail['response_data'];
+        }
+        return $data;
+    }
+
+    private  function approve_pinjam_keluar($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $DetAo = self::lend_detail($parameter['uid'])['response_data'][0];
+
+        $Inventori = new Inventori(self::$pdo);
+        
+        $process = self::$query->update('inventori_lend', array(
+            'disetujui' => $UserData['data']->uid
+        ))
+            ->where(array(
+                'inventori_lend.uid' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
+        $updateProgress = array();
+
+        if($process['response_result'] > 0) {
+            $Detail = '';
+
+            $Detail = self::$query->select('inventori_lend_detail', array(
+                'item', 'batch', 'qty'
+            ))
+                ->where(array(
+                    'lend' => '= ?',
+                    'AND',
+                    'deleted_at' => 'IS NULL'
+                ), array(
+                    $parameter['uid']
+                ))
+                ->execute();
+            foreach($Detail['response_data'] as $DKey => $DValue) {
+                $getStok = self::$query->select('inventori_stok', array(
+                    'id',
+                    'gudang',
+                    'barang',
+                    'stok_terkini'
+                ))
+                    ->where(array(
+                        'inventori_stok.gudang' => '= ?',
+                        'AND',
+                        'inventori_stok.barang' => '= ?',
+                        'AND',
+                        'inventori_stok.batch' => '= ?'
+                    ), array(
+                        __GUDANG_UTAMA__,
+                        $DValue['item'],
+                        $DValue['batch']
+                    ))
+                    ->execute();
+
+
+                //Potong Stok
+                if(
+                    floatval($DValue['qty']) > 0 &&
+                    floatval($getStok['response_data'][0]['stok_terkini']) >= floatval($DValue['qty'])
+                ) {
+                    $CheckGudangStatus = $Inventori->get_gudang_detail(__GUDANG_UTAMA__)['response_data'][0];
+
+                    if($CheckGudangStatus['status'] === 'A') {
+                        $updateStok = self::$query->update('inventori_stok', array(
+                            'stok_terkini' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($DValue['qty']))
+                        ))
+                            ->where(array(
+                                'inventori_stok.gudang' => '= ?',
+                                'AND',
+                                'inventori_stok.barang' => '= ?',
+                                'AND',
+                                'inventori_stok.batch' => '= ?'
+                            ), array(
+                                __GUDANG_UTAMA__,
+                                $DValue['item'],
+                                $DValue['batch']
+                            ))
+                            ->execute();
+                        if($updateStok['response_result'] > 0)
+                        {
+                            //Log Stok
+                            $stokLog = self::$query->insert('inventori_stok_log', array(
+                                'barang' => $DValue['item'],
+                                'batch'=> $DValue['batch'],
+                                'gudang' => __GUDANG_UTAMA__,
+                                'masuk' => 0,
+                                'keluar' => floatval($DValue['qty']),
+                                'saldo' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($DValue['qty'])),
+                                'type' => __STATUS_BARANG_KELUAR__,
+                                'jenis_transaksi' => 'pinjam_keluar',
+                                'uid_foreign' => $parameter['uid'],
+                                'keterangan' => 'Peminjaman Obat ' . $DetAo['penerima']['nama']
+                            ))
+                                ->execute();
+                        }
+                        array_push($updateProgress, $updateStok);
+                    }
+                } else {
+                    array_push($updateProgress, $getStok);
+                }
+            }
+        }
+
+        return $process;
+    }
+
+    private function hapus_pinjam_keluar($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $delete = self::$query->delete('inventori_lend')
+            ->where(array(
+                'uid' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+        return $delete;
+    }
+
+    private function lend_data($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            if(isset($parameter['hist'])) {
+                $paramData = array(
+                    'kode' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                    'AND',
+                    'deleted_at' => 'IS NULL',
+                    'AND',
+                    'disetujui' => 'IS NOT NULL'
+                );
+                $paramValue = array();
+            } else {
+                $paramData = array(
+                    'kode' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                    'AND',
+                    'deleted_at' => 'IS NULL',
+                    'AND',
+                    'disetujui' => 'IS NULL'
+                );
+                $paramValue = array();
+            }
+        } else {
+            if(isset($parameter['hist'])) {
+                $paramData = array(
+                    'deleted_at' => 'IS NULL',
+                    'AND',
+                    'disetujui' => 'IS NOT NULL'
+                );
+                $paramValue = array();
+            } else {
+                $paramData = array(
+                    'deleted_at' => 'IS NULL',
+                    'AND',
+                    'disetujui' => 'IS NULL'
+                );
+                $paramValue = array();
+            }
+        }
+
+        if (intval($parameter['length']) < 0) {
+            $data = self::$query->select('inventori_lend', array(
+                'uid', 'kode', 'diajukan', 'disetujui', 'penerima', 'keterangan', 'created_at', 'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_lend', array(
+                'uid', 'kode', 'diajukan', 'disetujui', 'penerima', 'keterangan', 'created_at', 'updated_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $dataResult = array();
+        $data['response_draw'] = intval($parameter['draw']);
+        $autonum = intval($parameter['start']) + 1;
+
+        $Supplier = new Supplier(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+
+        foreach($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['penerima'] = $Supplier->get_detail($value['penerima']);
+            $data['response_data'][$key]['diajukan'] = $Pegawai->get_detail($value['diajukan'])['response_data'][0];
+            $data['response_data'][$key]['disetujui'] = (isset($value['disetujui'])) ? $Pegawai->get_detail($value['disetujui'])['response_data'][0] : '-';
+            $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+            $data['response_data'][$key]['autonum'] = $autonum;
+
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('inventori_lend', array(
+            'uid', 'kode', 'diajukan', 'penerima', 'keterangan', 'created_at', 'updated_at'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
+    private function pinjam_keluar_edit($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $process = self::$query->update('inventori_lend', array(
+            'penerima' => $parameter['tujuan'],
+            'keterangan' => $parameter['keterangan'],
+            'updated_at' => parent::format_date()
+        ))
+            ->where(array(
+                'inventori_lend.uid' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
+
+        if($process['response_result'] > 0) {
+            $hard = self::$query->hard_delete('inventori_lend_detail')
+                ->where(array(
+                    'lend' => '= ?'
+                ), array(
+                    $parameter['uid']
+                ))
+                ->execute();
+
+            foreach($parameter['item_list'] as $key => $value) {
+                $LendItem = self::$query->insert('inventori_lend_detail', array(
+                    'lend' => $parameter['uid'],
+                    'item' => $value['item'],
+                    'batch' => $value['batch'],
+                    'qty' => $value['qty'],
+                    'qty_approve' => 0,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+            $log = parent::log(array(
+                'type' => 'activity',
+                'column' => array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value' => array(
+                    $parameter['uid'],
+                    $UserData['data']->uid,
+                    'inventori_lend',
+                    'I',
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class' => __CLASS__
+            ));
+        }
+
+        return $process;
+
+    }
+
+    private function pinjam_keluar($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $uid = parent::gen_uuid();
+
+        $lastNumber = self::$query->select('inventori_lend', array(
+            'uid'
+        ))
+            ->where(array(
+                'EXTRACT(month FROM created_at)' => '= ?'
+            ), array(
+                intval(date('m'))
+            ))
+            ->execute();
+
+        $Kode = 'PJM-' . date('Y/m') . '-' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT);
+
+        $process = self::$query->insert('inventori_lend', array(
+            'uid' => $uid,
+            'kode' => $Kode,
+            'diajukan' => $UserData['data']->uid,
+            'penerima' => $parameter['tujuan'],
+            'keterangan' => $parameter['keterangan'],
+            'created_at' => parent::format_date(),
+            'updated_at' => parent::format_date()
+
+        ))
+            ->execute();
+            
+        if($process['response_result'] > 0) {
+
+            foreach($parameter['item_list'] as $key => $value) {
+                $LendItem = self::$query->insert('inventori_lend_detail', array(
+                    'lend' => $uid,
+                    'item' => $value['item'],
+                    'batch' => $value['batch'],
+                    'qty' => $value['qty'],
+                    'qty_approve' => 0,
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+
+            $log = parent::log(array(
+                'type' => 'activity',
+                'column' => array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value' => array(
+                    $uid,
+                    $UserData['data']->uid,
+                    'inventori_lend',
+                    'I',
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class' => __CLASS__
+            ));
+        }
+
+        return $process;
     }
 
 
