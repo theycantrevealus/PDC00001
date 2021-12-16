@@ -30,9 +30,6 @@
                         rawData = response.response_package.response_data;
                     }
 
-                    console.clear();
-                    console.log(rawData);
-
                     for(var dataKey in rawData) {
                         if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
                             if(uniqueData[rawData[dataKey].barang] === undefined) {
@@ -145,6 +142,7 @@
                     "data" : null, render: function(data, type, row, meta) {
                         //return "<h5 class=\"number_style wrap_content\">" + row.stok_terkini + "</h5>";
                         var counter = 0;
+                        console.log(row.batch);
                         for(var az in row.batch) {
                             counter+= parseFloat(row.batch[az]);
                         }
