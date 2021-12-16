@@ -522,130 +522,135 @@
 				type:"GET",
 				success:function(response) {
 					var data = response.response_package.response_data[0];
-					$("#txt_periode_awal_detail").html(data.dari);
-					$("#txt_periode_akhir_detail").html(data.sampai);
-					$("#txt_diproses_detail").html(data.pegawai.nama);
-					$("#txt_kode_detail").html(data.kode);
-					//$("#detail-opname tbody tr").remove();
+                    if(data !== undefined) {
+                        $("#txt_periode_awal_detail").html(data.dari);
+                        $("#txt_periode_akhir_detail").html(data.sampai);
+                        $("#txt_diproses_detail").html(data.pegawai.nama);
+                        $("#txt_kode_detail").html(data.kode);
+                        //$("#detail-opname tbody tr").remove();
 
-					if($("#detail-opname").hasClass("dataTable")) {
-						tableDetailOpname.ajax.reload();
-					} else {
-						tableDetailOpname = $("#detail-opname").DataTable({
-							processing: true,
-							serverSide: true,
-							sPaginationType: "full_numbers",
-							bPaginate: true,
-							lengthMenu: [[5, 10, 15, 50], [5, 10, 15, 50]],
-							serverMethod: "POST",
-							"ajax":{
-								url: __HOSTAPI__ + "/Inventori",
-								type: "POST",
-								data: function(d){
-									d.request = "get_opname_detail_item";
-									d.uid = uid;
-								},
-								headers:{
-									Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
-								},
-								dataSrc:function(response) {
-									var dataSet = response.response_package.response_data;
-									if(dataSet == undefined) {
-										dataSet = [];
-									}
+                        if($("#detail-opname").hasClass("dataTable")) {
+                            tableDetailOpname.ajax.reload();
+                        } else {
+                            tableDetailOpname = $("#detail-opname").DataTable({
+                                processing: true,
+                                serverSide: true,
+                                sPaginationType: "full_numbers",
+                                bPaginate: true,
+                                lengthMenu: [[5, 10, 15, 50], [5, 10, 15, 50]],
+                                serverMethod: "POST",
+                                "ajax":{
+                                    url: __HOSTAPI__ + "/Inventori",
+                                    type: "POST",
+                                    data: function(d){
+                                        d.request = "get_opname_detail_item";
+                                        d.uid = uid;
+                                    },
+                                    headers:{
+                                        Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                                    },
+                                    dataSrc:function(response) {
+                                        var dataSet = response.response_package.response_data;
+                                        if(dataSet == undefined) {
+                                            dataSet = [];
+                                        }
 
-									response.draw = parseInt(response.response_package.response_draw);
-									response.recordsTotal = response.response_package.recordsTotal;
-									response.recordsFiltered = response.response_package.recordsFiltered;
-									return dataSet;
-								}
-							},
-							autoWidth: false,
-							language: {
-								search: "",
-								searchPlaceholder: "Cari Barang"
-							},
-							"columns" : [
-								{
-									"data" : null, render: function(data, type, row, meta) {
-                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
-									}
-								},
-								{
-									"data" : null, render: function(data, type, row, meta) {
-										return row.nama_barang;
-									}
-								},
-								{
-									"data" : null, render: function(data, type, row, meta) {
-										return row.batch.batch;
-									}
-								},
-								{
-									"data" : null, render: function(data, type, row, meta) {
-										return "<h6 class=\"number_style text-right\">" + number_format(row.qty_awal, 2, ".", ",") + "</h6>";
-									}
-								},
-								{
-									"data" : null, render: function(data, type, row, meta) {
-                                        return "<h6 class=\"number_style text-right\">" + number_format(row.qty_akhir, 2, ".", ",") + "</h6>";
-									}
-								},
-								{
-									"data" : null, render: function(data, type, row, meta) {
-										var parsedVisual = "";
-										var selisih = 0;
-										if(row.qty_awal > row.qty_akhir) {
-											selisih = parseFloat(row.qty_awal) - parseFloat(row.qty_akhir);
-											parsedVisual = "<b class=\"text-danger\"><i class=\"fa fa-caret-down\"></i> " + selisih + "</b>";
-										} else if(row.qty_awal < row.qty_akhir) {
-											selisih = parseFloat(row.qty_akhir) - parseFloat(row.qty_awal);
-											parsedVisual = "<b class=\"text-warning\"><i class=\"fa fa-caret-up\"></i> " + selisih + "</b>";
-										} else {
-											selisih = parseFloat(row.qty_akhir) - parseFloat(row.qty_awal);
-											parsedVisual = "<b class=\"text-success\"><i class=\"fa fa-check\"></i> " + selisih + "</b>";
-										}
-										return parsedVisual;
-									}
-								},
-								{
-									"data" : null, render: function(data, type, row, meta) {
-										return (row.keterangan === "") ? "-" : row.keterangan;
-									}
-								},
-							]
-						});
-					}
-					/*for(var b in data.detail) {
-						var parsedVisual = "";
-						var selisih = 0;
-						if(data.detail[b].qty_awal > data.detail[b].qty_akhir) {
-							selisih = parseFloat(data.detail[b].qty_awal) - parseFloat(data.detail[b].qty_akhir);
-							parsedVisual = "<b class=\"text-danger\"><i class=\"fa fa-caret-down\"></i> " + selisih + "</b>";
-						} else if(data.detail[b].qty_awal < data.detail[b].qty_akhir) {
-							selisih = parseFloat(data.detail[b].qty_akhir) - parseFloat(data.detail[b].qty_awal);
-							parsedVisual = "<b class=\"text-warning\"><i class=\"fa fa-caret-up\"></i> " + selisih + "</b>";
-						} else {
-							selisih = parseFloat(data.detail[b].qty_akhir) - parseFloat(data.detail[b].qty_awal);
-							parsedVisual = "<b class=\"text-success\"><i class=\"fa fa-check\"></i> " + selisih + "</b>";
-						}
+                                        response.draw = parseInt(response.response_package.response_draw);
+                                        response.recordsTotal = response.response_package.recordsTotal;
+                                        response.recordsFiltered = response.response_package.recordsFiltered;
+                                        return dataSet;
+                                    }
+                                },
+                                autoWidth: false,
+                                language: {
+                                    search: "",
+                                    searchPlaceholder: "Cari Barang"
+                                },
+                                "columns" : [
+                                    {
+                                        "data" : null, render: function(data, type, row, meta) {
+                                            return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+                                        }
+                                    },
+                                    {
+                                        "data" : null, render: function(data, type, row, meta) {
+                                            return row.nama_barang;
+                                        }
+                                    },
+                                    {
+                                        "data" : null, render: function(data, type, row, meta) {
+                                            return row.batch.batch;
+                                        }
+                                    },
+                                    {
+                                        "data" : null, render: function(data, type, row, meta) {
+                                            return "<h6 class=\"number_style text-right\">" + number_format(row.qty_awal, 2, ".", ",") + "</h6>";
+                                        }
+                                    },
+                                    {
+                                        "data" : null, render: function(data, type, row, meta) {
+                                            return "<h6 class=\"number_style text-right\">" + number_format(row.qty_akhir, 2, ".", ",") + "</h6>";
+                                        }
+                                    },
+                                    {
+                                        "data" : null, render: function(data, type, row, meta) {
+                                            var parsedVisual = "";
+                                            var selisih = 0;
+                                            if(row.qty_awal > row.qty_akhir) {
+                                                selisih = parseFloat(row.qty_awal) - parseFloat(row.qty_akhir);
+                                                parsedVisual = "<b class=\"text-danger\"><i class=\"fa fa-caret-down\"></i> " + selisih + "</b>";
+                                            } else if(row.qty_awal < row.qty_akhir) {
+                                                selisih = parseFloat(row.qty_akhir) - parseFloat(row.qty_awal);
+                                                parsedVisual = "<b class=\"text-warning\"><i class=\"fa fa-caret-up\"></i> " + selisih + "</b>";
+                                            } else {
+                                                selisih = parseFloat(row.qty_akhir) - parseFloat(row.qty_awal);
+                                                parsedVisual = "<b class=\"text-success\"><i class=\"fa fa-check\"></i> " + selisih + "</b>";
+                                            }
+                                            return parsedVisual;
+                                        }
+                                    },
+                                    {
+                                        "data" : null, render: function(data, type, row, meta) {
+                                            return (row.keterangan === "") ? "-" : row.keterangan;
+                                        }
+                                    },
+                                ]
+                            });
+                        }
+                        /*for(var b in data.detail) {
+                            var parsedVisual = "";
+                            var selisih = 0;
+                            if(data.detail[b].qty_awal > data.detail[b].qty_akhir) {
+                                selisih = parseFloat(data.detail[b].qty_awal) - parseFloat(data.detail[b].qty_akhir);
+                                parsedVisual = "<b class=\"text-danger\"><i class=\"fa fa-caret-down\"></i> " + selisih + "</b>";
+                            } else if(data.detail[b].qty_awal < data.detail[b].qty_akhir) {
+                                selisih = parseFloat(data.detail[b].qty_akhir) - parseFloat(data.detail[b].qty_awal);
+                                parsedVisual = "<b class=\"text-warning\"><i class=\"fa fa-caret-up\"></i> " + selisih + "</b>";
+                            } else {
+                                selisih = parseFloat(data.detail[b].qty_akhir) - parseFloat(data.detail[b].qty_awal);
+                                parsedVisual = "<b class=\"text-success\"><i class=\"fa fa-check\"></i> " + selisih + "</b>";
+                            }
 
-						$("#detail-opname tbody").append(
-							"<tr>" +
-								"<td>" + data.detail[b].autonum + "</td>" +
-								"<td>" + data.detail[b].item.nama + "</td>" +
-								"<td>" + data.detail[b].batch.batch + "</td>" +
-								"<td class=\"number_style\">" + data.detail[b].qty_awal + "</td>" +
-								"<td class=\"number_style\">" + data.detail[b].qty_akhir + "</td>" +
-								"<td class=\"number_style\">" + parsedVisual + "</td>" +
-								"<td>" + data.detail[b].keterangan + "</td>" +
-							"</tr>"
-						);
-					}*/
+                            $("#detail-opname tbody").append(
+                                "<tr>" +
+                                    "<td>" + data.detail[b].autonum + "</td>" +
+                                    "<td>" + data.detail[b].item.nama + "</td>" +
+                                    "<td>" + data.detail[b].batch.batch + "</td>" +
+                                    "<td class=\"number_style\">" + data.detail[b].qty_awal + "</td>" +
+                                    "<td class=\"number_style\">" + data.detail[b].qty_akhir + "</td>" +
+                                    "<td class=\"number_style\">" + parsedVisual + "</td>" +
+                                    "<td>" + data.detail[b].keterangan + "</td>" +
+                                "</tr>"
+                            );
+                        }*/
 
-					$("#txt_keterangan_detail").html(data.keterangan);
+                        $("#txt_keterangan_detail").html(data.keterangan);
 
-					$("#form-detail").modal("show");
+                        $("#form-detail").modal("show");
+                    } else {
+                        console.clear();
+                        console.log(response);
+                    }
 				},
 				error: function(response) {
 					console.log(response);

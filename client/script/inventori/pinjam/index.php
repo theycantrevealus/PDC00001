@@ -79,28 +79,34 @@
                 { 
 					"data": null,"sortable": false, 
 			    	render: function (data, type, row, meta) {
-						var allowDel = (row.diajukan.uid === __ME__) ? "<button class=\"btn btn-danger btn-sm btnDelete\" id=\"delete_" + row.uid + "\">" +
-											"<span><i class=\"fa fa-times-circle\"></i>Delete</span>" +
-										"</button>" : "";
+						// var allowDel = (row.diajukan.uid === __ME__) ? "<button class=\"btn btn-danger btn-sm btnDelete\" id=\"delete_" + row.uid + "\">" +
+						// 					"<span><i class=\"fa fa-times-circle\"></i>Delete</span>" +
+						// 				"</button>" : "";
 
-						if(__MY_PRIVILEGES__.response_data[0].uid == __UIDKEPALAGUDANG__) {
-							return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+						// if(__MY_PRIVILEGES__.response_data[0].uid == __UIDKEPALAGUDANG__) {
+						// 	return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                        //         "<a class=\"btn btn-sm btn-info\" href=\"" + __HOSTNAME__ + "/inventori/pinjam/detail/" + row.uid + "\">" +
+                        //         "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                        //         "</a>" +
+						// 		allowDel +
+                        //         "<button class=\"btn btn-success btn-sm btnApprove\" id=\"approve_" + row.uid + "\">" +
+                        //             "<span><i class=\"fa fa-check-circle\"></i>Approve</span>" +
+                        //         "</button>" +
+                        //     "</div>";
+						// } else {
+						// 	return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                        //         "<a class=\"btn btn-sm btn-info\" href=\"" + __HOSTNAME__ + "/inventori/pinjam/detail/" + row.uid + "\">" +
+                        //         "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                        //         "</a>" +
+						// 		allowDel +
+                        //     "</div>";
+						// }
+
+						return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<a class=\"btn btn-sm btn-info\" href=\"" + __HOSTNAME__ + "/inventori/pinjam/detail/" + row.uid + "\">" +
                                 "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
                                 "</a>" +
-								allowDel +
-                                "<button class=\"btn btn-success btn-sm btnApprove\" id=\"approve_" + row.uid + "\">" +
-                                    "<span><i class=\"fa fa-check-circle\"></i>Approve</span>" +
-                                "</button>" +
                             "</div>";
-						} else {
-							return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                "<a class=\"btn btn-sm btn-info\" href=\"" + __HOSTNAME__ + "/inventori/pinjam/detail/" + row.uid + "\">" +
-                                "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
-                                "</a>" +
-								allowDel +
-                            "</div>";
-						}
                 	}
     			}
             ]

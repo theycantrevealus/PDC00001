@@ -6,17 +6,22 @@
 			</div>
 			<div class="card-body">
 				<div class="row">
-					<div class="col-md-4">
+					<div class="col-md-3">
 						<div class="form-group">
 							<label for="txt_no_ktp">Supplier:</label>
 							<select class="form-control" id="txt_supplier"></select>
 						</div>
 					</div>
-					<div class="col-md-4"></div>
-					<div class="col-md-4">
+					<div class="col-md-3">
 						<div class="form-group">
 							<label for="txt_kategori">Tanggal:</label>
 							<input autocomplete="off" class="form-control txt_tanggal" id="txt_tanggal" />
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label for="txt_no_ktp">Sumber Dana:</label>
+							<select class="form-control" id="txt_sumber_dana"></select>
 						</div>
 					</div>
 				</div>

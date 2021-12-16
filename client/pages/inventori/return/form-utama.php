@@ -16,6 +16,7 @@
                         <h6 id="nomor_po" class="text-info"></h6>
                         <h5 id="nama_supplier"></h5>
                         <b id="tanggal_po"></b>
+                        <h5 id="no_invoice"></h5>
                     </div>
                 </div>
             </div>

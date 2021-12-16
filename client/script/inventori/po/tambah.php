@@ -30,7 +30,36 @@
 		});
 
 
+		function loadTermSelectBox(selector, id_term, selected = ""){
+			$.ajax({
+				url:__HOSTAPI__ + "/Terminologi/terminologi-items/" + id_term,
+				type: "GET",
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+				},
+				success: function(response){
+					var MetaData = response.response_package.response_data;
 
+					if (MetaData != ""){
+						for(i = 0; i < MetaData.length; i++){
+							var selection = document.createElement("OPTION");
+							if(MetaData[i].id == selected) {
+								$(selection).attr("selected", "selected");
+							}
+
+							$(selection).attr("value", MetaData[i].id).html(MetaData[i].nama);
+							$("#" + selector).append(selection);
+						}
+					}
+
+				},
+				error: function(response) {
+					console.log(response);
+				}
+			});
+		}
+
+		loadTermSelectBox("txt_sumber_dana", 18);
 
 		function load_supplier(target, selected = "") {
 			var kategoriData;
@@ -640,6 +669,7 @@
 			var tanggal = $.datepicker.formatDate('yy-mm-dd', new Date($("#txt_tanggal").datepicker("getDate")));
 			var diskonAll = $("#txt_diskon_all").inputmask("unmaskedvalue");
 			var diskonJenisAll = $("#txt_jenis_diskon_all").val();
+			var sumber_dana = $("#txt_sumber_dana option:selected").val();
 			var keteranganAll = $("#txt_keterangan").val();
 
 			var itemList = [];
@@ -650,6 +680,7 @@
 			form_data.append("tanggal", tanggal);
 			form_data.append("diskonAll", diskonAll);
 			form_data.append("diskonJenisAll", diskonJenisAll);
+			form_data.append("sumber_dana", sumber_dana);
 			form_data.append("keteranganAll", keteranganAll);
 			//form_data.append("fileList", JSON.stringify(fileList));
 

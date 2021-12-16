@@ -284,7 +284,7 @@
 
                         $(batchTable).append(tbodyContainer).css({
                             "margin-bottom": "30px"
-                        });
+                        }).addClass("singleTable");
 
                         if(batchGroup[a].log.length > 0) {
                             $("#loadResult").append(batchIdentifierInfo).append("<br />").append(batchTable);
@@ -320,6 +320,14 @@
 
                         $("#table-item-log tbody").append(newRow);*/
                     }
+
+                    var totalAllStock = 0;
+
+                    $(".singleTable").each(function() {
+                        var tar = parseFloat($(this).find("tbody tr:last-child td:eq(4) h5").html());
+                        totalAllStock += tar;
+                    });
+                    $("#total_all").html(number_format(totalAllStock, 2, ",", "."));
                 },
                 error: function(resp) {
                     console.log(resp);

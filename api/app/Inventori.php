@@ -6927,28 +6927,51 @@ class Inventori extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        $data = self::$query->select('inventori_stok_opname', array(
-            'uid',
-            'kode',
-            'dari',
-            'sampai',
-            'pegawai',
-            'created_at',
-            'updated_at',
-            'gudang',
-            'keterangan'
-        ))
-            ->where(array(
-                'inventori_stok_opname.deleted_at' => 'IS NULL',
-                'AND',
-                'inventori_stok_opname.uid' => '= ?',
-                'AND',
-                'inventori_stok_opname.gudang' => '= ?'
-            ), array(
-                $parameter,
-                $UserData['data']->gudang
+
+        if($UserData['data']->gudang === __GUDANG_UTAMA__) {
+            $data = self::$query->select('inventori_stok_opname', array(
+                'uid',
+                'kode',
+                'dari',
+                'sampai',
+                'pegawai',
+                'created_at',
+                'updated_at',
+                'gudang',
+                'keterangan'
             ))
-            ->execute();
+                ->where(array(
+                    'inventori_stok_opname.deleted_at' => 'IS NULL',
+                    'AND',
+                    'inventori_stok_opname.uid' => '= ?'
+                ), array(
+                    $parameter
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok_opname', array(
+                'uid',
+                'kode',
+                'dari',
+                'sampai',
+                'pegawai',
+                'created_at',
+                'updated_at',
+                'gudang',
+                'keterangan'
+            ))
+                ->where(array(
+                    'inventori_stok_opname.deleted_at' => 'IS NULL',
+                    'AND',
+                    'inventori_stok_opname.uid' => '= ?',
+                    'AND',
+                    'inventori_stok_opname.gudang' => '= ?'
+                ), array(
+                    $parameter,
+                    $UserData['data']->gudang
+                ))
+                ->execute();   
+        }
         $Pegawai = new Pegawai(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['dari'] = date('d F Y', strtotime($value['dari']));

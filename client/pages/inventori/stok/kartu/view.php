@@ -47,6 +47,10 @@
                                                 <td>Kemasan</td>
                                                 <td>:</td>
                                                 <td id="kemasan_barang"></td>
+
+                                                <td>Total</td>
+                                                <td>:</td>
+                                                <td id="total_all">0</td>
                                             </tr>
                                         </table>
                                     </div>

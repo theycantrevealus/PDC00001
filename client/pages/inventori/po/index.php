@@ -32,6 +32,7 @@
                     <th>Tanggal</th>
                     <th>Total Biaya</th>
                     <th>Oleh</th>
+                    <th>Sumber Dana</th>
                     <th class="wrap_content">Aksi</th>
                 </tr>
                 </thead>

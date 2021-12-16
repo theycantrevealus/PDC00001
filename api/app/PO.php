@@ -67,6 +67,7 @@ class PO extends Utility {
 			'total',
 			'total_after_disc',
 			'supplier',
+			'sumber_dana',
 			'keterangan'
 		))
 		->where(array(
@@ -74,6 +75,7 @@ class PO extends Utility {
 		))
 		->execute();
 		$autonum = 1;
+		$Terminologi = new Terminologi(self::$pdo);
         $Supplier = new Supplier(self::$pdo);
         $Pegawai = new Pegawai(self::$pdo);
 
@@ -108,6 +110,7 @@ class PO extends Utility {
 				$PODetail[$POKey]['sampai'] = $countBarang;
 			}
 			$data['response_data'][$key]['detail'] = $PODetail;
+			$data['response_data'][$key]['sumber_dana'] = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['sumber_dana'])['response_data'][0];
 
 
 			$InfoSupplier = $Supplier->get_detail($value['supplier']);
@@ -152,6 +155,16 @@ class PO extends Utility {
 
         $Inventori = new Inventori(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
+			$DO = self::$query->select('inventori_do', array(
+				'no_do', 'no_invoice'
+			))
+				->where(array(
+					'inventori_do.po' => '= ?'
+				), array(
+					$value['uid_po']
+				))
+				->execute();
+			$data['response_data'][$key]['do'] = $DO['response_data'][0];
             $data['response_data'][$key]['barang_detail'] = $Inventori->get_item_detail($value['uid_barang'])['response_data'][0];
             $batchAvail = $Inventori->get_item_batch($value['uid_barang'])['response_data'];
             $parsedBatch = array();
@@ -421,6 +434,7 @@ class PO extends Utility {
 			'total_after_disc' => $AllSubtotal,
 			'nomor_po' => $set_code,
 			'keterangan' => $parameter['keteranganAll'],
+			'sumber_dana' => $parameter['sumber_dana'],
 			'tanggal_po' => date("Y-m-d", strtotime($parameter['tanggal'])),
 			'created_at' => parent::format_date(),
 			'updated_at' => parent::format_date()

@@ -75,11 +75,11 @@
                             var detailData = response.response_package.response_data;
 
                             for(var a in detailData) {
+                                $("#no_invoice").html(detailData[a].do.no_invoice + "/" + detailData[a].do.no_do);
                                 var autonum = parseInt(a) + 1;
 
                                 var newRow, newCellNo, newCellItem, newCellQtyOrder, newCellQty, newCellSatuan, newQty;
                                 var availBatch = detailData[a].batch_avail;
-                                console.log(availBatch);
                                 for(var b in availBatch) {
                                     if(parseInt(b) === 0) {
                                         newRow = document.createElement("TR");
