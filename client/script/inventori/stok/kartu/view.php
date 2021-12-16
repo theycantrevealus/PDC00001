@@ -204,7 +204,7 @@
                             //$(newUraian).html(batchGroup[a].log[b].batch.batch);
                             $(newMasuk).html("<h6 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].masuk) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].masuk, 2, ",", ".") + "</h6>").addClass("number_style");
                             $(newKeluar).html("<h6 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].keluar) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].keluar, 2, ",", ".") + "</h6>").addClass("number_style");
-                            $(newSaldo).html("<h5 class=\"number_style text-orange\">" + number_format(batchGroup[a].log[b].saldo, 2, ",", ".") + "</h5>").addClass("number_style");
+                            $(newSaldo).html("<h5 class=\"number_style text-orange\" rawval=\"" + batchGroup[a].log[b].saldo + "\">" + number_format(batchGroup[a].log[b].saldo, 2, ",", ".") + "</h5>").addClass("number_style");
                             if(batchGroup[a].log[b].type.id === __STATUS_OPNAME__) {
                                 $(newKeterangan).html("<div class=\"row\">" +
                                     "<div class=\"col-lg-2\">" +
@@ -324,7 +324,7 @@
                     var totalAllStock = 0;
 
                     $(".singleTable").each(function() {
-                        var tar = parseFloat($(this).find("tbody tr:last-child td:eq(4) h5").html());
+                        var tar = parseFloat($(this).find("tbody tr:last-child td:eq(4) h5").attr("rawval"));
                         totalAllStock += tar;
                     });
                     $("#total_all").html(number_format(totalAllStock, 2, ",", "."));
