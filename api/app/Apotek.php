@@ -4174,7 +4174,7 @@ class Apotek extends Utility
                 $data['response_data'][$key]['departemen'] = (count($PoliInfo['response_data']) > 0) ? $PoliInfo['response_data'][0] : $value['departemen'];
             }
 
-            $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+            $data['response_data'][$key]['created_at_parsed'] = date('d F Y H:i:s', strtotime($value['created_at']));
             $data['response_data'][$key]['penjamin'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;

@@ -315,6 +315,11 @@
                         <?php
                         echo($_POST['dataCetak']);
                         ?>
+
+                        <br />
+                        <br />
+                        <br />
+                        <h5 style="text-align: right;">PCC</h5>
                     </div>
                 </td>
             </tr>

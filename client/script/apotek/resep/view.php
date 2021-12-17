@@ -183,7 +183,9 @@
                             nama: "Rawat Inap"
                         };
                     }
-                    $(".nama_pasien").html((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama);
+
+                    console.log(currentMetaData.pasien);
+                    $(".nama_pasien").html(currentMetaData.pasien.no_rm + " - " + ((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama));
                     $(".jk_pasien").html((currentMetaData.pasien.jenkel_detail !== undefined && currentMetaData.pasien.jenkel_detail !== null) ? currentMetaData.pasien.jenkel_detail.nama : "");
                     $(".tanggal_lahir_pasien").html(currentMetaData.pasien.tanggal_lahir_parsed);
                     $(".penjamin_pasien").html(currentMetaData.penjamin.nama);
@@ -191,6 +193,8 @@
                     $(".dokter").html(currentMetaData.dokter.nama);
                     $("#copy-resep-dokter").html(currentMetaData.dokter.nama);
                     $("#copy-resep-pasien").html((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama);
+                    $("#copy-resep-pasien-lahir-user").html(currentMetaData.pasien.tanggal_lahir_parsed + " - " + currentMetaData.pasien.usia + " tahun");
+                    $("#copy-resep-pasien-alamat").html(currentMetaData.pasien.alamat);
                     $("#copy-resep-tanggal").html(data.created_at_parsed);
 
                     if(data.resep.length > 0) {
@@ -803,9 +807,7 @@
                 type:"GET",
                 success:function(response) {
                     batchData = response.response_package.response_data;
-                    console.clear();
-                    console.log(batchData);
-
+                    
 
                     if(batchData !== null) {
                         if(rowTarget !== "") {
@@ -2058,7 +2060,6 @@
         }
 
         function CheckVerifResep(newData, id, data, alasanLib = {}) {
-            //console.clear();
             if(newData.resep[data.id] === undefined) {
                 newData.resep[data.id] = {
                     "aturan_pakai": $("#resep_obat_aturan_pakai_" + id + " option:selected").val(),
@@ -2302,7 +2303,6 @@
         }
 
         function CompareVerif(oldData, newData) {
-            console.clear();
             var changed = false;
 
             if(
@@ -2718,7 +2718,6 @@
         }
 
         $("#btnCopyResep").click(function() {
-            console.clear();
             var itemP = [];
 
             //Ambil Semua Resep yang dicentang
@@ -2900,6 +2899,10 @@
                         Dari dokter: <b id="copy-resep-dokter"></b>
                         <br />
                         Untuk: <b id="copy-resep-pasien"></b>
+                        <br />
+                        Tanggal Lahir/Usia:<br /><b id="copy-resep-pasien-lahir-user"></b>
+                        <br />
+                        Alamat:<br /><strong id="copy-resep-pasien-alamat"></strong>
                         <br />
                         Tanggal Resep: <b id="copy-resep-tanggal"></b>
                     </p>

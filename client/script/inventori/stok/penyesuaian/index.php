@@ -697,58 +697,90 @@
         });
 
 		$("#btnSubmitStokOpname").click(function() {
-            Swal.fire({
-                title: "Data Sudah Benar?",
-                showDenyButton: true,
-                type: "warning",
-                confirmButtonText: "Ya",
-                confirmButtonColor: "#1297fb",
-                denyButtonText: "Tidak",
-                denyButtonColor: "#ff2a2a"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    var rawAwal = $("#txt_periode_awal").datepicker("getDate");
-                    var awal =  rawAwal.getFullYear() + "-" + str_pad(2, rawAwal.getMonth()+1) + "-" + str_pad(2, rawAwal.getDate());
+            console.clear();
+            console.log(metaDataOpname);
 
-                    var rawAkhir = $("#txt_periode_akhir").datepicker("getDate");
-                    var akhir =  rawAkhir.getFullYear() + "-" + str_pad(2, rawAkhir.getMonth()+1) + "-" + str_pad(2, rawAkhir.getDate());
 
-                    $.ajax({
-                        url:__HOSTAPI__ + "/Inventori",
-                        async: false,
-                        data: {
-                            request: "tambah_opname",
-                            dari:awal,
-                            sampai:akhir,
-                            keterangan:$("#txt_keterangan").val(),
-                            item:metaDataOpname
-                        },
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        type:"POST",
-                        success:function(response) {
-                            console.log(response);
-                            if(response.response_package.response_result > 0) {
-                                $("#form-tambah").modal("hide");
-                                tableHistoryOpname.ajax.reload();
-                                tableCurrentStock.ajax.reload();
-                            } else {
-                                Swal.fire(
-                                    'Penyesuaian Stok',
-                                    response.response_package,
-                                    'warning'
-                                ).then((result) => {
-                                    //
-                                });
-                            }
-                        },
-                        error: function(response) {
-                            console.log(response);
-                        }
-                    });
+            var allowSaveDataOpname = false;
+
+            for(var az in metaDataOpname) {
+                if(metaDataOpname[az].keterangan === null) {
+                    metaDataOpname[az].keterangan = "";
                 }
-            });
+
+                if(
+                    metaDataOpname[az].keterangan !== null &&
+                    metaDataOpname[az].keterangan !== undefined &&
+                    metaDataOpname[az].keterangan !== ""
+                ) {
+                    allowSaveDataOpname = true;
+                } else {
+                    allowSaveDataOpname = false;
+                    break;
+                }
+            }
+
+            if(allowSaveDataOpname === true) {
+                Swal.fire({
+                    title: "Data Sudah Benar?",
+                    showDenyButton: true,
+                    type: "warning",
+                    confirmButtonText: "Ya",
+                    confirmButtonColor: "#1297fb",
+                    denyButtonText: "Tidak",
+                    denyButtonColor: "#ff2a2a"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var rawAwal = $("#txt_periode_awal").datepicker("getDate");
+                        var awal =  rawAwal.getFullYear() + "-" + str_pad(2, rawAwal.getMonth()+1) + "-" + str_pad(2, rawAwal.getDate());
+
+                        var rawAkhir = $("#txt_periode_akhir").datepicker("getDate");
+                        var akhir =  rawAkhir.getFullYear() + "-" + str_pad(2, rawAkhir.getMonth()+1) + "-" + str_pad(2, rawAkhir.getDate());
+
+                        $.ajax({
+                            url:__HOSTAPI__ + "/Inventori",
+                            async: false,
+                            data: {
+                                request: "tambah_opname",
+                                dari:awal,
+                                sampai:akhir,
+                                keterangan:$("#txt_keterangan").val(),
+                                item:metaDataOpname
+                            },
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type:"POST",
+                            success:function(response) {
+                                if(response.response_package.response_result > 0) {
+                                    $("#form-tambah").modal("hide");
+                                    tableHistoryOpname.ajax.reload();
+                                    tableCurrentStock.ajax.reload();
+                                } else {
+                                    Swal.fire(
+                                        'Penyesuaian Stok',
+                                        response.response_package,
+                                        'warning'
+                                    ).then((result) => {
+                                        //
+                                    });
+                                }
+                            },
+                            error: function(response) {
+                                console.log(response);
+                            }
+                        });
+                    }
+                });
+            } else {
+                Swal.fire(
+                        'Penyesuaian Stok',
+                        'Semua keterangan per item wajib diisi',
+                        'warning'
+                    ).then((result) => {
+                        //
+                    });
+            }
 		});
 
 		

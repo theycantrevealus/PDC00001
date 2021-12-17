@@ -26,11 +26,9 @@
                             </center>
                         </div>
                         <div class="col-md-10">
-                            <b class="nama_pasien"></b>
-                            <br />
-                            <span class="jk_pasien"></span>
-                            <br />
-                            <span class="tanggal_lahir_pasien"></span>
+                            <h6 class="nama_pasien"></h6>
+                            <h6 class="jk_pasien"></h6>
+                            <h6 class="tanggal_lahir_pasien"></h6>
                         </div>
                     </div>
                 </div>

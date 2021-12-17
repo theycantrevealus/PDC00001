@@ -2955,6 +2955,7 @@
             antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi,
             editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorAlergiObat, editorKeteranganResep, editorKeteranganResepRacikan,
             iterasiObat,
+            checkAlergi,
             metaSwitchEdit,
             charge_invoice = "N"
         ) {
@@ -3350,23 +3351,32 @@
             }
 
 
-
-            $.ajax({
-                async: false,
-                url: __HOSTAPI__ + "/Asesmen",
-                data: formData,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                type: "POST",
-                success: function(response) {
-                    savingResult = response;
-                },
-                error: function(response) {
-                    console.clear();
-                    console.log(response);
-                }
-            });
+            if(editorAlergiObat !== "" && editorAlergiObat !== undefined && editorAlergiObat !== null && checkAlergi === 'Y') {
+                $.ajax({
+                    async: false,
+                    url: __HOSTAPI__ + "/Asesmen",
+                    data: formData,
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    type: "POST",
+                    success: function(response) {
+                        savingResult = response;
+                    },
+                    error: function(response) {
+                        console.clear();
+                        console.log(response);
+                    }
+                });
+            } else {
+                Swal.fire(
+                        'Asesmen Medis',
+                        'Alergi obat wajib diisi',
+                        'warning'
+                    ).then((result) => {
+                        //
+                    });
+            }
 
             //orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, charge_invoice);
             //listTindakanRadiologiDihapus = [];		//set back to empty
@@ -3740,6 +3750,7 @@
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     $("#iterasi_resep").inputmask("unmaskedvalue"),
+                    'Y',
                     metaSwitchEdit));
             }).then(function(result) {
                 if(result.response_package.response_result > 0) {
@@ -3790,6 +3801,7 @@
                 metaSwitchEdit.txt_keterangan_resep.editor,
                 metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                 $("#iterasi_resep").inputmask("unmaskedvalue"),
+                'Y',
                 metaSwitchEdit);
             Swal.fire({
                 title: 'Selesai isi asesmen medis?',
@@ -3821,6 +3833,7 @@
                             metaSwitchEdit.txt_keterangan_resep.editor,
                             metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                             $("#iterasi_resep").inputmask("unmaskedvalue"),
+                            'Y',
                             metaSwitchEdit,
                             "Y"));
                     }).then(function(result) {
@@ -5455,6 +5468,7 @@
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     $("#iterasi_resep").inputmask("unmaskedvalue"),
+                    'Y',
                     metaSwitchEdit
                 ));
             }).then(function(result) {
@@ -5513,6 +5527,7 @@
                             metaSwitchEdit.txt_keterangan_resep.editor,
                             metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                             $("#iterasi_resep").inputmask("unmaskedvalue"),
+                            'Y',
                             metaSwitchEdit,
                             "Y"));
                     }).then(function(result) {
