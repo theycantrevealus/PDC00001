@@ -1381,13 +1381,13 @@
                                     Keterangan:<br />
                                     <table class="table">
                                         <tr>
-                                            <td class="bg-danger"> </td><td>Stok kurang</td>
+                                            <td class="bg-danger" style="width: 50px !important;"> </td><td>Stok kurang</td>
                                         </tr>
                                         <tr>
-                                            <td class="bg-warning"> </td><td>Stok berlebih</td>
+                                            <td class="bg-warning" style="width: 50px !important;"> </td><td>Stok berlebih</td>
                                         </tr>
                                         <tr>
-                                        <td class="bg-success"> </td><td>Stok sesuai</td>
+                                        <td class="bg-success" style="width: 50px !important;"> </td><td>Stok sesuai</td>
                                         </tr>
                                     </table>
                                 </div>
