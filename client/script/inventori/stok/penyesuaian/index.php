@@ -1377,6 +1377,20 @@
 										<tbody></tbody>
 									</table>
 								</div>
+                                <div class="form-group col-md-12">
+                                    Keterangan:<br />
+                                    <table class="table">
+                                        <tr>
+                                            <td class="bg-danger"> </td><td>Stok kurang</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="bg-warning"> </td><td>Stok berlebih</td>
+                                        </tr>
+                                        <tr>
+                                        <td class="bg-success"> </td><td>Stok sesuai</td>
+                                        </tr>
+                                    </table>
+                                </div>
 							</div>
 							<div class="row">
 								<div class="form-group col-md-12">
