@@ -3618,10 +3618,10 @@
                     metaSwitchEdit.txt_diagnosa_kerja.editor,
                     metaSwitchEdit.txt_diagnosa_banding.editor,
                     metaSwitchEdit.txt_planning.editor,
-                    alergiObat,
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     $("#iterasi_resep").inputmask("unmaskedvalue"),
+                    alergiObat,
                     metaSwitchEdit));
             }).then(function(result) {
                 if(result.response_package.response_result > 0) {
@@ -3746,10 +3746,10 @@
                     metaSwitchEdit.txt_diagnosa_kerja.editor,
                     metaSwitchEdit.txt_diagnosa_banding.editor,
                     metaSwitchEdit.txt_planning.editor,
-                    alergiObat,
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     $("#iterasi_resep").inputmask("unmaskedvalue"),
+                    alergiObat,
                     'Y',
                     metaSwitchEdit));
             }).then(function(result) {
@@ -3797,10 +3797,10 @@
                 metaSwitchEdit.txt_diagnosa_kerja.editor,
                 metaSwitchEdit.txt_diagnosa_banding.editor,
                 metaSwitchEdit.txt_planning.editor,
-                alergiObat,
                 metaSwitchEdit.txt_keterangan_resep.editor,
                 metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                 $("#iterasi_resep").inputmask("unmaskedvalue"),
+                alergiObat,
                 'Y',
                 metaSwitchEdit);
             Swal.fire({
@@ -3829,10 +3829,10 @@
                             metaSwitchEdit.txt_diagnosa_kerja.editor,
                             metaSwitchEdit.txt_diagnosa_banding.editor,
                             metaSwitchEdit.txt_planning.editor,
-                            alergiObat,
                             metaSwitchEdit.txt_keterangan_resep.editor,
                             metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                             $("#iterasi_resep").inputmask("unmaskedvalue"),
+                            alergiObat,
                             'Y',
                             metaSwitchEdit,
                             "Y"));
@@ -5464,10 +5464,10 @@
                     metaSwitchEdit.txt_diagnosa_kerja.editor,
                     metaSwitchEdit.txt_diagnosa_banding.editor,
                     metaSwitchEdit.txt_planning.editor,
-                    alergiObat,
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     $("#iterasi_resep").inputmask("unmaskedvalue"),
+                    alergiObat,
                     'Y',
                     metaSwitchEdit
                 ));
@@ -5523,10 +5523,10 @@
                             metaSwitchEdit.txt_diagnosa_kerja.editor,
                             metaSwitchEdit.txt_diagnosa_banding.editor,
                             metaSwitchEdit.txt_planning.editor,
-                            alergiObat,
                             metaSwitchEdit.txt_keterangan_resep.editor,
                             metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                             $("#iterasi_resep").inputmask("unmaskedvalue"),
+                            alergiObat,
                             'Y',
                             metaSwitchEdit,
                             "Y"));
@@ -5876,10 +5876,10 @@
                         metaSwitchEdit.txt_diagnosa_kerja.editor,
                         metaSwitchEdit.txt_diagnosa_banding.editor,
                         metaSwitchEdit.txt_planning.editor,
-                        alergiObat,
                         metaSwitchEdit.txt_keterangan_resep.editor,
                         metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                         $("#iterasi_resep").inputmask("unmaskedvalue"),
+                        alergiObat,
                         metaSwitchEdit
                     ));
                 }).then(function(result) {

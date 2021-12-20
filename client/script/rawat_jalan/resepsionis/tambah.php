@@ -113,8 +113,7 @@
                                 },
                                 type: "POST",
                                 success: function(response) {
-
-                                    console.log(response);
+                                    alert();
 
                                     localStorage.getItem("currentPasien");
                                     localStorage.getItem("currentAntrianID");
