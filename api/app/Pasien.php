@@ -692,6 +692,7 @@ class Pasien extends Utility
         $non_active = array();
         $success_proceed = 0;
         $proceed_data = array();
+        $failedData = array();
 
         foreach ($parameter['data_import'] as $key => $value) {
             $check = self::$query->select('pasien', array(
@@ -818,6 +819,28 @@ class Pasien extends Utility
 
                     if($new_pasien['response_result'] > 0) {
                         $success_proceed += 1;
+                    } else {
+                        array_push($failedData, array(
+                            'no_rm' => $value['no_rm'],
+                            'nik' => $value['nik'],
+                            'nama' => $value['nama'],
+                            'jenkel' => $target_jenkel,
+                            'tempat_lahir' => $value['tempat_lahir'],
+                            'tanggal_lahir' => $value['tanggal_lahir'],
+                            'agama' => $data_terminologi['agama']['target'],
+                            'status_pernikahan' => $data_terminologi['status_pernikahan']['target'],
+                            'pendidikan' => $data_terminologi['pendidikan']['target'],
+                            'pekerjaan' => $data_terminologi['pekerjaan']['target'],
+                            'alamat' => $value['alamat'],
+                            'kode_pos' => $value['kode_pos'],
+                            'no_telp' => $value['no_telp'],
+                            'email' => $value['email'],
+                            'nama_ayah' => $value['nama_ayah'],
+                            'nama_ibu' => $value['nama_ibu'],
+                            'nama_suami_istri' => $value['nama_suami_istri'],
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date()
+                        ));
                     }
 
                     array_push($proceed_data, $new_pasien);
@@ -831,6 +854,7 @@ class Pasien extends Utility
             'success_proceed' => $success_proceed,
             'data' => $parameter['data_import'],
             'proceed' => $proceed_data,
+            'failed_data' => $failedData,
             'termin_item' => $termi_item,
             'meta_data' => $data_terminologi
         );

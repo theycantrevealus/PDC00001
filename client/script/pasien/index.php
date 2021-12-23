@@ -187,11 +187,34 @@
                         },
                         success:function(response)
                         {
-                            var html = "Imported : " + response.response_package.success_proceed + "<br />";
-                            $("#csv_file_data").html(html);
+                            var html = "Imported : " + response.response_package.success_proceed + "<br /><br /><h5>Failed import data:</h5>";
+
+                            var failedData = response.response_package.failed_data;
+                            var failedResult = document.createElement("table");
+                            $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
+                            "<tr>" +
+                            "<th>No RM</th>" +
+                            "<th>NIK</th>" +
+                            "<th>Nama</th>" +
+                            "<th>Tempat Lahir</th>" +
+                            "<th>Tanggal Lahir</th></tr></thead><tbody></tbody>");
+
+                            $("#csv_file_data").html(html).append(failedResult);
+                            $(failedResult).DataTable({
+                                data: failedData,
+                                columns: [
+                                    { data: "no_rm" },
+                                    { data: "nik" },
+                                    { data: "nama" },
+                                    { data: "tempat_lahir" },
+                                    { data: "tanggal_lahir" }
+                                ]
+                            });
                             tablePasien.ajax.reload();
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
+                            console.clear();
+                            console.log(response);
                         },
                         error: function (response) {
                             $("#csv_file_data").html(response);
