@@ -78,7 +78,9 @@
 		$("#txt_obat_tambah").select2();
 		$("#txt_gudang").select2();
 		$("#txt_gudang_tambah").select2();
-		$("#target_gudang_import").select2();
+		$("#target_gudang_import").select2({
+            dropdownParent: $("#review-import")
+        });
 		$("#txt_qty_tambah").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
@@ -424,7 +426,7 @@
 </div>
 
 
-<div id="form-tambah" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+<div id="form-tambah" tabindex="-1" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">

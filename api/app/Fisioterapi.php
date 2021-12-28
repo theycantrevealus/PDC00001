@@ -64,13 +64,15 @@ class Fisioterapi extends Utility
             'tanggal' => parent::format_date(),
             'kunjungan' => $parameter['kunjungan'],
             'pasien' => $parameter['pasien'],
+            'asesmen' => $parameter['asesmen'],
             'terapis' => $UserData['data']->uid,
             'program' => $parameter['program'],
-            'dokter' => $parameter['dokter'],
+            'dokter' => $parameter['dokter']['uid'],
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date()
         ))
             ->execute();
+        return $worker;
     }
 
     public function get_terapi($parameter)
@@ -131,7 +133,7 @@ class Fisioterapi extends Utility
 
 
             $Terapis = new Pegawai(self::$pdo);
-            $data['response_data'][$key]['dokter'] = $Terapis::get_detail($value['terapis'])['response_data'][0];
+            $data['response_data'][$key]['terapis'] = $Terapis::get_detail($value['terapis'])['response_data'][0];
 
             $autonum++;
         }

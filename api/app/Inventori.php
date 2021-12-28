@@ -349,6 +349,7 @@ class Inventori extends Utility
         $duplicate_row = array();
         $non_active = array();
         $success_proceed = 0;
+        $failed_data = array();
         $proceed_data = array();
         $all_data = array();
 
@@ -476,7 +477,7 @@ class Inventori extends Utility
                         $targettedObat = parent::gen_uuid();
                         $new_obat = self::$query->insert('master_inv', array(
                             'uid' => $targettedObat,
-                            'nama' => $value['nama'],
+                            'nama' => addslashes($value['nama']),
                             'kategori' => $targettedKategori,
                             'keterangan' => $value['nama_rko'],
                             'satuan_terkecil' => $targettedSatuan,

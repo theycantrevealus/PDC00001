@@ -708,8 +708,9 @@ class Pasien extends Utility
                 ))
                 ->execute();
             if(count($check['response_data']) > 0) {
-                //
+                array_push($failedData, $value);
             } else {
+                //array_push($duplicate_row, $value);
                 //Prepare Data
                 $data_terminologi = array(
                     'agama' => array(
@@ -820,27 +821,28 @@ class Pasien extends Utility
                     if($new_pasien['response_result'] > 0) {
                         $success_proceed += 1;
                     } else {
-                        array_push($failedData, array(
-                            'no_rm' => $value['no_rm'],
-                            'nik' => $value['nik'],
-                            'nama' => $value['nama'],
-                            'jenkel' => intval($target_jenkel),
-                            'tempat_lahir' => (isset($value['tempat_lahir']) && !empty($value['tempat_lahir'])) ? $value['tempat_lahir'] : '-',
-                            'tanggal_lahir' => $value['tanggal_lahir'],
-                            'agama' => intval($data_terminologi['agama']['target']),
-                            'status_pernikahan' => intval($data_terminologi['status_pernikahan']['target']),
-                            'pendidikan' => intval($data_terminologi['pendidikan']['target']),
-                            'pekerjaan' => intval($data_terminologi['pekerjaan']['target']),
-                            'alamat' => (isset($value['alamat']) && !empty($value['alamat'])) ? $value['alamat'] : '-',
-                            'kode_pos' => (isset($value['kode_pos']) && !empty($value['kode_pos'])) ? $value['kode_pos'] : '-',
-                            'no_telp' => (isset($value['no_telp']) && !empty($value['no_telp'])) ? $value['no_telp'] : '-',
-                            'email' => (isset($value['email']) && !empty($value['email'])) ? $value['email'] : '-',
-                            'nama_ayah' => (isset($value['nama_ayah']) && !empty($value['nama_ayah'])) ? $value['nama_ayah'] : '-',
-                            'nama_ibu' => (isset($value['nama_ibu']) && !empty($value['nama_ibu'])) ? $value['nama_ibu'] : '-',
-                            'nama_suami_istri' => (isset($value['nama_suami_istri']) && !empty($value['nama_suami_istri'])) ? $value['nama_suami_istri'] : '-',
-                            'created_at' => parent::format_date(),
-                            'updated_at' => parent::format_date()
-                        ));
+                        //array_push($failedData, $new_pasien);
+                        // array_push($failedData, array(
+                        //     'no_rm' => $value['no_rm'],
+                        //     'nik' => $value['nik'],
+                        //     'nama' => $value['nama'],
+                        //     'jenkel' => intval($target_jenkel),
+                        //     'tempat_lahir' => (isset($value['tempat_lahir']) && !empty($value['tempat_lahir'])) ? $value['tempat_lahir'] : '-',
+                        //     'tanggal_lahir' => $value['tanggal_lahir'],
+                        //     'agama' => intval($data_terminologi['agama']['target']),
+                        //     'status_pernikahan' => intval($data_terminologi['status_pernikahan']['target']),
+                        //     'pendidikan' => intval($data_terminologi['pendidikan']['target']),
+                        //     'pekerjaan' => intval($data_terminologi['pekerjaan']['target']),
+                        //     'alamat' => (isset($value['alamat']) && !empty($value['alamat'])) ? $value['alamat'] : '-',
+                        //     'kode_pos' => (isset($value['kode_pos']) && !empty($value['kode_pos'])) ? $value['kode_pos'] : '-',
+                        //     'no_telp' => (isset($value['no_telp']) && !empty($value['no_telp'])) ? $value['no_telp'] : '-',
+                        //     'email' => (isset($value['email']) && !empty($value['email'])) ? $value['email'] : '-',
+                        //     'nama_ayah' => (isset($value['nama_ayah']) && !empty($value['nama_ayah'])) ? $value['nama_ayah'] : '-',
+                        //     'nama_ibu' => (isset($value['nama_ibu']) && !empty($value['nama_ibu'])) ? $value['nama_ibu'] : '-',
+                        //     'nama_suami_istri' => (isset($value['nama_suami_istri']) && !empty($value['nama_suami_istri'])) ? $value['nama_suami_istri'] : '-',
+                        //     'created_at' => parent::format_date(),
+                        //     'updated_at' => parent::format_date()
+                        // ));
                     }
 
                     array_push($proceed_data, $new_pasien);

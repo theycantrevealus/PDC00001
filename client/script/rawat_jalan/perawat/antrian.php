@@ -380,7 +380,9 @@
             rebasePartus();
         });
 
-		function simpanAsesmen(allData, dataPasien, btnSelesai) {
+        simpanAsesmen(allData, dataPasien, $("#btnSelesai"));
+
+		function simpanAsesmen(allData, dataPasien, btnSelesai, redirect = "N") {
             $(".inputan").each(function(){
                 var value = $(this).val();
 
@@ -471,8 +473,10 @@
                         response.response_package.response_result > 0 ||
                         response.response_package.asesmen.response_result > 0
                     ) {
-                        notification ("success", "Berhasil Simpan Data", 3000, "hasil_tambah_dev");
-                        location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+                        if(redirect === "Y") {
+                            notification ("success", "Berhasil Simpan Data", 3000, "hasil_tambah_dev");
+                            location.href = __HOSTNAME__ + '/rawat_jalan/perawat';
+                        }
                     } else {
                         notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                     }
@@ -501,7 +505,7 @@
                 denyButtonColor: `#ff2a2a`
             }).then((result) => {
                 if (result.isConfirmed) {
-                    simpanAsesmen(allData, dataPasien, btnSelesai);
+                    simpanAsesmen(allData, dataPasien, btnSelesai, "Y");
 
 
 
@@ -767,27 +771,22 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
+                        return row.program;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
+                        return row.created_at;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
+                        return row.dokter.nama;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row["autonum"];
+                        return row.terapis.nama;
                     }
                 }
             ]
@@ -822,14 +821,19 @@
                             kunjungan: kunjungan,
                             antrian: antrian,
                             penjamin: penjamin,
+                            asesmen: $("#no_rm").attr("uid-asesmen"),
+                            program: $("#terapis_form_program").val(),
                             pasien: pasien,
                             poli: poli,
                             dokter: dokter
                         },
                         type:"POST",
                         success:function(response) {
+
                             if(response.response_package.response_result > 0) {
-                                //
+                                $("#form-terapis").modal("hide");
+                                tableTerapi.ajax.reload();
+                                //TODO : History Terapi pada dokter sesuaikan dengan fisioterapis
                             } else {
                                 console.log(response);
                             }
@@ -1088,8 +1092,13 @@
 	                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 	            },
 	            success: function(response) {
+                    
 				    if (response.response_package != ""){
 	            		MetaData = response.response_package;
+
+                        $("#no_rm").attr({
+                            "uid-asesmen": MetaData.asesmen_rawat.uid
+                        });
 
                         var uidPasien = "";
 		                $.each(MetaData.pasien, function(key, item){

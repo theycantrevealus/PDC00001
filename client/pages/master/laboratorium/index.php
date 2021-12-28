@@ -21,7 +21,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">Tindakan</h5>
+                    <h5 class="card-header__title flex m-0">Master Laboratorium</h5>
                     <button class="btn btn-sm btn-info pull-right" id="importData">
                         <i class="fa fa-upload"></i> Import
                     </button>

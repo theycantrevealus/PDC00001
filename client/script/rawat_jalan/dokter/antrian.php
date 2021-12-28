@@ -20,6 +20,7 @@
         var dataTableRadOrder;
         var dataTableLabOrder;
         var tableDokumen;
+        var tableTerapi;
 
 
 
@@ -2952,8 +2953,23 @@
 
 
         function simpanAsesmen(
-            antrianData, UID, editorKeluhanUtamaData, editorKeluhanTambahanData, editorPeriksaFisikData, editorTerapisAnamnesa, editorTerapisTataLaksana, editorTerapisEvaluasi,
-            editorTerapisHasil, editorTerapisKesimpulan, editorTerapisRekomendasi, editorKerja, editorBanding, editorPlanning, editorAlergiObat, editorKeteranganResep, editorKeteranganResepRacikan,
+            antrianData,
+            UID,
+            editorKeluhanUtamaData,
+            editorKeluhanTambahanData,
+            editorPeriksaFisikData,
+            editorTerapisAnamnesa,
+            editorTerapisTataLaksana,
+            editorTerapisEvaluasi,
+            editorTerapisHasil,
+            editorTerapisKesimpulan,
+            editorTerapisRekomendasi,
+            editorKerja,
+            editorBanding,
+            editorPlanning,
+            editorAlergiObat,
+            editorKeteranganResep,
+            editorKeteranganResepRacikan,
             iterasiObat,
             checkAlergi,
             metaSwitchEdit,
@@ -3351,7 +3367,54 @@
             }
 
 
-            if(editorAlergiObat !== "" && editorAlergiObat !== undefined && editorAlergiObat !== null && checkAlergi === 'Y') {
+            if(checkAlergi === 'Y') {
+                if((resep.length > 0 || racikan.length > 0)) {
+                    
+                    if(editorAlergiObat !== "" && editorAlergiObat !== undefined && editorAlergiObat !== null) {
+                        $.ajax({
+                            async: false,
+                            url: __HOSTAPI__ + "/Asesmen",
+                            data: formData,
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            type: "POST",
+                            success: function(response) {
+                                savingResult = response;
+                            },
+                            error: function(response) {
+                                console.clear();
+                                console.log(response);
+                            }
+                        });
+                    } else {
+                        Swal.fire(
+                            'Asesmen Medis',
+                            'Alergi obat wajib diisi',
+                            'warning'
+                        ).then((result) => {
+                            //
+                        });   
+                    }
+                } else {
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Asesmen",
+                        data: formData,
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "POST",
+                        success: function(response) {
+                            savingResult = response;
+                        },
+                        error: function(response) {
+                            console.clear();
+                            console.log(response);
+                        }
+                    });
+                }
+            } else {
                 $.ajax({
                     async: false,
                     url: __HOSTAPI__ + "/Asesmen",
@@ -3368,14 +3431,6 @@
                         console.log(response);
                     }
                 });
-            } else {
-                Swal.fire(
-                        'Asesmen Medis',
-                        'Alergi obat wajib diisi',
-                        'warning'
-                    ).then((result) => {
-                        //
-                    });
             }
 
             //orderRadiologi(UID, listTindakanRadiologiTerpilih, listTindakanRadiologiDihapus, charge_invoice);
@@ -3394,6 +3449,73 @@
                     loadPasien(UID);
                     allowLoadPerawat = false;
                 }
+            } else if(targetID === "#tab-poli-9") {
+                tableTerapi = $("#table-history-terapi").DataTable({
+                    processing: true,
+                    serverSide: true,
+                    sPaginationType: "full_numbers",
+                    bPaginate: true,
+                    searching: false,
+                    lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+                    serverMethod: "POST",
+                    "ajax":{
+                        url: __HOSTAPI__ + "/Fisioterapi",
+                        type: "POST",
+                        data: function(d) {
+                            d.request = "history_terapi";
+                            d.pasien = pasien_uid;
+                        },
+                        headers:{
+                            Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                        },
+                        dataSrc:function(response) {
+                            var returnedData = [];
+                            if(response === undefined || response.response_package === undefined) {
+                                returnedData = [];
+                            } else {
+                                returnedData = response.response_package.response_data;
+                            }
+
+                            response.draw = parseInt(response.response_package.response_draw);
+                            response.recordsTotal = response.response_package.recordsTotal;
+                            response.recordsFiltered = response.response_package.recordsFiltered;
+
+                            return returnedData;
+                        }
+                    },
+                    autoWidth: false,
+                    language: {
+                        search: "",
+                        searchPlaceholder: "Cari Program"
+                    },
+                    "columns" : [
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return row["autonum"];
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return row.program;
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return row.created_at;
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return row.dokter.nama;
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return row.terapis.nama;
+                            }
+                        }
+                    ]
+                });
             } else if(targetID === "#tab-poli-8") {
                 if(allowLoadDokumen) {
                     tableDokumen = $("#table-dokumen").DataTable({
@@ -3467,7 +3589,7 @@
                                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                             },
                             "type" : "GET",
-                            "dataSrc": function(response){
+                            "dataSrc": function(response) {
                                 if (response.response_package != null){
                                     return response.response_package;
                                 } else {
@@ -3602,6 +3724,11 @@
                 loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], pasien_uid);
             }
 
+            console.clear();
+
+            var alergiObat = $("#alergi_obat").val();
+            
+
             const simpanDataProcess = new Promise(function(resolve, reject) {
                 resolve(simpanAsesmen(
                     antrianData,
@@ -3622,13 +3749,18 @@
                     metaSwitchEdit.txt_keterangan_resep.editor,
                     metaSwitchEdit.txt_keterangan_resep_racikan.editor,
                     $("#iterasi_resep").inputmask("unmaskedvalue"),
-                    'N',
-                    metaSwitchEdit));
+                    "N",
+                    metaSwitchEdit,
+                    "N"));
             }).then(function(result) {
-                if(result.response_package.response_result > 0) {
-                    notification ("success", "Asesmen Berhasil Disimpan", 1000, "hasil_tambah_dev");
-                } else {
-                    notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
+                
+                console.log(result);
+                if(result !== undefined && result !== null) {
+                    if(result.response_package.response_result > 0) {
+                        notification ("success", "Asesmen Berhasil Disimpan", 1000, "hasil_tambah_dev");
+                    } else {
+                        notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
+                    }
                 }
             });
         });
