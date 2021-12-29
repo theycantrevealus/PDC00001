@@ -540,94 +540,98 @@ class Laboratorium extends Utility {
         foreach ($parameter['data_import'] as $key => $value) {
             $targettedKategori = '';
 
-            //Check Kategori
-            $checkKategoriLab = self::$query->select('master_lab_kategori', array(
-                'uid'
-            ))
-                ->where(array(
-                    'master_lab_kategori.nama' => '= ?'
-                ), array(
-                    $value['kategori']
-                ))
-                ->execute();
-            if(count($checkKategoriLab['response_data']) > 0) {
-                $targettedKategori = $checkKategoriLab['response_data'][0]['uid'];
-                $proceed_kategori = self::$query->update('master_lab_kategori', array(
-                    'deleted_at' => NULL
-                ))
-                    ->where(array(
-                        'master_lab_kategori.uid' => '= ?'
-                    ), array(
-                        $targettedKategori
-                    ))
-                    ->execute();
-            } else {
-                $targettedKategori = parent::gen_uuid();
-                $proceed_kategori = self::$query->insert('master_lab_kategori', array(
-                    'uid' => $targettedKategori,
-                    'nama' => ($value['kategori'] != '') ? $value['kategori'] : 'UNSPECIFIED',
-                    'created_at' => parent::format_date(),
-                    'updated_at' => parent::format_date()
-                ))
-                    ->execute();
-            }
-
-
-
-            $master_lab_kategori_item = self::$query->select('master_lab_kategori_item', array(
-                'id',
-                'lab'
-            ))
-                ->where(array(
-                    'master_lab_kategori_item.kategori' => '= ?',
-                    'AND',
-                    'master_lab_kategori_item.deleted_at' => 'IS NULL'
-                ), array(
-                    $targettedKategori
-                ))
-                ->execute();
-            foreach($master_lab_kategori_item['response_data'] as $KKey => $KValue) {
-                $checkNilai = self::$query->select('master_lab_nilai', array(
-                    'id'
-                ))
-                    ->where(array(
-                        'master_lab_nilai.lab' => '= ?',
-                        'AND',
-                        'master_lab_nilai.keterangan' => '= ?'
-                    ), array(
-                        $KValue['lab'],
-                        $value['parameter']
-                    ))
-                    ->execute();
-                if(count($checkNilai['response_data']) > 0) {
-                    $proceed_nilai = self::$query->update('master_lab_nilai', array(
-                        'keterangan' => $value['parameter'],
-                        'satuan' => $value['satuan'],
-                        'nilai_min' => ($value['min'] != '') ? $value['min'] : '-',
-                        'nilai_maks' => ($value['max'] != '') ? $value['max'] : '-',
-                        'status' => 'A',
-                        'deleted_at' => NULL
-                    ))
-                        ->where(array(
-                            'master_lab_nilai.id' => '= ?'
-                        ), array(
-                            $checkNilai['response_data'][0]['id']
-                        ))
-                        ->execute();
-                } else {
-                    $proceed_nilai = self::$query->insert('master_lab_nilai', array(
-                        'lab' => $KValue['lab'],
-                        'keterangan' => $value['parameter'],
-                        'satuan' => $value['satuan'],
-                        'nilai_min' => ($value['min'] != '') ? $value['min'] : '-',
-                        'nilai_maks' => ($value['max'] != '') ? $value['max'] : '-',
-                        'status' => 'A',
-                        'created_at' => parent::format_date(),
-                        'updated_at' => parent::format_date()
-                    ))
-                        ->execute();
-                }
-            }
+			if(!empty($value['kategori']) && isset($value['kategori'])) {
+				//Check Kategori
+				$checkKategoriLab = self::$query->select('master_lab_kategori', array(
+					'uid'
+				))
+					->where(array(
+						'master_lab_kategori.nama' => '= ?'
+					), array(
+						$value['kategori']
+					))
+					->execute();
+				if(count($checkKategoriLab['response_data']) > 0) {
+					$targettedKategori = $checkKategoriLab['response_data'][0]['uid'];
+					$proceed_kategori = self::$query->update('master_lab_kategori', array(
+						'deleted_at' => NULL
+					))
+						->where(array(
+							'master_lab_kategori.uid' => '= ?'
+						), array(
+							$targettedKategori
+						))
+						->execute();
+				} else {
+					$targettedKategori = parent::gen_uuid();
+					$proceed_kategori = self::$query->insert('master_lab_kategori', array(
+						'uid' => $targettedKategori,
+						'nama' => (!empty($value['kategori'])) ? $value['kategori'] : 'UNSPECIFIED',
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+						->execute();
+				}
+	
+	
+	
+				$master_lab_kategori_item = self::$query->select('master_lab_kategori_item', array(
+					'id',
+					'lab'
+				))
+					->where(array(
+						'master_lab_kategori_item.kategori' => '= ?',
+						'AND',
+						'master_lab_kategori_item.deleted_at' => 'IS NULL'
+					), array(
+						$targettedKategori
+					))
+					->execute();
+				foreach($master_lab_kategori_item['response_data'] as $KKey => $KValue) {
+					$checkNilai = self::$query->select('master_lab_nilai', array(
+						'id'
+					))
+						->where(array(
+							'master_lab_nilai.lab' => '= ?',
+							'AND',
+							'master_lab_nilai.keterangan' => '= ?'
+						), array(
+							$KValue['lab'],
+							$value['parameter']
+						))
+						->execute();
+					if(count($checkNilai['response_data']) > 0) {
+						$proceed_nilai = self::$query->update('master_lab_nilai', array(
+							'keterangan' => $value['parameter'],
+							'satuan' => $value['satuan'],
+							'nilai_min' => ($value['min'] != '') ? $value['min'] : '-',
+							'nilai_maks' => ($value['max'] != '') ? $value['max'] : '-',
+							'status' => 'A',
+							'deleted_at' => NULL
+						))
+							->where(array(
+								'master_lab_nilai.id' => '= ?'
+							), array(
+								$checkNilai['response_data'][0]['id']
+							))
+							->execute();
+					} else {
+						$proceed_nilai = self::$query->insert('master_lab_nilai', array(
+							'lab' => $KValue['lab'],
+							'keterangan' => $value['parameter'],
+							'satuan' => $value['satuan'],
+							'nilai_min' => ($value['min'] != '') ? $value['min'] : '-',
+							'nilai_maks' => ($value['max'] != '') ? $value['max'] : '-',
+							'status' => 'A',
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						))
+							->execute();
+					}
+				}	
+			} else {
+				array_push($non_active, $value);
+			}
         }
 
         return array(
@@ -660,261 +664,264 @@ class Laboratorium extends Utility {
             $targettedTindakan = '';
             $targettedKategori = '';
 
-
-            //Check Kategori
-            $checkKategoriLab = self::$query->select('master_lab_kategori', array(
-                'uid'
-            ))
-                ->where(array(
-                    'master_lab_kategori.nama' => '= ?'
-                ), array(
-                    $value['kategori']
-                ))
-                ->execute();
-            if(count($checkKategoriLab['response_data']) > 0) {
-                $targettedKategori = $checkKategoriLab['response_data'][0]['uid'];
-                $proceed_kategori = self::$query->update('master_lab_kategori', array(
-                    'deleted_at' => NULL
-                ))
-                    ->where(array(
-                        'master_lab_kategori.uid' => '= ?'
-                    ), array(
-                        $targettedKategori
-                    ))
-                    ->execute();
-            } else {
-                $targettedKategori = parent::gen_uuid();
-                $proceed_kategori = self::$query->insert('master_lab_kategori', array(
-                    'uid' => $targettedKategori,
-                    'nama' => ($value['kategori'] != '') ? $value['kategori'] : 'UNSPECIFIED',
-                    'created_at' => parent::format_date(),
-                    'updated_at' => parent::format_date()
-                ))
-                    ->execute();
-            }
-
-
-
-
-
-            //Check Laboratorium & Tindakan
-            $checkLab = self::$query->select('master_lab', array(
-                'uid'
-            ))
-                ->where(array(
-                    'master_lab.nama' => '= ?',
-                    'AND',
-                    'master_lab.kode' => '= ?'
-                ), array(
-                    $value['nama'],
-                    $value['kode']
-                ))
-                ->execute();
-            if(count($checkLab['response_data']) > 0) {
-                $targettedLab = $checkLab['response_data'][0]['uid'];
-                $proceed_lab = self::$query->update('master_lab', array(
-                    'deleted_at' => NULL
-                ))
-                    ->where(array(
-                        'master_lab.uid' => '= ?'
-                    ), array(
-                        $targettedLab
-                    ))
-                    ->execute();
-            } else {
-                $targettedLab = parent::gen_uuid();
-                $proceed_lab = self::$query->insert('master_lab', array(
-                    'uid' => $targettedLab,
-                    'kode' => $value['kode'],
-                    'nama' => $value['nama'],
-                    'created_at' => parent::format_date(),
-                    'updated_at' => parent::format_date(),
-                    'keterangan' => (isset($value['keterangan'])) ? $value['keterangan'] : ''
-                ))
-                    ->execute();
-            }
-
-            //Check Selected Kategori
-            $checkSelectedKategori = self::$query->select('master_lab_kategori_item', array(
-                'id'
-            ))
-                ->where(array(
-                    'master_lab_kategori_item.kategori' => '= ?',
-                    'AND',
-                    'master_lab_kategori_item.lab' => '= ?'
-                ), array(
-                    $targettedKategori,
-                    $targettedLab
-                ))
-                ->execute();
-            if(count($checkSelectedKategori['response_data']) > 0) {
-                $proceedSelectedKategori = self::$query->update('master_lab_kategori_item', array(
-                    'deleted_at' => NULL
-                ))
-                    ->where(array(
-                        'master_lab_kategori_item.id' => '= ?'
-                    ), array(
-                        $checkSelectedKategori['response_data'][0]['id']
-                    ))
-                    ->execute();
-            } else {
-                $proceedSelectedKategori = self::$query->insert('master_lab_kategori_item', array(
-                    'lab' => $targettedLab,
-                    'kategori' => $targettedKategori,
-                    'created_at' => parent::format_date(),
-                    'updated_at' => parent::format_date()
-                ))
-                    ->execute();
-            }
-
-            array_push($proceed_data, $proceed_lab);
-
-            //Check Mitra
-            $checkMitra = self::$query->select('master_mitra', array(
-                'uid'
-            ))
-                ->where(array(
-                    'master_mitra.nama' => '= ?',
-                    'AND',
-                    'master_mitra.jenis' => '= ?'
-                ), array(
-                    $value['mitra'],
-                    'LAB'
-                ))
-                ->execute();
-            if(count($checkMitra['response_data']) > 0) {
-                $targettedMitra = $checkMitra['response_data'][0]['uid'];
-                $proceed_mitra = self::$query->update('master_mitra', array(
-                    'deleted_at' => NULL
-                ))
-                    ->where(array(
-                        'master_mitra.uid' => '= ?'
-                    ), array(
-                        $targettedMitra
-                    ))
-                    ->execute();
-            } else {
-                $targettedMitra = parent::gen_uuid();
-                $proceed_mitra = self::$query->insert('master_mitra', array(
-                    'uid' => $targettedMitra,
-                    'nama' => $value['mitra'],
-                    'jenis' => 'LAB',
-                    'kontak' => '',
-                    'alamat' => '',
-                    'created_at' => parent::format_date(),
-                    'updated_at' => parent::format_date()
-                ))
-                    ->execute();
-            }
-
-            if($proceed_mitra['response_result'] > 0) { //Jika tindakan berhasil diproses
-                //Check Tindakan
-                $checkTindakan = self::$query->select('master_tindakan', array(
-                    'uid'
-                ))
-                    ->where(array(
-                        'master_tindakan.uid' => '= ?',
-                        'AND',
-                        'master_tindakan.kelompok' => '= ?'
-                    ), array(
-                        $targettedLab,
-                        'LAB'
-                    ))
-                    ->execute();
-                if(count($checkTindakan['response_data']) > 0) {
-                    $proceed_tindakan = self::$query->update('master_tindakan', array(
-                        'deleted_at' => NULL
-                    ))
-                        ->where(array(
-                            'master_tindakan.uid' => '= ?',
-                            'AND',
-                            'master_tindakan.kelompok' => '= ?'
-                        ), array(
-                            $targettedLab,
-                            'LAB'
-                        ))
-                        ->execute();
-                } else {
-                    $proceed_tindakan = self::$query->insert('master_tindakan', array(
-                        'uid' => $targettedLab,
-                        'nama' => $value['nama'],
-                        'kelompok' => 'LAB',
-                        'created_at' => parent::format_date(),
-                        'updated_at' => parent::format_date()
-                    ))
-                        ->execute();
-                }
+			if(!empty($value['kategori']) && isset($value['kategori'])) {
+				//Check Kategori
+				$checkKategoriLab = self::$query->select('master_lab_kategori', array(
+					'uid'
+				))
+					->where(array(
+						'master_lab_kategori.nama' => '= ?'
+					), array(
+						$value['kategori']
+					))
+					->execute();
+				if(count($checkKategoriLab['response_data']) > 0) {
+					$targettedKategori = $checkKategoriLab['response_data'][0]['uid'];
+					$proceed_kategori = self::$query->update('master_lab_kategori', array(
+						'deleted_at' => NULL
+					))
+						->where(array(
+							'master_lab_kategori.uid' => '= ?'
+						), array(
+							$targettedKategori
+						))
+						->execute();
+				} else {
+					$targettedKategori = parent::gen_uuid();
+					$proceed_kategori = self::$query->insert('master_lab_kategori', array(
+						'uid' => $targettedKategori,
+						'nama' => ($value['kategori'] != '') ? $value['kategori'] : 'UNSPECIFIED',
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+						->execute();
+				}
 
 
 
 
-                //Loop Penjamin
-                $getPenjamin = self::$query->select('master_penjamin', array(
-                    'uid'
-                ))
-                    ->where(array(
-                        'master_penjamin.deleted_at' => 'IS NULL'
-                    ))
-                    ->execute();
-                foreach ($getPenjamin['response_data'] as $PKey => $PValue) { //Apply semua penjamin
-                    //Data Kelas Lab
-                    $kelasLab = self::$query->select('master_tindakan_kelas', array(
-                        'uid'
-                    ))
-                        ->where(array(
-                            'master_tindakan_kelas.jenis' => '= ?',
-                            'AND',
-                            'master_tindakan_kelas.deleted_at' => 'IS NULL'
-                        ), array(
-                            'LAB'
-                        ))
-                        ->execute();
-                    foreach ($kelasLab['response_data'] as $KKey => $KValue) { //Apply semua kelas Labor
-                        //Check kelas harga
-                        $checkTarif = self::$query->select('master_tindakan_kelas_harga', array(
-                            'id'
-                        ))
-                            ->where(array(
-                                'master_tindakan_kelas_harga.tindakan' => '',
-                                'AND',
-                                'master_tindakan_kelas_harga.kelas' => '= ?',
-                                'AND',
-                                'master_tindakan_kelas_harga.penjamin' => ' = ?',
-                                'AND',
-                                'master_tindakan_kelas_harga.mitra' => '= ?'
-                            ), array(
-                                $targettedLab,
-                                $KValue['uid'],
-                                $PValue['uid'],
-                                $targettedMitra
-                            ))
-                            ->execute();
-                        if(count($checkTarif['response_data']) > 0) {
-                            $proceed_tarif = self::$query->update('master_tindakan_kelas_harga', array(
-                                'harga' => floatval($value['harga']),
-                                'deleted_at' => NULL
-                            ))
-                                ->where(array(
-                                    'master_tindakan_kelas_harga.id' => '= ?'
-                                ), array(
-                                    $checkTarif['response_data'][0]['id']
-                                ))
-                                ->execute();
-                        } else {
-                            $proceed_tarif = self::$query->insert('master_tindakan_kelas_harga', array(
-                                'tindakan' => $targettedLab,
-                                'kelas' => $KValue['uid'],
-                                'penjamin' => $PValue['uid'],
-                                'mitra' => $targettedMitra,
-                                'harga' => floatval($value['harga']),
-                                'created_at' => parent::format_date(),
-                                'updated_at' => parent::format_date()
-                            ))
-                                ->execute();
-                        }
-                    }
-                }
-            }
+
+				//Check Laboratorium & Tindakan
+				$checkLab = self::$query->select('master_lab', array(
+					'uid'
+				))
+					->where(array(
+						'master_lab.nama' => '= ?',
+						'AND',
+						'master_lab.kode' => '= ?'
+					), array(
+						$value['nama'],
+						$value['kode']
+					))
+					->execute();
+				if(count($checkLab['response_data']) > 0) {
+					$targettedLab = $checkLab['response_data'][0]['uid'];
+					$proceed_lab = self::$query->update('master_lab', array(
+						'deleted_at' => NULL
+					))
+						->where(array(
+							'master_lab.uid' => '= ?'
+						), array(
+							$targettedLab
+						))
+						->execute();
+				} else {
+					$targettedLab = parent::gen_uuid();
+					$proceed_lab = self::$query->insert('master_lab', array(
+						'uid' => $targettedLab,
+						'kode' => $value['kode'],
+						'nama' => $value['nama'],
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date(),
+						'keterangan' => (isset($value['keterangan'])) ? $value['keterangan'] : ''
+					))
+						->execute();
+				}
+
+				//Check Selected Kategori
+				$checkSelectedKategori = self::$query->select('master_lab_kategori_item', array(
+					'id'
+				))
+					->where(array(
+						'master_lab_kategori_item.kategori' => '= ?',
+						'AND',
+						'master_lab_kategori_item.lab' => '= ?'
+					), array(
+						$targettedKategori,
+						$targettedLab
+					))
+					->execute();
+				if(count($checkSelectedKategori['response_data']) > 0) {
+					$proceedSelectedKategori = self::$query->update('master_lab_kategori_item', array(
+						'deleted_at' => NULL
+					))
+						->where(array(
+							'master_lab_kategori_item.id' => '= ?'
+						), array(
+							$checkSelectedKategori['response_data'][0]['id']
+						))
+						->execute();
+				} else {
+					$proceedSelectedKategori = self::$query->insert('master_lab_kategori_item', array(
+						'lab' => $targettedLab,
+						'kategori' => $targettedKategori,
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+						->execute();
+				}
+
+				array_push($proceed_data, $proceed_lab);
+
+				//Check Mitra
+				$checkMitra = self::$query->select('master_mitra', array(
+					'uid'
+				))
+					->where(array(
+						'master_mitra.nama' => '= ?',
+						'AND',
+						'master_mitra.jenis' => '= ?'
+					), array(
+						$value['mitra'],
+						'LAB'
+					))
+					->execute();
+				if(count($checkMitra['response_data']) > 0) {
+					$targettedMitra = $checkMitra['response_data'][0]['uid'];
+					$proceed_mitra = self::$query->update('master_mitra', array(
+						'deleted_at' => NULL
+					))
+						->where(array(
+							'master_mitra.uid' => '= ?'
+						), array(
+							$targettedMitra
+						))
+						->execute();
+				} else {
+					$targettedMitra = parent::gen_uuid();
+					$proceed_mitra = self::$query->insert('master_mitra', array(
+						'uid' => $targettedMitra,
+						'nama' => $value['mitra'],
+						'jenis' => 'LAB',
+						'kontak' => '',
+						'alamat' => '',
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+						->execute();
+				}
+
+				if($proceed_mitra['response_result'] > 0) { //Jika tindakan berhasil diproses
+					//Check Tindakan
+					$checkTindakan = self::$query->select('master_tindakan', array(
+						'uid'
+					))
+						->where(array(
+							'master_tindakan.uid' => '= ?',
+							'AND',
+							'master_tindakan.kelompok' => '= ?'
+						), array(
+							$targettedLab,
+							'LAB'
+						))
+						->execute();
+					if(count($checkTindakan['response_data']) > 0) {
+						$proceed_tindakan = self::$query->update('master_tindakan', array(
+							'deleted_at' => NULL
+						))
+							->where(array(
+								'master_tindakan.uid' => '= ?',
+								'AND',
+								'master_tindakan.kelompok' => '= ?'
+							), array(
+								$targettedLab,
+								'LAB'
+							))
+							->execute();
+					} else {
+						$proceed_tindakan = self::$query->insert('master_tindakan', array(
+							'uid' => $targettedLab,
+							'nama' => $value['nama'],
+							'kelompok' => 'LAB',
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						))
+							->execute();
+					}
+
+
+
+
+					//Loop Penjamin
+					$getPenjamin = self::$query->select('master_penjamin', array(
+						'uid'
+					))
+						->where(array(
+							'master_penjamin.deleted_at' => 'IS NULL'
+						))
+						->execute();
+					foreach ($getPenjamin['response_data'] as $PKey => $PValue) { //Apply semua penjamin
+						//Data Kelas Lab
+						$kelasLab = self::$query->select('master_tindakan_kelas', array(
+							'uid'
+						))
+							->where(array(
+								'master_tindakan_kelas.jenis' => '= ?',
+								'AND',
+								'master_tindakan_kelas.deleted_at' => 'IS NULL'
+							), array(
+								'LAB'
+							))
+							->execute();
+						foreach ($kelasLab['response_data'] as $KKey => $KValue) { //Apply semua kelas Labor
+							//Check kelas harga
+							$checkTarif = self::$query->select('master_tindakan_kelas_harga', array(
+								'id'
+							))
+								->where(array(
+									'master_tindakan_kelas_harga.tindakan' => '',
+									'AND',
+									'master_tindakan_kelas_harga.kelas' => '= ?',
+									'AND',
+									'master_tindakan_kelas_harga.penjamin' => ' = ?',
+									'AND',
+									'master_tindakan_kelas_harga.mitra' => '= ?'
+								), array(
+									$targettedLab,
+									$KValue['uid'],
+									$PValue['uid'],
+									$targettedMitra
+								))
+								->execute();
+							if(count($checkTarif['response_data']) > 0) {
+								$proceed_tarif = self::$query->update('master_tindakan_kelas_harga', array(
+									'harga' => floatval($value['harga']),
+									'deleted_at' => NULL
+								))
+									->where(array(
+										'master_tindakan_kelas_harga.id' => '= ?'
+									), array(
+										$checkTarif['response_data'][0]['id']
+									))
+									->execute();
+							} else {
+								$proceed_tarif = self::$query->insert('master_tindakan_kelas_harga', array(
+									'tindakan' => $targettedLab,
+									'kelas' => $KValue['uid'],
+									'penjamin' => $PValue['uid'],
+									'mitra' => $targettedMitra,
+									'harga' => floatval($value['harga']),
+									'created_at' => parent::format_date(),
+									'updated_at' => parent::format_date()
+								))
+									->execute();
+							}
+						}
+					}
+				}
+			} else {
+				array_push($non_active, $value);
+			}
         }
 
         return array(
