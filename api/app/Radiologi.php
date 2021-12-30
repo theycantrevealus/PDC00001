@@ -117,6 +117,8 @@ class Radiologi extends Utility
         $non_active = array();
         $success_proceed = 0;
         $proceed_data = array();
+        $failed_data = array();
+        $action_list_tindakan = array();
 
         //Reset Radiologi
         $resetRadiologi = self::$query->update('master_radiologi_tindakan', array(
@@ -136,9 +138,9 @@ class Radiologi extends Utility
                 'uid'
             ))
                 ->where(array(
-                    'master_lab_kategori.nama' => '= ?'
+                    'master_radiologi_jenis.nama' => '= ?'
                 ), array(
-                    $value['kategori']
+                    trim(strtoupper($value['kategori']))
                 ))
                 ->execute();
             if(count($checkKategoriRad['response_data']) > 0) {
@@ -156,7 +158,7 @@ class Radiologi extends Utility
                 $targettedKategori = parent::gen_uuid();
                 $proceed_kategori = self::$query->insert('master_radiologi_jenis', array(
                     'uid' => $targettedKategori,
-                    'nama' => ($value['kategori'] != '') ? $value['kategori'] : 'UNSPECIFIED',
+                    'nama' => ($value['kategori'] != '') ? (strtoupper(trim($value['kategori']))) : 'UNSPECIFIED',
                     'created_at' => parent::format_date(),
                     'updated_at' => parent::format_date()
                 ))
@@ -206,18 +208,20 @@ class Radiologi extends Utility
 
             //Check Tindakan
             $checkTindakan = self::$query->select('master_tindakan', array(
-                'uid'
+                'uid', 'nama'
             ))
                 ->where(array(
                     'master_tindakan.nama' => '= ?',
                     'AND',
                     'master_tindakan.kelompok' => '= ?'
                 ), array(
-                    $value['nama'],
+                    trim($value['nama']),
                     'RAD'
                 ))
                 ->execute();
+
             if(count($checkTindakan['response_data']) > 0) {
+                array_push($action_list_tindakan, $checkTindakan['response_data'][0]['nama']);
                 $targettedTindakan = $checkTindakan['response_data'][0]['uid'];
                 $proceed_tindakan = self::$query->update('master_tindakan', array(
                     'deleted_at' => NULL
@@ -228,133 +232,147 @@ class Radiologi extends Utility
                         $targettedTindakan
                     ))
                     ->execute();
+                //array_push($action_list_tindakan, $proceed_tindakan);
             } else {
                 $targettedTindakan = parent::gen_uuid();
                 $proceed_tindakan = self::$query->insert('master_tindakan', array(
                     'uid' => $targettedTindakan,
-                    'nama' => $value['nama'],
+                    'nama' => addslashes(trim($value['nama'])),
                     'kelompok' => 'RAD',
                     'created_at' => parent::format_date(),
                     'updated_at' => parent::format_date()
                 ))
                     ->execute();
+                //array_push($action_list_tindakan, $proceed_tindakan);
             }
 
-            //Sync ke radiologi
-            $checkRadiologi = self::$query->select('master_radiologi_tindakan', array(
-                'id'
-            ))
-                ->where(array(
-                    'master_radiologi_tindakan.uid_tindakan' => '= ?'
-                ), array(
-                    $targettedTindakan
-                ))
-                ->execute();
-            if(count($checkRadiologi['response_data']) > 0) {
-                $targettedRadiologi = $checkRadiologi['response_data'][0]['id'];
-                $proceed_radiologi = self::$query->update('master_radiologi_tindakan', array(
-                    'jenis' => $targettedKategori,
-                    'updated_at' => parent::format_date()
+            if($proceed_tindakan['response_result'] > 0) {
+
+                //Sync ke radiologi
+                $checkRadiologi = self::$query->select('master_radiologi_tindakan', array(
+                    'id'
                 ))
                     ->where(array(
-                        'master_radiologi_tindakan.uid' => '= ?'
+                        'master_radiologi_tindakan.uid_tindakan' => '= ?'
                     ), array(
-                        $targettedRadiologi
+                        $targettedTindakan
                     ))
                     ->execute();
-            } else {
-
-                $proceed_radiologi = self::$query->insert('master_radiologi_tindakan', array(
-                    'jenis' => $targettedKategori,
-                    'uid_tindakan' => $targettedTindakan,
-                    'created_at' => parent::format_date(),
-                    'updated_at' => parent::format_date()
-                ))
-                    ->returning('id')
-                    ->execute();
-                $targettedRadiologi = $proceed_radiologi['response_unique'];
-            }
-
-            //Manajer Tarif
-            //Loop Penjamin
-            $getPenjamin = self::$query->select('master_penjamin', array(
-                'uid'
-            ))
-                ->where(array(
-                    'master_penjamin.deleted_at' => 'IS NULL'
-                ))
-                ->execute();
-            foreach ($getPenjamin['response_data'] as $PKey => $PValue) { //Apply semua penjamin
-                //Data Kelas Lab
-                $kelasLab = self::$query->select('master_tindakan_kelas', array(
-                    'uid'
-                ))
-                    ->where(array(
-                        'master_tindakan_kelas.jenis' => '= ?',
-                        'AND',
-                        'master_tindakan_kelas.deleted_at' => 'IS NULL'
-                    ), array(
-                        'RAD'
-                    ))
-                    ->execute();
-                foreach ($kelasLab['response_data'] as $KKey => $KValue) {
-
-
-                    //Check kelas harga
-                    $checkTarif = self::$query->select('master_tindakan_kelas_harga', array(
-                        'id'
+                if(count($checkRadiologi['response_data']) > 0) {
+                    $targettedRadiologi = $checkRadiologi['response_data'][0]['id'];
+                    $proceed_radiologi = self::$query->update('master_radiologi_tindakan', array(
+                        'jenis' => $targettedKategori,
+                        'updated_at' => parent::format_date(),
+                        'deleted_at' => NULL
                     ))
                         ->where(array(
-                            'master_tindakan_kelas_harga.tindakan' => '',
-                            'AND',
-                            'master_tindakan_kelas_harga.kelas' => '= ?',
-                            'AND',
-                            'master_tindakan_kelas_harga.penjamin' => ' = ?',
-                            'AND',
-                            'master_tindakan_kelas_harga.mitra' => '= ?'
+                            'master_radiologi_tindakan.id' => '= ?'
                         ), array(
-                            $targettedTindakan,
-                            $KValue['uid'],
-                            $PValue['uid'],
-                            $targettedMitra
+                            $targettedRadiologi
                         ))
                         ->execute();
-                    if(count($checkTarif['response_data']) > 0) {
-                        $proceed_tarif = self::$query->update('master_tindakan_kelas_harga', array(
-                            'harga' => floatval($value['harga']),
-                            'deleted_at' => NULL
+                } else {
+
+                    $proceed_radiologi = self::$query->insert('master_radiologi_tindakan', array(
+                        'jenis' => $targettedKategori,
+                        'uid_tindakan' => $targettedTindakan,
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->returning('id')
+                        ->execute();
+                    $targettedRadiologi = $proceed_radiologi['response_unique'];
+                }
+
+                if($proceed_radiologi['response_result'] > 0) {
+                    //Manajer Tarif
+                    //Loop Penjamin
+                    $getPenjamin = self::$query->select('master_penjamin', array(
+                        'uid'
+                    ))
+                        ->where(array(
+                            'master_penjamin.deleted_at' => 'IS NULL'
+                        ))
+                        ->execute();
+                    foreach ($getPenjamin['response_data'] as $PKey => $PValue) { //Apply semua penjamin
+                        //Data Kelas Lab
+                        $kelasLab = self::$query->select('master_tindakan_kelas', array(
+                            'uid'
                         ))
                             ->where(array(
-                                'master_tindakan_kelas_harga.id' => '= ?'
+                                'master_tindakan_kelas.jenis' => '= ?',
+                                'AND',
+                                'master_tindakan_kelas.deleted_at' => 'IS NULL'
                             ), array(
-                                $checkTarif['response_data'][0]['id']
+                                'RAD'
                             ))
                             ->execute();
-                    } else {
-                        $proceed_tarif = self::$query->insert('master_tindakan_kelas_harga', array(
-                            'tindakan' => $targettedTindakan,
-                            'kelas' => $KValue['uid'],
-                            'penjamin' => $PValue['uid'],
-                            'mitra' => $targettedMitra,
-                            'harga' => floatval($value['harga']),
-                            'created_at' => parent::format_date(),
-                            'updated_at' => parent::format_date()
-                        ))
-                            ->execute();
+                        foreach ($kelasLab['response_data'] as $KKey => $KValue) {
+
+
+                            //Check kelas harga
+                            $checkTarif = self::$query->select('master_tindakan_kelas_harga', array(
+                                'id'
+                            ))
+                                ->where(array(
+                                    'master_tindakan_kelas_harga.tindakan' => '',
+                                    'AND',
+                                    'master_tindakan_kelas_harga.kelas' => '= ?',
+                                    'AND',
+                                    'master_tindakan_kelas_harga.penjamin' => ' = ?',
+                                    'AND',
+                                    'master_tindakan_kelas_harga.mitra' => '= ?'
+                                ), array(
+                                    $targettedTindakan,
+                                    $KValue['uid'],
+                                    $PValue['uid'],
+                                    $targettedMitra
+                                ))
+                                ->execute();
+                            if(count($checkTarif['response_data']) > 0) {
+                                $proceed_tarif = self::$query->update('master_tindakan_kelas_harga', array(
+                                    'harga' => floatval($value['harga']),
+                                    'deleted_at' => NULL
+                                ))
+                                    ->where(array(
+                                        'master_tindakan_kelas_harga.id' => '= ?'
+                                    ), array(
+                                        $checkTarif['response_data'][0]['id']
+                                    ))
+                                    ->execute();
+                            } else {
+                                $proceed_tarif = self::$query->insert('master_tindakan_kelas_harga', array(
+                                    'tindakan' => $targettedTindakan,
+                                    'kelas' => $KValue['uid'],
+                                    'penjamin' => $PValue['uid'],
+                                    'mitra' => $targettedMitra,
+                                    'harga' => floatval($value['harga']),
+                                    'created_at' => parent::format_date(),
+                                    'updated_at' => parent::format_date()
+                                ))
+                                    ->execute();
+                            }
+
+
+
+                        }
                     }
-
-
-
                 }
+            } else {
+                $value['query'] = $proceed_tindakan;
+                array_push($failed_data, $value);
             }
         }
 
         return array(
+            'all_data' => count($parameter['data_import']),
             'duplicate_row' => $duplicate_row,
             'non_active' => $non_active,
+            'action_list' => $action_list_tindakan,
             'success_proceed' => $success_proceed,
             'data' => $parameter['data_import'],
-            'proceed' => $proceed_data
+            'proceed' => $proceed_data,
+            'failed_data' => $failed_data
         );
     }
 
