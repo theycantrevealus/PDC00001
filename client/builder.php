@@ -737,6 +737,8 @@
 	?>
 	<script type="text/javascript">
 
+        console.log(protocolLib);
+
         function resend_socket(requestList, callback) {
             var sendingStatus = 0;
             for(var reqKey in requestList) {
