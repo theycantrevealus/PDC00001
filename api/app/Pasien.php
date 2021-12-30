@@ -707,92 +707,117 @@ class Pasien extends Utility
                     $value['nik']
                 ))
                 ->execute();
-            if(count($check['response_data']) > 0) {
-                array_push($failedData, $value);
-            } else {
-                //array_push($duplicate_row, $value);
-                //Prepare Data
-                $data_terminologi = array(
-                    'agama' => array(
-                        'target' => 0,
-                        'nama' => $value['agama'],
-                        'id' => 5
-                    ),
-                    'pendidikan' => array(
-                        'target' => 0,
-                        'nama' => $value['pendidikan'],
-                        'id' => 8
-                    ),
-                    'pekerjaan' => array(
-                        'target' => 0,
-                        'nama' => $value['pekerjaan'],
-                        'id' => 9
-                    ),
-                    'status_pernikahan' => array(
-                        'target' => 0,
-                        'nama' => $value['status_pernikahan'],
-                        'id' => 10
-                    ),
-                );
 
-                foreach ($data_terminologi as $TermiKey => $TermiValue) {
-                    $check_terminologi = self::$query->select('terminologi_item', array(
-                        'id',
-                        'nama',
-                        'deleted_at'
+            //array_push($duplicate_row, $value);
+            //Prepare Data
+            $data_terminologi = array(
+                'agama' => array(
+                    'target' => 0,
+                    'nama' => $value['agama'],
+                    'id' => 5
+                ),
+                'pendidikan' => array(
+                    'target' => 0,
+                    'nama' => $value['pendidikan'],
+                    'id' => 8
+                ),
+                'pekerjaan' => array(
+                    'target' => 0,
+                    'nama' => $value['pekerjaan'],
+                    'id' => 9
+                ),
+                'status_pernikahan' => array(
+                    'target' => 0,
+                    'nama' => $value['status_pernikahan'],
+                    'id' => 10
+                ),
+            );
+
+            foreach ($data_terminologi as $TermiKey => $TermiValue) {
+                $check_terminologi = self::$query->select('terminologi_item', array(
+                    'id',
+                    'nama',
+                    'deleted_at'
+                ))
+                    ->where(array(
+                        'terminologi_item.nama' => '= ?',
+                        'AND',
+                        'terminologi_item.terminologi' => '= ?'
+                    ), array(
+                        $TermiValue['nama'], $TermiValue['id']
                     ))
-                        ->where(array(
-                            'terminologi_item.nama' => '= ?',
-                            'AND',
-                            'terminologi_item.terminologi' => '= ?'
-                        ), array(
-                            $TermiValue['nama'], $TermiValue['id']
+                    ->execute();
+                if(count($check_terminologi['response_data']) > 0) {
+                    if(!empty($check_terminologi['response_data'][0]['deleted_at'])) {
+                        $update_status_delete = self::$query->update('terminologi_item', array(
+                            'deleted_at' => NULL
                         ))
-                        ->execute();
-                    if(count($check_terminologi['response_data']) > 0) {
-                        if(!empty($check_terminologi['response_data'][0]['deleted_at'])) {
-                            $update_status_delete = self::$query->update('terminologi_item', array(
-                                'deleted_at' => NULL
+                            ->where(array(
+                                'terminologi_item.id' => '= ?'
+                            ), array(
+                                $check_terminologi['response_data'][0]['id']
                             ))
-                                ->where(array(
-                                    'terminologi_item.id' => '= ?'
-                                ), array(
-                                    $check_terminologi['response_data'][0]['id']
-                                ))
-                                ->execute();
-                        }
-                        $data_terminologi[$TermiKey]['target'] = $check_terminologi['response_data'][0]['id'];
-                    } else {
-                        if($TermiValue['nama'] != "") {
-                            $new_terminologi = self::$query->insert('terminologi_item', array(
-                                'nama' => $TermiValue['nama'],
-                                'terminologi' => $TermiValue['id'],
-                                'created_at' => parent::format_date(),
-                                'updated_at' => parent::format_date()
-                            ))
-                                ->returning('id')
-                                ->execute();
-                            if($new_terminologi['response_result'] > 0) {
-                                $data_terminologi[$TermiKey]['target'] = $new_terminologi['response_unique'];
-                            } else {
-                                $data_terminologi[$TermiKey]['target'] = 0;
-                            }
-                            array_push($termi_item, $new_terminologi);
+                            ->execute();
+                    }
+                    $data_terminologi[$TermiKey]['target'] = $check_terminologi['response_data'][0]['id'];
+                } else {
+                    if($TermiValue['nama'] != "") {
+                        $new_terminologi = self::$query->insert('terminologi_item', array(
+                            'nama' => $TermiValue['nama'],
+                            'terminologi' => $TermiValue['id'],
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date()
+                        ))
+                            ->returning('id')
+                            ->execute();
+                        if($new_terminologi['response_result'] > 0) {
+                            $data_terminologi[$TermiKey]['target'] = $new_terminologi['response_unique'];
                         } else {
                             $data_terminologi[$TermiKey]['target'] = 0;
                         }
+                        array_push($termi_item, $new_terminologi);
+                    } else {
+                        $data_terminologi[$TermiKey]['target'] = 0;
                     }
                 }
+            }
 
-                //Prepare Jenis Kelamin
-                $target_jenkel = 0;
-                if($value['jenkel'] == 'Laki-laki') {
-                    $target_jenkel = 2;
-                } else if($value['jenkel'] == 'Perempuan') {
-                    $target_jenkel = 3;
-                }
-
-
+            //Prepare Jenis Kelamin
+            $target_jenkel = 0;
+            if($value['jenkel'] == 'Laki-laki') {
+                $target_jenkel = 2;
+            } else if($value['jenkel'] == 'Perempuan') {
+                $target_jenkel = 3;
+            }
+            
+            if(count($check['response_data']) > 0) {
+                $updatePasien = self::$query->update('pasien', array(
+                    'no_rm' => str_replace('-', '', $value['no_rm']),
+                    'nik' => $value['nik'],
+                    'nama' => $value['nama'],
+                    'jenkel' => intval($target_jenkel),
+                    'tempat_lahir' => (isset($value['tempat_lahir']) && !empty($value['tempat_lahir'])) ? $value['tempat_lahir'] : '-',
+                    'tanggal_lahir' => $value['tanggal_lahir'],
+                    'agama' => intval($data_terminologi['agama']['target']),
+                    'status_pernikahan' => intval($data_terminologi['status_pernikahan']['target']),
+                    'pendidikan' => intval($data_terminologi['pendidikan']['target']),
+                    'pekerjaan' => intval($data_terminologi['pekerjaan']['target']),
+                    'alamat' => (isset($value['alamat']) && !empty($value['alamat'])) ? $value['alamat'] : '-',
+                    'kode_pos' => (isset($value['kode_pos']) && !empty($value['kode_pos'])) ? $value['kode_pos'] : '-',
+                    'no_telp' => (isset($value['no_telp']) && !empty($value['no_telp'])) ? $value['no_telp'] : '-',
+                    'email' => (isset($value['email']) && !empty($value['email'])) ? $value['email'] : '-',
+                    'nama_ayah' => (isset($value['nama_ayah']) && !empty($value['nama_ayah'])) ? $value['nama_ayah'] : '-',
+                    'nama_ibu' => (isset($value['nama_ibu']) && !empty($value['nama_ibu'])) ? $value['nama_ibu'] : '-',
+                    'nama_suami_istri' => (isset($value['nama_suami_istri']) && !empty($value['nama_suami_istri'])) ? $value['nama_suami_istri'] : '-',
+                    'deleted_at' => NULL
+                ))
+                    ->where(array(
+                        'pasien.uid' => '= ?'
+                    ), array(
+                        $check['response_data'][0]['uid']
+                    ))
+                    ->execute();
+            } else {
                 //New Pasien
                 if($value['no_rm'] != '' && $value['nama'] != '') {
                     $new_pasien = self::$query->insert('pasien', array(
