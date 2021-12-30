@@ -493,7 +493,7 @@ class Inventori extends Utility
                         if($new_obat['response_result'] > 0) {
                             array_push($proceed_data, $new_obat);
                         } else {
-                            array_push($failed_data, $new_obat);
+                            //array_push($failed_data, $new_obat);
                         }
                     }
                 }
@@ -609,6 +609,8 @@ class Inventori extends Utility
                         'keterangan' => 'Stok Awal. Auto PO'
                     ))
                         ->execute();
+                } else {
+                    array_push($failed_data, $StokLog);
                 }
 
                 array_push($proceed_data, $StokAwal);
@@ -638,7 +640,7 @@ class Inventori extends Utility
             'duplicate_row' => $duplicate_row,
             'non_active' => $non_active,
             'success_proceed' => $success_proceed,
-            'failed_proceed' => $failed_proceed,
+            'failed_data' => $failed_data,
             'data' => $all_data,
             'po' => $Purchase,
             'po_detail' => $PODetailResult,

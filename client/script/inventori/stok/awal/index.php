@@ -156,7 +156,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+						return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -170,7 +170,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["batch"]["batch"];
+						return (row["batch"]["batch"] !== undefined && row["batch"]["batch"] !== null) ? row["batch"]["batch"] : "-";
 					}
 				},
 				{
@@ -352,7 +352,27 @@
                             console.clear();
                             console.log(response);
                             var html = "Imported : " + response.response_package.success_proceed + "<br />";
-                            $("#csv_file_data").html(html);
+                            var failedData = response.response_package.failed_data;
+                            var failedResult = document.createElement("table");
+                            $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
+                            "<tr>" +
+                            "<th>No RM</th>" +
+                            "<th>NIK</th>" +
+                            "<th>Nama</th>" +
+                            "<th>Tempat Lahir</th>" +
+                            "<th>Tanggal Lahir</th></tr></thead><tbody></tbody>");
+
+                            $("#csv_file_data").html(html).append(failedResult);
+                            $(failedResult).DataTable({
+                                data: failedData,
+                                columns: [
+                                    { data: "no_rm" },
+                                    { data: "nik" },
+                                    { data: "nama" },
+                                    { data: "tempat_lahir" },
+                                    { data: "tanggal_lahir" }
+                                ]
+                            });
                             tableStokAwal.ajax.reload();
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
