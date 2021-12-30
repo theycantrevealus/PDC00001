@@ -310,6 +310,7 @@
                             filtedData.push(data.row_data[aa]);
                         }
                     }
+                    console.log(data);
                     generated_data = filtedData;
                     $(table_view).addClass("table table-bordered table-striped largeDataType").DataTable({
                         data:filtedData,
@@ -356,21 +357,21 @@
                             var failedResult = document.createElement("table");
                             $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
                             "<tr>" +
-                            "<th>No RM</th>" +
-                            "<th>NIK</th>" +
                             "<th>Nama</th>" +
-                            "<th>Tempat Lahir</th>" +
-                            "<th>Tanggal Lahir</th></tr></thead><tbody></tbody>");
+                            "<th>Satuan</th>" +
+                            "<th>Harga</th>" +
+                            "<th>Kedaluwarsa</th>" +
+                            "<th>Stok</th></tr></thead><tbody></tbody>");
 
                             $("#csv_file_data").html(html).append(failedResult);
                             $(failedResult).DataTable({
                                 data: failedData,
                                 columns: [
-                                    { data: "no_rm" },
-                                    { data: "nik" },
                                     { data: "nama" },
-                                    { data: "tempat_lahir" },
-                                    { data: "tanggal_lahir" }
+                                    { data: "satuan" },
+                                    { data: "harga" },
+                                    { data: "kedaluarsa" },
+                                    { data: "stok" }
                                 ]
                             });
                             tableStokAwal.ajax.reload();

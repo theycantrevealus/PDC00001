@@ -650,6 +650,7 @@ class Laboratorium extends Utility {
         $duplicate_row = array();
         $non_active = array();
         $success_proceed = 0;
+		$failed_data = array();
         $proceed_data = array();
 
         //Reset selected kategori lab
@@ -738,6 +739,12 @@ class Laboratorium extends Utility {
 						->execute();
 				}
 
+				if($proceed_lab['response_result'] > 0) {
+					array_push($proceed_data, $proceed_lab);
+				} else {
+					array_push($failed_data, $value);
+				}
+
 				//Check Selected Kategori
 				$checkSelectedKategori = self::$query->select('master_lab_kategori_item', array(
 					'id'
@@ -771,7 +778,7 @@ class Laboratorium extends Utility {
 						->execute();
 				}
 
-				array_push($proceed_data, $proceed_lab);
+				
 
 				//Check Mitra
 				$checkMitra = self::$query->select('master_mitra', array(
@@ -847,6 +854,11 @@ class Laboratorium extends Utility {
 							'updated_at' => parent::format_date()
 						))
 							->execute();
+					}
+
+					if($proceed_tindakan['response_result'] == 0) {
+						$value['query'] = $proceed_tindakan;
+						array_push($failed_data, $value);
 					}
 
 
@@ -927,6 +939,7 @@ class Laboratorium extends Utility {
         return array(
             'duplicate_row' => $duplicate_row,
             'non_active' => $non_active,
+			'failed_data' => $failed_data,
             'success_proceed' => $success_proceed,
             'data' => $parameter['data_import'],
             'proceed' => $proceed_data

@@ -319,10 +319,13 @@ class Inventori extends Utility
                     array_push($unique_name, $row[0]);
                     $column_builder = array();
                     foreach ($column as $key => $value) {
-                        $column_builder[$value] = $row[$key];
+                        if(!isset($column_builder[$value])) {
+                            $column_builder[$value] = '-';
+                        }
+                        $column_builder[$value] = (isset($row[$key]) && !empty($row[$key])) ? strval($row[$key]) : "BELUM SET";
                     }
-                    array_push($row_data, $column_builder);
                 }
+                array_push($row_data, $column_builder);
             }
 
             $build_col = array();
@@ -487,7 +490,7 @@ class Inventori extends Utility
                             ->execute();
 
                         if($new_obat['response_result'] > 0) {
-                            $success_proceed += 1;
+                            //$success_proceed += 1;
                         }
 
                         if($new_obat['response_result'] > 0) {
@@ -609,8 +612,11 @@ class Inventori extends Utility
                         'keterangan' => 'Stok Awal. Auto PO'
                     ))
                         ->execute();
+                    if($StokLog['response_result'] > 0) {
+                        $success_proceed += 1;   
+                    }
                 } else {
-                    array_push($failed_data, $StokLog);
+                    array_push($failed_data, $StokAwal);
                 }
 
                 array_push($proceed_data, $StokAwal);

@@ -199,9 +199,36 @@
                             console.clear();
                             console.log(response);
                             var html = "Imported : " + response.response_package.success_proceed + "<br />";
-                            $("#csv_file_data").html(html);
+
+                            
+                            var failedData = response.response_package.failed_data;
+                            console.log(failedData);
+                            var failedResult = document.createElement("table");
+                            $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
+                            "<tr>" +
+                            "<th>Kode</th>" +
+                            "<th>Kategori</th>" +
+                            "<th>Subkategori</th>" +
+                            "<th>Nama</th>" +
+                            "<th>Mitra</th>" +
+                            "<th>Harga</th></tr></thead><tbody></tbody>");
+
+                            $("#csv_file_data").html(html).append(failedResult);
+                            $(failedResult).DataTable({
+                                data: failedData,
+                                columns: [
+                                    { data: "kode" },
+                                    { data: "kategori" },
+                                    { data: "subkategori" },
+                                    { data: "nama" },
+                                    { data: "mitra" },
+                                    { data: "harga" }
+                                ]
+                            });
+                            
+
                             tableLab.ajax.reload();
-                            $("#review-import").modal("hide");
+                            //$("#review-import").modal("hide");
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
                         },
