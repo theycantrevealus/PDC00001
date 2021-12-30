@@ -217,9 +217,7 @@
                             request: "proceed_import_radiologi",
                             data_import:generated_data
                         },
-                        success:function(response)
-                        {
-
+                        success:function(response) {
                             var html = "Imported : " + response.response_package.proceed.length + "<br />";
                             
 							var failedData = response.response_package.failed_data;

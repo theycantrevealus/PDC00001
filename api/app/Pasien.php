@@ -699,7 +699,7 @@ class Pasien extends Utility
                 'uid'
             ))
                 ->where(array(
-                    'pasien.no_rm' => '= ?',
+                    'REPLACE(pasien.no_rm, \'-\', \'\')' => '= ?',
                     'AND',
                     'pasien.nik' => '= ?',
                 ), array(
@@ -796,7 +796,7 @@ class Pasien extends Utility
                 //New Pasien
                 if($value['no_rm'] != '' && $value['nama'] != '') {
                     $new_pasien = self::$query->insert('pasien', array(
-                        'no_rm' => $value['no_rm'],
+                        'no_rm' => str_replace('-', '', $value['no_rm']),
                         'nik' => $value['nik'],
                         'nama' => $value['nama'],
                         'jenkel' => intval($target_jenkel),

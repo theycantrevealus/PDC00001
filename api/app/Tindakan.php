@@ -739,6 +739,7 @@ class Tindakan extends Utility {
         $autonum = 1;
 
         $itemTotalAll = 0;
+		$PoliParse = new Poli(self::$pdo);
         foreach ($kelas['response_data'] as $key => $value) {
 
             if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
@@ -832,8 +833,7 @@ class Tindakan extends Utility {
                         ))
                         ->execute();
                     foreach($Poli['response_data'] as $PKey => $PValue) {
-                        $PoliParse = new Poli(self::$pdo);
-                        $Poli['response_data'][$PKey]['detail'] = $PoliParse::get_poli_detail($PValue['uid_poli'])['response_data'][0];
+                        $Poli['response_data'][$PKey]['detail'] = $PoliParse->get_poli_info($PValue['uid_poli'])['response_data'][0];
                     }
                     $TKValue['poli'] = $Poli['response_data'];
 
