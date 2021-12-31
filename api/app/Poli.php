@@ -76,6 +76,9 @@ class Poli extends Utility {
 
 	public function __POST__($parameter = array()) {
 		switch ($parameter['request']) {
+			case 'sync_poli_dokter_data':
+				return self::sync_poli_dokter_data($parameter);
+				break;
             case 'get_poli_backend':
                 return self::get_poli_backend($parameter);
                 break;
@@ -179,6 +182,49 @@ class Poli extends Utility {
             ->execute();
         return $data['response_data'];
     }
+
+	private function sync_poli_dokter_data($parameter) {
+		$delRes = array();
+		$PoliDokter = self::$query->select('master_poli_dokter', array(
+			'id', 'poli'
+		))
+			->execute();
+		foreach($PoliDokter['response_data'] as $key => $value) {
+			$Poli = self::$query->select('master_poli', array(
+				'uid', 'deleted_at'
+			))
+				->where(array(
+					'master_poli.uid' => '= ?'
+				), array(
+					$value['poli']
+				))
+				->execute();
+			if(count($Poli['response_data']) > 0) {
+				if(isset($Poli['response_data'][0]['deleted_at']) && !empty($Poli['response_data'][0]['deleted_at'])) {
+					$proc = self::$query->hard_delete('master_poli_dokter')
+						->where(array(
+							'master_poli_dokter.id' => '= ?'
+						), array(
+							$value['id']
+						))
+						->execute();	
+				}
+			} else {
+				$proc = self::$query->hard_delete('master_poli_dokter')
+					->where(array(
+						'master_poli_dokter.id' => '= ?'
+					), array(
+						$value['id']
+					))
+					->execute();
+			}
+
+			if($proc['response_result'] > 0) {
+				array_push($delRes, $proc);
+			}
+		}
+		return $delRes;
+	}
 
     private function get_poli_backend($parameter) {
         $Authorization = new Authorization();

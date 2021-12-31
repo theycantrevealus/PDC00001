@@ -489,7 +489,7 @@ class CPPT extends Utility {
                 'AND',
                 'antrian.waktu_masuk' => 'BETWEEN ? AND ?'
             ), array(
-                $parameter['pasien'], $parameter['from'], $parameter['to']
+                $parameter['pasien'], date('Y-m-d', strtotime('-1 day', strtotime($parameter['from']))), date('Y-m-d', strtotime('+1 day', strtotime($parameter['to'])))
             ))
             ->order(array(
                 'created_at' => 'DESC'
