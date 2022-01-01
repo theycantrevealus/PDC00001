@@ -3977,6 +3977,13 @@
                             //Build request list
                             var requestList = [];
 
+                            if(pasien_penjamin_uid === __UIDPENJAMINBPJSOFFLINE__) {
+                                //
+                            } else {
+                                
+                            }
+
+
 
                             if(result.response_package.resep_response !== undefined && result.response_package.resep_response !== null) {
                                 if(result.response_package.resep_response.resep.length > 0 || result.response_package.resep_response.racikan.length) {

@@ -42,6 +42,7 @@
 
 	var __UIDPENJAMINUMUM__ = <?php echo json_encode(__UIDPENJAMINUMUM__); ?>;
 	var __UIDPENJAMINBPJS__ = <?php echo json_encode(__UIDPENJAMINBPJS__); ?>;
+    var __UIDPENJAMINBPJSOFFLINE__ = <?php echo json_encode(__UIDPENJAMINBPJSOFFLINE__); ?>;
 	var __GUDANG_APOTEK__ = <?php echo json_encode(__GUDANG_APOTEK__); ?>;
 	var __GUDANG_UTAMA__ = <?php echo json_encode(__GUDANG_UTAMA__); ?>;
     var __GUDANG_DEPO_OK__ = <?php echo json_encode(__GUDANG_DEPO_OK__); ?>;
