@@ -181,6 +181,7 @@ class Tindakan extends Utility {
         $termi_item = array();
         $non_active = array();
         $success_proceed = 0;
+		$failed_proceed = array();
         $proceed_data = array();
         $Penjamin = new Penjamin(self::$pdo);
 
@@ -195,17 +196,21 @@ class Tindakan extends Utility {
             ))
             ->execute();
 
-        //Reset Tindakan Poli
+        //Reset Poli
         $reset_poli = self::$query->update('master_poli', array(
             'deleted_at' => parent::format_date()
         ))
             ->execute();
 
-        //Reset Tindakan Poli
+        //Reset Harga Tindakan Poli
         $reset_tindakan_poli = self::$query->update('master_tindakan_kelas_harga', array(
             'deleted_at' => parent::format_date()
         ))
             ->execute();
+
+		//Reset Tindakan Poli
+		$resetPoliTindakan = self::$query->hard_delete('master_poli_tindakan')
+			->execute();
 
         foreach ($parameter['data_import'] as $key => $value) {
             $targettedJenis = '';
@@ -273,19 +278,36 @@ class Tindakan extends Utility {
                     ))
                     ->execute();
             } else {
-                if($value['tindakan'] != '') {
+                if(!empty($value['tindakan'])) {
                     $targettedTindakan = parent::gen_uuid();
-                    $proceed_tindakan = self::$query->insert('master_tindakan', array(
-                        'uid' => $targettedTindakan,
-                        'nama' => trim($value['tindakan']),
-                        'kelompok' => $value['kelompok'],
-                        'jenis' => $targettedJenis,
-                        'created_at' => parent::format_date(),
-                        'updated_at' => parent::format_date()
-                    ))
-                        ->execute();
+					if(!empty($targettedJenis)) {
+						$proceed_tindakan = self::$query->insert('master_tindakan', array(
+							'uid' => $targettedTindakan,
+							'nama' => trim($value['tindakan']),
+							'kelompok' => trim(strtoupper($value['kelompok'])),
+							'jenis' => $targettedJenis,
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						))
+							->execute();	
+					} else {
+						$proceed_tindakan = self::$query->insert('master_tindakan', array(
+							'uid' => $targettedTindakan,
+							'nama' => trim($value['tindakan']),
+							'kelompok' => trim(strtoupper($value['kelompok'])),
+							'created_at' => parent::format_date(),
+							'updated_at' => parent::format_date()
+						))
+							->execute();
+					}
                 }
             }
+
+			if($proceed_tindakan['response_result'] > 0) {
+				$success_proceed += 1;
+			} else {
+				array_push($failed_proceed, $proceed_tindakan);
+			}
 
 
 
@@ -353,7 +375,18 @@ class Tindakan extends Utility {
             }
 
 
-
+			$checkPoliTindakan = self::$query->select('master_poli_tindakan', array(
+				'id'
+			))
+				->where(array(
+					'master_poli_tindakan.uid_poli' => '= ?',
+					'AND',
+					'master_poli_tindakan.uid_tindakan' => '= ?'
+				), array(
+					$targettedPoli,
+					$targettedTindakan
+				))
+				->execute();
 
             //Check Poliklinik
             //Kasus khusus
@@ -439,6 +472,7 @@ class Tindakan extends Utility {
                         $targettedTindakan
                     ))
                     ->execute();
+
                 if(count($checkPoliTindakan['response_data']) > 0) {
                     $workerSettingTindakan = self::$query->update('master_poli_tindakan', array(
                         'deleted_at' => NULL
@@ -467,6 +501,7 @@ class Tindakan extends Utility {
         return array(
             'duplicate_row' => $duplicate_row,
             'non_active' => $non_active,
+			'failed_proceed' => $failed_proceed,
             'success_proceed' => $success_proceed,
             'data' => $parameter['data_import'],
             'proceed' => $proceed_data
