@@ -969,11 +969,27 @@ class Pasien extends Utility
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $term = new Terminologi(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
+
+            if(strlen($value['no_rm']) < 6) {
+                $updateRM = self::$query->update('pasien', array(
+                    'no_rm' => str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT)
+                ))
+                    ->where(array(
+                        'pasien.uid' => '= ?'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+            }
+
+            $data['response_data'][$key]['no_rm'] = str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT);
+
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
             $data['response_data'][$key]['tanggal_lahir'] = date('d F Y', strtotime($data['response_data'][$key]['tanggal_lahir']));
-            $term = new Terminologi(self::$pdo);
+            
 
             $value = $data['response_data'][$key]['id_panggilan'];
             $param = ['', 'terminologi-items-detail', $value];
