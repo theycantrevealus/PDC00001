@@ -286,8 +286,8 @@
                     $("#review-import").modal();
 
                     var data = response.response_package;
-
-
+                    console.clear();
+                    console.log(data);
 
                     $("#csv_file_data").html("");
                     var thead = "";

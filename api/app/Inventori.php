@@ -315,14 +315,19 @@ class Inventori extends Utility
             $column = fgetcsv($file_data); //array_head
             $row_data = array();
             while ($row = fgetcsv($file_data)) {
-                if (!in_array($row[0], $unique_name)) {
-                    array_push($unique_name, $row[0]);
-                    $column_builder = array();
-                    foreach ($column as $key => $value) {
-                        $column_builder[$value] = (isset($row[$key]) && !empty($row[$key])) ? strval($row[$key]) : "BELUM SET";
-                    }
-                    array_push($row_data, $column_builder);
+                // if (!in_array($row[0], $unique_name)) {
+                //     array_push($unique_name, $row[0]);
+                //     $column_builder = array();
+                //     foreach ($column as $key => $value) {
+                //         $column_builder[$value] = (isset($row[$key]) && !empty($row[$key])) ? strval($row[$key]) : "BELUM SET";
+                //     }
+                //     array_push($row_data, $column_builder);
+                // }
+                $column_builder = array();
+                foreach ($column as $key => $value) {
+                    $column_builder[$value] = (isset($row[$key]) && !empty($row[$key])) ? strval($row[$key]) : "BELUM SET";
                 }
+                array_push($row_data, $column_builder);
             }
 
             $build_col = array();
@@ -333,7 +338,8 @@ class Inventori extends Utility
             $output = array(
                 'column' => $column,
                 'row_data' => $row_data,
-                'column_builder' => $build_col
+                'column_builder' => $build_col,
+                'unique_name' => $unique_name
             );
             return $output;
         }
