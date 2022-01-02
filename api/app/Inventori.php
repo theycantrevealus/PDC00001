@@ -445,14 +445,18 @@ class Inventori extends Utility
                 }
             }
 
-            if($value['nama'] != '') {
+            if(!empty($value['nama'])) {
                 $checkObat = self::$query->select('master_inv', array(
                     'uid',
                     'nama'
                 ))
                     ->where(array(
-                        'master_inv.nama' => 'ILIKE ' . '\'' . strtoupper(trim($value['nama'])) . '%\'',
-                    ), array())
+                        'master_inv.nama' => '= ?',
+                        'AND',
+                        'master_inv.deleted_at' => 'IS NULL'
+                    ), array(
+                        strtoupper(trim($value['nama']))
+                    ))
                     ->execute();
                 if(count($checkObat['response_data']) > 0) {
                     $targettedObat = $checkObat['response_data'][0]['uid'];
@@ -7871,6 +7875,7 @@ class Inventori extends Utility
 
         $duplicate_row = array();
         $non_active = array();
+        $failed_data = array();
         $success_proceed = 0;
         $proceed_data = array();
 
@@ -8101,8 +8106,12 @@ class Inventori extends Utility
                     'updated_at' => parent::format_date()
                 ))
                     ->execute();
-
-                array_push($proceed_data, $newItem);
+                if($newItem['response_result'] > 0) {
+                    array_push($proceed_data, $newItem);
+                } else {
+                    $value['process'] = $newItem;
+                    array_push($failed_data, $value);
+                }
 
                 if($newItem['response_result'] > 0) {
                     $log = parent::log(array(
@@ -8170,6 +8179,7 @@ class Inventori extends Utility
             'duplicate_row' => $duplicate_row,
             'non_active' => $non_active,
             'success_proceed' => $success_proceed,
+            'failed_data' => $failed_data,
             'data' => $parameter['data_import'],
             'proceed' => $proceed_data
         );
