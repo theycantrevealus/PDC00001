@@ -1736,6 +1736,8 @@
                     },
                     cache: true,
                     processResults: function (response) {
+                        console.clear();
+                        console.log(response);
                         var data = response.response_package.response_data;
                         return {
                             results: $.map(data, function (item) {

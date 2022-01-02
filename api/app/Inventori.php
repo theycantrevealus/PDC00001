@@ -2296,11 +2296,11 @@ class Inventori extends Utility
             ->where(array(
                 'master_inv.deleted_at' => 'IS NULL',
                 'AND',
-                '(master_inv.kode_barang' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                '(master_inv.kode_barang' => 'ILIKE ' . '\'%' . (trim(strtoupper($_GET['search']))) . '%\'',
                 'OR',
-                '(master_inv_obat_kandungan.kandungan' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')',
+                '(master_inv_obat_kandungan.kandungan' => 'ILIKE ' . '\'%' . (trim(strtoupper($_GET['search']))) . '%\')',
                 'OR',
-                'master_inv.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
+                'master_inv.nama' => 'ILIKE ' . '\'%' . (trim(strtoupper($_GET['search']))) . '%\')'
             ))
             ->limit(10)
             ->execute();
@@ -7882,6 +7882,9 @@ class Inventori extends Utility
         $hapusUlangInv = self::$query->delete('master_inv')
             ->execute();
 
+        $kandungan_resep = self::$query->delete('master_inv_obat_kandungan')
+                ->execute();
+
         foreach ($parameter['data_import'] as $key => $value) {
             //Check duplicate
             $check = self::$query->select('master_inv', array(
@@ -7906,6 +7909,15 @@ class Inventori extends Utility
                             $CheckValue['uid']
                         ))
                         ->execute();
+
+                    $kandungan_worker = self::$query->insert('master_inv_obat_kandungan', array(
+                            'uid_obat' => $CheckValue['uid'],
+                            'kandungan' => $value['nama_generik'],
+                            'keterangan' => $value['nama_generik'],
+                            'created_at' => parent::format_date(),
+                            'updated_at' => parent::format_date()
+                        ))
+                            ->execute();
                         
                     if(!empty($CheckValue['deleted_at'])) {
                         array_push($non_active, $CheckValue);
@@ -8136,6 +8148,16 @@ class Inventori extends Utility
                         ),
                         'class' => __CLASS__
                     ));
+
+                    //New Kandungan Obat
+                    $kandungan_worker = self::$query->insert('master_inv_obat_kandungan', array(
+                        'uid_obat' => $newItemUID,
+                        'kandungan' => $value['nama_generik'],
+                        'keterangan' => $value['nama_generik'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
 
                     $success_proceed += 1;
 
