@@ -7886,6 +7886,201 @@ class Inventori extends Utility
                 ->execute();
 
         foreach ($parameter['data_import'] as $key => $value) {
+
+            //Check Ketersediaan Satuan
+            $satuan_check = self::$query->select('master_inv_satuan', array(
+                'uid',
+                'deleted_at'
+            ))
+                ->where(array(
+                    'master_inv_satuan.nama' => '= ?'
+                ), array(
+                    strtoupper($value['satuan'])
+                ))
+                ->limit(1)
+                ->execute();
+            if(count($satuan_check['response_data']) > 0) {
+                $targetSatuan = $satuan_check['response_data'][0]['uid'];
+                foreach($satuan_check['response_data'] as $SatuanKey => $SatuanValue) {
+                    if($SatuanValue['deleted_at'] != '') {
+                        //Aktifkan kembali satuan
+                        $activateSatuan = self::$query->update('master_inv_satuan', array(
+                            'deleted_at' => NULL
+                        ))
+                            ->where(array(
+                                'master_inv_satuan.uid' => '= ?'
+                            ), array(
+                                $SatuanValue['uid']
+                            ))
+                            ->execute();
+                        if($activateSatuan['response_result'] > 0) {
+                            $log = parent::log(array(
+                                'type' => 'activity',
+                                'column' => array(
+                                    'unique_target',
+                                    'user_uid',
+                                    'table_name',
+                                    'action',
+                                    'new_value',
+                                    'logged_at',
+                                    'status',
+                                    'login_id'
+                                ),
+                                'value' => array(
+                                    $SatuanValue['uid'],
+                                    $UserData['data']->uid,
+                                    'master_inv_satuan',
+                                    'U',
+                                    'aktifkan kembali',
+                                    parent::format_date(),
+                                    'N',
+                                    $UserData['data']->log_id
+                                ),
+                                'class' => __CLASS__
+                            ));
+                        }
+                    }
+                }
+
+            } else {
+                $targetSatuan = parent::gen_uuid();
+                // Satuan Baru
+                $new_satuan = self::$query->insert('master_inv_satuan', array(
+                    'uid' => $targetSatuan,
+                    'nama' => strtoupper($value['satuan']),
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+                if($new_satuan['response_result'] > 0) {
+                    $log = parent::log(array(
+                        'type' => 'activity',
+                        'column' => array(
+                            'unique_target',
+                            'user_uid',
+                            'table_name',
+                            'action',
+                            'logged_at',
+                            'status',
+                            'login_id'
+                        ),
+                        'value' => array(
+                            $targetSatuan,
+                            $UserData['data']->uid,
+                            'master_inv_satuan',
+                            'I',
+                            parent::format_date(),
+                            'N',
+                            $UserData['data']->log_id
+                        ),
+                        'class' => __CLASS__
+                    ));
+                }
+            }
+
+            //Check Ketersediaan Kategori
+            $kategori_check = self::$query->select('master_inv_kategori', array(
+                'uid',
+                'deleted_at'
+            ))
+                ->where(array(
+                    'master_inv_kategori.nama' => '= ?'
+                ), array(
+                    strtoupper($value['kategori'])
+                ))
+                ->limit(1)
+                ->execute();
+            if(count($kategori_check['response_data']) > 0) {
+                $targetKategori = $kategori_check['response_data'][0]['uid'];
+                foreach($kategori_check['response_data'] as $KategoriKey => $KategoriValue) {
+                    if($KategoriValue['deleted_at'] != '') {
+                        //Aktifkan kembali kategori
+                        $activateKategori = self::$query->update('master_inv_kategori', array(
+                            'deleted_at' => NULL
+                        ))
+                            ->where(array(
+                                'master_inv_kategori.uid' => '= ?'
+                            ), array(
+                                $KategoriValue['uid']
+                            ))
+                            ->execute();
+                        if($activateKategori['response_result'] > 0) {
+                            $log = parent::log(array(
+                                'type' => 'activity',
+                                'column' => array(
+                                    'unique_target',
+                                    'user_uid',
+                                    'table_name',
+                                    'action',
+                                    'new_value',
+                                    'logged_at',
+                                    'status',
+                                    'login_id'
+                                ),
+                                'value' => array(
+                                    $KategoriValue['uid'],
+                                    $UserData['data']->uid,
+                                    'master_inv_kategori',
+                                    'U',
+                                    'aktifkan kembali',
+                                    parent::format_date(),
+                                    'N',
+                                    $UserData['data']->log_id
+                                ),
+                                'class' => __CLASS__
+                            ));
+                        }
+                    }
+                }
+            } else {
+                $targetKategori = parent::gen_uuid();
+                // Kategori Baru
+                $new_kategori = self::$query->insert('master_inv_kategori', array(
+                    'uid' => $targetKategori,
+                    'nama' => strtoupper($value['kategori']),
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+                if($new_kategori['response_result'] > 0) {
+                    $log = parent::log(array(
+                        'type' => 'activity',
+                        'column' => array(
+                            'unique_target',
+                            'user_uid',
+                            'table_name',
+                            'action',
+                            'logged_at',
+                            'status',
+                            'login_id'
+                        ),
+                        'value' => array(
+                            $targetKategori,
+                            $UserData['data']->uid,
+                            'master_inv_kategori',
+                            'I',
+                            parent::format_date(),
+                            'N',
+                            $UserData['data']->log_id
+                        ),
+                        'class' => __CLASS__
+                    ));
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             //Check duplicate
             $check = self::$query->select('master_inv', array(
                 'uid',
@@ -7926,186 +8121,7 @@ class Inventori extends Utility
                     }
                 }
             } else { //Item Unik
-                //Check Ketersediaan Satuan
-                $satuan_check = self::$query->select('master_inv_satuan', array(
-                    'uid',
-                    'deleted_at'
-                ))
-                    ->where(array(
-                        'master_inv_satuan.nama' => '= ?'
-                    ), array(
-                        strtoupper($value['satuan'])
-                    ))
-                    ->limit(1)
-                    ->execute();
-                if(count($satuan_check['response_data']) > 0) {
-                    $targetSatuan = $satuan_check['response_data'][0]['uid'];
-                    foreach($satuan_check['response_data'] as $SatuanKey => $SatuanValue) {
-                        if($SatuanValue['deleted_at'] != '') {
-                            //Aktifkan kembali satuan
-                            $activateSatuan = self::$query->update('master_inv_satuan', array(
-                                'deleted_at' => NULL
-                            ))
-                                ->where(array(
-                                    'master_inv_satuan.uid' => '= ?'
-                                ), array(
-                                    $SatuanValue['uid']
-                                ))
-                                ->execute();
-                            if($activateSatuan['response_result'] > 0) {
-                                $log = parent::log(array(
-                                    'type' => 'activity',
-                                    'column' => array(
-                                        'unique_target',
-                                        'user_uid',
-                                        'table_name',
-                                        'action',
-                                        'new_value',
-                                        'logged_at',
-                                        'status',
-                                        'login_id'
-                                    ),
-                                    'value' => array(
-                                        $SatuanValue['uid'],
-                                        $UserData['data']->uid,
-                                        'master_inv_satuan',
-                                        'U',
-                                        'aktifkan kembali',
-                                        parent::format_date(),
-                                        'N',
-                                        $UserData['data']->log_id
-                                    ),
-                                    'class' => __CLASS__
-                                ));
-                            }
-                        }
-                    }
-
-                } else {
-                    $targetSatuan = parent::gen_uuid();
-                    // Satuan Baru
-                    $new_satuan = self::$query->insert('master_inv_satuan', array(
-                        'uid' => $targetSatuan,
-                        'nama' => strtoupper($value['satuan']),
-                        'created_at' => parent::format_date(),
-                        'updated_at' => parent::format_date()
-                    ))
-                        ->execute();
-                    if($new_satuan['response_result'] > 0) {
-                        $log = parent::log(array(
-                            'type' => 'activity',
-                            'column' => array(
-                                'unique_target',
-                                'user_uid',
-                                'table_name',
-                                'action',
-                                'logged_at',
-                                'status',
-                                'login_id'
-                            ),
-                            'value' => array(
-                                $targetSatuan,
-                                $UserData['data']->uid,
-                                'master_inv_satuan',
-                                'I',
-                                parent::format_date(),
-                                'N',
-                                $UserData['data']->log_id
-                            ),
-                            'class' => __CLASS__
-                        ));
-                    }
-                }
-
-                //Check Ketersediaan Kategori
-                $kategori_check = self::$query->select('master_inv_kategori', array(
-                    'uid',
-                    'deleted_at'
-                ))
-                    ->where(array(
-                        'master_inv_kategori.nama' => '= ?'
-                    ), array(
-                        strtoupper($value['kategori'])
-                    ))
-                    ->limit(1)
-                    ->execute();
-                if(count($kategori_check['response_data']) > 0) {
-                    $targetKategori = $kategori_check['response_data'][0]['uid'];
-                    foreach($kategori_check['response_data'] as $KategoriKey => $KategoriValue) {
-                        if($KategoriValue['deleted_at'] != '') {
-                            //Aktifkan kembali kategori
-                            $activateKategori = self::$query->update('master_inv_kategori', array(
-                                'deleted_at' => NULL
-                            ))
-                                ->where(array(
-                                    'master_inv_kategori.uid' => '= ?'
-                                ), array(
-                                    $KategoriValue['uid']
-                                ))
-                                ->execute();
-                            if($activateKategori['response_result'] > 0) {
-                                $log = parent::log(array(
-                                    'type' => 'activity',
-                                    'column' => array(
-                                        'unique_target',
-                                        'user_uid',
-                                        'table_name',
-                                        'action',
-                                        'new_value',
-                                        'logged_at',
-                                        'status',
-                                        'login_id'
-                                    ),
-                                    'value' => array(
-                                        $KategoriValue['uid'],
-                                        $UserData['data']->uid,
-                                        'master_inv_kategori',
-                                        'U',
-                                        'aktifkan kembali',
-                                        parent::format_date(),
-                                        'N',
-                                        $UserData['data']->log_id
-                                    ),
-                                    'class' => __CLASS__
-                                ));
-                            }
-                        }
-                    }
-                } else {
-                    $targetKategori = parent::gen_uuid();
-                    // Kategori Baru
-                    $new_kategori = self::$query->insert('master_inv_kategori', array(
-                        'uid' => $targetKategori,
-                        'nama' => strtoupper($value['kategori']),
-                        'created_at' => parent::format_date(),
-                        'updated_at' => parent::format_date()
-                    ))
-                        ->execute();
-                    if($new_kategori['response_result'] > 0) {
-                        $log = parent::log(array(
-                            'type' => 'activity',
-                            'column' => array(
-                                'unique_target',
-                                'user_uid',
-                                'table_name',
-                                'action',
-                                'logged_at',
-                                'status',
-                                'login_id'
-                            ),
-                            'value' => array(
-                                $targetKategori,
-                                $UserData['data']->uid,
-                                'master_inv_kategori',
-                                'I',
-                                parent::format_date(),
-                                'N',
-                                $UserData['data']->log_id
-                            ),
-                            'class' => __CLASS__
-                        ));
-                    }
-                }
+                
 
 
                 $newItemUID = parent::gen_uuid();
