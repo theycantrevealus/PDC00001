@@ -306,8 +306,12 @@
                     var filtedData = [];
 
                     for(var aa in data.row_data) {
-                        if(data.row_data[aa].stok > 0) {
+                        if($("#target_gudang_import").val() === __GUDANG_UTAMA__) {
                             filtedData.push(data.row_data[aa]);
+                        } else {
+                            if(data.row_data[aa].stok > 0) {
+                                filtedData.push(data.row_data[aa]);
+                            }
                         }
                     }
                     console.log(data);
