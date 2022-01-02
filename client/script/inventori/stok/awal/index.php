@@ -312,7 +312,7 @@
                     }
                     console.log(data);
                     generated_data = filtedData;
-                    $(table_view).addClass("table table-bordered table-striped largeDataType").DataTable({
+                    $(table_view).addClass("table table-responsive table-bordered table-striped largeDataType").DataTable({
                         data:filtedData,
                         columns : data.column_builder
                     });
@@ -430,7 +430,7 @@
                                         </div>
                                         <div class="col-md-12">
                                             <hr />
-                                            <div id="csv_file_data" class="table-responsive"></div>
+                                            <div id="csv_file_data" style="overflow-y: scroll" class="table-responsive"></div>
                                         </div>
                                     </div>
                                 </div>

@@ -319,13 +319,10 @@ class Inventori extends Utility
                     array_push($unique_name, $row[0]);
                     $column_builder = array();
                     foreach ($column as $key => $value) {
-                        if(!isset($column_builder[$value])) {
-                            $column_builder[$value] = '-';
-                        }
                         $column_builder[$value] = (isset($row[$key]) && !empty($row[$key])) ? strval($row[$key]) : "BELUM SET";
                     }
+                    array_push($row_data, $column_builder);
                 }
-                array_push($row_data, $column_builder);
             }
 
             $build_col = array();
@@ -7879,8 +7876,8 @@ class Inventori extends Utility
         $success_proceed = 0;
         $proceed_data = array();
 
-        $hapusUlangInv = self::$query->delete('master_inv')
-            ->execute();
+        // $hapusUlangInv = self::$query->delete('master_inv')
+        //     ->execute();
 
         $kandungan_resep = self::$query->delete('master_inv_obat_kandungan')
                 ->execute();
@@ -8096,6 +8093,7 @@ class Inventori extends Utility
             if (count($check['response_data']) > 0) {
                 foreach ($check['response_data'] as $CheckKey => $CheckValue) {
                     $ReActivate = self::$query->update('master_inv', array(
+                        'updated_at' => parent::format_date(),
                         'deleted_at' => NULL
                     ))
                         ->where(array(
