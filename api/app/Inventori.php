@@ -451,10 +451,8 @@ class Inventori extends Utility
                     'nama'
                 ))
                     ->where(array(
-                        'master_inv.nama' => '= ?'
-                    ), array(
-                        $value['nama']
-                    ))
+                        'master_inv.nama' => 'ILIKE ' . '\'' . strtoupper(trim($value['nama'])) . '%\'',
+                    ), array())
                     ->execute();
                 if(count($checkObat['response_data']) > 0) {
                     $targettedObat = $checkObat['response_data'][0]['uid'];
@@ -476,11 +474,11 @@ class Inventori extends Utility
                         ->execute();
                 } else {
                     //New Inventori
-                    if($value['nama'] != '') {
+                    if(!empty($value['nama'])) {
                         $targettedObat = parent::gen_uuid();
                         $new_obat = self::$query->insert('master_inv', array(
                             'uid' => $targettedObat,
-                            'nama' => addslashes($value['nama']),
+                            'nama' => strtoupper(trim(addslashes($value['nama']))),
                             'kategori' => $targettedKategori,
                             'keterangan' => $value['nama_rko'],
                             'satuan_terkecil' => $targettedSatuan,
@@ -496,7 +494,8 @@ class Inventori extends Utility
                         if($new_obat['response_result'] > 0) {
                             array_push($proceed_data, $new_obat);
                         } else {
-                            //array_push($failed_data, $new_obat);
+                            $value['process'] = $new_obat;
+                            array_push($failed_data, $value);
                         }
                     }
                 }
@@ -616,7 +615,8 @@ class Inventori extends Utility
                         $success_proceed += 1;   
                     }
                 } else {
-                    array_push($failed_data, $StokAwal);
+                    $value['process'] = $StokAwal;
+                    array_push($failed_data, $value);
                 }
 
                 array_push($proceed_data, $StokAwal);
@@ -2385,6 +2385,7 @@ class Inventori extends Utility
             ->execute();
 
         $autonum = 1;
+        $PenjaminObat = new Penjamin(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $kategori_obat = self::get_kategori_obat_item($value['uid']);
@@ -2401,7 +2402,6 @@ class Inventori extends Utility
             $data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
 
             //Data Penjamin
-            $PenjaminObat = new Penjamin(self::$pdo);
             $ListPenjaminObat = $PenjaminObat::get_penjamin_obat($value['uid'])['response_data'];
             foreach ($ListPenjaminObat as $PenjaminKey => $PenjaminValue) {
                 $ListPenjaminObat[$PenjaminKey]['profit'] = floatval($PenjaminValue['profit']);
@@ -7874,6 +7874,9 @@ class Inventori extends Utility
         $success_proceed = 0;
         $proceed_data = array();
 
+        $hapusUlangInv = self::$query->delete('master_inv')
+            ->execute();
+
         foreach ($parameter['data_import'] as $key => $value) {
             //Check duplicate
             $check = self::$query->select('master_inv', array(
@@ -7882,14 +7885,24 @@ class Inventori extends Utility
                 'deleted_at'
             ))
                 ->where(array(
-                    'master_inv.nama' => '= ?'
+                    'master_inv.nama' => 'ILIKE ' . '\'' . strtoupper(trim($parameter['search']['value'])) . '%\''
                 ), array(
                     $value['nama']
                 ))
                 ->execute();
             if (count($check['response_data']) > 0) {
                 foreach ($check['response_data'] as $CheckKey => $CheckValue) {
-                    if($CheckValue['deleted_at'] !== '') {
+                    $ReActivate = self::$query->update('master_inv', array(
+                        'deleted_at' => NULL
+                    ))
+                        ->where(array(
+                            'master_inv.uid' => '= ?'
+                        ), array(
+                            $CheckValue['uid']
+                        ))
+                        ->execute();
+                        
+                    if(!empty($CheckValue['deleted_at'])) {
                         array_push($non_active, $CheckValue);
                     } else {
                         array_push($duplicate_row, $CheckValue);
@@ -8081,7 +8094,7 @@ class Inventori extends Utility
                 $newItemUID = parent::gen_uuid();
                 $newItem = self::$query->insert('master_inv', array(
                     'uid' => $newItemUID,
-                    'nama' => $value['nama'],
+                    'nama' => strtoupper(trim($value['nama'])),
                     'kategori' => $targetKategori,
                     'satuan_terkecil' => $targetSatuan,
                     'created_at' => parent::format_date(),
