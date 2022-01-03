@@ -58,6 +58,10 @@ class Penjamin extends Utility {
 				return self::edit_penjamin($parameter);
 				break;
 
+			case 'sync_profit_obat':
+				return self::sync_profit_obat($parameter);
+				break;
+
 			default:
 				# code...
 				break;
@@ -247,6 +251,75 @@ class Penjamin extends Utility {
 			return $penjamin;
 
 		}
+	}
+
+	private function sync_profit_obat($parameter) {
+		$reset = self::$query->delete('master_inv_harga')
+			->execute();
+
+		$proceed = array();
+
+		$Penjamin = self::$query->select('master_penjamin', array(
+			'uid'
+		))
+			->where(array(
+				'master_penjamin.deleted_at' => 'IS NULL'
+			), array())
+			->execute();
+		foreach($Penjamin['response_data'] as $key => $value) {
+			$Item = self::$query->select('master_inv', array(
+				'uid'
+			))
+				->where(array(
+					'master_inv.deleted_at' => 'IS NULL'
+				), array())
+				->execute();
+			foreach($Item['response_data'] as $IKey => $IValue) {
+				$profitCheck = self::$query->select('master_inv_harga', array(
+					'id'
+				))
+					->where(array(
+						'master_inv_harga.barang' => '= ?',
+						'AND',
+						'master_inv_harga.penjamin' => '= ?'
+					), array(
+						$IValue['uid'],
+						$value['uid']
+					))
+					->execute();
+
+				if(count($profitCheck['response_data']) > 0) {
+					$process_prof = self::$query->update('master_inv_harga', array(
+						'profit' => '25',
+						'profit_type' => 'P',
+						'deleted_at' => NULL
+					))
+						->where(array(
+							'master_inv_harga.id' => '= ?'
+						), array(
+							$profitCheck['response_data'][0]['id']
+						))
+						->execute();
+				} else {
+					$process_prof = self::$query->insert('master_inv_harga', array(
+						'barang' => $IValue['uid'],
+						'penjamin' => $value['uid'],
+						'profit' => '25',
+						'profit_type' => 'P',
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+						->execute();
+				}
+
+				
+				if($process_prof['response_result'] <= 0) {
+					array_push($proceed, $process_prof);	
+				}
+			}
+		}
+
+		return $proceed;
 	}
 
 	private function edit_penjamin($parameter) {
