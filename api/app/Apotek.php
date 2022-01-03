@@ -3637,7 +3637,9 @@ class Apotek extends Utility
                     $paramData = array(
                         'resep.deleted_at' => 'IS NULL',
                         'AND',
-                        'resep.status_resep' => '= ?',
+                        '(resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
                         'AND',
                         'antrian.departemen' => '= ?',
                         'AND',
@@ -3649,13 +3651,15 @@ class Apotek extends Utility
                     $paramData = array(
                         'resep.deleted_at' => 'IS NULL',
                         'AND',
-                        'resep.status_resep' => '= ?',
+                        '(resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
                         'AND',
                         'antrian.departemen' => '= ?'
                     );
                 }
 
-                $paramValue = array('K', __POLI_INAP__);
+                $paramValue = array('K', 'L', __POLI_INAP__);
             } else if($parameter['request_type'] === 'verifikasi') {
                 if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
                     $paramData = array(

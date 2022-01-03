@@ -113,8 +113,7 @@
                                 },
                                 type: "POST",
                                 success: function(response) {
-                                    alert();
-
+                                    
                                     localStorage.getItem("currentPasien");
                                     localStorage.getItem("currentAntrianID");
 
@@ -218,7 +217,6 @@
                                             }
 
                                         } else {
-                                            alert("sini");
                                             console.log("command not found");
                                         }
 
@@ -297,7 +295,6 @@
                                         }
 
                                     } else {
-                                        alert("atau sini");
                                         console.log("command not found");
                                     }
 
