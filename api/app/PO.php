@@ -599,7 +599,9 @@ class PO extends Utility {
             'id'
         ))
             ->where(array(
-                'inventori_po_detail.po' => '= ?'
+                'inventori_po_detail.po' => '= ?',
+				'AND',
+				'inventori_po_detail.qty' => '> 0'
 			), array(
 				$parameter['uid']
 			))

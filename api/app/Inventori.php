@@ -245,6 +245,9 @@ class Inventori extends Utility
             case 'proceed_import_stok':
                 return self::proceed_import_stok($parameter);
                 break;
+            case 'proceed_sync_harga':
+                return self::proceed_sync_harga($parameter);
+                break;
             case 'get_stok_log_backend':
                 return self::get_stok_log_backend($parameter);
                 break;
@@ -336,6 +339,90 @@ class Inventori extends Utility
             }
 
             $output = array(
+                'column' => $column,
+                'row_data' => $row_data,
+                'column_builder' => $build_col,
+                'unique_name' => $unique_name
+            );
+            return $output;
+        }
+    }
+
+    private function proceed_sync_harga($parameter) {
+        if (!empty($_FILES['csv_file']['name'])) {
+            $unique_name = array();
+            $affectedPODetail = array();
+            $failedPODetail = array();
+
+            $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $column = fgetcsv($file_data); //array_head
+            $row_data = array();
+            while ($row = fgetcsv($file_data)) {
+                $column_builder = array();
+                foreach ($column as $key => $value) {
+                    $column_builder[$value] = (isset($row[$key]) && !empty($row[$key])) ? strval($row[$key]) : "BELUM SET";
+                }
+                array_push($row_data, $column_builder);
+            }
+
+            $build_col = array();
+            foreach ($column as $key => $value) {
+                array_push($build_col, array("data" => $value));
+            }
+
+            foreach($row_data as $key => $value) {
+                if(!empty($value['nama'])) {
+                    $checkObat = self::$query->select('master_inv', array(
+                        'uid',
+                        'nama'
+                    ))
+                        ->where(array(
+                            'master_inv.nama' => '= ?',
+                            'AND',
+                            'master_inv.deleted_at' => 'IS NULL'
+                        ), array(
+                            strtoupper(trim($value['nama']))
+                        ))
+                        ->execute();
+                    if(count($checkObat['response_data']) > 0) {
+                        $getPODetail = self::$query->select('inventori_po_detail', array(
+                            'id', 'harga', 'qty'
+                            ))
+                            ->where(array(
+                                'inventori_po_detail.barang' => '= ?'
+                            ), array(
+                                $checkObat['response_data'][0]['uid']
+                            ))
+                            ->execute();
+                        if(count($getPODetail['response_data']) > 0) {
+                            foreach($getPODetail['response_data'] as $POK => $POV) {
+                                $updatePODetail = self::$query->update('inventori_po_detail', array(
+                                    'harga' => floatval($value['harga']),
+                                    'subtotal' => (floatval($POV['qty']) * floatval($value['harga']))
+                                ))
+                                    ->where(array(
+                                        'inventori_po_detail.barang' => '= ?',
+                                        'AND',
+                                        'inventori_po_detail.id' => '= ?'
+                                    ), array(
+                                        $checkObat['response_data'][0]['uid'],
+                                        $POV['id']
+                                    ))
+                                    ->execute();
+                                if($updatePODetail['response_result'] > 0) {
+                                    array_push($affectedPODetail, $updatePODetail);
+                                } else {
+                                    array_push($failedPODetail, $updatePODetail);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $output = array(
+                'affectedPODetail' => $affectedPODetail,
+                'failedPODetail' => $failedPODetail,
                 'column' => $column,
                 'row_data' => $row_data,
                 'column_builder' => $build_col,
