@@ -354,6 +354,8 @@ class Inventori extends Utility
             $affectedPODetail = array();
             $failedPODetail = array();
 
+            $harga_tertinggi = array();
+
             $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
             $column = fgetcsv($file_data); //array_head
             $row_data = array();
@@ -385,6 +387,34 @@ class Inventori extends Utility
                         ))
                         ->execute();
                     if(count($checkObat['response_data']) > 0) {
+
+
+                        if(!isset($harga_tertinggi[$checkObat['response_data'][0]['uid']])) {
+                            $harga_tertinggi[$checkObat['response_data'][0]['uid']] = 0;
+                        }
+
+                        if(floatval($harga_tertinggi[$checkObat['response_data'][0]['uid']]) < floatval($value['harga'])) {
+                            $harga_tertinggi[$checkObat['response_data'][0]['uid']] = floatval($value['harga']);
+                        }
+                    }
+                }
+            }
+
+            foreach($row_data as $key => $value) {
+                if(!empty($value['nama'])) {
+                    $checkObat = self::$query->select('master_inv', array(
+                        'uid',
+                        'nama'
+                    ))
+                        ->where(array(
+                            'master_inv.nama' => '= ?',
+                            'AND',
+                            'master_inv.deleted_at' => 'IS NULL'
+                        ), array(
+                            strtoupper(trim($value['nama']))
+                        ))
+                        ->execute();
+                    if(count($checkObat['response_data']) > 0) {
                         $getPODetail = self::$query->select('inventori_po_detail', array(
                             'id', 'harga', 'qty'
                             ))
@@ -397,8 +427,8 @@ class Inventori extends Utility
                         if(count($getPODetail['response_data']) > 0) {
                             foreach($getPODetail['response_data'] as $POK => $POV) {
                                 $updatePODetail = self::$query->update('inventori_po_detail', array(
-                                    'harga' => floatval($value['harga']),
-                                    'subtotal' => (floatval($POV['qty']) * floatval($value['harga']))
+                                    'harga' => floatval($harga_tertinggi[$checkObat['response_data'][0]['uid']]),
+                                    'subtotal' => (floatval($POV['qty']) * floatval($harga_tertinggi[$checkObat['response_data'][0]['uid']]))
                                 ))
                                     ->where(array(
                                         'inventori_po_detail.barang' => '= ?',

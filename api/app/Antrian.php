@@ -2165,15 +2165,15 @@ class Antrian extends Utility
         );
         if (isset($parameter['cari']) && !empty($parameter['cari'])) {
             $paramData = array(
-                '(pasien.nik' => 'LIKE \'%' . $parameter['cari'] . '%\'',
+                '(pasien.nik' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
                 'OR',
-                'pasien.no_rm' => 'LIKE \'%' . $parameter['cari'] . '%\'',
+                'pasien.no_rm' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
                 'OR',
-                'pasien.no_passport' => 'LIKE \'%' . $parameter['cari'] . '%\'',
+                'pasien.no_passport' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
                 'OR',
-                'pasien.driving_license' => 'LIKE \'%' . $parameter['cari'] . '%\'',
+                'pasien.driving_license' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
                 'OR',
-                'LOWER(pasien.nama)' => 'LIKE \'%' . $parameter['cari'] . '%\')',
+                'LOWER(pasien.nama)' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\')',
                 'AND',
                 'pasien.deleted_at' => 'IS NULL'
             );
@@ -2236,6 +2236,32 @@ class Antrian extends Utility
             foreach ($data['response_data'] as $key => $value) {
                 $data_lengkap = false;
                 $data['response_data'][$key]['autonum'] = $autonum;
+
+                if(strlen($value['no_rm']) < 6) {
+                    $updateRM = self::$query->update('pasien', array(
+                        'no_rm' => str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT)
+                    ))
+                        ->where(array(
+                            'pasien.uid' => '= ?'
+                        ), array(
+                            $value['uid']
+                        ))
+                        ->execute();
+                }
+    
+                if (stripos(strtolower($value['no_rm']), '-') !== false) {
+                    $updateRM = self::$query->update('pasien', array(
+                        'no_rm' => str_replace('-', '', $value['no_rm'])
+                    ))
+                        ->where(array(
+                            'pasien.uid' => '= ?'
+                        ), array(
+                            $value['uid']
+                        ))
+                        ->execute();
+                }
+    
+                $data['response_data'][$key]['no_rm'] = str_replace('-', '', str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT));
 
                 $data['response_data'][$key]['berobat'] = self::cekStatusAntrian($value['uid']);
                 $param = ['', 'terminologi-items-detail', $value['id_panggilan']];
@@ -2334,15 +2360,15 @@ class Antrian extends Utility
                 )
             )
             ->where(array(
-                '(pasien.nik' => 'LIKE \'%' . $parameter . '%\'',
+                '(pasien.nik' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
                 'OR',
-                'pasien.no_rm' => 'LIKE \'%' . $parameter . '%\'',
+                'pasien.no_rm' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
                 'OR',
-                'pasien.no_passport' => 'LIKE \'%' . $parameter . '%\'',
+                'pasien.no_passport' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
                 'OR',
-                'pasien.driving_license' => 'LIKE \'%' . $parameter . '%\'',
+                'pasien.driving_license' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
                 'OR',
-                'pasien.nama' => 'LIKE \'%' . $parameter . '%\')',
+                'pasien.nama' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\')',
                 'AND',
                 'pasien.deleted_at' => 'IS NULL'
             ),
@@ -2367,6 +2393,32 @@ class Antrian extends Utility
             $data_lengkap = false;
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
+
+            if(strlen($value['no_rm']) < 6) {
+                $updateRM = self::$query->update('pasien', array(
+                    'no_rm' => str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT)
+                ))
+                    ->where(array(
+                        'pasien.uid' => '= ?'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+            }
+
+            if (stripos(strtolower($value['no_rm']), '-') !== false) {
+                $updateRM = self::$query->update('pasien', array(
+                    'no_rm' => str_replace('-', '', $value['no_rm'])
+                ))
+                    ->where(array(
+                        'pasien.uid' => '= ?'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+            }
+
+            $data['response_data'][$key]['no_rm'] = str_replace('-', '', str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT));
 
             $data['response_data'][$key]['berobat'] = self::cekStatusAntrian($value['uid']);
             $param = ['', 'terminologi-items-detail', $value['id_panggilan']];

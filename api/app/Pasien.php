@@ -984,7 +984,19 @@ class Pasien extends Utility
                     ->execute();
             }
 
-            $data['response_data'][$key]['no_rm'] = str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT);
+            if (stripos(strtolower($value['no_rm']), '-') !== false) {
+                $updateRM = self::$query->update('pasien', array(
+                    'no_rm' => str_replace('-', '', $value['no_rm'])
+                ))
+                    ->where(array(
+                        'pasien.uid' => '= ?'
+                    ), array(
+                        $value['uid']
+                    ))
+                    ->execute();
+            }
+
+            $data['response_data'][$key]['no_rm'] = str_replace('-', '', str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT));
 
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
