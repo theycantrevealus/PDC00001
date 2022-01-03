@@ -798,7 +798,7 @@
                             keterangan_racikan: targettedData.keterangan_racikan,
                             alasan_ubah: targettedData.alasan_ubah,
                             alergi: targettedData.alergi_obat,
-                            sep: (targettedData.antrian.penjamin === __UIDPENJAMINUMUM__) ? "-" : targettedData.bpjs.sep,
+                            sep: (targettedData.antrian.penjamin === __UIDPENJAMINUMUM__) ? "-" : ((targettedData.bpjs !== undefined) ? ((targettedData.bpjs.sep !== undefined) ? targettedData.bpjs.sep : "-") : "-"),
                             resep_dokter: resep_dokter,
                             racikan_dokter: racikan_dokter,
                             resep_apotek: resep_apotek,
