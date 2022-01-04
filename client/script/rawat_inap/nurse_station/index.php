@@ -330,8 +330,22 @@
                             allowManageRanjang = true;
                         }
 
-                        if(allowManageRanjang) {
-                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                        // if(allowManageRanjang) {
+                        //     return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                        //         "<button id=\"edit_" + row.uid + "\" class=\"btn btn-info btn-sm btnEditNS\">" +
+                        //         "<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
+                        //         "</button>" +
+                        //         "<button id=\"delete_" + row.uid + "\" class=\"btn btn-danger btn-sm btnDeleteNS\">" +
+                        //         "<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
+                        //         "</button>" +
+                        //         "</div>";
+                        // } else {
+                        //     return "<span class=\"text-warning wrap_content\"><i class=\"fa fa-exclamation-triangle\"></i> Nurse Station sedang aktif</span>";
+                        // }
+
+                        //TODO : AKTIFKAN LAGI CEK PELAYANAN
+
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button id=\"edit_" + row.uid + "\" class=\"btn btn-info btn-sm btnEditNS\">" +
                                 "<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
                                 "</button>" +
@@ -339,9 +353,6 @@
                                 "<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
                                 "</button>" +
                                 "</div>";
-                        } else {
-                            return "<span class=\"text-warning wrap_content\"><i class=\"fa fa-exclamation-triangle\"></i> Nurse Station sedang aktif</span>";
-                        }
                     }
                 }
             ]
