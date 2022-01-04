@@ -29,7 +29,7 @@ class Anjungan extends Utility {
 		try {
 			switch($parameter[1]) {
 				case 'avail_loket':
-					return self::avail_loket();
+					return self::avail_loket($parameter);
 					break;
 				case 'check_job':
 					return self::check_job($parameter[2]);
@@ -75,6 +75,12 @@ class Anjungan extends Utility {
 				case 'get_terbilang':
 					return self::get_terbilang($parameter);
 					break;
+				case 'master_tambah_loket':
+					return self::master_tambah_loket($parameter);
+					break;
+				case 'master_edit_loket':
+					return self::master_edit_loket($parameter);
+					break;
 				case 'master_tambah_jenis_antrian':
 					return self::master_tambah_jenis_antrian($parameter);
 					break;
@@ -97,6 +103,105 @@ class Anjungan extends Utility {
 
 	public function __DELETE__($parameter = array()) {
 		return self::delete($parameter);
+	}
+
+	private function master_tambah_loket($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
+		$uid = parent::gen_uuid();
+		$Proc = self::$query->insert('master_loket', array(
+			'uid' => $uid,
+			'nama_loket' => $parameter['nama'],
+			'created_at' => parent::format_date(),
+			'updated_at' => parent::format_date()
+		))
+			->execute();
+
+		if($Proc['response_result'] > 0) {
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$uid,
+					$UserData['data']->uid,
+					'antrian_jenis',
+					'I',
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
+
+		return $Proc;
+	}
+
+	private function master_edit_loket($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+		$old = self::$query->select('master_loket', array(
+			'uid', 'nama_loket', 'created_at', 'updated_at', 'deleted_at', 'user_active'
+		))
+			->where(array(
+				'master_loket.deleted_at' => 'IS NULL',
+				'AND',
+				'master_loket.uid' => '= ?'
+			), array(
+				$parameter['uid']
+			))
+			->execute();
+
+		$Proc = self::$query->update('master_loket', array(
+			'nama_loket' => $parameter['nama'],
+			'updated_at' => parent::format_date()
+		))
+			->where(array(
+				'master_loket.deleted_at' => 'IS NULL',
+				'AND',
+				'master_loket.uid' => '= ?'
+			), array(
+				$parameter['uid']
+			))
+			->execute();
+
+		if($Proc['response_result'] > 0) {
+			$log = parent::log(array(
+				'type' => 'activity',
+				'column' => array(
+					'unique_target',
+					'user_uid',
+					'table_name',
+					'action',
+					'old_value',
+					'new_value',
+					'logged_at',
+					'status',
+					'login_id'
+				),
+				'value' => array(
+					$parameter['uid'],
+					$UserData['data']->uid,
+					'antrian_jenis',
+					'U',
+					json_encode($old['response_data'][0]),
+					json_encode($parameter),
+					parent::format_date(),
+					'N',
+					$UserData['data']->log_id
+				),
+				'class' => __CLASS__
+			));
+		}
 	}
 
 	private function get_terbilang($parameter) {
@@ -167,6 +272,11 @@ class Anjungan extends Utility {
 			'nama_loket' => 'ASC'
 		))
 		->execute();
+		$autonum = 1;
+		foreach($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$autonum++;
+		}
 		return $data;
 	}
 
@@ -456,7 +566,7 @@ class Anjungan extends Utility {
 		return $data;
 	}
 
-	private function avail_loket() {
+	private function avail_loket($parameter) {
 		$Authorization = new Authorization();
 		$UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -956,7 +1066,7 @@ class Anjungan extends Utility {
 								'login_id'
 							),
 							'value' => array(
-								$JMAntrian['response_unique'],
+								$JMAntrianWorker['response_unique'],
 								$UserData['data']->uid,
 								'antrian_jenis_item',
 								'I',
