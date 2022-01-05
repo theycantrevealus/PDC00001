@@ -260,13 +260,11 @@
 						}
 					}
 				}
-
-				console.clear();
-				console.log(metaData[selectedItem]);
 			});
 
 			if(totalRequest != parseFloat(targetJumlahAmprah)) {
 				if($("#keterangan_per_item").val() != "") {
+					console.log('Waw');
 					$("ol#item_batch_" + selectedItem + " li").remove();
 					for(var bKey in metaData[selectedItem].batch) {
 						var newListBatch = document.createElement("LI");
@@ -282,6 +280,7 @@
 					$("#qty_disetujui_" + selectedItem).html(totalRequest);
 					$("#form-batch-barang").modal("hide");
 				} else {
+					console.log('Waw');
 					$("#keterangan_per_item").focus();
 					notification ("danger", "Jumlah tidak memenuhi permintaan. Wajib isi keterangan", 3000, "proceed_amprah");
 				}
