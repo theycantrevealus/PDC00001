@@ -263,6 +263,8 @@
 				}
 			});
 
+			console.log(totalRequest);
+
 			if(totalRequest != parseFloat(targetJumlahAmprah)) {
 				if($("#keterangan_per_item").val() != "") {
 					console.log('Waw');
