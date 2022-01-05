@@ -314,6 +314,14 @@ class Antrian extends Utility
                     )
                     ->execute();
 
+                if($updateNomorAntrian['response_result'] <= 0) {
+                    $log = parent::log(array(
+                        'type' => 'error',
+                        'class' => 'Pendaftaran',
+                        'message' => $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse']
+                    ));
+                }
+
                 unset($parameter['dataObj']['currentPasien']);
                 $antrian['response_notif'] = 'K';
                 return $antrian;
@@ -1255,9 +1263,23 @@ class Antrian extends Utility
                 return $antrian;
 
             } else {
+                if($updateNomorAntrian['response_result'] <= 0) {
+                    $log = parent::log(array(
+                        'type' => 'error',
+                        'class' => 'Pendaftaran',
+                        'message' => $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse']
+                    ));
+                }
                 return $updateNomorAntrian;
             }
         } else {
+            if($antrian['response_result'] <= 0) {
+                $log = parent::log(array(
+                    'type' => 'error',
+                    'class' => 'Pendaftaran Antrian',
+                    'message' => $antrian['response_query'] . '|' . $antrian['response_values_parse']
+                ));
+            }
             return $antrian;
         }
     }
