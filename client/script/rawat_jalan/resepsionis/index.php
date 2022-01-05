@@ -129,7 +129,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/Antrian/antrian",
@@ -146,8 +146,8 @@
 				    var filtered = [];
 
                     response.draw = parseInt(response.response_package.response_draw);
-                    response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsTotal = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
 				    for(var key in data) {
 				        if(data[key].departemen !== "IGD") {
