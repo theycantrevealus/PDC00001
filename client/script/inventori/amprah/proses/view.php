@@ -186,6 +186,7 @@
 				//alert($("#qty_" + id).html());
 				
 				for(var key in metaData[id].batch) {
+					console.log(metaData[id].batch[key]);
 					if(metaData[id].batch[key].gudang != null && metaData[id].batch[key].gudang.uid == __GUDANG_UTAMA__) {
 						var batchRow = document.createElement("TR");
 						$(batchRow).attr({
