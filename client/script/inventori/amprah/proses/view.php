@@ -257,13 +257,11 @@
 								metaData[selectedItem].batch[bKey].disetujui = 0;
 							}
 							
-							metaData[selectedItem].batch[bKey].disetujui = currentCount;
+							metaData[selectedItem].batch[bKey].disetujui = floatval(currentCount);
 						}
 					}
 				}
 			});
-
-			console.log(metaData[selectedItem]);
 
 			if(totalRequest != parseFloat(targetJumlahAmprah)) {
 				if($("#keterangan_per_item").val() != "") {
