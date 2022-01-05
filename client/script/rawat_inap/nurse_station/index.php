@@ -407,7 +407,8 @@
                     var result = response.response_package.response_data[0];
                     console.log(result);
                     allow_manage = response.response_package.allow_manage;
-                    if(!allow_manage) {
+                    if(allow_manage) {
+                    //if(!allow_manage) {
                         Swal.fire(
                             "Nurse Station",
                             "Kosongkan nurse station sebelum melakukan perubahan data",
