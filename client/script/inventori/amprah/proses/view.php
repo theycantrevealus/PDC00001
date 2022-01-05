@@ -187,7 +187,7 @@
 				
 				for(var key in metaData[id].batch) {
 					var targetDisetujui = (metaData[selectedItem].batch[key].disetujui == undefined) ? 0 : metaData[selectedItem].batch[key].disetujui;
-					if(metaData[id].batch[key].gudang != null && metaData[id].batch[key].gudang.uid == __GUDANG_UTAMA__ && targetDisetujui > 0) {
+					if(metaData[id].batch[key].gudang != null && metaData[id].batch[key].gudang.uid == __GUDANG_UTAMA__ && metaData[id].batch[key].stok_terkini > 0) {
 						console.log(metaData[id].batch[key]);
 						var batchRow = document.createElement("TR");
 						$(batchRow).attr({
