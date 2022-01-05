@@ -231,6 +231,12 @@ class Antrian extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
+        $log = parent::log(array(
+            'type' => 'error',
+            'class' => 'Pendaftaran',
+            'message' => 'Error Test'
+        ));
+
         if(isset($parameter['dataObj']['konsul'])) { //Kunjungan karena konsul
 
 
