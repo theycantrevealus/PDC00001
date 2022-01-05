@@ -259,8 +259,9 @@
 							}
 							
 							metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
-						} else {
 							console.log(currentBatch + ">>>>" + metaData[selectedItem].batch[bKey].batch);
+						} else {
+							
 						}
 					}
 				}
