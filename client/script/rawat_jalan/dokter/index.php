@@ -139,7 +139,7 @@
 					"data" : null, render: function(data, type, row, meta) {
 						console.log(row);
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									"<a pasien=\"" + row.pasien_detail.uid + "\" tindakan=\"" + row.poli_detail.tindakan_konsultasi + "\" href=\"" + __HOSTNAME__ + "/rawat_jalan/dokter/antrian/" + row['uid'] + "\" class=\"btn btn-success btnDetailAntrian\">" +
+									"<a pasien=\"" + uid_pasien + "\" tindakan=\"" + row.poli_detail.tindakan_konsultasi + "\" href=\"" + __HOSTNAME__ + "/rawat_jalan/dokter/antrian/" + row['uid'] + "\" class=\"btn btn-success btnDetailAntrian\">" +
 										"<i class=\"fa fa-sign-out-alt\"></i> Proses Perobatan" +
 									"</a>" +
 								"</div>";
