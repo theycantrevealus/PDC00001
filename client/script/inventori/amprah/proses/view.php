@@ -285,6 +285,7 @@
 					notification ("danger", "Jumlah tidak memenuhi permintaan. Wajib isi keterangan", 3000, "proceed_amprah");
 				}
 			} else {
+				console.log('Wow');
                 $("ol#item_batch_" + selectedItem + " li").remove();
                 for(var bKey in metaData[selectedItem].batch) {
                     var newListBatch = document.createElement("LI");
