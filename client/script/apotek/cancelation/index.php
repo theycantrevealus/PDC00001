@@ -68,8 +68,12 @@
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.departemen !== undefined && row.departemen !== null) {
                             if(row.departemen.uid === __POLI_INAP__) {
-                                return row.departemen.nama + "<br />" +
-                                    "<span class=\"text-info\">" + row.antrian.ns_detail.kode_ns + "</span> - " + row.antrian.ns_detail.nama_ns;
+                                if(row.antrian.ns_detail !== undefined && row.antrian.ns_detail !== null) {
+                                    return row.departemen.nama + "<br />" +
+                                        "<span class=\"text-info\">" + row.antrian.ns_detail.kode_ns + "</span> - " + row.antrian.ns_detail.nama_ns;
+                                } else {
+                                    return "-";
+                                }
                             } else {
                                 return row.departemen.nama;
                             }
