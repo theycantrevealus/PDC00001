@@ -186,7 +186,8 @@
 				//alert($("#qty_" + id).html());
 				
 				for(var key in metaData[id].batch) {
-					if(metaData[id].batch[key].gudang != null && metaData[id].batch[key].gudang.uid == __GUDANG_UTAMA__) {
+					var targetDisetujui = (metaData[selectedItem].batch[key].disetujui == undefined) ? 0 : metaData[selectedItem].batch[key].disetujui;
+					if(metaData[id].batch[key].gudang != null && metaData[id].batch[key].gudang.uid == __GUDANG_UTAMA__ && targetDisetujui > 0) {
 						console.log(metaData[id].batch[key]);
 						var batchRow = document.createElement("TR");
 						$(batchRow).attr({
@@ -259,9 +260,6 @@
 							}
 							
 							metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
-							console.log(currentBatch + ">>>>" + metaData[selectedItem].batch[bKey].batch);
-						} else {
-							
 						}
 					}
 				}
