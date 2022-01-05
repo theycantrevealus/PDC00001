@@ -230,6 +230,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        console.log(row);
                         return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
                     }
                 },

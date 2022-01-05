@@ -2425,6 +2425,9 @@
         });
 
         $("#btnSelesai").click(function() {
+            $(this).attr({
+                "disabled": "disabled"
+            }).addClass("btn-warning").removeClass("btn-info");
             $("#alasan-ubah-resep").val(alasanUbah);
             if(CompareVerif(currentData, verifData)) {
                 $("#form-alasan-ubah").modal("show");
@@ -2641,6 +2644,10 @@
                                     kajian: kajian
                                 },
                                 success:function(response) {
+                                    $("#btnSelesai").removeAttr({
+                                        "disabled": "disabled"
+                                    }).removeClass("btn-warning").addClass("btn-info");
+
                                     if(response.response_package.antrian.response_result > 0) {
                                         if(currentMetaData.departemen.uid === __POLI_IGD__) {
                                             Swal.fire(
@@ -2680,6 +2687,9 @@
                                     }
                                 },
                                 error: function(response) {
+                                    $("#btnSelesai").attr({
+                                        "disabled": "disabled"
+                                    }).addClass("btn-warning").removeClass("btn-info");
                                     console.log(response);
                                 }
                             });
@@ -2704,6 +2714,9 @@
                         }
                     } else {
                         $("#form-alasan-ubah").modal("hide");
+                        $("#btnSelesai").removeAttr({
+                            "disabled": "disabled"
+                        }).removeClass("btn-warning").addClass("btn-info");
                     }
                 });
             } else {
