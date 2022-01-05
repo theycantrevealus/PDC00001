@@ -231,11 +231,11 @@ class Antrian extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        $log = parent::log(array(
-            'type' => 'error',
-            'class' => 'Pendaftaran',
-            'message' => 'Error Test'
-        ));
+        // $log = parent::log(array(
+        //     'type' => 'error',
+        //     'class' => 'Pendaftaran',
+        //     'message' => 'Error Test'
+        // ));
 
         if(isset($parameter['dataObj']['konsul'])) { //Kunjungan karena konsul
 
@@ -321,11 +321,11 @@ class Antrian extends Utility
                     ->execute();
 
                 if($updateNomorAntrian['response_result'] <= 0) {
-                    $log = parent::log(array(
-                        'type' => 'error',
-                        'class' => 'Pendaftaran',
-                        'message' => $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse']
-                    ));
+                    // $log = parent::log(array(
+                    //     'type' => 'error',
+                    //     'class' => 'Pendaftaran',
+                    //     'message' => $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse']
+                    // ));
                 }
 
                 unset($parameter['dataObj']['currentPasien']);
@@ -1270,21 +1270,21 @@ class Antrian extends Utility
 
             } else {
                 if($updateNomorAntrian['response_result'] <= 0) {
-                    $log = parent::log(array(
-                        'type' => 'error',
-                        'class' => 'Pendaftaran',
-                        'message' => $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse']
-                    ));
+                    // $log = parent::log(array(
+                    //     'type' => 'error',
+                    //     'class' => 'Pendaftaran',
+                    //     'message' => $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse']
+                    // ));
                 }
                 return $updateNomorAntrian;
             }
         } else {
             if($antrian['response_result'] <= 0) {
-                $log = parent::log(array(
-                    'type' => 'error',
-                    'class' => 'Pendaftaran Antrian',
-                    'message' => $antrian['response_query'] . '|' . $antrian['response_values_parse']
-                ));
+                // $log = parent::log(array(
+                //     'type' => 'error',
+                //     'class' => 'Pendaftaran Antrian',
+                //     'message' => $antrian['response_query'] . '|' . $antrian['response_values_parse']
+                // ));
             }
             return $antrian;
         }
