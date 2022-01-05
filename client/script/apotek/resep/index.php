@@ -233,7 +233,7 @@
                         if(row.pasien_info !== undefined && row.pasien_info !== null) {
                             return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
                         } else {
-                            return row.pasien_info.nama;
+                            return row.nama_pasien;
                         }
                     }
                 },
