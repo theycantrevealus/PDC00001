@@ -2711,6 +2711,10 @@
                                     $("#form-alasan-ubah").modal("hide");
                                 });
                             }
+
+                            $("#btnSelesai").removeAttr({
+                                "disabled": "disabled"
+                            }).removeClass("btn-warning").addClass("btn-info");
                         }
                     } else {
                         $("#form-alasan-ubah").modal("hide");
