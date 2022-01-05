@@ -257,7 +257,7 @@
 								metaData[selectedItem].batch[bKey].disetujui = 0;
 							}
 							
-							metaData[selectedItem].batch[bKey].disetujui = floatval(currentCount);
+							metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
 						}
 					}
 				}
