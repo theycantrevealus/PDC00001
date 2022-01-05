@@ -263,7 +263,7 @@
 				}
 			});
 
-			console.log(totalRequest != parseFloat(targetJumlahAmprah));
+			console.log(metaData[selectedItem]);
 
 			if(totalRequest != parseFloat(targetJumlahAmprah)) {
 				if($("#keterangan_per_item").val() != "") {
