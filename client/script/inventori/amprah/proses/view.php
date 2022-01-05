@@ -179,6 +179,7 @@
 				$("#table-batch tbody tr").remove();
 				//$("#table-monitor-batch tbody tr").remove();
                 targetJumlahAmprah = parseFloat($("#request_qty_" + id).html().replaceAll(",",""));
+				console.log(targetJumlahAmprah);
 				$("#target_batch_amprah").html(metaData[id].nama);
 				$("#qty_batch_amprah").html($("#request_qty_" + id).html());
 				$("#unit_pengamprah").html(unit_pengamprah.nama);
