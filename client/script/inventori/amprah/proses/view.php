@@ -249,6 +249,9 @@
 				var currentCount = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
 				totalRequest += parseFloat(currentCount);
 
+				console.clear();
+				console.log(metaData[selectedItem].batch);
+
 				for(var bKey in metaData[selectedItem].batch) {
 						
 
