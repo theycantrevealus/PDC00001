@@ -249,12 +249,7 @@
 				var currentCount = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
 				totalRequest += parseFloat(currentCount);
 
-				console.clear();
-				console.log(metaData[selectedItem].batch);
-
 				for(var bKey in metaData[selectedItem].batch) {
-						
-
 					if(metaData[selectedItem].batch[bKey].gudang.uid == __GUDANG_UTAMA__) {
 						if(metaData[selectedItem].batch[bKey].batch == currentBatch) {
 							if(metaData[selectedItem].batch[bKey].disetujui == undefined) {
@@ -265,6 +260,9 @@
 						}
 					}
 				}
+
+				console.clear();
+				console.log(metaData[selectedItem]);
 			});
 
 			if(totalRequest != parseFloat(targetJumlahAmprah)) {
