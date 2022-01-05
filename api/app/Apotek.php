@@ -4122,7 +4122,7 @@ class Apotek extends Utility
             $PegawaiInfo = $Pegawai->get_info($value['dokter']);
             $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
 
-            $PasienData = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            $PasienData = $Pasien->get_pasien_info('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
 
             if($value['departemen'] === __POLI_INAP__ || $value['departemen'] === __POLI_IGD__) {
