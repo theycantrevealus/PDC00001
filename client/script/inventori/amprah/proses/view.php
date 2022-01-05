@@ -259,6 +259,8 @@
 							
 							metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
 						}
+					} else {
+						console.log("Wadaw");
 					}
 				}
 			});
