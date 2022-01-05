@@ -186,8 +186,8 @@
 				//alert($("#qty_" + id).html());
 				
 				for(var key in metaData[id].batch) {
-					console.log(metaData[id].batch[key]);
 					if(metaData[id].batch[key].gudang != null && metaData[id].batch[key].gudang.uid == __GUDANG_UTAMA__) {
+						console.log(metaData[id].batch[key]);
 						var batchRow = document.createElement("TR");
 						$(batchRow).attr({
 							"id":"batch_" + metaData[id].batch[key].batch
@@ -224,9 +224,9 @@
 							$(batchRow).append(batchStokCont);
 							$(batchRow).append(batchJumlahCont);
 						} else {
-							$(batchRow).append(batchAutoNumCont);
-							$(batchRow).append(batchKodeCont);
-							$(batchRow).append(batchStokCont);
+							// $(batchRow).append(batchAutoNumCont);
+							// $(batchRow).append(batchKodeCont);
+							// $(batchRow).append(batchStokCont);
 						}
 
 						$("#table-batch tbody").append(batchRow);
