@@ -231,12 +231,6 @@ class Antrian extends Utility
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        // $log = parent::log(array(
-        //     'type' => 'error',
-        //     'class' => 'Pendaftaran',
-        //     'message' => 'Error Test'
-        // ));
-
         if(isset($parameter['dataObj']['konsul'])) { //Kunjungan karena konsul
 
 
@@ -323,9 +317,17 @@ class Antrian extends Utility
                 if($updateNomorAntrian['response_result'] <= 0) {
                     // $log = parent::log(array(
                     //     'type' => 'error',
-                    //     'class' => 'Pendaftaran',
-                    //     'message' => $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse']
-                    // ));
+                    //     'column' => array(
+                    //         'type_err',
+                    //         'class_err',
+                    //         'messages',
+                    //         'logged_at'
+                    //     ), 'value' => array(
+                    //         'CRITICAL',
+                    //         'Pendaftaran',
+                    //         $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse'],
+                    //         parent::format_date()
+                    //     ), 'class' => __CLASS__));
                 }
 
                 unset($parameter['dataObj']['currentPasien']);
@@ -1272,9 +1274,17 @@ class Antrian extends Utility
                 if($updateNomorAntrian['response_result'] <= 0) {
                     // $log = parent::log(array(
                     //     'type' => 'error',
-                    //     'class' => 'Pendaftaran',
-                    //     'message' => $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse']
-                    // ));
+                    //     'column' => array(
+                    //         'type_err',
+                    //         'class_err',
+                    //         'messages',
+                    //         'logged_at'
+                    //     ), 'value' => array(
+                    //         'CRITICAL',
+                    //         'Pendaftaran',
+                    //         $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse'],
+                    //         parent::format_date()
+                    //     ), 'class' => __CLASS__));
                 }
                 return $updateNomorAntrian;
             }
@@ -1282,9 +1292,17 @@ class Antrian extends Utility
             if($antrian['response_result'] <= 0) {
                 // $log = parent::log(array(
                 //     'type' => 'error',
-                //     'class' => 'Pendaftaran Antrian',
-                //     'message' => $antrian['response_query'] . '|' . $antrian['response_values_parse']
-                // ));
+                //     'column' => array(
+                //         'type_err',
+                //         'class_err',
+                //         'messages',
+                //         'logged_at'
+                //     ), 'value' => array(
+                //         'CRITICAL',
+                //         'Pendaftaran',
+                //         $antrian['response_query'] . '|' . $antrian['response_values_parse'],
+                //         parent::format_date()
+                //     ), 'class' => __CLASS__));
             }
             return $antrian;
         }
@@ -2187,9 +2205,31 @@ class Antrian extends Utility
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $term = new Terminologi(self::$pdo);
+        // $expect_data = array(
+        //     'no_rm',
+        //     'nik',
+        //     'tanggal_lahir',
+        //     'nama',
+        //     'id_panggilan',
+        //     'id_jenkel',
+        //     'agama',
+        //     'warganegara',
+        //     'pendidikan',
+        //     'nama_ibu',
+        //     'alamat',
+        //     'no_telp'
+        // );
         $expect_data = array(
-            'no_rm', 'nik', 'tanggal_lahir', 'nama', 'id_panggilan', 'tanggal_lahir', 'tempat_lahir', 'id_jenkel', 'agama', 'warganegara', 'pendidikan',
-            'nama_ibu', 'alamat', 'no_telp'
+            'no_rm',
+            'nik',
+            'tanggal_lahir',
+            'nama',
+            'id_panggilan',
+            'id_jenkel',
+            'agama',
+            'nama_ibu',
+            'alamat',
+            'no_telp'
         );
         if (isset($parameter['cari']) && !empty($parameter['cari'])) {
             $paramData = array(
