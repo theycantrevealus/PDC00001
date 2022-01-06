@@ -71,17 +71,28 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									/*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
-									 	"<i class=\"fa fa-list\"></i> Detail" +
-									"</button>" +*/
-									"<a href=\"" + __HOSTNAME__ + "/pasien/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-pasien\" data-toggle='tooltip' title='Edit'>" +
-										"<span><i class=\"fa fa-edit\"></i>Edit</span>" +
-									"</a>" +
-									"<button id=\"pasien_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-pasien\" data-toggle='tooltip' title='Hapus'>" +
-										"<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
-									"</button>" +
-								"</div>";
+                        if(__MY_PRIVILEGES__.response_data[0].uid == __UIDADMIN__) {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                        /*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
+                                            "<i class=\"fa fa-list\"></i> Detail" +
+                                        "</button>" +*/
+                                        "<a href=\"" + __HOSTNAME__ + "/pasien/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-pasien\" data-toggle='tooltip' title='Edit'>" +
+                                            "<span><i class=\"fa fa-edit\"></i>Edit</span>" +
+                                        "</a>" +
+                                        "<button id=\"pasien_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-pasien\" data-toggle='tooltip' title='Hapus'>" +
+                                            "<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
+                                        "</button>" +
+                                    "</div>";
+                        } else {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                        /*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
+                                            "<i class=\"fa fa-list\"></i> Detail" +
+                                        "</button>" +*/
+                                        "<a href=\"" + __HOSTNAME__ + "/pasien/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-pasien\" data-toggle='tooltip' title='Edit'>" +
+                                            "<span><i class=\"fa fa-edit\"></i>Edit</span>" +
+                                        "</a>" +
+                                    "</div>";
+                        }
 					}
 				}
 			]
