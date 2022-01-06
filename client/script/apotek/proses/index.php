@@ -398,13 +398,17 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        if(
-                            row.pasien_info.panggilan_name !== undefined &&
-                            row.pasien_info.panggilan_name !== null
-                        ) {
-                            return row.pasien_info.panggilan_name.nama + " " + row.pasien_info.nama;
+                        if(row.pasien_info !== undefined && row.pasien_info !== null) {
+                            if(
+                                row.pasien_info.panggilan_name !== undefined &&
+                                row.pasien_info.panggilan_name !== null
+                            ) {
+                                return row.pasien_info.panggilan_name.nama + " " + row.pasien_info.nama;
+                            } else {
+                                return row.pasien_info.nama;
+                            }
                         } else {
-                            return row.pasien_info.nama;
+                            return row.nama_pasien;
                         }
                     }
                 },
