@@ -280,6 +280,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        
                         if(row.pasien_info !== undefined && row.pasien_info !== null) {
                             if(
                                 row.pasien_info.panggilan_name !== undefined &&
