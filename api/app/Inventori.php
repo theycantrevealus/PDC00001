@@ -3960,7 +3960,8 @@ class Inventori extends Utility
             'pegawai' => $UserData['data']->uid,
             //'tanggal' => $parameter['tanggal'],
             'tanggal' => parent::format_date(),
-            'status' => ($UserData['data']->jabatan === __UIDAPOTEKER__) ? 'A' : 'N',
+            //'status' => ($UserData['data']->jabatan === __UIDAPOTEKER__) ? 'A' : 'N',
+            'status' => ($UserData['data']->gudang === __GUDANG_APOTEK__) ? 'A' : 'N',
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date(),
             'keterangan' => $parameter['keterangan']
