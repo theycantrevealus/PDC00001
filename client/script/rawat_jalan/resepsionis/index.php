@@ -230,9 +230,9 @@
                                 "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
                                 "<i class=\"fa fa-check\"></i> Selesai" +
                                 "</button>" +
-                                "<button id=\"batalkan_kunjungan_" + row.uid + "\" class=\"btn btn-danger btn-sm btn-pasien-batal\">" +
-                                "<span><i class=\"fa fa-times-circle\"></i> Hapus</span>" +
-                                "</button>" +
+                                // "<button id=\"batalkan_kunjungan_" + row.uid + "\" class=\"btn btn-danger btn-sm btn-pasien-batal\">" +
+                                // "<span><i class=\"fa fa-times-circle\"></i> Hapus</span>" +
+                                // "</button>" +
                                 "<div class=\"btn-group\">" +
                                 "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
                                 "<i class=\"fa fa-print\"></i> Cetak" +
@@ -255,9 +255,9 @@
                                 "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-success btn-sm btn-pasien-pulang\">" +
                                 "<i class=\"fa fa-check\"></i> Selesai" +
                                 "</button>" +
-                                "<button id=\"batalkan_kunjungan_" + row.uid + "\" class=\"btn btn-danger btn-sm btn-pasien-batal\">" +
-                                "<span><i class=\"fa fa-times-circle\"></i> Hapus</span>" +
-                                "</button>" +
+                                // "<button id=\"batalkan_kunjungan_" + row.uid + "\" class=\"btn btn-danger btn-sm btn-pasien-batal\">" +
+                                // "<span><i class=\"fa fa-times-circle\"></i> Hapus</span>" +
+                                // "</button>" +
                                 "<div class=\"btn-group\">" +
                                 "<button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">" +
                                 "<i class=\"fa fa-print\"></i> Cetak" +
