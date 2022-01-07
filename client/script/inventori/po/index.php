@@ -17,9 +17,7 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.clear();
-					console.log(response);
-				    response.draw = parseInt(response.response_package.response_draw);
+					response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
 					return response.response_package.response_data;
@@ -62,6 +60,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
+						console.log(row.sumber_dana);
 						return (row.sumber_dana !== undefined && row.sumber_dana !== null) ? row.sumber_dana.nama : "-";
 					}
 				},
