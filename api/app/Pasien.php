@@ -74,6 +74,10 @@ class Pasien extends Utility
     public function __POST__($parameter = array())
     {
         switch ($parameter['request']) {
+            case 'pulangkan_pasien':
+                return self::pulangkan_pasien($parameter);
+                break;
+
             case 'tambah-pasien':
                 return self::tambah_pasien('pasien', $parameter);
                 break;
@@ -408,6 +412,48 @@ class Pasien extends Utility
     }
 
     /*==================== CRUD ====================*/
+
+    private function pulangkan_pasien($parameter) {
+        $Antrian = self::$query->select('antrian', array(
+            'uid', 'departemen', 'waktu_masuk', 'waktu_keluar',
+            'kunjungan'
+        ))
+            ->where(array(
+                'antrian.waktu_masuk' => ' < \'' . $parameter['keluar'] . '\'',
+                'AND',
+                'antrian.waktu_keluar' => 'IS NULL'
+            ), array())
+            ->execute();
+        foreach($Antrian['response_data'] as $key => $value) {
+            if(date('d', strtotime($value['waktu_masuk'])) !== date('d')) {
+                if($value['departemen'] !== __POLI_IGD__ && $value['departemen'] !== __POLI_INAP__) {
+                    //Pulangkan
+                    $UAntrian = self::$query->update('antrian', array(
+                        'waktu_keluar' => parent::format_date()
+                    ))
+                        ->where(array(
+                            'antrian.uid' => '= ?'
+                        ), array(
+                            $value['uid']
+                        ))
+                        ->execute();
+
+
+                        
+    
+                    //Kunjungan
+                    $UKunjungan = self::$query->update('kunjungan', array())
+                        ->where(array(
+                            'kunjungan.uid' => '= ?'
+                        ), array(
+                            $value['kunjungan']
+                        ))
+                        ->execute();
+                }   
+            }
+        }
+        return $Antrian['response_data'];
+    }
 
     private function tambah_pasien($table, $parameter)
     {
