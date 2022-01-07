@@ -17,6 +17,7 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+					
 					response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
@@ -60,14 +61,13 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						console.log(row.sumber_dana);
 						return (row.sumber_dana !== undefined && row.sumber_dana !== null) ? row.sumber_dana.nama : "-";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a href=\"" + __HOSTNAME__ + "/inventori/po/detail/" + row["uid"] + "\" class=\"btn btn-info btn-sm\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/inventori/po/detail/" + row.uid + "\" class=\"btn btn-info btn-sm\">" +
                             "<span><i class=\"fa fa-eye\"></i>Detail<span>" +
                             "</a></div>";
 					}
