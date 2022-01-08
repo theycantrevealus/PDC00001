@@ -435,42 +435,42 @@
 					}
 
 					for(var InvKeyData in response.response_package.response_data) {
-                        returnedData.push(response.response_package.response_data[InvKeyData]);
-					    // if(
-                        //     response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
-                        //     response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
-                        // ) {
+                        //returnedData.push(response.response_package.response_data[InvKeyData]);
+					    if(
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
+                        ) {
 
-                        //     if(
-                        //         response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                        //         response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                        //         response.response_package.response_data[InvKeyData].pasien !== null &&
-                        //         (response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
-                        //         response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__) || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
-                        //     ) {
-                        //         if(!response.response_package.response_data[InvKeyData].lunas) {
+                            if(
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                                response.response_package.response_data[InvKeyData].pasien !== null &&
+                                (response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__) || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
+                            ) {
+                                if(!response.response_package.response_data[InvKeyData].lunas) {
 
-                        //             if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                        //                 response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
-                        //             }
-                        //             var showIt = false;
-                        //             for(var az in response.response_package.response_data[InvKeyData].invoice_detail) {
-                        //                 if(response.response_package.response_data[InvKeyData].invoice_detail[az].status_bayar === "N" && response.response_package.response_data[InvKeyData].invoice_detail[az].departemen !== __POLI_INAP__) {
-                        //                     showIt = true;
-                        //                     break;
-                        //                 } else {
-                        //                     showIt = false;
-                        //                 }
-                        //             }
+                                    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                    }
+                                    var showIt = false;
+                                    for(var az in response.response_package.response_data[InvKeyData].invoice_detail) {
+                                        if(response.response_package.response_data[InvKeyData].invoice_detail[az].status_bayar === "N" && response.response_package.response_data[InvKeyData].invoice_detail[az].departemen !== __POLI_INAP__) {
+                                            showIt = true;
+                                            break;
+                                        } else {
+                                            showIt = false;
+                                        }
+                                    }
 
-                        //             if(showIt) {
-                        //                 returnedData.push(response.response_package.response_data[InvKeyData]);
-                        //             }
-                        //         }
-                        //     } else {
+                                    if(showIt) {
+                                        returnedData.push(response.response_package.response_data[InvKeyData]);
+                                    }
+                                }
+                            } else {
 
-                        //     }
-                        // }
+                            }
+                        }
 					}
 
 					for(var a in returnedData) {
