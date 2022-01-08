@@ -2208,8 +2208,7 @@ class Inap extends Utility
 
             if(
                 count($PasienDetail['response_data']) > 0 &&
-                count($PenjaminDetail['response_data']) > 0 &&
-                count($NurseStation['response_data']) > 0
+                count($PenjaminDetail['response_data']) > 0
             ) {
                 array_push($returnedData, $data['response_data'][$key]);
                 $autonum++;
