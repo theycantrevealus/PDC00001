@@ -138,7 +138,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 50, -1], [5, 50, "All"]],
+            lengthMenu: [[15, 50, -1], [15, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Apotek",
@@ -159,7 +159,10 @@
                     var IGD = [];
 
                     for(var resepKey in resepDataRaw) {
-                        if(resepDataRaw[resepKey].departemen !== undefined && resepDataRaw[resepKey].departemen !== null) {
+                        if(
+                            resepDataRaw[resepKey].departemen !== undefined && resepDataRaw[resepKey].departemen !== null &&
+                            resepDataRaw[resepKey].penjamin !== undefined && resepDataRaw[resepKey].penjamin !== null
+                        ) {
                             if(resepDataRaw[resepKey].departemen.uid === __POLI_IGD__) {
                                 IGD.push(resepDataRaw[resepKey]);
                             } else {
