@@ -2095,6 +2095,7 @@ class Inap extends Utility
         $Ruangan = new Ruangan(self::$pdo);
         $Bed = new Bed(self::$pdo);
         $Invoice = new Invoice(self::$pdo);
+        $returnedData = array();
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
 
@@ -2205,7 +2206,10 @@ class Inap extends Utility
             $data['response_data'][$key]['waktu_masuk_jam'] = date('H:i', strtotime($value['waktu_masuk']));
 
 
-            $autonum++;
+            if(count($PasienDetail['response_data']) > 0) {
+                array_push($returnedData, $data['response_data'][$key]);
+                $autonum++;
+            }
         }
 
         $itemTotal = self::$query->select('rawat_inap', array(
@@ -2213,6 +2217,8 @@ class Inap extends Utility
         ))
             ->where($paramData, $paramValue)
             ->execute();
+
+        $data['response_data'] = $returnedData;
 
         $data['recordsTotal'] = count($itemTotal['response_data']);
         $data['recordsFiltered'] = count($data['response_data']);
