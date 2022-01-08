@@ -88,7 +88,7 @@
 		// 	]
 		// });
 
-		var tableDo = $("#table-po").DataTable({
+		var tableDo = $("#table-do").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
@@ -107,11 +107,11 @@
 				dataSrc:function(response) {
 					console.clear();
 					console.log(response);
-					var returnedData = response.response_package.response_data;
+					// var returnedData = response.response_package.response_data;
 
-					response.draw = parseInt(response.response_package.response_draw);
-					response.recordsTotal = response.response_package.recordsTotal;
-					response.recordsFiltered = returnedData.length;
+					// response.draw = parseInt(response.response_package.response_draw);
+					// response.recordsTotal = response.response_package.recordsTotal;
+					// response.recordsFiltered = returnedData.length;
 					
 					return [];
 				}
@@ -119,7 +119,7 @@
 			autoWidth: false,
 			language: {
 				search: "",
-				searchPlaceholder: "Cari Nomor Invoice"
+				searchPlaceholder: "Cari Nomor DO"
 			},
 			"columns" : [
 				{

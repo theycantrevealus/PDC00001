@@ -41,7 +41,7 @@
 			</div>
 			<div class="card card-body tab-content">
 				<div class="tab-pane show fade active" id="tab-do">
-					<table class="table table-bordered" id="table-po" style="font-size: 0.9rem;">
+					<table class="table table-bordered" id="table-do" style="font-size: 0.9rem;">
 						<thead class="thead-dark">
 							<tr>
 								<th class="wrap_content">No</th>
@@ -56,7 +56,7 @@
 					</table>
 				</div>
 				<div class="tab-pane show fade " id="tab-do-history">
-					<table class="table table-bordered" id="table-do" style="font-size: 0.9rem;">
+					<table class="table table-bordered" id="table-do-his" style="font-size: 0.9rem;">
 						<thead class="thead-dark">
 							<tr>
 								<th class="wrap_content">No</th>
