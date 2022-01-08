@@ -1713,7 +1713,7 @@
             }
 
             $(newCellResepSatuan).html((setter.obat_detail !== undefined && setter.obat_detail.satuan_terkecil_info !== undefined) ? setter.obat_detail.satuan_terkecil_info.nama : "");
-
+            
             $(newObat).addClass("form-control resep-obat").select2({
                 minimumInputLength: 2,
                 "language": {
@@ -1731,7 +1731,8 @@
                     type: "GET",
                     data: function (term) {
                         return {
-                            search:term.term
+                            search:term.term,
+                            penjamin:pasien_penjamin_uid
                         };
                     },
                     cache: true,
