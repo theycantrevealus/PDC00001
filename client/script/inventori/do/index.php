@@ -88,13 +88,6 @@
 			]
 		});
 
-
-
-
-
-
-
-
 		alert();
 
 		var tableDo = $("#table-do").DataTable({
@@ -105,8 +98,9 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					var data = response.response_package.response_data;
 					console.log(response);
+					var data = response.response_package.response_data;
+					
 					for(var a = 0; a < data.length; a++) {
 						if(data[a].supplier == undefined || data[a].supplier == null) {
 							data[a].supplier = {
