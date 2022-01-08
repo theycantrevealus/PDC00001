@@ -395,7 +395,7 @@ class Antrian extends Utility
                 unset($parameter['dataObj']['currentPasien']);
                 unset($parameter['dataObj']['bangsal']);
 
-                /*//Keluar dari poli
+                //Keluar dari poli
                 $keluar = self::$query->update('antrian', array(
                     'waktu_keluar' => parent::format_date()
                 ))
@@ -406,7 +406,9 @@ class Antrian extends Utility
                     ), array(
                         $parameter['dataObj']['antrian']
                     ))
-                    ->execute();*/
+                    ->execute();
+
+                unset($parameter['dataObj']['antrian']);
 
                 $antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
                 $antrian['response_notif'] = 'P';
@@ -1203,22 +1205,41 @@ class Antrian extends Utility
 
         if ($antrian['response_result'] > 0) {
             if(isset($parameter['dataObj']['konsul'])) {
-                $updateNomorAntrian = self::$query->update('antrian_nomor', array(
-                    'antrian' => $uid,
-                    'status' => 'K',
-                    'poli' => $allData['departemen'],
-                    'dokter' => $allData['dokter'],
-                ))
-                    ->where(array(
-                        'antrian_nomor.pasien' => '= ?',
-                        'AND',
-                        'antrian_nomor.penjamin' => '= ?'
-                    ), array(
-                            $allData['pasien'],
-                            $allData['penjamin']
+                if($allData['penjamin'] === __UIDPENJAMINUMUM__) {
+                    $updateNomorAntrian = self::$query->update('antrian_nomor', array(
+                        'antrian' => $uid,
+                        'status' => 'K',
+                        'poli' => $allData['departemen'],
+                        'dokter' => $allData['dokter'],
+                    ))
+                        ->where(array(
+                            'antrian_nomor.pasien' => '= ?',
+                            'AND',
+                            'antrian_nomor.penjamin' => '= ?'
+                        ), array(
+                                $allData['pasien'],
+                                $allData['penjamin']
+                            )
                         )
-                    )
-                    ->execute();
+                        ->execute();   
+                } else {
+                    $updateNomorAntrian = self::$query->update('antrian_nomor', array(
+                        'antrian' => $uid,
+                        'status' => 'P',
+                        'poli' => $allData['departemen'],
+                        'dokter' => $allData['dokter'],
+                    ))
+                        ->where(array(
+                            'antrian_nomor.pasien' => '= ?',
+                            'AND',
+                            'antrian_nomor.penjamin' => '= ?'
+                        ), array(
+                                $allData['pasien'],
+                                $allData['penjamin']
+                            )
+                        )
+                        ->execute();
+                }
             } else {
                 $updateNomorAntrian = self::$query->update('antrian_nomor', array(
                     'antrian' => $uid,

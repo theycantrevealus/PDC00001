@@ -6002,6 +6002,9 @@
                 dataObj.pj_pasien = kunjungan.pj_pasien;
                 dataObj.info_didapat_dari = kunjungan.info_didapat_dari;
 
+                console.clear();
+                console.log(dataObj);
+
                 var alergiObat = $("#alergi_obat").val();
                 const simpanDataProcess = new Promise(function(resolve, rejector) {
                     resolve(simpanAsesmen(
@@ -6071,6 +6074,7 @@
                                     },
                                     type: "POST",
                                     success: function(response) {
+                                        console.log(response);
                                         proceed(response);
                                     },
                                     error: function(response) {
@@ -6100,6 +6104,7 @@
                             location.href = __HOSTNAME__ + '/rawat_jalan/dokter';
                         });
                     } else if(result.response_package.response_notif === 'P') {
+                        push_socket(__ME__, "antrian_poli_baru", "*", "Antrian poli baru", "warning");
                         Swal.fire(
                             'Berhasil konsul!',
                             'Silahkan arahkan pasien ke poli tujuan',
