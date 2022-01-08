@@ -113,7 +113,7 @@
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = returnedData.length;
 					
-					return returnedData;
+					return [];
 				}
 			},
 			autoWidth: false,
