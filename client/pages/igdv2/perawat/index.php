@@ -4,10 +4,10 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Daftar Pasien Rawat Inap</li>
+                    <li class="breadcrumb-item active" aria-current="page">Daftar Pasien IGD</li>
                 </ol>
             </nav>
-            <h4 class="m-0">Daftar Pasien Rawat Inap</h4>
+            <h4 class="m-0">Daftar Pasien IGD</h4>
         </div>
     </div>
 </div>
@@ -17,7 +17,7 @@
         <div class="col-lg">
             <div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
-                    <h5 class="card-header__title flex m-0">Daftar Pasien Rawat Inap</h5>
+                    <h5 class="card-header__title flex m-0">Daftar Pasien IGD</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive border-bottom">
