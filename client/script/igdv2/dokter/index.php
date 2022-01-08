@@ -29,7 +29,7 @@
                     for(var key in data) {
                         if(
                             data[key].pasien !== null && data[key].pasien !== undefined &&
-                            data[key].dokter.uid === __ME__ &&
+                            //data[key].dokter.uid === __ME__ &&
                             data[key].nurse_station !== null
                         ) {
                             data[key].autonum = autonum;
