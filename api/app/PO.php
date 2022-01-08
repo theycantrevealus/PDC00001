@@ -153,7 +153,7 @@ class PO extends Utility {
 			// 	$PODetail[$POKey]['sampai'] = $countBarang;
 			// }
 			// $data['response_data'][$key]['detail'] = $PODetail;
-			// $data['response_data'][$key]['sumber_dana'] = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['sumber_dana'])['response_data'][0];
+			$data['response_data'][$key]['sumber_dana'] = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['sumber_dana'])['response_data'][0];
 
 
 			$InfoSupplier = $Supplier->get_detail($value['supplier']);
