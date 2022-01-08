@@ -70,6 +70,9 @@ class Invoice extends Utility
                 case 'biaya_pasien':
                     return self::get_biaya_pasien_back_end($parameter);
                     break;
+                case 'lunaskan_kartu_pasien_lama':
+                    return self::lunaskan_kartu_pasien_lama($parameter);
+                    break;
                 default:
                     return self::get_biaya_pasien();
             }
@@ -430,6 +433,10 @@ class Invoice extends Utility
         $payment['start'] = intval($parameter['start']);
 
         return $payment;
+    }
+
+    private function lunaskan_kartu_pasien_lama($parameter) {
+        return array();
     }
 
     private function get_biaya_pasien_back_end($parameter) {

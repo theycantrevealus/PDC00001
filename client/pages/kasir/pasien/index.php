@@ -15,6 +15,14 @@
 	</div>
 </div>
 
+<?php
+    $yesterday = new DateTime(date('Y-m-d')); // For today/now, don't pass an arg.
+    $yesterday->modify("-1 day");
+
+    $tomorrow = new DateTime(date('Y-m-d'));
+    $tomorrow->modify("+1 day");
+?>
+
 
 
 <div class="container-fluid page__container">
@@ -76,7 +84,7 @@
                                 <div class="tab-pane show fade active" id="tab-rawat_jalan">
                                     <div class="row">
                                         <div class="col-lg">
-                                            <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                            <input id="range_invoice_rajal" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $yesterday->format("Y-m-d"); ?> to <?php echo $tomorrow->format("Y-m-d"); ?>" />
                                             <div class="row">
                                                 <div class="col-lg" style="margin-top: 25px">
                                                     <table class="table table-padding table-striped largeDataType" id="table-biaya-pasien-rj" style="font-size: 0.9rem;">
@@ -102,7 +110,7 @@
                                 <div class="tab-pane show fade" id="tab-rawat_inap">
                                     <div class="row">
                                         <div class="col-lg">
-                                            <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                            <input id="range_invoice_ranap" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $yesterday->format("Y-m-d"); ?> to <?php echo $tomorrow->format("Y-m-d"); ?>" />
                                             <div class="row">
                                                 <div class="col-lg" style="margin-top: 25px">
                                                     <table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien-ri" style="font-size: 0.9rem;">
@@ -128,7 +136,7 @@
                                 <div class="tab-pane show fade" id="tab-igd">
                                     <div class="row">
                                         <div class="col-lg">
-                                            <input id="range_invoice" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                            <input id="range_invoice_igd" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $yesterday->format("Y-m-d"); ?> to <?php echo $tomorrow->format("Y-m-d"); ?>" />
                                             <div class="row">
                                                 <div class="col-lg" style="margin-top: 25px">
                                                     <table class="table table-bordered table-striped largeDataType" id="table-biaya-pasien-igd" style="font-size: 0.9rem;">

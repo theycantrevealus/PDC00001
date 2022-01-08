@@ -421,8 +421,8 @@
 				type: "POST",
 				data: function(d) {
 					d.request = "biaya_pasien";
-					d.from = getDateRange("#range_invoice")[0];
-					d.to = getDateRange("#range_invoice")[1];
+					d.from = getDateRange("#range_invoice_rajal")[0];
+					d.to = getDateRange("#range_invoice_rajal")[1];
 					d.filter_poli = "rajal";
 				},
 				headers:{
@@ -435,41 +435,42 @@
 					}
 
 					for(var InvKeyData in response.response_package.response_data) {
-					    if(
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
-                        ) {
+                        returnedData.push(response.response_package.response_data[InvKeyData]);
+					    // if(
+                        //     response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+                        //     response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
+                        // ) {
 
-                            if(
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                                response.response_package.response_data[InvKeyData].pasien !== null &&
-                                (response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__) || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
-                            ) {
-                                if(!response.response_package.response_data[InvKeyData].lunas) {
+                        //     if(
+                        //         response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+                        //         response.response_package.response_data[InvKeyData].pasien !== undefined &&
+                        //         response.response_package.response_data[InvKeyData].pasien !== null &&
+                        //         (response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
+                        //         response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__) || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
+                        //     ) {
+                        //         if(!response.response_package.response_data[InvKeyData].lunas) {
 
-                                    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
-                                    }
-                                    var showIt = false;
-                                    for(var az in response.response_package.response_data[InvKeyData].invoice_detail) {
-                                        if(response.response_package.response_data[InvKeyData].invoice_detail[az].status_bayar === "N" && response.response_package.response_data[InvKeyData].invoice_detail[az].departemen !== __POLI_INAP__) {
-                                            showIt = true;
-                                            break;
-                                        } else {
-                                            showIt = false;
-                                        }
-                                    }
+                        //             if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+                        //                 response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                        //             }
+                        //             var showIt = false;
+                        //             for(var az in response.response_package.response_data[InvKeyData].invoice_detail) {
+                        //                 if(response.response_package.response_data[InvKeyData].invoice_detail[az].status_bayar === "N" && response.response_package.response_data[InvKeyData].invoice_detail[az].departemen !== __POLI_INAP__) {
+                        //                     showIt = true;
+                        //                     break;
+                        //                 } else {
+                        //                     showIt = false;
+                        //                 }
+                        //             }
 
-                                    if(showIt) {
-                                        returnedData.push(response.response_package.response_data[InvKeyData]);
-                                    }
-                                }
-                            } else {
+                        //             if(showIt) {
+                        //                 returnedData.push(response.response_package.response_data[InvKeyData]);
+                        //             }
+                        //         }
+                        //     } else {
 
-                            }
-                        }
+                        //     }
+                        // }
 					}
 
 					for(var a in returnedData) {
@@ -614,8 +615,8 @@
                 type: "POST",
                 data: function(d) {
                     d.request = "biaya_pasien";
-                    d.from = getDateRange("#range_invoice")[0];
-                    d.to = getDateRange("#range_invoice")[1];
+                    d.from = getDateRange("#range_invoice_ranap")[0];
+                    d.to = getDateRange("#range_invoice_ranap")[1];
                     d.filter_poli = "ranap";
                 },
                 headers:{
@@ -773,8 +774,8 @@
                 type: "POST",
                 data: function(d) {
                     d.request = "biaya_pasien";
-                    d.from = getDateRange("#range_invoice")[0];
-                    d.to = getDateRange("#range_invoice")[1];
+                    d.from = getDateRange("#range_invoice_igd")[0];
+                    d.to = getDateRange("#range_invoice_igd")[1];
                     d.filter_poli = "igd";
                 },
                 headers:{
