@@ -95,6 +95,8 @@
 
 
 
+		alert();
+
 		var tableDo = $("#table-do").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/DeliveryOrder",
