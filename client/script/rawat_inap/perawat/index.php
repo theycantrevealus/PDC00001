@@ -92,6 +92,7 @@
                                 "<a>" +
                                 "</div>";
                         } else {
+                            console.log(row);
                             return "";
                         }
                     }
