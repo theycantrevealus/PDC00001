@@ -99,5 +99,7 @@
                 }
             ]
         });
+        
+        console.log(__NURSE_STATION__);
     });
 </script>
