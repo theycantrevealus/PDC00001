@@ -243,13 +243,13 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        //return "<h5 class=\"number_style wrap_content\">" + row.stok_terkini + "</h5>";
-                        var counter = 0;
-                        console.log(row.batch);
-                        for(var az in row.batch) {
-                            counter+= parseFloat(row.batch[az]);
-                        }
-                        return "<h5 class=\"number_style text-right\">" + counter + "</h5>";
+                        return "<h5 class=\"number_style wrap_content\">" + row.stok_terkini + "</h5>";
+                        // var counter = 0;
+                        // console.log(row.batch);
+                        // for(var az in row.batch) {
+                        //     counter+= parseFloat(row.batch[az]);
+                        // }
+                        // return "<h5 class=\"number_style text-right\">" + counter + "</h5>";
                     }
                 },
                 {
