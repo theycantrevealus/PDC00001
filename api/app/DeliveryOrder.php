@@ -56,14 +56,17 @@ class DeliveryOrder extends Utility {
 			case 'tambah_do':
 				return self::tambah_do($parameter);
 				break;
+			case 'get_do_back_end':
+				return self::get_do_back_end($parameter);
+				break;
 			default:
-				# code...
+				return $parameter;
 				break;
 		}
 	}
 
 	public function __DELETE__($parameter = array()){
-		return self::delete_penjamin($parameter);
+		//return self::delete_penjamin($parameter);
 	}
 
 
@@ -283,6 +286,113 @@ class DeliveryOrder extends Utility {
 		}
 		
 		return $dataPO;
+	}
+
+	private function get_do_back_end($parameter) {
+		$Authorization = new Authorization();
+		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+		if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+                'inventori_do.deleted_at' => 'IS NULL',
+                'AND',
+                'inventori_do.no_do' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array();
+		} else {
+			$paramData = array(
+                'inventori_do.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+		}
+
+		if ($parameter['length'] < 0) {
+			$data = self::$query
+				->select('inventori_do', array(
+						'uid',
+						'po',
+						'gudang',
+						'supplier',
+						'tgl_do',
+						'no_do',
+						'no_invoice',
+						'tgl_invoice',
+						'keterangan',
+						'status',
+						'pegawai',
+						'created_at',
+						'updated_at'
+					)
+				)
+					->where($paramData, $paramValue)
+					->order(array(
+						'created_at' => 'DESC'
+					))
+					->execute();
+		} else {
+			$data = self::$query
+				->select('inventori_do', array(
+						'uid',
+						'po',
+						'gudang',
+						'supplier',
+						'tgl_do',
+						'no_do',
+						'no_invoice',
+						'tgl_invoice',
+						'keterangan',
+						'status',
+						'pegawai',
+						'created_at',
+						'updated_at'
+					)
+				)
+					->where($paramData, $paramValue)
+					->offset(intval($parameter['start']))
+					->limit(intval($parameter['length']))
+					->order(array(
+						'created_at' => 'DESC'
+					))
+					->execute();
+		}
+
+		$data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+
+		$Supplier = new Supplier(self::$pdo);
+		$Inventori = new Inventori(self::$pdo);
+		$Pegawai = new Pegawai(self::$pdo);
+
+        foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			
+			$data['response_data'][$key]['tgl_do'] = date('d F Y', strtotime($value['tgl_do']));
+			
+			$SupplierInfo = $Supplier->get_detail($value['supplier']);
+			$data['response_data'][$key]['supplier'] = $SupplierInfo;
+			
+			$InventoriInfo = $Inventori->get_gudang_detail($value['gudang']);
+			$data['response_data'][$key]['gudang'] = $InventoriInfo['response_data'][0];
+			
+			$PegawaiInfo = $Pegawai->get_info($value['pegawai']);
+			$data['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
+			$autonum++;
+		}
+
+		$itemTotal = self::$query->select('inventori_do', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
 	}
 
 	/*=========================CREATE DO======================*/
