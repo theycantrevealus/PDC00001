@@ -193,7 +193,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -208,7 +208,18 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.pegawai.nama;
+                        if(row.pegawai !== undefined && row.pegawai !== null) {
+                            if(row.pegawai.nama !== undefined && row.pegawai.nama !== null) {
+                                return row.pegawai.nama;
+                            } else {
+                                console.log(row.pegawai);
+                                return "-";
+                            }
+                            
+                        } else {
+                            return "-";
+                        }
+                        
                     }
                 },
                 {

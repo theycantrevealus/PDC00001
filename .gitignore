@@ -4,6 +4,7 @@ database.ini
 .git
 config.php
 config.ptb.php
+config.local.php
 sync.php
 .htaccess
 composer.lock
