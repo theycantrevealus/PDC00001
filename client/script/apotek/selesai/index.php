@@ -644,6 +644,7 @@
                 type:"GET",
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
+                    console.log(targettedData);
                     var kajian = targettedData.kajian;
                     for(var kaj in kajian) {
                         $("#hasil_" + kajian[kaj].parameter_kajian).html((kajian[kaj].nilai === "y") ? "<span class=\"text-success wrap_content\"><i class=\"fa fa-check-circle\"></i> Ya</span>" : "<span class=\"text-danger wrap_content\"><i class=\"fa fa-times-circle\"></i> Tidak</span>");
@@ -773,6 +774,7 @@
                             racikan_dokter: racikan_dokter,
                             resep_apotek: resep_apotek,
                             racikan_apotek: racikan_apotek,
+                            verifikator: targettedData.verifikator.nama,
                             total_bayar: "<h6 class=\"number_style\">Rp. " + number_format(totalAll, 2, ".", ",") + "</h6>",
                             terbilang: titleCase(targettedData.terbilang)
                         },

@@ -56,6 +56,15 @@
             <td class="wrap_content">:</td>
             <td><?php echo $_POST['sep'] ?></td>
         </tr>
+        <tr>
+            <td>Verifikator</td>
+            <td class="wrap_content">:</td>
+            <td><?php echo $_POST['verifikator'] ?></td>
+
+            <td></td>
+            <td class="wrap_content">:</td>
+            <td></td>
+        </tr>
     </table>
     <hr />
     <center style="padding: 1% 0 1% 0; font-size: 1.5rem;"><b>RESEP DOKTER</b></center>
@@ -201,11 +210,17 @@
                     <td style="border-right: solid 1px #fff !important">Rp.</td>
                     <td><?php echo $value['subtotal']; ?></td>
                 </tr>
+                <?php
+                    if(
+                        !empty($value['keterangan']) && trim($value['keterangan']) !== '-' &&
+                        !empty($value['alasan_ubah']) && trim($value['alasan_ubah']) !== '-'
+                    ) {
+                ?>
                 <tr>
                     <td></td>
                     <td colspan="8" class="text-mode" style="padding-bottom: 20px;">
                         <?php
-                        if(!empty($value['keterangan'])) {
+                        if(!empty($value['keterangan']) && trim($value['keterangan']) !== '-') {
                             ?>
                             <b>Keterangan:</b>
                             <p>
@@ -214,7 +229,7 @@
                             <br />
                             <?php
                         }
-                        if(!empty($value['alasan_ubah'])) {
+                        if(!empty($value['alasan_ubah']) && trim($value['alasan_ubah']) !== '-') {
                             ?>
                             <b>Alasan Ubah:</b>
                             <p>
@@ -226,6 +241,7 @@
                     </td>
                 </tr>
                 <?php
+                    }
                 $autonum++;
             }
             ?>
@@ -282,6 +298,12 @@
                     $autonum++;
                 }
                 ?>
+                <?php
+                    if(
+                        !empty($value['keterangan']) && trim($value['keterangan']) !== '-' &&
+                        !empty($value['alasan_ubah']) && trim($value['alasan_ubah']) !== '-'
+                    ) {
+                ?>
                 <tr>
                     <td></td>
                     <td colspan="6" class="text-mode" style="padding-bottom: 20px;">
@@ -295,7 +317,7 @@
                                 <br />
                                 <?php
                             }
-                            if(!empty($value['alasan_ubah'])) {
+                            if(!empty($value['alasan_ubah']) && trim($value['alasan_ubah']) !== '-') {
                                 ?>
                                 <b>Alasan Ubah:</b>
                                 <p>
@@ -306,6 +328,9 @@
                         ?>
                     </td>
                 </tr>
+                <?php
+                    }
+                ?>
                 </tbody>
             </table>
             <?php
