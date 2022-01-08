@@ -265,7 +265,7 @@
 				}
 			});
 
-			if(totalRequest != parseFloat(targetJumlahAmprah)) {
+			if(parseFloat(totalRequest) != parseFloat(targetJumlahAmprah)) {
 				if($("#keterangan_per_item").val() != "") {
 					console.log('Waw');
 					$("ol#item_batch_" + selectedItem + " li").remove();
@@ -288,8 +288,8 @@
 					notification ("danger", "Jumlah tidak memenuhi permintaan. Wajib isi keterangan", 3000, "proceed_amprah");
 				}
 			} else {
-				console.log(totalRequest);
-				console.log(targetJumlahAmprah);
+				console.log("Total Request : " + totalRequest);
+				console.log("Amprah Request : " + targetJumlahAmprah);
 				
                 $("ol#item_batch_" + selectedItem + " li").remove();
                 for(var bKey in metaData[selectedItem].batch) {
