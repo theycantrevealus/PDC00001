@@ -4,8 +4,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap">Rawat Inap</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Tambah Rawat Inap</li>
+                    <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/rawat_inap">Rawat IGD</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Tambah Rawat IGD</li>
                 </ol>
             </nav>
         </div>
@@ -44,7 +44,7 @@
     <div class="card card-form">
         <div class="row no-gutters">
             <div class="col-lg-4 card-body">
-                <p><strong class="headings-color">Detail Rawat Inap</strong></p>
+                <p><strong class="headings-color">Detail Rawat IGD</strong></p>
                 <p class="text-muted">Mohon masukkan data dengan benar<br>* Wajib diisi</p>
             </div>
             <div class="col-lg-8 card-form__body card-body">
@@ -66,7 +66,7 @@
                         </select>
                     </div> -->
                     <div class="col-12 col-md-6 mb-3">
-                        <label>Asal Rawat Inap <span class="red">*</span></label>
+                        <label>Asal Rawat IGD <span class="red">*</span></label>
                         <select id="asal_rawat_inap" disabled class="form-control select2 inputan">
                             <option value="" disabled>Pilih</option>
                             <option value="1" selected>Rawat Jalan</option>
@@ -82,7 +82,7 @@
                         <div class="form-row">
                             <button type="submit" class="btn btn-success" id="btnSubmit">Simpan Data</button>
                             &nbsp;
-                            <a href="<?php echo __HOSTNAME__; ?>/rawat_inap" class="btn btn-danger">Batal</a>
+                            <a href="<?php echo __HOSTNAME__; ?>/igdv2" class="btn btn-danger">Batal</a>
                         </div>
                     </div>
                 </div>

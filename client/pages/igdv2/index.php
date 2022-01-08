@@ -17,7 +17,7 @@
         <div class="col-lg">
         	<div class="card">
 				<div class="card-header card-header-large bg-white d-flex align-items-center">
-					<h5 class="card-header__title flex m-0">Antrian Rawat Inap</h5>
+					<h5 class="card-header__title flex m-0">Antrian Rawat IGD</h5>
 				</div>
                 <div class="card-body">
 					<div class="table-responsive border-bottom">
