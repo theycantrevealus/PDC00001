@@ -626,51 +626,23 @@ class Invoice extends Utility
         $TunggakanRanap = array();
         $RekapBiayaKamar = array();
 
-
-        $Ranap = self::$query->select('rawat_inap', array(
-            'uid',
-            'bed',
-            'petugas',
-            'pasien',
-            'kunjungan',
-            'waktu_masuk'
-        ))
-            ->where(array(
-                'rawat_inap.waktu_keluar' => 'IS NULL'
-            ), array())
-            ->execute();
-
-        foreach ($Ranap['response_data'] as $key => $value) {
-            //Dapatkan awal tagihan
-            $INPAwal = self::$query->select('rawat_inap_biaya_kamar', array(
-                'logged_at',
-                'rawat_inap',
-                'petugas',
+        if($parameter['filter_poli'] === 'ranap') {
+            $Ranap = self::$query->select('rawat_inap', array(
+                'uid',
                 'bed',
-                'harga'
+                'petugas',
+                'pasien',
+                'kunjungan',
+                'waktu_masuk'
             ))
-                ->order(array(
-                    'logged_at' => 'DESC'
-                ))
-                ->limit(1)
                 ->where(array(
-                    'rawat_inap_biaya_kamar.status' => '= ?',
-                    'AND',
-                    'rawat_inap_biaya_kamar.rawat_inap' => '= ?',
-                    'AND',
-                    'rawat_inap_biaya_kamar.bed' => '= ?'
-                ), array(
-                    'Y', $value['uid'], $value['bed']
-                ))
+                    'rawat_inap.waktu_keluar' => 'IS NULL'
+                ), array())
                 ->execute();
 
-            $Awal = (count($INPAwal['response_data']) > 0) ? date('Y-m-d', strtotime($INPAwal['response_data'][0]['logged_at'] . ' +1 day')) : date('Y-m-d', strtotime($value['waktu_masuk']));
-
-            $interval = DateInterval::createFromDateString('1 day');
-            $period = new DatePeriod(new \DateTime($Awal), $interval, ((new \DateTime(date('Y-m-d')) >= new \DateTime($Awal)) ? new \DateTime(date('Y-m-d', strtotime('+1 day'))) : new \DateTime(date('Y-m-d'))));
-
-            foreach ($period as $dt) {
-                $INP = self::$query->select('rawat_inap_biaya_kamar', array(
+            foreach ($Ranap['response_data'] as $key => $value) {
+                //Dapatkan awal tagihan
+                $INPAwal = self::$query->select('rawat_inap_biaya_kamar', array(
                     'logged_at',
                     'rawat_inap',
                     'petugas',
@@ -682,143 +654,146 @@ class Invoice extends Utility
                     ))
                     ->limit(1)
                     ->where(array(
+                        'rawat_inap_biaya_kamar.status' => '= ?',
+                        'AND',
                         'rawat_inap_biaya_kamar.rawat_inap' => '= ?',
                         'AND',
-                        'rawat_inap_biaya_kamar.bed' => '= ?',
-                        'AND',
-                        'rawat_inap_biaya_kamar.logged_at::date' => '= date \'' . $dt->format('Y-m-d') . '\''
+                        'rawat_inap_biaya_kamar.bed' => '= ?'
                     ), array(
-                        $value['uid'], $value['bed']
+                        'Y', $value['uid'], $value['bed']
                     ))
                     ->execute();
-                array_push($TunggakanRanap, $INP);
-                if(count($INP['response_data']) < 1) {
 
-                    $InvDetail = self::$query->select('invoice', array(
-                        'uid'
-                    ))
-                        ->where(array(
-                            'invoice.pasien' => '= ?',
-                            'AND',
-                            'invoice.kunjungan' => '= ?'
-                        ), array(
-                            $value['pasien'],
-                            $value['kunjungan']
-                        ))
-                        ->execute();
+                $Awal = (count($INPAwal['response_data']) > 0) ? date('Y-m-d', strtotime($INPAwal['response_data'][0]['logged_at'] . ' +1 day')) : date('Y-m-d', strtotime($value['waktu_masuk']));
 
-                    $InvDetailItem = self::$query->select('invoice_detail', array(
-                        'id', 'penjamin'
+                $interval = DateInterval::createFromDateString('1 day');
+                $period = new DatePeriod(new \DateTime($Awal), $interval, ((new \DateTime(date('Y-m-d')) >= new \DateTime($Awal)) ? new \DateTime(date('Y-m-d', strtotime('+1 day'))) : new \DateTime(date('Y-m-d'))));
+
+                foreach ($period as $dt) {
+                    $INP = self::$query->select('rawat_inap_biaya_kamar', array(
+                        'logged_at',
+                        'rawat_inap',
+                        'petugas',
+                        'bed',
+                        'harga'
                     ))
-                        ->where(array(
-                            'invoice_detail.invoice' => '= ?'
-                        ), array(
-                            $InvDetail['response_data'][0]['uid']
+                        ->order(array(
+                            'logged_at' => 'DESC'
                         ))
                         ->limit(1)
+                        ->where(array(
+                            'rawat_inap_biaya_kamar.rawat_inap' => '= ?',
+                            'AND',
+                            'rawat_inap_biaya_kamar.bed' => '= ?',
+                            'AND',
+                            'rawat_inap_biaya_kamar.logged_at::date' => '= date \'' . $dt->format('Y-m-d') . '\''
+                        ), array(
+                            $value['uid'], $value['bed']
+                        ))
                         ->execute();
+                    array_push($TunggakanRanap, $INP);
+                    if(count($INP['response_data']) < 1) {
 
-                    $EntryLog = self::$query->insert('rawat_inap_biaya_kamar', array(
-                        'logged_at' => $dt->format('Y-m-d'),
-                        'rawat_inap' => $value['uid'],
-                        'petugas' => (!isset($value['petugas'])) ? $UserData['data']->uid : $value['petugas'],
-                        'bed' => $value['bed'],
-                        'invoice' => $InvDetail['response_data'][0]['uid'],
-                        'harga' => $Bed->get_bed_detail('master_unit_bed', $value['bed'])['response_data'][0]['tarif'],
-                        'penjamin' => $InvDetailItem['response_data'][0]['penjamin'],
-                        'status' => 'N'
+                        $InvDetail = self::$query->select('invoice', array(
+                            'uid'
+                        ))
+                            ->where(array(
+                                'invoice.pasien' => '= ?',
+                                'AND',
+                                'invoice.kunjungan' => '= ?'
+                            ), array(
+                                $value['pasien'],
+                                $value['kunjungan']
+                            ))
+                            ->execute();
+
+                        $InvDetailItem = self::$query->select('invoice_detail', array(
+                            'id', 'penjamin'
+                        ))
+                            ->where(array(
+                                'invoice_detail.invoice' => '= ?'
+                            ), array(
+                                $InvDetail['response_data'][0]['uid']
+                            ))
+                            ->limit(1)
+                            ->execute();
+
+                        $EntryLog = self::$query->insert('rawat_inap_biaya_kamar', array(
+                            'logged_at' => $dt->format('Y-m-d'),
+                            'rawat_inap' => $value['uid'],
+                            'petugas' => (!isset($value['petugas'])) ? $UserData['data']->uid : $value['petugas'],
+                            'bed' => $value['bed'],
+                            'invoice' => $InvDetail['response_data'][0]['uid'],
+                            'harga' => $Bed->get_bed_detail('master_unit_bed', $value['bed'])['response_data'][0]['tarif'],
+                            'penjamin' => $InvDetailItem['response_data'][0]['penjamin'],
+                            'status' => 'N'
+                        ))
+                            ->execute();
+                        array_push($InvDetailRanap, $EntryLog);
+                    }
+                }
+
+
+
+
+
+                $TotalKamar = array();
+                $INP = self::$query->select('rawat_inap_biaya_kamar', array(
+                    'id',
+                    'logged_at',
+                    'rawat_inap',
+                    'petugas',
+                    'bed',
+                    'invoice',
+                    'harga',
+                    'penjamin'
+                ))
+                    ->order(array(
+                        'logged_at' => 'ASC'
                     ))
-                        ->execute();
-                    array_push($InvDetailRanap, $EntryLog);
+                    ->join('rawat_inap', array(
+                        'uid',
+                        'pasien',
+                        'kunjungan'
+                    ))
+                    ->on(array(
+                        array('rawat_inap_biaya_kamar.rawat_inap', '=', 'rawat_inap.uid')
+                    ))
+                    ->where(array(
+                        'rawat_inap_biaya_kamar.status' => '= ?',
+                        'AND',
+                        'rawat_inap_biaya_kamar.rawat_inap' => '= ?'
+                    ), array(
+                        'N', $value['uid']
+                    ))
+                    ->execute();
+                foreach ($INP['response_data'] as $RIKey => $RIValue) {
+                    if(!isset($TotalKamar[$RIValue['bed']])) {
+                        $TotalKamar[$RIValue['bed']] = array(
+                            'total' => 0,
+                            'detail' => array(),
+                            'tanggal_charge' => array()
+                        );
+                    }
+
+                    $TotalKamar[$RIValue['bed']]['total'] += floatval($RIValue['harga']);
+                    $TotalKamar[$RIValue['bed']]['detail'] = $RIValue;
+                    array_push($TotalKamar[$RIValue['bed']]['tanggal_charge'], date('Y-m-d', strtotime($RIValue['logged_at'])));
                 }
             }
 
 
-
-
-
-            $TotalKamar = array();
-            $INP = self::$query->select('rawat_inap_biaya_kamar', array(
-                'id',
-                'logged_at',
-                'rawat_inap',
-                'petugas',
-                'bed',
-                'invoice',
-                'harga',
-                'penjamin'
-            ))
-                ->order(array(
-                    'logged_at' => 'ASC'
-                ))
-                ->join('rawat_inap', array(
-                    'uid',
-                    'pasien',
-                    'kunjungan'
-                ))
-                ->on(array(
-                    array('rawat_inap_biaya_kamar.rawat_inap', '=', 'rawat_inap.uid')
-                ))
-                ->where(array(
-                    'rawat_inap_biaya_kamar.status' => '= ?',
-                    'AND',
-                    'rawat_inap_biaya_kamar.rawat_inap' => '= ?'
-                ), array(
-                    'N', $value['uid']
-                ))
-                ->execute();
-            foreach ($INP['response_data'] as $RIKey => $RIValue) {
-                if(!isset($TotalKamar[$RIValue['bed']])) {
-                    $TotalKamar[$RIValue['bed']] = array(
-                        'total' => 0,
-                        'detail' => array(),
-                        'tanggal_charge' => array()
-                    );
-                }
-
-                $TotalKamar[$RIValue['bed']]['total'] += floatval($RIValue['harga']);
-                $TotalKamar[$RIValue['bed']]['detail'] = $RIValue;
-                array_push($TotalKamar[$RIValue['bed']]['tanggal_charge'], date('Y-m-d', strtotime($RIValue['logged_at'])));
-            }
-        }
-
-
-
-        foreach ($TotalKamar as $key => $value) {
-            $InvoiceItem = self::$query->select('invoice_detail', array(
-                'id',
-                'invoice',
-                'status_bayar',
-                'subtotal',
-                'departemen',
-                'keterangan',
-                'billing_group'
-            ))
-                ->where(array(
-                    'invoice_detail.invoice' => '= ?',
-                    'AND',
-                    'invoice_detail.deleted_at' => 'IS NULL',
-                    'AND',
-                    'invoice_detail.billing_group' => '= ?',
-                    'AND',
-                    'invoice_detail.status_bayar' => '= ?',
-                    'AND',
-                    'invoice_detail.item_type' => '= ?',
-                    'AND',
-                    'invoice_detail.item' => '= ?'
-                ), array(
-                    $value['detail']['invoice'], 'tarif_kamar', 'N', 'master_unit_bed', $key
-                ))
-                ->execute();
-            if(count($InvoiceItem['response_data']) > 0) {
-                $update_inv_item = self::$query->update('invoice_detail', array(
-                    'harga' => floatval($value['detail']['harga']),
-                    'subtotal' => $value['total'],
-                    'keterangan' => 'Biaya Kamar Rawat Inap <br />' . implode('<br />', $value['tanggal_charge'])
+            foreach ($TotalKamar as $key => $value) {
+                $InvoiceItem = self::$query->select('invoice_detail', array(
+                    'id',
+                    'invoice',
+                    'status_bayar',
+                    'subtotal',
+                    'departemen',
+                    'keterangan',
+                    'billing_group'
                 ))
                     ->where(array(
-                        'invoice_detail.id' => '= ?',
-                        'AND',
                         'invoice_detail.invoice' => '= ?',
                         'AND',
                         'invoice_detail.deleted_at' => 'IS NULL',
@@ -827,31 +802,56 @@ class Invoice extends Utility
                         'AND',
                         'invoice_detail.status_bayar' => '= ?',
                         'AND',
-                        'invoice_detail.item_type' => '= ?'
+                        'invoice_detail.item_type' => '= ?',
+                        'AND',
+                        'invoice_detail.item' => '= ?'
                     ), array(
-                        $InvoiceItem['response_data'][0]['id'], $value['detail']['invoice'], 'tarif_kamar', 'N', 'master_unit_bed'
+                        $value['detail']['invoice'], 'tarif_kamar', 'N', 'master_unit_bed', $key
                     ))
                     ->execute();
-            } else {
-                $update_inv_item = self::$query->insert('invoice_detail', array(
-                    'invoice' => $value['detail']['invoice'],
-                    'item' => $key,
-                    'item_type' => 'master_unit_bed',
-                    'qty' => 1,
-                    'harga' => floatval($value['harga']),
-                    'subtotal' => floatval($value['harga']),
-                    'discount' => 0,
-                    'discount_type' => 'N',
-                    'keterangan' => 'Biaya Kamar Rawat Inap <br />' . implode('<br />', $value['tanggal_charge']),
-                    'created_at' => parent::format_date(),
-                    'updated_at' => parent::format_date(),
-                    'status_bayar' => 'N',
-                    'penjamin' => $value['detail']['penjamin'],
-                    'pasien' => $value['detail']['pasien'],
-                    'billing_group' => 'tarif_kamar',
-                    'departemen' => __POLI_INAP__
-                ))
-                    ->execute();
+                if(count($InvoiceItem['response_data']) > 0) {
+                    $update_inv_item = self::$query->update('invoice_detail', array(
+                        'harga' => floatval($value['detail']['harga']),
+                        'subtotal' => $value['total'],
+                        'keterangan' => 'Biaya Kamar Rawat Inap <br />' . implode('<br />', $value['tanggal_charge'])
+                    ))
+                        ->where(array(
+                            'invoice_detail.id' => '= ?',
+                            'AND',
+                            'invoice_detail.invoice' => '= ?',
+                            'AND',
+                            'invoice_detail.deleted_at' => 'IS NULL',
+                            'AND',
+                            'invoice_detail.billing_group' => '= ?',
+                            'AND',
+                            'invoice_detail.status_bayar' => '= ?',
+                            'AND',
+                            'invoice_detail.item_type' => '= ?'
+                        ), array(
+                            $InvoiceItem['response_data'][0]['id'], $value['detail']['invoice'], 'tarif_kamar', 'N', 'master_unit_bed'
+                        ))
+                        ->execute();
+                } else {
+                    $update_inv_item = self::$query->insert('invoice_detail', array(
+                        'invoice' => $value['detail']['invoice'],
+                        'item' => $key,
+                        'item_type' => 'master_unit_bed',
+                        'qty' => 1,
+                        'harga' => floatval($value['harga']),
+                        'subtotal' => floatval($value['harga']),
+                        'discount' => 0,
+                        'discount_type' => 'N',
+                        'keterangan' => 'Biaya Kamar Rawat Inap <br />' . implode('<br />', $value['tanggal_charge']),
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date(),
+                        'status_bayar' => 'N',
+                        'penjamin' => $value['detail']['penjamin'],
+                        'pasien' => $value['detail']['pasien'],
+                        'billing_group' => 'tarif_kamar',
+                        'departemen' => __POLI_INAP__
+                    ))
+                        ->execute();
+                }
             }
         }
 
@@ -897,7 +897,7 @@ class Invoice extends Utility
                 ))
                 ->execute();
 
-            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            $PasienInfo = $Pasien->get_pasien_info('pasien', $value['pasien']);
             $value['pasien'] = $PasienInfo['response_data'][0];
 
             $value['created_at_parse'] = date('d F Y', strtotime($value['created_at']));
@@ -2357,6 +2357,7 @@ class Invoice extends Utility
             'penjamin' => $parameter['penjamin'],
             'billing_group' => $parameter['billing_group'],
             'keterangan' => $parameter['keterangan'],
+            'document' => (isset($parameter['document'])) ? $parameter['document'] : '-',
             'departemen' => $parameter['departemen'],
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date()
