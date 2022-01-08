@@ -184,7 +184,6 @@
                         };
                     }
 
-                    console.log(currentMetaData.pasien);
                     $(".nama_pasien").html(currentMetaData.pasien.no_rm + " - " + ((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama));
                     $(".jk_pasien").html((currentMetaData.pasien.jenkel_detail !== undefined && currentMetaData.pasien.jenkel_detail !== null) ? currentMetaData.pasien.jenkel_detail.nama : "");
                     $(".tanggal_lahir_pasien").html(currentMetaData.pasien.tanggal_lahir_parsed);
@@ -745,7 +744,6 @@
 
                 //Sini
                 var batchData = refreshBatch($(this).find("td:eq(1) select.resep-obat").val(), id);
-                console.log(batchData);
                 totalResep += parseFloat(batchData.harga);
             });
 
@@ -834,7 +832,6 @@
                                 $("#batch_obat_" + rowTarget + " li").remove();
 
                                 total_kebutuhan = parseFloat($("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue"));
-                                console.log(total_kebutuhan);
                                 kebutuhan = $("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue");
 
                                 if(total_kebutuhan === 0 || isNaN(total_kebutuhan)) {
@@ -1645,7 +1642,6 @@
                 });
 
                 var komposisiRacikan = refreshBatch($(this).find("td:eq(1) h6").attr("uid-obat"), id + "_" + cid, "racikan");
-                console.log(komposisiRacikan);
                 totalRacikan += komposisiRacikan.harga;
             });
             return totalRacikan
@@ -2515,7 +2511,6 @@
                                     var resepVerifIDSave = (e + 1);
                                     var obat = $(this).find("td:eq(1) select:eq(0)").val();
                                     if(obat !== null) {
-                                        console.log($(this).find("td:eq(1) ol li").length);
                                         
                                         // if($(this).find("td:eq(1) ol li").length === 0) {
                                         //     allowSave = false;
@@ -2551,10 +2546,8 @@
                                 }
                             });
 
-                            console.log("Check Allow : " + allowSave);
 
                             if(allowSave) {
-                                console.log("Allow Save Resep");
                                 var racikanItem = [];
                                 $("#table-resep-racikan > tbody > tr").each(function(e) {
                                     var racikanVerifIDSave = (e + 1);
@@ -2592,10 +2585,10 @@
                                                 "harga": parseFloat(hargaPerObatRacikan)
                                             });
 
-                                            if($(this).find("td:eq(2) input").inputmask("unmaskedvalue") < 1) {
-                                                allowSave = false;
-                                                return  false;
-                                            }
+                                            // if($(this).find("td:eq(2) input").inputmask("unmaskedvalue") < 1) {
+                                            //     allowSave = false;
+                                            //     return  false;
+                                            // }
                                         });
 
                                         racikanItem.push({
@@ -2620,7 +2613,7 @@
                         }
 
                         if(allowSave) {
-
+                            
                             $.ajax({
                                 url:__HOSTAPI__ + "/Apotek",
                                 async:false,
@@ -2645,9 +2638,7 @@
                                     kajian: kajian
                                 },
                                 success:function(response) {
-                                    $("#btnSelesai").removeAttr({
-                                        "disabled": "disabled"
-                                    }).removeClass("btn-warning").addClass("btn-info");
+                                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
 
                                     if(response.response_package.antrian.response_result > 0) {
                                         if(currentMetaData.departemen.uid === __POLI_IGD__) {
@@ -2683,14 +2674,14 @@
                                                 });
                                             }
                                         }
+                                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
                                     } else {
                                         console.log(response);
+                                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
                                     }
                                 },
                                 error: function(response) {
-                                    $("#btnSelesai").attr({
-                                        "disabled": "disabled"
-                                    }).addClass("btn-warning").removeClass("btn-info");
+                                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
                                     console.log(response);
                                 }
                             });
@@ -2713,15 +2704,11 @@
                                 });
                             }
 
-                            $("#btnSelesai").removeAttr({
-                                "disabled": "disabled"
-                            }).removeClass("btn-warning").addClass("btn-info");
+                            $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
                         }
                     } else {
                         $("#form-alasan-ubah").modal("hide");
-                        $("#btnSelesai").removeAttr({
-                            "disabled": "disabled"
-                        }).removeClass("btn-warning").addClass("btn-info");
+                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
                     }
                 });
             } else {
