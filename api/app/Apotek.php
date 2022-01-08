@@ -5085,6 +5085,19 @@ class Apotek extends Utility
             $TargetInvoice = $NewInvoice['response_unique'];
         }
 
+        //Resep Detail
+        $ResepDetail = self::$query->select('resep', array(
+            'kode'
+        ))
+            ->where(array(
+                'resep.uid' => '= ?',
+                'AND',
+                'resep.deleted_at' =>'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
         foreach ($parameter['resep'] as $key => $value) {
             $alasan_resep = "";
             foreach ($parameter['alasan_resep'] as $AResKey => $AResValue) {
@@ -5109,23 +5122,53 @@ class Apotek extends Utility
                 ->execute();
             array_push($resepChangedRecord, $resepChange);
 
-            $AppendInvoice = $Invoice->append_invoice(array(
-                'invoice' => $TargetInvoice,
-                'item' => $value['obat'],
-                'item_origin' => 'master_inv',
-                'qty' => floatval($value['jumlah']),
-                'harga' => floatval($value['harga']),
-                'status_bayar' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'N' : 'Y',
-                'subtotal' => floatval($value['harga']) * floatval($value['jumlah']),
-                'discount' => 0,
-                'discount_type' => 'N',
-                'pasien' => $parameter['pasien'],
-                'penjamin' => $parameter['penjamin'],
-                'billing_group' => 'obat',
-                'keterangan' => 'Biaya resep obat',
-                'departemen' => $parameter['departemen']
-            ));
-            array_push($invoice_detail, $AppendInvoice);
+            //Check pengecasan biaya untuk resep dengan nomor yang digenerate
+            $CheckInvoiceCharged = self::$query->select('invoice_detail', array(
+                'id'
+            ))
+                ->where(
+                    array(
+                        'invoice_detail.invoice' => '= ?',
+                        'AND',
+                        'invoice_detail.item' => '= ?',
+                        'AND',
+                        'invoice_detail.item_type' => '= ?',
+                        'AND',
+                        'invoice_detail.pasien' => '= ?',
+                        'AND',
+                        'invoice_detail.penjamin' => '= ?',
+                        'AND',
+                        'invoice_detail.document' => '= ?'
+                    ), array(
+                        $TargetInvoice,
+                        $value['obat'],
+                        'master_inv',
+                        $parameter['pasien'],
+                        $parameter['penjamin'],
+                        'RESEP' . $ResepDetail['response_data'][0]['kode']
+                    )
+                )
+                ->execute();
+            if(count($CheckInvoiceCharged['response_data']) === 0) {
+                $AppendInvoice = $Invoice->append_invoice(array(
+                    'invoice' => $TargetInvoice,
+                    'item' => $value['obat'],
+                    'item_origin' => 'master_inv',
+                    'qty' => floatval($value['jumlah']),
+                    'harga' => floatval($value['harga']),
+                    'status_bayar' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'N' : 'Y',
+                    'subtotal' => floatval($value['harga']) * floatval($value['jumlah']),
+                    'discount' => 0,
+                    'discount_type' => 'N',
+                    'pasien' => $parameter['pasien'],
+                    'penjamin' => $parameter['penjamin'],
+                    'billing_group' => 'obat',
+                    'keterangan' => 'Biaya resep obat',
+                    'departemen' => $parameter['departemen'],
+                    'document' => 'RESEP' . $ResepDetail['response_data'][0]['kode']
+                ));
+                array_push($invoice_detail, $AppendInvoice);
+            }
 
             $usedBatch = array();
             $InventoriBatch = $Inventori->get_item_batch($value['obat']);
@@ -5219,24 +5262,55 @@ class Apotek extends Utility
                 ))
                     ->execute();
 
-                $AppendInvoice = $Invoice->append_invoice(array(
-                    'invoice' => $TargetInvoice,
-                    'item' => $KValue['obat'],
-                    'item_origin' => 'master_inv',
-                    //'qty' => floatval($value['jumlah']),
-                    'qty' => floatval($KValue['jumlah']),
-                    'harga' => floatval($KValue['harga']),
-                    'status_bayar' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'N' : 'Y',
-                    'subtotal' => floatval($KValue['harga']) * floatval($KValue['jumlah']),
-                    'discount' => 0,
-                    'discount_type' => 'N',
-                    'pasien' => $parameter['pasien'],
-                    'billing_group' => 'obat',
-                    'penjamin' => $parameter['penjamin'],
-                    'keterangan' => 'Biaya racikan obat',
-                    'departemen' => $parameter['departemen']
-                ));
-                array_push($invoice_detail, $AppendInvoice);
+                //Check pengecasan biaya untuk resep dengan nomor yang digenerate
+                $CheckInvoiceCharged = self::$query->select('invoice_detail', array(
+                    'id'
+                ))
+                    ->where(
+                        array(
+                            'invoice_detail.invoice' => '= ?',
+                            'AND',
+                            'invoice_detail.item' => '= ?',
+                            'AND',
+                            'invoice_detail.item_type' => '= ?',
+                            'AND',
+                            'invoice_detail.pasien' => '= ?',
+                            'AND',
+                            'invoice_detail.penjamin' => '= ?',
+                            'AND',
+                            'invoice_detail.document' => '= ?'
+                        ), array(
+                            $TargetInvoice,
+                            $KValue['obat'],
+                            'master_inv',
+                            $parameter['pasien'],
+                            $parameter['penjamin'],
+                            'RACIKAN' . $ResepDetail['response_data'][0]['kode']
+                        )
+                    )
+                    ->execute();
+                if(count($CheckInvoiceCharged['response_data']) === 0) {
+                    $AppendInvoice = $Invoice->append_invoice(array(
+                        'invoice' => $TargetInvoice,
+                        'item' => $KValue['obat'],
+                        'item_origin' => 'master_inv',
+                        //'qty' => floatval($value['jumlah']),
+                        'qty' => floatval($KValue['jumlah']),
+                        'harga' => floatval($KValue['harga']),
+                        'status_bayar' => ($parameter['penjamin'] === __UIDPENJAMINUMUM__) ? 'N' : 'Y',
+                        'subtotal' => floatval($KValue['harga']) * floatval($KValue['jumlah']),
+                        'discount' => 0,
+                        'discount_type' => 'N',
+                        'pasien' => $parameter['pasien'],
+                        'billing_group' => 'obat',
+                        'penjamin' => $parameter['penjamin'],
+                        'keterangan' => 'Biaya racikan obat',
+                        'departemen' => $parameter['departemen'],
+                        'document' => 'RACIKAN' . $ResepDetail['response_data'][0]['kode']
+                    ));
+                    array_push($invoice_detail, $AppendInvoice);
+                }
+                
                 $usedBatch = array();
                 $InventoriBatch = $Inventori->get_item_batch($KValue['obat']);
                 $kebutuhanRacikan = floatval($KValue['jumlah']);
