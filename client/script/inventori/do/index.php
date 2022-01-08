@@ -91,37 +91,36 @@
 		alert();
 
 		var tableDo = $("#table-do").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/DeliveryOrder",
-				type: "GET",
+				type: "POST",
+				data: function(d) {
+					d.request = "get_do_back_end";
+				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.log(response);
-					var data = response.response_package.response_data;
-					
-					for(var a = 0; a < data.length; a++) {
-						if(data[a].supplier == undefined || data[a].supplier == null) {
-							data[a].supplier = {
-								nama: "No Data"
-							};
-						}
+					var returnedData = response.response_package.response_data;
 
-						if(data[a].pegawai == undefined || data[a].pegawai == null) {
-							data[a].pegawai = {
-								nama: "No Data"
-							};
-						}
-					}
-					return data;
+					response.draw = parseInt(response.response_package.response_draw);
+					response.recordsTotal = response.response_package.recordsTotal;
+					response.recordsFiltered = returnedData.length;
+					
+					return returnedData;
 				}
 			},
 			autoWidth: false,
-			aaSorting: [[0, "asc"]],
-			"columnDefs":[
-				{"targets":0, "className":"dt-body-left"}
-			],
+			language: {
+				search: "",
+				searchPlaceholder: "Cari Nomor Invoice"
+			},
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
