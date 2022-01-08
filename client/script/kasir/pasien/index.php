@@ -947,7 +947,7 @@
         };
 
 
-		$("#range_invoice").change(function() {
+		$(".range_invoice").change(function() {
             tableAntrianBayarRJ.ajax.reload();
             tableAntrianBayarRI.ajax.reload();
             tableAntrianBayarIGD.ajax.reload();
