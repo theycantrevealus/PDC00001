@@ -161,26 +161,50 @@ class Penjamin extends Utility {
 		return $data;
 	}
 	
-	public function get_penjamin_obat($parameter) {
-		$data = self::$query
-		->select('master_inv_harga', array(
-			'barang',
-			'penjamin',
-			'profit',
-			'profit_type',
-			'created_at',
-			'updated_at'
-		))
-		->where(array(
-			'master_inv_harga.deleted_at' => 'IS NULL',
-			'AND',
-			'master_inv_harga.barang' => '= ?',
-			'AND',
-			'master_inv_harga.profit' => '> 0',
-		), array(
-			$parameter
-		))
-		->execute();
+	public function get_penjamin_obat($parameter, $target_penjamin = '') {
+		if(isset($target_penjamin) && !empty($target_penjamin)) {
+			$data = self::$query
+				->select('master_inv_harga', array(
+					'barang',
+					'penjamin',
+					'profit',
+					'profit_type',
+					'created_at',
+					'updated_at'
+				))
+				->where(array(
+					'master_inv_harga.penjamin' => '= ?',
+					'AND',
+					'master_inv_harga.deleted_at' => 'IS NULL',
+					'AND',
+					'master_inv_harga.barang' => '= ?',
+					'AND',
+					'master_inv_harga.profit' => '> 0',
+				), array(
+					$target_penjamin, $parameter
+				))
+				->execute();
+		} else {
+			$data = self::$query
+			->select('master_inv_harga', array(
+				'barang',
+				'penjamin',
+				'profit',
+				'profit_type',
+				'created_at',
+				'updated_at'
+			))
+			->where(array(
+				'master_inv_harga.deleted_at' => 'IS NULL',
+				'AND',
+				'master_inv_harga.barang' => '= ?',
+				'AND',
+				'master_inv_harga.profit' => '> 0',
+			), array(
+				$parameter
+			))
+			->execute();
+		}
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
