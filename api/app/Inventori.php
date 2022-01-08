@@ -2400,8 +2400,7 @@ class Inventori extends Utility
         );
     }
 
-    private function get_item_select2($parameter)
-    {
+    private function get_item_select2($parameter) {
         $dupCheck = array();
         $dataResult = array();
         $data = self::$query
@@ -2442,7 +2441,9 @@ class Inventori extends Utility
                 'kandungan'
             ))
                 ->where(array(
-                    'master_inv_obat_kandungan.uid_obat' => '= ?'
+                    'master_inv_obat_kandungan.uid_obat' => '= ?',
+                    'AND',
+                    'master_inv_obat_kandungan.deleted_at' => 'IS NULL'
                 ), array(
                     $value['uid']
                 ))
@@ -2451,6 +2452,7 @@ class Inventori extends Utility
                 array_push($kandunganList, $kKV['kandungan']);
             }
             $data['response_data'][$key]['nama'] = $value['nama'] . ' [' . implode(', ', $kandunganList) . ']';
+            
             $kategori_obat = self::get_kategori_obat_item($value['uid']);
             foreach ($kategori_obat as $KOKey => $KOValue) {
                 $KategoriCaption = self::get_kategori_obat_detail($KOValue['kategori'])['response_data'][0]['nama'];
@@ -2465,7 +2467,7 @@ class Inventori extends Utility
             $data['response_data'][$key]['manufacture'] = self::get_manufacture_detail($value['manufacture'])['response_data'][0];
 
             //Data Penjamin
-            $ListPenjaminObat = $PenjaminObat->get_penjamin_obat($value['uid'])['response_data'];
+            $ListPenjaminObat = $PenjaminObat->get_penjamin_obat($value['uid'], $_GET['penjamin'])['response_data'];
             foreach ($ListPenjaminObat as $PenjaminKey => $PenjaminValue) {
                 $ListPenjaminObat[$PenjaminKey]['profit'] = floatval($PenjaminValue['profit']);
             }
@@ -2473,6 +2475,7 @@ class Inventori extends Utility
 
             //Cek Ketersediaan Stok
             $TotalStock = 0;
+            
             $InventoriStockPopulator = self::get_item_batch($value['uid']);
             if (count($InventoriStockPopulator['response_data']) > 0) {
                 foreach ($InventoriStockPopulator['response_data'] as $TotalKey => $TotalValue) {
@@ -2587,7 +2590,8 @@ class Inventori extends Utility
             } else {
                 //$data['response_data'][$key]['item_detail'] = self::get_item_detail($value['barang'])['response_data'][0];
                 $data['response_data'][$key]['gudang'] = self::get_gudang_detail($value['gudang'])['response_data'][0];
-                $data['response_data'][$key]['kode'] = self::get_batch_detail($value['batch'])['response_data'][0]['batch'];
+                //$data['response_data'][$key]['kode'] = self::get_batch_detail($value['batch'])['response_data'][0]['batch'];
+                $data['response_data'][$key]['kode'] = $batch_info['batch'];
                 $data['response_data'][$key]['expired'] = date('d F Y', strtotime($batch_info['expired_date']));
                 $data['response_data'][$key]['stok_terkini'] = floatval($value['stok_terkini']);
                 $data['response_data'][$key]['expired_sort'] = $batch_info['expired_date'];
@@ -2822,6 +2826,35 @@ class Inventori extends Utility
                 $parameter
             ))
             ->execute();
+        foreach ($data['response_data'] as $key => $value) {
+            //Text
+            //$data['response_data'][$key]['id'] = $value['uid'];
+            //$data['response_data'][$key]['text'] = $value['nama'];
+
+            //Kategori Obat
+            //$data['response_data'][$key]['kategori_obat'] = self::get_kategori_obat_item($value['uid']);
+
+            //Prepare Image File
+            //$data['response_data'][$key]['image'] = file_exists('../images/produk/' . $value['uid'] . '.png');
+
+            //Konversi
+            //$data['response_data'][$key]['konversi'] = self::get_konversi($value['uid']);
+
+            //Penjamin
+            //$data['response_data'][$key]['penjamin'] = self::get_penjamin($value['uid']);
+
+            //Lokasi
+            //$data['response_data'][$key]['lokasi'] = self::get_rak($value['uid']);
+
+            //Monitoring
+            //$data['response_data'][$key]['monitoring'] = self::get_monitoring($value['uid']);
+
+            //Satuan Terkecil
+            $data['response_data'][$key]['satuan_terkecil_info'] = self::get_satuan_detail($value['satuan_terkecil'])['response_data'][0];
+
+            //Kandungan
+            //$data['response_data'][$key]['kandungan'] = self::get_kandungan($value['uid'])['response_data'];
+        }
         return $data;
     }
 
@@ -8676,7 +8709,9 @@ class Inventori extends Utility
         foreach ($data['response_data'] as $key => $value) {
             if($value['gudang'] === $UserData['data']->gudang) {
                 $data['response_data'][$key]['autonum'] = $autonum;
-                $ItemDetail = self::get_item_detail($value['barang'])['response_data'][0];
+                
+                $ItemDetail = self::get_item_info($value['barang'])['response_data'][0];
+                //$ItemDetail = self::get_item_detail($value['barang'])['response_data'][0];
                 $data['response_data'][$key]['detail'] = $ItemDetail;
 
                 if(file_exists('../images/produk/' . $value['barang'] . '.png')) {
@@ -8703,22 +8738,22 @@ class Inventori extends Utility
                 $data['response_data'][$key]['penjamin'] = $ListPenjaminObat;
 
                 //Cek Ketersediaan Stok
-                $TotalStock = 0;
-                $InventoriStockPopulator = self::get_item_batch($value['barang']);
-                if (count($InventoriStockPopulator['response_data']) > 0) {
-                    foreach ($InventoriStockPopulator['response_data'] as $TotalKey => $TotalValue) {
-                        if($TotalValue['gudang'] === $UserData['data']->gudang) {
-                            //Sini
-                            $TotalStock += floatval($TotalValue['stok_terkini']);
-                        }
-                    }
-                    //$data['response_data'][$key]['stok'] = $TotalStock;
-                    $data['response_data'][$key]['stok'] = $value['stok_terkini'];
-                    $data['response_data'][$key]['batch'] = $InventoriStockPopulator['response_data'];
-                } else {
-                    $data['response_data'][$key]['stok'] = 0;
-                }
-                $data['response_data'][$key]['batch_info'] = $InventoriStockPopulator;
+                // $TotalStock = 0;
+                // $InventoriStockPopulator = self::get_item_batch($value['barang']);
+                // if (count($InventoriStockPopulator['response_data']) > 0) {
+                //     foreach ($InventoriStockPopulator['response_data'] as $TotalKey => $TotalValue) {
+                //         if($TotalValue['gudang'] === $UserData['data']->gudang) {
+                //             //Sini
+                //             $TotalStock += floatval($TotalValue['stok_terkini']);
+                //         }
+                //     }
+                //     //$data['response_data'][$key]['stok'] = $TotalStock;
+                //     $data['response_data'][$key]['stok'] = $value['stok_terkini'];
+                //     $data['response_data'][$key]['batch'] = $InventoriStockPopulator['response_data'];
+                // } else {
+                //     $data['response_data'][$key]['stok'] = 0;
+                // }
+                // $data['response_data'][$key]['batch_info'] = $InventoriStockPopulator;
 
                 //Data reserved
                 $tempIn = 0;
