@@ -1,6 +1,109 @@
+<script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js" type="text/javascript"></script>
+<script src="https://cdn.datatables.net/buttons/2.1.0/js/buttons.html5.min.js" type="text/javascript"></script>
+
 <script type="text/javascript">
     $(function(){
         var MODE = "tambah", selectedUID;
+
+        var tableExportStok = $("#tableExportStok").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            dom: 'Bfrtip',
+            buttons: [{
+                text: 'Export CSV',
+                action: function (e, dt, node, config) {
+                    $.ajax({
+                        url: __HOSTAPI__ + "/Inventori",
+                        type: "POST",
+                        headers:{
+                            Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                        },
+                        data: {
+                            request: 'export_current_gudang_stok',
+                            gudang: __UNIT__.gudang
+                        },
+                        success: function(res, status, xhr) {
+                            var dataSet = "\"Batch\",\"Item\",\"Qty\"\n";
+                            console.log(res);
+                            
+                            res = res.response_package;
+                            console.log(res);
+
+                            for(var a in res) {
+                                dataSet += "\"" + res[a].batch + "\",\"" + res[a].barang + "\"," + res[a].stok_terkini + "\n";
+                            }
+                            
+                            var csvData = new Blob([dataSet], {type: 'text/csv;charset=utf-8;'});
+                            var csvURL = window.URL.createObjectURL(csvData);
+                            var tempLink = document.createElement('a');
+                            tempLink.href = csvURL;
+                            var currentdate = new Date();
+
+                            tempLink.setAttribute('download', (__UNIT__.nama.toUpperCase().replace(' ', '_')) + '-' + currentdate.getDate() + '/' + (currentdate.getMonth()+1) + '/' + currentdate.getFullYear() + '_' + currentdate.getHours() + '_' + currentdate.getMinutes() + '_' + currentdate.getSeconds() + '.csv');
+                            tempLink.click();
+                        }
+                    });
+                }
+            }],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Inventori",
+                type: "POST",
+                data: function(d) {
+                    d.request = "data_populate_export_stok";
+                    d.gudang = __UNIT__.gudang;
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    var returnedData = response.response_package.response_data;
+
+                    console.clear();
+                    console.log(returnedData);
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Barang"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.batch;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.barang;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.stok_terkini;
+                    }
+                }
+            ]
+        });
+
+        $("#btnExport").click(function() {
+            $("#review-stok-export").modal("show");
+        });
 
         var tableGudang = $("#table-item").DataTable({
             processing: true,
@@ -167,3 +270,49 @@
         });
     });
 </script>
+
+<div id="review-stok-export" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">Export Stok</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                <h5 class="card-header__title flex m-0">Data Export</h5>
+                            </div>
+                            <div class="card-body tab-content">
+                                <div class="tab-pane active show fade">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <table class="table table-bordered table-striped" id="tableExportStok">
+                                                <thead class="thead-dark">
+                                                    <tr>
+                                                        <th class="wrap_content">No</th>
+                                                        <th class="wrap_content">Batch</th>
+                                                        <th>Item</th>
+                                                        <th class="wrap_content">Saldo</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="import_data">Import</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -292,6 +292,14 @@ class Inventori extends Utility
                 return self::get_return_entry($parameter);
                 break;
 
+            case 'data_populate_export_stok':
+                return self::data_populate_export_stok($parameter);
+                break;
+
+            case 'export_current_gudang_stok':
+                return self::export_current_gudang_stok($parameter);
+                break;
+
             default:
                 return $parameter;
                 break;
@@ -2608,6 +2616,24 @@ class Inventori extends Utility
         return $data;
     }
 
+    public function get_batch_info($parameter) {
+        $data = self::$query->select('inventori_batch', array(
+            'uid',
+            'batch',
+            'barang',
+            'expired_date',
+            'po',
+            'do_master'
+        ))
+            ->where(array(
+                'inventori_batch.uid' => ' = ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+        return $data;
+    }
+
     public function get_batch_detail($parameter)
     {
         $data = self::$query->select('inventori_batch', array(
@@ -2772,6 +2798,30 @@ class Inventori extends Utility
             }
         }
 
+        return $data;
+    }
+
+    public function get_item_info($parameter) {
+        $data = self::$query
+            ->select('master_inv', array(
+                'uid',
+                'nama',
+                'kode_barang',
+                'keterangan',
+                'kategori',
+                'manufacture',
+                'satuan_terkecil',
+                'created_at',
+                'updated_at'
+            ))
+            ->where(array(
+                'master_inv.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv.uid' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
         return $data;
     }
 
@@ -4740,6 +4790,106 @@ class Inventori extends Utility
             $data['response_data'][$key]['detail'] = $detail['response_data'];
             $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
         }
+
+        return $data;
+    }
+
+    private function export_current_gudang_stok($parameter) {
+        $paramData = array(
+            'inventori_stok.gudang' => '= ?'
+        );
+
+        $paramValue = array($parameter['gudang']);
+
+        $data = self::$query-> select('inventori_stok', array(
+            'barang', 'batch', 'stok_terkini'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        foreach($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['barang'] = str_replace('"', '', self::get_item_info($value['barang'])['response_data'][0]['nama']);
+            $data['response_data'][$key]['batch'] = str_replace('"', '', self::get_batch_info($value['batch'])['response_data'][0]['batch']);
+        }
+
+        // $dataSet = '"No","Batch", "Item", "Saldo"';
+        // foreach($data['response_data'] as $key => $value) {
+        //     $dataSet .= '"' . $value['autonum'] . '", "' . $value['batch'] . '", "' . $value['barang'] . '", "' . $value['stok_terkini'] . '"\n';
+        // }
+
+        return $data['response_data'];
+    }
+
+    private function data_populate_export_stok($parameter) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'inventori_stok.gudang' => '= ?',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+            );
+
+            $paramValue = array($parameter['gudang']);
+        } else {
+            $paramData = array(
+                'inventori_stok.gudang' => '= ?'
+            );
+
+            $paramValue = array($parameter['gudang']);
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query-> select('inventori_stok', array(
+                'batch', 'stok_terkini'
+            ))
+                ->join('master_inv', array(
+                    'nama as barang'
+                ))
+                ->on(array(
+                    array('inventori_stok.barang', '=', 'master_inv.uid')
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query-> select('inventori_stok', array(
+                'batch', 'stok_terkini'
+            ))
+                ->join('master_inv', array(
+                    'nama as barang'
+                ))
+                ->on(array(
+                    array('inventori_stok.barang', '=', 'master_inv.uid')
+                ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+
+        foreach($data['response_data'] as $key => $value) {
+            //$data['response_data'][$key]['barang'] = str_replace('"', '', self::get_item_info($value['barang'])['response_data'][0]['nama']);
+            $data['response_data'][$key]['batch'] = str_replace('"', '', self::get_batch_info($value['batch'])['response_data'][0]['batch']);
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['stok_terkini'] = floatval($value['stok_terkini']);
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('inventori_stok', array(
+            'barang'
+        ))
+            ->where(array(
+                'inventori_stok.gudang' => '= ?',
+            ), array(
+                $parameter['gudang']
+            ))
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
 
         return $data;
     }
