@@ -2206,7 +2206,11 @@ class Inap extends Utility
             $data['response_data'][$key]['waktu_masuk_jam'] = date('H:i', strtotime($value['waktu_masuk']));
 
 
-            if(count($PasienDetail['response_data']) > 0) {
+            if(
+                count($PasienDetail['response_data']) > 0 &&
+                count($PenjaminDetail['response_data']) > 0 &&
+                count($NurseStation['response_data']) > 0
+            ) {
                 array_push($returnedData, $data['response_data'][$key]);
                 $autonum++;
             }
