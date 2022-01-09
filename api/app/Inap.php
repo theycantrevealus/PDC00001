@@ -2020,32 +2020,65 @@ class Inap extends Utility
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-            $paramData = array(
-                'rawat_inap.deleted_at' => 'IS NULL',
-                'AND',
-                /*'rawat_inap.dokter' => '= ?',
-                'AND',*/
-                'rawat_inap.waktu_keluar' => 'IS NULL',
-                'AND',
-                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                'OR',
-                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
-            );
+            if(isset($parameter['division'])) {
+                $paramData = array(
+                    'rawat_inap.deleted_at' => 'IS NULL',
+                    'AND',
+                    'rawat_inap.nurse_station' => 'IS NOT NULL',
+                    'AND',
+                    'rawat_inap.waktu_keluar' => 'IS NULL',
+                    'AND',
+                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                );
 
-            //$paramValue = array($UserData['data']->uid);
-            $paramValue = array();
+                //$paramValue = array($UserData['data']->uid);
+                $paramValue = array();
+            } else {
+                $paramData = array(
+                    'rawat_inap.deleted_at' => 'IS NULL',
+                    'AND',
+                    /*'rawat_inap.dokter' => '= ?',
+                    'AND',*/
+                    'rawat_inap.waktu_keluar' => 'IS NULL',
+                    'AND',
+                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                );
+
+                //$paramValue = array($UserData['data']->uid);
+                $paramValue = array();
+            }
         } else {
-            $paramData = array(
-                'rawat_inap.deleted_at' => 'IS NULL',
-                'AND',
-                /*'rawat_inap.dokter' => '= ?',
-                'AND',*/
-                'rawat_inap.waktu_keluar' => 'IS NULL'
-                /**/
-            );
+            if(isset($parameter['division'])) {
+                $paramData = array(
+                    'rawat_inap.deleted_at' => 'IS NULL',
+                    'AND',
+                    'rawat_inap.nurse_station' => 'IS NOT NULL',
+                    'AND',
+                    /*'rawat_inap.dokter' => '= ?',
+                    'AND',*/
+                    'rawat_inap.waktu_keluar' => 'IS NULL'
+                    /**/
+                );
 
-            //$paramValue = array($UserData['data']->uid);
-            $paramValue = array();
+                //$paramValue = array($UserData['data']->uid);
+                $paramValue = array();
+            } else {
+                $paramData = array(
+                    'rawat_inap.deleted_at' => 'IS NULL',
+                    'AND',
+                    /*'rawat_inap.dokter' => '= ?',
+                    'AND',*/
+                    'rawat_inap.waktu_keluar' => 'IS NULL'
+                    /**/
+                );
+
+                //$paramValue = array($UserData['data']->uid);
+                $paramValue = array();
+            }
         }
 
 

@@ -12,6 +12,7 @@
                 type: "POST",
                 data: function(d) {
                     d.request = "get_rawat_inap";
+                    d.division = "doctor";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -24,21 +25,24 @@
                         var data = response.response_package.response_data;
                         var autonum = 1;
                         for(var key in data) {
-                            if(
-                                data[key].pasien !== null && data[key].pasien !== undefined &&
-                                //data[key].dokter.uid === __ME__ &&
-                                data[key].nurse_station !== null
-                            ) {
-                                data[key].autonum = autonum;
-                                returnedData.push(data[key]);
-                                autonum++;
-                            }
+                            data[key].autonum = autonum;
+                            returnedData.push(data[key]);
+                            autonum++;
+                            // if(
+                            //     data[key].pasien !== null && data[key].pasien !== undefined &&
+                            //     //data[key].dokter.uid === __ME__ &&
+                            //     data[key].nurse_station !== null
+                            // ) {
+                            //     data[key].autonum = autonum;
+                            //     returnedData.push(data[key]);
+                            //     autonum++;
+                            // }
                         }
                     }
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
                     return returnedData;
                 }
