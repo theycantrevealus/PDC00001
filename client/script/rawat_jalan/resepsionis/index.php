@@ -507,11 +507,12 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-info btn-sm btn-pasien-pulang\">" +
-                            "<i class=\"fa fa-check\"></i> Selesai" +
-                            "</button>" +
-                            "</div>";
+                        return "";
+                        // return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                        //     "<button id=\"pasien_pulang_" + row.uid + "\" class=\"btn btn-info btn-sm btn-pasien-pulang\">" +
+                        //     "<i class=\"fa fa-check\"></i> Selesai" +
+                        //     "</button>" +
+                        //     "</div>";
                     }
                 }
             ]
