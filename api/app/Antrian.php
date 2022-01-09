@@ -771,7 +771,8 @@ class Antrian extends Utility
                                     'penjamin' => $parameter['dataObj']['penjamin'],
                                     'billing_group' => 'tindakan',
                                     'keterangan' => 'Biaya konsultasi',
-                                    'departemen' => $parameter['dataObj']['departemen']
+                                    'departemen' => $parameter['dataObj']['departemen'],
+                                    'document' => ''
                                 ));
                             } else {
                                 //
@@ -1125,6 +1126,7 @@ class Antrian extends Utility
                             $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
                             $antrianKunjungan['response_data'][0]['response_invoice'] = 'asd';
                             $antrianKunjungan['response_notif'] = 'K';
+                            $antrianKunjungan['womaak'] = $Invoice;
                             $antrianKunjungan['aaawdaw'] = $parameter;
                             return $antrianKunjungan;
                         }
