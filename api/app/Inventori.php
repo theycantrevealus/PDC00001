@@ -4843,6 +4843,7 @@ class Inventori extends Utility
         foreach($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['barang'] = str_replace('"', '', self::get_item_info($value['barang'])['response_data'][0]['nama']);
             $data['response_data'][$key]['batch'] = str_replace('"', '', self::get_batch_info($value['batch'])['response_data'][0]['batch']);
+            $data['response_data'][$key]['ed'] = date('Y-m-d', strtotime(str_replace('"', '', self::get_batch_info($value['batch'])['response_data'][0]['expired_date'])));
         }
 
         // $dataSet = '"No","Batch", "Item", "Saldo"';
