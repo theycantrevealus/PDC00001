@@ -2025,7 +2025,11 @@ class Inap extends Utility
                 'AND',
                 /*'rawat_inap.dokter' => '= ?',
                 'AND',*/
-                'rawat_inap.waktu_keluar' => 'IS NULL'
+                'rawat_inap.waktu_keluar' => 'IS NULL',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
             //$paramValue = array($UserData['data']->uid);
@@ -2037,8 +2041,7 @@ class Inap extends Utility
                 /*'rawat_inap.dokter' => '= ?',
                 'AND',*/
                 'rawat_inap.waktu_keluar' => 'IS NULL'
-                /*'AND',
-                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''*/
+                /**/
             );
 
             //$paramValue = array($UserData['data']->uid);
@@ -2062,6 +2065,12 @@ class Inap extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('pasien', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('rawat_inap.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
@@ -2080,6 +2089,12 @@ class Inap extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('pasien', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('rawat_inap.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
                 ->limit(intval($parameter['length']))
