@@ -2,93 +2,93 @@
 <script type="text/javascript">
 	$(function(){
 
-		// var tablePo = $("#table-do").DataTable({
-		// 	"ajax":{
-		// 		url: __HOSTAPI__ + "/PO",
-		// 		type: "GET",
-		// 		headers:{
-		// 			Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
-		// 		},
-		// 		dataSrc:function(response) {
-		// 			//check barang sudah sampai semua atau belum
-        //             var returnedData = [];
-		// 			var poData = response.response_package.response_data;
-		// 			console.log(poData);
-		// 			for(var CPOKey in poData) {
-		// 				if(poData[CPOKey].supplier == undefined || poData[CPOKey].supplier == null) {
-		// 					poData[CPOKey].supplier = {
-		// 						nama: "No Data"
-		// 					};
-		// 				}
+		var tablePo = $("#table-do").DataTable({
+			"ajax":{
+				url: __HOSTAPI__ + "/PO",
+				type: "GET",
+				headers:{
+					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+				},
+				dataSrc:function(response) {
+					//check barang sudah sampai semua atau belum
+                    var returnedData = [];
+					var poData = response.response_package.response_data;
+					console.log(poData);
+					for(var CPOKey in poData) {
+						if(poData[CPOKey].supplier == undefined || poData[CPOKey].supplier == null) {
+							poData[CPOKey].supplier = {
+								nama: "No Data"
+							};
+						}
 
-		// 				if(poData[CPOKey].pegawai == undefined || poData[CPOKey].pegawai == null) {
-		// 					poData[CPOKey].pegawai = {
-		// 						nama: "No Data"
-		// 					};
-		// 				}
+						if(poData[CPOKey].pegawai == undefined || poData[CPOKey].pegawai == null) {
+							poData[CPOKey].pegawai = {
+								nama: "No Data"
+							};
+						}
 
-		// 				var done_po = false;
+						var done_po = false;
 
-		// 				//Check Item
-		// 				var poItem = poData[CPOKey].detail;
-		// 				for(var itemKey in poItem) {
-		// 					if(poItem[itemKey].sampai >= poItem[itemKey].qty) {
-		// 						done_po = true
-		// 					} else {
-		// 					    done_po = false;
-		// 					    break;
-        //                     }
-		// 				}
+						//Check Item
+						var poItem = poData[CPOKey].detail;
+						for(var itemKey in poItem) {
+							if(poItem[itemKey].sampai >= poItem[itemKey].qty) {
+								done_po = true
+							} else {
+							    done_po = false;
+							    break;
+                            }
+						}
 
-		// 				if(!done_po) {
-		// 				    returnedData.push(poData[CPOKey]);
-        //                 }
-		// 			}
-		// 			return returnedData;
-		// 		}
-		// 	},
-		// 	autoWidth: false,
-		// 	aaSorting: [[0, "asc"]],
-		// 	"columnDefs":[
-		// 		{"targets":0, "className":"dt-body-left"}
-		// 	],
-		// 	"columns" : [
-		// 		{
-		// 			"data" : null, render: function(data, type, row, meta) {
-        //                 return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
-		// 			}
-		// 		},
-		// 		{
-		// 			"data" : null, render: function(data, type, row, meta) {
-		// 				return row.nomor_po;
-		// 			}
-		// 		},
-        //         {
-        //             "data" : null, render: function(data, type, row, meta) {
-        //                 return row.tanggal_po;
-        //             }
-        //         },
-		// 		{
-		// 			"data" : null, render: function(data, type, row, meta) {
-		// 				return row.supplier.nama;
-		// 			}
-		// 		},
-		// 		{
-		// 			"data" : null, render: function(data, type, row, meta) {
-		// 				return row.pegawai.nama;
-		// 			}
-		// 		},
-		// 		{
-		// 			"data" : null, render: function(data, type, row, meta) {
-		// 				return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-        //                     "<a href=\"" + __HOSTNAME__ + "/inventori/do/tambah/" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail\"><i class=\"fa fa-box-open\"></i> Detail</a>" +
-        //                     "</div>";
-		// 			}
-		// 		},
-		// 	]
-		// });
+						if(!done_po) {
+						    returnedData.push(poData[CPOKey]);
+                        }
+					}
+					return returnedData;
+				}
+			},
+			autoWidth: false,
+			aaSorting: [[0, "asc"]],
+			"columnDefs":[
+				{"targets":0, "className":"dt-body-left"}
+			],
+			"columns" : [
+				{
+					"data" : null, render: function(data, type, row, meta) {
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.nomor_po;
+					}
+				},
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.tanggal_po;
+                    }
+                },
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.supplier.nama;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return row.pegawai.nama;
+					}
+				},
+				{
+					"data" : null, render: function(data, type, row, meta) {
+						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/inventori/do/tambah/" + row.uid + "\" class=\"btn btn-info btn-sm btn-detail\"><i class=\"fa fa-box-open\"></i> Detail</a>" +
+                            "</div>";
+					}
+				},
+			]
+		});
 
-		var tableDo = $("#table-do").DataTable({
+		var tableDo = $("#table-do-his").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
@@ -107,13 +107,13 @@
 				dataSrc:function(response) {
 					console.clear();
 					console.log(response);
-					// var returnedData = response.response_package.response_data;
+					var returnedData = response.response_package.response_data;
 
 					// response.draw = parseInt(response.response_package.response_draw);
 					// response.recordsTotal = response.response_package.recordsTotal;
 					// response.recordsFiltered = returnedData.length;
 					
-					return [];
+					return returnedData;
 				}
 			},
 			autoWidth: false,
