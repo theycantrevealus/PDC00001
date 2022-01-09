@@ -2513,8 +2513,12 @@
                                     if(obat !== null) {
                                         
                                         if($(this).find("td:eq(1) ol li").length === 0) {
-                                            allowSave = false;
-                                            return false;
+                                            if(parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")) === 0) {
+                                                allowSave = true;
+                                            } else {
+                                                allowSave = false;
+                                                return false;
+                                            }
                                         } else {
                                             $(this).find("td:eq(1) ol li").each(function() {
                                                 if($(this).find("i").hasClass("text-danger")) {
@@ -2564,8 +2568,12 @@
                                                 hargaPerObatRacikan = $(this).find("td:eq(1) ol").attr("harga");
 
                                                 if($(this).find("td:eq(1) ol li").length === 0) {
-                                                    allowSave = false;
-                                                    return false;
+                                                    if(parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")) === 0) {
+                                                        allowSave = true;
+                                                    } else {
+                                                        allowSave = false;
+                                                        return false;
+                                                    }
                                                 } else {
                                                     $(this).find("td:eq(1) ol li").each(function() {
                                                         if(currentStatusOpname === "O") {
