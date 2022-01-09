@@ -2415,7 +2415,7 @@
                     "Alasan ubah harus diisi",
                     "warning"
                 ).then((result) => {
-
+                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
                 });
             }
         });
@@ -2708,6 +2708,7 @@
                                     "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong. Harap isi kajian resep",
                                     "warning"
                                 ).then((result) => {
+                                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
                                     $("#form-alasan-ubah").modal("hide");
                                 });
                             } else {
@@ -2716,6 +2717,7 @@
                                     "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong",
                                     "warning"
                                 ).then((result) => {
+                                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
                                     $("#form-alasan-ubah").modal("hide");
                                 });
                             }
@@ -2733,6 +2735,7 @@
                     "Semua alasan perubahan resep dan racikan harus diisi",
                     "warning"
                 ).then((result) => {
+                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
                     $("#form-alasan-ubah").modal("hide");
                 });
             }
