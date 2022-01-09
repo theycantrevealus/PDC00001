@@ -276,7 +276,7 @@
                                                 'Silahkan arahkan pasien ke kasir',
                                                 'success'
                                             ).then((result) => {
-                                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                                //location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
                                             });
                                         });
 
