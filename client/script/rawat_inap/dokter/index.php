@@ -5,7 +5,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[2, 50, -1], [2, 50, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Inap",

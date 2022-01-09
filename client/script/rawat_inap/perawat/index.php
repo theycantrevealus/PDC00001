@@ -12,6 +12,7 @@
                 type: "POST",
                 data: function(d) {
                     d.request = "get_rawat_inap";
+                    d.division = "doctor";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -24,13 +25,13 @@
                         var data = response.response_package.response_data;
                         var autonum = 1;
                         for(var key in data) {
-                            if(
-                                data.uid !== null &&
-                                data[key].pasien !== null && data[key].pasien !== undefined && data[key].nurse_station !== undefined && data[key].nurse_station !== null &&
-                                __NURSE_STATION__.indexOf(data[key].nurse_station.nurse_station) >= 0
-                            ) {
+                            // if(
+                            //     data.uid !== null &&
+                            //     data[key].pasien !== null && data[key].pasien !== undefined && data[key].nurse_station !== undefined && data[key].nurse_station !== null &&
+                            //     __NURSE_STATION__.indexOf(data[key].nurse_station.nurse_station) >= 0
+                            // ) {
                                 
-                            }
+                            // }
                             data[key].autonum = autonum;
                             returnedData.push(data[key]);
                             autonum++;   
