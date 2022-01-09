@@ -4828,6 +4828,9 @@ class Inventori extends Utility
     }
 
     private function export_current_gudang_stok($parameter) {
+
+        $populateData = array();
+
         $paramData = array(
             'inventori_stok.gudang' => '= ?'
         );
@@ -4841,9 +4844,43 @@ class Inventori extends Utility
             ->execute();
 
         foreach($data['response_data'] as $key => $value) {
+            if(!isset($populateData[$value['barang']])) {
+                $populateData[$value['barang']] = array();
+            }
+
+            if(!isset($populateData[$value['barang']][$value['batch']])) {
+                $populateData[$value['barang']][$value['batch']] = array(
+                    'ed' => '',
+                    'jlh' => 0,
+                    'dup' => 0
+                );
+            }
+
+            if(floatval($populateData[$value['barang']][$value['batch']]['jlh']) > 0) {
+                $populateData[$value['barang']][$value['batch']]['dup'] += 1;
+            }
+
+            $populateData[$value['barang']][$value['batch']]['jlh'] += floatval($value['stok_terkini']);
+            $populateData[$value['barang']][$value['batch']]['ed'] = date('Y-m-d', strtotime(str_replace('"', '', self::get_batch_info($value['batch'])['response_data'][0]['expired_date'])));
+
+
             $data['response_data'][$key]['barang'] = str_replace('"', '', self::get_item_info($value['barang'])['response_data'][0]['nama']);
             $data['response_data'][$key]['batch'] = str_replace('"', '', self::get_batch_info($value['batch'])['response_data'][0]['batch']);
             $data['response_data'][$key]['ed'] = date('Y-m-d', strtotime(str_replace('"', '', self::get_batch_info($value['batch'])['response_data'][0]['expired_date'])));
+        }
+
+        $freshData = array();
+
+        foreach($populateData as $key => $value) {
+            foreach($value as $dBK => $dBV) {
+                array_push($freshData, array(
+                    'barang' => str_replace('"', '', self::get_item_info($key)['response_data'][0]['nama']),
+                    'batch' => str_replace('"', '', self::get_batch_info($dBK)['response_data'][0]['batch']),
+                    'ed' => $dBV['ed'],
+                    'stok_terkini' => $dBV['jlh'],
+                    'dup' => $dBV['dup']
+                ));
+            }
         }
 
         // $dataSet = '"No","Batch", "Item", "Saldo"';
@@ -4851,7 +4888,8 @@ class Inventori extends Utility
         //     $dataSet .= '"' . $value['autonum'] . '", "' . $value['batch'] . '", "' . $value['barang'] . '", "' . $value['stok_terkini'] . '"\n';
         // }
 
-        return $data['response_data'];
+        //return $data['response_data'];
+        return $freshData;
     }
 
     private function data_populate_export_stok($parameter) {

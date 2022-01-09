@@ -25,14 +25,14 @@
                             gudang: __UNIT__.gudang
                         },
                         success: function(res, status, xhr) {
-                            var dataSet = "\"Batch\",\"Item\",\"ED\",\"Qty\"\n";
+                            var dataSet = "\"batch\",\"nama\",\"kedaluarsa\",\"stok\",\"dup\"\n";
                             console.log(res);
                             
                             res = res.response_package;
                             console.log(res);
 
                             for(var a in res) {
-                                dataSet += "\"" + res[a].batch + "\",\"" + res[a].barang + "\",\"" + res[a].ed + "\"," + res[a].stok_terkini + "\n";
+                                dataSet += "\"" + res[a].batch + "\",\"" + res[a].barang + "\",\"" + res[a].ed + "\"," + res[a].stok_terkini + "," + res[a].dup + "\n";
                             }
                             
                             var csvData = new Blob([dataSet], {type: 'text/csv;charset=utf-8;'});
