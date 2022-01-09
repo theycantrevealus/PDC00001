@@ -2512,23 +2512,27 @@
                                     var obat = $(this).find("td:eq(1) select:eq(0)").val();
                                     if(obat !== null) {
                                         
-                                        // if($(this).find("td:eq(1) ol li").length === 0) {
-                                        //     allowSave = false;
-                                        //     return false;
-                                        // } else {
-                                        //     $(this).find("td:eq(1) ol li").each(function() {
-                                        //         if($(this).find("i").hasClass("text-danger")) {
-                                        //             if(currentStatusOpname === "O") {
-                                        //                 allowSave = true;
-                                        //             } else {
-                                        //                 allowSave = false;
-                                        //                 return false;
-                                        //             }
-                                        //         } else {
-                                        //             allowSave = true;
-                                        //         }
-                                        //     });
-                                        // }
+                                        if($(this).find("td:eq(1) ol li").length === 0) {
+                                            allowSave = false;
+                                            return false;
+                                        } else {
+                                            $(this).find("td:eq(1) ol li").each(function() {
+                                                if($(this).find("i").hasClass("text-danger")) {
+                                                    if(currentStatusOpname === "O") {
+                                                        allowSave = true;
+                                                    } else {
+                                                        if(parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")) === 0) {
+                                                            allowSave = true;
+                                                        } else {
+                                                            allowSave = false;
+                                                            return false;
+                                                        }
+                                                    }
+                                                } else {
+                                                    allowSave = true;
+                                                }
+                                            });
+                                        }
 
                                         resepItem.push({
                                             "obat": $(this).find("td:eq(1) select:eq(0)").val(),
@@ -2559,23 +2563,27 @@
                                             if($(this).find("td:eq(1) ol").length > 0) {
                                                 hargaPerObatRacikan = $(this).find("td:eq(1) ol").attr("harga");
 
-                                                // if($(this).find("td:eq(1) ol li").length === 0) {
-                                                //     allowSave = false;
-                                                //     return false;
-                                                // } else {
-                                                //     $(this).find("td:eq(1) ol li").each(function() {
-                                                //         if(currentStatusOpname === "O") {
-                                                //             allowSave = true;
-                                                //         } else {
-                                                //             if($(this).find("i").hasClass("text-danger")) {
-                                                //                 allowSave = false;
-                                                //                 return false;
-                                                //             } else {
-                                                //                 allowSave = true;
-                                                //             }
-                                                //         }
-                                                //     });
-                                                // }
+                                                if($(this).find("td:eq(1) ol li").length === 0) {
+                                                    allowSave = false;
+                                                    return false;
+                                                } else {
+                                                    $(this).find("td:eq(1) ol li").each(function() {
+                                                        if(currentStatusOpname === "O") {
+                                                            allowSave = true;
+                                                        } else {
+                                                            if($(this).find("i").hasClass("text-danger")) {
+                                                                if(parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")) === 0) {
+                                                                    allowSave = true;
+                                                                } else {
+                                                                    allowSave = false;
+                                                                    return false;
+                                                                }
+                                                            } else {
+                                                                allowSave = true;
+                                                            }
+                                                        }
+                                                    });
+                                                }
                                             }
 
                                             komposisi.push({
