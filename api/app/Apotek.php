@@ -4163,12 +4163,12 @@ class Apotek extends Utility
                     ->where(array(
                         'rawat_inap.kunjungan' => '= ?',
                         'AND',
-                        'rawat_inap.dokter' => '= ?',
-                        'AND',
+                        // 'rawat_inap.dokter' => '= ?',
+                        // 'AND',
                         'rawat_inap.pasien' => '= ?'
                     ), array(
                         $value['kunjungan'],
-                        $value['dokter'],
+                        //$value['dokter'],
                         $value['pasien']
                     ))
                     ->execute();
@@ -4193,12 +4193,12 @@ class Apotek extends Utility
                     ->where(array(
                         'rawat_inap.kunjungan' => '= ?',
                         'AND',
-                        'rawat_inap.dokter' => '= ?',
-                        'AND',
+                        // 'rawat_inap.dokter' => '= ?',
+                        // 'AND',
                         'rawat_inap.pasien' => '= ?'
                     ), array(
                         $value['kunjungan'],
-                        $value['dokter'],
+                        //$value['dokter'],
                         $value['pasien']
                     ))
                     ->execute();
