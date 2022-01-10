@@ -270,6 +270,8 @@
 			}
 		});
 
+		console.log(__UNIT__);
+
 		
 		$("#btnSubmitVerifikasi").click(function() {
 			var tanggal_amprah = $("#txt_tanggal").datepicker("getDate");
