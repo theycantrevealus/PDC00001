@@ -99,22 +99,25 @@ class DeliveryOrder extends Utility {
 			->execute();
 
 		$autonum = 1;
+		$Pegawai = new Pegawai(self::$pdo);
+		$Inventori = new Inventori(self::$pdo);
+		$Supplier = new Supplier(self::$pdo);
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 
 			$data['response_data'][$key]['tgl_do'] = date('d F Y', strtotime($value['tgl_do']));
 
-			$Supplier = new Supplier(self::$pdo);
+			
 			$SupplierInfo = $Supplier::get_detail($value['supplier']);
 			$data['response_data'][$key]['supplier'] = $SupplierInfo;
 
-			$Inventori = new Inventori(self::$pdo);
+			
 			$InventoriInfo = $Inventori::get_gudang_detail($value['gudang']);
 			$data['response_data'][$key]['gudang'] = $InventoriInfo['response_data'][0];
 
-			$Pegawai = new Pegawai(self::$pdo);
-			$PegawaiInfo = $Pegawai::get_detail($value['pegawai']);
+			
+			$PegawaiInfo = $Pegawai->get_info($value['pegawai']);
 			$data['response_data'][$key]['pegawai'] = $PegawaiInfo['response_data'][0];
 		}
 

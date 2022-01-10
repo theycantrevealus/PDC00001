@@ -45,6 +45,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        
                         var tagihanAllow = 0;
                         var itemTagihanApotek = [];
                         var tagihan = row.invoice;
@@ -88,17 +89,22 @@
 
 
                         var laborAllow = 0;
-                        var labor = row.tagihan_laboratorim;
+                        var labor = row.tagihan_laboratorium;
+                        
                         if(labor.length > 0) {
                             for(var a in labor) {
-                                if(
-                                    labor[a].status === "V" ||   //Verifikasi
-                                    labor[a].status === "K"      //Bayar
-                                ) {
-                                    laborAllow = 0;
-                                    break;
-                                } else {
+                                if(labor[a].detail === undefined || labor[a].detail === null) {
                                     laborAllow = 1;
+                                } else {
+                                    if(
+                                        labor[a].status === "V" ||
+                                        labor[a].status === "K"
+                                    ) {
+                                        laborAllow = 0;
+                                        break;
+                                    } else {
+                                        laborAllow = 1;
+                                    }
                                 }
                             }
                         } else {
@@ -111,14 +117,19 @@
                         var radio = row.tagihan_radiologi;
                         if(radio.length > 0) {
                             for(var a in radio) {
-                                if(
-                                    radio[a].status === "V" ||   //Verifikasi
-                                    radio[a].status === "K"      //Bayar
-                                ) {
-                                    radioAllow = 0;
-                                    break;
-                                } else {
+                                if(radio[a].detail === undefined || radio[a].detail === null) {
+                                    console.log(1);
                                     radioAllow = 1;
+                                } else {
+                                    if(
+                                        radio[a].status === "V" ||
+                                        radio[a].status === "K"
+                                    ) {
+                                        radioAllow = 0;
+                                        break;
+                                    } else {
+                                        radioAllow = 1;
+                                    }
                                 }
                             }
                         } else {
@@ -333,59 +344,65 @@
 
                                 var tagihanLabor = dataTagihan[a].tagihan_laboratorium;
                                 for(var b in tagihanLabor) {
-                                    var status_parse = "";
-                                    var status = tagihanLabor[b].status;
-                                    if(status === "V") {
-                                        status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</i></span>";
-                                    } else if(status === "K") {
-                                        status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>";
-                                    } else if(status === "L" || status === "P" || status === "D") {
-                                        status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>";
-                                    }
-                                    var kalkulasiTotal = 0;
-                                    var TotalBiayaLaboratorium = tagihanLabor[b].biaya;
-                                    for(var tbLabor in TotalBiayaLaboratorium) {
-                                        kalkulasiTotal += parseFloat(TotalBiayaLaboratorium[tbLabor].subtotal);
-                                    }
+                                    if(tagihanLabor[b].detail !== null  && tagihanLabor[b].detail !== undefined) {
+                                        var status_parse = "";
+                                        var status = tagihanLabor[b].status;
+                                        if(status === "V") {
+                                            status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</i></span>";
+                                        } else if(status === "K") {
+                                            status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>";
+                                        } else if(status === "L" || status === "P" || status === "D") {
+                                            status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>";
+                                        }
+                                        var kalkulasiTotal = 0;
+                                        var TotalBiayaLaboratorium = tagihanLabor[b].biaya;
+                                        for(var tbLabor in TotalBiayaLaboratorium) {
+                                            kalkulasiTotal += parseFloat(TotalBiayaLaboratorium[tbLabor].subtotal);
+                                        }
 
-                                    totalBiaya += kalkulasiTotal;
+                                        totalBiaya += kalkulasiTotal;
 
-                                    $("#table-tagihan-pra-inap tbody").append("<tr>" +
-                                        "<td>" + autoTagihanID + "</td>" +
-                                        "<td>" + tagihanLabor[b].no_order + "</td>" +
-                                        "<td class=\"wrap_content\">" + status_parse + "</td>" +
-                                        "<td class=\"number_style\">" + ((tagihanLabor[b].status === "V") ? number_format(0, 2, ".", ",") : number_format(kalkulasiTotal, 2, ".", ",")) + "</td>" +
-                                        "</tr>");
-                                    autoTagihanID++;
+                                        
+
+                                        $("#table-tagihan-pra-inap tbody").append("<tr>" +
+                                            "<td>" + autoTagihanID + "</td>" +
+                                            "<td>" + tagihanLabor[b].no_order + "</td>" +
+                                            "<td class=\"wrap_content\">" + status_parse + "</td>" +
+                                            "<td class=\"number_style\">" + ((tagihanLabor[b].status === "V") ? number_format(0, 2, ".", ",") : number_format(kalkulasiTotal, 2, ".", ",")) + "</td>" +
+                                            "</tr>");
+                                        autoTagihanID++;
+                                    }
                                 }
 
 
                                 var tagihanRadio = dataTagihan[a].tagihan_radiologi;
                                 for(var b in tagihanRadio) {
-                                    var status_parse = "";
-                                    var status = tagihanRadio[b].status;
-                                    if(status === "V") {
-                                        status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</i></span>";
-                                    } else if(status === "K") {
-                                        status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>";
-                                    } else if(status === "L" || status === "P" || status === "D") {
-                                        status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>";
-                                    }
-                                    var kalkulasiTotal = 0;
-                                    var TotalBiayaRadiologi = tagihanRadio[b].biaya;
-                                    for(var tbRadio in TotalBiayaRadiologi) {
-                                        kalkulasiTotal += parseFloat(TotalBiayaRadiologi[tbRadio].subtotal);
-                                    }
+                                    if(tagihanRadio[b].detail !== null  && tagihanRadio[b].detail !== undefined) {
+                                        var status_parse = "";
+                                        var status = tagihanRadio[b].status;
+                                        if(status === "V") {
+                                            status_parse = "<span class=\"text-info\"><i class=\"fa fa-clock\"></i> Sedang Verifikasi</i></span>";
+                                        } else if(status === "K") {
+                                            status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</i></span>";
+                                        } else if(status === "L" || status === "P" || status === "D") {
+                                            status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</i></span>";
+                                        }
+                                        var kalkulasiTotal = 0;
+                                        var TotalBiayaRadiologi = tagihanRadio[b].biaya;
+                                        for(var tbRadio in TotalBiayaRadiologi) {
+                                            kalkulasiTotal += parseFloat(TotalBiayaRadiologi[tbRadio].subtotal);
+                                        }
 
-                                    totalBiaya += kalkulasiTotal;
+                                        totalBiaya += kalkulasiTotal;
 
-                                    $("#table-tagihan-pra-inap tbody").append("<tr>" +
-                                        "<td>" + autoTagihanID + "</td>" +
-                                        "<td>" + tagihanRadio[b].no_order + "</td>" +
-                                        "<td class=\"wrap_content\">" + status_parse + "</td>" +
-                                        "<td class=\"number_style\">" + ((tagihanRadio[b].status === "V") ? number_format(0, 2, ".", ",") : number_format(kalkulasiTotal, 2, ".", ",")) + "</td>" +
-                                        "</tr>");
-                                    autoTagihanID++;
+                                        $("#table-tagihan-pra-inap tbody").append("<tr>" +
+                                            "<td>" + autoTagihanID + "</td>" +
+                                            "<td>" + tagihanRadio[b].no_order + "</td>" +
+                                            "<td class=\"wrap_content\">" + status_parse + "</td>" +
+                                            "<td class=\"number_style\">" + ((tagihanRadio[b].status === "V") ? number_format(0, 2, ".", ",") : number_format(kalkulasiTotal, 2, ".", ",")) + "</td>" +
+                                            "</tr>");
+                                        autoTagihanID++;
+                                    }
                                 }
 
 

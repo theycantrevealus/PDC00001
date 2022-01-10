@@ -222,7 +222,7 @@ class Inap extends Utility
 
             //Laboratorium
             $LaborVerif = self::$query->select('lab_order', array(
-                'status', 'no_order'
+                'uid', 'status', 'no_order'
             ))
                 ->where(array(
                     'lab_order.kunjungan' => '= ?',
@@ -251,6 +251,18 @@ class Inap extends Utility
                         'laboratorium'
                     ))
                     ->execute();
+                $ExistLabor = self::$query->select('lab_order_detail', array(
+                    'id'
+                ))
+                    ->where(array(
+                        'lab_order_detail.lab_order' => '= ?',
+                        'AND',
+                        'lab_order_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $LbValue['uid']
+                    ))
+                    ->execute();
+                $LaborVerif['response_data'][$LbKey]['detail'] = $ExistLabor['response_data'];
                 $LaborVerif['response_data'][$LbKey]['biaya'] = $BiayaKasir['response_data'];
             }
             $data['response_data'][$key]['tagihan_laboratorium'] = $LaborVerif['response_data'];
@@ -286,6 +298,18 @@ class Inap extends Utility
                         'radiologi'
                     ))
                     ->execute();
+                $ExistRadio = self::$query->select('rad_order_detail', array(
+                    'id'
+                ))
+                    ->where(array(
+                        'rad_order_detail.radiologi_order' => '= ?',
+                        'AND',
+                        'rad_order_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $RdValue['uid']
+                    ))
+                    ->execute();
+                $RadioVerif['response_data'][$RdKey]['detail'] = $ExistRadio['response_data'];
                 $RadioVerif['response_data'][$RdKey]['biaya'] = $BiayaKasir['response_data'];
             }
             $data['response_data'][$key]['tagihan_radiologi'] = $RadioVerif['response_data'];
@@ -2192,7 +2216,21 @@ class Inap extends Utility
                     $value['kunjungan']
                 ))
                 ->execute();
-            $data['response_data'][$key]['tagihan_laboratorim'] = $LaborVerif['response_data'];
+            foreach($LaborVerif['response_data'] as $LbKeey => $LbVallue) {
+                $ExistLabor = self::$query->select('lab_order_detail', array(
+                    'id'
+                ))
+                    ->where(array(
+                        'lab_order_detail.lab_order' => '= ?',
+                        'AND',
+                        'lab_order_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $LbVallue['uid']
+                    ))
+                    ->execute();
+                $LaborVerif['response_data'][$LbKeey]['detail'] = $ExistLabor['response_data'];
+            }
+            $data['response_data'][$key]['tagihan_laboratorium'] = $LaborVerif['response_data'];
 
             //Radiologi
             $RadioVerif = self::$query->select('rad_order', array(
@@ -2204,6 +2242,20 @@ class Inap extends Utility
                     $value['kunjungan']
                 ))
                 ->execute();
+            foreach($RadioVerif['response_data'] as $RdKeey => $RdVallue) {
+                $ExistRadio = self::$query->select('lab_order_detail', array(
+                    'id'
+                ))
+                    ->where(array(
+                        'lab_order_detail.lab_order' => '= ?',
+                        'AND',
+                        'lab_order_detail.deleted_at' => 'IS NULL'
+                    ), array(
+                        $RdVallue['uid']
+                    ))
+                    ->execute();
+                $RadioVerif['response_data'][$RdKeey]['detail'] = $ExistRadio['response_data'];
+            }
             $data['response_data'][$key]['tagihan_radiologi'] = $RadioVerif['response_data'];
 
             //Pasien

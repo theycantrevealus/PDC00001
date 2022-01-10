@@ -4,7 +4,7 @@
 
 		var tablePo = $("#table-do").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/PO",
+				url: __HOSTAPI__ + "/PO/all2",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -55,7 +55,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+						return row.autonum;
 					}
 				},
 				{
@@ -88,43 +88,47 @@
 			]
 		});
 
+
+
+
+
+
+
+
 		var tableDo = $("#table-do-his").DataTable({
-            processing: true,
-            serverSide: true,
-            sPaginationType: "full_numbers",
-            bPaginate: true,
-            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
-            serverMethod: "POST",
 			"ajax":{
 				url: __HOSTAPI__ + "/DeliveryOrder",
-				type: "POST",
-				data: function(d) {
-					d.request = "get_do_back_end";
-				},
+				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.clear();
-					console.log(response);
-					var returnedData = response.response_package.response_data;
+					var data = response.response_package.response_data;
+					for(var a = 0; a < data.length; a++) {
+						if(data[a].supplier == undefined || data[a].supplier == null) {
+							data[a].supplier = {
+								nama: "No Data"
+							};
+						}
 
-					// response.draw = parseInt(response.response_package.response_draw);
-					// response.recordsTotal = response.response_package.recordsTotal;
-					// response.recordsFiltered = returnedData.length;
-					
-					return returnedData;
+						if(data[a].pegawai == undefined || data[a].pegawai == null) {
+							data[a].pegawai = {
+								nama: "No Data"
+							};
+						}
+					}
+					return data;
 				}
 			},
 			autoWidth: false,
-			language: {
-				search: "",
-				searchPlaceholder: "Cari Nomor DO"
-			},
+			aaSorting: [[0, "asc"]],
+			"columnDefs":[
+				{"targets":0, "className":"dt-body-left"}
+			],
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+						return row.autonum;
 					}
 				},
 				{
@@ -286,16 +290,12 @@
 			$("#form-tambah").modal("show");
 			return false;
 		});
-
 		
 		$("#tambah-penjamin").click(function() {
 			$("#txt_nama").val("");
 			$("#form-tambah").modal("show");
 			MODE = "tambah";
-
 		});
-
-
 		$("#btnSubmit").click(function() {
 			var nama = $("#txt_nama").val();
 			if(nama != "") {
@@ -312,7 +312,6 @@
 						"nama": nama
 					};
 				}
-
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Penjamin",

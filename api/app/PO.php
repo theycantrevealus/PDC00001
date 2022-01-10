@@ -37,6 +37,9 @@ class PO extends Utility {
                 case 'select2':
                     return self::get_po_select($parameter);
                     break;
+				case 'all2':
+					return self::get_po2($parameter);
+					break;
 				default:
 					return self::get_po();
 					break;
@@ -182,6 +185,54 @@ class PO extends Utility {
         $data['start'] = intval($parameter['start']);
 
         return $data;
+	}
+
+	public function get_po2($parameter) {
+		$data = self::$query->select('inventori_po', array(
+			'uid',
+			'nomor_po',
+			'pegawai',
+			'tanggal_po',
+			'total',
+			'total_after_disc',
+			'supplier',
+			'sumber_dana',
+			'keterangan'
+		))
+		->where(array(
+			'inventori_po.deleted_at' => 'IS NULL',
+			'AND',
+			'inventori_po.nomor_po' => '!= ?'
+		), array(
+			'STOK_AWAL'
+		))
+		->execute();
+
+		$autonum = 1;
+		$Terminologi = new Terminologi(self::$pdo);
+        $Supplier = new Supplier(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+
+		foreach ($data['response_data'] as $key => $value) {
+			//Check Barang sudah sampai atau belum
+			
+			$data['response_data'][$key]['sumber_dana'] = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['sumber_dana'])['response_data'][0];
+
+
+			$InfoSupplier = $Supplier->get_detail($value['supplier']);
+			$data['response_data'][$key]['supplier'] = $InfoSupplier;
+
+
+			$InfoPegawai = $Pegawai->get_info($value['pegawai']);
+
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['tanggal_po'] = date("d F Y", strtotime($value['tanggal_po']));
+			$data['response_data'][$key]['pegawai'] = $InfoPegawai['response_data'][0];
+			
+			$autonum++;
+		}
+
+		return $data;
 	}
 
 	public function get_po() {
