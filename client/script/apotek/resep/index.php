@@ -221,6 +221,7 @@
                                     return row.departemen.nama + "<br />" +
                                         "<span class=\"text-info\">" + ((row.ns_detail.kode_ns !== undefined && row.ns_detail.kode_ns !== null) ? row.ns_detail.kode_ns : "-") + "</span> - " + row.ns_detail.nama_ns;
                                 } else {
+                                    console.log(row.ns_response);
                                     return "-";
                                 }
                             } else {
