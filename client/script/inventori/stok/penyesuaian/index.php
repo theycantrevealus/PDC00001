@@ -810,12 +810,12 @@
 					}
 
 					for(var a in dataSet) {
-						if(metaDataOpname[dataSet[a].uid] == undefined) {
-							metaDataOpname[dataSet[a].uid] = {
+						if(metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid] == undefined) {
+							metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid] = {
 								qty_awal: dataSet[a].stok_terkini,
 								batch: dataSet[a].batch.uid,
-								nilai: ((dataSet[a].old_value !== undefined) ? dataSet[a].old_value : 0),
-								keterangan: dataSet[a].keterangan
+								nilai: (dataSet[a].old_value !== undefined && dataSet[a].old_value !== null) ? dataSet[a].old_value : 0,
+								keterangan: (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-"
 							};
 						}
 					}
@@ -857,12 +857,12 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 
-						return "<input type=\"text\" class=\"form-control aktual_qty\" id=\"item_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"0.00\" value=\"" + parseFloat((row.old_value !== undefined) ? row.old_value : 0) + "\" />";
+						return "<input type=\"text\" class=\"form-control aktual_qty\" id=\"item_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"0.00\" value=\"" + parseFloat((metaDataOpname[row.uid + "_" + row.batch.uid] !== undefined) ? metaDataOpname[row.uid + "_" + row.batch.uid].nilai : 0) + "\" />";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<input type=\"text\" class=\"form-control keterangan_item\" id=\"keterangan_" + row.uid + "\" placeholder=\"Keterangan per Item\" value=\"" + ((row.keterangan !== null && row.keterangan !== undefined) ? row.keterangan : "") + "\" />";
+						return "<input type=\"text\" class=\"form-control keterangan_item\" id=\"keterangan_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"Keterangan per Item\" value=\"" + ((metaDataOpname[row.uid] !== null && metaDataOpname[row.uid + "_" + row.batch.uid] !== undefined) ? metaDataOpname[row.uid + "_" + row.batch.uid].keterangan : "-") + "\" />";
 					}
 				}
 			]
@@ -964,14 +964,23 @@
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
-			metaDataOpname[uid].nilai = parseFloat($(this).inputmask("unmaskedvalue"));
+            var batch = $(this).attr("batch");
+
+			metaDataOpname[uid + "_" + batch].nilai = parseFloat($(this).inputmask("unmaskedvalue"));
+
+            console.clear();
+            console.log(metaDataOpname);
 		});
 
 		$("body").on("keyup", ".keterangan_item", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
-			metaDataOpname[uid].keterangan = $(this).val();
+            var batch = $(this).attr("batch");
+
+			metaDataOpname[uid + "_" + batch].keterangan = $(this).val();
+            console.clear();
+            console.log(metaDataOpname);
 		});
 
 

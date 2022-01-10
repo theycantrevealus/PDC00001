@@ -26,11 +26,9 @@
                         },
                         success: function(res, status, xhr) {
                             var dataSet = "\"batch\",\"nama\",\"kedaluarsa\",\"stok\",\"dup\"\n";
-                            console.log(res);
                             
                             res = res.response_package;
-                            console.log(res);
-
+                            
                             for(var a in res) {
                                 dataSet += "\"" + res[a].batch + "\",\"" + res[a].barang + "\",\"" + res[a].ed + "\"," + res[a].stok_terkini + "," + res[a].dup + "\n";
                             }
@@ -62,9 +60,7 @@
                 dataSrc:function(response) {
                     var returnedData = response.response_package.response_data;
 
-                    console.clear();
-                    console.log(returnedData);
-
+                    
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
@@ -134,39 +130,40 @@
                     }
 
                     for(var dataKey in rawData) {
-                        if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
-                            if(uniqueData[rawData[dataKey].barang] === undefined) {
-                                uniqueData[rawData[dataKey].barang] = {
-                                    barang: rawData[dataKey].barang,
-                                    stok_terkini: parseFloat(rawData[dataKey].stok_terkini),
-                                    stok_batch: 0,
-                                    batch: {},
-                                    detail : rawData[dataKey].detail,
-                                    image: rawData[dataKey].image,
-                                    kategori_obat: rawData[dataKey].kategori_obat,
-                                    kode_barang: rawData[dataKey].kode_barang,
-                                    in: rawData[dataKey].in,
-                                    out: rawData[dataKey].out
-                                };
-                            }
-
-
-                            var uniqueBatch = {};
-                            if(Array.isArray(rawData[dataKey].batch)) {
-                                var batchData = rawData[dataKey].batch;
-                                for(var bKey in batchData) {
-                                    if(batchData[bKey].gudang.uid === __UNIT__.gudang && batchData[bKey].barang === rawData[dataKey].barang) {
-                                        if(uniqueBatch[batchData[bKey].batch] === undefined && uniqueBatch[batchData[bKey].batch] === null) {
-                                            uniqueBatch[batchData[bKey].batch] = 0;
-                                        }
-                                        uniqueBatch[batchData[bKey].batch] = parseFloat(batchData[bKey].stok_terkini);
-                                        uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
-                                    }
-                                }
-
-                                uniqueData[rawData[dataKey].barang].batch = uniqueBatch;
-                            }
+                        if(uniqueData[rawData[dataKey].barang] === undefined) {
+                            uniqueData[rawData[dataKey].barang] = {
+                                barang: rawData[dataKey].barang,
+                                stok_terkini: 0,
+                                stok_batch: 0,
+                                batch: {},
+                                detail : rawData[dataKey].detail,
+                                image: rawData[dataKey].image,
+                                kategori_obat: rawData[dataKey].kategori_obat,
+                                kode_barang: rawData[dataKey].kode_barang,
+                                in: rawData[dataKey].in,
+                                out: rawData[dataKey].out
+                            };
                         }
+
+                        uniqueData[rawData[dataKey].barang].stok_terkini += parseFloat(rawData[dataKey].stok_terkini);
+                        // if(rawData[dataKey].gudang === __UNIT__.gudang/* && parseFloat(rawData[dataKey].stok_terkini) > 0*/) {
+                            
+                        //     var uniqueBatch = {};
+                        //     if(Array.isArray(rawData[dataKey].batch)) {
+                        //         var batchData = rawData[dataKey].batch;
+                        //         for(var bKey in batchData) {
+                        //             if(batchData[bKey].gudang.uid === __UNIT__.gudang && batchData[bKey].barang === rawData[dataKey].barang) {
+                        //                 if(uniqueBatch[batchData[bKey].batch] === undefined && uniqueBatch[batchData[bKey].batch] === null) {
+                        //                     uniqueBatch[batchData[bKey].batch] = 0;
+                        //                 }
+                        //                 uniqueBatch[batchData[bKey].batch] = parseFloat(batchData[bKey].stok_terkini);
+                        //                 uniqueData[rawData[dataKey].barang].stok_batch += parseFloat(batchData[bKey].stok_terkini);
+                        //             }
+                        //         }
+
+                        //         uniqueData[rawData[dataKey].barang].batch = uniqueBatch;
+                        //     }
+                        // }
                     }
 
                     var autonum = 1;
@@ -192,11 +189,17 @@
                         autonum++;
                     }
 
+                    
+
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
                     return returnedData;
+                },
+                error: function(response) {
+                    console.clear();
+                    console.log(response);
                 }
             },
             autoWidth: false,

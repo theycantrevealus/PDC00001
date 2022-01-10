@@ -62,7 +62,7 @@
 			var poData;
 			$.ajax({
 				async: false,
-				url: __HOSTAPI__ + "/PO",
+				url: __HOSTAPI__ + "/PO/list",
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
@@ -129,7 +129,9 @@
 			var newQtyInput = document.createElement("INPUT");
 			$(newQty).append(newQtyInput);
 			$(newQtyInput).addClass("form-control qty").inputmask({
-				alias: 'decimal', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true
+				alias: 'decimal', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true,
+				min: 0, max: (parseFloat(data.qty) - parseFloat(data.sudah_sampai)),
+				allowMinus: false,
 			});
 
 			console.log(data.detail);
@@ -457,7 +459,7 @@
 					},
 					type: "POST",
 					success: function(response){
-						//console.log(response);
+						console.log(response);
 						if(response.response_package.response_result > 0) {
 							location.href = __HOSTNAME__ + '/inventori/do';
 						}

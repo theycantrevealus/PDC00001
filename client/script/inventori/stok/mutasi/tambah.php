@@ -409,7 +409,7 @@
                         success:function(response) {
                             if(response.response_package.response_result > 0) {
                                 notification ("success", "Mutasi Stok berhasil di proses", 3000, "hasil_mutasi");
-                                location.href = __HOSTNAME__ + "/inventori/stok/mutasi";
+                                //location.href = __HOSTNAME__ + "/inventori/stok/mutasi";
                             } else {
                                 notification ("danger", "Mutasi Stok gagal di proses", 3000, "hasil_mutasi");
                                 $("#btnSubmitVerifikasi").removeAttr("disabled");
