@@ -116,7 +116,6 @@
                 dataSrc:function(response) {
                     var forReturn = [];
                     var dataSet = response.response_package.response_data;
-                    console.log(dataSet);
                     if(dataSet == undefined) {
                         dataSet = [];
                     }
@@ -126,8 +125,7 @@
                             forReturn.push(dataSet[dKey]);
                         }
                     }
-                    console.log(forReturn);
-
+                    
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsTotal;

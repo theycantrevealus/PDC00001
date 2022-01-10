@@ -4144,7 +4144,7 @@ class Apotek extends Utility
 
 
             //Departemen Info
-            if($value['departemen'] === __POLI_INAP__) {
+            if($value['departemen'] === __POLI_INAP__ ||$value['departemen'] === __POLI_IGD__) {
                 $data['response_data'][$key]['departemen'] = array(
                     'uid' => __POLI_INAP__,
                     'nama' => 'Rawat Inap'
