@@ -398,7 +398,13 @@
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.departemen !== null && row.departemen !== undefined) {
                             if (row.departemen.uid === __POLI_INAP__) {
-                                return row.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.ns_detail.kode_ns + "]</span>" + row.ns_detail.nama_ns;
+                                if(row.ns_detail !== undefined && row.ns_detail !== null) {
+                                    return row.departemen.nama + "<br />" + "<span class=\"text-info\">[" + row.ns_detail.kode_ns + "]</span>" + row.ns_detail.nama_ns;
+                                } else {
+                                    console.log(row.ns_detail);
+                                    return "";
+                                }
+                                
                             } else {
                                 return row.departemen.nama;
                             }
