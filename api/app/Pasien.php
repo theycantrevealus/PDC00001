@@ -86,6 +86,10 @@ class Pasien extends Utility
                 return self::edit_pasien('pasien', $parameter);
                 break;
 
+            case 'reformat_pasien':
+                return self::reformat_pasien($parameter);
+                break;
+
             case 'master_pasien_import_fetch':
                 return self::master_pasien_import_fetch($parameter);
                 break;
@@ -694,6 +698,31 @@ class Pasien extends Utility
         }
 
         return $data;
+    }
+
+    private function reformat_pasien($parameter) {
+        $Data = self::$query->select('pasien', array(
+            'uid', 'no_rm'
+        ))
+            ->where(array(
+                'pasien.no_rm' => 'ILIKE ' . '\'%-%\'',
+            ), array())
+            ->execute();
+        $failedData = array();
+        foreach($Data['response_data'] as $key => $value) {
+            $U = self::$query->update('pasien', array(
+                'no_rm' => str_replace('-', '', $value['no_rm'])
+            ))
+                ->where(array(
+                    'pasien.uid' => '= ?',
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            array_push($failedData, $U);
+        }
+
+        return $failedData;
     }
 
     private function master_pasien_import_fetch($parameter)
