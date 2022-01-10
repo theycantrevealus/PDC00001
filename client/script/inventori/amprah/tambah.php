@@ -18,7 +18,15 @@
 			autoclose: true
 		}).datepicker("setDate", new Date());
 
-		$("#txt_unit").val(__UNIT__.nama);
+
+		if(__UNIT__.response_data !== undefined) {
+			if(__UNIT__.response_data.length > 0) {
+				$("#txt_unit").val(__UNIT__.response_data[0].nama);
+			}
+		} else {
+			$("#txt_unit").val(__UNIT__.nama);
+		}
+		
 		$("#txt_nama").val(__MY_NAME__);
 
 		autoTable("#table-detail-amprah");
@@ -269,8 +277,6 @@
 				notification ("danger", "Isi data permintaan amprah", 3000, "detail_amprah");
 			}
 		});
-
-		console.log(__UNIT__);
 
 		
 		$("#btnSubmitVerifikasi").click(function() {
