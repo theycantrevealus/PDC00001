@@ -315,6 +315,8 @@
                                         status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</span>";
                                     } else if(status === "L" || status === "P" || status === "S") {
                                         status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</span>";
+                                    } else {
+                                        status_parse = status;
                                     }
                                     var kalkulasiTotal = 0;
                                     var TotalBiayaApotek = tagihanApotek[b].biaya;
