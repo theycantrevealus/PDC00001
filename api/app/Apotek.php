@@ -4144,7 +4144,7 @@ class Apotek extends Utility
 
 
             //Departemen Info
-            if($value['departemen'] === __POLI_INAP__ ||$value['departemen'] === __POLI_IGD__) {
+            if($value['departemen'] === __POLI_INAP__) {
                 $data['response_data'][$key]['departemen'] = array(
                     'uid' => __POLI_INAP__,
                     'nama' => 'Rawat Inap'
@@ -4172,6 +4172,37 @@ class Apotek extends Utility
                         $value['pasien']
                     ))
                     ->execute();
+                $data['response_data'][$key]['ns_response'] = $NS;
+                $data['response_data'][$key]['ns_detail'] = $NS['response_data'][0];
+            } else if($value['departemen'] === __POLI_IGD__) {
+                $data['response_data'][$key]['departemen'] = array(
+                    'uid' => __POLI_IGD__,
+                    'nama' => 'IGD'
+                );
+
+                //NS Info
+                $NS = self::$query->select('rawat_inap', array(
+                    'nurse_station'
+                ))
+                    ->join('nurse_station', array(
+                        'kode as kode_ns', 'nama as nama_ns'
+                    ))
+                    ->on(array(
+                        array('rawat_inap.nurse_station', '=', 'nurse_station.uid')
+                    ))
+                    ->where(array(
+                        'rawat_inap.kunjungan' => '= ?',
+                        'AND',
+                        'rawat_inap.dokter' => '= ?',
+                        'AND',
+                        'rawat_inap.pasien' => '= ?'
+                    ), array(
+                        $value['kunjungan'],
+                        $value['dokter'],
+                        $value['pasien']
+                    ))
+                    ->execute();
+                $data['response_data'][$key]['ns_response'] = $NS;
                 $data['response_data'][$key]['ns_detail'] = $NS['response_data'][0];
             } else {
                 $PoliInfo = $Poli->get_poli_info($value['departemen']);
