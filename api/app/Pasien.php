@@ -481,6 +481,7 @@ class Pasien extends Utility
             $uid = parent::gen_uuid();
 
             $allData['uid'] = $uid;
+            $allData['no_rm'] = str_replace('-', '', $allData['no_rm']);
             $allData['created_at'] = parent::format_date();
             $allData['updated_at'] = parent::format_date();
 
