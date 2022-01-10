@@ -54,11 +54,15 @@
                                 if(tagihan[ab].invoice_detail[az].status_bayar === "Y") {
                                     tagihanAllow = 1;
                                 } else {
-                                    if(tagihan[ab].invoice_detail[az].item_type === "master_inv" && itemTagihanApotek.indexOf(tagihan[ab].invoice_detail[az].item) < 0) {
+                                    if(tagihan[ab].invoice_detail[az].item_type === "master_unit_bed") {
+                                        tagihanAllow = 1;    
+                                    } else {
+                                        if(tagihan[ab].invoice_detail[az].item_type === "master_inv" && itemTagihanApotek.indexOf(tagihan[ab].invoice_detail[az].item) < 0) {
                                         itemTagihanApotek.push(tagihan[ab].invoice_detail[az].item);
                                     }
                                     tagihanAllow = 0;
                                     break;
+                                    }
                                 }
                             }
                         }
