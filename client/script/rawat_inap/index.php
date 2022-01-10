@@ -75,7 +75,7 @@
                                     apotekAllow = 0;
                                     break;
                                 } else {
-                                    if(itemTagihanApotek.length > 0 && apotek[a].status_resep === "L") {
+                                    if(itemTagihanApotek.length > 0 && (apotek[a].status_resep === "L" || apotek[a].status_resep === "D")) {
                                         apotekAllow = 0;
                                         break;
                                     } else {
@@ -313,7 +313,7 @@
                                         status_parse = "<span class=\"text-muted\"><i class=\"fa fa-exclamation-triangle\"></i> Cancel</span>";
                                     } else if(status === "K") {
                                         status_parse = "<span class=\"text-danger\"><i class=\"fa fa-exclamation-circle\"></i> Belum Lunas</span>";
-                                    } else if(status === "L" || status === "P" || status === "S") {
+                                    } else if(status === "L" || status === "P" || status === "S" || status === "D") {
                                         status_parse = "<span class=\"text-success\"><i class=\"fa fa-check-circle\"></i> Lunas</span>";
                                     } else {
                                         status_parse = status;
