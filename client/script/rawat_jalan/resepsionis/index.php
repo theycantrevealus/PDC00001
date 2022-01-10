@@ -145,18 +145,19 @@
 				    var data = response.response_package.response_data;
 				    var filtered = [];
 
-                    response.draw = parseInt(response.response_package.response_draw);
-                    response.recordsTotal = response.response_package.recordsFiltered;
-                    response.recordsFiltered = response.response_package.recordsTotal;
-
-				    for(var key in data) {
+                    for(var key in data) {
 				        if(data[key].departemen !== "IGD") {
 				            filtered.push(data[key])
                         } else {
                             filtered.push(data[key])
                         }
                     }
+
 					return filtered;
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 				}
 			},
 			autoWidth: false,
@@ -365,7 +366,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
                     return returnedData;
                 },

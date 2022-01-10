@@ -102,7 +102,8 @@ class Antrian extends Utility
                 'updated_at'
             ))
                 ->join('pasien', array(
-                    'nama as nama_pasien'
+                    'nama as nama_pasien',
+                    'no_rm'
                 ))
                 ->on(array(
                     array('igd.pasien', '=' , 'pasien.uid')
