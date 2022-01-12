@@ -149,7 +149,7 @@
                             } else {
                                 $("#strategi-amprah").append("<tr>" +
                                     "<td>" + amprah[a].detail[aa].batch.batch + "</td>" +
-                                    "<td> class=\"number_style\"" + number_format(amprah[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(amprah[a].detail[aa].qty, 2, ".", ",") + "</td>" +
                                     "<td class=\"number_style\">" + number_format(amprah[a].total, 2, ".", ",") + "</td>" +
                                     "</tr>");
                             }
@@ -173,7 +173,7 @@
                             } else {
                                 $("#strategi-potong").append("<tr>" +
                                     "<td>" + potong[a].detail[aa].batch.batch + "</td>" +
-                                    "<td> class=\"number_style\"" + number_format(potong[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(potong[a].detail[aa].qty, 2, ".", ",") + "</td>" +
                                     "<td class=\"number_style\">" + number_format(potong[a].total, 2, ".", ",") + "</td>" +
                                     "</tr>");
                             }
@@ -213,7 +213,7 @@
                             } else {
                                 $("#strategi-amprah").append("<tr>" +
                                     "<td>" + amprah[a].detail[aa].batch.batch + "</td>" +
-                                    "<td> class=\"number_style\"" + number_format(amprah[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(amprah[a].detail[aa].qty, 2, ".", ",") + "</td>" +
                                     "<td class=\"number_style\">" + number_format(amprah[a].total, 2, ".", ",") + "</td>" +
                                     "</tr>");
                             }
@@ -242,7 +242,7 @@
                             } else {
                                 $("#strategi-potong").append("<tr>" +
                                     "<td>" + potong[a].detail[aa].batch.batch + "</td>" +
-                                    "<td> class=\"number_style\"" + number_format(potong[a].detail[aa].qty, 2, ".", ",") + "</td>" +
+                                    "<td class=\"number_style\">" + number_format(potong[a].detail[aa].qty, 2, ".", ",") + "</td>" +
                                     "<td class=\"number_style\">" + number_format(potong[a].total, 2, ".", ",") + "</td>" +
                                     "</tr>");
                             }
@@ -818,6 +818,11 @@
 								keterangan: (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-"
 							};
 						}
+
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_awal = dataSet[a].stok_terkini;
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].batch = dataSet[a].batch.uid;
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].nilai = (dataSet[a].old_value !== undefined && dataSet[a].old_value !== null) ? dataSet[a].old_value : 0;
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].keterangan = (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-";
 					}
 
 					$("#txt_keterangan").val(response.response_package.keterangan);
