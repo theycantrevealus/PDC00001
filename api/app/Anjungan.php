@@ -291,15 +291,20 @@ class Anjungan extends Utility {
 			'jenis_antrian'
 		))
 		->where(array(
-			'antrian_nomor.status' => '= ?',
+			'(antrian_nomor.status' => '= ?',
+			'OR',
+			'antrian_nomor.status' => '= ?)',
 			'AND',
 			'antrian_nomor.pegawai' => '= ?',
 			'AND',
 			'DATE(antrian_nomor.created_at)' => '= ?'
 		), array(
-			'D',
+			'D', 'K',
 			$UserData['data']->uid,
 			date('Y-m-d')
+		))
+		->order(array(
+			'created_at' => 'DESC'
 		))
 		->execute();
 		if(count($data['response_data']) > 0) {
@@ -805,13 +810,15 @@ class Anjungan extends Utility {
             'jenis_antrian'
         ))
             ->where(array(
-                'antrian_nomor.status' => '= ?',
+                '(antrian_nomor.status' => '= ?',
+				'OR',
+				'antrian_nomor.status' => '= ?)',
                 'AND',
                 'antrian_nomor.pegawai' => '= ?',
                 'AND',
                 'DATE(antrian_nomor.created_at)' => '= ?'
             ), array(
-                'C',
+                'C', 'K',
                 $UserData['data']->uid,
                 date('Y-m-d')
             ))
