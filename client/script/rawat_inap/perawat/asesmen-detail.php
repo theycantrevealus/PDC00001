@@ -1402,6 +1402,8 @@
                             nurse_station: nurse_station
                         },
                         success: function (response) {
+                            console.clear();
+                            console.log(response);
                             var data = [];
                             if(response.response_package !== undefined) {
                                 data = response.response_package.response_data;
