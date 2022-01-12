@@ -808,8 +808,8 @@
 					}
 
 					for(var a in dataSet) {
-                        
-						if(metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid] == undefined) {
+                        console.log(dataSet[a].supervisi_detail);
+                        if(metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid] == undefined) {
 							metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid] = {
 								qty_awal: dataSet[a].stok_terkini,
                                 signed: (dataSet[a].supervisi === __ME__) ? 1 : 0,
@@ -839,6 +839,14 @@
 				search: "",
 				searchPlaceholder: "Cari Barang"
 			},
+            "rowCallback": function ( row, data, index ) {
+                console.info(metaDataOpname[data.barang + "_" + data.batch.uid].signed);
+                if(metaDataOpname[data.barang + "_" + data.batch.uid].signed > 0) {
+                    $("td", row).addClass("bg-success-custom");
+                } else {
+                    //$("td", row).addClass("bg-danger-custom");
+                }
+            },
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
@@ -848,6 +856,11 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<b>" + row.nama + "</b><span class=\"pull-right text-info\" style=\"font-size: 12pt;\">[" + row.batch.batch + "]</span>" + "<br /><small>ED: " + row.batch.expired_date + "</small>";
+					}
+				},
+                {
+					"data" : null, render: function(data, type, row, meta) {
+                        return "<h6 class=\"wrap_content\">" + ((row.supervisi_detail.nama !== undefined && row.supervisi_detail.nama !== "") ? row.supervisi_detail.nama : "-")  + "</h6>";
 					}
 				},
 				{
@@ -873,7 +886,7 @@
 				}
 			]
 		}).on("draw.dt", function () {
-			$(".aktual_qty").inputmask({
+            $(".aktual_qty").inputmask({
 				alias: 'decimal',
 				rightAlign: true,
 				placeholder: "0.00",
@@ -1292,7 +1305,8 @@
 										<thead class="thead-dark">
 											<tr>
 												<th class="wrap_content">No</th>
-												<th style="width: 50%">Barang</th>
+												<th style="width: 40%">Barang</th>
+                                                <th class="wrap_content">Petugas</th>
 												<th class="wrap_content">Stok</th>
                                                 <th>Satuan</th>
 												<th style="width: 10%;">Aktual</th>

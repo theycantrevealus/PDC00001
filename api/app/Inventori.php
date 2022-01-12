@@ -7014,16 +7014,19 @@ class Inventori extends Utility
 
                 $obatIdentifier[$OPValue['item']][$OPValue['batch']]['qty'] = $OPValue['qty_akhir'];
                 $obatIdentifier[$OPValue['item']][$OPValue['batch']]['remark'] = $OPValue['keterangan'];
+                $obatIdentifier[$OPValue['item']][$OPValue['batch']]['supervisi'] = $OPValue['supervisi'];
             }
         }
 
         $autonum = 1;
+        $Pegawai = new Pegawai(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $data['response_data'][$key]['satuan_terkecil'] = self::get_satuan_detail($value['satuan_terkecil'])['response_data'][0];
             $data['response_data'][$key]['old_value'] = $obatIdentifier[$value['uid']][$value['batch']]['qty'];
             $data['response_data'][$key]['keterangan'] = $obatIdentifier[$value['uid']][$value['batch']]['remark'];
             $data['response_data'][$key]['supervisi'] = $obatIdentifier[$value['uid']][$value['batch']]['supervisi'];
+            $data['response_data'][$key]['supervisi_detail'] = $Pegawai->get_info($obatIdentifier[$value['uid']][$value['batch']]['supervisi'])['response_data'][0];
             $data['response_data'][$key]['batch'] = self::get_batch_detail($value['batch'])['response_data'][0];
             $data['response_data'][$key]['batch']['expired_date'] = date('d F Y', strtotime($data['response_data'][$key]['batch']['expired_date']));
             $autonum++;
