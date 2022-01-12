@@ -720,6 +720,7 @@ class Inventori extends Utility
 
 
                 //Import Stok Obat
+                //TODO : Sementara saja untuk harga Obat
                 $StokAwal = self::$query->insert('inventori_stok', array(
                     'barang' => $targettedObat,
                     'batch' => $targettedBatch,
@@ -6758,6 +6759,9 @@ class Inventori extends Utility
                     array('inventori_stok.barang', '=', 'master_inv.uid')
                 ))
                 ->where($paramData, $paramValue)
+                ->order(array(
+                    'id' => 'ASC'
+                ))
                 ->execute();
         } else {
             $data = self::$query->select('inventori_stok', array(
@@ -6777,6 +6781,9 @@ class Inventori extends Utility
                 ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
+                ->order(array(
+                    'id' => 'ASC'
+                ))
                 ->limit(intval($parameter['length']))
                 ->execute();
         }
