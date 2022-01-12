@@ -131,8 +131,6 @@
                 },
                 type:"GET",
                 success:function(response) {
-                    console.clear();
-                    console.log(response);
                     $("#strategi-amprah tbody").html("");
                     var amprah = response.response_package.amprah;
                     var autoAmprah = 1;
@@ -697,9 +695,7 @@
         });
 
 		$("#btnSubmitStokOpname").click(function() {
-            console.clear();
-            console.log(metaDataOpname);
-
+            
 
             var allowSaveDataOpname = false;
 
@@ -752,10 +748,10 @@
                             },
                             type:"POST",
                             success:function(response) {
+                                tableHistoryOpname.ajax.reload();
+                                tableCurrentStock.ajax.reload();
                                 if(response.response_package.response_result > 0) {
                                     $("#form-tambah").modal("hide");
-                                    tableHistoryOpname.ajax.reload();
-                                    tableCurrentStock.ajax.reload();
                                 } else {
                                     Swal.fire(
                                         'Penyesuaian Stok',
@@ -797,22 +793,26 @@
 				url: __HOSTAPI__ + "/Inventori",
 				type: "POST",
 				data: function(d){
-					d.request = "get_stok_gudang";
+					d.request = "get_stok_gudang_opname";
 					d.gudang = __UNIT__.gudang;
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+                    console.clear();
+                    var opnameItemIden = response.response_package.opname_iden;
 					var dataSet = response.response_package.response_data;
 					if(dataSet == undefined) {
 						dataSet = [];
 					}
 
 					for(var a in dataSet) {
+                        
 						if(metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid] == undefined) {
 							metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid] = {
 								qty_awal: dataSet[a].stok_terkini,
+                                signed: (dataSet[a].supervisi === __ME__) ? 1 : 0,
 								batch: dataSet[a].batch.uid,
 								nilai: (dataSet[a].old_value !== undefined && dataSet[a].old_value !== null) ? dataSet[a].old_value : 0,
 								keterangan: (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-"
@@ -823,6 +823,7 @@
                         // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].batch = dataSet[a].batch.uid;
                         // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].nilai = (dataSet[a].old_value !== undefined && dataSet[a].old_value !== null) ? dataSet[a].old_value : 0;
                         // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].keterangan = (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-";
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_akhir = opnameItemIden[dataSet[a].uid + "_" + dataSet[a].batch.uid];
 					}
 
 					$("#txt_keterangan").val(response.response_package.keterangan);
@@ -862,12 +863,12 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 
-						return "<input type=\"text\" class=\"form-control aktual_qty\" id=\"item_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"0.00\" value=\"" + parseFloat((metaDataOpname[row.uid + "_" + row.batch.uid] !== undefined) ? metaDataOpname[row.uid + "_" + row.batch.uid].nilai : 0) + "\" />";
+						return "<input type=\"text\" class=\"form-control aktual_qty\" id=\"item_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"0.00\" value=\"" + parseFloat((metaDataOpname[row.uid + "_" + row.batch.uid] !== null && metaDataOpname[row.uid + "_" + row.batch.uid] !== undefined) ? metaDataOpname[row.uid + "_" + row.batch.uid].nilai : 0) + "\" />";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<input type=\"text\" class=\"form-control keterangan_item\" id=\"keterangan_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"Keterangan per Item\" value=\"" + ((metaDataOpname[row.uid] !== null && metaDataOpname[row.uid + "_" + row.batch.uid] !== undefined) ? metaDataOpname[row.uid + "_" + row.batch.uid].keterangan : "-") + "\" />";
+						return "<input type=\"text\" class=\"form-control keterangan_item\" id=\"keterangan_" + row.uid + "\" batch=\"" + row.batch.uid + "\" placeholder=\"Keterangan per Item\" value=\"" + ((metaDataOpname[row.uid + "_" + row.batch.uid] !== null && metaDataOpname[row.uid + "_" + row.batch.uid] !== undefined) ? metaDataOpname[row.uid + "_" + row.batch.uid].keterangan : "-") + "\" />";
 					}
 				}
 			]
@@ -971,21 +972,17 @@
 
             var batch = $(this).attr("batch");
 
+            metaDataOpname[uid + "_" + batch].signed = 1;
 			metaDataOpname[uid + "_" + batch].nilai = parseFloat($(this).inputmask("unmaskedvalue"));
-
-            console.clear();
-            console.log(metaDataOpname);
 		});
 
-		$("body").on("keyup", ".keterangan_item", function() {
+		$("body").on("change", ".keterangan_item", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
             var batch = $(this).attr("batch");
-
+            metaDataOpname[uid + "_" + batch].signed = 1;
 			metaDataOpname[uid + "_" + batch].keterangan = $(this).val();
-            console.clear();
-            console.log(metaDataOpname);
 		});
 
 
