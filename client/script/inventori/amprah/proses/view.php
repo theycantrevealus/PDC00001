@@ -179,13 +179,16 @@
 				$("#table-batch tbody tr").remove();
 				//$("#table-monitor-batch tbody tr").remove();
                 targetJumlahAmprah = parseFloat($("#request_qty_" + id).html().replaceAll(",",""));
+				
 				$("#target_batch_amprah").html(metaData[id].nama);
 				$("#qty_batch_amprah").html($("#request_qty_" + id).html());
 				$("#unit_pengamprah").html(unit_pengamprah.nama);
 				//alert($("#qty_" + id).html());
 				
 				for(var key in metaData[id].batch) {
-					if(metaData[id].batch[key].gudang != null && metaData[id].batch[key].gudang.uid == __GUDANG_UTAMA__) {
+					var targetDisetujui = (metaData[selectedItem].batch[key].disetujui == undefined) ? 0 : metaData[selectedItem].batch[key].disetujui;
+					if(metaData[id].batch[key].gudang != null && metaData[id].batch[key].gudang.uid == __GUDANG_UTAMA__ && metaData[id].batch[key].stok_terkini > 0) {
+						console.log(metaData[id].batch[key]);
 						var batchRow = document.createElement("TR");
 						$(batchRow).attr({
 							"id":"batch_" + metaData[id].batch[key].batch
@@ -222,9 +225,9 @@
 							$(batchRow).append(batchStokCont);
 							$(batchRow).append(batchJumlahCont);
 						} else {
-							$(batchRow).append(batchAutoNumCont);
-							$(batchRow).append(batchKodeCont);
-							$(batchRow).append(batchStokCont);
+							// $(batchRow).append(batchAutoNumCont);
+							// $(batchRow).append(batchKodeCont);
+							// $(batchRow).append(batchStokCont);
 						}
 
 						$("#table-batch tbody").append(batchRow);
@@ -250,27 +253,26 @@
 				totalRequest += parseFloat(currentCount);
 
 				for(var bKey in metaData[selectedItem].batch) {
-						
-
 					if(metaData[selectedItem].batch[bKey].gudang.uid == __GUDANG_UTAMA__) {
 						if(metaData[selectedItem].batch[bKey].batch == currentBatch) {
 							if(metaData[selectedItem].batch[bKey].disetujui == undefined) {
 								metaData[selectedItem].batch[bKey].disetujui = 0;
 							}
 							
-							metaData[selectedItem].batch[bKey].disetujui = currentCount;
+							metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
 						}
 					}
 				}
 			});
 
-			if(totalRequest != parseFloat(targetJumlahAmprah)) {
+			if(parseFloat(totalRequest) != parseFloat(targetJumlahAmprah)) {
 				if($("#keterangan_per_item").val() != "") {
+					console.log('Waw');
 					$("ol#item_batch_" + selectedItem + " li").remove();
 					for(var bKey in metaData[selectedItem].batch) {
 						var newListBatch = document.createElement("LI");
 
-						if(metaData[selectedItem].batch[bKey].disetujui > 0) {
+						if(floatval(metaData[selectedItem].batch[bKey].disetujui) > 0) {
 							$(newListBatch).html(metaData[selectedItem].batch[bKey].kode + " - [<b>" + metaData[selectedItem].batch[bKey].expired + "</b>] <b style=\"padding-right: 120px; float: right\" class=\"text-info\">(" + metaData[selectedItem].batch[bKey].disetujui + ")</b>");
 							$("ol#item_batch_" + selectedItem).append(newListBatch);
 						}
@@ -281,10 +283,14 @@
 					$("#qty_disetujui_" + selectedItem).html(totalRequest);
 					$("#form-batch-barang").modal("hide");
 				} else {
+					console.log('Waw');
 					$("#keterangan_per_item").focus();
 					notification ("danger", "Jumlah tidak memenuhi permintaan. Wajib isi keterangan", 3000, "proceed_amprah");
 				}
 			} else {
+				console.log("Total Request : " + totalRequest);
+				console.log("Amprah Request : " + targetJumlahAmprah);
+				
                 $("ol#item_batch_" + selectedItem + " li").remove();
                 for(var bKey in metaData[selectedItem].batch) {
                     var newListBatch = document.createElement("LI");

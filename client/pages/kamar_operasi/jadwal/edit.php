@@ -36,6 +36,10 @@
 						<label for="nik_pasien">NIK</label>
 						<input disabled type="text" id="nik_pasien" class="form-control" value="">
 					</div>
+                    <div class="col-6 col-md-6 mb-3">
+                        <label for="penjamin">Penjamin</label>
+                        <select id="penjamin" class="form-control"></select>
+                    </div>
 				</div>
 			</div>
 		</div>
@@ -89,6 +93,37 @@
 			</div>
 		</div>
 	</div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-4">
+                    <b>Paket Obat:</b>
+                    <select class="form-control" id="paket_obat">
+                        <option value="none">Tanpa Paket</option>
+                    </select>
+                </div>
+                <div class="col-lg-8 text-right">
+                    <small>Total Biaya Obat:</small><br />
+                    <h4 class="text-danger" id="totalBiayaObatOK">0.00</h4>
+                </div>
+                <div class="col-lg-12">
+                    <br />
+                    <table class="table table-bordered largeDataType table-striped" id="autoObat">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th class="wrap_content">No</th>
+                                <th style="width: 50%">Nama Obat / BHP</th>
+                                <th style="width: 10%">Jlh</th>
+                                <th style="width: 10%">Satuan</th>
+                                <th class="wrap_content">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 	<div class="card card-form">
 		<div class="row no-gutters">
 			<div class="col-lg-4 card-body">

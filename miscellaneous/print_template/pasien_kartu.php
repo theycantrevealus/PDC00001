@@ -74,8 +74,8 @@
             <div class="left1">
                 <?php
                 Sentry\init(['dsn' => 'https://9754244694444cccaf869914e1e4f5a3@o412931.ingest.sentry.io/5294475' ]);
-                $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
-                echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($_POST['no_rm'], $generator::TYPE_CODE_128, 25, 350)) . '" width="100px !important">';
+                //$generator = new Picqer\Barcode\BarcodeGeneratorPNG();
+                //echo '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($_POST['no_rm'], $generator::TYPE_CODE_128, 25, 350)) . '" width="100px !important">';
                 ?>
             </div>
             <div class="clear"></div>

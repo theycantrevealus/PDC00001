@@ -20,7 +20,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -33,7 +33,7 @@
 										"<i class=\"fa fa-home\"></i> " + row.alamat +
 									"</small>";
 						}
-						return 	"<b id=\"nama_" + row.uid + "\">" + row.nama + "</b><br />" + 
+						return 	"<b class=\"title-caption text-info\" id=\"nama_" + row.uid + "\">" + row.nama + "</b><br />" +
 								alamat;
 					}
 				},

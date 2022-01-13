@@ -1,12 +1,29 @@
 <script type="text/javascript">
 	$(function() {
+        var currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#opname_notif_amprah");
+        reCheckStatus(currentStatus);
+        function reCheckStatus(currentStatus) {
+            if(currentStatus === "A") {
+                $(".disable-panel-opname").hide();
+                $("#btnSubmitAmprah").show();
+                $("#btnSubmitAmprah").removeAttr("disabled");
+            } else {
+                $(".disable-panel-opname").show();
+                $("#btnSubmitAmprah").hide();
+                $("#btnSubmitAmprah").attr({
+                    "disabled": "disabled"
+                });
+            }
+        }
 		var metaDataOpname = {};
 		$("#txt_tanggal").datepicker({
 			dateFormat: 'DD, dd MM yy',
 			autoclose: true
 		}).datepicker("setDate", new Date());
 
-		$("#txt_unit_asal").val(__UNIT__.nama);
+		$("#txt_unit_asal").val(__UNIT__.nama).attr({
+            "disabled": "disabled"
+        });
 		$("#txt_nama").val(__MY_NAME__);
 		load_unit("#txt_unit_asal", "", __UNIT__.uid);
 		load_unit("#txt_unit_tujuan", __UNIT__.uid);
@@ -24,6 +41,8 @@
 			var row = document.createElement("TR");
 			$(row).addClass("new-row");
 			var num = document.createElement("TD");
+
+            $(num).addClass("autonum");
 			
 			var item = document.createElement("TD");
 			var itemSelector = document.createElement("SELECT");
@@ -103,7 +122,7 @@
 					$(target).find("option").remove();
 					for(var a = 0; a < unitData.length; a++) {
 						if(unitData[a].uid != exclude) {
-							$(target).append("<option " + ((unitData[a].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + unitData[a].gudang.uid + "\">" + unitData[a].nama + "</option>");
+						    $(target).append("<option " + ((unitData[a].status === "A") ? "" : "disabled") + " " + ((unitData[a].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + unitData[a].gudang.uid + "\">" + unitData[a].nama + " " + ((unitData[a].status === "A") ? "" : "(Opname)") + "</option>");
 						}
 					}
 				},
@@ -174,9 +193,7 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-				    console.clear();
-				    console.log(response);
-					var dataSet = response.response_package.response_data;
+				    var dataSet = response.response_package.response_data;
 					if(dataSet == undefined) {
 						dataSet = [];
 					}
@@ -210,12 +227,12 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+						return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<b id=\"item_identifier_" + row.uid_item + "|" + row.batch.uid + "\">" + row.nama + "</b>";
+						return "<b id=\"item_identifier_" + row.barang + "|" + row.batch.uid + "\">" + row.nama + "</b>";
 					}
 				},
 				{
@@ -280,6 +297,7 @@
 
 		$("#btnSubmitAmprah").click(function() {
 			//Prepare Verifikasi
+            var allowSave = false;
 			$("#table-detail-mutasi tbody tr").each(function(e) {
 				if(!$(this).hasClass("new-row")) {
 					var item_uid = $(this).find("td:eq(1) b").attr("id").split("_");
@@ -342,13 +360,18 @@
 				}
 
 				if(totalMutasi > 0) {
-					$("#verif_unit_asal").html($("#txt_unit_asal option:selected").text());
-					$("#verif_unit_tujuan").html($("#txt_unit_tujuan option:selected").text());
-					$("#verif_tanggal").html($("#txt_tanggal").val());
-					$("#verif_nama").html($("#txt_nama").val());
-					$("#verif_keterangan").html($("#txt_keterangan").val());
+                    if($("#txt_keterangan").val() !== "") {
+                        $("#verif_unit_asal").html($("#txt_unit_asal option:selected").text());
+                        $("#verif_unit_tujuan").html($("#txt_unit_tujuan option:selected").text());
+                        $("#verif_tanggal").html($("#txt_tanggal").val());
+                        $("#verif_nama").html($("#txt_nama").val());
+                        $("#verif_keterangan").html($("#txt_keterangan").val());
 
-					$("#form-verifikasi-amprah").modal("show");
+                        $("#form-verifikasi-amprah").modal("show");
+                    } else {
+                        notification ("danger", "Keterangan mutasi wajib diisi", 3000, "detail_mutasi");
+                        $("#txt_keterangan").focus();
+                    }
 				} else {
 					notification ("danger", "Isi data permintaan mutasi", 3000, "detail_mutasi");
 				}
@@ -360,38 +383,45 @@
 
 		
 		$("#btnSubmitVerifikasi").click(function() {
-			var conf = confirm("Proses Mutasi Stok?");
-			if(conf) {
-				$("#btnSubmitVerifikasi").attr("disabled", "disabled");
-				$.ajax({
-					url:__HOSTAPI__ + "/Inventori",
-					async:false,
-					data:{
-						request : "tambah_mutasi",
-						dari: $("#txt_unit_asal").val(),
-						ke: $("#txt_unit_tujuan").val(),
-						keterangan : $("#txt_keterangan").val(),
-						item : metaData
-					},
-					beforeSend: function(request) {
-						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-					},
-					type:"POST",
-					success:function(response) {
-						if(response.response_package.response_result > 0) {
-							notification ("success", "Mutasi Stok berhasil di proses", 3000, "hasil_mutasi");
-							location.href = __HOSTNAME__ + "/inventori/stok/mutasi";
-						} else {
-							notification ("danger", "Mutasi Stok gagal di proses", 3000, "hasil_mutasi");
-							$("#btnSubmitVerifikasi").removeAttr("disabled");
-						}
-					},
-					error: function(response) {
-						console.log(response);
-						$("#btnSubmitVerifikasi").removeAttr("disabled");
-					}
-				});
-			}
+
+            Swal.fire({
+                title: "Proses Mutasi?",
+                showDenyButton: true,
+                confirmButtonText: "Ya",
+                denyButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $("#btnSubmitVerifikasi").attr("disabled", "disabled");
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Inventori",
+                        async:false,
+                        data:{
+                            request : "tambah_mutasi",
+                            dari: $("#txt_unit_asal").val(),
+                            ke: $("#txt_unit_tujuan").val(),
+                            keterangan : $("#txt_keterangan").val(),
+                            item : metaData
+                        },
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type:"POST",
+                        success:function(response) {
+                            if(response.response_package.response_result > 0) {
+                                notification ("success", "Mutasi Stok berhasil di proses", 3000, "hasil_mutasi");
+                                //location.href = __HOSTNAME__ + "/inventori/stok/mutasi";
+                            } else {
+                                notification ("danger", "Mutasi Stok gagal di proses", 3000, "hasil_mutasi");
+                                $("#btnSubmitVerifikasi").removeAttr("disabled");
+                            }
+                        },
+                        error: function(response) {
+                            console.log(response);
+                            $("#btnSubmitVerifikasi").removeAttr("disabled");
+                        }
+                    });
+                }
+            });
 		});
 	});
 </script>
@@ -432,7 +462,7 @@
 								<td id="verif_unit_tujuan"></td>
 							</tr>
 							<tr>
-								<td class="wrap_content">Tanggal Amprah</td>
+								<td class="wrap_content">Tanggal Mutasi</td>
 								<td class="wrap_content">:</td>
 								<td id="verif_tanggal"></td>
 							</tr>
@@ -462,7 +492,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Edit Data</button>
-				<button type="button" class="btn btn-primary" id="btnSubmitVerifikasi">Proses Amprah</button>
+				<button type="button" class="btn btn-primary" id="btnSubmitVerifikasi">Proses Mutasi</button>
 			</div>
 		</div>
 	</div>

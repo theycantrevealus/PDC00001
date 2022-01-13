@@ -1,6 +1,7 @@
 <script type="text/javascript">
 	$(function() {
 		var poliList = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
+		var myPoliAvail = [];
 
 		if(poliList.length > 1) {
 			$("#change-poli").show();
@@ -45,18 +46,38 @@
 				},
 				dataSrc:function(response) {
 				    var data = response.response_package.response_data;
+				    var poliList = [];
+				    var my_poliData = __POLI__.response_data;
+				    for(var a in my_poliData) {
+				        var poliGet = my_poliData[a].poli.response_data;
+				        for(var b in poliGet) {
+                            if(myPoli.indexOf(poliGet[b].nama) < 0) {
+                                myPoli.push(poliGet[b].nama);
+                            }
+
+                            if(myPoliAvail.indexOf(poliGet[b].uid) < 0) {
+                                myPoliAvail.push(poliGet[b].uid);
+                            }
+                        }
+                    }
 				    var parsedData = [];
-				    for(var key in data) {
+                    for(var key in data) {
+                        if(data[key].uid_poli !== __POLI_INAP__ && data[key].uid_poli !== __POLI_IGD__ && myPoliAvail.indexOf(data[key].uid_poli) >= 0) {
+                            parsedData.push(data[key]);
+                        }
+                    }
+				    /*for(var key in data) {
 				        if(data[key].uid_poli !== __POLI_INAP__ && data[key].uid_poli !== __POLI_IGD__) {
 				            parsedData.push(data[key]);
                         }
+
 				        if(myPoli.indexOf(data[key].departemen) < 0) {
                             myPoli.push(data[key].departemen);
                         }
 
-                    }
+                    }*/
 
-                    $("#current-poli").prepend(myPoli.join(", "));
+                    $("#current-poli").html(myPoli.join(", "));
 					$("#jlh-antrian").html(parsedData.length);
 					return parsedData;
 				}
@@ -116,8 +137,9 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
+						console.log(row);
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									"<a pasien=\"" + row.pasien_detail.uid + "\" tindakan=\"" + row.poli_detail.tindakan_konsultasi + "\" href=\"" + __HOSTNAME__ + "/rawat_jalan/dokter/antrian/" + row['uid'] + "\" class=\"btn btn-success btnDetailAntrian\">" +
+									"<a pasien=\"" + row.uid_pasien + "\" tindakan=\"" + row.poli_detail.tindakan_konsultasi + "\" href=\"" + __HOSTNAME__ + "/rawat_jalan/dokter/antrian/" + row['uid'] + "\" class=\"btn btn-success btnDetailAntrian\">" +
 										"<i class=\"fa fa-sign-out-alt\"></i> Proses Perobatan" +
 									"</a>" +
 								"</div>";
@@ -164,6 +186,12 @@
 
 
         protocolLib = {
+            antrian_poli_ubah: function (protocols, type, parameter, sender, receiver, time) {
+                if(receiver === __ME__) {
+                    notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
+                }
+                tableAntrian.ajax.reload();
+            },
             antrian_poli_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", "Antrian poli baru", 3000, "notif_pasien_baru");
                 tableAntrian.ajax.reload();

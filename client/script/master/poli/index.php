@@ -59,7 +59,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -74,7 +74,7 @@
 				},
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return  (row.kode_bpjs === undefined || row.kode_bpjs === null) ? "<h6 class=\"text-warning\"><i class=\"fa fa-exclamation-triangle\"></i> Belum Set</h6>" : row.nama_bpjs;
+                        return  (row.kode_bpjs === undefined || row.kode_bpjs === null) ? "<strong class=\"text-danger\"><i class=\"fa fa-exclamation-triangle\"></i> Belum Set</strong>" : "<strong class=\"text-success\"><i class=\"fa fa-check-circle\"></i> " + row.nama_bpjs + "</strong>";
                     }
                 },
 				{

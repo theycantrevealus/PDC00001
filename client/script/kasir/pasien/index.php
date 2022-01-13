@@ -5,6 +5,7 @@
 		var selectedUID;
 		var selectedUIDPasien;
 		var selectedUIDKwitansi;
+		var selectedKodeKwitansi;
 		var selectedPoli;
 		var selectedPasien;
 		var selectedPenjamin;
@@ -30,7 +31,7 @@
 			serverSide: true,
 			sPaginationType: "full_numbers",
 			bPaginate: true,
-			lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
 			serverMethod: "POST",
             "order": [[ 1, "desc" ]],
 			"ajax":{
@@ -41,6 +42,7 @@
 					d.from = getDateRange("#range_kwitansi")[0];
 					d.to = getDateRange("#range_kwitansi")[1];
 					d.column_set = ['created_at', 'nomor_kwitansi', 'created_at', 'metode_bayar', 'pegawai', 'terbayar'];
+					d.jenis = $("#filter_kwitansi_item").val();
 				},
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -69,9 +71,12 @@
 					    var totalTerbayar = 0;
 					    var detailCheck = dataResponse[a].status.detail;
 					    for(var b in detailCheck) {
-                            if (detailCheck[b].status === "R" && detailCheck[b].allow_retur) {
+                            /*if (detailCheck[b].status === "R" && detailCheck[b].allow_retur) {
                                 totalTerbayar += 0;
                             } else {
+                                totalTerbayar += detailCheck[b].harga;
+                            }*/
+                            if (detailCheck[b].status !== "R") {
                                 totalTerbayar += detailCheck[b].harga;
                             }
                         }
@@ -89,7 +94,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -98,9 +103,9 @@
 					        row.pasien.panggilan_name !== undefined &&
                             row.pasien.panggilan_name !== null
                         ) {
-                            return row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama;
+                            return "<span id=\"kode_kwitansi_" + row.uid + "\">" + row.nomor_kwitansi + " - " + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</span>";
                         } else {
-                            return row.nomor_kwitansi + " - " + row.pasien.nama;
+                            return "<span id=\"kode_kwitansi_" + row.uid + "\">" + row.nomor_kwitansi + " - " + row.pasien.nama + "</span>";
                         }
 					}
 				},
@@ -122,7 +127,7 @@
 					    var parsedPenjaminList = "";
 
 					    for(var b in uniquePenjamin) {
-					        parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+					        parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
                         }
 
 						return row.metode_bayar + "<br />" + parsedPenjaminList;
@@ -135,26 +140,43 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.terbayar;
+					    /*var terbayarAktual = row.record_terbayar;
+					    var parsedActual = 0;
+					    for(var a in terbayarAktual); {
+					        console.log(terbayarAktual[a]);
+					        parsedActual += terbayarAktual[a].terbayar;
+                        }
+                        return number_format(parsedActual, 2, ".", ",");*/
+                        
+                        var totalSet = 0;
+                        var rowDataPay = row.detail_item;
+                        for(var a in rowDataPay) {
+                            totalSet += parseFloat(rowDataPay[a].subtotal);
+                        }
+						return number_format(totalSet, 2, ".", ",");
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-info btn-sm btnDetailKwitansi\" invoice_payment=\"" + row.uid + "\" invoice=\"" + row.invoice + "\" id=\"invoice_" + row.uid + "\">" +
-                            "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
-                            "</button>" +
+                                "<button class=\"btn btn-info btn-sm btnDetailKwitansi\" invoice_payment=\"" + row.uid + "\" invoice=\"" + row.invoice + "\" id=\"invoice_" + row.uid + "\">" +
+                                    "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                                "</button>" +
                             "</div>";
 					}
 				}
 			]
 		});
 
+        $("#filter_kwitansi_item").change(function () {
+            tableKwitansi.ajax.reload();
+        });
+
 		$("#btnCetakFaktur").click(function() {
 
             var data = $("#payment-detail-loader").html();
 		    var containerTemp = document.createElement("DIV");
-		    $(containerTemp).html(data);
+		    $(containerTemp).html(data).addClass("col-12");
 
 
             $(containerTemp).find(".row, .card-body, .card-header").css({
@@ -190,15 +212,17 @@
                 "padding-top": "20px"
             });
 
-            $(containerTemp).find("table tbody tr td:eq(2)").css({
+            /*$(containerTemp).find("table tbody tr td:eq(2)").css({
                 "width": "50%",
                 "color": "#000 !important"
             });
 
-            $(containerTemp).find("table thead").addClass("thead-dark");
+            $(containerTemp).find("table thead").addClass("thead-dark");*/
 		    $(containerTemp).find("#keterangan-faktur").attr({
                 "colspan": "3"
             });
+
+            $(containerTemp).find("#biaya-terkini").addClass("row");
 
 		    $(containerTemp).find("#nama-pasien-faktur span").css({
                 "display": "inline"
@@ -213,10 +237,15 @@
                 },
                 type: "POST",
                 data: {
-                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                    __PC_CUSTOMER__: __PC_CUSTOMER__.toUpperCase(),
+                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__.toUpperCase(),
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    __PC_IDENT__: __PC_IDENT__,
+                    __PC_CUSTOMER_EMAIL__: __PC_CUSTOMER_EMAIL__,
+                    __PC_CUSTOMER_ADDRESS_SHORT__: __PC_CUSTOMER_ADDRESS_SHORT__.toUpperCase(),
                     kwitansi_data: $(containerTemp).html(),
+                    __ME__: __MY_NAME__,
                     pasien: $("#payment-detail-loader .info-kwitansi col-3:eq(1)").html(),
                     pegawai: $("#payment-detail-loader .info-kwitansi col-3:eq(2)").html(),
                     tgl_bayar: $("#payment-detail-loader .info-kwitansi col-3:eq(3)").html(),
@@ -230,12 +259,9 @@
 
                     $(containerItem).html(response);
                     $(containerItem).printThis({
-                        importCSS: true,
-                        base: true,
-                        importStyle: true,
                         header: null,
                         footer: null,
-                        pageTitle: "Kwitansi",
+                        pageTitle: selectedKodeKwitansi,
                         afterPrint: function() {
                             $("#form-payment-detail").modal("hide");
                         }
@@ -257,6 +283,8 @@
 
 			selectedUID = $(this).attr("invoice");
 			selectedUIDKwitansi = $(this).attr("invoice_payment");
+
+			selectedKodeKwitansi = $("#kode_kwitansi_" + selectedUIDKwitansi).html();
 
 			$.ajax({
                 async: false,
@@ -290,19 +318,19 @@
                             } else {
                                 $("#nama-pasien-faktur").html("Pasien:<br /><b>" + pasienInfo.nama + " [<span class=\"text-info\">" + pasienInfo.no_rm + "</span>]</b>");
                             }
-
-							$("#nomor-faktur").html($("#kwitansi_" + uid).html());
-
 							var historyData = response_data.response_package.response_data[0];
 							var historyDetail = historyData.detail;
 
 							$("#pegawai-faktur").html("Diterima Oleh :<br /><b>" + historyData.pegawai.nama + "</b>");
 							$("#tanggal-faktur").html("Tanggal Bayar :<br /><b>" + historyData.tanggal_bayar + "</b>");
+                            $(".nomor-faktur").html("Nomor :<br /><b>" + historyData.nomor_kwitansi + "</b>");
 							var deptList = [];
 							for(var depKey in historyData.antrian) {
-							    deptList.push(historyData.antrian[depKey].nama);
+							    if(deptList.indexOf(historyData.antrian[depKey].nama) < 0) {
+                                    deptList.push(historyData.antrian[depKey].nama);
+                                }
                             }
-							$("#poli").html("Departemen/Poli :<br /><b>" + deptList.join(", ") + "</b>");
+							$("#poli").html("Poliklinik/Bangsal :<br /><b>" + deptList.join(", ") + "</b>");
 							$("#keterangan-faktur").html(historyData.keterangan);
 
 
@@ -353,19 +381,19 @@
 
 							for(var groupKey in billing_group) {
                                 $("#invoice_detail_history tbody").append("<tr>" +
-                                    "<td></td>" +
-                                    "<td colspan=\"5\" class=\"bg-info\" style=\"color: #fff\">" + groupKey.toUpperCase() + "</td>" +
+                                    "<td class=\"wrap_content\"></td>" +
+                                    "<td colspan=\"5\" class=\"bg-info wrap_content text-left\" style=\"color: #fff\">" + groupKey.toUpperCase() + "</td>" +
                                     "</tr>");
                                 for(var itemKey in billing_group[groupKey]) {
                                     var returned = (billing_group[groupKey][itemKey].status === "R" && billing_group[groupKey][itemKey].allow_retur);
                                     $("#invoice_detail_history tbody").append(
                                         "<tr>" +
                                         "<td>" + ((billing_group[groupKey][itemKey].status === "P") ? ((billing_group[groupKey][itemKey].allow_retur) ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + billing_group[groupKey][itemKey].uid + "\" />" : "<i class=\"fa fa-exclamation-circle text-warning\"></i>") : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
-                                        "<td style=\"width: 50px !important;\">" + (parseInt(itemKey) + 1)+ "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\">" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style\">" + billing_group[groupKey][itemKey].qty + "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
-                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
+                                        "<td class=\"wrap_content\">" + (parseInt(itemKey) + 1)+ "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "; width: 50%\">" + billing_group[groupKey][itemKey].nama.toUpperCase() + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-center\">" + billing_group[groupKey][itemKey].qty + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-right\">" + number_format(billing_group[groupKey][itemKey].harga, 2, ".", ",") + "</td>" +
+                                        "<td style=\"" + ((returned) ? "text-decoration: line-through" : "") + "\" class=\"number_style text-right\">" + number_format(billing_group[groupKey][itemKey].subtotal, 2, ".", ",") + "</td>" +
                                         "</tr>"
                                     );
                                 }
@@ -393,8 +421,8 @@
 				type: "POST",
 				data: function(d) {
 					d.request = "biaya_pasien";
-					d.from = getDateRange("#range_invoice")[0];
-					d.to = getDateRange("#range_invoice")[1];
+					d.from = getDateRange("#range_invoice_rajal")[0];
+					d.to = getDateRange("#range_invoice_rajal")[1];
 					d.filter_poli = "rajal";
 				},
 				headers:{
@@ -406,10 +434,8 @@
 						returnedData = [];
 					}
 
-					console.log(response);
-
-
 					for(var InvKeyData in response.response_package.response_data) {
+                        //returnedData.push(response.response_package.response_data[InvKeyData]);
 					    if(
                             response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
                             response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
@@ -419,8 +445,8 @@
                                 response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
                                 response.response_package.response_data[InvKeyData].pasien !== undefined &&
                                 response.response_package.response_data[InvKeyData].pasien !== null &&
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__
+                                (response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__) || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
                             ) {
                                 if(!response.response_package.response_data[InvKeyData].lunas) {
 
@@ -447,6 +473,10 @@
                         }
 					}
 
+					for(var a in returnedData) {
+					    returnedData[a].autonum = (parseInt(a) + 1);
+                    }
+
 					response.draw = parseInt(response.response_package.response_draw);
 					response.recordsTotal = response.response_package.recordsTotal;
 					response.recordsFiltered = returnedData.length;
@@ -462,7 +492,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -478,7 +508,7 @@
                         var parsedPenjaminList = "";
 
                         for(var b in uniquePenjamin) {
-                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                            parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
                         }
 
 						return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
@@ -523,13 +553,13 @@
                             }
 					        if(uniquePoliList.indexOf(targetPoli.uid) < 0) {
 					            uniquePoliList.push(targetPoli.uid);
-                                poliList.push("<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + targetPoli.nama + "</span>");
+                                poliList.push("<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + targetPoli.nama + "</span>");
                             }
                         }
 					    if(poliList.length > 0) {
                             return poliList.join(" ");
                         } else {
-                            return "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli.nama + "</span>";
+                            return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli.nama + "</span>";
                         }
 					}
 				},
@@ -578,15 +608,15 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Invoice",
                 type: "POST",
                 data: function(d) {
                     d.request = "biaya_pasien";
-                    d.from = getDateRange("#range_invoice")[0];
-                    d.to = getDateRange("#range_invoice")[1];
+                    d.from = getDateRange("#range_invoice_ranap")[0];
+                    d.to = getDateRange("#range_invoice_ranap")[1];
                     d.filter_poli = "ranap";
                 },
                 headers:{
@@ -607,7 +637,7 @@
                                 response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
                                 response.response_package.response_data[InvKeyData].pasien !== undefined &&
                                 response.response_package.response_data[InvKeyData].pasien !== null &&
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_INAP__
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_INAP__ || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
                             ) {
                                 if (!response.response_package.response_data[InvKeyData].lunas) {
                                     if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
@@ -629,7 +659,7 @@
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsFiltered = returnedData.length;
 
                     return returnedData;
                 }
@@ -642,7 +672,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -658,7 +688,7 @@
                         var parsedPenjaminList = "";
 
                         for(var b in uniquePenjamin) {
-                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                            parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
                         }
 
                         return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
@@ -683,7 +713,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> Rawat Inap</span>";
+                        return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> Rawat Inap</span>";
                     }
                 },
                 {
@@ -737,16 +767,16 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Invoice",
                 type: "POST",
                 data: function(d) {
                     d.request = "biaya_pasien";
-                    d.from = getDateRange("#range_invoice")[0];
-                    d.to = getDateRange("#range_invoice")[1];
-                    d.filter_poli = "IGD";
+                    d.from = getDateRange("#range_invoice_igd")[0];
+                    d.to = getDateRange("#range_invoice_igd")[1];
+                    d.filter_poli = "igd";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -766,7 +796,7 @@
                                 response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
                                 response.response_package.response_data[InvKeyData].pasien !== undefined &&
                                 response.response_package.response_data[InvKeyData].pasien !== null &&
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__
+                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__ || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
                             ) {
                                 if (!response.response_package.response_data[InvKeyData].lunas) {
                                     if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
@@ -781,8 +811,8 @@
                     }
 
                     response.draw = parseInt(response.response_package.response_draw);
-                    response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    response.recordsTotal = returnedData.length;
+                    response.recordsFiltered = returnedData.length;
 
                     return returnedData;
                 }
@@ -795,7 +825,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -811,7 +841,7 @@
                         var parsedPenjaminList = "";
 
                         for(var b in uniquePenjamin) {
-                            parsedPenjaminList += "<span class=\"badge badge-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                            parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
                         }
 
                         return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
@@ -836,7 +866,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tags\"></i> IGD</span>";
+                        return "<span class=\"badge badge-custom-caption badge-outline-danger\"><i class=\"fa fa-tags\"></i> IGD</span>";
                     }
                 },
                 {
@@ -848,10 +878,15 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         var invDetail = row.invoice_detail;
+
+
+
                         var totalParse = 0;
                         for(var a in invDetail) {
-                            if(invDetail[a].departemen === __POLI_IGD__) {
-                                totalParse += parseFloat(invDetail[a].subtotal);
+                            if(invDetail[a].status_bayar === "N") {
+                                if(invDetail[a].departemen === __POLI_IGD__ || invDetail[a].departemen === __POLI_OPERASI__) {
+                                    totalParse += parseFloat(invDetail[a].subtotal);
+                                }
                             }
                         }
                         return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
@@ -912,7 +947,7 @@
         };
 
 
-		$("#range_invoice").change(function() {
+		$(".range_invoice").change(function() {
             tableAntrianBayarRJ.ajax.reload();
             tableAntrianBayarRI.ajax.reload();
             tableAntrianBayarIGD.ajax.reload();
@@ -922,11 +957,13 @@
 
 
 		$("body").on("click", ".btnDetail", function() {
-			var uid = $(this).attr("id").split("_");
+		    var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
 			var me = $(this);
-			me.removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i>Loading</span>");
+			me.removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i>Loading</span>").attr({
+                "disabled": "disabled"
+            });
 			var poli = $(this).attr("poli");
 			var pasien = $(this).attr("pasien");
 			var penjamin = $(this).attr("penjamin");
@@ -1005,19 +1042,22 @@
                                 if(classified === 'RJ') {
                                     if(
                                         invoice_detail_item[invKey].departemen !== __POLI_INAP__ &&
-                                        invoice_detail_item[invKey].departemen !== __POLI_IGD__
+                                        invoice_detail_item[invKey].departemen !== __POLI_IGD__ ||
+                                        invoice_detail_item[invKey].departemen === __POLI_OPERASI__
                                     ) {
                                         filteredClassified.push(invoice_detail_item[invKey]);
                                     }
                                 } else if(classified === 'RI') {
                                     if(
-                                        invoice_detail_item[invKey].departemen === __POLI_INAP__
+                                        invoice_detail_item[invKey].departemen === __POLI_INAP__ ||
+                                        invoice_detail_item[invKey].departemen === __POLI_OPERASI__
                                     ) {
                                         filteredClassified.push(invoice_detail_item[invKey]);
                                     }
                                 } else if(classified === 'IGD') {
                                     if(
-                                        invoice_detail_item[invKey].departemen === __POLI_IGD__
+                                        invoice_detail_item[invKey].departemen === __POLI_IGD__ ||
+                                        invoice_detail_item[invKey].departemen === __POLI_OPERASI__
                                     ) {
                                         filteredClassified.push(invoice_detail_item[invKey]);
                                     }
@@ -1035,23 +1075,23 @@
                                 }
 								var status_bayar = "";
 								if(invoice_detail_item[invKey].status_bayar == 'N') {
-                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"proceedInvoice\" />";
+                                    status_bayar = "<input item-id=\"" + invoice_detail_item[invKey].id + "\" value=\"" + invoice_detail_item[invKey].subtotal + "\" type=\"checkbox\" class=\"bulk_item_" + invoice_detail_item[invKey].item_type + " proceedInvoice form-control\" />";
                                 } else if(invoice_detail_item[invKey].status_bayar == 'V') {
-                                    status_bayar = "<span class=\"text-info\" style=\"white-space: pre\"><i class=\"fa fa-info-circle\"></i> Verifikasi</span>";
+                                    status_bayar = "<h6 class=\"text-info text-center\" style=\"white-space: pre\"><i class=\"fa fa-info-circle\"></i> Verifikasi</h6>";
 								} else {
 									if(invoice_detail_item[invKey].item.allow_retur == true) {
 										if(invoice_detail_item[invKey].status_berobat == undefined) {
-											status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+											status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 										} else {
 											if(invoice_detail_item[invKey].status_berobat.status == "N") {
 												//status_bayar = "<button class=\"btn btn-info btn-sm btn-retur-pembayaran\" id=\"retur_pembayaran_" + invoice_detail_item[invKey].item.uid + "\">Retur</button>";
-												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 											} else {
-												status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+												status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 											}
 										}
 									} else {
-										status_bayar = "<span class=\"text-success\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</span>";
+										status_bayar = "<h6 class=\"text-success text-center\" style=\"white-space: pre\"><i class=\"fa fa-check\"></i> Lunas</h6>";
 									}
 								}
 
@@ -1106,17 +1146,17 @@
                                         "<tr>" +
                                         "<td>" + detailData[itemDetailKey].status_bayar + "</td>" +
                                         "<td>" + detailData[itemDetailKey].autonum + "</td>" +
-                                        "<td>" + detailData[itemDetailKey].nama + "<br /><label class=\"text-info\">[" + detailData[itemDetailKey].departemen_info.nama + "]</label><br /><b class=\"text-muted\">" + detailData[itemDetailKey].keterangan + "</b>" + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + detailData[itemDetailKey].penjamin + "</span></td>" +
+                                        "<td>" + detailData[itemDetailKey].nama + "<br /><label class=\"text-info\">[" + detailData[itemDetailKey].departemen_info.nama + "]</label><br /><b class=\"text-muted\">" + detailData[itemDetailKey].keterangan + "</b>" + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-outline-info\">" + detailData[itemDetailKey].penjamin + "</span></td>" +
                                         "<td>" + detailData[itemDetailKey].qty + "</td>" +
-                                        "<td class=\"text-right\">" + detailData[itemDetailKey].harga + "</td>" +
-                                        "<td class=\"text-right\">" + detailData[itemDetailKey].total + "</td>" +
+                                        "<td class=\"number_style\">" + detailData[itemDetailKey].harga + "</td>" +
+                                        "<td class=\"number_style\">" + detailData[itemDetailKey].total + "</td>" +
                                         "</tr>"
                                     );
                                     /*$("#invoice_detail_item").append(
                                     "<tr>" +
                                     "<td>" + status_bayar + "</td>" +
                                     "<td>" + invoice_detail_item[invKey].autonum + "</td>" +
-                                    "<td>" + invoice_detail_item[invKey].item.nama.toUpperCase() + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
+                                    "<td>" + invoice_detail_item[invKey].item.nama.toUpperCase() + " <span style=\"float: right; margin-right: 50px;\" class=\"badge badge-outline-info\">" + invoice_detail_item[invKey].penjamin.nama + "</span></td>" +
                                     "<td>" + invoice_detail_item[invKey].qty + "</td>" +
                                     "<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].harga, 2, ".", ",") + "</td>" +
                                     "<td class=\"text-right\">" + number_format(invoice_detail_item[invKey].subtotal, 2, ".", ",") + "</td>" +
@@ -1143,7 +1183,7 @@
 							}
 
 							$("#form-invoice").modal("show");
-                            me.removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-eye\"></i>Detail</span>");
+                            me.removeClass("btn-warning").addClass("btn-info").html("<span><i class=\"fa fa-eye\"></i>Detail</span>").removeAttr("disabled");
 						},
 						error: function(response) {
 							console.log("Error : " + response);
@@ -1152,8 +1192,6 @@
 				}
 			});
 		});
-
-		
 
 		$("body").on("change", "#bulk-all", function() {
 			if($(this).is(":checked")) {
@@ -1200,6 +1238,18 @@
 			} else {
 				$("#bulk-all").prop("checked", false);
 			}
+
+			if($(this).hasClass("bulk_item_master_inv")) {
+                if(!$(this).is(":checked")) {
+                    $(".bulk_item_master_inv").each(function(){
+                        $(this).prop("checked", false);
+                    });
+                } else {
+                    $(".bulk_item_master_inv").each(function(){
+                        $(this).prop("checked", true);
+                    });
+                }
+            }
 
 			/*var diskonAll = $("#txt_diskon_all").val();
 			var diskonTypeAll = $("#txt_diskon_type_all").val();
@@ -1297,19 +1347,21 @@
 						});
 
 						var totalFaktur = 0;
-
+						var autoFakturNum = 1;
 						for(var selKey in itemMeta) {
 							if(selectedPay.indexOf(itemMeta[selKey].id) >= 0) {
 								totalFaktur += parseFloat(itemMeta[selKey].subtotal);
 								$("#fatur_detail_item tbody").append(
 									"<tr>" +
-										"<td>" + itemMeta[selKey].autonum + "</td>" +
+										//"<td>" + itemMeta[selKey].autonum + "</td>" +
+                                        "<td>" + autoFakturNum + "</td>" +
 										"<td>" + itemMeta[selKey].item.nama + "</td>" +
 										"<td>" + itemMeta[selKey].qty + "</td>" +
 										"<td class=\"text-right\">" + number_format(itemMeta[selKey].harga, 2, ".", ",") + "</td>" +
 										"<td class=\"text-right\">" + number_format(itemMeta[selKey].subtotal, 2, ".", ",") + "</td>" +
 									"</tr>"
 								);
+                                autoFakturNum++;
 							}
 						}
 
@@ -1366,8 +1418,7 @@
                             keterangan:$("#keterangan-faktur").val()
                         },
                         success:function(response) {
-                            console.clear();
-                            console.log(response);
+                            var notifier_target = response.response_package.response_notifier;
                             if(response.response_package.response_result > 0) {
                                 Swal.fire({
                                     title: "Pembayaran Berhasil!",
@@ -1393,8 +1444,6 @@
                                     tableKwitansi.ajax.reload();
                                     $("#form-invoice").modal("hide");
                                     $("#form-payment").modal("hide");
-
-                                    var notifier_target = response.response_package.response_notifier;
                                     for(var notifKey in notifier_target)
                                     {
                                         push_socket(__ME__, notifier_target[notifKey].protocol, notifier_target[notifKey].target, notifier_target[notifKey].message, "info").then(function() {
@@ -1457,9 +1506,9 @@
 										"<td>" + ((historyDetail[historyKey].status == "P") ? "<input type=\"checkbox\" class=\"returItem\" value=\"" + historyDetail[historyKey].item_uid + "\" />" : "<i class=\"fa fa-times text-danger\"></i>") + "</td>" +
 										"<td>" + (parseInt(historyKey) + 1)+ "</td>" +
 										"<td>" + historyDetail[historyKey].item + "</td>" +
-										"<td>" + historyDetail[historyKey].qty + "</td>" +
-										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
-										"<td class=\"text-right\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
+										"<td class=\"number_style\">" + historyDetail[historyKey].qty + "</td>" +
+										"<td class=\"text-right number_style\">" + number_format(historyDetail[historyKey].harga, 2, ".", ",") + "</td>" +
+										"<td class=\"text-right number_style\">" + number_format(historyDetail[historyKey].subtotal, 2, ".", ",") + "</td>" +
 									"</tr>"
 								);
 							}

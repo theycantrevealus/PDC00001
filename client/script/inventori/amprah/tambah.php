@@ -1,11 +1,32 @@
 <script type="text/javascript">
 	$(function() {
+        var currentStatus = checkStatusGudang(__GUDANG_APOTEK__, "#opname_notif_amprah");
+        reCheckStatus(currentStatus);
+        function reCheckStatus(currentStatus) {
+            if(currentStatus === "A") {
+                $(".disable-panel-opname").hide();
+                $("#btnSubmitAmprah").removeAttr("disabled");
+            } else {
+                $(".disable-panel-opname").show();
+                $("#btnSubmitAmprah").attr({
+                    "disabled": "disabled"
+                });
+            }
+        }
 	    $("#txt_tanggal").datepicker({
 			dateFormat: 'DD, dd MM yy',
 			autoclose: true
 		}).datepicker("setDate", new Date());
 
-		$("#txt_unit").val(__UNIT__.nama);
+
+		if(__UNIT__.response_data !== undefined) {
+			if(__UNIT__.response_data.length > 0) {
+				$("#txt_unit").val(__UNIT__.response_data[0].nama);
+			}
+		} else {
+			$("#txt_unit").val(__UNIT__.nama);
+		}
+		
 		$("#txt_nama").val(__MY_NAME__);
 
 		autoTable("#table-detail-amprah");
@@ -23,7 +44,7 @@
 			var item = document.createElement("TD");
 			var itemSelector = document.createElement("SELECT");
 			//load_product(itemSelector);
-			$(item).append(itemSelector);
+			$(item).append(itemSelector).append("<br /><br /><span class=\"kentut\"></span>");
 			$(itemSelector).select2({
                 minimumInputLength: 2,
                 "language": {
@@ -48,12 +69,13 @@
                     cache: true,
                     processResults: function (response) {
                         var data = response.response_package.response_data;
-                        console.log(data);
+
                         return {
                             results: $.map(data, function (item) {
                                 return {
                                     text: item.nama,
                                     id: item.uid,
+                                    stok: item.batch,
                                     satuan_terkecil: item.satuan_terkecil.nama
                                 }
                             })
@@ -62,9 +84,20 @@
                 }
             }).addClass("form-control item-amprah").on("select2:select", function(e) {
                 var data = e.params.data;
+                var totalStok = 0;
+                for(var a in data.stok) {
+                    console.log(data.stok[a]);
+                    if(data.stok[a].gudang.uid === __GUDANG_UTAMA__) {
+                        totalStok += data.stok[a].stok_terkini
+                    }
+                }
+
+                console.log(totalStok);
+
                 if(data.satuan_terkecil != undefined) {
                     $(this).children("[value=\""+ data.id + "\"]").attr({
-                        "satuan-caption": data.satuan_terkecil
+                        "satuan-caption": data.satuan_terkecil,
+                        "stok": totalStok
                     });
                 } else {
                     return false;
@@ -100,6 +133,7 @@
 				$(this).attr("id", "row_" + (e + 1));
 				$(this).find("td:eq(0)").html((e + 1));
 				$(this).find("td:eq(1) select").attr("id", "item_" + (e + 1));
+                $(this).find("td:eq(1) span.kentut").attr("id", "stok_" + (e + 1));
 				$(this).find("td:eq(2)").attr("id", "satuan_" + (e + 1));
 				$(this).find("td:eq(3) input").attr("id", "qty_" + (e + 1));
 			});
@@ -172,7 +206,7 @@
 			var id = $(this).attr("id").split("_");
 			id = id[id.length - 1];
 			$("#satuan_" + id).html($(this).find("option:selected").attr("satuan-caption"));
-
+            $("#stok_" + id).html("Stok gudang : " + $(this).find("option:selected").attr("stok"));
 			if($("#qty_" + id).inputmask("unmaskedvalue") > 0 && $("#row_" + id).hasClass("new-row") && $("#item_" + id).val() != "none") {
 				autoTable("#table-detail-amprah");
 			}			
@@ -204,7 +238,7 @@
 
 					metaData[item].nama = $(this).find("td:eq(1) select option:selected").text();
 					metaData[item].satuan = $(this).find("td:eq(2)").text();
-					metaData[item].qty += parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
+					metaData[item].qty = parseFloat($(this).find("td:eq(3) input").inputmask("unmaskedvalue"));
 				}
 			});
 
@@ -267,8 +301,29 @@
 					type:"POST",
 					success:function(response) {
 						if(response.response_package.response_result > 0) {
-							notification ("success", "Amprah berhasil di proses", 3000, "hasil_amprah");
-							location.href = __HOSTNAME__ + "/inventori/amprah";
+							//Notif Amprah Untuk Apotek
+							if(__MY_PRIVILEGES__.response_data[0].uid === __UIDAPOTEKER__) {
+								push_socket(
+									__ME__,
+									"amprah_new_approval_request",
+									__UIDKARUAPOTEKER__,
+									"Permohonan Amprah Baru",
+									"info").then(function() {
+									notification ("success", "Amprah berhasil di ajukan kepada karu apotek", 3000, "hasil_amprah");
+									location.href = __HOSTNAME__ + "/inventori/amprah";
+								});
+							} else {
+								push_socket(
+									__ME__,
+									"amprah_new_approved",
+									__UIDKARUAPOTEKER__,
+									"Permohonan Amprah Baru",
+									"info"
+								).then(function() {
+									notification ("success", "Amprah berhasil di ajukan", 3000, "hasil_amprah");
+									location.href = __HOSTNAME__ + "/inventori/amprah";
+								});
+							}
 						} else {
 							notification ("danger", "Amprah gagal di proses", 3000, "hasil_amprah");
 							$("#btnSubmitVerifikasi").removeAttr("disabled");

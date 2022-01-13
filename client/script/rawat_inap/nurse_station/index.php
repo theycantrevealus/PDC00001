@@ -104,7 +104,9 @@
         });
 
         loadRuangan("#filterRuangan");
-        $("#filterRuangan").select2().on("select2:select", function(e) {
+        $("#filterRuangan").select2({
+            dropdownParent: $("#form-nurse-station")
+        }).on("select2:select", function(e) {
             loadRanjang("#filterRanjang", $("#filterRuangan option:selected").val());
         });
 
@@ -252,6 +254,8 @@
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = returnedData.length;
 
+                    console.log(returnedData);
+
                     return returnedData;
                 }
             },
@@ -263,7 +267,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -284,7 +288,7 @@
                                 status_ranjang = "<b>" + dataRanjang[a].status.nama_pasien + "</b><br />" + dataRanjang[a].status.nama_dokter;
                             }
                             parseRanjang += "<div class=\"col-lg-3\">" +
-                                "<i class=\"fa fa-bed\"></i> " + dataRanjang[a].detail.nama +
+                                "<i class=\"fa fa-bed\"></i> " + ((dataRanjang[a] !== undefined && dataRanjang[a] !== null && dataRanjang[a].detail !== undefined && dataRanjang[a].detail !== null && dataRanjang[a].detail.nama !== undefined && dataRanjang[a].detail.nama !== null) ? dataRanjang[a].detail.nama : "???") +
                                 "</div>" +
                                 "<div class=\"col-lg-9\">" + status_ranjang +
                                 "</div>";
@@ -313,18 +317,35 @@
                     "data" : null, render: function(data, type, row, meta) {
                         var checkRanjang = row.ranjang;
                         var allowManageRanjang = false;
-                        for(var a in checkRanjang) {
-                            if(!checkRanjang[a].allow_manage) {
-                                allowManageRanjang = false;
-                                break;
-                            } else {
-                                allowManageRanjang = true;
+                        if(checkRanjang.length > 0) {
+                            for(var a in checkRanjang) {
+                                if(!checkRanjang[a].allow_manage) {
+                                    allowManageRanjang = false;
+                                    break;
+                                } else {
+                                    allowManageRanjang = true;
+                                }
                             }
+                        } else {
+                            allowManageRanjang = true;
                         }
-                        console.log(row);
 
-                        if(allowManageRanjang) {
-                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                        // if(allowManageRanjang) {
+                        //     return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                        //         "<button id=\"edit_" + row.uid + "\" class=\"btn btn-info btn-sm btnEditNS\">" +
+                        //         "<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
+                        //         "</button>" +
+                        //         "<button id=\"delete_" + row.uid + "\" class=\"btn btn-danger btn-sm btnDeleteNS\">" +
+                        //         "<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
+                        //         "</button>" +
+                        //         "</div>";
+                        // } else {
+                        //     return "<span class=\"text-warning wrap_content\"><i class=\"fa fa-exclamation-triangle\"></i> Nurse Station sedang aktif</span>";
+                        // }
+
+                        //TODO : AKTIFKAN LAGI CEK PELAYANAN
+
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                 "<button id=\"edit_" + row.uid + "\" class=\"btn btn-info btn-sm btnEditNS\">" +
                                 "<span><i class=\"fa fa-pencil-alt\"></i> Edit</span>" +
                                 "</button>" +
@@ -332,9 +353,6 @@
                                 "<span><i class=\"fa fa-trash\"></i> Hapus</span>" +
                                 "</button>" +
                                 "</div>";
-                        } else {
-                            return "<span class=\"text-warning wrap_content\"><i class=\"fa fa-exclamation-triangle\"></i> Nurse Station sedang aktif</span>";
-                        }
                     }
                 }
             ]
@@ -389,7 +407,8 @@
                     var result = response.response_package.response_data[0];
                     console.log(result);
                     allow_manage = response.response_package.allow_manage;
-                    if(!allow_manage) {
+                    if(allow_manage) {
+                    //if(!allow_manage) {
                         Swal.fire(
                             "Nurse Station",
                             "Kosongkan nurse station sebelum melakukan perubahan data",

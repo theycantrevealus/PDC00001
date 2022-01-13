@@ -41,7 +41,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -49,7 +49,7 @@
 						var kategoriObat = "";
 						for(var kategoriObatKey in row["kategori_obat"]) {
 						    if(row["kategori_obat"][kategoriObatKey].kategori != null) {
-                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-custom-caption badge-info\"><i class=\"fa fa-tag\"></i> " + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
+                                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tag\"></i> " + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
                             }
 						}
 
@@ -59,7 +59,7 @@
 										"</div>" +
 										"<div class=\"col-md-10\">" +
 											"<b><i>" + ((row["kode_barang"] == undefined) ? "[KODE_BARANG]" : row["kode_barang"].toUpperCase()) + "</i></b><br />" +
-											"<h5>" + row["nama"].toUpperCase() + "</h5>" +
+											"<strong style=\"display: block\">" + row["nama"].toUpperCase() + "</strong>" +
 											kategoriObat +
 										"</div>" +
 									"</div>";
@@ -190,7 +190,39 @@
                             /*html += "Imported : " + response.response_package.success_proceed + "<br />";
                             html += "Imported : " + response.response_package.success_proceed + "<br />";*/
 
-                            $("#csv_file_data").html(html);
+                            var failedData = response.response_package.failed_data;
+                            console.log(failedData);
+                            var failedResult = document.createElement("table");
+                            $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
+                            "<tr>" +
+                            "<th>Nama</th>" +
+                            "<th>Kategori</th>" +
+                            "<th>Satuan</th>" +
+                            "<th>Nama Generik</th>" +
+                            "<th>Nama RKO</th>" +
+                            "<th>Generik</th>" +
+                            "<th>Antibiotik</th>" +
+                            "<th>Narkotika</th>" +
+                            "<th>Psikotropika</th>" +
+                            "<th>Fornas</th></tr></thead><tbody></tbody>");
+
+                            $("#csv_file_data").html(html).append(failedResult);
+                            $(failedResult).DataTable({
+                                data: failedData,
+                                columns: [
+                                    { data: "nama" },
+                                    { data: "kategori" },
+                                    { data: "satuan" },
+                                    { data: "nama_generik" },
+                                    { data: "nama_rko" },
+                                    { data: "generik" },
+                                    { data: "antibiotik" },
+                                    { data: "narkotika" },
+                                    { data: "psikotropika" },
+                                    { data: "fornas" }
+                                ]
+                            });
+
                             tableGudang.ajax.reload();
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");

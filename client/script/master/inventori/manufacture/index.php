@@ -20,12 +20,12 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
+						return "<span class=\"title-caption\" id=\"nama_" + row["uid"] + "\">" + row["nama"] + "</span>";
 					}
 				},
 				{

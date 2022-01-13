@@ -456,6 +456,7 @@
                     __PC_CUSTOMER__: __PC_CUSTOMER__,
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                    __PC_CUSTOMER_EMAIL__: __PC_CUSTOMER_EMAIL__,
                     lab_pasien: labPasien,
                     lab_item: labItem,
                     lab_lampiran: labLampiran,
@@ -1057,6 +1058,11 @@
             permintaan_laboratorium_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", parameter, 3000, "hasil_order_labor");
                 tableVerifikasiLabor.ajax.reload();
+            },
+            labor_petugas_selesai: function(protocols, type, parameter, sender, receiver, time) {
+                alert("Test");
+                notification ("info", "Update hasil labor baru", 3000, "notif_update_order_baru");
+                tableAntrian.ajax.reload();
             }
         };
 

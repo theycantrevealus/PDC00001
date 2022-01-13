@@ -85,7 +85,7 @@
                             </div>
                             <div class="col-lg-12">
                                 <br />
-                                <table class="table table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
+                                <!--table class="table table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
                                     <thead class="thead-dark">
                                     <tr>
                                         <th class="wrap_content">No</th>
@@ -97,7 +97,32 @@
                                     <tbody>
 
                                     </tbody>
-                                </table>
+                                </table-->
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="filter_date">Dari - Sampai</label>
+                                            <input id="filter_date" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div id="cppt_loader" class="card-body">
+                                            <div class="no-data-panel">
+                                                <div class="row">
+                                                    <div class="col-lg-6">
+                                                        <div style="padding: 50px;">
+                                                            <h1 class="text-muted">Tidak ada Data Ditemukan</h1>
+                                                            <p style="padding: 10px;">Silahkan ubah filter pencarian untuk mendapatkan data lain.</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <img style="width: 100%;" alt="no-data" src="<?php echo __HOSTNAME__; ?>/template/assets/images/illustration/undraw_startled_8p0r.png" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

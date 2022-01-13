@@ -41,7 +41,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -71,17 +71,28 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-									/*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
-									 	"<i class=\"fa fa-list\"></i> Detail" +
-									"</button>" +*/
-									"<a href=\"" + __HOSTNAME__ + "/pasien/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-pasien\" data-toggle='tooltip' title='Edit'>" +
-										"<span><i class=\"fa fa-edit\"></i>Edit</span>" +
-									"</a>" +
-									"<button id=\"pasien_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-pasien\" data-toggle='tooltip' title='Hapus'>" +
-										"<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
-									"</button>" +
-								"</div>";
+                        if(__MY_PRIVILEGES__.response_data[0].uid == __UIDADMIN__) {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                        /*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
+                                            "<i class=\"fa fa-list\"></i> Detail" +
+                                        "</button>" +*/
+                                        "<a href=\"" + __HOSTNAME__ + "/pasien/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-pasien\" data-toggle='tooltip' title='Edit'>" +
+                                            "<span><i class=\"fa fa-edit\"></i>Edit</span>" +
+                                        "</a>" +
+                                        "<button id=\"pasien_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-pasien\" data-toggle='tooltip' title='Hapus'>" +
+                                            "<span><i class=\"fa fa-trash\"></i>Hapus</span>" +
+                                        "</button>" +
+                                    "</div>";
+                        } else {
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                        /*"<button id=\"poli_view_" + row['uid'] + "\" class=\"btn btn-warning btn-sm btn-detail-poli\">" +
+                                            "<i class=\"fa fa-list\"></i> Detail" +
+                                        "</button>" +*/
+                                        "<a href=\"" + __HOSTNAME__ + "/pasien/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm btn-edit-pasien\" data-toggle='tooltip' title='Edit'>" +
+                                            "<span><i class=\"fa fa-edit\"></i>Edit</span>" +
+                                        "</a>" +
+                                    "</div>";
+                        }
 					}
 				}
 			]
@@ -187,11 +198,34 @@
                         },
                         success:function(response)
                         {
-                            var html = "Imported : " + response.response_package.success_proceed + "<br />";
-                            $("#csv_file_data").html(html);
+                            var html = "Imported : " + response.response_package.success_proceed + "<br /><br /><h5>Failed import data:</h5>";
+
+                            var failedData = response.response_package.failed_data;
+                            var failedResult = document.createElement("table");
+                            $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
+                            "<tr>" +
+                            "<th>No RM</th>" +
+                            "<th>NIK</th>" +
+                            "<th>Nama</th>" +
+                            "<th>Tempat Lahir</th>" +
+                            "<th>Tanggal Lahir</th></tr></thead><tbody></tbody>");
+
+                            $("#csv_file_data").html(html).append(failedResult);
+                            $(failedResult).DataTable({
+                                data: failedData,
+                                columns: [
+                                    { data: "no_rm" },
+                                    { data: "nik" },
+                                    { data: "nama" },
+                                    { data: "tempat_lahir" },
+                                    { data: "tanggal_lahir" }
+                                ]
+                            });
                             tablePasien.ajax.reload();
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
+                            console.clear();
+                            console.log(response);
                         },
                         error: function (response) {
                             $("#csv_file_data").html(response);

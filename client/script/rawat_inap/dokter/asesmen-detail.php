@@ -4,6 +4,29 @@
         var selectedKunjungan = "", selectedPenjamin = "", selected_waktu_masuk = "";
 
         $.ajax({
+            url: __HOSTAPI__ + "/Pasien/pasien-info/" + __PAGES__[3],
+            async:false,
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type:"GET",
+            success: function (response) {
+                var filteredData = response.response_package.response_data;
+                $("#target_pasien").html(filteredData[0].uid);
+                $("#rm_pasien").html(filteredData[0].no_rm);
+                $("#nama_pasien").html((filteredData[0].panggilan_name === null) ? filteredData[0].nama : filteredData[0].panggilan_name.nama + " " +  filteredData[0].nama);
+                $("#jenkel_pasien").html(filteredData[0].jenkel_detail.nama);
+                $("#tempat_lahir_pasien").html(filteredData[0].tempat_lahir);
+                $("#alamat_pasien").html(filteredData[0].alamat);
+                $("#usia_pasien").html(filteredData[0].usia);
+                $("#tanggal_lahir_pasien").html(filteredData[0].tanggal_lahir_parsed);
+            },
+            error: function(response) {
+                console.log(response);
+            }
+        });
+
+        $.ajax({
             url: __HOSTAPI__ + "/Invoice/biaya_pasien_total/" + __PAGES__[3],
             async:false,
             beforeSend: function(request) {
@@ -172,8 +195,10 @@
                     }
 
                     for(var a in rawData) {
-                        if(rawData[a].antrian_detail.departemen === __POLI_INAP__) {
-                            returnedData.push(rawData[a]);
+                        if(rawData[a].antrian_detail !== undefined && rawData[a].antrian_detail !== null) {
+                            if(rawData[a].antrian_detail.departemen === __POLI_INAP__) {
+                                returnedData.push(rawData[a]);
+                            }
                         }
                     }
 
@@ -250,7 +275,7 @@
             ]
         });
 
-        var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
+        /*var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
             "ajax":{
                 url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis/inap",
                 type: "GET",
@@ -261,13 +286,16 @@
                     var filteredData = [];
                     var data = response.response_package.response_data;
 
+                    var reautoNum = 1;
                     for(var a = 0; a < data.length; a++) {
                         if(
                             data[a].uid_pasien === __PAGES__[3] &&
                             data[a].uid_kunjungan === __PAGES__[4] &&
                             data[a].uid_poli === __POLI_INAP__
                         ) {
+                            data[a].autonum = reautoNum;
                             filteredData.push(data[a]);
+                            reautoNum++;
                         }
                     }
 
@@ -347,6 +375,12 @@
                     }
                 }
             ]
+        });*/
+
+        loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
+
+        $("#filter_date").change(function() {
+            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
         });
 
         $("#btnTambahAsesmen").click(function() {
@@ -354,6 +388,13 @@
                 "disabled": "disabled"
             }).removeClass("btn-info").addClass("btn-warning").html("<i class=\"fa fa-sync\"></i> Menambahkan Asesmen");
 
+            /*console.log({
+                request: "tambah_asesmen",
+                penjamin: __PAGES__[5],
+                kunjungan: __PAGES__[4],
+                pasien: __PAGES__[3],
+                poli: __POLI_INAP__
+            });*/
             var formData = {
                 request: "tambah_asesmen",
                 penjamin: __PAGES__[5],
@@ -371,7 +412,8 @@
                 type:"POST",
                 data: formData,
                 success:function(response) {
-                    location.href = __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4];
+                    //console.log(response);
+                    location.href = __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + response.response_package.response_values[0] + "/" + __PAGES__[3] + "/" + __PAGES__[4] + "/" + __PAGES__[5]+ "/" + __PAGES__[6];
                 },
                 error: function(response) {
                     console.log(response);

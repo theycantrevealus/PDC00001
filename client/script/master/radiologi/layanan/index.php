@@ -10,7 +10,6 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-					console.log(response);
 					return response.response_package.response_data;
 				}
 			},
@@ -22,7 +21,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -38,7 +37,7 @@
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-								"<button data-uid='" + row['uid'] + "' data-jenis='"+ row['uid_jenis'] +"' data-nama='"+ row['nama'] +"'class=\"btn btn-info btn-sm btnEdit\" data-toggle='tooltip' title='Edit'>" +
+								"<button data-uid='" + row['uid'] + "' data-jenis='"+ row['uid_jenis'] +"' data-nama='"+ row['nama'] +"' class=\"btn btn-info btn-sm btnEdit\" data-toggle='tooltip' title='Edit'>" +
                                 "<span><i class=\"fa fa-pencil-alt\"></i>Edit</span>" +
                                 "</button>" +
 
@@ -218,14 +217,32 @@
                             request: "proceed_import_radiologi",
                             data_import:generated_data
                         },
-                        success:function(response)
-                        {
-                            console.clear();
-                            console.log(response);
-                            var html = "Imported : " + response.response_package.success_proceed + "<br />";
-                            $("#csv_file_data").html(html);
+                        success:function(response) {
+                            var html = "Imported : " + response.response_package.proceed.length + "<br />";
+                            
+							var failedData = response.response_package.failed_data;
+                            console.log(failedData);
+                            var failedResult = document.createElement("table");
+                            $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
+                            "<tr>" +
+                            "<th>Kategori</th>" +
+                            "<th>Nama</th>" +
+                            "<th>Mitra</th>" +
+                            "<th>Harga</th></tr></thead><tbody></tbody>");
+
+                            $("#csv_file_data").html(html).append(failedResult);
+                            $(failedResult).DataTable({
+                                data: failedData,
+                                columns: [
+                                    { data: "kategori" },
+                                    { data: "nama" },
+                                    { data: "mitra" },
+                                    { data: "harga" }
+                                ]
+                            });
+
                             tableLayanan.ajax.reload();
-                            $("#review-import").modal("hide");
+                            //$("#review-import").modal("hide");
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
                         },

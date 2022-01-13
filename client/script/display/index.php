@@ -266,7 +266,7 @@
 				i = 0;
 				console.log("Finished");
 			} else {
-                console.log("Palying : " + playlist[i]);
+                console.log("Playing : " + playlist[i]);
 				audio.src = playlist[i];
 				audio.play();
 			}
@@ -336,6 +336,7 @@
 
 
 						if(response.response_package != "") {
+							push_socket("display", "isCalling", "*", "", "info");
 							/*playlist = [
 								__HOST__ + 'audio/openning.mpeg',
 								__HOST__ + 'audio/antrian.mp3'
@@ -371,6 +372,7 @@
                                     audio.pause();
                                     audio.currentTime = 0;
                                     i = 0;
+									push_socket("display", "doneCalling", "*", "", "info");
                                     console.log("Finished");
                                 } else {
                                     console.log("Playing : " + playlist[i]);
@@ -379,7 +381,6 @@
                                 }
                             });
 						} else {
-						    alert();
                             console.log(playlist);
                         }
 

@@ -12,7 +12,7 @@ use \Firebase\JWT\JWT;
 class Pegawai extends Utility {
     static $pdo, $query;
 
-    protected static function getConn(){
+    protected static function getConn() {
         return self::$pdo;
     }
 
@@ -25,6 +25,12 @@ class Pegawai extends Utility {
         if($parameter[1] == 'detail') {
             //__HOST__/Pegawai/detail/{uid}
             return self::get_detail($parameter[2]);
+
+        } else if($parameter[1] == 'kehadiran_dokter') {
+            return self::kehadiran_dokter();
+        } else if($parameter[1] == 'jabatan_modul') {
+
+            return self::get_jabatan_module($parameter[2]);
 
         } else if($parameter[1] == 'jabatan') {
 
@@ -44,6 +50,10 @@ class Pegawai extends Utility {
         } else if($parameter[1] == 'get_module') {
 
             return self::get_module($parameter[2]);
+
+        } else if($parameter[1] == 'get_all_pegawai') {
+
+            return self::get_all_pegawai();
 
         } else if($parameter[1] == 'get_all_dokter') {
 
@@ -67,8 +77,14 @@ class Pegawai extends Utility {
 
     public function __POST__($parameter = array()) {
         switch ($parameter['request']) {
+            case 'logged_out':
+                return self::logged_out($parameter);
+                break;
             case 'login':
                 return self::login($parameter);
+                break;
+            case 'get_pegawai_backend':
+                return self::get_pegawai_backend($parameter);
                 break;
             case 'tambah_pegawai':
                 return self::tambah_pegawai($parameter);
@@ -88,11 +104,26 @@ class Pegawai extends Utility {
             case 'update_pegawai_access':
                 return self::update_pegawai_access($parameter);
                 break;
+            case 'update_jabatan_access':
+                return self::update_jabatan_access($parameter);
+                break;
             case 'proceed_import_pegawai':
                 return self::proceed_import_pegawai($parameter);
                 break;
             case 'master_pegawai_import_fetch':
                 return self::master_pegawai_import_fetch($parameter);
+                break;
+            case 'edit_password':
+                return self::edit_password($parameter);
+                break;
+            case 'reset_password':
+                return self::reset_password($parameter);
+                break;
+            case 'get-pegawai-jabatan':
+                return self::get_pegawai_jabatan($parameter);
+                break;
+            case 'update_unit_jabatan':
+                return self::update_unit_jabatan($parameter);
                 break;
             default:
                 return array();
@@ -110,7 +141,7 @@ class Pegawai extends Utility {
 
     private function delete($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $worker = self::$query
             ->delete($parameter[6])
@@ -148,7 +179,22 @@ class Pegawai extends Utility {
     }
 
 //=====================================================================================
-
+    private function logged_out($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        
+        $LoginState = self::$query->update('pegawai_kehadiran_real_time', array(
+            'status' => 'U'
+        ))
+            ->where(array(
+                'pegawai_kehadiran_real_time.pegawai' => '= ?'
+            ), array(
+                $UserData['data']->uid
+            ))
+            ->execute();
+            session_destroy();
+        return $LoginState;
+    }
 
     //LOGIN
     private function login($parameter) {
@@ -198,6 +244,7 @@ class Pegawai extends Utility {
                         'unit_name' => $Unit_Info['response_data'][0]['nama'],
                         'unit_kode' => $Unit_Info['response_data'][0]['kode'],
                         'gudang' => $Unit_Info['response_data'][0]['gudang'],
+                        'password' => $read[0]['password'],
                         'jabatan' => $read[0]['jabatan'],
                         'email' => $read[0]['email'],
                         'nama' => $read[0]['nama'],
@@ -249,6 +296,7 @@ class Pegawai extends Utility {
                         'unit_name' => $Unit_Info['nama'],
                         'unit_kode' => $Unit_Info['kode'],
                         'gudang' => $Unit_Info['gudang'],
+                        'password' => $read[0]['password'],
                         'nurse_station' => $NurseStation['response_data'],
                         'jabatan' => $read[0]['jabatan'],
                         'email' => $read[0]['email'],
@@ -264,11 +312,44 @@ class Pegawai extends Utility {
                         'unit_name' => $Unit_Info['response_data'][0]['nama'],
                         'unit_kode' => $Unit_Info['response_data'][0]['kode'],
                         'gudang' => $Unit_Info['response_data'][0]['gudang'],
+                        'password' => $read[0]['password'],
                         'jabatan' => $read[0]['jabatan'],
                         'email' => $read[0]['email'],
                         'nama' => $read[0]['nama'],
                         'log_id' => $log
                     );
+                }
+
+                //Update Login Status
+                $LoginStatus = self::$query->select('pegawai_kehadiran_real_time', array(
+                    'pegawai'
+                ))
+                    ->where(array(
+                        'pegawai_kehadiran_real_time.pegawai' => '= ?'
+                    ), array(
+                        $read[0]['uid']
+                    ))
+                    ->execute();
+
+                if(count($LoginStatus['response_data']) > 0) {
+                    // Update
+                    $LoginState = self::$query->update('pegawai_kehadiran_real_time', array(
+                        'status' => 'A'
+                    ))
+                        ->where(array(
+                            'pegawai_kehadiran_real_time.pegawai' => '= ?'
+                        ), array(
+                            $read[0]['uid']
+                        ))
+                        ->execute();
+                } else {
+                    // New
+                    $LoginState = self::$query->insert('pegawai_kehadiran_real_time', array(
+                        'pegawai' => $read[0]['uid'],
+                        'jabatan' => $read[0]['jabatan'],
+                        'status' => 'A'
+                    ))
+                        ->execute();
                 }
 
 
@@ -333,6 +414,330 @@ class Pegawai extends Utility {
         return $responseBuilder;
     }
 
+    private function get_pegawai_backend($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'pegawai.deleted_at' => 'IS NULL',
+                'AND',
+                '(pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pegawai.email' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+            );
+
+            $paramValue = array();
+        } else {
+            $paramData = array(
+                'pegawai.deleted_at' => 'IS NULL'
+            );
+
+            $paramValue = array();
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('pegawai', array(
+                'uid',
+                'email',
+                'nama',
+                'password',
+                'jabatan',
+                'editable',
+                'unit',
+                'kontak',
+                'created_at',
+                'updated_at',
+                'deleted_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('pegawai', array(
+                'uid',
+                'email',
+                'nama',
+                'password',
+                'jabatan',
+                'editable',
+                'unit',
+                'kontak',
+                'created_at',
+                'updated_at',
+                'deleted_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            if(file_exists('../images/pegawai/' . $value['uid'] . '.png')) {
+                $profile_pic = '/images/pegawai/' . $value['uid'] . '.png';
+            } else {
+                $profile_pic = '/client/template/assets/images/avatar/demi.png';
+            }
+            $data['response_data'][$key]['profile_pic'] = $profile_pic;
+
+            $Jabatan = self::get_jabatan_detail($value['jabatan'])['response_data'][0];
+            $data['response_data'][$key]['jabatan'] = $Jabatan;
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('pegawai', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
+    private function update_unit_jabatan($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        if($parameter['unit_switch'] === 'Y') {
+            $checkUnit = self::$query->select('pegawai_jabatan_unit', array(
+                'id'
+            ))
+                ->where(array(
+                    'pegawai_jabatan_unit.unit' => '= ?',
+                    'AND',
+                    'pegawai_jabatan_unit.jabatan' => '= ?'
+                ), array(
+                    $parameter['unit'],
+                    $parameter['uid']
+                ))
+                ->execute();
+            if(count($checkUnit['response_data']) > 0) {
+                $updateUnit = self::$query->update('pegawai_jabatan_unit', array(
+                    'deleted' => NULL
+                ))
+                    ->where(array(
+                        'pegawai_jabatan_unit.unit' => '= ?',
+                        'AND',
+                        'pegawai_jabatan_unit.jabatan' => '= ?'
+                    ), array(
+                        $parameter['unit'],
+                        $parameter['uid']
+                    ))
+                    ->execute();
+            } else {
+                $updateUnit = self::$query->insert('pegawai_jabatan_unit', array(
+                    'unit' => $parameter['unit'],
+                    'jabatan' => $parameter['uid'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                ))
+                    ->execute();
+            }
+        } else {
+            $updateUnit = self::$query->update('pegawai_jabatan_unit', array(
+                'deleted' => parent::format_date()
+            ))
+                ->where(array(
+                    'pegawai_jabatan_unit.unit' => '= ?',
+                    'AND',
+                    'pegawai_jabatan_unit.jabatan' => '= ?'
+                ), array(
+                    $parameter['unit'],
+                    $parameter['uid']
+                ))
+                ->execute();
+        }
+        return $updateUnit;
+    }
+
+    private function get_pegawai_jabatan($parameter) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'pegawai.deleted_at' => 'IS NULL',
+                'AND',
+                'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'AND',
+                'pegawai.jabatan' => '= ?'
+            );
+            $paramValue = array($parameter['jabatan']);
+        } else {
+            $paramData = array(
+                'pegawai.deleted_at' => 'IS NULL',
+                'AND',
+                'pegawai.jabatan' => '= ?'
+            );
+            $paramValue = array($parameter['jabatan']);
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('pegawai', array(
+                'uid',
+                'nama',
+                'created_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->order(array(
+                    'nama' => 'ASC'
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('pegawai', array(
+                'uid',
+                'nama',
+                'created_at'
+            ))
+                ->where($paramData, $paramValue)
+                ->order(array(
+                    'nama' => 'ASC'
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('pegawai', array(
+            'uid'
+        ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($data['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+        $data['param'] = $parameter;
+
+        return $data;
+    }
+
+    private function reset_password($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $responseBuilder = array();
+        $data = self::$query->update('pegawai', array(
+            'password' => password_hash('123456', PASSWORD_DEFAULT)
+        ))
+            ->where(array(
+                'pegawai.uid' => '= ?',
+                'AND',
+                'pegawai.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+        $responseBuilder['response_result'] = $data['response_result'];
+        if($data['response_result'] > 0) {
+            $log = parent::log(array(
+                'type' => 'activity',
+                'column' => array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'old_value',
+                    'new_value',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value' => array(
+                    $parameter['uid'],
+                    $UserData['data']->uid,
+                    'pegawai',
+                    'U',
+                    json_encode($UserData['data']->password),
+                    json_encode(password_hash('123456', PASSWORD_DEFAULT)),
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class' => __CLASS__
+            ));
+
+            $responseBuilder['response_message'] = 'Password Berhasil diubah! 123456';
+            session_destroy();
+        } else {
+            $responseBuilder['response_message'] = 'Password Gagal diubah';
+        }
+        return $responseBuilder;
+    }
+
+    private function edit_password($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $responseBuilder = array();
+        if(password_verify($parameter['old'], $UserData['data']->password)) {
+            $data = self::$query->update('pegawai', array(
+                'password' => password_hash($parameter['new'], PASSWORD_DEFAULT)
+            ))
+                ->where(array(
+                    'pegawai.uid' => '= ?',
+                    'AND',
+                    'pegawai.deleted_at' => 'IS NULL'
+                ), array(
+                    $UserData['data']->uid
+                ))
+                ->execute();
+            $responseBuilder['response_result'] = $data['response_result'];
+            if($data['response_result'] > 0) {
+                $log = parent::log(array(
+                    'type' => 'activity',
+                    'column' => array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'old_value',
+                        'new_value',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value' => array(
+                        $UserData['data']->uid,
+                        $UserData['data']->uid,
+                        'pegawai',
+                        'U',
+                        json_encode($UserData['data']->password),
+                        json_encode(password_hash($parameter['new'], PASSWORD_DEFAULT)),
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class' => __CLASS__
+                ));
+
+                $responseBuilder['response_message'] = 'Password Berhasil diubah! Harap login ulang menggunakan password baru demi keamanan akun Anda.';
+                session_destroy();
+            } else {
+                $responseBuilder['response_message'] = 'Password Gagal diubah';
+            }
+        } else {
+            $responseBuilder['response_result'] = 0;
+            $responseBuilder['response_message'] = 'Otentikasi Salah.';
+        }
+
+        return $responseBuilder;
+    }
+
     //SEMUA PEGAWAI
     public function get_all() {
         $query = self::$pdo->prepare('SELECT * FROM pegawai WHERE deleted_at IS NULL');
@@ -357,7 +762,38 @@ class Pegawai extends Utility {
     }
 
     //DETAIL PEGAWAI
+    public function get_info($parameter) {
+        $data = self::$query
+            ->select('pegawai', array(
+                'uid',
+                'email',
+                'jabatan',
+                'nama',
+                'unit',
+                'password',
+                'created_at',
+                'updated_at'
+            ))
+            ->where(array(
+                'pegawai.deleted_at' => 'IS NULL',
+                'AND',
+                'pegawai.uid' => '= ?'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+
+        if(file_exists('../images/pegawai/' . $data['response_data'][0]['uid'] . '.png')) {
+            $profile_pic = '/images/pegawai/' . $data['response_data'][0]['uid'] . '.png';
+        } else {
+            $profile_pic = '/client/template/assets/images/avatar/demi.png';
+        }
+        $data['response_data'][0]['profile_pic'] = $profile_pic;
+        return $data;
+    }
+
     public function get_detail($parameter) {
+        $Unit = new Unit(self::$pdo);
         $data = self::$query
             ->select('pegawai', array(
                 'uid',
@@ -385,6 +821,7 @@ class Pegawai extends Utility {
         } else {
             $profile_pic = '/client/template/assets/images/avatar/demi.png';
         }
+        $data['response_data'][0]['unit_detail'] = $Unit->get_unit_detail($data['response_data'][0]['unit'])['response_data'][0];
         $data['response_data'][0]['profile_pic'] = $profile_pic;
         $data['response_selected'] = $modulDataMeta['selected'];
 
@@ -410,10 +847,28 @@ class Pegawai extends Utility {
             ->execute();
 
         $autonum = 1;
+        $Unit = new Unit(self::$pdo);
+        $AllUnit = $Unit->get_unit();
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+            $PegawaiUnit = self::$query->select('pegawai_jabatan_unit', array(
+                'id', 'unit', 'jabatan'
+            ))
+                ->where(array(
+                    'pegawai_jabatan_unit.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai_jabatan_unit.jabatan' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($PegawaiUnit['response_data'] as $PJKey => $PJValue) {
+                $PegawaiUnit['response_data'][$PJKey]['unit'] = $Unit->get_unit_detail($PJValue['unit'])['response_data'][0];
+            }
+            $data['response_data'][$key]['unit'] = (count($PegawaiUnit['response_data']) > 0) ? $PegawaiUnit['response_data'] : array();
             $autonum++;
         }
+        $data['all_unit'] = $AllUnit;
         return $data;
     }
 
@@ -428,11 +883,31 @@ class Pegawai extends Utility {
             ->where(array(
                 'pegawai_jabatan.deleted_at' => 'IS NULL'
             ))
+            ->order(array(
+                'created_at' => 'ASC'
+            ))
             ->execute();
 
         $autonum = 1;
+        $Unit = new Unit(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+            $PegawaiUnit = self::$query->select('pegawai_jabatan_unit', array(
+                'id', 'unit', 'jabatan'
+            ))
+                ->where(array(
+                    'pegawai_jabatan_unit.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai_jabatan_unit.jabatan' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($PegawaiUnit['response_data'] as $PJKey => $PJValue) {
+                $PegawaiUnit['response_data'][$PJKey]['unit'] = $Unit->get_unit_detail($PJValue['unit'])['response_data'][0];
+            }
+            $data['response_data'][$key]['unit'] = $PegawaiUnit['response_data'];
+
             $autonum++;
         }
         return $data;
@@ -441,7 +916,7 @@ class Pegawai extends Utility {
     //JABATAN TAMBAH
     private function tambah_jabatan($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $check = self::duplicate_check(array(
             'table' => 'master_inv_kategori',
@@ -491,7 +966,7 @@ class Pegawai extends Utility {
     //JABATAN EDIT
     private function edit_jabatan($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         $old = self::get_jabatan_detail($parameter['uid']);
 
@@ -539,6 +1014,49 @@ class Pegawai extends Utility {
                 ),
                 'class' => __CLASS__
             ));
+
+
+            $AksesTemplate = self::$query->select('pegawai_jabatan_modul', array(
+                'modul'
+            ))
+                ->where(array(
+                    'pegawai_jabatan_modul.jabatan' => '= ?',
+                    'AND',
+                    'pegawai_jabatan_modul.deleted_at' => 'IS NULL',
+                ), array(
+                    $parameter['uid']
+                ))
+                ->execute();
+            $Pegawai_Jabatan = self::$query->select('pegawai', array(
+                'uid'
+            ))
+                ->where(array(
+                    'pegawai.jabatan' => '= ?'
+                ), array(
+                    $parameter['uid']
+                ))
+                ->execute();
+            foreach ($Pegawai_Jabatan['response_data'] as $PKey => $PValue) {
+                //Reset Access
+                $resetAccess = self::$query->update('pegawai_module', array(
+                    'deleted_at' => parent::format_date()
+                ))
+                    ->where(array(
+                        'pegawai_module.uid_pegawai' => '= ?'
+                    ), array(
+                        $PValue['uid']
+                    ))
+                    ->execute();
+                foreach ($AksesTemplate['response_data'] as $MKey => $MValue) {
+                    array_push($PegawaiModules, self::update_pegawai_access(array(
+                        'accessType' => 'Y',
+                        'uid' => $PValue['uid'],
+                        'modul' => $MValue['modul']
+                    )));
+                }
+            }
+
+
         }
 
         return $worker;
@@ -564,6 +1082,99 @@ class Pegawai extends Utility {
                 ))
 
                 ->execute();
+    }
+
+    private function kehadiran_dokter() {
+        $DokterList = self::$query->select('pegawai', array(
+            'uid', 'nama'
+        ))
+            ->where(array(
+                'pegawai.jabatan' => '= ?'
+            ), array(
+                __UIDDOKTER__
+            ))
+            ->execute();
+        $Poli = new Poli(self::$pdo);
+        foreach($DokterList['response_data'] as $key => $value) {
+            $LoginStatus = self::$query->select('pegawai_kehadiran_real_time', array(
+                'pegawai', 'status'
+            ))
+                ->where(array(
+                    'pegawai_kehadiran_real_time.pegawai' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $DokterList['response_data'][$key]['logged_in'] = (isset($LoginStatus['response_data']) && count($LoginStatus['response_data']) > 0) ? $LoginStatus['response_data'][0]['status'] : 'U';
+
+            //Poli
+            $DokterPoli = self::$query->select('master_poli_dokter', array(
+                'poli'
+            ))
+                ->where(array(
+                    'master_poli_dokter.dokter' => '= ?',
+                    'AND',
+                    'master_poli_dokter.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach($DokterPoli['response_data'] as $DPK => $DPV) {
+                $DokterPoli['response_data'][$DPK]['poli'] = $Poli->get_poli_info($DPV['poli'])['response_data'][0]['nama'];
+            }
+            $DokterList['response_data'][$key]['poli'] = $DokterPoli['response_data'];
+        }
+        return $DokterList;
+    }
+
+    public function get_jabatan_module($parameter) {
+        /*$Authorization = new Authorization();
+        $UserData = $Authorization::readBearerToken($parameter['access_token']);*/
+
+        //Load All Module
+        $Module = new Modul(self::$pdo);
+        $moduleData = $Module->get_all();
+
+
+        //Module setter
+        $setter = self::$query->select('pegawai_jabatan_modul', array(
+            'id',
+            'modul'
+        ))
+            ->where(array(
+                'pegawai_jabatan_modul.jabatan' => '= ?',
+                'AND',
+                'pegawai_jabatan_modul.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+        $settedModule = array();
+        $settedModuleLink = array();
+        $settedModuleMeta = array();
+        foreach ($setter['response_data'] as $key => $value) {
+            if(!in_array($value['modul'], $settedModule)) {
+                array_push($settedModule, $value['modul']);
+                array_push($settedModuleLink, self::get_module_detail($value['modul'])['response_data'][0]['identifier']);
+                array_push($settedModuleMeta, $value);
+            }
+        }
+
+        foreach ($moduleData as $key => $value) {
+            if(in_array($value['id'], $settedModule)) {
+                $moduleData[$key]['checked'] = true;
+            } else {
+                $moduleData[$key]['checked'] = false;
+            }
+        }
+
+        return array(
+            'build' => $moduleData,
+            'selected' => $settedModule,
+            'selected_link' => $settedModuleLink,
+            'selected_meta' => $settedModuleMeta,
+            'setter' => $setter
+        );
     }
 
     public function get_module($parameter) {
@@ -761,9 +1372,100 @@ class Pegawai extends Utility {
         return $worker;
     }
 
+    private function update_jabatan_access($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $Pegawai_Jabatan = self::$query->select('pegawai', array(
+            'uid'
+        ))
+            ->where(array(
+                'pegawai.jabatan' => '= ?'
+            ), array(
+                $parameter['uid']
+            ))
+            ->execute();
+
+        if($parameter['accessType'] == 'Y') {
+            $check = self::$query
+                ->select('pegawai_jabatan_modul', array(
+                    'id'
+                ))
+
+                ->where(array(
+                    'pegawai_jabatan_modul.jabatan' => '= ?',
+                    'AND',
+                    'pegawai_jabatan_modul.modul' => '= ?'
+                ), array(
+                    $parameter['uid'],
+                    $parameter['modul']
+                ))
+
+                ->execute();
+            if(count($check['response_data']) > 0) {
+                $proceed = self::$query
+                        ->update('pegawai_jabatan_modul', array(
+                            'deleted_at' => NULL
+                        ))
+
+                        ->where(array(
+                            'pegawai_jabatan_modul.jabatan' => '= ?',
+                            'AND',
+                            'pegawai_jabatan_modul.modul' => '= ?'
+                        ), array(
+                            $parameter['uid'],
+                            $parameter['modul']
+                        ))
+
+                        ->execute();
+
+            } else {
+                $proceed = self::$query
+                        ->insert('pegawai_jabatan_modul', array(
+                            'jabatan' => $parameter['uid'],
+                            'modul' => $parameter['modul'],
+                            'logged_at' => parent::format_date(),
+                            'uid_admin' => $UserData['data']->uid
+                        ))
+
+                        ->execute();
+            }
+        } else {
+            $proceed = self::$query
+                    ->update('pegawai_jabatan_modul', array(
+                        'deleted_at' => parent::format_date()
+                    ))
+
+                    ->where(array(
+                        'pegawai_jabatan_modul.jabatan' => '= ?',
+                        'AND',
+                        'pegawai_jabatan_modul.modul' => '= ?'
+                    ), array(
+                        $parameter['uid'],
+                        $parameter['modul']
+                    ))
+
+                    ->execute();
+        }
+
+        //Update Semua Pegawai dengan Jabatan Bersangkutan
+        $PegawaiModules = array();
+        if($proceed['response_result'] > 0) {
+            foreach ($Pegawai_Jabatan['response_data'] as $PKey => $PValue) {
+                array_push($PegawaiModules, self::update_pegawai_access(array(
+                    'accessType' => $parameter['accessType'],
+                    'uid' => $PValue['uid'],
+                    'modul' => $parameter['modul']
+                )));
+            }
+        }
+
+        return $proceed;
+    }
+
     private function update_pegawai_access($parameter) {
         $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
         if($parameter['accessType'] == 'Y') {
             $check = self::$query
@@ -876,6 +1578,41 @@ class Pegawai extends Utility {
 
                     ->execute();
         }
+    }
+
+    private function get_all_pegawai() {
+        $Pegawai = self::$query->select('pegawai', array(
+                'uid',
+                'nama'
+            )
+        )
+            ->join('pegawai_jabatan', array(
+                    'uid AS uid_jabatan',
+                    'nama AS nama_jabatan'
+                )
+            )
+            ->on(
+                array(
+                    array('pegawai.jabatan', '=', 'pegawai_jabatan.uid')
+                )
+            )
+            ->where(
+                array(
+                    'pegawai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\''
+                ), array()
+            )
+            ->execute();
+
+        $allData = array(
+            array(
+                'uid' => 'all',
+                'nama' => 'Any'
+            )
+        );
+        $Pegawai['response_data'] = array_merge($allData, $Pegawai['response_data']);
+        return $Pegawai;
     }
 
     private function get_all_dokter(){

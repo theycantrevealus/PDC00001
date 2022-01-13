@@ -18,7 +18,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var returnData = [];
                     var returnedData = [];
                     if(response == undefined || response.response_package == undefined) {
@@ -37,7 +36,7 @@
             autoWidth: false,
             language: {
                 search: "",
-                searchPlaceholder: "Cari Pasien"
+                searchPlaceholder: "Cari Tindakan"
             },
 
             aaSorting: [[0, "asc"]],
@@ -47,7 +46,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -213,7 +212,7 @@
                             var html = "Imported : " + response.response_package.success_proceed + "<br />";
                             $("#csv_file_data").html(html);
                             tableTindakan.ajax.reload();
-                            $("#review-import").modal("hide");
+                            //$("#review-import").modal("hide");
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
                         },

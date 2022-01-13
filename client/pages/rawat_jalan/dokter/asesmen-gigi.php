@@ -167,7 +167,7 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="gingiva" value="n" />
+                                                        <input class="form-check-input" type="radio" checked name="gingiva" value="n" />
                                                         <label class="form-check-label">
                                                             Normal
                                                         </label>
@@ -175,7 +175,7 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="gingiva" value="a" checked>
+                                                        <input class="form-check-input" type="radio" name="gingiva" value="a" />
                                                         <label class="form-check-label">
                                                             Ada Kelainan
                                                         </label>
@@ -191,7 +191,7 @@
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="frenulum" value="n" />
+                                                        <input class="form-check-input" type="radio" checked name="frenulum" value="n" />
                                                         <label class="form-check-label">
                                                             Normal
                                                         </label>
@@ -199,7 +199,7 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="frenulum" value="a" checked>
+                                                        <input class="form-check-input" type="radio" name="frenulum" value="a">
                                                         <label class="form-check-label">
                                                             Ada Kelainan
                                                         </label>
@@ -217,7 +217,7 @@
                                     <div class="row">
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="mulut_bersih" value="b" />
+                                                <input class="form-check-input" type="radio" name="mulut_bersih" value="b" checked />
                                                 <label class="form-check-label">
                                                     Baik
                                                 </label>
@@ -225,7 +225,7 @@
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="mulut_bersih" value="s" checked>
+                                                <input class="form-check-input" type="radio" name="mulut_bersih" value="s" />
                                                 <label class="form-check-label">
                                                     Sedang
                                                 </label>
@@ -233,7 +233,7 @@
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="mulut_bersih" value="j" checked>
+                                                <input class="form-check-input" type="radio" name="mulut_bersih" value="j" />
                                                 <label class="form-check-label">
                                                     Buruk
                                                 </label>

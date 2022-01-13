@@ -119,18 +119,20 @@ class Ruangan extends Utility {
 					->execute();
 
 		$autonum = 1;
+        $kelas = new Terminologi(self::$pdo);
+        $lantai = new Lantai(self::$pdo);
 		foreach ($data['response_data'] as $key => $value) {
 			$data['response_data'][$key]['autonum'] = $autonum;
 			$autonum++;
 
 			$arr = ['','lantai-detail', $value['uid_lantai']];
-			$lantai = new Lantai(self::$pdo);
+
 			$get_lantai = $lantai::__GET__($arr);
 
 			$lantai_res = $get_lantai['response_data'][0];
 			$data['response_data'][$key]['lantai'] = $lantai_res['nama']; 
 
-			$kelas = new Terminologi(self::$pdo);
+
 			$param = ['','terminologi-items-detail',$value['id_kelas']];
 			$get_kelas = $kelas::__GET__($param);
 			$data['response_data'][$key]['kelas'] = $get_kelas['response_data'][0]['nama']; 
@@ -208,7 +210,7 @@ class Ruangan extends Utility {
 	/*====================== CRUD ========================*/
 	private function tambah_edit_multiple_ruangan($table, $parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$uid_lantai = $parameter['dataObj']['uid_lantai'];
 		$add_ruangan = property_exists($parameter['dataObj'], 'add') ? $parameter['dataObj']['add'] : "";
@@ -364,16 +366,16 @@ class Ruangan extends Utility {
 		return $ruangan;
 	}
 
-	private function tambah_ruangan($table, $parameter){
+	public function tambah_ruangan($table, $parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$check = self::duplicate_check(array(
 			'table'=>$table,
-			'check'=>$parameter['nama']
+			'check'=>$parameter['kode_ruangan']
 		));
 
-		if (count($check['response_data']) > 0){
+		if (count($check['response_data']) > 0) {
 			$check['response_message'] = 'Duplicate data detected';
 			$check['response_result'] = 0;
 			unset($check['response_data']);
@@ -427,7 +429,7 @@ class Ruangan extends Utility {
 
 	private function edit_ruangan($table, $parameter){
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$old = self::get_ruangan_detail('master_unit_ruangan', $parameter['uid']);
 

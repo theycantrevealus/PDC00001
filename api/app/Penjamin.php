@@ -58,6 +58,10 @@ class Penjamin extends Utility {
 				return self::edit_penjamin($parameter);
 				break;
 
+			case 'sync_profit_obat':
+				return self::sync_profit_obat($parameter);
+				break;
+
 			default:
 				# code...
 				break;
@@ -157,26 +161,50 @@ class Penjamin extends Utility {
 		return $data;
 	}
 	
-	public function get_penjamin_obat($parameter) {
-		$data = self::$query
-		->select('master_inv_harga', array(
-			'barang',
-			'penjamin',
-			'profit',
-			'profit_type',
-			'created_at',
-			'updated_at'
-		))
-		->where(array(
-			'master_inv_harga.deleted_at' => 'IS NULL',
-			'AND',
-			'master_inv_harga.barang' => '= ?',
-			'AND',
-			'master_inv_harga.profit' => '> 0',
-		), array(
-			$parameter
-		))
-		->execute();
+	public function get_penjamin_obat($parameter, $target_penjamin = '') {
+		if(isset($target_penjamin) && !empty($target_penjamin)) {
+			$data = self::$query
+				->select('master_inv_harga', array(
+					'barang',
+					'penjamin',
+					'profit',
+					'profit_type',
+					'created_at',
+					'updated_at'
+				))
+				->where(array(
+					'master_inv_harga.penjamin' => '= ?',
+					'AND',
+					'master_inv_harga.deleted_at' => 'IS NULL',
+					'AND',
+					'master_inv_harga.barang' => '= ?',
+					'AND',
+					'master_inv_harga.profit' => '> 0',
+				), array(
+					$target_penjamin, $parameter
+				))
+				->execute();
+		} else {
+			$data = self::$query
+			->select('master_inv_harga', array(
+				'barang',
+				'penjamin',
+				'profit',
+				'profit_type',
+				'created_at',
+				'updated_at'
+			))
+			->where(array(
+				'master_inv_harga.deleted_at' => 'IS NULL',
+				'AND',
+				'master_inv_harga.barang' => '= ?',
+				'AND',
+				'master_inv_harga.profit' => '> 0',
+			), array(
+				$parameter
+			))
+			->execute();
+		}
 
 		$autonum = 1;
 		foreach ($data['response_data'] as $key => $value) {
@@ -249,9 +277,78 @@ class Penjamin extends Utility {
 		}
 	}
 
+	private function sync_profit_obat($parameter) {
+		$reset = self::$query->delete('master_inv_harga')
+			->execute();
+
+		$proceed = array();
+
+		$Penjamin = self::$query->select('master_penjamin', array(
+			'uid'
+		))
+			->where(array(
+				'master_penjamin.deleted_at' => 'IS NULL'
+			), array())
+			->execute();
+		foreach($Penjamin['response_data'] as $key => $value) {
+			$Item = self::$query->select('master_inv', array(
+				'uid'
+			))
+				->where(array(
+					'master_inv.deleted_at' => 'IS NULL'
+				), array())
+				->execute();
+			foreach($Item['response_data'] as $IKey => $IValue) {
+				$profitCheck = self::$query->select('master_inv_harga', array(
+					'id'
+				))
+					->where(array(
+						'master_inv_harga.barang' => '= ?',
+						'AND',
+						'master_inv_harga.penjamin' => '= ?'
+					), array(
+						$IValue['uid'],
+						$value['uid']
+					))
+					->execute();
+
+				if(count($profitCheck['response_data']) > 0) {
+					$process_prof = self::$query->update('master_inv_harga', array(
+						'profit' => '25',
+						'profit_type' => 'P',
+						'deleted_at' => NULL
+					))
+						->where(array(
+							'master_inv_harga.id' => '= ?'
+						), array(
+							$profitCheck['response_data'][0]['id']
+						))
+						->execute();
+				} else {
+					$process_prof = self::$query->insert('master_inv_harga', array(
+						'barang' => $IValue['uid'],
+						'penjamin' => $value['uid'],
+						'profit' => '25',
+						'profit_type' => 'P',
+						'created_at' => parent::format_date(),
+						'updated_at' => parent::format_date()
+					))
+						->execute();
+				}
+
+				
+				if($process_prof['response_result'] <= 0) {
+					array_push($proceed, $process_prof);	
+				}
+			}
+		}
+
+		return $proceed;
+	}
+
 	private function edit_penjamin($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$old = self::get_penjamin_detail($parameter['uid']);
 

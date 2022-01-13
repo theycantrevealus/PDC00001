@@ -63,7 +63,7 @@
                     <li class="nav-item">
                         <a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								06 [CLAIM]
+								06 <i class="fa fa-check-circle"></i>
 							</span>
                             Procedure
                         </a>
@@ -71,7 +71,7 @@
                     <li class="nav-item">
                         <a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								07 [CLAIM]
+								07 <i class="fa fa-check-circle"></i>
 							</span>
                             Kelas Rawat
                         </a>
@@ -79,7 +79,7 @@
                     <li class="nav-item">
                         <a href="#tab-poli-8" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								08 [CLAIM]
+								08 <i class="fa fa-check-circle"></i>
 							</span>
                             Dokter
                         </a>
@@ -87,7 +87,7 @@
                     <li class="nav-item">
                         <a href="#tab-poli-9" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								09 [CLAIM]
+								09 <i class="fa fa-check-circle"></i>
 							</span>
                             Spesialistik
                         </a>
@@ -95,7 +95,7 @@
                     <li class="nav-item">
                         <a href="#tab-poli-10" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								10 [CLAIM]
+								10 <i class="fa fa-check-circle"></i>
 							</span>
                             Ruang Rawat
                         </a>
@@ -103,7 +103,7 @@
                     <li class="nav-item">
                         <a href="#tab-poli-11" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								11 [CLAIM]
+								11 <i class="fa fa-check-circle"></i>
 							</span>
                             Cara Keluar
                         </a>
@@ -111,7 +111,7 @@
                     <li class="nav-item">
                         <a href="#tab-poli-12" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
-								12 [CLAIM]
+								12 <i class="fa fa-check-circle"></i>
 							</span>
                             Pasca Pulang
                         </a>

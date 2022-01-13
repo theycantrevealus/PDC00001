@@ -78,7 +78,9 @@
 		$("#txt_obat_tambah").select2();
 		$("#txt_gudang").select2();
 		$("#txt_gudang_tambah").select2();
-		$("#target_gudang_import").select2();
+		$("#target_gudang_import").select2({
+            dropdownParent: $("#review-import")
+        });
 		$("#txt_qty_tambah").inputmask({
 			alias: 'decimal',
 			rightAlign: true,
@@ -154,7 +156,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+						return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -168,7 +170,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["batch"]["batch"];
+						return (row["batch"]["batch"] !== undefined && row["batch"]["batch"] !== null) ? row["batch"]["batch"] : "-";
 					}
 				},
 				{
@@ -284,8 +286,8 @@
                     $("#review-import").modal();
 
                     var data = response.response_package;
-
-
+                    console.clear();
+                    console.log(data);
 
                     $("#csv_file_data").html("");
                     var thead = "";
@@ -304,12 +306,17 @@
                     var filtedData = [];
 
                     for(var aa in data.row_data) {
-                        if(data.row_data[aa].stok > 0) {
+                        if($("#target_gudang_import").val() === __GUDANG_UTAMA__) {
                             filtedData.push(data.row_data[aa]);
+                        } else {
+                            if(data.row_data[aa].stok > 0) {
+                                filtedData.push(data.row_data[aa]);
+                            }
                         }
                     }
+                    console.log(data);
                     generated_data = filtedData;
-                    $(table_view).addClass("table table-bordered table-striped largeDataType").DataTable({
+                    $(table_view).addClass("table table-responsive table-bordered table-striped largeDataType").DataTable({
                         data:filtedData,
                         columns : data.column_builder
                     });
@@ -350,7 +357,27 @@
                             console.clear();
                             console.log(response);
                             var html = "Imported : " + response.response_package.success_proceed + "<br />";
-                            $("#csv_file_data").html(html);
+                            var failedData = response.response_package.failed_data;
+                            var failedResult = document.createElement("table");
+                            $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
+                            "<tr>" +
+                            "<th>Nama</th>" +
+                            "<th>Satuan</th>" +
+                            "<th>Harga</th>" +
+                            "<th>Kedaluwarsa</th>" +
+                            "<th>Stok</th></tr></thead><tbody></tbody>");
+
+                            $("#csv_file_data").html(html).append(failedResult);
+                            $(failedResult).DataTable({
+                                data: failedData,
+                                columns: [
+                                    { data: "nama" },
+                                    { data: "satuan" },
+                                    { data: "harga" },
+                                    { data: "kedaluarsa" },
+                                    { data: "stok" }
+                                ]
+                            });
                             tableStokAwal.ajax.reload();
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
@@ -407,7 +434,7 @@
                                         </div>
                                         <div class="col-md-12">
                                             <hr />
-                                            <div id="csv_file_data" class="table-responsive"></div>
+                                            <div id="csv_file_data" style="overflow-y: scroll" class="table-responsive"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -424,7 +451,7 @@
 </div>
 
 
-<div id="form-tambah" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+<div id="form-tambah" tabindex="-1" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">

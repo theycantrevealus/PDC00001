@@ -25,6 +25,15 @@
 								<input type="text" class="form-control uppercase" id="txt_nama" placeholder="Nama Supplier" required>
 							</div>
 						</div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="txt_no_ktp">Jenis Supplier:</label>
+                                <select class="form-control" id="txt_jenis">
+                                    <option value="A">Default</option>
+                                    <option value="B">Rumah Sakit</option>
+                                </select>
+                            </div>
+                        </div>
 					</div>
 					<div class="row">
 						<div class="col-md-5">

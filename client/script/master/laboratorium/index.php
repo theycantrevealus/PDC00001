@@ -36,7 +36,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -199,9 +199,36 @@
                             console.clear();
                             console.log(response);
                             var html = "Imported : " + response.response_package.success_proceed + "<br />";
-                            $("#csv_file_data").html(html);
+
+                            
+                            var failedData = response.response_package.failed_data;
+                            console.log(failedData);
+                            var failedResult = document.createElement("table");
+                            $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
+                            "<tr>" +
+                            "<th>Kode</th>" +
+                            "<th>Kategori</th>" +
+                            "<th>Subkategori</th>" +
+                            "<th>Nama</th>" +
+                            "<th>Mitra</th>" +
+                            "<th>Harga</th></tr></thead><tbody></tbody>");
+
+                            $("#csv_file_data").html(html).append(failedResult);
+                            $(failedResult).DataTable({
+                                data: failedData,
+                                columns: [
+                                    { data: "kode" },
+                                    { data: "kategori" },
+                                    { data: "subkategori" },
+                                    { data: "nama" },
+                                    { data: "mitra" },
+                                    { data: "harga" }
+                                ]
+                            });
+                            
+
                             tableLab.ajax.reload();
-                            $("#review-import").modal("hide");
+                            //$("#review-import").modal("hide");
                             $("#import_data").removeAttr("disabled");
                             $("#csv_file").removeAttr("disabled");
                         },
@@ -223,7 +250,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal-large-title">Import Harga Tindakan (Poli)</h5>
+                <h5 class="modal-title" id="modal-large-title">Import Tarif Laboratorium</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>

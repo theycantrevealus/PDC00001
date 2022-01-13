@@ -25,7 +25,10 @@
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-header card-header-large bg-white d-flex align-items-center">
-                                <h5 class="card-header__title flex m-0">Stok</h5>
+                                <h5 class="card-header__title flex m-0">
+                                    Stok
+                                    <button class="btn btn-primary pull-right" id="btnExport">Export Stok</button>
+                                </h5>
                             </div>
                             <div class="card-body tab-content">
                                 <div class="tab-pane active show fade">
@@ -34,7 +37,10 @@
                                         <tr>
                                             <th class="wrap_content">No</th>
                                             <th style="width: 50%;">Item</th>
-                                            <th style="wrap_content">Stok Terkini</th>
+                                            <th class="wrap_content">Reserved Out</th>
+                                            <th class="wrap_content">Reserved In</th>
+                                            <th class="wrap_content">Stok Terkini</th>
+                                            <th class="wrap_content">Satuan</th>
                                             <th class="wrap_content">Aksi</th>
                                         </tr>
                                         </thead>

@@ -14,7 +14,6 @@
                                 <th>Tanggal</th>
                                 <th>Dokter</th>
                                 <th>Terapis</th>
-                                <th class="wrap_content">Aksi</th>
                             </tr>
                         </thead>
                         <tbody></tbody>

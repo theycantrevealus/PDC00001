@@ -31,7 +31,7 @@ class Bed extends Utility {
 					break;
 
 				case 'bed-detail':
-					return self::get_ruangan_detail('master_unit_ruangan', $parameter[2]);
+					// return self::get_ruangan_detail('master_unit_ruangan', $parameter[2]);
 					break;
 
 				/*case 'ruangan-lantai':
@@ -192,35 +192,84 @@ class Bed extends Utility {
 
     }
 
-	private function get_bed_ruangan($table, $parameter){
-		$data = self::$query
-					->select($table, 
-						array(
-							'uid',
-							'nama',
-							'status',
-							'uid_lantai',
-							'uid_ruangan',
-							'created_at',
-							'updated_at'
-						)
-					)
+	private function get_bed_ruangan($table, $parameter) {
+		if($parameter === __KAMAR_IGD__) {
+			$dataSet = array();
+			$data = self::$query->select('nurse_station', array(
+				'uid'
+			))
+				->join('nurse_station_ranjang', array(
+					'ranjang'
+				))
+				->on(array(
+					array('nurse_station_ranjang.nurse_station', '=', 'nurse_station.uid')
+				))
+				->where(array(
+					'nurse_station.deleted_at' => 'IS NULL',
+					'AND',
+					'nurse_station_ranjang.deleted_at' => 'IS NULL'
+				), array(
+
+				))
+				->execute();
+			foreach($data['response_data'] as $key => $value) {
+				$det = self::$query->select('master_unit_bed', array(
+					'uid',
+					'nama',
+					'status',
+					'uid_lantai',
+					'uid_ruangan',
+					'created_at',
+					'updated_at'
+				))
 					->where(array(
-							$table . '.deleted_at' => 'IS NULL',
-							'AND',
-							$table . '.uid_ruangan' => '= ?'
-						),
-						array($parameter)
-					)
+						'master_unit_bed.deleted_at' => 'IS NULL',
+						'AND',
+						'master_unit_bed.uid_ruangan' => '= ?',
+						'AND',
+						'master_unit_bed.uid' => '= ?'
+					), array(
+						$parameter, $value['ranjang']
+					))
 					->execute();
+				if(count($det['response_data']) > 0) {
+					array_push($dataSet, $det['response_data'][0]);
+				}
+			}
 
-		$autonum = 1;
-		foreach ($data['response_data'] as $key => $value) {
-			$data['response_data'][$key]['autonum'] = $autonum;
-			$autonum++;
+			return array(
+				'response_data' => $dataSet
+			);
+		} else {
+			$data = self::$query
+						->select($table, 
+							array(
+								'uid',
+								'nama',
+								'status',
+								'uid_lantai',
+								'uid_ruangan',
+								'created_at',
+								'updated_at'
+							)
+						)
+						->where(array(
+								$table . '.deleted_at' => 'IS NULL',
+								'AND',
+								$table . '.uid_ruangan' => '= ?'
+							),
+							array($parameter)
+						)
+						->execute();
+
+			$autonum = 1;
+			foreach ($data['response_data'] as $key => $value) {
+				$data['response_data'][$key]['autonum'] = $autonum;
+				$autonum++;
+			}
+
+			return $data;
 		}
-
-		return $data;
 	}
 	/*=========================================================*/
 

@@ -28,7 +28,7 @@
                 <div class="row card-body">
                     <div class="col-md-12">
                         <div class="card">
-                            <div class="card-body">
+                            <div class="card-header">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <table class="table form-mode">
@@ -47,15 +47,18 @@
                                                 <td>Kemasan</td>
                                                 <td>:</td>
                                                 <td id="kemasan_barang"></td>
+
+                                                <td>Total</td>
+                                                <td>:</td>
+                                                <td id="total_all">0</td>
                                             </tr>
                                         </table>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="card">
+                            <div class="card-header">
+                                <canvas id="currentStokGraph" width="400" height="50"></canvas>
+                            </div>
                             <div class="card-body">
                                 <div class="tab-pane active show fade" id="loadResult">
                                     <!--<table class="table largeDataType" id="table-item-log">

@@ -47,7 +47,7 @@
 			"columns" : [
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return row["autonum"];
+						return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
 					}
 				},
 				{
@@ -199,6 +199,8 @@
 					},
 					type:"DELETE",
 					success:function(response) {
+                        console.clear();
+                        console.log(response);
 						tableRuangan.ajax.reload();
 					},
 					error: function(response) {
@@ -313,8 +315,7 @@
 			success: function(response){
 			    //console.log(response);
 				var MetaData = response.response_package;
-
-				if (MetaData.length > 0){
+				if (MetaData !== null && MetaData.length > 0){
 					 for(i = 0; i < MetaData.length; i++){
 						var selection = document.createElement("OPTION");
 

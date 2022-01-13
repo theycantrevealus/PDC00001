@@ -61,6 +61,7 @@
         refresh_penjamin("#filter-penjamin", __UIDPENJAMINUMUM__);
         var returnProceed = refresh_kelas(tindakanKelas);
         columnBuilder = returnProceed.dataKelas;
+        console.log(columnBuilder);
         tableTindakan = returnProceed.table;
         dataBuilder = returnProceed.dataBuilder;
         classNameBuilder = returnProceed.dataNamaKelas;
@@ -230,7 +231,6 @@
 
                             generateHeader.push({
                                 "data" : null, render: function(data, type, row, meta) {
-                                    console.log(nama_target);
                                     return row[nama_target];
                                 }
                             });
@@ -286,9 +286,7 @@
                                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                                 },
                                 dataSrc: function (response) {
-                                    console.clear();
-                                    console.log(response);
-
+                                    
                                     var DataPopulator = {};
                                     var DataPopulatorParsed = [];
 
@@ -393,8 +391,6 @@
             $("#txt_tindakan").attr("disabled", "disabled");
             dataBuilder = refresh_kelas_data(tindakanKelas);
             var tempDataBuilder = dataBuilder;
-            //console.log(tempDataBuilder);
-            console.log(columnBuilder);
 
             /*$("#txt_tindakan option[value=\"" + uid + "\"").prop("selected", true);
             $("#txt_tindakan").val(uid).trigger("change");
@@ -404,8 +400,6 @@
 
 
             for(var i in columnBuilder) {
-
-                console.log(classNameBuilder[i]);
 
                 if(
                     classNameBuilder[i].identifier != "auto_number" &&
@@ -476,7 +470,6 @@
                     },
                     type:"DELETE",
                     success:function(response) {
-                        console.log(response);
                         tableTindakan.ajax.reload();
                     },
                     error: function(response) {
@@ -686,8 +679,7 @@
         $("#btnSubmit").click(function() {
             var penjaminList = tindakanBuilder;
 
-            console.log(metaData);
-
+            
             var form_data = {};
             if(MODE == "tambah") {
                 form_data = {
@@ -710,7 +702,6 @@
                 },
                 type: "POST",
                 success: function(response){
-                    console.log(response);
                     metaData = {};
                     dataBuilder = refresh_kelas_data(tindakanKelas);
                     tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);

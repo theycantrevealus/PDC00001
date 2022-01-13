@@ -64,7 +64,8 @@ class Modul extends Utility {
 
 			//__HOST__/Modul/module_server_side
 			return self::module_server_side($parameter);
-
+        } else if($parameter[1] == 'module_select2') {
+            return self::get_select2();
 		} else {
 
 			//__HOST__/Modul
@@ -308,6 +309,23 @@ class Modul extends Utility {
 
 		return $child_list;
 	}
+
+	private function get_select2() {
+        $query = self::$query->select('modul', array(
+            'id', 'level', 'nama', 'identifier', 'keterangan', 'created_at', 'updated_at', 'deleted_at', 'parent', 'icon', 'show_on_menu', 'show_order', 'menu_group'
+        ))
+            ->order(array(
+                'parent' => 'asc'
+            ))
+            ->where(array(
+                'modul.deleted_at' => 'IS NULL',
+                'AND',
+                'modul.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\''
+            ))
+            ->limit(10)
+            ->execute();
+        return $query;
+    }
 	
 	public function get_all() {
 		//$query = self::$pdo->prepare('SELECT * FROM "public"."modul" WHERE deleted_at IS NULL');

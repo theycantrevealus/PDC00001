@@ -147,6 +147,7 @@ class Supplier extends Utility {
 			'email',
 			'kontak',
 			'alamat',
+            'supplier_type',
 			'created_at',
 			'updated_at'
 		))
@@ -164,12 +165,13 @@ class Supplier extends Utility {
 	private function edit_supplier($parameter) {
 		$old = self::get_detail($parameter['uid']);
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 		$worker = self::$query
 		->update('master_supplier', array(
 			'nama' => strtoupper($parameter['nama']),
 			'email' => $parameter['email'],
 			'kontak' => $parameter['kontak'],
+            'supplier_type' => $parameter['jenis'],
 			'alamat' => $parameter['alamat'],
 			'updated_at' => parent::format_date()
 		))
@@ -213,7 +215,7 @@ class Supplier extends Utility {
 
 	private function tambah_supplier($parameter) {
 		$Authorization = new Authorization();
-		$UserData = $Authorization::readBearerToken($parameter['access_token']);
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
 
 		$check = self::duplicate_check(array(
 			'table' => 'master_supplier',
@@ -234,6 +236,7 @@ class Supplier extends Utility {
 				'email' => $parameter['email'],
 				'kontak' => $parameter['kontak'],
 				'alamat' => $parameter['alamat'],
+                'supplier_type' => $parameter['jenis'],
 				'created_at' => parent::format_date(),
 				'updated_at' => parent::format_date()
 			))

@@ -4,6 +4,7 @@
 		var currentAntrianID = localStorage.getItem("currentAntrianID");
 		var curremtAntrianType = localStorage.getItem("currentAntrianType");
 
+
 		var penjaminMetaData;
 
 		/*alert(currentPasien);
@@ -37,6 +38,11 @@
 		});
 		
 		$("#btnSubmit").click(function(){
+            var me = $(this);
+            var lastCap = me.html();
+            me.attr({
+                "disabled" : "disabled"
+            }).addClass("btn-warning").removeClass("btn-success").html("Processing...");
 			var dataObj = {};
 			if(currentAntrianID != undefined || currentAntrianID != null) {
 				$('.inputan').each(function(){
@@ -52,103 +58,267 @@
 				if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 					if(dataObj.penjamin === __UIDPENJAMINBPJS__) {
 
-						//Get Nomor BPJS
-                        $.ajax({
-                            async: false,
-                            url: __HOSTAPI__ + "/BPJS/info_bpjs/" + __PAGES__[3],
-                            beforeSend: function (request) {
-                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                            },
-                            type: "GET",
-                            success: function (response) {
 
-                                (response);
-                                $("#modal-sep").modal("show");
-                                $("#btnProsesPasien").hide();
-                                $("#btnProsesSEP").hide();
-                                $("#hasil_bpjs").hide();
+                        if(__BPJS_MODE__ > 0) {
+                            //Get Nomor BPJS
+                            $.ajax({
+                                async: false,
+                                url: __HOSTAPI__ + "/BPJS/info_bpjs/" + __PAGES__[3],
+                                beforeSend: function (request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                type: "GET",
+                                success: function (response) {
+                                    $("#modal-sep").modal("show");
+                                    $("#btnProsesPasien").hide();
+                                    $("#btnProsesSEP").hide();
+                                    $("#hasil_bpjs").hide();
 
-                                var data = response.response_package.response_data[0];
-                                var restMeta;
-                                var penjaminList = data.history_penjamin;
-                                for(var penjaminKey in penjaminList) {
-                                    if(penjaminList[penjaminKey].penjamin === __UIDPENJAMINBPJS__) {
-                                        restMeta = JSON.parse(penjaminList[penjaminKey].rest_meta);
+                                    var data = response.response_package.response_data[0];
+                                    var restMeta;
+                                    var penjaminList = data.history_penjamin;
+                                    for(var penjaminKey in penjaminList) {
+                                        if(penjaminList[penjaminKey].penjamin === __UIDPENJAMINBPJS__) {
+                                            restMeta = JSON.parse(penjaminList[penjaminKey].rest_meta);
+                                        }
                                     }
-                                }
 
-                                if(restMeta !== undefined) {
-                                    $("#txt_no_bpjs").val(restMeta.response.peserta.noKartu);
-                                    penjaminMetaData = cekPasienBPJS(loadPasien(__PAGES__[3]), restMeta.response.peserta.noKartu);
-                                } else {
-                                    $("#txt_no_bpjs").focus();
+                                    if(restMeta !== undefined) {
+                                        if(restMeta !== undefined && restMeta !== null) {
+                                            $("#txt_no_bpjs").val(restMeta.response.peserta.noKartu);
+                                            penjaminMetaData = cekPasienBPJS(loadPasien(__PAGES__[3]), restMeta.response.peserta.noKartu);
+                                        }
+
+                                    } else {
+                                        $("#txt_no_bpjs").focus();
+                                    }
+
+                                    me.removeAttr("disabled").addClass("btn-success").removeClass("btn-warning").html(lastCap);
+                                },
+                                error: function (response) {
+                                    console.log(response);
+                                    me.removeAttr("disabled").addClass("btn-success").removeClass("btn-warning").html(lastCap);
                                 }
-                            },
-                            error: function (response) {
-                                console.log(response);
-                            }
-                        });
+                            });
+                        } else {
+                            $.ajax({
+                                async: false,
+                                url: __HOSTAPI__ + "/Antrian",
+                                data: {
+                                    request : "tambah-kunjungan",
+                                    dataObj : dataObj
+                                },
+                                beforeSend: function(request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                type: "POST",
+                                success: function(response) {
+                                    
+                                    localStorage.getItem("currentPasien");
+                                    localStorage.getItem("currentAntrianID");
+                                    console.log(response);
+
+                                    if(response.response_package.response_notif == 'K') {
+                                        push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                            Swal.fire(
+                                                'Berhasil ditambahkan!',
+                                                'Silahkan arahkan pasien ke kasir',
+                                                'success'
+                                            ).then((result) => {
+                                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                            });
+                                        });
+
+                                    } else if(response.response_package.response_notif == 'P') {
+                                        /*push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                            Swal.fire(
+                                                'Berhasil ditambahkan!',
+                                                'Silahkan arahkan pasien ke poli',
+                                                'success'
+                                            ).then((result) => {
+                                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                            });
+                                        });*/
+                                        if(dataObj.penjamin === __UIDPENJAMINUMUM__) {
+                                            push_socket(__ME__, "antrian_poli_baru", "*", "Antrian poli baru", "info").then(function() {
+                                                console.log("pushed!");
+                                            });
+                                        }
+
+                                    } else {
+                                        alert();
+                                        console.log("command not found");
+                                    }
+
+                                    me.attr({
+                                        "disabled" : "disabled"
+                                    }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
+
+                                },
+                                error: function(response) {
+                                    console.log("Error : ");
+                                    console.log(response);
+                                    me.attr({
+                                        "disabled" : "disabled"
+                                    }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
+                                }
+                            });
+                        }
 
 
 					} else {
 
-					    $.ajax({
-							async: false,
-							url: __HOSTAPI__ + "/Antrian",
-							data: {
-								request : "tambah-kunjungan",
-								dataObj : dataObj
-							},
-							beforeSend: function(request) {
-								request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-							},
-							type: "POST",
-							success: function(response){
-							    console.clear();
-                                console.log(response);
-                                localStorage.getItem("currentPasien");
-                                localStorage.getItem("currentAntrianID");
 
-                                if(response.response_package.response_notif == 'K') {
-									push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
-                                        Swal.fire(
-                                            'Berhasil ditambahkan!',
-                                            'Silahkan arahkan pasien ke kasir',
-                                            'success'
-                                        ).then((result) => {
-                                            location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
-                                        });
+                        if(dataObj.departemen === __POLI_IGD__) {
+                            if(
+                                dataObj.bangsal !== null && dataObj.bangsal !== undefined &&
+                                dataObj.cara_datang !== null && dataObj.cara_datang !== undefined
+                            ) {
+                                $.ajax({
+                                    async: false,
+                                    url: __HOSTAPI__ + "/Antrian",
+                                    data: {
+                                        request : "tambah-kunjungan",
+                                        dataObj : dataObj
+                                    },
+                                    beforeSend: function(request) {
+                                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                    },
+                                    type: "POST",
+                                    success: function(response){
+                                        localStorage.getItem("currentPasien");
+                                        localStorage.getItem("currentAntrianID");
+
+                                        
+                                        if(response.response_package.response_notif == 'K') {
+                                            push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                                Swal.fire(
+                                                    'Berhasil ditambahkan!',
+                                                    'Silahkan arahkan pasien ke kasir',
+                                                    'success'
+                                                ).then((result) => {
+                                                    location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                                });
+                                            });
+
+                                        } else if(response.response_package.response_notif == 'P') {
+                                            /*push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                                Swal.fire(
+                                                    'Berhasil ditambahkan!',
+                                                    'Silahkan arahkan pasien ke poli',
+                                                    'success'
+                                                ).then((result) => {
+                                                    location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                                });
+                                            });*/
+                                            if(dataObj.penjamin === __UIDPENJAMINUMUM__) {
+                                                push_socket(__ME__, "antrian_poli_baru", "*", "Antrian poli baru", "info").then(function() {
+                                                    console.log("pushed!");
+                                                });
+                                            }
+
+                                        } else {
+                                            alert();
+                                            console.log("command not found");
+                                        }
+
+                                        me.attr({
+                                            "disabled" : "disabled"
+                                        }).addClass("btn-success").removeClass("btn-warning").html(lastCap);
+
+                                    },
+                                    error: function(response) {
+                                        console.log("Error : ");
+                                        console.log(response);
+                                    }
+                                });
+                            } else {
+                                if(dataObj.bangsal === null || dataObj.bangsal === undefined) {
+                                    Swal.fire(
+                                        'Pendaftaran IGD',
+                                        'Silahkan pilih ranjang',
+                                        'error'
+                                    ).then((result) => {
+                                        //
                                     });
+                                } else if(dataObj.cara_datang === null || dataObj.cara_datang === undefined) {
+                                    Swal.fire(
+                                        'Pendaftaran IGD',
+                                        'Silahkan pilih cara datang',
+                                        'error'
+                                    ).then((result) => {
+                                        //
+                                    });
+                                }
+                                me.removeAttr("disabled").addClass("btn-success").removeClass("btn-warning").html(lastCap);
+                            }
+                        } else {
+                            $.ajax({
+                                async: false,
+                                url: __HOSTAPI__ + "/Antrian",
+                                data: {
+                                    request : "tambah-kunjungan",
+                                    dataObj : dataObj
+                                },
+                                beforeSend: function(request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                type: "POST",
+                                success: function(response){
+                                    console.log(response);
+                                    localStorage.getItem("currentPasien");
+                                    localStorage.getItem("currentAntrianID");
 
-								} else if(response.response_package.response_notif == 'P') {
-									/*push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
-                                        Swal.fire(
-                                            'Berhasil ditambahkan!',
-                                            'Silahkan arahkan pasien ke poli',
-                                            'success'
-                                        ).then((result) => {
-                                            location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                    if(response.response_package.response_notif == 'K') {
+                                        push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya daftar pasien umum a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                            Swal.fire(
+                                                'Berhasil ditambahkan!',
+                                                'Silahkan arahkan pasien ke kasir',
+                                                'success'
+                                            ).then((result) => {
+                                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                            });
                                         });
-                                    });*/
-                                    if(dataObj.penjamin === __UIDPENJAMINUMUM__) {
-                                        push_socket(__ME__, "antrian_poli_baru", "*", "Antrian poli baru", "info").then(function() {
-                                            console.log("pushed!");
-                                        });
+
+                                    } else if(response.response_package.response_notif == 'P') {
+                                        /*push_socket(__ME__, "kasir_daftar_baru", "*", "Antrian pasien a/n. " + response.response_package.response_data[0].pasien_detail.nama, "warning").then(function () {
+                                            Swal.fire(
+                                                'Berhasil ditambahkan!',
+                                                'Silahkan arahkan pasien ke poli',
+                                                'success'
+                                            ).then((result) => {
+                                                location.href = __HOSTNAME__ + '/rawat_jalan/resepsionis';
+                                            });
+                                        });*/
+                                        if(dataObj.penjamin === __UIDPENJAMINUMUM__) {
+                                            push_socket(__ME__, "antrian_poli_baru", "*", "Antrian poli baru", "info").then(function() {
+                                                console.log("pushed!");
+                                            });
+                                        }
+
+                                    } else {
+                                        alert();
+                                        console.log("command not found");
                                     }
 
-								} else {
-									console.log("command not found");
-								}
+                                    me.removeAttr("disabled").addClass("btn-success").removeClass("btn-warning").html(lastCap);
 
-							},
-							error: function(response) {
-								console.log("Error : ");
-								console.log(response);
-							}
-						});
+                                },
+                                error: function(response) {
+                                    console.log("Error : ");
+                                    console.log(response);
+                                }
+                            });
+                        }
 					}
 				} else {
-					alert("Data belum lengkap");
+					Swal.fire(
+                        'Pendaftaran IGD',
+                        'Data Belum Lengkap',
+                        'error'
+                    ).then((result) => {
+                        me.removeAttr("disabled").addClass("btn-success").removeClass("btn-warning").html(lastCap);
+                    });
 				}
 			} else {
 			    console.log(currentAntrianID);
@@ -157,7 +327,7 @@
 			return false;
 		});
 
-        function loadBed(ruangan){
+        function loadBed(ruangan) {
             $.ajax({
                 url:__HOSTAPI__ + "/Bed/bed-ruangan/" + ruangan,
                 type: "GET",
@@ -201,7 +371,7 @@
                 dataObj.valid_end = penjaminMetaData.response.peserta.tglTAT;
                 dataObj.penjaminMeta = JSON.stringify(penjaminMetaData);
             }
-			console.log(dataObj);
+
 			if(dataObj.departemen != null && dataObj.dokter != null && dataObj.penjamin != null && dataObj.prioritas != null) {
 			    $.ajax({
 					async: false,
@@ -284,7 +454,7 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             type: "POST",
-            success: function(response){
+            success: function(response) {
                 var data = response.response_package.content;
 
                 console.log(data);
@@ -391,8 +561,8 @@
             success: function(response){
                 var MetaData = response.response_package.response_data;
 
-                if (MetaData != ""){ 
-                	for(i = 0; i < MetaData.length; i++){
+                if (MetaData !== undefined && MetaData !== null){
+                	for(var i in MetaData){
 	                    var selection = document.createElement("OPTION");
 
 	                    $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);

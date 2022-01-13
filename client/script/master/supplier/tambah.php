@@ -9,6 +9,7 @@
 			var kontak = $("#txt_kontak").inputmask("unmaskedvalue");
 			var email = $("#txt_email").val();
 			var alamat = $("#txt_alamat").val();
+            var jenis = $("#txt_jenis option:selected").val();
 
 			if(nama != "" && kontak != "") {
 				$.ajax({
@@ -22,7 +23,8 @@
 						nama:nama,
 						kontak:kontak,
 						email:email,
-						alamat:alamat
+						alamat:alamat,
+                        jenis: jenis
 					},
 					success:function(response) {
 						location.href = __HOSTNAME__ + "/master/supplier";

@@ -2,9 +2,9 @@
 <script type="text/javascript">
 	$(function(){
 
-		var tablePo = $("#table-po").DataTable({
+		var tablePo = $("#table-do").DataTable({
 			"ajax":{
-				url: __HOSTAPI__ + "/PO",
+				url: __HOSTAPI__ + "/PO/all2",
 				type: "GET",
 				headers:{
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -95,7 +95,7 @@
 
 
 
-		var tableDo = $("#table-do").DataTable({
+		var tableDo = $("#table-do-his").DataTable({
 			"ajax":{
 				url: __HOSTAPI__ + "/DeliveryOrder",
 				type: "GET",
@@ -290,16 +290,12 @@
 			$("#form-tambah").modal("show");
 			return false;
 		});
-
 		
 		$("#tambah-penjamin").click(function() {
 			$("#txt_nama").val("");
 			$("#form-tambah").modal("show");
 			MODE = "tambah";
-
 		});
-
-
 		$("#btnSubmit").click(function() {
 			var nama = $("#txt_nama").val();
 			if(nama != "") {
@@ -316,7 +312,6 @@
 						"nama": nama
 					};
 				}
-
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Penjamin",
