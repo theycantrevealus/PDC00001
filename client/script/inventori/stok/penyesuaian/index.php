@@ -780,7 +780,9 @@
 		});
 
 		
-
+        $("#resync_job").click(function() {
+            tableCurrentStock.ajax.reload();
+        });
 
 		var tableCurrentStock = $("#current-stok").DataTable({
 			processing: true,
@@ -1301,6 +1303,7 @@
 						<div class="col-lg-12 card-body">
 							<div class="row">
 								<div class="form-group col-md-12">
+                                    <button class="btn btn-success" id="resync_job">Sync Data</button>
 									<table class="table table-bordered table-striped" id="current-stok">
 										<thead class="thead-dark">
 											<tr>
