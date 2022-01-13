@@ -7248,6 +7248,7 @@ class Inventori extends Utility
                             if($CheckOpnameItem['response_data'][0]['supervisi'] === $UserData['data']->uid) {
                                 $opname_detail = self::$query->update('inventori_stok_opname_detail', array(
                                     'qty_akhir' => $value['nilai'],
+                                    'supervisi' => $UserData['data']->uid,
                                     'keterangan' => $value['keterangan'],
                                     'updated_at' => parent::format_date()
                                 ))
