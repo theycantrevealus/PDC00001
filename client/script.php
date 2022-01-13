@@ -32,6 +32,7 @@
 <script src="<?php echo __HOSTNAME__; ?>/template/assets/js/select2.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/pdfjs/build/pdf.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/socketio/socket.io.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.rowgroup.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.all.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/intro/intro.js"></script>

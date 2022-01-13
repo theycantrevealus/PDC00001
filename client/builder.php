@@ -20,7 +20,14 @@
 		}
 	?>
 	<div class="mdk-header-layout js-mdk-header-layout">
-		<?php require 'header.php'; ?>
+		<?php
+            if(file_exists('header.php')) {
+                require 'header.php';
+            } else {
+                echo 'no header found';
+            }
+            
+        ?>
 		<div class="mdk-header-layout__content">
 
 			<div class="mdk-drawer-layout js-mdk-drawer-layout">
@@ -361,11 +368,9 @@
 
                 tutorStart.onchange(function(targetElement) {
                     if(needDOM.indexOf($(targetElement).attr("id")) > -1) {
-                        console.log(needDOMProc[$(targetElement).attr("id")].type);
                         if(needDOMProc[$(targetElement).attr("id")].type === "modal") {
                             $(needDOMProc[$(targetElement).attr("id")].dom).modal("show");
                         } else if (needDOMProc[$(targetElement).attr("id")].type === "tab") {
-                            console.log(needDOMProc[$(targetElement).attr("id")].dom);
                             $(needDOMProc[$(targetElement).attr("id")].dom).tab("show");
                         }
                     }
@@ -401,45 +406,47 @@
 
 
 			var idleCheck;
-			function reloadSession() {
+			function reloadSession(idleCheck) {
                 var excludedPages = ['display_dokter','display','anjungan'];
 
                 if(excludedPages.indexOf(__PAGES__[0]) < 0) {
                     window.clearTimeout(idleCheck);
-				idleCheck = window.setTimeout(function(){
+    				idleCheck = window.setTimeout(function() {
 					
-                    $.ajax({
-                        url:__HOSTAPI__ + "/Pegawai",
-                        type: "POST",
-                        data: {
-                            request: "logged_out"
-                        },
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        success: function(response) {
-                            localStorage.removeItem("currentLoggedInState");
-                            location.href = __HOSTNAME__;
-                        },
-                        error: function(response) {
-                            console.log(response);
-                        }
-                    });
+                        $.ajax({
+                            url:__HOSTAPI__ + "/Pegawai",
+                            type: "POST",
+                            data: {
+                                request: "logged_out"
+                            },
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            success: function(response) {
+                                localStorage.removeItem("currentLoggedInState");
+                                location.href = __HOSTNAME__;
+                            },
+                            error: function(response) {
+                                console.log(response);
+                            }
+                        });
                     
-				},30 * 60 * 1000);
+				    },30 * 60 * 1000);
+
+                    return idleCheck;
                 }
 			}
 
 			$("body").on("click", function() {
-				reloadSession();
+				idleCheck = reloadSession(idleCheck);
 			});
 
 			$("body").on("keyup", function() {
-				reloadSession();
+				idleCheck = reloadSession(idleCheck);
 			});
 
 			$("body").on("mousemove", function() {
-				reloadSession();
+				idleCheck = reloadSession(idleCheck);
 			});
 
 			refresh_notification();
@@ -512,7 +519,6 @@
                 success:function(response) {
                     var data = response.response_package;
                     console.clear();
-                    console.log(data);
                     if(data && Object.keys(data).length > 0 && data.constructor === Object) {
                         $("#no-data-panel").hide();
                         for(var a in data) {
@@ -658,6 +664,7 @@
 
 
         var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
+        //var serverTarget = "ws://127.0.0.1:3000/socket.io/?EIO=3&transport=websocket";
 		var Sync;
         var tm;
         var protocolLib = {
@@ -685,7 +692,6 @@
                 location.href = __HOSTNAME__ + "/system/logout";
             },
             refresh: function(protocols, type, parameter, sender, receiver, time) {
-                alert();
                 location.reload();
             }
         };
@@ -739,8 +745,7 @@
 	?>
 	<script type="text/javascript">
 
-        console.log(protocolLib);
-
+        
         function resend_socket(requestList, callback) {
             var sendingStatus = 0;
             for(var reqKey in requestList) {
@@ -767,7 +772,7 @@
         async function push_socket(sender, protocols, receiver, parameter, type) {
 
             if(Sync.readyState === WebSocket.CLOSED) {
-                Sync = SocketCheck(serverTarget, protocolLib, tm);
+                //Sync = SocketCheck(serverTarget, protocolLib, tm);
             }
 
             var msg = {
@@ -779,7 +784,8 @@
             };
 
             return new Promise((resolve, reject) => {
-                Sync.send(JSON.stringify(msg));
+                Sync.emit('message', msg);
+                //Sync.send(JSON.stringify(msg));
                 resolve(msg);
             });
         }
@@ -789,7 +795,82 @@
 
                 //var Sync = new WebSocket(serverTarget);
                 //console.log(protocolLib);
-                Sync = SocketCheck(serverTarget, protocolLib, tm);
+                //Sync = SocketCheck(serverTarget, protocolLib, tm);
+                Sync = io.connect(serverTarget);
+            
+                Sync.on('message', data => {
+                    console.clear();
+                    console.log(data);
+                    var audio;
+                    var signalData = data;
+                    var command = signalData.protocols;
+                    var type = signalData.type;
+                    var sender = signalData.sender;
+                    var receiver = signalData.receiver;
+                    var time = signalData.time;
+                    var parameter = signalData.parameter;
+
+
+                    if(command !== undefined && command !== null && command !== "") {
+
+                        if(protocolLib[command] !== undefined) {
+                            if(command === "anjungan_kunjungan_panggil") {
+                                if (audio !== undefined && audio.audio !== undefined) {
+                                    if (!audio.paused) {
+                                        audio.audio.pause();
+                                        audio.audio.currentTime = 0;
+                                    } else {
+                                        //alert();
+                                    }
+                                }
+                                audio = protocolLib[command](command, type, parameter, sender, receiver, time);
+                            } else if(command === "reset_password") {
+                                if(receiver === __ME__) {
+                                    protocolLib[command](command, type, parameter, sender, receiver, time);
+                                }
+                            } else {
+                                if(receiver === __ME__ || sender === __ME__ || receiver === "*" || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
+                                    if(receiver === __ME__ || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
+                                        var audio = new Audio(), i = 0;
+                                        audio.volume = 0.5;
+                                        audio.playbackRate = 0.1;
+                                        audio.loop = false;
+                                        var playlist = [
+                                            __HOST__ + "/audio/notif.mp3"
+                                        ];
+                                        var currentLength = 0;
+
+                                        audio.addEventListener('ended', function () {
+                                            i++;
+                                            if(i == playlist.length) {
+                                                audio.pause();
+                                                audio.currentTime = 0;
+                                                i = 0;
+                                                console.log("Finished");
+                                            } else {
+                                                console.log("Playing : " + playlist[i]);
+                                                audio.src = playlist[i];
+                                                audio.play();
+                                            }
+                                        });
+
+                                        audio.src = playlist[0];
+                                        audio.currentTime = 0;
+                                        audio.volume = 0.5;
+                                        audio.playbackRate = 1;
+                                        audio.loop = false;
+                                        audio.play();
+                                    }
+                                    protocolLib[command](command, type, parameter, sender, receiver, time);
+                                    //console.log("Sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
+                                } else {
+                                    protocolLib[command](command, type, parameter, sender, receiver, time);
+                                    //console.log("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
+                                }
+                            }
+                        }
+                    }
+                });
 
             } else {
                 console.log("WebSocket Not Supported");
@@ -801,22 +882,19 @@
 
         });
 
+        $(".global-sync-container").fadeOut();
+
         function SocketCheck(serverTarget, protocolLib, tm) {
             var audio;
+
             var Sync = new WebSocket(serverTarget);
             Sync.onopen = function() {
                 clearInterval(tm);
-                //console.log("connected");
                 if(!currentLoggedInState) {
                     push_socket("system", "loggedIn", "*", "User logged in", "info").then(function() {
                         localStorage.setItem("currentLoggedInState", true);
                     });
                 }
-                /*setInterval(function() {
-                    //if (Sync.bufferedAmount == 0)
-
-                }, 2000);*/
-
                 $(".global-sync-container").fadeOut();
             }
 
@@ -828,15 +906,6 @@
                 var receiver = signalData.receiver;
                 var time = signalData.time;
                 var parameter = signalData.parameter;
-
-                console.log({
-                    command: command,
-                    type:type,
-                    sender: sender,
-                    receiver: receiver,
-                    time: time,
-                    parameter: parameter
-                });
 
 
                 if(command !== undefined && command !== null && command !== "") {
@@ -903,12 +972,12 @@
             Sync.onclose = function() {
                 $(".global-sync-container").fadeIn();
                 var tryCount = 1;
-                tm = setInterval(function() {
-                    console.clear();
-                    console.log("CPR..." + tryCount);
-                    Sync = SocketCheck(serverTarget, protocolLib, tm);
-                    tryCount++;
-                }, 3000);
+                // tm = setInterval(function() {
+                //     console.clear();
+                //     console.log("CPR..." + tryCount);
+                //     Sync = SocketCheck("ws://10.2.2.48:8089/socket.io/?EIO=3&transport=websocket", protocolLib, tm);
+                //     tryCount++;
+                // }, 3000);
             }
 
             Sync.onerror = function() {
