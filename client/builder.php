@@ -799,7 +799,6 @@
                 Sync = io.connect(serverTarget);
             
                 Sync.on('message', data => {
-                    console.clear();
                     console.log(data);
                     var audio;
                     var signalData = data;
