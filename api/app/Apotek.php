@@ -455,99 +455,118 @@ class Apotek extends Utility
                         ))
                         ->execute();
 
-                    $Mutasi = $Inventori->tambah_mutasi(array(
-                        'access_token' => $parameter['access_token'],
-                        'dari' => $UserData['data']->gudang,
-                        'ke' => $RawatInap['response_data'][0]['gudang'],
-                        'keterangan' => 'Kebutuhan Resep Rawat Inap',
-                        'status' => 'N',
-                        'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
-                        'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
-                        //'apotek_order' => true,
-                        'item' => $itemMutasi
-                    ));
+                    //TODO : Sini seharusnya kalo masa opname
+                    $CheckGudangStatus = $Inventori->get_gudang_detail($UserData['data']->gudang)['response_data'][0];
+                    if($CheckGudangStatus['status'] === 'A') {
+                        $Mutasi = $Inventori->tambah_mutasi(array(
+                            'access_token' => $parameter['access_token'],
+                            'dari' => $UserData['data']->gudang,
+                            'ke' => $RawatInap['response_data'][0]['gudang'],
+                            'keterangan' => 'Kebutuhan Resep Rawat Inap',
+                            'status' => 'N',
+                            'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
+                            'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
+                            //'apotek_order' => true,
+                            'item' => $itemMutasi
+                        ));
 
-                    if($Mutasi['response_result'] > 0) {
+                        if($Mutasi['response_result'] > 0) {
 
-                        //Update batch rawat inap
-                        foreach ($itemMutasi as $mutBatch => $mutValue) {
-                            if(floatval($mutValue['mutasi']) > 0) {
-                                $BarangBatch = explode('|', $mutBatch);
-                                $inapBatch = self::$query->select('rawat_inap_batch', array(
-                                    'id'
-                                ))
-                                    ->where(array(
-                                        'rawat_inap_batch.obat' => '= ?',
-                                        'AND',
-                                        'rawat_inap_batch.batch' => '= ?',
-                                        'AND',
-                                        'rawat_inap_batch.resep' => '= ?',
-                                        'AND',
-                                        'rawat_inap_batch.gudang' => '= ?',
-                                        'AND',
-                                        'rawat_inap_batch.deleted_at' => 'IS NULL'
-                                    ), array(
-                                        $BarangBatch[0],
-                                        $BarangBatch[1],
-                                        $parameter['resep'],
-                                        $RawatInap['response_data'][0]['gudang']
-                                    ))
-                                    ->execute();
-                                if(count($inapBatch['response_data']) > 0) {
-                                    $updateBatchInap = self::$query->update('rawat_inap_batch', array(
-                                        'status' => 'N',
-                                        'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
-                                        'mutasi' => $Mutasi['response_unique'],
-                                        'updated_at' => parent::format_date()
+                            //Update batch rawat inap
+                            foreach ($itemMutasi as $mutBatch => $mutValue) {
+                                if(floatval($mutValue['mutasi']) > 0) {
+                                    $BarangBatch = explode('|', $mutBatch);
+                                    $inapBatch = self::$query->select('rawat_inap_batch', array(
+                                        'id'
                                     ))
                                         ->where(array(
-                                            'rawat_inap_batch.id' => '= ?'
+                                            'rawat_inap_batch.obat' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.batch' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.resep' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.gudang' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.deleted_at' => 'IS NULL'
                                         ), array(
-                                            $inapBatch['response_data'][0]['id']
+                                            $BarangBatch[0],
+                                            $BarangBatch[1],
+                                            $parameter['resep'],
+                                            $RawatInap['response_data'][0]['gudang']
                                         ))
                                         ->execute();
-                                } else {
-                                    $updateBatchInap = self::$query->insert('rawat_inap_batch', array(
-                                        'status' => 'N',
-                                        'gudang' => $RawatInap['response_data'][0]['gudang'],
-                                        'pasien' => $RawatInap['response_data'][0]['pasien'],
-                                        'resep' => $parameter['resep'],
-                                        'obat' => $BarangBatch[0],
-                                        'batch' => $BarangBatch[1],
-                                        'qty' => floatval($mutValue['mutasi']),
-                                        'mutasi' => $Mutasi['response_unique'],
-                                        'created_at' => parent::format_date(),
-                                        'updated_at' => parent::format_date()
-                                    ))
-                                        ->execute();
+                                    if(count($inapBatch['response_data']) > 0) {
+                                        $updateBatchInap = self::$query->update('rawat_inap_batch', array(
+                                            'status' => 'N',
+                                            'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
+                                            'mutasi' => $Mutasi['response_unique'],
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->where(array(
+                                                'rawat_inap_batch.id' => '= ?'
+                                            ), array(
+                                                $inapBatch['response_data'][0]['id']
+                                            ))
+                                            ->execute();
+                                    } else {
+                                        $updateBatchInap = self::$query->insert('rawat_inap_batch', array(
+                                            'status' => 'N',
+                                            'gudang' => $RawatInap['response_data'][0]['gudang'],
+                                            'pasien' => $RawatInap['response_data'][0]['pasien'],
+                                            'resep' => $parameter['resep'],
+                                            'obat' => $BarangBatch[0],
+                                            'batch' => $BarangBatch[1],
+                                            'qty' => floatval($mutValue['mutasi']),
+                                            'mutasi' => $Mutasi['response_unique'],
+                                            'created_at' => parent::format_date(),
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->execute();
+                                    }
                                 }
                             }
+
+                            // $updateResep = self::$query->update('resep', array(
+                            //     'status_resep' => 'D'
+                            // ))
+                            //     ->where(array(
+                            //         'resep.uid' => '= ?'
+                            //     ), array(
+                            //         $parameter['resep']
+                            //     ))
+                            //     ->execute();
+
+                            // $updateRacikan = self::$query->update('racikan', array(
+                            //     'status' => 'D'
+                            // ))
+                            //     ->where(array(
+                            //         'racikan.asesmen' => '= ?',
+                            //         'AND',
+                            //         'racikan.status' => '= ?',
+                            //         'AND',
+                            //         'racikan.deleted_at' => 'IS NULL'
+                            //     ), array(
+                            //         $parameter['asesmen'],
+                            //         'L'
+                            //     ))
+                            //     ->execute();
                         }
-
-                        // $updateResep = self::$query->update('resep', array(
-                        //     'status_resep' => 'D'
-                        // ))
-                        //     ->where(array(
-                        //         'resep.uid' => '= ?'
-                        //     ), array(
-                        //         $parameter['resep']
-                        //     ))
-                        //     ->execute();
-
-                        // $updateRacikan = self::$query->update('racikan', array(
-                        //     'status' => 'D'
-                        // ))
-                        //     ->where(array(
-                        //         'racikan.asesmen' => '= ?',
-                        //         'AND',
-                        //         'racikan.status' => '= ?',
-                        //         'AND',
-                        //         'racikan.deleted_at' => 'IS NULL'
-                        //     ), array(
-                        //         $parameter['asesmen'],
-                        //         'L'
-                        //     ))
-                        //     ->execute();
+                    } else {
+                        //Temp Stok masa mutasi
+                        foreach ($itemMutasi as $mutBatch => $mutValue) {
+                            $BarangBatch = explode('|', $mutBatch);
+                            $Virtual = $Inventori->virtual_stok(array(
+                                'transact_table' => 'resep',
+                                'transact_iden' => $parameter['resep'],
+                                'gudang_asal' => $UserData['data']->gudang,
+                                'gudang_tujuan' => $RawatInap['response_data'][0]['gudang'],
+                                'barang' => $BarangBatch[0],
+                                'batch' => $BarangBatch[1],
+                                'qty' => floatval($mutValue['mutasi']),
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                            ));
+                        }
                     }
                 }
             } else if($parameter['departemen'] === __POLI_IGD__) {
@@ -598,73 +617,92 @@ class Apotek extends Utility
                         ))
                         ->execute();
 
-                    $Mutasi = $Inventori->tambah_mutasi(array(
-                        'access_token' => $parameter['access_token'],
-                        'dari' => $UserData['data']->gudang,
-                        'ke' => $IGD['response_data'][0]['gudang'],
-                        'keterangan' => 'Kebutuhan Resep IGD',
-                        'status' => 'N',
-                        'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
-                        'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
-                        //'apotek_order' => true,
-                        'item' => $itemMutasi
-                    ));
 
-                    if($Mutasi['response_result'] > 0) {
+                    $CheckGudangStatus = $Inventori->get_gudang_detail($UserData['data']->gudang)['response_data'][0];
+                    if($CheckGudangStatus['status'] === 'A') {
+                        $Mutasi = $Inventori->tambah_mutasi(array(
+                            'access_token' => $parameter['access_token'],
+                            'dari' => $UserData['data']->gudang,
+                            'ke' => $IGD['response_data'][0]['gudang'],
+                            'keterangan' => 'Kebutuhan Resep IGD',
+                            'status' => 'N',
+                            'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
+                            'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
+                            //'apotek_order' => true,
+                            'item' => $itemMutasi
+                        ));
 
-                        //Update batch igd
-                        foreach ($itemMutasi as $mutBatch => $mutValue) {
-                            if(floatval($mutValue['mutasi']) > 0) {
-                                $BarangBatch = explode('|', $mutBatch);
-                                $inapBatch = self::$query->select('igd_batch', array(
-                                    'id'
-                                ))
-                                    ->where(array(
-                                        'igd_batch.obat' => '= ?',
-                                        'AND',
-                                        'igd_batch.batch' => '= ?',
-                                        'AND',
-                                        'igd_batch.resep' => '= ?',
-                                        'AND',
-                                        'igd_batch.gudang' => '= ?',
-                                        'AND',
-                                        'igd_batch.deleted_at' => 'IS NULL'
-                                    ), array(
-                                        $BarangBatch[0],
-                                        $BarangBatch[1],
-                                        $parameter['resep'],
-                                        $IGD['response_data'][0]['gudang']
-                                    ))
-                                    ->execute();
-                                if(count($inapBatch['response_data']) > 0) {
-                                    $updateBatchInap = self::$query->update('igd_batch', array(
-                                        'status' => 'N',
-                                        'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
-                                        'mutasi' => $Mutasi['response_unique'],
-                                        'updated_at' => parent::format_date()
+                        if($Mutasi['response_result'] > 0) {
+
+                            //Update batch igd
+                            foreach ($itemMutasi as $mutBatch => $mutValue) {
+                                if(floatval($mutValue['mutasi']) > 0) {
+                                    $BarangBatch = explode('|', $mutBatch);
+                                    $inapBatch = self::$query->select('igd_batch', array(
+                                        'id'
                                     ))
                                         ->where(array(
-                                            'igd_batch.id' => '= ?'
+                                            'igd_batch.obat' => '= ?',
+                                            'AND',
+                                            'igd_batch.batch' => '= ?',
+                                            'AND',
+                                            'igd_batch.resep' => '= ?',
+                                            'AND',
+                                            'igd_batch.gudang' => '= ?',
+                                            'AND',
+                                            'igd_batch.deleted_at' => 'IS NULL'
                                         ), array(
-                                            $inapBatch['response_data'][0]['id']
+                                            $BarangBatch[0],
+                                            $BarangBatch[1],
+                                            $parameter['resep'],
+                                            $IGD['response_data'][0]['gudang']
                                         ))
                                         ->execute();
-                                } else {
-                                    $updateBatchInap = self::$query->insert('igd_batch', array(
-                                        'status' => 'N',
-                                        'gudang' => $IGD['response_data'][0]['gudang'],
-                                        'pasien' => $IGD['response_data'][0]['pasien'],
-                                        'resep' => $parameter['resep'],
-                                        'obat' => $BarangBatch[0],
-                                        'batch' => $BarangBatch[1],
-                                        'qty' => floatval($mutValue['mutasi']),
-                                        'mutasi' => $Mutasi['response_unique'],
-                                        'created_at' => parent::format_date(),
-                                        'updated_at' => parent::format_date()
-                                    ))
-                                        ->execute();
+                                    if(count($inapBatch['response_data']) > 0) {
+                                        $updateBatchInap = self::$query->update('igd_batch', array(
+                                            'status' => 'N',
+                                            'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
+                                            'mutasi' => $Mutasi['response_unique'],
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->where(array(
+                                                'igd_batch.id' => '= ?'
+                                            ), array(
+                                                $inapBatch['response_data'][0]['id']
+                                            ))
+                                            ->execute();
+                                    } else {
+                                        $updateBatchInap = self::$query->insert('igd_batch', array(
+                                            'status' => 'N',
+                                            'gudang' => $IGD['response_data'][0]['gudang'],
+                                            'pasien' => $IGD['response_data'][0]['pasien'],
+                                            'resep' => $parameter['resep'],
+                                            'obat' => $BarangBatch[0],
+                                            'batch' => $BarangBatch[1],
+                                            'qty' => floatval($mutValue['mutasi']),
+                                            'mutasi' => $Mutasi['response_unique'],
+                                            'created_at' => parent::format_date(),
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->execute();
+                                    }
                                 }
                             }
+                        }
+                    } else {
+                        //Temp Stok masa mutasi
+                        foreach ($itemMutasi as $mutBatch => $mutValue) {
+                            $BarangBatch = explode('|', $mutBatch);
+                            $Virtual = $Inventori->virtual_stok(array(
+                                'transact_table' => 'resep',
+                                'transact_iden' => $parameter['resep'],
+                                'gudang_asal' => $UserData['data']->gudang,
+                                'gudang_tujuan' => $IGD['response_data'][0]['gudang'],
+                                'barang' => $BarangBatch[0],
+                                'batch' => $BarangBatch[1],
+                                'qty' => floatval($mutValue['mutasi']),
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                            ));
                         }
                     }
                 }

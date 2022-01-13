@@ -1300,10 +1300,15 @@
 				</div>
 				<div class="card card-form">
 					<div class="row no-gutters">
+                        <div class="card-header card-header-large bg-white d-flex align-items-center">
+                            <h5 class="card-header__title flex m-0">
+                            <button class="btn btn-success pull-right" id="resync_job">Sync Data</button>
+                            </h5>
+                        </div>
 						<div class="col-lg-12 card-body">
 							<div class="row">
 								<div class="form-group col-md-12">
-                                    <button class="btn btn-success" id="resync_job">Sync Data</button>
+
 									<table class="table table-bordered table-striped" id="current-stok">
 										<thead class="thead-dark">
 											<tr>
