@@ -2432,6 +2432,10 @@
             }
         });
 
+        $("#form-alasan-ubah").on('hidden.bs.modal', function () {
+            $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
+        });
+
         function simpanDataVerifikasi(alasanLib, alasanRacikanLib) {
             var allowVerifReason = false;
             var allowVerifRacikanReason = false;

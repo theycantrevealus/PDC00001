@@ -1042,26 +1042,50 @@ class Antrian extends Utility
                         return $antrianKunjungan;
                     } else {
                         if (count($checkStatusPasien['response_data']) > 0) { //Pasien sudah pernah terdaftar
-                            $antrianKunjungan = self::$query->update('antrian_nomor', array(
-                                'status' => 'P',
-                                'kunjungan' => $uid,
-                                'prioritas' => $parameter['dataObj']['prioritas'],
-                                'poli' => $parameter['dataObj']['departemen'],
-                                'pasien' => $parameter['dataObj']['currentPasien'],
-                                'penjamin' => $parameter['dataObj']['penjamin'],
-                                'dokter' => $parameter['dataObj']['dokter']
-                            ))
-                                ->where(array(
-                                    'antrian_nomor.id' => '= ?',
-                                    'AND',
-                                    '(antrian_nomor.status' => '= ?',
-                                    'OR',
-                                    'antrian_nomor.status' => '= ?)'
-                                ), array(
-                                    $parameter['dataObj']['currentAntrianID'],
-                                    'D', 'C'
+                            if($parameter['dataObj']['penjamin'] === __UIDPENJAMINBPJSOFFLINE__) {
+                                $antrianKunjungan = self::$query->update('antrian_nomor', array(
+                                    'status' => 'P',
+                                    'kunjungan' => $uid,
+                                    'prioritas' => $parameter['dataObj']['prioritas'],
+                                    'poli' => $parameter['dataObj']['departemen'],
+                                    'pasien' => $parameter['dataObj']['currentPasien'],
+                                    'penjamin' => $parameter['dataObj']['penjamin'],
+                                    'dokter' => $parameter['dataObj']['dokter']
                                 ))
-                                ->execute();
+                                    ->where(array(
+                                        'antrian_nomor.id' => '= ?',
+                                        'AND',
+                                        '(antrian_nomor.status' => '= ?',
+                                        'OR',
+                                        'antrian_nomor.status' => '= ?)'
+                                    ), array(
+                                        $parameter['dataObj']['currentAntrianID'],
+                                        'N', 'C'
+                                    ))
+                                    ->execute();
+                            } else {
+                                $antrianKunjungan = self::$query->update('antrian_nomor', array(
+                                    'status' => 'P',
+                                    'kunjungan' => $uid,
+                                    'prioritas' => $parameter['dataObj']['prioritas'],
+                                    'poli' => $parameter['dataObj']['departemen'],
+                                    'pasien' => $parameter['dataObj']['currentPasien'],
+                                    'penjamin' => $parameter['dataObj']['penjamin'],
+                                    'dokter' => $parameter['dataObj']['dokter']
+                                ))
+                                    ->where(array(
+                                        'antrian_nomor.id' => '= ?',
+                                        'AND',
+                                        '(antrian_nomor.status' => '= ?',
+                                        'OR',
+                                        'antrian_nomor.status' => '= ?)'
+                                    ), array(
+                                        $parameter['dataObj']['currentAntrianID'],
+                                        'D', 'C'
+                                    ))
+                                    ->execute();
+                            }
+                            
                             $Pasien = new Pasien(self::$pdo);
                             $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
                             $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
