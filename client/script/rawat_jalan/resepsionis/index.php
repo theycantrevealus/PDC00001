@@ -1683,6 +1683,7 @@
 						// $("#txt_current_antrian").html(dataCheck.response_queue).attr({
 						// 	"current_queue": dataCheck.response_queue_id
 						// });
+                        
 					} else {
 						if(dataCheck.response_used != undefined && dataCheck.response_used != "") {
 							load_loket("#txt_loket", dataCheck.response_used);
