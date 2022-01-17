@@ -372,6 +372,7 @@
                                     audio.pause();
                                     audio.currentTime = 0;
                                     i = 0;
+									console.clear();
 									push_socket("display", "doneCalling", "*", "", "info");
                                     console.log("Finished");
                                 } else {

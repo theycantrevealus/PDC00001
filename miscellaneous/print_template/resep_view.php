@@ -1,4 +1,8 @@
-
+<?php
+    $databaseObatResep = array();
+    $databaseObatRacikan = array();
+    //TODO : Harga Full Charge
+?>
 <div id="target-cetak-resep">
     <hr />
     <table class="form-mode">
@@ -84,6 +88,15 @@
             <?php
             $autonum = 1;
             foreach ($_POST['resep_dokter'] as $key => $value) {
+                if(!isset($databaseObatResep[$value['uid_obat']])) {
+                    $databaseObatResep[$value['uid_obat']] = array(
+                        'kuantitas' => 0,
+                        'harga' => 0
+                    );
+                }
+
+                $databaseObat[$value['uid_obat']]['qty'] = $value['kuantitas'];
+                $databaseObat[$value['uid_obat']]['harga'] = $value['harga'];
                 ?>
                 <tr>
                     <td>
@@ -143,6 +156,16 @@
                         </span>
                         <?php
                             foreach ($value['item'] as $ItemKey => $ItemValue) {
+                                if(!isset($databaseObatRacikan[$ItemValue['uid_obat']])) {
+                                    $databaseObatRacikan[$ItemValue['obat']] = array(
+                                        'kuantitas' => 0,
+                                        'harga' => 0
+                                    );
+                                }
+                
+                                $databaseObatRacikan[$ItemValue['obat']]['kuantitas'] = $ItemValue['kuantitas'];
+                                $databaseObatRacikan[$ItemValue['obat']]['harga'] = $ItemValue['harga'];
+
                                 ?>
                                 <li>
                                     <?php echo $ItemValue['detail']['nama']; ?> <b class="text-info">(<?php echo $ItemValue['kekuatan'] ?>)</b>

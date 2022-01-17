@@ -40,6 +40,8 @@ class Apotek extends Utility
                     break;
                 case 'detail_resep_verifikator':
                     return self::detail_resep_verifikator($parameter[2]);
+                case 'detail_resep_verifikator_2':
+                    return self::detail_resep_verifikator_2($parameter[2]);
                     break;
                 case 'detail_resep_2':
                     return self::detail_resep_2($parameter[2]);
@@ -68,6 +70,9 @@ class Apotek extends Utility
     {
         try {
             switch ($parameter['request']) {
+                case 'sync_harga_obat_resep':
+                    return self::sync_harga_obat_resep($parameter);
+                    break;
                 case 'revisi_resep':
                     //return self::revisi_resep($parameter);
                     return array();
@@ -207,6 +212,70 @@ class Apotek extends Utility
             ))
             ->execute();
         return $worker;
+    }
+
+    private function sync_harga_obat_resep($parameter) {
+        $updated_harga = array();
+        $POList = self::$query->select('inventori_po', array(
+            'uid', 'tanggal_po'
+        ))
+            ->where(array(
+                'inventori_po.deleted_at' => "IS NULL"
+            ), array(
+
+            ))
+            ->order(array(
+                'tanggal_po' => 'ASC'
+            ))
+            ->execute();
+
+        foreach($POList['response_data'] as $key => $value) {
+            $PODet = self::$query->select('inventori_po_detail', array(
+                'barang', 'harga'
+            ))
+                ->where(array(
+                    'inventori_po_detail.po' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach($PODet['response_data'] as $DKey => $DValue) {
+                $UpdateHargaResep = self::$query->update('resep_detail', array(
+                    'harga' => floatval($DValue['harga'])
+                ))
+                    ->where(array(
+                        'resep_detail.created_at' => '> ?',
+                        'AND',
+                        'resep_detail.obat' => '= ?',
+                    ), array(
+                        date('Y-m-d', strtotime($value['tanggal_po'])),
+                        $DValue['barang']
+                    ))
+                    ->execute();
+
+                if($UpdateHargaResep['response_result'] > 0) {
+                    array_push($updated_harga, $UpdateHargaResep);
+                }
+
+                $UpdateHargaRacikan = self::$query->update('racikan_detail', array(
+                    'harga' => floatval($DValue['harga'])
+                ))
+                    ->where(array(
+                        'racikan_detail.created_at' => '> ?',
+                        'AND',
+                        'racikan_detail.obat' => '= ?',
+                    ), array(
+                        date('Y-m-d', strtotime($value['tanggal_po'])),
+                        $DValue['barang']
+                    ))
+                    ->execute();
+                if($UpdateHargaRacikan['response_result'] > 0) {
+                    array_push($updated_harga, $UpdateHargaRacikan);
+                }
+            }
+        }
+
+        return $updated_harga;
     }
 
     private function revisi_resep($parameter)
@@ -455,99 +524,118 @@ class Apotek extends Utility
                         ))
                         ->execute();
 
-                    $Mutasi = $Inventori->tambah_mutasi(array(
-                        'access_token' => $parameter['access_token'],
-                        'dari' => $UserData['data']->gudang,
-                        'ke' => $RawatInap['response_data'][0]['gudang'],
-                        'keterangan' => 'Kebutuhan Resep Rawat Inap',
-                        'status' => 'N',
-                        'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
-                        'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
-                        //'apotek_order' => true,
-                        'item' => $itemMutasi
-                    ));
+                    //TODO : Sini seharusnya kalo masa opname
+                    $CheckGudangStatus = $Inventori->get_gudang_detail($UserData['data']->gudang)['response_data'][0];
+                    if($CheckGudangStatus['status'] === 'A') {
+                        $Mutasi = $Inventori->tambah_mutasi(array(
+                            'access_token' => $parameter['access_token'],
+                            'dari' => $UserData['data']->gudang,
+                            'ke' => $RawatInap['response_data'][0]['gudang'],
+                            'keterangan' => 'Kebutuhan Resep Rawat Inap',
+                            'status' => 'N',
+                            'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
+                            'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
+                            //'apotek_order' => true,
+                            'item' => $itemMutasi
+                        ));
 
-                    if($Mutasi['response_result'] > 0) {
+                        if($Mutasi['response_result'] > 0) {
 
-                        //Update batch rawat inap
-                        foreach ($itemMutasi as $mutBatch => $mutValue) {
-                            if(floatval($mutValue['mutasi']) > 0) {
-                                $BarangBatch = explode('|', $mutBatch);
-                                $inapBatch = self::$query->select('rawat_inap_batch', array(
-                                    'id'
-                                ))
-                                    ->where(array(
-                                        'rawat_inap_batch.obat' => '= ?',
-                                        'AND',
-                                        'rawat_inap_batch.batch' => '= ?',
-                                        'AND',
-                                        'rawat_inap_batch.resep' => '= ?',
-                                        'AND',
-                                        'rawat_inap_batch.gudang' => '= ?',
-                                        'AND',
-                                        'rawat_inap_batch.deleted_at' => 'IS NULL'
-                                    ), array(
-                                        $BarangBatch[0],
-                                        $BarangBatch[1],
-                                        $parameter['resep'],
-                                        $RawatInap['response_data'][0]['gudang']
-                                    ))
-                                    ->execute();
-                                if(count($inapBatch['response_data']) > 0) {
-                                    $updateBatchInap = self::$query->update('rawat_inap_batch', array(
-                                        'status' => 'N',
-                                        'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
-                                        'mutasi' => $Mutasi['response_unique'],
-                                        'updated_at' => parent::format_date()
+                            //Update batch rawat inap
+                            foreach ($itemMutasi as $mutBatch => $mutValue) {
+                                if(floatval($mutValue['mutasi']) > 0) {
+                                    $BarangBatch = explode('|', $mutBatch);
+                                    $inapBatch = self::$query->select('rawat_inap_batch', array(
+                                        'id'
                                     ))
                                         ->where(array(
-                                            'rawat_inap_batch.id' => '= ?'
+                                            'rawat_inap_batch.obat' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.batch' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.resep' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.gudang' => '= ?',
+                                            'AND',
+                                            'rawat_inap_batch.deleted_at' => 'IS NULL'
                                         ), array(
-                                            $inapBatch['response_data'][0]['id']
+                                            $BarangBatch[0],
+                                            $BarangBatch[1],
+                                            $parameter['resep'],
+                                            $RawatInap['response_data'][0]['gudang']
                                         ))
                                         ->execute();
-                                } else {
-                                    $updateBatchInap = self::$query->insert('rawat_inap_batch', array(
-                                        'status' => 'N',
-                                        'gudang' => $RawatInap['response_data'][0]['gudang'],
-                                        'pasien' => $RawatInap['response_data'][0]['pasien'],
-                                        'resep' => $parameter['resep'],
-                                        'obat' => $BarangBatch[0],
-                                        'batch' => $BarangBatch[1],
-                                        'qty' => floatval($mutValue['mutasi']),
-                                        'mutasi' => $Mutasi['response_unique'],
-                                        'created_at' => parent::format_date(),
-                                        'updated_at' => parent::format_date()
-                                    ))
-                                        ->execute();
+                                    if(count($inapBatch['response_data']) > 0) {
+                                        $updateBatchInap = self::$query->update('rawat_inap_batch', array(
+                                            'status' => 'N',
+                                            'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
+                                            'mutasi' => $Mutasi['response_unique'],
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->where(array(
+                                                'rawat_inap_batch.id' => '= ?'
+                                            ), array(
+                                                $inapBatch['response_data'][0]['id']
+                                            ))
+                                            ->execute();
+                                    } else {
+                                        $updateBatchInap = self::$query->insert('rawat_inap_batch', array(
+                                            'status' => 'N',
+                                            'gudang' => $RawatInap['response_data'][0]['gudang'],
+                                            'pasien' => $RawatInap['response_data'][0]['pasien'],
+                                            'resep' => $parameter['resep'],
+                                            'obat' => $BarangBatch[0],
+                                            'batch' => $BarangBatch[1],
+                                            'qty' => floatval($mutValue['mutasi']),
+                                            'mutasi' => $Mutasi['response_unique'],
+                                            'created_at' => parent::format_date(),
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->execute();
+                                    }
                                 }
                             }
+
+                            // $updateResep = self::$query->update('resep', array(
+                            //     'status_resep' => 'D'
+                            // ))
+                            //     ->where(array(
+                            //         'resep.uid' => '= ?'
+                            //     ), array(
+                            //         $parameter['resep']
+                            //     ))
+                            //     ->execute();
+
+                            // $updateRacikan = self::$query->update('racikan', array(
+                            //     'status' => 'D'
+                            // ))
+                            //     ->where(array(
+                            //         'racikan.asesmen' => '= ?',
+                            //         'AND',
+                            //         'racikan.status' => '= ?',
+                            //         'AND',
+                            //         'racikan.deleted_at' => 'IS NULL'
+                            //     ), array(
+                            //         $parameter['asesmen'],
+                            //         'L'
+                            //     ))
+                            //     ->execute();
                         }
-
-                        // $updateResep = self::$query->update('resep', array(
-                        //     'status_resep' => 'D'
-                        // ))
-                        //     ->where(array(
-                        //         'resep.uid' => '= ?'
-                        //     ), array(
-                        //         $parameter['resep']
-                        //     ))
-                        //     ->execute();
-
-                        // $updateRacikan = self::$query->update('racikan', array(
-                        //     'status' => 'D'
-                        // ))
-                        //     ->where(array(
-                        //         'racikan.asesmen' => '= ?',
-                        //         'AND',
-                        //         'racikan.status' => '= ?',
-                        //         'AND',
-                        //         'racikan.deleted_at' => 'IS NULL'
-                        //     ), array(
-                        //         $parameter['asesmen'],
-                        //         'L'
-                        //     ))
-                        //     ->execute();
+                    } else {
+                        //Temp Stok masa mutasi
+                        foreach ($itemMutasi as $mutBatch => $mutValue) {
+                            $BarangBatch = explode('|', $mutBatch);
+                            $Virtual = $Inventori->virtual_stok(array(
+                                'transact_table' => 'resep',
+                                'transact_iden' => $parameter['resep'],
+                                'gudang_asal' => $UserData['data']->gudang,
+                                'gudang_tujuan' => $RawatInap['response_data'][0]['gudang'],
+                                'barang' => $BarangBatch[0],
+                                'batch' => $BarangBatch[1],
+                                'qty' => floatval($mutValue['mutasi']),
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                            ));
+                        }
                     }
                 }
             } else if($parameter['departemen'] === __POLI_IGD__) {
@@ -598,73 +686,92 @@ class Apotek extends Utility
                         ))
                         ->execute();
 
-                    $Mutasi = $Inventori->tambah_mutasi(array(
-                        'access_token' => $parameter['access_token'],
-                        'dari' => $UserData['data']->gudang,
-                        'ke' => $IGD['response_data'][0]['gudang'],
-                        'keterangan' => 'Kebutuhan Resep IGD',
-                        'status' => 'N',
-                        'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
-                        'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
-                        //'apotek_order' => true,
-                        'item' => $itemMutasi
-                    ));
 
-                    if($Mutasi['response_result'] > 0) {
+                    $CheckGudangStatus = $Inventori->get_gudang_detail($UserData['data']->gudang)['response_data'][0];
+                    if($CheckGudangStatus['status'] === 'A') {
+                        $Mutasi = $Inventori->tambah_mutasi(array(
+                            'access_token' => $parameter['access_token'],
+                            'dari' => $UserData['data']->gudang,
+                            'ke' => $IGD['response_data'][0]['gudang'],
+                            'keterangan' => 'Kebutuhan Resep IGD',
+                            'status' => 'N',
+                            'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
+                            'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
+                            //'apotek_order' => true,
+                            'item' => $itemMutasi
+                        ));
 
-                        //Update batch igd
-                        foreach ($itemMutasi as $mutBatch => $mutValue) {
-                            if(floatval($mutValue['mutasi']) > 0) {
-                                $BarangBatch = explode('|', $mutBatch);
-                                $inapBatch = self::$query->select('igd_batch', array(
-                                    'id'
-                                ))
-                                    ->where(array(
-                                        'igd_batch.obat' => '= ?',
-                                        'AND',
-                                        'igd_batch.batch' => '= ?',
-                                        'AND',
-                                        'igd_batch.resep' => '= ?',
-                                        'AND',
-                                        'igd_batch.gudang' => '= ?',
-                                        'AND',
-                                        'igd_batch.deleted_at' => 'IS NULL'
-                                    ), array(
-                                        $BarangBatch[0],
-                                        $BarangBatch[1],
-                                        $parameter['resep'],
-                                        $IGD['response_data'][0]['gudang']
-                                    ))
-                                    ->execute();
-                                if(count($inapBatch['response_data']) > 0) {
-                                    $updateBatchInap = self::$query->update('igd_batch', array(
-                                        'status' => 'N',
-                                        'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
-                                        'mutasi' => $Mutasi['response_unique'],
-                                        'updated_at' => parent::format_date()
+                        if($Mutasi['response_result'] > 0) {
+
+                            //Update batch igd
+                            foreach ($itemMutasi as $mutBatch => $mutValue) {
+                                if(floatval($mutValue['mutasi']) > 0) {
+                                    $BarangBatch = explode('|', $mutBatch);
+                                    $inapBatch = self::$query->select('igd_batch', array(
+                                        'id'
                                     ))
                                         ->where(array(
-                                            'igd_batch.id' => '= ?'
+                                            'igd_batch.obat' => '= ?',
+                                            'AND',
+                                            'igd_batch.batch' => '= ?',
+                                            'AND',
+                                            'igd_batch.resep' => '= ?',
+                                            'AND',
+                                            'igd_batch.gudang' => '= ?',
+                                            'AND',
+                                            'igd_batch.deleted_at' => 'IS NULL'
                                         ), array(
-                                            $inapBatch['response_data'][0]['id']
+                                            $BarangBatch[0],
+                                            $BarangBatch[1],
+                                            $parameter['resep'],
+                                            $IGD['response_data'][0]['gudang']
                                         ))
                                         ->execute();
-                                } else {
-                                    $updateBatchInap = self::$query->insert('igd_batch', array(
-                                        'status' => 'N',
-                                        'gudang' => $IGD['response_data'][0]['gudang'],
-                                        'pasien' => $IGD['response_data'][0]['pasien'],
-                                        'resep' => $parameter['resep'],
-                                        'obat' => $BarangBatch[0],
-                                        'batch' => $BarangBatch[1],
-                                        'qty' => floatval($mutValue['mutasi']),
-                                        'mutasi' => $Mutasi['response_unique'],
-                                        'created_at' => parent::format_date(),
-                                        'updated_at' => parent::format_date()
-                                    ))
-                                        ->execute();
+                                    if(count($inapBatch['response_data']) > 0) {
+                                        $updateBatchInap = self::$query->update('igd_batch', array(
+                                            'status' => 'N',
+                                            'qty' => floatval($inapBatch['response_data'][0]['qty']) + floatval($mutValue['mutasi']),
+                                            'mutasi' => $Mutasi['response_unique'],
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->where(array(
+                                                'igd_batch.id' => '= ?'
+                                            ), array(
+                                                $inapBatch['response_data'][0]['id']
+                                            ))
+                                            ->execute();
+                                    } else {
+                                        $updateBatchInap = self::$query->insert('igd_batch', array(
+                                            'status' => 'N',
+                                            'gudang' => $IGD['response_data'][0]['gudang'],
+                                            'pasien' => $IGD['response_data'][0]['pasien'],
+                                            'resep' => $parameter['resep'],
+                                            'obat' => $BarangBatch[0],
+                                            'batch' => $BarangBatch[1],
+                                            'qty' => floatval($mutValue['mutasi']),
+                                            'mutasi' => $Mutasi['response_unique'],
+                                            'created_at' => parent::format_date(),
+                                            'updated_at' => parent::format_date()
+                                        ))
+                                            ->execute();
+                                    }
                                 }
                             }
+                        }
+                    } else {
+                        //Temp Stok masa mutasi
+                        foreach ($itemMutasi as $mutBatch => $mutValue) {
+                            $BarangBatch = explode('|', $mutBatch);
+                            $Virtual = $Inventori->virtual_stok(array(
+                                'transact_table' => 'resep',
+                                'transact_iden' => $parameter['resep'],
+                                'gudang_asal' => $UserData['data']->gudang,
+                                'gudang_tujuan' => $IGD['response_data'][0]['gudang'],
+                                'barang' => $BarangBatch[0],
+                                'batch' => $BarangBatch[1],
+                                'qty' => floatval($mutValue['mutasi']),
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                            ));
                         }
                     }
                 }
@@ -1835,12 +1942,12 @@ class Apotek extends Utility
                 $total_sedia = 0;
                 foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
                 {
-                    if($bValue['gudang']['uid'] === $UserData['data']->gudang)
-                    {
+                    if($bValue['gudang']['uid'] === $UserData['data']->gudang) {
                         array_push($batch_current, $bValue);
                         $total_sedia += $bValue['stok_terkini'];
                     }
                 }
+                
                 $resep_verifikator['response_data'][$ResKey]['batch'] = $batch_current;
                 $resep_verifikator['response_data'][$ResKey]['sedia'] = $total_sedia;
                 $InvoiceDetailCharged = self::$query->select('invoice_detail', array(
@@ -1859,6 +1966,8 @@ class Apotek extends Utility
                         'AND',
                         'invoice_detail.status_bayar' => '= ?',
                         'AND',
+                        'invoice_detail.document' => '= ?',
+                        'AND',
                         'invoice_detail.keterangan' => '= ?',
                     ), array(
                         $Invoice_detail['response_data'][0]['uid'],
@@ -1866,6 +1975,7 @@ class Apotek extends Utility
                         'master_inv',
                         $value['pasien'],
                         'Y',
+                        'RESEP' . $value['kode'],
                         'Biaya resep obat'
                     ))
                     ->execute();
@@ -2021,6 +2131,8 @@ class Apotek extends Utility
                             'AND',
                             'invoice_detail.status_bayar' => '= ?',
                             'AND',
+                            'invoice_detail.document' => '= ?',
+                            'AND',
                             'invoice_detail.keterangan' => '= ?',
                         ), array(
                             $Invoice_detail['response_data'][0]['uid'],
@@ -2028,6 +2140,409 @@ class Apotek extends Utility
                             'master_inv',
                             $value['pasien'],
                             'Y',
+                            'RACIKAN' . $value['kode'],
+                            'Biaya racikan obat'
+                        ))
+                        ->execute();
+                    foreach ($InvoiceDetailCharged['response_data'] as $InvChargedKey => $InvChargedValue) {
+                        $totalAll += floatval($InvChargedValue['subtotal']);
+                    }
+                    $racikan_detail['response_data'][$RDIKey]['pay'] = $InvoiceDetailCharged['response_data'];
+                }
+                $racikan['response_data'][$RDKey]['detail'] = $racikan_detail['response_data'];
+            }
+            $resep_dokter['response_data'][$key]['racikan'] = $racikan['response_data'];
+            $resep_dokter['response_data'][$key]['total_all'] = $totalAll;
+            $resep_dokter['response_data'][$key]['terbilang'] = parent::terbilang($totalAll);
+        }
+
+
+
+
+        return $resep_dokter;
+    }
+
+
+
+
+
+    private function detail_resep_verifikator_2($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $Inventori = new Inventori(self::$pdo);
+        $Poli = new Poli(self::$pdo);
+        $Antrian = new Antrian(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+
+        $totalAll = 0;
+
+        $resep_dokter = self::$query->select('resep', array(
+            'uid',
+            'kode',
+            'kunjungan',
+            'antrian',
+            'asesmen',
+            'dokter',
+            'apoteker',
+            'pasien',
+            'total',
+            'alergi_obat',
+            'status_resep',
+            'keterangan',
+            'keterangan_racikan',
+            'created_at',
+            'updated_at',
+            'alasan_ubah'
+        ))
+            ->where(array(
+                'resep.uid' => '= ?',
+                'AND',
+                'resep.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter
+            ))
+            ->execute();
+
+        foreach($resep_dokter['response_data'] as $key => $value) {
+            //Kajian Apotek
+            $Kajian = self::$query->select('resep_kajian', array(
+                'parameter_kajian', 'nilai'
+            ))
+                ->where(array(
+                    'resep_kajian.resep' => '= ?',
+                    'AND',
+                    'resep_kajian.pasien' => '= ?',
+                    'AND',
+                    'resep_kajian.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid'], $value['pasien']
+                ))
+                ->execute();
+            $resep_dokter['response_data'][$key]['kajian'] = $Kajian['response_data'];
+
+            //Charged Item
+            $Invoice_detail = self::$query->select('invoice', array(
+                'uid'
+            ))
+                ->where(array(
+                    'invoice.kunjungan' => '= ?',
+                    'AND',
+                    'invoice.pasien' => '= ?'
+                ), array(
+                    $value['kunjungan'],
+                    $value['pasien']
+                ))
+                ->execute();
+
+            //Dokter Info
+            $PegawaiInfo = $Pegawai->get_info($value['dokter']);
+            $resep_dokter['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
+
+            $ApotekerInfo = $Pegawai->get_info($value['apoteker']);
+            $resep_dokter['response_data'][$key]['verifikator'] = $ApotekerInfo['response_data'][0];
+
+            $resep_dokter['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+
+            //Pasien Info
+            $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
+            $resep_dokter['response_data'][$key]['pasien'] = $PasienInfo['response_data'][0];
+
+            //Get Antrian Detail
+            $AntrianInfo = $Antrian->get_antrian_detail('antrian', $value['antrian']);
+            $resep_dokter['response_data'][$key]['antrian'] = $AntrianInfo['response_data'][0];
+
+            //Departemen Info
+            if($AntrianInfo['response_data'][0]['departemen'] === __POLI_INAP__) {
+                $AntrianInfo['response_data'][0]['departemen'] = array(
+                    'uid' => __POLI_INAP__,
+                    'nama' => 'Rawat Inap'
+                );
+            } else {
+                $PoliInfo = $Poli->get_poli_info($AntrianInfo['response_data'][0]['departemen']);
+                $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];
+            }
+
+            $resep_detail_dokter = self::$query->select('resep_detail', array(
+                'id',
+                'resep',
+                'obat',
+                'harga',
+                'signa_qty',
+                'signa_pakai',
+                'qty',
+                'satuan',
+                'keterangan',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'resep_detail.resep' => '= ?',
+                    'AND',
+                    'resep_detail.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+
+            foreach ($resep_detail_dokter['response_data'] as $ResDKey => $ResDValue) {
+                $InventoriInfo = $Inventori->get_item_detail($ResDValue['obat']);
+                $resep_detail_dokter['response_data'][$ResDKey]['detail'] = $InventoriInfo['response_data'][0];
+
+                //Batch Info
+                $aturan_pakai = self::$query->select('terminologi_item', array(
+                    'id',
+                    'nama'
+                ))
+                    ->where(array(
+                        'terminologi_item.id' => '= ?',
+                        'AND',
+                        'terminologi_item.deleted_at' => 'IS NULL'
+                    ), array(
+                        $ResDValue['aturan_pakai']
+                    ))
+                    ->execute();
+
+
+                $resep_detail_dokter['response_data'][$ResDKey]['aturan_pakai'] = $aturan_pakai['response_data'][0];
+            }
+
+            $resep_dokter['response_data'][$key]['detail_dokter'] = $resep_detail_dokter['response_data'];
+
+
+
+            $resep_verifikator = self::$query->select('resep_change_log', array(
+                'item',
+                'keterangan',
+                'qty',
+                'aturan_pakai',
+                'signa_qty',
+                'signa_pakai',
+                'aturan_pakai',
+                'verifikator',
+                'alasan_ubah'
+            ))
+                ->where(array(
+                    'resep_change_log.resep' => '= ?',
+                    'AND',
+                    'resep_change_log.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($resep_verifikator['response_data'] as $ResKey => $ResValue) {
+                $VerifikatorInfo = $Pegawai->get_info($ResValue['verifikator']);
+                $resep_verifikator['response_data'][$ResKey]['verifikator'] = $VerifikatorInfo['response_data'][0];
+
+                $InventoriInfo = $Inventori->get_item_detail($ResValue['item']);
+                $resep_verifikator['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
+
+                // $batch_current = array();
+                // Batch Info
+                // $InventoriBatch = $Inventori->get_item_batch($ResValue['item']);
+
+                // $total_sedia = 0;
+                // foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
+                // {
+                //     if($bValue['gudang']['uid'] === $UserData['data']->gudang) {
+                //         array_push($batch_current, $bValue);
+                //         $total_sedia += $bValue['stok_terkini'];
+                //     }
+                // }
+                
+                // $resep_verifikator['response_data'][$ResKey]['batch'] = $batch_current;
+                // $resep_verifikator['response_data'][$ResKey]['sedia'] = $total_sedia;
+                $InvoiceDetailCharged = self::$query->select('invoice_detail', array(
+                    'qty',
+                    'harga',
+                    'subtotal'
+                ))
+                    ->where(array(
+                        'invoice_detail.invoice' => '= ?',
+                        'AND',
+                        'invoice_detail.item' => '= ?',
+                        'AND',
+                        'invoice_detail.item_type' => '= ?',
+                        'AND',
+                        'invoice_detail.pasien' => '= ?',
+                        'AND',
+                        'invoice_detail.status_bayar' => '= ?',
+                        'AND',
+                        'invoice_detail.document' => '= ?',
+                        'AND',
+                        'invoice_detail.keterangan' => '= ?',
+                    ), array(
+                        $Invoice_detail['response_data'][0]['uid'],
+                        $ResValue['item'],
+                        'master_inv',
+                        $value['pasien'],
+                        'Y',
+                        'RESEP' . $value['kode'],
+                        'Biaya resep obat'
+                    ))
+                    ->execute();
+                foreach ($InvoiceDetailCharged['response_data'] as $InvChargedKey => $InvChargedValue) {
+                    $totalAll += floatval($InvChargedValue['subtotal']);
+                }
+                $resep_verifikator['response_data'][$ResKey]['pay'] = $InvoiceDetailCharged['response_data'];
+
+                $aturan_pakai = self::$query->select('terminologi_item', array(
+                    'id',
+                    'nama'
+                ))
+                    ->where(array(
+                        'terminologi_item.id' => '= ?',
+                        'AND',
+                        'terminologi_item.deleted_at' => 'IS NULL'
+                    ), array(
+                        $ResValue['aturan_pakai']
+                    ))
+                    ->execute();
+
+
+                $resep_verifikator['response_data'][$ResKey]['aturan_pakai'] = $aturan_pakai['response_data'][0];
+            }
+
+            $resep_dokter['response_data'][$key]['detail'] = $resep_verifikator['response_data'];
+
+
+
+            //Racikan Item
+            $racikan = self::$query->select('racikan', array(
+                'uid',
+                'asesmen',
+                'kode',
+                'total',
+                'keterangan',
+                'signa_qty',
+                'signa_pakai',
+                'qty',
+                'keterangan',
+                'created_at',
+                'updated_at'
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?',
+                    'AND',
+                    'racikan.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['asesmen']
+                ))
+                ->execute();
+            foreach ($racikan['response_data'] as $RDKey => $RDValue) {
+                $racikan_detail_dokter = self::$query->select('racikan_detail', array(
+                    'id',
+                    'asesmen',
+                    'obat',
+                    'kekuatan',
+                    'ratio',
+                    'pembulatan',
+                    'harga',
+                    'racikan',
+                    'takar_bulat',
+                    'takar_decimal',
+                    'penjamin',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where(array(
+                        'racikan_detail.deleted_at' => 'IS NULL',
+                        'AND',
+                        'racikan_detail.racikan' => '= ?'
+                    ), array(
+                        $RDValue['uid']
+                    ))
+                    ->execute();
+
+                foreach ($racikan_detail_dokter['response_data'] as $RDIDKey => $RDIDValue) {
+                    $InventoriInfo = $Inventori->get_item_detail($RDIDValue['obat']);
+                    $racikan_detail_dokter['response_data'][$RDIDKey]['detail'] = $InventoriInfo['response_data'][0];
+                }
+                $racikan['response_data'][$RDKey]['detail_dokter'] = $racikan_detail_dokter['response_data'];
+
+                $racikan_verifikator = self::$query->select('racikan_change_log', array(
+                    'jumlah',
+                    'signa_qty',
+                    'signa_pakai',
+                    'aturan_pakai',
+                    'keterangan',
+                    'alasan_ubah'
+                ))
+                    ->where(array(
+                        'racikan_change_log.racikan' => '= ?',
+                        'AND',
+                        'racikan_change_log.deleted_at' => 'IS NULL'
+                    ), array(
+                        $RDValue['uid']
+                    ))
+                    ->execute();
+                $racikan['response_data'][$RDKey]['change'] = $racikan_verifikator['response_data'];
+
+
+
+
+                $racikan_detail = self::$query->select('racikan_detail_change_log', array(
+                    'id',
+                    'obat',
+                    'jumlah',
+                    'kekuatan',
+                    'created_at',
+                    'updated_at'
+                ))
+                    ->where(array(
+                        'racikan_detail_change_log.deleted_at' => 'IS NULL',
+                        'AND',
+                        'racikan_detail_change_log.racikan' => '= ?'
+                    ), array(
+                        $RDValue['uid']
+                    ))
+                    ->execute();
+                foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
+                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
+                    $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
+
+                    // $InventoriBacthRacikan = $Inventori->get_item_batch($RDIValue['obat']);
+                    // $racikan_detail['response_data'][$RDIKey]['batch'] = $InventoriBacthRacikan['response_data'];
+
+                    // $total_sedia_racikan = 0;
+                    // foreach ($InventoriBacthRacikan['response_data'] as $bRKey => $bRValue)
+                    // {
+                    //     if($bRValue['gudang']['uid'] === $UserData['data']->gudang)
+                    //     {
+                    //         $total_sedia_racikan += floatval($bRValue['stok_terkini']);
+                    //     }
+                    // }
+                    // $racikan_detail['response_data'][$RDIKey]['sedia'] = $total_sedia_racikan;
+
+
+
+
+                    $InvoiceDetailCharged = self::$query->select('invoice_detail', array(
+                        'qty',
+                        'harga',
+                        'subtotal'
+                    ))
+                        ->where(array(
+                            'invoice_detail.invoice' => '= ?',
+                            'AND',
+                            'invoice_detail.item' => '= ?',
+                            'AND',
+                            'invoice_detail.item_type' => '= ?',
+                            'AND',
+                            'invoice_detail.pasien' => '= ?',
+                            'AND',
+                            'invoice_detail.status_bayar' => '= ?',
+                            'AND',
+                            'invoice_detail.document' => '= ?',
+                            'AND',
+                            'invoice_detail.keterangan' => '= ?',
+                        ), array(
+                            $Invoice_detail['response_data'][0]['uid'],
+                            $RDIValue['obat'],
+                            'master_inv',
+                            $value['pasien'],
+                            'Y',
+                            'RACIKAN' . $value['kode'],
                             'Biaya racikan obat'
                         ))
                         ->execute();
@@ -5118,7 +5633,7 @@ class Apotek extends Utility
 
         //Resep Detail
         $ResepDetail = self::$query->select('resep', array(
-            'kode'
+            'uid', 'kode', 'asesmen'
         ))
             ->where(array(
                 'resep.uid' => '= ?',
@@ -5198,6 +5713,25 @@ class Apotek extends Utility
                     'departemen' => $parameter['departemen'],
                     'document' => 'RESEP' . $ResepDetail['response_data'][0]['kode']
                 ));
+
+                if($resepChange['response_result'] > 0) {
+                    //Update Charged Harga
+                    $updateHargaResepDetail = self::$query->update('resep_detail', array(
+                        'harga' => floatval($value['harga'])
+                    ))
+                        ->where(array(
+                            'resep_detail.deleted_at' => 'IS NULL',
+                            'AND',
+                            'resep_detail.resep' => '= ?',
+                            'AND',
+                            'resep_detail.obat' => '= ?'
+                        ), array(
+                            $ResepDetail['response_data'][0]['uid'],
+                            $value['obat']
+                        ))
+                        ->execute();
+                }
+
                 array_push($invoice_detail, $AppendInvoice);
             }
 
@@ -5340,6 +5874,23 @@ class Apotek extends Utility
                         'document' => 'RACIKAN' . $ResepDetail['response_data'][0]['kode']
                     ));
                     array_push($invoice_detail, $AppendInvoice);
+
+                    if($racikanDetailChange['response_resul'] > 0) {
+                        $updateHargaRacikanDetail = self::$query->update('racikan_detail', array(
+                            'harga' => floatval($value['harga'])
+                        ))
+                            ->where(array(
+                                'racikan_detail.deleted_at' => 'IS NULL',
+                                'AND',
+                                'racikan_detail.asesmen' => '= ?',
+                                'AND',
+                                'racikan_detail.obat' => '= ?'
+                            ), array(
+                                $ResepDetail['response_data'][0]['asesmen'],
+                                $value['obat']
+                            ))
+                            ->execute();
+                    }
                 }
                 
                 $usedBatch = array();

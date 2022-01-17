@@ -636,7 +636,7 @@
 
             //Load Resep Detail
             $.ajax({
-                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + uid,
+                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator_2/" + uid,
                 async:false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -644,6 +644,7 @@
                 type:"GET",
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
+                    console.clear();
                     console.log(targettedData);
                     var kajian = targettedData.kajian;
                     for(var kaj in kajian) {
@@ -654,8 +655,10 @@
                     var resep_dokter = [];
                     for(var a in detail_dokter) {
                         resep_dokter.push({
+                            uid_obat: detail_dokter[a].detail.uid,
                             obat: "<b>R\/</b> " + detail_dokter[a].detail.nama,
                             satuan: detail_dokter[a].detail.satuan_terkecil_info.nama,
+                            harga: detail_dokter[a].harga,
                             kuantitas: detail_dokter[a].qty,
                             signa: detail_dokter[a].signa_qty + " &times; " + detail_dokter[a].signa_pakai,
                             keterangan: detail_dokter[a].keterangan
@@ -763,7 +766,7 @@
                             departemen: (targettedData.antrian.poli_info !== undefined && targettedData.antrian.poli_info !== null) ? targettedData.antrian.poli_info.nama : "Rawat Inap",
                             tanggal_lahir: targettedData.pasien.tanggal_lahir_parsed,
                             dokter: targettedData.dokter.nama,
-                            jenis_kelamin: targettedData.pasien.jenkel_detail.nama,
+                            jenis_kelamin: (targettedData.pasien.jenkel_detail !== undefined && targettedData.pasien.jenkel_detail !== null) ? targettedData.pasien.jenkel_detail.nama : "-",
                             penjamin: targettedData.antrian.penjamin_data.nama,
                             keterangan_resep: targettedData.keterangan,
                             keterangan_racikan: targettedData.keterangan_racikan,
