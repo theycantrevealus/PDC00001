@@ -8960,7 +8960,8 @@ class Inventori extends Utility
         );
 
         if ($parameter['length'] < 0) {
-            $query = self::$pdo->prepare('SELECT DISTINCT(barang) as barang, inventori_stok.*, master_inv.nama FROM inventori_stok JOIN master_inv ON inventori_stok.barang = master_inv.uid WHERE inventori_stok.gudang = ? AND master_inv.nama ILIKE \'%' . $parameter['search']['value'] . '%\'');
+            $qString = '';
+            $query = self::$pdo->prepare('SELECT DISTINCT(barang) as barang, inventori_stok.*, master_inv.nama FROM inventori_stok JOIN master_inv ON inventori_stok.barang = master_inv.uid WHERE inventori_stok.gudang = ? AND master_inv.nama ILIKE \'%' . $parameter['search']['value'] . '%\' ORDER BY master_inv.nama ASC');
             $query->execute(array($UserData['data']->gudang));
             $data['response_data'] = $query->fetchAll(\PDO::FETCH_ASSOC);
             // $data = self::$query->select('inventori_stok', array(
@@ -8979,7 +8980,7 @@ class Inventori extends Utility
             //     ->where($paramData, $paramValue)
             //     ->execute();
         } else {
-            $query = self::$pdo->prepare('SELECT DISTINCT(barang) as barang, inventori_stok.*, master_inv.nama FROM inventori_stok JOIN master_inv ON inventori_stok.barang = master_inv.uid WHERE inventori_stok.gudang = ? AND master_inv.nama ILIKE \'%' . $parameter['search']['value'] . '%\' OFFSET ' . intval($parameter['start']) . ' LIMIT ' . intval($parameter['length']));
+            $query = self::$pdo->prepare('SELECT DISTINCT(barang) as barang, inventori_stok.*, master_inv.nama FROM inventori_stok JOIN master_inv ON inventori_stok.barang = master_inv.uid WHERE inventori_stok.gudang = ? AND master_inv.nama ILIKE \'%' . $parameter['search']['value'] . '%\' ORDER BY master_inv.nama ASC OFFSET ' . intval($parameter['start']) . ' LIMIT ' . intval($parameter['length']));
             $query->execute(array($UserData['data']->gudang));
             $data['response_data'] = $query->fetchAll(\PDO::FETCH_ASSOC);
             // $data = self::$query->select('inventori_stok', array(
