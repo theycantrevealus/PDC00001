@@ -488,7 +488,11 @@
 
 
 
-
+        loadPoli("#filter_departemen_riwayat");
+        $("#filter_departemen_riwayat").select2();
+        $("#filter_departemen_riwayat").change(function() {
+            tableResepRiwayat.ajax.reload();
+        });
 
 
         var tableResepRiwayat = $("#table-resep-history").DataTable({
@@ -503,6 +507,7 @@
                 type: "POST",
                 data: function(d){
                     d.request = "get_resep_backend_v3";
+                    d.filter_departemen = $("#filter_departemen_riwayat option:selected").val();
                     d.request_type = "riwayat";
                 },
                 headers:{
@@ -613,6 +618,48 @@
                 }
             ]
         });
+
+
+        function loadPoli(targetDOM, targetted = ""){
+            var dataPoli = null;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Poli/poli-available",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData != ""){ 
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            if(MetaData[i].uid !== __POLI_INAP__) {
+                                if(targetted !== "") {
+                                    if(MetaData[i].uid === targetted) {
+                                        $(selection).attr("selected", "selected");
+                                    }
+                                    $(targetDOM).append(selection);
+                                } else {
+                                    if(MetaData[i].editable) {
+                                        $(targetDOM).append(selection);
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataPoli;
+        }
 
 
 

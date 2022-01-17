@@ -4292,28 +4292,60 @@ class Apotek extends Utility
                 $paramValue = array('D', 'P', __POLI_INAP__);
             } else if($parameter['request_type'] === 'riwayat') {
                 if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-                    $paramData = array(
-                        'resep.deleted_at' => 'IS NULL',
-                        'AND',
-                        'resep.status_resep' => '= ?',
-                        'AND',
-                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                        'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
-                        'AND',
-                        'pasien.deleted_at' => 'IS NULL'
-                    );
+                    if(isset($parameter['filter_departemen']) && $parameter['filter_departemen'] !== 'all') {
+                        $paramData = array(
+                            'resep.deleted_at' => 'IS NULL',
+                            'AND',
+                            'resep.status_resep' => '= ?',
+                            'AND',
+                            '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                            'OR',
+                            'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                            'AND',
+                            'pasien.deleted_at' => 'IS NULL',
+                            'AND',
+                            'antrian.departemen' => '= ?'
+                        );
+                    } else {
+                        $paramData = array(
+                            'resep.deleted_at' => 'IS NULL',
+                            'AND',
+                            'resep.status_resep' => '= ?',
+                            'AND',
+                            '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                            'OR',
+                            'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                            'AND',
+                            'pasien.deleted_at' => 'IS NULL'
+                        );
+                    }
                 } else {
-                    $paramData = array(
-                        'resep.deleted_at' => 'IS NULL',
-                        'AND',
-                        'resep.status_resep' => '= ?',
-                        'AND',
-                        'pasien.deleted_at' => 'IS NULL'
-                    );
+                    if(isset($parameter['filter_departemen']) && $parameter['filter_departemen'] !== 'all') {
+                        $paramData = array(
+                            'resep.deleted_at' => 'IS NULL',
+                            'AND',
+                            'resep.status_resep' => '= ?',
+                            'AND',
+                            'pasien.deleted_at' => 'IS NULL',
+                            'AND',
+                            'antrian.departemen' => '= ?'
+                        );
+                    } else {
+                        $paramData = array(
+                            'resep.deleted_at' => 'IS NULL',
+                            'AND',
+                            'resep.status_resep' => '= ?',
+                            'AND',
+                            'pasien.deleted_at' => 'IS NULL'
+                        );
+                    }
                 }
 
-                $paramValue = array('S');
+                if(isset($parameter['filter_departemen']) && $parameter['filter_departemen'] !== 'all') {
+                    $paramValue = array('S', $parameter['filter_departemen']);
+                } else {
+                    $paramValue = array('S');
+                }
             } else if($parameter['request_type'] === 'igd') {
                 if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
                     $paramData = array(
