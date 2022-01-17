@@ -4160,7 +4160,9 @@ class Apotek extends Utility
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 } else {
                     $paramData = array(
@@ -4170,7 +4172,9 @@ class Apotek extends Utility
                         'OR',
                         'resep.status_resep' => '= ?)',
                         'AND',
-                        'antrian.departemen' => '= ?'
+                        'antrian.departemen' => '= ?',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 }
 
@@ -4186,7 +4190,9 @@ class Apotek extends Utility
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 } else {
                     $paramData = array(
@@ -4194,7 +4200,9 @@ class Apotek extends Utility
                         'AND',
                         'resep.status_resep' => '= ?',
                         'AND',
-                        'antrian.departemen' => '!= ?'
+                        'antrian.departemen' => '!= ?',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 }
                 $paramValue = array('N', __POLI_IGD__);
@@ -4205,11 +4213,15 @@ class Apotek extends Utility
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 } else {
                     $paramData = array(
-                        'resep.deleted_at' => 'IS NOT NULL'
+                        'resep.deleted_at' => 'IS NOT NULL',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 }
 
@@ -4227,7 +4239,9 @@ class Apotek extends Utility
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 } else {
                     $paramData = array(
@@ -4237,7 +4251,9 @@ class Apotek extends Utility
                         'OR',
                         'resep.status_resep' => '= ?)',
                         'AND',
-                        'antrian.departemen' =>'= ?'
+                        'antrian.departemen' =>'= ?',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 }
 
@@ -4255,7 +4271,9 @@ class Apotek extends Utility
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 } else {
                     $paramData = array(
@@ -4265,7 +4283,9 @@ class Apotek extends Utility
                         'OR',
                         'resep.status_resep' => '= ?)',
                         'AND',
-                        'antrian.departemen' => '= ?'
+                        'antrian.departemen' => '= ?',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 }
 
@@ -4279,13 +4299,17 @@ class Apotek extends Utility
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 } else {
                     $paramData = array(
                         'resep.deleted_at' => 'IS NULL',
                         'AND',
-                        'resep.status_resep' => '= ?'
+                        'resep.status_resep' => '= ?',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 }
 
@@ -4301,7 +4325,9 @@ class Apotek extends Utility
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 } else {
                     $paramData = array(
@@ -4309,7 +4335,9 @@ class Apotek extends Utility
                         'AND',
                         'resep.status_resep' => '= ?',
                         'AND',
-                        'antrian.departemen' =>'= ?'
+                        'antrian.departemen' =>'= ?',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 }
 
@@ -4327,7 +4355,9 @@ class Apotek extends Utility
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 } else {
                     $paramData = array(
@@ -4337,7 +4367,9 @@ class Apotek extends Utility
                         'AND',
                         '(NOT antrian.departemen' =>'= ?',
                         'AND',
-                        'NOT antrian.departemen' =>'= ?)'
+                        'NOT antrian.departemen' =>'= ?)',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 }
 
@@ -4356,7 +4388,9 @@ class Apotek extends Utility
                         'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 } else {
                     $paramData = array(
@@ -4368,7 +4402,9 @@ class Apotek extends Utility
                         'AND',
                         '(NOT antrian.departemen' =>'= ?',
                         'AND',
-                        'NOT antrian.departemen' =>'= ?)'
+                        'NOT antrian.departemen' =>'= ?)',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
                     );
                 }
 
@@ -4392,7 +4428,9 @@ class Apotek extends Utility
                     'AND',
                     '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                     'OR',
-                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                    'AND',
+                    'pasien.deleted_at' => 'IS NULL'
                 );
             } else {
                 $paramData = array(
@@ -4406,7 +4444,9 @@ class Apotek extends Utility
                     'OR',
                     'resep.status_resep' => '= ?)',
                     'OR',
-                    '(resep.status_resep' => '= ?))'
+                    '(resep.status_resep' => '= ?))',
+                    'AND',
+                    'pasien.deleted_at' => 'IS NULL'
                 );
             }
 
