@@ -235,9 +235,9 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.pasien_info !== undefined && row.pasien_info !== null) {
-                            return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
                         } else {
-                            return row.nama_pasien;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + row.nama_pasien;
                         }
                     }
                 },

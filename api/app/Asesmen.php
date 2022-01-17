@@ -204,7 +204,9 @@ class Asesmen extends Utility {
                 'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                 'OR',
-                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                'AND',
+                'pasien.deleted_at' => 'IS NULL'
             );
 
             $paramValue = array(
@@ -216,7 +218,9 @@ class Asesmen extends Utility {
                 'AND',
                 'asesmen.created_at' => 'BETWEEN ? AND ?',
                 'AND',
-                'asesmen.dokter' => '= ?'
+                'asesmen.dokter' => '= ?',
+                'AND',
+                'pasien.deleted_at' => 'IS NULL'
             );
 
             $paramValue = array(
