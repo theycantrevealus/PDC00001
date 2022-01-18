@@ -556,6 +556,7 @@
                                                 kunjungan: currentData.kunjungan,
                                                 antrian: currentData.uid,
                                                 penjamin: currentData.penjamin,
+                                                penjamin_detail: currentData.penjamin_detail,
                                                 pasien: currentData.asesmen.pasien,
                                                 group_tanggal_name: a,
                                                 waktu_masuk: listData[b].parsed,
