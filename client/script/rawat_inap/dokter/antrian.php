@@ -1567,8 +1567,8 @@
                 "<div class=\"row\" style=\"padding-top: 5px;\">" +
                 "<div class=\"col-md-12\"><br /></div>" +
                 "<div style=\"position: relative\" class=\"col-md-12 penjamin-container text-right\"></div>" +
-                "<div class=\"col-md-7 aturan-pakai-container\"><span>Aturan Pakai</span></div>" +
-                "<div class=\"col-md-5 kategori-obat-container\"><span>Kategori Obat</span><br /></div>" +
+                "<!--div class=\"col-md-7 aturan-pakai-container\"><span>Aturan Pakai</span></div-->" +
+                "<div class=\"col-md-12 kategori-obat-container\"><!--span>Kategori Obat</span><br /--></div>" +
                 "<div class=\"col-md-12\"><br /></div>" +
                 "<div class=\"col-md-6 iterasi-container\"><span>Iterasi</span><br /></div><div class=\"col-md-6 satuan-pemakaian-container\"><span>Satuan Pemakaian</span><br /></div>" +
                 "<div class=\"col-md-12\"><br /></div>" +
@@ -1576,7 +1576,7 @@
                 "</div>");
             var newAturanPakai = document.createElement("SELECT");
             var dataAturanPakai = autoAturanPakai();
-            $(newCellResepObat).find("div.aturan-pakai-container").append(newAturanPakai);
+            //$(newCellResepObat).find("div.aturan-pakai-container").append(newAturanPakai);
 
             $(newAturanPakai).addClass("form-control aturan-pakai-resep");
             $(newAturanPakai).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
@@ -1585,7 +1585,9 @@
             }
 
             var newSatuanPemakaian = document.createElement("INPUT");
-            $(newSatuanPemakaian).addClass("form-control resep-satuan-pemakaian").val(setter.satuan_pemakaian);
+            $(newSatuanPemakaian).addClass("form-control resep-satuan-pemakaian").val(setter.satuan_pemakaian).attr({
+                "placeholder": "Ex : PULV, PUFF"
+            });
             $(newCellResepObat).find("div.satuan-pemakaian-container").append(newSatuanPemakaian);
 
             var newIterasi = document.createElement("INPUT");
@@ -1603,7 +1605,7 @@
 
 
             var keteranganPerObat = document.createElement("TEXTAREA");
-            $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span>").append(keteranganPerObat);
+            $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan / Aturan Pemakaian</span>").append(keteranganPerObat);
             $(keteranganPerObat).addClass("form-control").attr({
                 "placeholder": "Keterangan per Obat"
             }).val(setter.keterangan);
@@ -2003,7 +2005,12 @@
 
 
             var newKeteranganRacikan = document.createElement("TEXTAREA");
-            $(newRacikanCellNama).append("<br /><span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<br /><br /><span>Keterangan</span>").append(newKeteranganRacikan);
+            //$(newRacikanCellNama).append("<br /><span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<br /><br /><span>Keterangan</span>").append(newKeteranganRacikan);
+            var satuanKonsumsi = document.createElement("INPUT");
+            $(satuanKonsumsi).addClass("form-control satuan_konsumsi").attr({
+                "placeholder": "Ex : PULV, PUFF"
+            });
+            $(newRacikanCellNama).append("<br /><span>Satuan Pemakaian</span>").append(satuanKonsumsi).append("<br /><br /><span>Keterangan / Aturan Pakai</span>").append(newKeteranganRacikan);
             $(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
             for(var aturanPakaiKey in dataAturanPakai) {
                 $(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
@@ -3047,6 +3054,7 @@
                     "nama": "",
                     "item": [],
                     "keterangan": "",
+                    "satuan_konsumsi": "",
                     "iterasi": 0,
                     "signaKonsumsi": 0,
                     "signaTakar": 0,
@@ -3058,6 +3066,7 @@
                 dataRacikan.aturanPakai = (masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val() === "none") ? 0 : parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
                 dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
                 dataRacikan.iterasi = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.racikan_iterasi").inputmask("unmaskedvalue");
+                dataRacikan.satuan_konsumsi = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.satuan_konsumsi").val();
                 /*dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
                 dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));*/
                 dataRacikan.signaKonsumsi = masterRacikanRow.find("td.master-racikan-cell:eq(2) input").val();
