@@ -393,7 +393,11 @@
 
             if(parseInt(setter.iterasi) > 0) {
                 $(newCellResepObat).append("<br /><h3 sath=\"" + setter.sat_konsumsi + "\" class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times; (" + setter.sat_konsumsi.toLowerCase() + ")</h3>");
+            } else {
+                $(newCellResepObat).append("<br /><h3 sath=\"" + setter.sat_konsumsi + "\" class=\"text-right\">(" + setter.sat_konsumsi.toLowerCase() + ")</h3>");
             }
+
+            //Satuan pemakaian
 
             var itemData = [];
             var parsedItemData = [];
