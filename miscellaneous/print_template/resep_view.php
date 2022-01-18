@@ -105,13 +105,13 @@
                         </h5>
                     </td>
                     <td>
-                        <span class="wrap_content"><h5 class="text-info"><?php echo $value['obat']; ?></h5></span>
+                        <span class="wrap_content"><h5 class="text-info"><?php echo $value['obat']; ?> <b class="text-warning">[<?php echo $value['satuan_konsumsi']; ?>]</b></h5></span>
                         <?php
                         if(!empty($value['keterangan'])) {
                             ?>
                             <br />
                             <b>Keterangan:</b>
-                            <p><?php echo $value['keterangan']; ?></p>
+                            <p><?php echo nl2br(trim($value['keterangan'])); ?></p>
                             <?php
                         }
                         ?>
@@ -152,7 +152,7 @@
                     </td>
                     <td>
                         <span class="wrap_content">
-                            <h5 class="text-info"><?php echo $value['racikan']; ?></h5>
+                            <h5 class="text-info"><?php echo $value['racikan']; ?> <b class="text-warning">[<?php echo $value['satuan_konsumsi']; ?>]</h5>
                         </span>
                         <?php
                             foreach ($value['item'] as $ItemKey => $ItemValue) {
@@ -176,7 +176,7 @@
                                 ?>
                                 <br />
                                 <b>Keterangan:</b>
-                                <p><?php echo $value['keterangan']; ?></p>
+                                <p><?php echo nl2br(trim($value['keterangan'])); ?></p>
                                 <br />
                                 <?php
                             }
@@ -247,15 +247,15 @@
                             ?>
                             <b>Keterangan:</b>
                             <p>
-                                <?php echo $value['keterangan']; ?>
+                                <?php echo nl2br(trim($value['keterangan'])); ?>
                             </p>
                             <br />
                             <?php
                         }
                         if(!empty($value['alasan_ubah']) && trim($value['alasan_ubah']) !== '-') {
                             ?>
-                            <b>Alasan Ubah:</b>
-                            <p>
+                            <b style="color: #b32323">Alasan Ubah:</b>
+                            <p style="color: #b32323">
                                 <?php echo $value['alasan_ubah']; ?>
                             </p>
                             <?php
@@ -334,16 +334,16 @@
                             if(!empty($value['keterangan'])) {
                                 ?>
                                 <b>Keterangan:</b>
-                                <p>
-                                    <?php echo $value['keterangan']; ?>
+                                <p style="white-space: no-wrap">
+                                    <?php echo nl2br(trim($value['keterangan'])); ?>
                                 </p>
                                 <br />
                                 <?php
                             }
                             if(!empty($value['alasan_ubah']) && trim($value['alasan_ubah']) !== '-') {
                                 ?>
-                                <b>Alasan Ubah:</b>
-                                <p>
+                                <b style="color: #b32323">Alasan Ubah:</b>
+                                <p style="color: #b32323">
                                     <?php echo (isset($value['alasan_ubah']) && !empty($value['alasan_ubah']) && $value['alasan_ubah'] !== '') ? $value['alasan_ubah'] : '-'; ?>
                                 </p>
                                 <?php

@@ -1870,6 +1870,7 @@ class Apotek extends Utility
                 'signa_qty',
                 'signa_pakai',
                 'qty',
+                'satuan_konsumsi',
                 'satuan',
                 'keterangan',
                 'created_at',
@@ -2016,6 +2017,7 @@ class Apotek extends Utility
                 'signa_qty',
                 'signa_pakai',
                 'qty',
+                'satuan_konsumsi',
                 'keterangan',
                 'created_at',
                 'updated_at'
