@@ -1271,6 +1271,7 @@ class Apotek extends Utility
                 'signa_qty',
                 'signa_pakai',
                 'qty',
+                'satuan_konsumsi',
                 'total'
             ))
                 ->where(array(
@@ -5877,12 +5878,12 @@ class Apotek extends Utility
 
             $racikanChange = self::$query->insert('racikan_change_log', array(
                 'racikan' => $value['racikan_uid'],
-                'jumlah' => $value['jumlah'],
+                'jumlah' => floatval($value['jumlah']),
                 'signa_qty' => $value['signa_qty'],
                 'signa_pakai' => $value['signa_pakai'],
-                'keterangan' => $value['keterangan'],
-                'aturan_pakai' => $value['aturan_pakai'],
-                'alasan_ubah' => $alasan_racikan,
+                'keterangan' => (isset($value['keterangan'])) ? $value['keterangan'] : '',
+                'aturan_pakai' => floatval($value['aturan_pakai']),
+                'alasan_ubah' => (isset($alasan_racikan)) ? $alasan_racikan : '',
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
             ))

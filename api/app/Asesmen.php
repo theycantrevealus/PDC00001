@@ -1945,6 +1945,7 @@ class Asesmen extends Utility {
 					'kode' => '['. $Kode . ']' . $parameter['racikan'][$key]['nama'],
                     'iterasi' => (isset($parameter['racikan'][$key]['iterasi'])) ? intval($parameter['racikan'][$key]['iterasi']) : 0,
 					'aturan_pakai' => intval($parameter['racikan'][$key]['aturanPakai']),
+                    'satuan_konsumsi' => $parameter['racikan'][$key]['satuan_konsumsi'],
 					'keterangan' => $parameter['racikan'][$key]['keterangan'],
 					'signa_qty' => $parameter['racikan'][$key]['signaKonsumsi'],
 					'signa_pakai' => $parameter['racikan'][$key]['signaTakar'],
@@ -2084,6 +2085,7 @@ class Asesmen extends Utility {
                     'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
                     'keterangan' => $value['keterangan'],
 					'signa_pakai' => $value['signaTakar'],
+                    'satuan_konsumsi' => $value['satuan_konsumsi'],
 					'aturan_pakai' => intval($value['aturanPakai']),
 					'qty' => $value['signaHari'],
 					'created_at' => parent::format_date(),
@@ -2192,6 +2194,7 @@ class Asesmen extends Utility {
                             'signa_qty' => $value['signaKonsumsi'],
                             'signa_pakai' => $value['signaTakar'],
                             'keterangan' => $value['keterangan'],
+                            'satuan_konsumsi' => $value['satuan_konsumsi'],
                             'aturan_pakai' => intval($value['aturanPakai']),
                             'qty' => $value['signaHari'],
                             'total' => 0,
@@ -3456,6 +3459,7 @@ class Asesmen extends Utility {
 		$uid = parent::gen_uuid();
 
         $DataPartus = $dataAsesmen['partus_list'];
+        $proceed_bidan_id = array();
 
 
 

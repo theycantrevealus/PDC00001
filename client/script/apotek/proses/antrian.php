@@ -27,6 +27,8 @@
                 $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
                 //$("#verifikator").html(targettedData.verifikator.nama);
                 loadDetailResep(targettedData);
+                console.clear();
+                console.log(targettedData);
 
             },
             error: function(response) {
@@ -463,7 +465,7 @@
                         }
 
                         //$(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[b].jumlah + "<h5>");
-                        $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
+                        $(newCellRacikanKeterangan).html(data.racikan[b].change[0].keterangan);
                         $(newCellRacikanAlasan).html((data.racikan[b].change.length > 0) ? ((data.racikan[b].change[0].alasan_ubah !== undefined && data.racikan[b].change[0].alasan_ubah !== null && data.racikan[b].change[0].alasan_ubah !== "") ? data.racikan[b].change[0].alasan_ubah : "-") : "-");
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
@@ -613,7 +615,7 @@
                         }
 
                         //$(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[b].jumlah + "<h5>");
-                        $(newCellRacikanKeterangan).html(data.racikan[b].keterangan);
+                        $(newCellRacikanKeterangan).html(data.racikan[b].change[0].keterangan);
                         $(newCellRacikanAlasan).html((data.racikan[b].change.length > 0) ? ((data.racikan[b].change[0].alasan_ubah !== undefined && data.racikan[b].change[0].alasan_ubah !== null && data.racikan[b].change[0].alasan_ubah !== "") ? data.racikan[b].change[0].alasan_ubah : "-") : "-");
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
