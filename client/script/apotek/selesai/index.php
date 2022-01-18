@@ -706,6 +706,7 @@
                             obat: "<b>R\/</b> " + detail_dokter[a].detail.nama,
                             satuan: detail_dokter[a].detail.satuan_terkecil_info.nama,
                             harga: detail_dokter[a].harga,
+                            satuan_konsumsi: detail_dokter[a].satuan_konsumsi,
                             kuantitas: detail_dokter[a].qty,
                             signa: detail_dokter[a].signa_qty + " &times; " + detail_dokter[a].signa_pakai,
                             keterangan: detail_dokter[a].keterangan
@@ -718,6 +719,7 @@
                         racikan_dokter.push({
                             racikan: "<b>R\/</b> " + detail_racikan_dokter[b].kode,
                             kuantitas: detail_racikan_dokter[b].qty,
+                            satuan_konsumsi: detail_racikan_dokter[b].satuan_konsumsi,
                             signa: detail_racikan_dokter[b].signa_qty + " &times; " + detail_racikan_dokter[b].signa_pakai,
                             keterangan: detail_racikan_dokter[b].keterangan,
                             item: detail_racikan_dokter[b].detail_dokter
