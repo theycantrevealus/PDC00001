@@ -1456,6 +1456,7 @@
                             status: "N",
                             gudang: nurse_station_info.gudang,
                             pasien: __PAGES__[3],
+                            nama_pasien: $("#nama_pasien").html(),
                             item: parsedData,
                             remark: remarkAll,
                             kunjungan: __PAGES__[4],

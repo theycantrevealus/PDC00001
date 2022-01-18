@@ -1649,6 +1649,9 @@
                 tableAntrian.ajax.reload();
                 tableAntrianIGD.ajax.reload();
                 tableAntrianRI.ajax.reload();
+            },
+            loket_ambil_tiket: function(protocols, type, parameter, sender, receiver, time) {
+                reinitAntrianSync($("#txt_loket").val());
             }
             /*anjungan_kunjungan_panggil: function(protocols, type, parameter, sender, receiver, time) {
                 //
@@ -1665,6 +1668,8 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				success: function(response) {
+                    console.clear();
+                    console.log(response);
 				    var dataCheck = response.response_package;
 					$("#sisa_antrian").html(dataCheck.response_standby);
 					if(dataCheck.response_data.length > 0) {
@@ -1675,16 +1680,17 @@
 							.append("<option value=\"" + dataCheck.response_data[0].loket.uid + "\">" + dataCheck.response_data[0].loket.nama_loket + "</option>")
 							.attr("disabled", "disabled");
 						$("#txt_loket").select2();
-						$("#txt_current_antrian").html(dataCheck.response_queue).attr({
-							"current_queue": dataCheck.response_queue_id
-						});
+						// $("#txt_current_antrian").html(dataCheck.response_queue).attr({
+						// 	"current_queue": dataCheck.response_queue_id
+						// });
+                        
 					} else {
 						if(dataCheck.response_used != undefined && dataCheck.response_used != "") {
 							load_loket("#txt_loket", dataCheck.response_used);
 							$("#txt_loket").attr("disabled", "disabled");
 							$("#btnSelesaiGunakan").removeAttr("disabled", "disabled");
 							$("#btnGunakanLoket").attr("disabled", "disabled");
-							reloadPanggilan($("#txt_loket").val(), dataCheck.response_queue_id);
+							//reloadPanggilan($("#txt_loket").val(), dataCheck.response_queue_id);
 							//Otomatis Panggil
 							//reloadPanggilan($("#txt_loket").val());
 						} else {
@@ -1749,17 +1755,23 @@
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
-				success: function(response){
+				success: function(response) {
+                    console.clear();
+                    console.log(response);
 				    if(response.response_package !== undefined && response.response_package !== null) {
 						currentQueue = response.response_package;
 						$("#sisa_antrian").html(currentQueue.response_standby);
 						if((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null || currentQueue.response_queue == 0)) {
 							//reloadPanggilan(loket, "");
 						} else {
-							
-							$("#txt_current_antrian").html((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null) ? "0" : currentQueue.response_queue).attr({
+                            $("#txt_current_antrian").html((currentQueue.response_queue == "" || currentQueue.response_queue == undefined || currentQueue.response_queue == null) ? "0" : currentQueue.response_queue).attr({
 								"current_queue": currentQueue.response_queue_id
 							});
+
+                            push_socket($("#txt_loket").val(), "loket_ambil_tiket", "*", {
+                                loket: $("#txt_loket").val(),
+                                nomor: $("#txt_current_antrian").html()
+                            }, "info");
 						}
 					}
 				},
@@ -1786,7 +1798,7 @@
 					if(response.response_package.response_result > 0) {
 						notification ("success", "Loket berhasil digunakan", 3000, "hasil_loket");
 						$("#btnGunakanLoket").attr("disabled", "disabled");
-						reloadPanggilan($("#txt_loket").val());
+						//reloadPanggilan($("#txt_loket").val());
 						$("#txt_loket").attr("disabled", "disabled");
 						$("#btnSelesaiGunakan").removeAttr("disabled");	
 						$("#btnNext").removeAttr("disabled", "disabled");
@@ -1795,7 +1807,7 @@
 						if(response.response_package.response_loket_user == __ME__) {
 							notification ("success", "Loket berhasil digunakan", 3000, "hasil_loket");
 							$("#btnGunakanLoket").attr("disabled", "disabled");
-							reloadPanggilan($("#txt_loket").val());
+							//reloadPanggilan($("#txt_loket").val());
 							$("#txt_loket").attr("disabled", "disabled");
 							$("#btnSelesaiGunakan").removeAttr("disabled");	
 							$("#btnNext").removeAttr("disabled", "disabled");

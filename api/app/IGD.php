@@ -582,16 +582,18 @@ class IGD extends Utility
         }
 
         //Dulu dimutasikan, sekarangn dianggurin aja dikipas kipas pake sampul majalah bobo
-        $Mutasi = $Inventori->tambah_mutasi(array(
-            'access_token' => $parameter['access_token'],
-            'dari' => $parameter['gudang'],
-            'status' => $parameter['status'],
-            'ke' => __GUDANG_APOTEK__,
-            'keterangan' => 'Retur Obat Inap. ' . $parameter['remark'],
-            'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
-            'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
-            'item' => $parsedItem
-        ));
+        if(count($parameter['item']) > 0) {
+            $Mutasi = $Inventori->tambah_mutasi(array(
+                'access_token' => $parameter['access_token'],
+                'dari' => $parameter['gudang'],
+                'status' => $parameter['status'],
+                'ke' => __GUDANG_APOTEK__,
+                'keterangan' => 'Retur Obat IGD. Pasien a.n. ' . $parameter['nama_pasien'] . ' : ' . $parameter['remark'],
+                'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
+                'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
+                'item' => $parsedItem
+            ));
+        }
 
 
         $Invoice = new Invoice(self::$pdo);

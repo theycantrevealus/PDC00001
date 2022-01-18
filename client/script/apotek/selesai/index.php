@@ -192,9 +192,9 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.pasien_info !== undefined && row.pasien_info !== null) {
-                            return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
                         } else {
-                            return row.nama_pasien;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + row.nama_pasien;
                         }
                     }
                 },
@@ -316,9 +316,9 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.pasien_info !== undefined && row.pasien_info !== null) {
-                            return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
                         } else {
-                            return row.nama_pasien;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + row.nama_pasien;
                         }
                     }
                 },
@@ -449,9 +449,9 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.pasien_info !== undefined && row.pasien_info !== null) {
-                            return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
                         } else {
-                            return row.nama_pasien;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + row.nama_pasien;
                         }
                     }
                 },
@@ -488,7 +488,11 @@
 
 
 
-
+        loadPoli("#filter_departemen_riwayat");
+        $("#filter_departemen_riwayat").select2();
+        $("#filter_departemen_riwayat").change(function() {
+            tableResepRiwayat.ajax.reload();
+        });
 
 
         var tableResepRiwayat = $("#table-resep-history").DataTable({
@@ -503,6 +507,7 @@
                 type: "POST",
                 data: function(d){
                     d.request = "get_resep_backend_v3";
+                    d.filter_departemen = $("#filter_departemen_riwayat option:selected").val();
                     d.request_type = "riwayat";
                 },
                 headers:{
@@ -559,9 +564,9 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.pasien_info !== undefined && row.pasien_info !== null) {
-                            return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
                         } else {
-                            return row.nama_pasien;
+                            return ("<h6 class=\"text-info\">" + row.pasien_info.no_rm + "</h6>") + row.nama_pasien;
                         }
                     }
                 },
@@ -615,6 +620,48 @@
         });
 
 
+        function loadPoli(targetDOM, targetted = ""){
+            var dataPoli = null;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Poli/poli-available",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    var MetaData = dataPoli = response.response_package.response_data;
+
+                    if (MetaData != ""){ 
+                        for(i = 0; i < MetaData.length; i++){
+                            var selection = document.createElement("OPTION");
+                            $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                            if(MetaData[i].uid !== __POLI_INAP__) {
+                                if(targetted !== "") {
+                                    if(MetaData[i].uid === targetted) {
+                                        $(selection).attr("selected", "selected");
+                                    }
+                                    $(targetDOM).append(selection);
+                                } else {
+                                    if(MetaData[i].editable) {
+                                        $(targetDOM).append(selection);
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataPoli;
+        }
+
+
 
 
 
@@ -636,7 +683,7 @@
 
             //Load Resep Detail
             $.ajax({
-                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + uid,
+                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator_2/" + uid,
                 async:false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -644,6 +691,7 @@
                 type:"GET",
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
+                    console.clear();
                     console.log(targettedData);
                     var kajian = targettedData.kajian;
                     for(var kaj in kajian) {
@@ -654,8 +702,10 @@
                     var resep_dokter = [];
                     for(var a in detail_dokter) {
                         resep_dokter.push({
+                            uid_obat: detail_dokter[a].detail.uid,
                             obat: "<b>R\/</b> " + detail_dokter[a].detail.nama,
                             satuan: detail_dokter[a].detail.satuan_terkecil_info.nama,
+                            harga: detail_dokter[a].harga,
                             kuantitas: detail_dokter[a].qty,
                             signa: detail_dokter[a].signa_qty + " &times; " + detail_dokter[a].signa_pakai,
                             keterangan: detail_dokter[a].keterangan
@@ -763,7 +813,7 @@
                             departemen: (targettedData.antrian.poli_info !== undefined && targettedData.antrian.poli_info !== null) ? targettedData.antrian.poli_info.nama : "Rawat Inap",
                             tanggal_lahir: targettedData.pasien.tanggal_lahir_parsed,
                             dokter: targettedData.dokter.nama,
-                            jenis_kelamin: targettedData.pasien.jenkel_detail.nama,
+                            jenis_kelamin: (targettedData.pasien.jenkel_detail !== undefined && targettedData.pasien.jenkel_detail !== null) ? targettedData.pasien.jenkel_detail.nama : "-",
                             penjamin: targettedData.antrian.penjamin_data.nama,
                             keterangan_resep: targettedData.keterangan,
                             keterangan_racikan: targettedData.keterangan_racikan,

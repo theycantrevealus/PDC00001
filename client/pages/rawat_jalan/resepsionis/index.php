@@ -52,7 +52,7 @@
 								<i class="fa fa-bullhorn"></i> PANGGIL
 							</button>
 							<button class="btn btn-warning" style="color: #fff;" id="btnNext">
-								<i class="fa fa-caret-square-right"></i> NEXT
+								<i class="fa fa-caret-square-right"></i> AMBIL ANTRIAN
 							</button>
 							<button class="btn btn-success" id="btnTambahAntrian">
 								<i class="fa fa-plus"></i> DAFTAR PASIEN
@@ -65,7 +65,7 @@
                                 <h5><b id="sisa_antrian">0</b></h5>
                             </center>
 						</div>
-                        <div class="col-lg-4">
+                        <div class="col-lg-4" style="visibility: hidden;">
                             <div class="row">
                                 <div class="col-lg-12">
                                     <span class="text-secondary">Antrian Terlewat</span>

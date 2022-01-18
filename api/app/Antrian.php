@@ -413,6 +413,7 @@ class Antrian extends Utility
 
                 $antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
                 $antrian['response_notif'] = 'P';
+                $antrian['inap_check'] = 3;
                 $antrian['param'] = $parameter;
                 return $antrian;
 
@@ -1054,17 +1055,21 @@ class Antrian extends Utility
                                 ->where(array(
                                     'antrian_nomor.id' => '= ?',
                                     'AND',
+                                    '((antrian_nomor.status' => '= ?)',
+                                    'OR',
                                     '(antrian_nomor.status' => '= ?',
                                     'OR',
-                                    'antrian_nomor.status' => '= ?)'
+                                    'antrian_nomor.status' => '= ?))'
                                 ), array(
                                     $parameter['dataObj']['currentAntrianID'],
-                                    'D', 'C'
+                                    'N', 'C', 'D'
                                 ))
                                 ->execute();
+                            
                             $Pasien = new Pasien(self::$pdo);
                             $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
                             $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
+                            $antrianKunjungan['response_data'][0]['inap_check'] = 1;
 
                             if ($antrianKunjungan['response_result'] > 0) {
                                 unset($parameter['dataObj']['currentPasien']);
@@ -1078,6 +1083,7 @@ class Antrian extends Utility
                                 return $antrian;
                             } else {
                                 $antrianKunjungan['response_notif'] = 'P';
+                                $antrianKunjungan['inap_check'] = 4;
                                 return $antrianKunjungan;
                             }
 
@@ -1127,6 +1133,7 @@ class Antrian extends Utility
                             $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
                             $antrianKunjungan['response_data'][0]['response_invoice'] = 'asd';
                             $antrianKunjungan['response_notif'] = 'K';
+                            $antrianKunjungan['inap_check'] = 2;
                             $antrianKunjungan['womaak'] = $Invoice;
                             $antrianKunjungan['aaawdaw'] = $parameter;
                             return $antrianKunjungan;
@@ -1244,6 +1251,8 @@ class Antrian extends Utility
                         ->execute();
                 }
             } else {
+                //TODO : Check Inap
+
                 $updateNomorAntrian = self::$query->update('antrian_nomor', array(
                     'antrian' => $uid,
                     'status' => 'P'
@@ -1257,16 +1266,22 @@ class Antrian extends Utility
                         'AND',*/
                         'antrian_nomor.penjamin' => '= ?',
                         'AND',
-                        'antrian_nomor.status' => '= ?'
+                        '((antrian_nomor.status' => '= ?)',
+                        'OR',
+                        '(antrian_nomor.status' => '= ?',
+                        'OR',
+                        'antrian_nomor.status' => '= ?))'
                     ), array(
                             $allData['pasien'],
                             $allData['departemen'],
                             //$allData['dokter'],
                             $allData['penjamin'],
-                            'K' //Dulu N?
+                            'K', 'N', 'P'
+                            //Dulu N?
                         )
                     )
                     ->execute();
+                $updateNomorAntrian['inap_check'] = 5;
             }
 
             if ($updateNomorAntrian['response_result'] > 0) {

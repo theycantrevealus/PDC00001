@@ -77,6 +77,18 @@
                         </table>
                     </div>
                     <div class="tab-pane show fade" id="list-resep-riwayat">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <select class="form-control" id="filter_departemen_riwayat">
+                                    <option value="all">Semua</option>
+                                </select>  
+                            </div>
+                            <div class="col-lg-6">
+                            </div>
+                            <div class="col-lg-12">
+                                <br />
+                            </div>
+                        </div>
                         <table class="table table-bordered table-striped largeDataType" id="table-resep-history">
                             <thead class="thead-dark">
                             <tr>

@@ -612,14 +612,14 @@ class Inap extends Utility
 
         $TargetInvoice = $InvoiceCheck['response_data'][0]['uid'];
 
-        if(count($parsedItem) > 0) {
+        if(count($usedBatchInap) > 0) {
             //Dulu dimutasikan, sekarangn dianggurin aja dikipas kipas pake sampul majalah bobo
             $Mutasi = $Inventori->tambah_mutasi(array(
                 'access_token' => $parameter['access_token'],
                 'dari' => $parameter['gudang'],
                 'status' => $parameter['status'],
                 'ke' => __GUDANG_APOTEK__,
-                'keterangan' => 'Retur Obat Inap. ' . $parameter['remark'],
+                'keterangan' => 'Retur Obat Inap. Pasien a.n. ' . $parameter['nama_pasien'] . ' : ' . $parameter['remark'],
                 'inap' => true,
                 'item' => $parsedItem
             ));
