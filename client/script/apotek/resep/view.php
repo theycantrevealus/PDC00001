@@ -1334,6 +1334,8 @@
 
             if(parseInt(setter.iterasi) > 0) {
                 $(newRacikanCellNama).append("<br /><h3 class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times; (" + setter.sat_konsumsi.toLowerCase() + ")</h3>");
+            } else {
+                $(newRacikanCellNama).append("<br /><h3 class=\"text-right\">(" + setter.sat_konsumsi.toLowerCase() + ")</h3>");
             }
 
             /*var newRacikanObat = document.createElement("SELECT");
