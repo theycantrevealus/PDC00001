@@ -1,5 +1,5 @@
-<script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js" type="text/javascript"></script>
-<script src="https://cdn.datatables.net/buttons/2.1.0/js/buttons.html5.min.js" type="text/javascript"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/cdndt/button.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/cdndt/button.html.js"></script>
 
 <script type="text/javascript">
     $(function(){
