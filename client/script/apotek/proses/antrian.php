@@ -27,9 +27,6 @@
                 $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
                 //$("#verifikator").html(targettedData.verifikator.nama);
                 loadDetailResep(targettedData);
-                console.clear();
-                console.log(targettedData);
-
             },
             error: function(response) {
                 console.log(response);
@@ -247,7 +244,9 @@
                         }
 
                         var newDetailCellKeterangan = document.createElement("TD");
-                        $(newDetailCellKeterangan).html(data.detail[a].keterangan);
+                        $(newDetailCellKeterangan).css({
+                            "white-space": "pre-wrap"
+                        }).html(data.detail[a].keterangan);
 
                         var newDetailCellAlasan = document.createElement("TD");
                         $(newDetailCellAlasan).html((data.detail[a].alasan_ubah !== undefined && data.detail[a].alasan_ubah !== null && data.detail[a].alasan_ubah !== "") ? data.detail[a].alasan_ubah : "-");
@@ -465,7 +464,9 @@
                         }
 
                         //$(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[b].jumlah + "<h5>");
-                        $(newCellRacikanKeterangan).html(data.racikan[b].change[0].keterangan);
+                        $(newCellRacikanKeterangan).css({
+                            "white-space": "pre-wrap"
+                        }).html(data.racikan[b].change[0].keterangan);
                         $(newCellRacikanAlasan).html((data.racikan[b].change.length > 0) ? ((data.racikan[b].change[0].alasan_ubah !== undefined && data.racikan[b].change[0].alasan_ubah !== null && data.racikan[b].change[0].alasan_ubah !== "") ? data.racikan[b].change[0].alasan_ubah : "-") : "-");
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
@@ -615,7 +616,9 @@
                         }
 
                         //$(newCellRacikanJlh).html("<h5>" + data.racikan[b].change[b].jumlah + "<h5>");
-                        $(newCellRacikanKeterangan).html(data.racikan[b].change[0].keterangan);
+                        $(newCellRacikanKeterangan).css({
+                            "white-space": "pre-wrap"
+                        }).html(data.racikan[b].change[0].keterangan);
                         $(newCellRacikanAlasan).html((data.racikan[b].change.length > 0) ? ((data.racikan[b].change[0].alasan_ubah !== undefined && data.racikan[b].change[0].alasan_ubah !== null && data.racikan[b].change[0].alasan_ubah !== "") ? data.racikan[b].change[0].alasan_ubah : "-") : "-");
                         //alert(b + " - " + racDetailKey);
                         if(racDetailKey === 0) {
@@ -677,6 +680,8 @@
                 type:"GET",
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
+                    console.clear();
+                    
                     var kajian = targettedData.kajian;
                     for(var kaj in kajian) {
                         $("#hasil_" + kajian[kaj].parameter_kajian).html((kajian[kaj].nilai === "y") ? "<span class=\"text-success wrap_content\"><i class=\"fa fa-check-circle\"></i> Ya</span>" : "<span class=\"text-danger wrap_content\"><i class=\"fa fa-times-circle\"></i> Tidak</span>");
@@ -689,6 +694,7 @@
                             obat: "<b>R\/</b> " + detail_dokter[a].detail.nama,
                             satuan: detail_dokter[a].detail.satuan_terkecil_info.nama,
                             kuantitas: detail_dokter[a].qty,
+                            satuan_konsumsi: detail_dokter[a].satuan_konsumsi,
                             signa: detail_dokter[a].signa_qty + " &times; " + detail_dokter[a].signa_pakai,
                             keterangan: detail_dokter[a].keterangan
                         });
@@ -702,6 +708,7 @@
                             kuantitas: detail_racikan_dokter[b].qty,
                             signa: detail_racikan_dokter[b].signa_qty + " &times; " + detail_racikan_dokter[b].signa_pakai,
                             keterangan: detail_racikan_dokter[b].keterangan,
+                            satuan_konsumsi: detail_racikan_dokter[b].satuan_konsumsi,
                             item: detail_racikan_dokter[b].detail_dokter
                         });
                     }
