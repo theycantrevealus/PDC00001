@@ -16,8 +16,8 @@ $keteranganRacikan = '';
                             <i class="fa fa-pencil-alt"></i> Edit Resep
                         </span>
                     </a-->
-                    <span class="badge badge-info badge-custom-caption">
-                        <h6 style="color: #fff !important;">UMUM</h6>
+                    <span class="badge badge-outline-info badge-custom-caption">
+                        <b class="text-info"><?php echo $_POST['penjamin_detail']['nama']; ?></b>
                     </span>
                 </div>
             </div>

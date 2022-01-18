@@ -251,6 +251,7 @@
                                 item:racikan_detail[racikanKey].item,
                                 iterasi:racikan_detail[racikanKey].iterasi,
                                 aturan_pakai: racikan_detail[racikanKey].aturan_pakai,
+                                sat_konsumsi: racikan_detail[racikanKey].satuan_konsumsi,
                                 qty_roman: racikan_detail[racikanKey].qty_roman
                             });
 
@@ -359,29 +360,30 @@
                 "roman": setter.qty_roman
             });
 
-            $(newCellResepObat).append(newObat).append("<br /><br /><ol></ol>");
+            $(newCellResepObat).append(newObat).append("<br /><br /><ol></ol><hr />");
 
             $(newCellResepObat).append(
                 "<div class=\"row\" style=\"padding-top: 5px;\">" +
                 "<div style=\"position: relative\" class=\"col-md-12 penjamin-container text-right\"></div>" +
-                "<div class=\"col-md-7 aturan-pakai-container\"><span>Aturan Pakai</span></div>" +
-                "<div class=\"col-md-5 kategori-obat-container\"><span>Kategori Obat</span><br /></div>" +
-                "<div style=\"position: relative; padding-top: 5px;\" class=\"col-md-12 keterangan-container\"></div>" +
+                "<!--div class=\"col-md-7 aturan-pakai-container\"><span>Aturan Pakai</span></div-->" +
+                "<div style=\"position: relative; padding-top: 5px;\" class=\"col-md-8 keterangan-container\"></div>" +
+                "<div class=\"col-md-4 kategori-obat-container\"><span>Kategori Obat</span><br /></div>" +
                 "</div>");
             var newAturanPakai = document.createElement("SELECT");
             var dataAturanPakai = autoAturanPakai();
 
-            $(newCellResepObat).find("div.aturan-pakai-container").append(newAturanPakai);
+            //$(newCellResepObat).find("div.aturan-pakai-container").append(newAturanPakai);
+            $(newCellResepObat).find("div.aturan-pakai-container");
             $(newAturanPakai).addClass("form-control aturan-pakai").attr({
                 "old-data": setter.aturan_pakai
             });
-            $(newAturanPakai).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
+            $(newAturanPakai).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2().hide();
             for(var aturanPakaiKey in dataAturanPakai) {
                 $(newAturanPakai).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
             }
 
             var keteranganPerObat = document.createElement("TEXTAREA");
-            $(newCellResepObat).find("div.keterangan-container").append("<span>Keterangan</span><p class=\"keterangan_resep_dokter\">" + ((setter.keterangan !== "") ? setter.keterangan : "-") + "</p>")/*.append(keteranganPerObat)*/;
+            $(newCellResepObat).find("div.keterangan-container").append("<span><b>Keterangan / Aturan Pakai</b></span><textarea class=\"form-control keterangan_resep_dokter\">" + ((setter.keterangan !== "") ? setter.keterangan : "-") + "</textarea>")/*.append(keteranganPerObat)*/;
             /*$(keteranganPerObat).addClass("form-control").attr({
                 "placeholder": "Keterangan per Obat",
                 "disabled": "disabled"
@@ -390,8 +392,12 @@
             }).val(setter.keterangan);*/
 
             if(parseInt(setter.iterasi) > 0) {
-                $(newCellResepObat).append("<br /><h3 sath=\"" + setter.sat_konsumsi + "\" class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times;</h3>");
+                $(newCellResepObat).append("<br /><h3 sath=\"" + setter.sat_konsumsi + "\" class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times; (" + setter.sat_konsumsi.toLowerCase() + ")</h3>");
+            } else {
+                $(newCellResepObat).append("<br /><h3 sath=\"" + setter.sat_konsumsi + "\" class=\"text-right\">(" + setter.sat_konsumsi.toLowerCase() + ")</h3>");
             }
+
+            //Satuan pemakaian
 
             var itemData = [];
             var parsedItemData = [];
@@ -1234,6 +1240,7 @@
             "aturan_pakai": "",
             "iterasi": 0,
             "qty_roman": "",
+            "sat_konsumsi": "",
             "item":[]
         }) {
             $("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
@@ -1304,29 +1311,31 @@
 
             var newAturanPakaiRacikan = document.createElement("SELECT");
 
-            var dataAturanPakai = autoAturanPakai();
+            //var dataAturanPakai = autoAturanPakai();
 
             $(newAturanPakaiRacikan).addClass("form-control aturan-pakai-racikan");
             var newKeteranganRacikan = document.createElement("TEXTAREA");
-            $(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<span>Keterangan</span>").append(newKeteranganRacikan);
+            //$(newRacikanCellNama).append("<span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<span>Keterangan</span>").append(newKeteranganRacikan);
+            $(newRacikanCellNama).append("<span>Keterangan / Aturan Pakai</span>").append(newKeteranganRacikan);
             if(setter.uid !== "") {
                 $(newAturanPakaiRacikan).attr({
                     "uid-racikan": setter.uid
                 });
             }
-            $(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
-            for(var aturanPakaiKey in dataAturanPakai) {
-                $(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
-            }
+            // $(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
+            // for(var aturanPakaiKey in dataAturanPakai) {
+            //     $(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
+            // }
             $(newKeteranganRacikan).addClass("form-control").attr({
-                "placeholder": "Keterangan racikan",
-                "disabled": "disabled"
+                "placeholder": "Keterangan racikan"
             }).css({
-                "min-height": "200px"
+                "min-height": "120px"
             }).val(setter.keterangan);
 
             if(parseInt(setter.iterasi) > 0) {
-                $(newRacikanCellNama).append("<br /><h3 class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times;</h3>");
+                $(newRacikanCellNama).append("<br /><h3 class=\"text-success text-right resep_script\" data=\"" + setter.iterasi + "\">Iter " + setter.iterasi + " &times; (" + setter.sat_konsumsi.toLowerCase() + ")</h3>");
+            } else {
+                $(newRacikanCellNama).append("<br /><h3 class=\"text-right\">(" + setter.sat_konsumsi.toLowerCase() + ")</h3>");
             }
 
             /*var newRacikanObat = document.createElement("SELECT");
@@ -1489,6 +1498,8 @@
                 var newKomposisiCellJumlah = document.createElement("TD");
                 var newKomposisiCellSatuan = document.createElement("TD");
                 var newKomposisiCellAksi = document.createElement("TD");
+
+                $(newKomposisiCellID).addClass("autonum wrap_content");
 
 
                 $(newKomposisiCellObat).append("<h6></h6><ol></ol>");

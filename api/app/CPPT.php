@@ -499,6 +499,7 @@ class CPPT extends Utility {
         $Pegawai = new Pegawai(self::$pdo);
 	    $ICD10 = new Icd(self::$pdo);
         $Inventori = new Inventori(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
         $Tindakan = new Tindakan(self::$pdo);
         $Laboratorium = new Laboratorium(self::$pdo);
         $Mitra = new Mitra(self::$pdo);
@@ -519,6 +520,10 @@ class CPPT extends Utility {
                         'parsed' => date('H:i', strtotime($value['waktu_masuk']))
                     );
                 }
+
+                //Penjamin Data
+                $PenjaminDetail = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
+                $Antrian['response_data'][$key]['penjamin_detail'] = $PenjaminDetail;
 
 
                 //Prepare Data
