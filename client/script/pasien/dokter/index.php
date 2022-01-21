@@ -69,7 +69,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"wrap_content\">" + row.pasien.nama + "</span>";
+                        return "<span class=\"wrap_content\"><h6 class=\"text-info\">" + row.pasien.no_rm + "</h6>" + row.pasien.nama + "</span>";
                     }
                 },
                 {
