@@ -233,7 +233,7 @@
 				},*/
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<button class=\"btn btn-info btn-sm btn-detail\" id=\"detail_do_" + row.uid + "\"><i class=\"fa fa-eye\"></i></button>";
+						return "<button class=\"btn btn-info btn-sm btn-detail\" id=\"detail_do_" + row.uid + "\"><i class=\"fa fa-eye\"></i> Detail</button>";
 					}
 				},
 			]
