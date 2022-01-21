@@ -251,7 +251,7 @@ class Asesmen extends Utility {
                     array('asesmen.pasien', '=', 'pasien.uid')
                 ))
                 ->order(array(
-                    'asesmen.created_at' => 'ASC'
+                    'asesmen.created_at' => 'DESC'
                 ))
                 ->execute();
         } else {
@@ -279,7 +279,7 @@ class Asesmen extends Utility {
                     array('asesmen.pasien', '=', 'pasien.uid')
                 ))
                 ->order(array(
-                    'asesmen.created_at' => 'ASC'
+                    'asesmen.created_at' => 'DESC'
                 ))
                 ->execute();
         }
