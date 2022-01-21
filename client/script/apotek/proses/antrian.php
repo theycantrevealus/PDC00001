@@ -800,6 +800,7 @@
                             nama_pasien: targettedData.pasien.nama,
                             departemen: (targettedData.antrian.poli_info !== undefined && targettedData.antrian.poli_info !== null) ? targettedData.antrian.poli_info.nama : "Rawat Inap",
                             tanggal_lahir: targettedData.pasien.tanggal_lahir_parsed,
+                            verifikator: $("#verifikator").html(),
                             dokter: targettedData.dokter.nama,
                             jenis_kelamin: targettedData.pasien.jenkel_detail.nama,
                             penjamin: targettedData.antrian.penjamin_data.nama,

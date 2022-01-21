@@ -2178,7 +2178,7 @@ class Apotek extends Utility
             $ApotekerInfo = $Pegawai->get_detail($value['apoteker']);
             $resep_dokter['response_data'][$key]['verifikator'] = $ApotekerInfo['response_data'][0];
 
-            $resep_dokter['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+            $resep_dokter['response_data'][$key]['created_at_parsed'] = date('d F Y, H:i', strtotime($value['created_at']));
 
             //Pasien Info
             $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
