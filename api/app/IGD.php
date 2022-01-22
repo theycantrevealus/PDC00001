@@ -673,28 +673,28 @@ class IGD extends Utility
                     }
                 }
             }
+        }
 
-            //Pulangkan Pasien
-            $Kunjungan = self::$query->update('kunjungan', array(
-                'waktu_keluar' => parent::format_date()
+        //Pulangkan Pasien
+        $Kunjungan = self::$query->update('kunjungan', array(
+            'waktu_keluar' => parent::format_date()
+        ))
+            ->where(array(
+                'kunjungan.uid' => '= ?',
+                'AND',
+                'kunjungan.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['kunjungan']
             ))
-                ->where(array(
-                    'kunjungan.uid' => '= ?',
-                    'AND',
-                    'kunjungan.deleted_at' => 'IS NULL'
-                ), array(
-                    $parameter['kunjungan']
-                ))
-                ->execute();
+            ->execute();
 
-            if($Kunjungan['response_result'] > 0) {
-                $Pulang = self::pulangkan_pasien(array(
-                    'access_token' => $parameter['access_token'],
-                    'uid' => $parameter['pasien'],
-                    'jenis' => $parameter['jenis'],
-                    'keterangan' => $parameter['keterangan']
-                ));
-            }
+        if($Kunjungan['response_result'] > 0) {
+            $Pulang = self::pulangkan_pasien(array(
+                'access_token' => $parameter['access_token'],
+                'uid' => $parameter['pasien'],
+                'jenis' => $parameter['jenis'],
+                'keterangan' => $parameter['keterangan']
+            ));
         }
 
         return array(
