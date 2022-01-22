@@ -55,21 +55,24 @@
 							</div>
 						</div>
 						<hr />
-						<table class="table table-bordered" id="table-list-amprah">
-							<thead class="thead-dark">
-								<tr>
-									<th class="wrap_content">No</th>
-									<th>Tanggal</th>
-									<th>Kode</th>
-									<th>Dari</th>
-									<th>Ke</th>
-									<th>Diproses Oleh</th>
-                                    <th>Status</th>
-									<th class="wrap_content">Aksi</th>
-								</tr>
-							</thead>
-							<tbody></tbody>
-						</table>
+						<div class="dt-responsive table-responsive">
+							<table class="table table-bordered table-responsive table-striped display nowrap" id="table-list-amprah">
+								<thead class="thead-dark">
+									<tr>
+										<th class="all wrap_content">No</th>
+										<th class="all wrap_content">Aksi</th>
+										<th class="all">Tanggal</th>
+										<th class="all">Kode</th>
+										<th class="all">Dari</th>
+										<th class="all">Ke</th>
+										<th class="all">Diproses Oleh</th>
+										<th class="all">Status</th>
+										<th class="none">Keperluan</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
 					</div>
 					<div class="tab-pane show fade" id="tab-history">
 						

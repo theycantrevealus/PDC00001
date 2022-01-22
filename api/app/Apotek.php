@@ -868,8 +868,9 @@ class Apotek extends Utility
                             'access_token' => $parameter['access_token'],
                             'dari' => $UserData['data']->gudang,
                             'ke' => $RawatInap['response_data'][0]['gudang'],
-                            'keterangan' => 'Kebutuhan Resep Rawat Inap',
+                            'keterangan' => 'Kebutuhan Resep Rawat Inap untuk pasien a.n. ' . $parameter['nama_pasien'],
                             'status' => 'N',
+                            'mut_resep_pasien' => $parameter['nama_pasien'],
                             'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
                             'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
                             //'apotek_order' => true,
@@ -970,7 +971,7 @@ class Apotek extends Utility
                                 'barang' => $BarangBatch[0],
                                 'batch' => $BarangBatch[1],
                                 'qty' => floatval($mutValue['mutasi']),
-                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap untuk pasien a.n. ' . $parameter['nama_pasien']
                             ));
                         }
                     }
@@ -981,7 +982,7 @@ class Apotek extends Utility
                         if(!isset($itemMutasi[$bValue['barang'] . '|' . $bValue['batch']])) {
                             $itemMutasi[$bValue['barang'] . '|' . $bValue['batch']] = array(
                                 'mutasi' => $bValue['qty'],
-                                'keterangan' => 'Mutasi kebutuhan IGD'
+                                'keterangan' => 'Mutasi kebutuhan IGD untuk pasien a.n. ' . $parameter['nama_pasien']
                             );
                         }
                     }
@@ -1030,8 +1031,9 @@ class Apotek extends Utility
                             'access_token' => $parameter['access_token'],
                             'dari' => $UserData['data']->gudang,
                             'ke' => $IGD['response_data'][0]['gudang'],
-                            'keterangan' => 'Kebutuhan Resep IGD',
+                            'keterangan' => 'Kebutuhan Resep IGD untuk pasien a.n. ' . $parameter['nama_pasien'],
                             'status' => 'N',
+                            'mut_resep_pasien' => $parameter['nama_pasien'],
                             'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
                             'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
                             //'apotek_order' => true,
@@ -1107,7 +1109,7 @@ class Apotek extends Utility
                                 'barang' => $BarangBatch[0],
                                 'batch' => $BarangBatch[1],
                                 'qty' => floatval($mutValue['mutasi']),
-                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap untuk pasien a.n. ' . $parameter['nama_pasien']
                             ));
                         }
                     }
