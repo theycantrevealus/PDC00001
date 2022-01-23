@@ -458,7 +458,7 @@
                         $("#target_pasien").html(filteredData[0].pasien);
                         $("#rm_pasien").html(filteredData[0].no_rm);
                         $("#nama_pasien").html((filteredData[0].pasien_detail.panggilan_name === null) ? filteredData[0].pasien_detail.nama : filteredData[0].pasien_detail.panggilan_name.nama + " " +  filteredData[0].pasien_detail.nama);
-                        $("#jenkel_pasien").html(filteredData[0].pasien_detail.jenkel_detail.nama);
+                        $("#jenkel_pasien").html((filteredData[0].pasien_detail.jenkel_detail !== undefined && filteredData[0].pasien_detail.jenkel_detail !== null) ? filteredData[0].pasien_detail.jenkel_detail.nama : "");
                         $("#tempat_lahir_pasien").html(filteredData[0].pasien_detail.tempat_lahir);
                         $("#alamat_pasien").html(filteredData[0].pasien_detail.alamat);
                         $("#usia_pasien").html(filteredData[0].pasien_detail.usia);
@@ -1464,7 +1464,9 @@
                             keterangan: $("#txt_keterangan_pulang").val()
                         },
                         success: function (response) {
-                            location.href = __HOSTNAME__ + "/igdv2/perawat";
+                            console.clear();
+                            console.log(response);
+                            //location.href = __HOSTNAME__ + "/igdv2/perawat";
                         },
                         error: function (response) {
 

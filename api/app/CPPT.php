@@ -481,8 +481,6 @@ class CPPT extends Utility {
             'waktu_masuk'
         ))
             ->where(array(
-                /*'antrian.waktu_keluar' => 'IS NOT NULL',
-                'AND',*/
                 'antrian.deleted_at' => 'IS NULL',
                 'AND',
                 'antrian.pasien' => '= ?',
@@ -491,6 +489,8 @@ class CPPT extends Utility {
             ), array(
                 $parameter['pasien'], date('Y-m-d', strtotime('-1 day', strtotime($parameter['from']))), date('Y-m-d', strtotime('+1 day', strtotime($parameter['to'])))
             ))
+            ->limit(1)
+            ->offset($parameter['offset'])
             ->order(array(
                 'created_at' => 'DESC'
             ))
@@ -503,6 +503,27 @@ class CPPT extends Utility {
         $Tindakan = new Tindakan(self::$pdo);
         $Laboratorium = new Laboratorium(self::$pdo);
         $Mitra = new Mitra(self::$pdo);
+        $AntrianTotal = self::$query->select('antrian', array(
+	        'uid',
+	        'kunjungan',
+	        'penjamin',
+	        'departemen',
+            'dokter',
+            'waktu_masuk'
+        ))
+            ->where(array(
+                'antrian.deleted_at' => 'IS NULL',
+                'AND',
+                'antrian.pasien' => '= ?',
+                'AND',
+                'antrian.waktu_masuk' => 'BETWEEN ? AND ?'
+            ), array(
+                $parameter['pasien'], date('Y-m-d', strtotime('-1 day', strtotime($parameter['from']))), date('Y-m-d', strtotime('+1 day', strtotime($parameter['to'])))
+            ))
+            ->order(array(
+                'created_at' => 'DESC'
+            ))
+            ->execute();
 	    foreach ($Antrian['response_data'] as $key => $value) {
 	        //if($value['uid'] !== $parameter['current']) {
                 $GrouperName = date('Y-m-d', strtotime($value['waktu_masuk']));
@@ -897,7 +918,10 @@ class CPPT extends Utility {
             //}
         }
 
-	    return $GroupTanggal;
+	    return array(
+            'data' => $GroupTanggal,
+            'total' => count($AntrianTotal['response_data'])
+        );
     }
 
 

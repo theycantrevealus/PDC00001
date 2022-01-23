@@ -93,7 +93,7 @@
         });
 
 
-        loadCPPT("2021-01-01", "2021-08-01", __PAGES__[3]);
+        loadCPPT("2021-01-01", "2021-08-01", __PAGES__[3], currentCPPTStep, "");
 
         function resetSelectBox(selector, name){
             $("#"+ selector +" option").remove();
@@ -230,117 +230,117 @@
 			]
 		});*/
 
-        function loadCPPT(from, to, pasien) {
-            $("#cppt_loader").html("");
-            $.ajax({
-                async: false,
-                url: __HOSTAPI__ + "/Pasien/pasien-detail/" + pasien,
-                type: "GET",
-                beforeSend: function (request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                success: function (response) {
-                    var pasienData = response.response_package.response_data;
-                    $("#target_pasien").html(pasienData[0].nama);
-                    $("#rm_pasien").html(pasienData[0].no_rm).attr({
-                        "uid": pasienData[0].uid
-                    });
-                    $("#nama_pasien").html((pasienData[0].panggilan_name === null) ? pasienData[0].nama : pasienData[0].panggilan_name.nama + " " +  pasienData[0].nama);
-                    $("#usia_pasien").html(pasienData[0].usia);
-                    $("#jenkel_pasien").html(pasienData[0].jenkel_detail.nama);
-                    $("#tanggal_lahir_pasien").html(pasienData[0].tanggal_lahir_parsed);
-                    $("#tempat_lahir_pasien").html(pasienData[0].tempat_lahir);
-                    $("#alamat_pasien").html(pasienData[0].alamat);
-                },
-                error: function (response) {
-                    console.log(response);
-                }
-            });
-            $.ajax({
-                url: __HOSTAPI__ + "/CPPT",
-                async:false,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                type:"POST",
-                data: {
-                    request: "group_tanggal",
-                    pasien: pasien,
-                    from: from,
-                    to: to
-                },
-                success:function(response) {
-                    var data = response.response_package;
-                    for(var a in data) {
-                        $.ajax({
-                            url: __HOSTNAME__ + "/pages/pasien/cppt-grouper.php",
-                            async:false,
-                            beforeSend: function(request) {
-                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                            },
-                            type:"POST",
-                            data: {
-                                group_tanggal_caption: data[a].parsed,
-                                group_tanggal_name: a
-                            },
-                            success:function(responseGrouper) {
-                                $("#cppt_loader").append(responseGrouper);
-                                var listData = data[a].data;
-                                for(var b in listData) {
-                                    var currentData = listData[b].data[0];
-                                    //if(currentData.uid !== UID) {
-                                    $.ajax({
-                                        url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
-                                        async:false,
-                                        beforeSend: function(request) {
-                                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                                        },
-                                        type:"POST",
-                                        data: {
-                                            __HOST__: __HOST__,
-                                            __ME__: __ME__,
-                                            group_tanggal_name: a,
-                                            waktu_masuk: listData[b].parsed,
-                                            waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),
-                                            departemen: currentData.departemen.nama,
-                                            dokter_uid: currentData.dokter.uid,
-                                            dokter: currentData.dokter.nama,
-                                            dokter_pic: __HOST__ + currentData.dokter.profile_pic,
-                                            icd10_kerja: currentData.asesmen.icd10_kerja,
-                                            icd10_banding: currentData.asesmen.icd10_banding,
-                                            keluhan_utama:currentData.asesmen.keluhan_utama,
-                                            keluhan_tambahan:currentData.asesmen.keluhan_tambahan,
-                                            diagnosa_kerja:currentData.asesmen.diagnosa_kerja,
-                                            diagnosa_banding:currentData.asesmen.diagnosa_banding,
-                                            pemeriksaan_fisik:currentData.asesmen.pemeriksaan_fisik,
-                                            planning:currentData.asesmen.planning,
-                                            tindakan: currentData.asesmen.tindakan,
-                                            resep: currentData.asesmen.resep,
-                                            racikan: currentData.asesmen.racikan,
-                                            laboratorium: currentData.asesmen.laboratorium,
-                                            radiologi: currentData.asesmen.radiologi
-                                        },
-                                        success:function(responseSingle) {
-                                            $("#group_cppt_" + a).append(responseSingle);
-                                        },
-                                        error: function(responseSingleError) {
-                                            console.log(responseSingleError);
-                                        }
-                                    });
-                                    //}
-                                }
-                            },
-                            error: function(responseGrouperError) {
-                                console.log(responseGrouperError);
-                            }
-                        });
-                    }
-                },
-                error: function(response) {
-                    console.log(response);
-                }
-            });
-        }
+        // function loadCPPT(from, to, pasien) {
+        //     $("#cppt_loader").html("");
+        //     $.ajax({
+        //         async: false,
+        //         url: __HOSTAPI__ + "/Pasien/pasien-detail/" + pasien,
+        //         type: "GET",
+        //         beforeSend: function (request) {
+        //             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+        //         },
+        //         success: function (response) {
+        //             var pasienData = response.response_package.response_data;
+        //             $("#target_pasien").html(pasienData[0].nama);
+        //             $("#rm_pasien").html(pasienData[0].no_rm).attr({
+        //                 "uid": pasienData[0].uid
+        //             });
+        //             $("#nama_pasien").html((pasienData[0].panggilan_name === null) ? pasienData[0].nama : pasienData[0].panggilan_name.nama + " " +  pasienData[0].nama);
+        //             $("#usia_pasien").html(pasienData[0].usia);
+        //             $("#jenkel_pasien").html(pasienData[0].jenkel_detail.nama);
+        //             $("#tanggal_lahir_pasien").html(pasienData[0].tanggal_lahir_parsed);
+        //             $("#tempat_lahir_pasien").html(pasienData[0].tempat_lahir);
+        //             $("#alamat_pasien").html(pasienData[0].alamat);
+        //         },
+        //         error: function (response) {
+        //             console.log(response);
+        //         }
+        //     });
+        //     $.ajax({
+        //         url: __HOSTAPI__ + "/CPPT",
+        //         async:false,
+        //         beforeSend: function(request) {
+        //             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+        //         },
+        //         type:"POST",
+        //         data: {
+        //             request: "group_tanggal",
+        //             pasien: pasien,
+        //             from: from,
+        //             to: to
+        //         },
+        //         success:function(response) {
+        //             var data = response.response_package;
+        //             for(var a in data) {
+        //                 $.ajax({
+        //                     url: __HOSTNAME__ + "/pages/pasien/cppt-grouper.php",
+        //                     async:false,
+        //                     beforeSend: function(request) {
+        //                         request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+        //                     },
+        //                     type:"POST",
+        //                     data: {
+        //                         group_tanggal_caption: data[a].parsed,
+        //                         group_tanggal_name: a
+        //                     },
+        //                     success:function(responseGrouper) {
+        //                         $("#cppt_loader").append(responseGrouper);
+        //                         var listData = data[a].data;
+        //                         for(var b in listData) {
+        //                             var currentData = listData[b].data[0];
+        //                             //if(currentData.uid !== UID) {
+        //                             $.ajax({
+        //                                 url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
+        //                                 async:false,
+        //                                 beforeSend: function(request) {
+        //                                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+        //                                 },
+        //                                 type:"POST",
+        //                                 data: {
+        //                                     __HOST__: __HOST__,
+        //                                     __ME__: __ME__,
+        //                                     group_tanggal_name: a,
+        //                                     waktu_masuk: listData[b].parsed,
+        //                                     waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),
+        //                                     departemen: currentData.departemen.nama,
+        //                                     dokter_uid: currentData.dokter.uid,
+        //                                     dokter: currentData.dokter.nama,
+        //                                     dokter_pic: __HOST__ + currentData.dokter.profile_pic,
+        //                                     icd10_kerja: currentData.asesmen.icd10_kerja,
+        //                                     icd10_banding: currentData.asesmen.icd10_banding,
+        //                                     keluhan_utama:currentData.asesmen.keluhan_utama,
+        //                                     keluhan_tambahan:currentData.asesmen.keluhan_tambahan,
+        //                                     diagnosa_kerja:currentData.asesmen.diagnosa_kerja,
+        //                                     diagnosa_banding:currentData.asesmen.diagnosa_banding,
+        //                                     pemeriksaan_fisik:currentData.asesmen.pemeriksaan_fisik,
+        //                                     planning:currentData.asesmen.planning,
+        //                                     tindakan: currentData.asesmen.tindakan,
+        //                                     resep: currentData.asesmen.resep,
+        //                                     racikan: currentData.asesmen.racikan,
+        //                                     laboratorium: currentData.asesmen.laboratorium,
+        //                                     radiologi: currentData.asesmen.radiologi
+        //                                 },
+        //                                 success:function(responseSingle) {
+        //                                     $("#group_cppt_" + a).append(responseSingle);
+        //                                 },
+        //                                 error: function(responseSingleError) {
+        //                                     console.log(responseSingleError);
+        //                                 }
+        //                             });
+        //                             //}
+        //                         }
+        //                     },
+        //                     error: function(responseGrouperError) {
+        //                         console.log(responseGrouperError);
+        //                     }
+        //                 });
+        //             }
+        //         },
+        //         error: function(response) {
+        //             console.log(response);
+        //         }
+        //     });
+        // }
 
 		$("#btnTambahAsesmen").click(function() {
 		    $(this).attr({
