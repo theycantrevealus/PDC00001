@@ -868,8 +868,9 @@ class Apotek extends Utility
                             'access_token' => $parameter['access_token'],
                             'dari' => $UserData['data']->gudang,
                             'ke' => $RawatInap['response_data'][0]['gudang'],
-                            'keterangan' => 'Kebutuhan Resep Rawat Inap',
+                            'keterangan' => 'Kebutuhan Resep Rawat Inap untuk pasien a.n. ' . $parameter['nama_pasien'],
                             'status' => 'N',
+                            'mut_resep_pasien' => $parameter['nama_pasien'],
                             'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
                             'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
                             //'apotek_order' => true,
@@ -970,7 +971,7 @@ class Apotek extends Utility
                                 'barang' => $BarangBatch[0],
                                 'batch' => $BarangBatch[1],
                                 'qty' => floatval($mutValue['mutasi']),
-                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap untuk pasien a.n. ' . $parameter['nama_pasien']
                             ));
                         }
                     }
@@ -981,7 +982,7 @@ class Apotek extends Utility
                         if(!isset($itemMutasi[$bValue['barang'] . '|' . $bValue['batch']])) {
                             $itemMutasi[$bValue['barang'] . '|' . $bValue['batch']] = array(
                                 'mutasi' => $bValue['qty'],
-                                'keterangan' => 'Mutasi kebutuhan IGD'
+                                'keterangan' => 'Mutasi kebutuhan IGD untuk pasien a.n. ' . $parameter['nama_pasien']
                             );
                         }
                     }
@@ -1030,8 +1031,9 @@ class Apotek extends Utility
                             'access_token' => $parameter['access_token'],
                             'dari' => $UserData['data']->gudang,
                             'ke' => $IGD['response_data'][0]['gudang'],
-                            'keterangan' => 'Kebutuhan Resep IGD',
+                            'keterangan' => 'Kebutuhan Resep IGD untuk pasien a.n. ' . $parameter['nama_pasien'],
                             'status' => 'N',
+                            'mut_resep_pasien' => $parameter['nama_pasien'],
                             'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
                             'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
                             //'apotek_order' => true,
@@ -1107,7 +1109,7 @@ class Apotek extends Utility
                                 'barang' => $BarangBatch[0],
                                 'batch' => $BarangBatch[1],
                                 'qty' => floatval($mutValue['mutasi']),
-                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap untuk pasien a.n. ' . $parameter['nama_pasien']
                             ));
                         }
                     }
@@ -3159,6 +3161,8 @@ class Apotek extends Utility
                 'resep.pasien' => '= ?',
                 'AND',
                 'resep.kunjungan' => '= ?',
+                'AND',
+                'antrian.departemen' => '= ?'
             );
 
             $paramValue = array($parameter['pasien'], $parameter['kunjungan']);
@@ -3169,9 +3173,11 @@ class Apotek extends Utility
                 'resep.pasien' => '= ?',
                 'AND',
                 'resep.kunjungan' => '= ?',
+                'AND',
+                'antrian.departemen' => '= ?'
             );
 
-            $paramValue = array($parameter['pasien'], $parameter['kunjungan']);
+            $paramValue = array($parameter['pasien'], $parameter['kunjungan'], __POLI_INAP__);
         }
 
 
@@ -3189,6 +3195,14 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('antrian', array(
+                    'departemen'
+                ))
+                ->on(array(
+                    array(
+                        'resep.antrian', '=', 'antrian.uid'
+                    )
+                ))
                 ->order(array(
                     'created_at' => 'ASC'
                 ))
@@ -3207,6 +3221,14 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('antrian', array(
+                    'departemen'
+                ))
+                ->on(array(
+                    array(
+                        'resep.antrian', '=', 'antrian.uid'
+                    )
+                ))
                 ->order(array(
                     'created_at' => 'ASC'
                 ))
@@ -3268,10 +3290,10 @@ class Apotek extends Utility
                 ->execute();
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 //Batch Info
-                $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
-                $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
+                // $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
+                // $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
 
-                $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
+                $InventoriInfo = $Inventori->get_item_info($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
 
                 //Check Ketersediaan Obat pada NS
@@ -3372,7 +3394,7 @@ class Apotek extends Utility
                     ))
                     ->execute();
                 foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
-                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
+                    $InventoriInfo = $Inventori->get_item_info($RDIValue['obat']);
 
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }
@@ -3401,7 +3423,7 @@ class Apotek extends Utility
                         ))
                         ->execute();
                     foreach ($DetailApRac['response_data'] as $RApoDIKey => $RApoDIValue) {
-                        $InventoriInfo = $Inventori->get_item_detail($RApoDIValue['obat']);
+                        $InventoriInfo = $Inventori->get_item_info($RApoDIValue['obat']);
                         $DetailApRac['response_data'][$RApoDIKey]['detail'] = $InventoriInfo['response_data'][0];
                     }
                     $racikan_change['response_data'][$RacApKey]['detail'] = $DetailApRac['response_data'];
@@ -3417,6 +3439,14 @@ class Apotek extends Utility
         $itemTotal = self::$query->select('resep', array(
             'uid'
         ))
+            ->join('antrian', array(
+                'departemen'
+            ))
+            ->on(array(
+                array(
+                    'resep.antrian', '=', 'antrian.uid'
+                )
+            ))
             ->where($paramData, $paramValue)
             ->execute();
 

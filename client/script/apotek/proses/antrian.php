@@ -5,6 +5,9 @@
         var resepUID = __PAGES__[3];
         var resepJenis = __PAGES__[4];
         var targettedData = {};
+        var selectedNamaPasien = "";
+        var selectedRMPasien = "";
+        var selectedUIDPasien = "";
         var currentStatusOpname = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
         var allowProcess = false;
         $.ajax({
@@ -16,13 +19,18 @@
             type:"GET",
             success:function(response) {
                 targettedData = response.response_package.response_data[0];
+
+
+                selectedUIDPasien = targettedData.antrian.pasien_info.uid;
+                selectedRMPasien = targettedData.antrian.pasien_info.no_rm;
+                selectedNamaPasien = ((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name.nama !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama;
                 // $("#verifikator").html(targettedData.detail[0].verifikator.nama);
                 $("#verifikator").html(targettedData.verifikator.nama);
                 $("#txt_keterangan_resep").html(targettedData.keterangan);
                 $("#txt_keterangan_racikan").html(targettedData.keterangan_racikan);
                 $("#nama-pasien").attr({
                     "set-penjamin": targettedData.antrian.penjamin_data.uid
-                }).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
+                }).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name.nama !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
                 $("#jk-pasien").html(targettedData.antrian.pasien_info.jenkel_nama);
                 $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
                 //$("#verifikator").html(targettedData.verifikator.nama);
@@ -919,6 +927,7 @@
                             request: "proses_resep",
                             resep: resepUID,
                             //antrian: antrian,
+                            nama_pasien: selectedRMPasien + " - " + selectedNamaPasien,
                             asesmen: asesmen,
                             kunjungan: kunjungan,
                             dokter: dokter,

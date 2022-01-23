@@ -89,7 +89,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            lengthMenu: [[1, 10, -1], [1, 10, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Inap",
@@ -171,7 +171,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            lengthMenu: [[10, 20, -1], [10, 20, "All"]],
             serverMethod: "POST",
             "ajax":{
                 url: __HOSTAPI__ + "/Apotek",
@@ -196,18 +196,19 @@
 
                     for(var a in rawData) {
                         if(rawData[a].antrian_detail !== undefined && rawData[a].antrian_detail !== null) {
-                            if(rawData[a].antrian_detail.departemen === __POLI_INAP__) {
-                                returnedData.push(rawData[a]);
-                            }
+                            returnedData.push(rawData[a]);
+                            // if(rawData[a].antrian_detail.departemen === __POLI_INAP__) {
+                            //     returnedData.push(rawData[a]);
+                            // }
                         }
                     }
 
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = returnedData.length;
+                    response.recordsFiltered = response.response_package.recordsTotal;
 
-                    return returnedData;
+                    return rawData;
                 }
             },
             autoWidth: false,
@@ -238,7 +239,7 @@
                             parsedDetail = "<div class=\"row\">";
                             for(var a in detail) {
                                 if(detail[a].detail.nama !== "") {
-                                    parsedDetail += "<div class=\"col-md-12\">" +
+                                    parsedDetail += "<div class=\"col-md-4\">" +
                                         "<span class=\"badge badge-info badge-custom-caption\"><i class=\"fa fa-tablets\"></i> " + detail[a].detail.nama + "</span><br />" +
                                         "<div style=\"padding-left: 20px;\">" + detail[a].signa_qty + " &times; " + detail[a].signa_pakai + " <label class=\"text-info\">[" + detail[a].qty + "]</label></div>" +
                                         "</div>";
@@ -377,10 +378,35 @@
             ]
         });*/
 
-        loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
+        $("body").on("click", ".cppt_paginate_prev", function() {
+            if(currentCPPTStep > 1) {
+                currentCPPTStep -= 1;
+                loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, "");
+            }
+            return false;
+        });
+
+        $("body").on("click", ".cppt_paginate_next", function() {
+            var total = $(".cppt_paginate").length;
+            if(currentCPPTStep < total) {
+                currentCPPTStep += 1;
+                loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, "");
+            }
+            return false;
+        });
+
+        $("body").on("click", ".cppt_paginate", function(e) {
+            e.preventDefault();
+            var tar = $(this).attr("target");
+            currentCPPTStep = parseInt(tar);
+            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, "");
+            return false;
+        });
+
+        loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, "");
 
         $("#filter_date").change(function() {
-            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3]);
+            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, "");
         });
 
         $("#btnTambahAsesmen").click(function() {
