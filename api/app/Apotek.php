@@ -3161,6 +3161,8 @@ class Apotek extends Utility
                 'resep.pasien' => '= ?',
                 'AND',
                 'resep.kunjungan' => '= ?',
+                'AND',
+                'antrian.departemen' => '= ?'
             );
 
             $paramValue = array($parameter['pasien'], $parameter['kunjungan']);
@@ -3171,9 +3173,11 @@ class Apotek extends Utility
                 'resep.pasien' => '= ?',
                 'AND',
                 'resep.kunjungan' => '= ?',
+                'AND',
+                'antrian.departemen' => '= ?'
             );
 
-            $paramValue = array($parameter['pasien'], $parameter['kunjungan']);
+            $paramValue = array($parameter['pasien'], $parameter['kunjungan'], __POLI_INAP__);
         }
 
 
@@ -3191,6 +3195,14 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('antrian', array(
+                    'departemen'
+                ))
+                ->on(array(
+                    array(
+                        'resep.antrian', '=', 'antrian.uid'
+                    )
+                ))
                 ->order(array(
                     'created_at' => 'ASC'
                 ))
@@ -3209,6 +3221,14 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('antrian', array(
+                    'departemen'
+                ))
+                ->on(array(
+                    array(
+                        'resep.antrian', '=', 'antrian.uid'
+                    )
+                ))
                 ->order(array(
                     'created_at' => 'ASC'
                 ))
@@ -3270,10 +3290,10 @@ class Apotek extends Utility
                 ->execute();
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 //Batch Info
-                $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
-                $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
+                // $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
+                // $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
 
-                $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
+                $InventoriInfo = $Inventori->get_item_info($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
 
                 //Check Ketersediaan Obat pada NS
@@ -3374,7 +3394,7 @@ class Apotek extends Utility
                     ))
                     ->execute();
                 foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
-                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
+                    $InventoriInfo = $Inventori->get_item_info($RDIValue['obat']);
 
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }
@@ -3403,7 +3423,7 @@ class Apotek extends Utility
                         ))
                         ->execute();
                     foreach ($DetailApRac['response_data'] as $RApoDIKey => $RApoDIValue) {
-                        $InventoriInfo = $Inventori->get_item_detail($RApoDIValue['obat']);
+                        $InventoriInfo = $Inventori->get_item_info($RApoDIValue['obat']);
                         $DetailApRac['response_data'][$RApoDIKey]['detail'] = $InventoriInfo['response_data'][0];
                     }
                     $racikan_change['response_data'][$RacApKey]['detail'] = $DetailApRac['response_data'];
@@ -3419,6 +3439,14 @@ class Apotek extends Utility
         $itemTotal = self::$query->select('resep', array(
             'uid'
         ))
+            ->join('antrian', array(
+                'departemen'
+            ))
+            ->on(array(
+                array(
+                    'resep.antrian', '=', 'antrian.uid'
+                )
+            ))
             ->where($paramData, $paramValue)
             ->execute();
 
