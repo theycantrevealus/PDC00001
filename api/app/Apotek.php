@@ -70,6 +70,9 @@ class Apotek extends Utility
     {
         try {
             switch ($parameter['request']) {
+                case 'check_invoice_obat':
+                    return self::check_invoice_obat($parameter);
+                    break;
                 case 'sync_harga_obat_resep':
                     return self::sync_harga_obat_resep($parameter);
                     break;
@@ -214,6 +217,311 @@ class Apotek extends Utility
         return $worker;
     }
 
+    private function check_invoice_obat($parameter) {
+        $SInvoice = array();
+        //Sync Document
+        $Resep = self::$query->select('resep', array(
+            'uid', 'asesmen', 'kode', 'pasien', 'kunjungan'
+        ))
+            ->where(array(
+                'resep.created_at' => 'BETWEEN ? AND ?'
+            ), array(
+                $parameter['from'],
+                $parameter['to']
+            ))
+            ->execute();
+        foreach($Resep['response_data'] as $RKey => $RValue) {
+
+            $InvoiceMaster = self::$query->select('invoice', array(
+                'uid'
+            ))
+                ->join('antrian', array(
+                    'penjamin', 'departemen'
+                ))
+                ->on(array(
+                    array('antrian.kunjungan', '=', 'invoice.kunjungan', ' AND ', 'antrian.pasien', '=', 'invoice.pasien')
+                ))
+                ->where(array(
+                    'invoice.kunjungan' => '= ?',
+                    'AND',
+                    'invoice.pasien' => '= ?'
+                ), array(
+                    $RValue['kunjungan'],
+                    $RValue['pasien']
+                ))
+                ->execute();
+            
+
+            $ResepDetail = self::$query->select('resep_change_log', array(
+                'item as obat', 'qty'
+            ))
+                ->where(array(
+                    'resep_change_log.resep' => '= ?'
+                ), array(
+                    $RValue['uid']
+                ))
+                ->execute();
+            foreach($ResepDetail['response_data'] as $RDKey => $RDValue) {
+                
+                //Check Charged Invoice
+                $CheckResep = self::$query->select('invoice_detail', array(
+                    'id', 'qty', 'penjamin', 'departemen', 'pasien'
+                ))
+                    ->where(array(
+                        'invoice_detail.item' => '= ?',
+                        'AND',
+                        'invoice_detail.pasien' => '= ?',
+                        'AND',
+                        'invoice_detail.item_type' => '= ?',
+                        'AND',
+                        'invoice_detail.keterangan' => '= ?',
+                        'AND',
+                        'invoice_detail.created_at' => 'BETWEEN ? AND ?'
+                    ), array(
+                        $RDValue['obat'],
+                        $RValue['pasien'],
+                        'master_inv',
+                        'Biaya resep obat',
+                        $parameter['from'],
+                        $parameter['to']
+                    ))
+                    ->execute();
+
+                if(count($CheckResep['response_data']) > 0) {
+                    $InvoiceDetail = self::$query->update('invoice_detail', array(
+                        'document' => 'RESEP' . $RValue['kode']
+                    ))
+                        ->where(array(
+                            'invoice_detail.item' => '= ?',
+                            'AND',
+                            'invoice_detail.pasien' => '= ?',
+                            'AND',
+                            '(invoice_detail.document' => 'IS NULL',
+                            'OR',
+                            ' invoice_detail.document' => '= ?',
+                            'OR',
+                            'invoice_detail.document' => '= ?)',
+                            'AND',
+                            'invoice_detail.item_type' => '= ?',
+                            'AND',
+                            'invoice_detail.keterangan' => '= ?',
+                            'AND',
+                            'invoice_detail.created_at' => 'BETWEEN ? AND ?'
+                        ), array(
+                            $RDValue['obat'],
+                            $RValue['pasien'],
+                            '',
+                            '-',
+                            'master_inv',
+                            'Biaya resep obat',
+                            $parameter['from'],
+                            $parameter['to']
+                        ))
+                        ->execute();
+                } else {
+                    $InvoiceDetail = self::$query->insert('invoice_detail', array(
+                        'invoice' => $InvoiceMaster['response_data'][0]['uid'],
+                        'item' => $RDValue['obat'],
+                        'item_type' => 'master_inv',
+                        'qty' => $RDValue['qty'],
+                        'harga' => 0,
+                        'status_bayar' => 'Y',
+                        'subtotal' => 0,
+                        'discount' => 0,
+                        'discount_type' => 'N',
+                        'pasien' => $RValue['pasien'],
+                        'penjamin' => $InvoiceMaster['response_data'][0]['penjamin'],
+                        'billing_group' => 'obat',
+                        'keterangan' => 'Biaya resep obat',
+                        'document' => 'RESEP' . $RValue['kode'],
+                        'departemen' => $InvoiceMaster['response_data'][0]['departemen'],
+                        'created_at' => date($parameter['created']. ' H:i:s'),
+                        'updated_at' => date($parameter['created']. ' H:i:s')
+                    ))
+                        ->execute();
+                }
+
+                array_push($SInvoice,$InvoiceDetail);
+            }
+
+            $RacikanMaster = self::$query->select('racikan', array(
+                'uid'
+            ))
+                ->where(array(
+                    'racikan.asesmen' => '= ?'
+                ), array(
+                    $RValue['asesmen']
+                ))
+                ->execute();
+
+            foreach($RacikanMaster['response_data'] as $RMKey => $RMValue) {
+                //Racikan Code
+                $Racikan = self::$query->select('racikan_detail_change_log', array(
+                    'obat'
+                ))
+                    ->where(array(
+                        'racikan_detail.racikan' => '= ?'
+                    ), array(
+                        $RMValue['uid']
+                    ))
+                    ->execute();
+
+                foreach($Racikan['response_data'] as $RacKey => $RacValue) {
+                    $CheckResep = self::$query->select('invoice_detail', array(
+                        'id', 'qty', 'penjamin', 'departemen', 'pasien'
+                    ))
+                        ->where(array(
+                            'invoice_detail.item' => '= ?',
+                            'AND',
+                            'invoice_detail.pasien' => '= ?',
+                            'AND',
+                            'invoice_detail.item_type' => '= ?',
+                            'AND',
+                            'invoice_detail.keterangan' => '= ?',
+                            'AND',
+                            'invoice_detail.created_at' => 'BETWEEN ? AND ?'
+                        ), array(
+                            $RDValue['obat'],
+                            $RValue['pasien'],
+                            'master_inv',
+                            'Biaya resep obat',
+                            $parameter['from'],
+                            $parameter['to']
+                        ))
+                        ->execute();
+
+                    if(count($CheckResep['response_data']) > 0) {
+                        $InvoiceDetail = self::$query->update('invoice_detail', array(
+                            'document' => 'RACIKAN' . $RValue['kode']
+                        ))
+                            ->where(array(
+                                'invoice_detail.item' => '= ?',
+                                'AND',
+                                'invoice_detail.pasien' => '= ?',
+                                'AND',
+                                '(invoice_detail.document' => 'IS NULL',
+                                'OR',
+                                ' invoice_detail.document' => '= ?',
+                                'OR',
+                                'invoice_detail.document' => '= ?)',
+                                'AND',
+                                'invoice_detail.item_type' => '= ?',
+                                'AND',
+                                'invoice_detail.keterangan' => '= ?',
+                                'AND',
+                                'invoice_detail.created_at' => 'BETWEEN ? AND ?'
+                            ), array(
+                                $RacValue['obat'],
+                                $RValue['pasien'],
+                                '',
+                                '-',
+                                'master_inv',
+                                'Biaya racikan obat',
+                                $parameter['from'],
+                                $parameter['to']
+                            ))
+                            ->execute();
+                    } else {
+                        $InvoiceDetail = self::$query->insert('invoice_detail', array(
+                            'invoice' => $InvoiceMaster['response_data'][0]['uid'],
+                            'item' => $RDValue['obat'],
+                            'item_type' => 'master_inv',
+                            'qty' => $RDValue['qty'],
+                            'harga' => 0,
+                            'status_bayar' => 'Y',
+                            'subtotal' => 0,
+                            'discount' => 0,
+                            'discount_type' => 'N',
+                            'pasien' => $RValue['pasien'],
+                            'penjamin' => $InvoiceMaster['response_data'][0]['penjamin'],
+                            'billing_group' => 'obat',
+                            'keterangan' => 'Biaya racikan obat',
+                            'document' => 'RACIKAN' . $RValue['kode'],
+                            'departemen' => $InvoiceMaster['response_data'][0]['departemen'],
+                            'created_at' => date($parameter['created']. ' H:i:s'),
+                            'updated_at' => date($parameter['created']. ' H:i:s')
+                        ))
+                            ->execute();
+                    }
+                    array_push($SInvoice,$InvoiceDetail);
+                }
+            }
+        }
+
+        $updated_harga = array();
+        $POList = self::$query->select('inventori_po', array(
+            'uid', 'tanggal_po'
+        ))
+            ->where(array(
+                'inventori_po.deleted_at' => "IS NULL"
+            ), array(
+
+            ))
+            ->order(array(
+                'tanggal_po' => 'ASC'
+            ))
+            ->execute();
+
+        foreach($POList['response_data'] as $key => $value) {
+            $PODet = self::$query->select('inventori_po_detail', array(
+                'barang', 'harga'
+            ))
+                ->where(array(
+                    'inventori_po_detail.po' => '= ?',
+                    'AND',
+                    'inventori_po_detail.harga' => '> 0',
+                    'AND',
+                    'inventori_po_detail.qty' => '> 0'
+                ), array(
+                    $value['uid']
+                ))
+                ->order(array(
+                    'inventori_po_detail.id' => 'DESC',
+                    'inventori_po_detail.harga' => 'ASC'
+                ))
+                ->execute();
+            foreach($PODet['response_data'] as $DKey => $DValue) {
+                $getQtyCharged = self::$query->select('invoice_detail', array(
+                    'id', 'qty'
+                ))
+                    ->where(array(
+                        'invoice_detail.item' => '= ?',
+                        'AND',
+                        'invoice_detail.item_type' => '= ?',
+                        'AND',
+                        '(invoice_detail.created_at' => 'BETWEEN ? AND ?)'
+                    ), array(
+                        $DValue['barang'],
+                        'master_inv',
+                        $parameter['from'],
+                        $parameter['to']
+                    ))
+                    ->execute();
+                if(count($getQtyCharged['response_data']) > 0) {
+                    foreach($getQtyCharged['response_data'] as $DKKey => $DKValue) {
+                        $totalCharged = floatval($getQtyCharged['response_data'][0]['qty']) * floatval($DValue['harga']);
+                        $UpdateInvoiceDetail = self::$query->update('invoice_detail', array(
+                            'harga' => floatval($DValue['harga']),
+                            'subtotal' => $totalCharged
+                        ))
+                            ->where(array(
+                                'invoice_detail.id' => '= ?'
+                            ), array(
+                                $DKValue['id']
+                            ))
+                            ->execute();
+
+                        if($UpdateInvoiceDetail['response_result'] > 0) {
+                            //array_push($updated_harga, $UpdateInvoiceDetail);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $SInvoice;
+    }
+
     private function sync_harga_obat_resep($parameter) {
         $updated_harga = array();
         $POList = self::$query->select('inventori_po', array(
@@ -254,7 +562,36 @@ class Apotek extends Utility
                     ->execute();
 
                 if($UpdateHargaResep['response_result'] > 0) {
-                    array_push($updated_harga, $UpdateHargaResep);
+                    
+                    $getQtyCharged = self::$query->select('invoice_detail', array(
+                        'id', 'qty'
+                    ))
+                        ->where(array(
+                            'invoice_detail.created_at' => 'BETWEEN ? AND ?',
+                            'AND',
+                            'invoice_detail.item' => '= ?',
+                            'AND',
+                            'invoice_item.item_type' => '= ?'
+                        ), array(
+                            $parameter['from'],
+                            $parameter['to'],
+                            'master_inv'
+                            
+                        ))
+                        ->execute();
+                    array_push($updated_harga, $getQtyCharged['response_data']);
+                    if(floatval($getQtyCharged['response_data'][0]) > 0) {
+                        // $UpdateInvoiceDetail = self::$query->update('invoice_detail', array(
+                        //     'harga' => floatval($DValue['harga']),
+                        //     'subtotal' => floatval($getQtyCharged['response_data'][0]) * floatval($DValue['harga'])
+                        // ))
+                        //     ->where(array(
+                        //         'invoice_detail.id' => '= ?'
+                        //     ), array(
+                        //         $getQtyCharged['response_data']
+                        //     ))
+                        //     ->execute();
+                    }
                 }
 
                 $UpdateHargaRacikan = self::$query->update('racikan_detail', array(
@@ -531,8 +868,9 @@ class Apotek extends Utility
                             'access_token' => $parameter['access_token'],
                             'dari' => $UserData['data']->gudang,
                             'ke' => $RawatInap['response_data'][0]['gudang'],
-                            'keterangan' => 'Kebutuhan Resep Rawat Inap',
+                            'keterangan' => 'Kebutuhan Resep Rawat Inap untuk pasien a.n. ' . $parameter['nama_pasien'],
                             'status' => 'N',
+                            'mut_resep_pasien' => $parameter['nama_pasien'],
                             'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
                             'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
                             //'apotek_order' => true,
@@ -633,7 +971,7 @@ class Apotek extends Utility
                                 'barang' => $BarangBatch[0],
                                 'batch' => $BarangBatch[1],
                                 'qty' => floatval($mutValue['mutasi']),
-                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap untuk pasien a.n. ' . $parameter['nama_pasien']
                             ));
                         }
                     }
@@ -644,7 +982,7 @@ class Apotek extends Utility
                         if(!isset($itemMutasi[$bValue['barang'] . '|' . $bValue['batch']])) {
                             $itemMutasi[$bValue['barang'] . '|' . $bValue['batch']] = array(
                                 'mutasi' => $bValue['qty'],
-                                'keterangan' => 'Mutasi kebutuhan IGD'
+                                'keterangan' => 'Mutasi kebutuhan IGD untuk pasien a.n. ' . $parameter['nama_pasien']
                             );
                         }
                     }
@@ -693,8 +1031,9 @@ class Apotek extends Utility
                             'access_token' => $parameter['access_token'],
                             'dari' => $UserData['data']->gudang,
                             'ke' => $IGD['response_data'][0]['gudang'],
-                            'keterangan' => 'Kebutuhan Resep IGD',
+                            'keterangan' => 'Kebutuhan Resep IGD untuk pasien a.n. ' . $parameter['nama_pasien'],
                             'status' => 'N',
+                            'mut_resep_pasien' => $parameter['nama_pasien'],
                             'special_code_out' => __STATUS_BARANG_KELUAR_INAP__,
                             'special_code_in' => __STATUS_BARANG_MASUK_INAP__,
                             //'apotek_order' => true,
@@ -770,7 +1109,7 @@ class Apotek extends Utility
                                 'barang' => $BarangBatch[0],
                                 'batch' => $BarangBatch[1],
                                 'qty' => floatval($mutValue['mutasi']),
-                                'remark' => 'Reserved stok resep untuk mutasi rawat inap'
+                                'remark' => 'Reserved stok resep untuk mutasi rawat inap untuk pasien a.n. ' . $parameter['nama_pasien']
                             ));
                         }
                     }
@@ -1841,7 +2180,7 @@ class Apotek extends Utility
             $ApotekerInfo = $Pegawai->get_detail($value['apoteker']);
             $resep_dokter['response_data'][$key]['verifikator'] = $ApotekerInfo['response_data'][0];
 
-            $resep_dokter['response_data'][$key]['created_at_parsed'] = date('d F Y', strtotime($value['created_at']));
+            $resep_dokter['response_data'][$key]['created_at_parsed'] = date('d F Y, H:i', strtotime($value['created_at']));
 
             //Pasien Info
             $PasienInfo = $Pasien->get_pasien_detail('pasien', $value['pasien']);
@@ -2370,8 +2709,8 @@ class Apotek extends Utility
                         'AND',
                         'invoice_detail.pasien' => '= ?',
                         'AND',
-                        'invoice_detail.status_bayar' => '= ?',
-                        'AND',
+                        // 'invoice_detail.status_bayar' => '= ?',
+                        // 'AND',
                         'invoice_detail.document' => '= ?',
                         'AND',
                         'invoice_detail.keterangan' => '= ?',
@@ -2380,7 +2719,7 @@ class Apotek extends Utility
                         $ResValue['item'],
                         'master_inv',
                         $value['pasien'],
-                        'Y',
+                        //'Y',
                         'RESEP' . $value['kode'],
                         'Biaya resep obat'
                     ))
@@ -2536,8 +2875,8 @@ class Apotek extends Utility
                             'AND',
                             'invoice_detail.pasien' => '= ?',
                             'AND',
-                            'invoice_detail.status_bayar' => '= ?',
-                            'AND',
+                            // 'invoice_detail.status_bayar' => '= ?',
+                            // 'AND',
                             'invoice_detail.document' => '= ?',
                             'AND',
                             'invoice_detail.keterangan' => '= ?',
@@ -2546,7 +2885,7 @@ class Apotek extends Utility
                             $RDIValue['obat'],
                             'master_inv',
                             $value['pasien'],
-                            'Y',
+                            //'Y',
                             'RACIKAN' . $value['kode'],
                             'Biaya racikan obat'
                         ))
@@ -2822,6 +3161,8 @@ class Apotek extends Utility
                 'resep.pasien' => '= ?',
                 'AND',
                 'resep.kunjungan' => '= ?',
+                'AND',
+                'antrian.departemen' => '= ?'
             );
 
             $paramValue = array($parameter['pasien'], $parameter['kunjungan']);
@@ -2832,9 +3173,11 @@ class Apotek extends Utility
                 'resep.pasien' => '= ?',
                 'AND',
                 'resep.kunjungan' => '= ?',
+                'AND',
+                'antrian.departemen' => '= ?'
             );
 
-            $paramValue = array($parameter['pasien'], $parameter['kunjungan']);
+            $paramValue = array($parameter['pasien'], $parameter['kunjungan'], __POLI_INAP__);
         }
 
 
@@ -2852,6 +3195,14 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('antrian', array(
+                    'departemen'
+                ))
+                ->on(array(
+                    array(
+                        'resep.antrian', '=', 'antrian.uid'
+                    )
+                ))
                 ->order(array(
                     'created_at' => 'ASC'
                 ))
@@ -2870,6 +3221,14 @@ class Apotek extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('antrian', array(
+                    'departemen'
+                ))
+                ->on(array(
+                    array(
+                        'resep.antrian', '=', 'antrian.uid'
+                    )
+                ))
                 ->order(array(
                     'created_at' => 'ASC'
                 ))
@@ -2931,10 +3290,10 @@ class Apotek extends Utility
                 ->execute();
             foreach ($resep_detail['response_data'] as $ResKey => $ResValue) {
                 //Batch Info
-                $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
-                $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
+                // $InventoriBatch = $Inventori->get_item_batch($ResValue['obat']);
+                // $resep_detail['response_data'][$ResKey]['batch'] = $InventoriBatch['response_data'];
 
-                $InventoriInfo = $Inventori->get_item_detail($ResValue['obat']);
+                $InventoriInfo = $Inventori->get_item_info($ResValue['obat']);
                 $resep_detail['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
 
                 //Check Ketersediaan Obat pada NS
@@ -3035,7 +3394,7 @@ class Apotek extends Utility
                     ))
                     ->execute();
                 foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
-                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
+                    $InventoriInfo = $Inventori->get_item_info($RDIValue['obat']);
 
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
                 }
@@ -3064,7 +3423,7 @@ class Apotek extends Utility
                         ))
                         ->execute();
                     foreach ($DetailApRac['response_data'] as $RApoDIKey => $RApoDIValue) {
-                        $InventoriInfo = $Inventori->get_item_detail($RApoDIValue['obat']);
+                        $InventoriInfo = $Inventori->get_item_info($RApoDIValue['obat']);
                         $DetailApRac['response_data'][$RApoDIKey]['detail'] = $InventoriInfo['response_data'][0];
                     }
                     $racikan_change['response_data'][$RacApKey]['detail'] = $DetailApRac['response_data'];
@@ -3080,6 +3439,14 @@ class Apotek extends Utility
         $itemTotal = self::$query->select('resep', array(
             'uid'
         ))
+            ->join('antrian', array(
+                'departemen'
+            ))
+            ->on(array(
+                array(
+                    'resep.antrian', '=', 'antrian.uid'
+                )
+            ))
             ->where($paramData, $paramValue)
             ->execute();
 
@@ -3955,6 +4322,8 @@ class Apotek extends Utility
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
+                'master_penjamin.deleted_at' => 'IS NULL',
+                'AND',
                 'resep.dokter' => '= ?',
                 'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
@@ -3964,6 +4333,8 @@ class Apotek extends Utility
             $paramValue = array($UserData['data']->uid);
         } else {
             $paramData = array(
+                'master_penjamin.deleted_at' => 'IS NULL',
+                'AND',
                 'resep.dokter' => '= ?'
             );
             $paramValue = array($UserData['data']->uid);
@@ -3991,12 +4362,16 @@ class Apotek extends Utility
                     'penjamin',
                     'created_at as tanggal_antrian'
                 ))
+                ->join('master_penjamin', array(
+                    'nama as nama_penjamin'
+                ))
                 ->on(array(
                     array('resep.pasien', '=', 'pasien.uid'),
-                    array('resep.antrian', '=', 'antrian.uid')
+                    array('resep.antrian', '=', 'antrian.uid'),
+                    array('antrian.penjamin', '=', 'master_penjamin.uid')
                 ))
                 ->order(array(
-                    'resep.created_at' => 'ASC'
+                    'resep.created_at' => 'DESC'
                 ))
                 ->where($paramData, $paramValue)
                 ->execute();
@@ -4022,12 +4397,16 @@ class Apotek extends Utility
                     'penjamin',
                     'created_at as tanggal_antrian'
                 ))
+                ->join('master_penjamin', array(
+                    'nama as nama_penjamin'
+                ))
                 ->on(array(
                     array('resep.pasien', '=', 'pasien.uid'),
-                    array('resep.antrian', '=', 'antrian.uid')
+                    array('resep.antrian', '=', 'antrian.uid'),
+                    array('antrian.penjamin', '=', 'master_penjamin.uid')
                 ))
                 ->order(array(
-                    'resep.created_at' => 'ASC'
+                    'resep.created_at' => 'DESC'
                 ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))

@@ -1,3 +1,5 @@
+<script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/Responsive-2.2.5/js/dataTables.responsive.min.js"></script>
+<link type="text/css" href="<?php echo __HOSTNAME__; ?>/plugins/DataTables/Responsive-2.2.5/css/responsive.dataTables.min.css" rel="stylesheet" />
 <script type="text/javascript">
 	$(function() {
 	    var targettedUID = ""
@@ -26,6 +28,21 @@
 			bPaginate: true,
 			lengthMenu: [[20, 50, -1], [20, 50, "All"]],
 			serverMethod: "POST",
+            responsive: {
+                details: {
+                    type: 'column'
+                }
+            },
+            columnDefs: [{
+                className: 'control',
+                orderable: false,
+                targets: 0
+            }, {
+                ordering: false,
+                orderable: false,
+                targets: 1
+            }],
+            autoWidth: false,
 			"ajax":{
 				url: __HOSTAPI__ + "/Inventori",
 				type: "POST",
@@ -39,6 +56,8 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
+                    console.clear();
+                    console.log(response);
 					var dataSet = response.response_package.response_data;
 					if(dataSet == undefined) {
 						dataSet = [];
@@ -61,6 +80,11 @@
                         return "<h5 class=\"autonum\">" + row.autonum + "</h5><input type=\"hidden\" id=\"keterangan_" + row.uid + "\" value=\"" + row.keterangan + "\" />";
 					}
 				},
+                {
+					"data" : null, render: function(data, type, row, meta) {
+						return "<button class=\"btn btn-sm btn-info detail_mutasi\" id=\"mutasi_" + row.uid + "\"><i class=\"fa fa-eye\"></i> Detail</button>";
+					}
+				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
 						return "<span id=\"tanggal_" + row.uid + "\">" + row.tanggal + "</span>";
@@ -68,7 +92,7 @@
 				},
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<span class=\"wrap_content\" status=\"" + row.status + "\" id=\"kode_" + row.uid + "\"><img class=\"icon-pack\" src=\"" + __HOSTNAME__ + "/template/assets/images/icons/bill.png\"> " + row.kode + "</span>";
+                        return "<span class=\"wrap_content\" status=\"" + row.status + "\" id=\"kode_" + row.uid + "\"><img class=\"icon-pack\" src=\"" + __HOSTNAME__ + "/template/assets/images/icons/bill.png\"> " + row.kode + "</span>";
 					}
 				},
 				{
@@ -93,7 +117,8 @@
                 },
 				{
 					"data" : null, render: function(data, type, row, meta) {
-						return "<button class=\"btn btn-sm btn-info detail_mutasi\" id=\"mutasi_" + row.uid + "\"><i class=\"fa fa-eye\"></i></button>";
+                        var childRowTemplate = "<div class=\"row-child-template\">" + ((row.mut_resep_pasien !== undefined && row.mut_resep_pasien !== null) ? row.mut_resep_pasien : "Mutasi Biasa") + "</div>";
+						return childRowTemplate;
 					}
 				}
 			]

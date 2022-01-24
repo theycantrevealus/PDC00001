@@ -157,6 +157,7 @@
 	</div> -->
 	<?php require 'script.php'; ?>
 	<script type="text/javascript">
+        var currentCPPTStep = 1;
         var targetModule = 0;
         var tutorList = {};
         function isHTML(str) {
@@ -500,7 +501,43 @@
             });
 		});
 
-        function loadCPPT(from, to, pasien, UID = "") {
+        function getPageList(totalPages, page, maxLength) {
+            if (maxLength < 5) throw "maxLength must be at least 5";
+
+            function range(start, end) {
+                return Array.from(Array(end - start + 1), (_, i) => i + start); 
+            }
+
+            var sideWidth = maxLength < 9 ? 1 : 2;
+            var leftWidth = (maxLength - sideWidth*2 - 3) >> 1;
+            var rightWidth = (maxLength - sideWidth*2 - 2) >> 1;
+            console.log("==================");
+            
+            if (totalPages <= maxLength) {
+                // no breaks in list
+                return range(1, totalPages);
+            }
+            if (page <= maxLength - sideWidth - 1 - rightWidth) {
+                // no break on left of page
+                return range(1, maxLength - sideWidth - 1)
+                .concat(0, range(totalPages - sideWidth + 1, totalPages));
+            }
+            if (page >= totalPages - sideWidth - 1 - rightWidth) {
+                // no break on right of page
+                return range(1, sideWidth)
+                .concat(0, range(totalPages - sideWidth - 1 - rightWidth - leftWidth, totalPages));
+            }
+            // Breaks on both sides
+            console.log(page);
+            console.log(page - leftWidth);
+            console.log(page + rightWidth);
+            return range(1, sideWidth)
+                .concat(0, range(page - leftWidth, page + rightWidth),
+                0, range(totalPages - sideWidth + 1, totalPages));
+        }
+
+        function loadCPPT(from, to, pasien, currentStep, UID = "") {
+            
             $("#cppt_loader").html("");
             $.ajax({
                 url: __HOSTAPI__ + "/CPPT",
@@ -514,11 +551,35 @@
                     pasien: pasien,
                     from: from,
                     to: to,
+                    offset: parseInt(currentStep),
                     current: UID
                 },
                 success:function(response) {
-                    var data = response.response_package;
-                    console.clear();
+                    var data = response.response_package.data;
+                    var total = parseInt(response.response_package.total);
+
+                    $("#cppt_pagination ul li").remove();
+
+                    $("#cppt_pagination ul").append("<li class=\"page-item\" id=\"cppt_prev_page\"><a class=\"page-link cppt_paginate_prev\">Previous</a></li>");
+                    for(var azTot = 1; azTot < total; azTot++) {
+                        //$("#cppt_pagination ul").append("<li class=\"page-item stepper" + ((currentStep === azTot) ? "active" : "") + "\"><a class=\"page-link cppt_paginate\" target=\"" + azTot + "\">" + (azTot) + "</a></li>");
+                    }
+                    $("#cppt_pagination ul").append("<li class=\"page-item\" id=\"cppt_next_page\"><a class=\"page-link cppt_paginate_next\">Next</a></li>");
+                    
+                    $("#cppt_pagination ul li.stepper").slice(1, -1).remove();
+                    getPageList(total, parseInt(currentStep), 7).forEach( item => {
+                        $("<li>").addClass("page-item stepper")
+                                .addClass(item ? "current-page" : "disabled")
+                                .toggleClass("active", item === parseInt(currentStep)).append(
+                            $("<a>").addClass("page-link cppt_paginate").attr({
+                                target: item}).text(item || "...")
+                        ).insertBefore("#cppt_next_page");
+                    });
+
+                    
+                    $("cppt_paginate_prev").toggleClass("disabled", currentStep === 1);
+                    $(".cppt_paginate_next").toggleClass("disabled", currentStep === total);
+
                     if(data && Object.keys(data).length > 0 && data.constructor === Object) {
                         $("#no-data-panel").hide();
                         for(var a in data) {

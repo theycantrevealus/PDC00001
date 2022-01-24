@@ -8203,6 +8203,7 @@ class Inventori extends Utility
             'ke' => $parameter['ke'],
             'keterangan' => $parameter['keterangan'],
             'pegawai' => $UserData['data']->uid,
+            'mut_resep_pasien' => (isset($parameter['mut_resep_pasien'])) ? $parameter['mut_resep_pasien'] : '-',
             'status' => (isset($parameter['status']) && !empty($parameter['status'])) ? $parameter['status'] : 'N',
             'created_at' => parent::format_date(),
             'updated_at' => parent::format_date()
@@ -9280,6 +9281,7 @@ class Inventori extends Utility
                 'keterangan',
                 'status',
                 'diproses_oleh',
+                'mut_resep_pasien',
                 'created_at',
                 'updated_at'
             ))
@@ -9306,6 +9308,7 @@ class Inventori extends Utility
                 'keterangan',
                 'status',
                 'diproses_oleh',
+                'mut_resep_pasien',
                 'created_at',
                 'updated_at'
             ))

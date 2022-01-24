@@ -58,6 +58,9 @@ class PO extends Utility {
 			case 'tambah_po':
 				return self::tambah_po($parameter);
 				break;
+			case 'get_po_backend':
+				return self::get_po_backend($parameter);
+				break;
 			case 'po_data_detail':
 				return self::po_data_detail($parameter);
 				break;
@@ -257,6 +260,144 @@ class PO extends Utility {
 		return $data;
 	}
 
+	private function get_po_backend($parameter) {
+		//TODO PO Back End
+		$Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+		if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+			$paramData = array(
+				'master_supplier.deleted_at' => 'IS NULL',
+				'AND',
+				'inventori_po.deleted_at' => 'IS NULL',
+				'AND',
+				'inventori_po.nomor_po' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+			);
+
+			$paramValue = array();
+		} else {
+			$paramData = array(
+				'master_supplier.deleted_at' => 'IS NULL',
+				'AND',
+				'inventori_po.deleted_at' => 'IS NULL'
+			);
+
+			$paramValue = array();
+		}
+
+		if ($parameter['length'] < 0) {
+			$data = self::$query->select('inventori_po', array(
+				'uid',
+				'nomor_po',
+				'pegawai',
+				'tanggal_po',
+				'total',
+				'total_after_disc',
+				'supplier',
+				'sumber_dana',
+				'keterangan'
+			))
+			->order(array(
+				'inventori_po.created_at' => 'DESC'
+			))
+			->join('master_supplier', array(
+				'nama as nama_supplier'
+			))
+			->on(array(
+				array('inventori_po.supplier', '=', 'master_supplier.uid')
+			))
+			->where($paramData, $paramValue)
+			->execute();
+		} else {
+			$data = self::$query->select('inventori_po', array(
+				'uid',
+				'nomor_po',
+				'pegawai',
+				'tanggal_po',
+				'total',
+				'total_after_disc',
+				'supplier',
+				'sumber_dana',
+				'keterangan'
+			))
+			->order(array(
+				'inventori_po.created_at' => 'DESC'
+			))
+			->join('master_supplier', array(
+				'nama as nama_supplier'
+			))
+			->on(array(
+				array('inventori_po.supplier', '=', 'master_supplier.uid')
+			))
+			->offset(intval($parameter['start']))
+			->limit(intval($parameter['length']))
+			->where($paramData, $paramValue)
+			->execute();
+		}
+
+		$data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+
+		$Terminologi = new Terminologi(self::$pdo);
+        $Supplier = new Supplier(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+
+		foreach ($data['response_data'] as $key => $value) {
+			$data['response_data'][$key]['autonum'] = $autonum;
+			$data['response_data'][$key]['sumber_dana'] = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['sumber_dana'])['response_data'][0];
+
+			$InfoPegawai = $Pegawai->get_info($value['pegawai']);
+
+
+			//Check Penerimaan
+			$Det = self::$query->select('inventori_po_detail', array(
+				'barang', 'qty as qty_pesan'
+			))
+				->join('inventori_do_detail', array(
+					'qty as qty_sampai'
+				))
+				->on(array(
+					array('inventori_po_detail.po', '=', 'inventori_do_detail.po')
+				))
+				->where(array(
+					'inventori_po_detail.po' => '= ?',
+					'AND',
+					'inventori_po_detail.deleted_at' => 'IS NULL'
+				), array(
+					$value['uid']
+				))
+				->execute();
+
+			$data['response_data'][$key]['tanggal_po'] = date("d F Y, H:i", strtotime($value['tanggal_po']));
+			$data['response_data'][$key]['pegawai'] = $InfoPegawai['response_data'][0];
+
+			$autonum++;
+		}
+
+
+		$itemTotal = self::$query->select('inventori_po', array(
+            'uid'
+        ))
+			->join('master_supplier', array(
+				'nama as nama_supplier'
+			))
+			->on(array(
+				array('inventori_po.supplier', '=', 'master_supplier.uid')
+			))
+            ->where(array(
+				'master_supplier.deleted_at' => 'IS NULL',
+				'AND',
+				'inventori_po.deleted_at' => 'IS NULL'
+			), array())
+            ->execute();
+
+		$data['recordsTotal'] = count($itemTotal['response_data']);
+		$data['recordsFiltered'] = count($data['response_data']);
+		$data['length'] = intval($parameter['length']);
+		$data['start'] = intval($parameter['start']);
+
+		return $data;
+	}
+
 	public function get_po2($parameter) {
 		$data = self::$query->select('inventori_po', array(
 			'uid',
@@ -275,6 +416,9 @@ class PO extends Utility {
 			'inventori_po.nomor_po' => '!= ?'
 		), array(
 			'STOK_AWAL'
+		))
+		->order(array(
+			'created_at' => 'DESC'
 		))
 		->execute();
 

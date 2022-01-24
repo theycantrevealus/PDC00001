@@ -1,3 +1,10 @@
+<?php
+    $yesterday = new DateTime(date('Y-m-d')); // For today/now, don't pass an arg.
+    $yesterday->modify("-1 day");
+
+    $tomorrow = new DateTime(date('Y-m-d'));
+    $tomorrow->modify("+1 day");
+?>
 <div class="row">
 	<div class="col-lg">
 		<div class="card">
@@ -13,11 +20,17 @@
 							<div class="card card-form d-flex flex-column flex-sm-row">
 								<div class="card-body-form-group flex">
                                     <div class="row">
-                                        <div class="col-md-auto">
-                                            <div class="form-group" style="width: 400px;">
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
                                                 <label for="filter_date">Dari - Sampai</label>
-                                                <input id="filter_date" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                                <input id="filter_date" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $yesterday->format("Y-m-d"); ?> to <?php echo $tomorrow->format("Y-m-d"); ?>" />
                                             </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <br /><br />
+                                            <nav aria-label="CPPT Pagination" id="cppt_pagination" class="paginate_selection">
+                                                <ul class="pagination"></ul>
+                                            </nav>
                                         </div>
                                     </div>
 								</div>
@@ -45,13 +58,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
-							<div class="mt-4">
-                                <ul class="pagination justify-content-center" id="pagin">
-                                    awdawd
-                                </ul>
-							</div>
 						</div>
 					</div>
 				</div>

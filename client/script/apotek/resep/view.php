@@ -2774,6 +2774,7 @@
                 var signaA = $("#resep_signa_konsumsi_" + id).val();
                 var signaB = $("#resep_signa_takar_" + id).val();
                 var jumlah = $("#resep_jlh_hari_" + id).inputmask("unmaskedvalue");
+                var old_jumlah = $("#resep_jlh_hari_" + id).attr("old-data");
                 var konsumsi = $("#resep_obat_aturan_pakai_" + id + " option:selected").html();
                 var keterangan = $("#keterangan_resep_obat_" + id).text();
                 var iterasi = $("#iterasi_resep_obat_" + id).attr("data");
@@ -2785,6 +2786,7 @@
                     konsumsi: konsumsi,
                     keterangan: keterangan,
                     jumlah: jumlah,
+                    old_jumlah: old_jumlah,
                     iterasi: iterasi,
                     detOrig: (me.is(":checked")) ? "Y" : "N",
                     roman: roman,
@@ -2805,6 +2807,7 @@
                 var signaA = $("#racikan_signaA_" + id).val();
                 var signaB = $("#racikan_signaB_" + id).val();
                 var jumlah = $("#racikan_jumlah_" + id).inputmask("unmaskedvalue");
+                var old_jumlah = $("#racikan_jumlah_" + id).attr("old-data");
                 var konsumsi = $("#racikan_aturan_pakai_" + id + " option:selected").html();
                 var keterangan = $("#racikan_keterangan_" + id).val();
                 var iterasi = $("#racikan_iterasi_" + id).attr("data");
@@ -2825,6 +2828,7 @@
                     konsumsi: konsumsi,
                     keterangan: keterangan,
                     jumlah: jumlah,
+                    old_jumlah: old_jumlah,
                     roman: roman,
                     iterasi: iterasi,
                     detOrig: (me.is(":checked")) ? "Y" : "N",
@@ -2854,7 +2858,7 @@
                     obatList +
                     "<h5 class=\"text-right resep_script\">" + " <b>" + itemP[a].roman + "</b><br />" +((parseInt(itemP[a].iterasi) > 0) ? ("Iter " + itemP[a].iterasi + " &times;") : "") + "</h5>" +
                     "<h4>" + itemP[a].signa + ((itemP[a].sath !== "") ? (" <b class=\"resep_script\">da. In " + itemP[a].sath.toLowerCase()) + "</b>" : "") + "</h4>" +
-                    "<h6 class=\"text-right resep_script\" style=\"border-bottom: dashed 1px #000; margin-bottom: 10px\">" + ((parseInt(itemP[a].jumlah) > 0) ? ("det orig") : "ne det") + "</h6>" +
+                    "<h6 class=\"text-right resep_script\" style=\"border-bottom: dashed 1px #000; margin-bottom: 10px\">" + ((parseInt(itemP[a].jumlah) > 0) ? ((itemP[a].jumlah === itemP[a].old_jumlah) ? "" : "det " + itemP[a].jumlah) : "ne det") + "</h6>" +
                     "</td>" +
                     "</tr>");
             }

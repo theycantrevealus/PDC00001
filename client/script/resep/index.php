@@ -139,19 +139,29 @@
                     var resepDataRaw = response.response_package.response_data;
                     var parsedData = [];
                     var IGD = [];
+                    var INAP = [];
 
                     for(var resepKey in resepDataRaw) {
                         if(resepDataRaw[resepKey].antrian.departemen !== undefined && resepDataRaw[resepKey].antrian.departemen !== null) {
-                            if(resepDataRaw[resepKey].antrian.departemen.uid === __POLI_IGD__) {
-                                IGD.push(resepDataRaw[resepKey]);
+                            if(
+                                resepDataRaw[resepKey].antrian.departemen.uid === __POLI_IGD__
+                            ) {
+                                if(resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
+                                    IGD.push(resepDataRaw[resepKey]);
+                                }
+                            } else if(
+                                resepDataRaw[resepKey].antrian.departemen.uid === __POLI_INAP__
+                            ) {
+                                if(resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
+                                    INAP.push(resepDataRaw[resepKey]);
+                                }
                             } else {
-
                                 parsedData.push(resepDataRaw[resepKey]);
                             }
                         }
                     }
                     var autonum = 1;
-                    var finalData = IGD.concat(parsedData);
+                    var finalData = IGD.concat(parsedData).concat(INAP);
                     for(var az in finalData) {
                         finalData[az].autonum = autonum;
                         autonum++;
@@ -188,7 +198,7 @@
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         if(row.departemen !== undefined && row.antrian.departemen !== null) {
-                            if(row.departemen.uid === __POLI_INAP__) {
+                            if(row.departemen.uid === __POLI_INAP__ && row.ns_detail !== null) {
                                 return row.departemen.nama + "<br />" +
                                     "<span class=\"text-info\">" + row.ns_detail.kode_ns + "</span> - " + row.ns_detail.nama_ns;
                             } else {

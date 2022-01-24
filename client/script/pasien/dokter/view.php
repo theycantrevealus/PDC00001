@@ -1,10 +1,36 @@
 <script type="text/javascript">
     $(function () {
         var UID = __PAGES__[4];
-        loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], UID);
+        
+        $("body").on("click", ".cppt_paginate_prev", function() {
+            if(currentCPPTStep > 1) {
+                currentCPPTStep -= 1;
+                loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, "");
+            }
+            return false;
+        });
+
+        $("body").on("click", ".cppt_paginate_next", function() {
+            var total = $(".cppt_paginate").length;
+            if(currentCPPTStep < total) {
+                currentCPPTStep += 1;
+                loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, "");
+            }
+            return false;
+        });
+
+        $("body").on("click", ".cppt_paginate", function(e) {
+            e.preventDefault();
+            var tar = $(this).attr("target");
+            currentCPPTStep = parseInt(tar);
+            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, "");
+            return false;
+        });
+
+        loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, UID);
 
         $("#filter_date").change(function() {
-            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], UID);
+            loadCPPT(getDateRange("#filter_date")[0], getDateRange("#filter_date")[1], __PAGES__[3], currentCPPTStep, UID);
         });
 
         $("body").on("click", ".lampiran_view_trigger", function() {

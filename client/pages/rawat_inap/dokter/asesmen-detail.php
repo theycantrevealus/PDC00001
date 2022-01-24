@@ -12,6 +12,14 @@
     </div>
 </div>
 
+<?php
+    $yesterday = new DateTime(date('Y-m-d')); // For today/now, don't pass an arg.
+    $yesterday->modify("-1 day");
+
+    $tomorrow = new DateTime(date('Y-m-d'));
+    $tomorrow->modify("+1 day");
+?>
+
 
 <div class="container-fluid page__container">
     <div class="row card-group-row">
@@ -79,12 +87,7 @@
                     <div class="tab-pane active show fade" id="dokter">
                         <div class="row">
                             <div class="col-lg-12">
-                                <button class="btn btn-info pull-right" id="btnTambahAsesmen">
-                                    <i class="fa fa-plus"></i> Tambah Asesmen
-                                </button>
-                            </div>
-                            <div class="col-lg-12">
-                                <br />
+                                
                                 <!--table class="table table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
                                     <thead class="thead-dark">
                                     <tr>
@@ -99,13 +102,26 @@
                                     </tbody>
                                 </table-->
                                 <div class="row">
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-4">
                                         <div class="form-group">
                                             <label for="filter_date">Dari - Sampai</label>
-                                            <input id="filter_date" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                            <input id="filter_date" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $yesterday->format("Y-m-d"); ?> to <?php echo $tomorrow->format("Y-m-d"); ?>" />
                                         </div>
                                     </div>
+                                    <div class="col-lg-6">
+                                        <br /><br />
+                                        <nav aria-label="CPPT Pagination" id="cppt_pagination" class="paginate_selection">
+                                            <ul class="pagination"></ul>
+                                        </nav>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <br /><br />
+                                        <button class="btn btn-info pull-right" id="btnTambahAsesmen">
+                                            <i class="fa fa-plus"></i> Tambah Asesmen
+                                        </button>
+                                    </div>
                                     <div class="col-lg-12">
+                                        <hr />
                                         <div id="cppt_loader" class="card-body">
                                             <div class="no-data-panel">
                                                 <div class="row">
