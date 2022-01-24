@@ -8,6 +8,7 @@
 			selectedParent,
 			selectedCheckChild,
 			selectedNama,
+			selectedColor,
 			selectedIdentifier,
 			selectedKeterangan,
 			selectedIcon,
@@ -43,6 +44,8 @@
 		}
 
 		var TreeData = reloadDataTree(__HOSTAPI__ + "/Modul/tree");
+		console.clear();
+		console.log(TreeData);
 
 		var jsTreeBuilder = $("#module").jstree({
 			"core": {
@@ -59,6 +62,7 @@
 			selectedCheckChild = data.node.data.childCount;
 			selectedParent = data.node.data.parent;
 			selectedNama = data.node.data.nama;
+			selectedColor = data.node.data.group_color;
 			selectedIdentifier = data.node.data.identifier;
 			selectedKeterangan = data.node.data.keterangan;
 			selectedIcon = data.node.data.icon;
@@ -111,6 +115,7 @@
 					$("#modal-large").modal("show");
 					$("#modal-large-title").html("Edit Module");
 					$("#txt_nama_modul").val(selectedNama);
+					$("#txt_color_modul").val(selectedColor);
 					$("#txt_lokasi_modul").val(selectedIdentifier);
 					$("#txt_tampil_menu").prop("checked", (selectedShowOnMenu == "Y") ? true : false);
 					if(selectedShowOnMenu == "Y") {
@@ -158,6 +163,7 @@
 			var getUrutanTampil = $("#txt_urutan_modul").val();
 			var getIconModul = $("#txt_icon_modul").val();
 			var getGroupModul = $("#txt_group_modul").val();
+			var colorModule = $("#txt_color_modul").val();
 
 			
 
@@ -174,6 +180,7 @@
 						id:(MODE == 'add') ? 0 : selectedID,
 						nama:getNama,
 						identifier:getIdentifier,
+						colorModule: colorModule,
 						show_on_menu:getShowOnMenu,
 						keterangan:getKeterangan,
 						show_order:getUrutanTampil,
@@ -286,6 +293,10 @@
 				<div class="form-group">
 					<label for="txt_nama_modul">Nama Modul:</label>
 					<input type="text" class="form-control" id="txt_nama_modul" placeholder="Nama Modul">
+				</div>
+				<div class="form-group">
+					<label for="txt_color_modul">Group Color:</label>
+					<input type="text" class="form-control" id="txt_color_modul" placeholder="Warna pada Menu">
 				</div>
 				<div class="form-group">
 					<label for="txt_lokasi_modul">Lokasi:</label>
