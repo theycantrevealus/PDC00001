@@ -128,6 +128,9 @@ class Inventori extends Utility
     public function __POST__($parameter = array())
     {
         switch ($parameter['request']) {
+            case 'auto_so_prog':
+                return self::auto_so_prog($parameter);
+                break;
             case 'hapus_pinjam_keluar':
                 return self::hapus_pinjam_keluar($parameter);
                 break;
@@ -245,6 +248,9 @@ class Inventori extends Utility
             case 'stok_import_fetch':
                 return self::stok_import_fetch($parameter);
                 break;
+            case 'stok_import_fetch_auto_so':
+                return self::stok_import_fetch_auto_so($parameter);
+                break;
             case 'proceed_import_stok':
                 return self::proceed_import_stok($parameter);
                 break;
@@ -310,9 +316,169 @@ class Inventori extends Utility
     }
 
 
+    private function auto_so_prog($parameter) {
+        $DataSet = $parameter['dataSet'];
+
+        $DataSet['nama'] = str_replace('^', '"', $DataSet['nama']);
+
+        $dataFailed = array();
+        $result = 0;
+        //Insert Auto SO
+        $SOMaster = self::$query->select('inventori_stok_opname', array(
+            'uid'
+        ))
+            ->where(array(
+                'inventori_stok_opname.gudang' => '= ?',
+                'AND',
+                'inventori_stok_opname.status' => '= ?'
+            ), array(
+                $parameter['gudang'], 'P'
+            ))
+            ->execute();
+        foreach($SOMaster['response_data'] as $SOK => $SOV) {
+            //Check Item
+            $Item = self::$query->select('master_inv', array(
+                'uid'
+            ))
+                ->where(array(
+                    'master_inv.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_inv.nama' => '= ?'
+                ), array(
+                    $DataSet['nama']
+                ))
+                ->execute();
+            if(count($Item['response_data']) > 0) {
+                $BatchTarget = '';
+
+                //Check Batch Exist
+                $BatchCheck = self::$query->select('inventori_batch', array(
+                    'uid'
+                ))
+                    ->where(array(
+                        'inventori_batch.batch' => '= ?',
+                        'AND',
+                        'inventori_batch.barang' => '= ?',
+                        'AND',
+                        'inventori_batch.expired_date' => '= ?',
+                        'AND',
+                        'inventori_batch.deleted_at' => 'IS NULL'
+                    ), array(
+                        $DataSet['batch'],
+                        $Item['response_data'][0]['uid'],
+                        date('Y-m-d', strtotime($DataSet['kedaluarsa']))
+                    ))
+                    ->execute();
+                if(count($BatchCheck['response_data']) > 0) {
+                    //Current Batch
+                    $BatchTarget = $BatchCheck['response_data'][0]['uid'];
+                } else {
+                    $BatchTarget = parent::gen_uuid();
+                    $NewBatch = self::$query->insert('inventori_batch', array(
+                        'uid' => $BatchTarget,
+                        'barang' => $Item['response_data'][0]['uid'],
+                        'batch' => $DataSet['batch'],
+                        'expired_at' => date('Y-m-d', strtotime($DataSet['kedaluarsa'])),
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                    //Create New Batch
+                }
 
 
+                $SODetailCheck = self::$query->select('inventori_stok_opname_detail', array(
+                    'id', 'qty_akhir'
+                ))
+                    ->where(array(
+                        'inventori_stok_opname_detail.item' => '= ?',
+                        'AND',
+                        'inventori_stok_opname_detail.batch' => '= ?',
+                        'AND'
+                    ), array(
+                        $Item['response_data'][0]['uid'],
+                        $BatchTarget
+                    ))
+                    ->execute();
+                if(count($SODetailCheck['response_data']) > 0) {
+                    //Accumulate Qty
+                    $updateOpDet = self::$query->update('inventori_stok_opname_detail', array(
+                        'updated_at' => parent::format_date(),
+                        'qty_akhir' => floatval($SODetailCheck['response_data'][0]['qty_akhir']) + floatval($DataSet['stok'])
+                    ))
+                        ->where(array(
+                            'inventori_stok_opname_detail.id' => '= ?'
+                        ), array(
+                            $SODetailCheck['response_data'][0]['id']
+                        ))
+                        ->execute();
+                } else {
+                    //New Qty
+                    $updateOpDet = self::$query->insert('inventori_stok_opname_detail', array(
+                        'opname' => $SOV['uid'],
+                        'item' => $Item['response_data'][0]['uid'],
+                        'batch' => $BatchTarget,
+                        'qty_awal' => 0,
+                        'qty_akhir' => floatval($DataSet['stok']),
+                        'keterangan' => 'SO Auto',
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                }
 
+                if($updateOpDet['response_result'] > 0) {
+                    $result = $updateOpDet['response_result'];
+                } else {
+                    array_push($dataFailed, $updateOpDet);
+                }
+            } else {
+                //Item Not Exist
+                $result = 0;
+                array_push($dataFailed, $DataSet);
+            }
+        }
+
+        return array(
+            'result' => $result,
+            'failed' => $dataFailed
+        );
+    }
+
+    private function stok_import_fetch_auto_so($parameter)
+    {
+        if (!empty($_FILES['csv_file']['name'])) {
+            $unique_name = array();
+
+            $file_data = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $column = fgetcsv($file_data); //array_head
+            $row_data = array();
+            while ($row = fgetcsv($file_data, null, ',', '"', '')) {
+                $column_builder = array();
+                foreach ($column as $key => $value) {
+                    $column_builder[$value] = (isset($row[$key]) && !empty($row[$key])) ? strval($row[$key]) : "BELUM SET";
+                }
+
+                $tanggal_formatter = explode('-', $column_builder['kedaluarsa']);
+                $column_builder['kedaluarsa'] = date('Y-m-d', strtotime($tanggal_formatter[2] . '-' . $tanggal_formatter[1] . '-' . $tanggal_formatter[0]));
+                $column_builder['stok'] = floatval($column_builder['stok']);
+                array_push($row_data, $column_builder);
+            }
+
+            $build_col = array();
+            foreach ($column as $key => $value) {
+                array_push($build_col, array("data" => $value));
+            }
+
+            $output = array(
+                'column' => $column,
+                'row_data' => $row_data,
+                'column_builder' => $build_col,
+                'unique_name' => $unique_name
+            );
+            return $output;
+        }
+    }
 
 
 
