@@ -322,6 +322,7 @@ class Inventori extends Utility
         $DataSet['nama'] = str_replace('^', '"', $DataSet['nama']);
 
         $dataFailed = array();
+        $batchFailed = array();
         $result = 0;
         //Insert Auto SO
         $SOMaster = self::$query->select('inventori_stok_opname', array(
@@ -350,6 +351,7 @@ class Inventori extends Utility
                 ->execute();
             if(count($Item['response_data']) > 0) {
                 $BatchTarget = '';
+                $TotalAllCurrent = 0;
 
                 //Check Batch Exist
                 $BatchCheck = self::$query->select('inventori_batch', array(
@@ -372,18 +374,36 @@ class Inventori extends Utility
                 if(count($BatchCheck['response_data']) > 0) {
                     //Current Batch
                     $BatchTarget = $BatchCheck['response_data'][0]['uid'];
+                    $UPDATEBATCH = self::$query->update('inventori_batch', array(
+                        'updated_at' => parent::format_date(),
+                        'deleted_at' => null
+                    ))
+                        ->where(array(
+                            'inventori_batch.uid' => '= ?',
+                            'AND',
+                            'inventori_batch.deleted_at' => 'IS NULL'
+                        ), array(
+                            $BatchCheck['response_data'][0]['uid']
+                        ))
+                        ->execute();
                 } else {
                     $BatchTarget = parent::gen_uuid();
-                    $NewBatch = self::$query->insert('inventori_batch', array(
+                    //Create New Batch
+                    $UPDATEBATCH = self::$query->insert('inventori_batch', array(
                         'uid' => $BatchTarget,
                         'barang' => $Item['response_data'][0]['uid'],
                         'batch' => $DataSet['batch'],
-                        'expired_at' => date('Y-m-d', strtotime($DataSet['kedaluarsa'])),
+                        'expired_date' => date('Y-m-d', strtotime($DataSet['kedaluarsa'])),
                         'created_at' => parent::format_date(),
                         'updated_at' => parent::format_date()
                     ))
                         ->execute();
-                    //Create New Batch
+                }
+
+                if($UPDATEBATCH['response_result'] > 0) {
+                        
+                } else {
+                    array_push($batchFailed, $UPDATEBATCH);
                 }
 
 
@@ -412,6 +432,7 @@ class Inventori extends Utility
                             $SODetailCheck['response_data'][0]['id']
                         ))
                         ->execute();
+                    $TotalAllCurrent = floatval($SODetailCheck['response_data'][0]['qty_akhir']) + floatval($DataSet['stok']);
                 } else {
                     //New Qty
                     $updateOpDet = self::$query->insert('inventori_stok_opname_detail', array(
@@ -425,23 +446,143 @@ class Inventori extends Utility
                         'updated_at' => parent::format_date()
                     ))
                         ->execute();
+                    $TotalAllCurrent = floatval($DataSet['stok']);
                 }
 
                 if($updateOpDet['response_result'] > 0) {
-                    $result = $updateOpDet['response_result'];
+
+                    $TotalForOpname = $TotalAllCurrent;
+                    
+
+                    //TODO : 1. Kalkulasi semua barang dengan batch ini dan lakukan kalkulasi otomatis
+                    $LogBefore = self::$query->select('inventori_stok_log', array(
+                        'id', 'masuk', 'keluar', 'saldo', 'jenis_transaksi'
+                    ))
+                        ->where(array(
+                            'inventori_stok_log.barang' => '= ?',
+                            'AND',
+                            'inventori_stok_log.batch' => '= ?',
+                            'AND',
+                            'inventori_stok_log.gudang' => '= ?',
+                            'AND',
+                            'inventori_stok_log.logged_at' => '>= ?',
+                            'AND',
+                            'inventori_stok_log.type' => '!= ?'
+                        ), array(
+                            $Item['response_data'][0]['uid'],
+                            $BatchTarget,
+                            $parameter['gudang'],
+                            date('Y-m-d H:i:s', strtotime($parameter['date_limit_opname'])),
+                            __STATUS_OPNAME__
+                        ))
+                        ->order(array(
+                            'logged_at' => 'ASC'
+                        ))
+                        ->execute();
+
+                    foreach($LogBefore['response_data'] as $LOGBK =>$LOGBV) {
+                        $BMasuk = floatval($LOGBV['masuk']);
+                        $BKeluar = floatval($LOGBV['keluar']);
+                        $BSaldo = floatval($LOGBV['saldo']);
+
+                        if($BMasuk == 0 && $BKeluar > 0) { //Potong
+                            $TotalAllCurrent -= floatval($BKeluar);
+                        } else if($BMasuk > 0 && $BKeluar == 0) { //Tambah
+                            $TotalAllCurrent += floatval($BMasuk);
+                        } else {
+                            $TotalAllCurrent = $BSaldo;
+                        }
+
+                        $UpSaldoLog = self::$query->update('inventori_stok_log', array(
+                            'saldo' => $TotalAllCurrent
+                        ))
+                            ->where(array(
+                                'inventori_stok_log.id' => '= ?'
+                            ), array(
+                                $LOGBV['id']
+                            ))
+                            ->execute();
+                    }
+
+                    //TODO : 2. Catat ke dalam inventori stok log sebagai opname. KODE : __STATUS_OPNAME__
+                    $OpnameLOG = self::$query->insert('inventori_stok_log', array(
+                        'barang' => $Item['response_data'][0]['uid'],
+                        'batch' => $BatchTarget,
+                        'gudang' => $parameter['gudang'],
+                        'masuk' => $TotalForOpname,
+                        'keluar' => 0,
+                        'saldo' => $TotalForOpname,
+                        'logged_at' => date('Y-m-d H:i:s', strtotime($parameter['date_limit_opname']) - 60),    // Minus 1 Minute (Agar tidak kena recalculate)
+                        'type' => __STATUS_OPNAME__
+                    ))
+                        ->execute();
+
+                    //TODO : 3. Catatkan hasil kalkulasi ke stok
+                    //Check Stok
+                    $LOGCheck = self::$query->select('inventori_stok', array(
+                        'id'
+                    ))
+                        ->where(array(
+                            'inventori_stok.barang' => '= ?',
+                            'AND',
+                            'inventori_stok.batch' => '= ?',
+                            'AND',
+                            'inventori_stok.gudang' => '= ?'
+                        ), array(
+                            $Item['response_data'][0]['uid'],
+                            $BatchTarget,
+                            $parameter['gudang']
+                        ))
+                        ->execute();
+                    if(count($LOGCheck['response_data']) > 0) {
+                        //Update STOK
+                        $UPDATELOGPOSTOPNAME = self::$query->update('inventori_stok', array(
+                            'stok_terkini' => $TotalAllCurrent
+                        ))
+                            ->where(array(
+                                'inventori_stok.id' => '= ?'
+                            ), array(
+                                $LOGCheck['response_data'][0]['id']
+                            ))
+                            ->execute();
+                    } else {
+                        //Insert STOK
+                        $UPDATELOGPOSTOPNAME = self::$query->insert('inventori_stok', array(
+                            'barang' => $Item['response_data'][0]['uid'],
+                            'batch' => $BatchTarget,
+                            'gudang' => $parameter['gudang'],
+                            'stok_terkini' => $TotalAllCurrent
+                        ))
+                            ->execute();
+                    }
+
+                    
+                    if($UPDATELOGPOSTOPNAME['response_result'] > 0) {
+                        
+                    } else {
+                        array_push($dataFailed, $DataSet);
+                        array_push($batchFailed, $UPDATELOGPOSTOPNAME);
+                    }
+                    $result = $UPDATELOGPOSTOPNAME['response_result'];
+                    
                 } else {
-                    array_push($dataFailed, $updateOpDet);
+                    //Opname Detail Not Set
+                    $result = 0;
+                    array_push($batchFailed, $updateOpDet);
+                    array_push($dataFailed, $DataSet);
                 }
             } else {
                 //Item Not Exist
                 $result = 0;
+                array_push($batchFailed, 'Not Set');
                 array_push($dataFailed, $DataSet);
             }
         }
 
         return array(
             'result' => $result,
-            'failed' => $dataFailed
+            'failed' => $dataFailed,
+            'batch_failed' => $batchFailed
         );
     }
 
@@ -459,7 +600,7 @@ class Inventori extends Utility
                     $column_builder[$value] = (isset($row[$key]) && !empty($row[$key])) ? strval($row[$key]) : "BELUM SET";
                 }
 
-                $tanggal_formatter = explode('-', $column_builder['kedaluarsa']);
+                $tanggal_formatter = explode('-', str_replace('/','-',$column_builder['kedaluarsa']));
                 $column_builder['kedaluarsa'] = date('Y-m-d', strtotime($tanggal_formatter[2] . '-' . $tanggal_formatter[1] . '-' . $tanggal_formatter[0]));
                 $column_builder['stok'] = floatval($column_builder['stok']);
                 array_push($row_data, $column_builder);
@@ -2932,7 +3073,7 @@ class Inventori extends Utility
 
             $data['response_data'][$key]['batch'] = self::get_batch_detail($value['batch'])['response_data'][0];
 
-            $data['response_data'][$key]['logged_at'] = date('d M Y', strtotime($value['logged_at'])) . '<br />' . date('H:i', strtotime($value['logged_at']));
+            $data['response_data'][$key]['logged_at'] = date('d M Y', strtotime($value['logged_at'])) . '&nbsp;&nbsp;<strong class="text-info number_style">' . date('H:i', strtotime($value['logged_at']) . '</strong>');
 
             if($value['uid_foreign'] !== null && $value['uid_foreign'] !== '')
             {
@@ -9128,7 +9269,7 @@ class Inventori extends Utility
 
         if ($parameter['length'] < 0) {
             $qString = '';
-            $query = self::$pdo->prepare('SELECT DISTINCT(barang) as barang, inventori_stok.*, master_inv.nama FROM inventori_stok JOIN master_inv ON inventori_stok.barang = master_inv.uid WHERE inventori_stok.gudang = ? AND master_inv.nama ILIKE \'%' . $parameter['search']['value'] . '%\' ORDER BY master_inv.nama ASC');
+            $query = self::$pdo->prepare('SELECT DISTINCT(barang) as barang, master_inv.nama FROM inventori_stok JOIN master_inv ON inventori_stok.barang = master_inv.uid WHERE inventori_stok.gudang = ? AND master_inv.nama ILIKE \'%' . $parameter['search']['value'] . '%\' ORDER BY master_inv.nama ASC');
             $query->execute(array($UserData['data']->gudang));
             $data['response_data'] = $query->fetchAll(\PDO::FETCH_ASSOC);
             // $data = self::$query->select('inventori_stok', array(
@@ -9147,7 +9288,7 @@ class Inventori extends Utility
             //     ->where($paramData, $paramValue)
             //     ->execute();
         } else {
-            $query = self::$pdo->prepare('SELECT DISTINCT(barang) as barang, inventori_stok.*, master_inv.nama FROM inventori_stok JOIN master_inv ON inventori_stok.barang = master_inv.uid WHERE inventori_stok.gudang = ? AND master_inv.nama ILIKE \'%' . $parameter['search']['value'] . '%\' ORDER BY master_inv.nama ASC OFFSET ' . intval($parameter['start']) . ' LIMIT ' . intval($parameter['length']));
+            $query = self::$pdo->prepare('SELECT DISTINCT(barang) as barang, master_inv.nama FROM inventori_stok JOIN master_inv ON inventori_stok.barang = master_inv.uid WHERE inventori_stok.gudang = ? AND master_inv.nama ILIKE \'%' . $parameter['search']['value'] . '%\' ORDER BY master_inv.nama ASC OFFSET ' . intval($parameter['start']) . ' LIMIT ' . intval($parameter['length']));
             $query->execute(array($UserData['data']->gudang));
             $data['response_data'] = $query->fetchAll(\PDO::FETCH_ASSOC);
             // $data = self::$query->select('inventori_stok', array(
@@ -9174,6 +9315,25 @@ class Inventori extends Utility
         $PenjaminObat = new Penjamin(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+
+            $StokTerkini = 0;
+            $CountStok = self::$query->select('inventori_stok', array(
+                'stok_terkini'
+            ))
+                ->where(array(
+                    'inventori_stok.barang' => '= ?',
+                    'AND',
+                    'inventori_stok.gudang' => '= ?'
+                ), array(
+                    $value['barang'],
+                    $UserData['data']->gudang
+                ))
+                ->execute();
+            foreach($CountStok['response_data'] as $SKey => $SValue) {
+                $StokTerkini += floatval($SValue['stok_terkini']);
+            }
+
+            $data['response_data'][$key]['stok_terkini'] = $StokTerkini;
             
             $ItemDetail = self::get_item_info($value['barang'])['response_data'][0];
             //$ItemDetail = self::get_item_detail($value['barang'])['response_data'][0];
@@ -9254,6 +9414,10 @@ class Inventori extends Utility
             $autonum++;
         }
 
+        $totalItem = self::$pdo->prepare('SELECT DISTINCT(barang) as barang, master_inv.nama FROM inventori_stok JOIN master_inv ON inventori_stok.barang = master_inv.uid WHERE inventori_stok.gudang = ?');
+        $totalItem->execute(array($UserData['data']->gudang));
+        $countTotal = $totalItem->fetchAll(\PDO::FETCH_ASSOC);
+
         $itemTotal = self::$query->select('inventori_stok', array(
             'id'
         ))
@@ -9266,8 +9430,8 @@ class Inventori extends Utility
             ->where($paramData, $paramValue)
             ->execute();
 
-        $data['recordsTotal'] = count($itemTotal['response_data']);
-        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['recordsTotal'] = count($countTotal);
+        $data['recordsFiltered'] = count($countTotal);
         $data['length'] = intval($parameter['length']);
         $data['gudang_saya'] = $UserData['data']->gudang;
         $data['start'] = intval($parameter['start']);
@@ -9275,8 +9439,7 @@ class Inventori extends Utility
         return $data;
     }
 
-    private function satu_harga_profit($parameter)
-    {
+    private function satu_harga_profit($parameter) {
 
         $Penjamin = new Penjamin(self::$pdo);
         $PenjaminData = $Penjamin::get_penjamin();
