@@ -119,13 +119,19 @@
                     "aria-valuemax": filtedData.length,
                 });
                 $("#progressed_so").html(currentProgCount);
+                console.clear();
                 filtedData.forEach(function(ent) {
                     syncSO(ent, $("#filter_gudang option:selected").val()).then((result) => {
                         currentProgCount += parseFloat(result['result']);
+                        // if(result['batch_failed'].length > 0) {
+                        //     console.log(result['batch_failed']);    
+                        // }
+                        
                         if(parseFloat(result['result']) < 1) {
                             reportSODT.row.add(result['failed'][0]);
                             failedDataSet.push(result['failed'][0]);
                             reportSODT.draw();
+                            console.log(result);
                         }
                         
                         $("#progressed_so").html(currentProgCount);
@@ -136,6 +142,8 @@
                         });
                     });
                 });
+
+                LOG.ajax.reload();
             });
         });
 
@@ -150,7 +158,8 @@
                     data: {
                         request: "auto_so_prog",
                         gudang: gudang,
-                        dataSet: dataSet
+                        dataSet: dataSet,
+                        date_limit_opname: $("#filter_tanggal").val() + " " + $("#filter_jam").val() + ":00"
                     },
                     success:function(response) {
                         resolve(response.response_package);

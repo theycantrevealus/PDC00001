@@ -298,7 +298,7 @@ class Laporan extends Utility
             } else {
 
             }*/
-            $data['response_data'][$key]['obat'] = $Inventori->get_item_detail($value['item'])['response_data'][0];
+            $data['response_data'][$key]['obat'] = $Inventori->get_item_info($value['item'])['response_data'][0];
             $data['response_data'][$key]['autonum'] = $autonum;
             if(!isset($data_populator[$value['item']])) {
                 $data_populator[$value['item']] = array();

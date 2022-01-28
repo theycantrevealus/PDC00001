@@ -1,5 +1,11 @@
 <?php
-$judul_laporan = 'Laporan Pemakaian Obat';
+    $judul_laporan = 'Laporan Pemakaian Obat';
+
+    $yesterday = new DateTime(date('Y-m-d')); // For today/now, don't pass an arg.
+    $yesterday->modify("-1 day");
+
+    $tomorrow = new DateTime(date('Y-m-d'));
+    $tomorrow->modify("+1 day");
 ?>
 <div class="mdk-header-layout__content">
     <div class="mdk-drawer-layout js-mdk-drawer-layout" data-push data-responsive-width="992px">
@@ -33,7 +39,7 @@ $judul_laporan = 'Laporan Pemakaian Obat';
                             <div class="tab-pane active show fade" id="perpenjamin">
                                 <div class="row">
                                     <div class="col-md-9">
-                                        <input id="range_laporan" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                        <input id="range_laporan" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $yesterday->format("Y-m-d"); ?> to <?php echo $tomorrow->format("Y-m-d"); ?>" />
                                     </div>
                                     <div class="col-md-3">
                                         <button class="btn btn-primary" id="btnCetak">
