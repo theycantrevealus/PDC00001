@@ -1,0 +1,16 @@
+{
+    "sqltools.connections": [
+
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "SIMRSV2",
+            "group": "LOCALHOST",
+            "database": "simrsv2_ptb_prod_5",
+            "username": "postgres",
+            "password": "kalijati123156423"
+        }
+    ]
+}
