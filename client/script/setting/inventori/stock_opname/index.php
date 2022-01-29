@@ -103,12 +103,16 @@
             });
             currentProgCount = 0;
             $("#progressed_so").html(0);
+            $("#import_data").removeAttr("disabled").addClass("btn-success").removeClass("btn-warning");
         })
 
         
 
         $("#import_data").click(function() {
             var failedDataSet = [];
+            $("#import_data").attr({
+                "disabled": "disabled"
+            }).removeClass("btn-success").addClass("btn-warning");
             reportSODT.clear();
             reportSODT.draw();
             $("#so_progress").fadeIn(function() {
