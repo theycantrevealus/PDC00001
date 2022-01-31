@@ -40,11 +40,11 @@
 						<?php
 							if($parent == 0) {
 						?>
-						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons"><?php echo $value['icon'] ?></i>
+						<i class="sidebar-menu-icon sidebar-menu-icon--left material-icons <?php echo $value['group_color']; ?>"><?php echo $value['icon'] ?></i>
 						<?php
 							}
 						?>
-						<span class="sidebar-menu-text"><?php echo $value['nama']; ?></span>
+						<span class="sidebar-menu-text <?php echo $value['group_color']; ?>"><?php echo $value['nama']; ?></span>
 						<?php
 							if($child->rowCount() > 0) {
 						?>

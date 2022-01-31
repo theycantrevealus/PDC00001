@@ -41,6 +41,10 @@ class Setting extends Utility
                 return self::get_setting_group_backend($parameter);
                 break;
 
+            case 'get_stok_log':
+                return self::get_stok_log($parameter);
+                break;
+
             default:
                 return array();
                 break;
@@ -66,6 +70,190 @@ class Setting extends Utility
                 return self::get_setting_group($parameter);
                 break;
         }
+    }
+
+    private function get_stok_log($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            if($parameter['gudang'] === 'all') {
+                $paramData = array(
+                    'master_inv.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_inv_gudang.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'AND',
+                    'inventori_stok_log.logged_at' => 'BETWEEN ? AND ?'
+                );
+
+                $paramValue = array(
+                    date('Y-m-d H:i:00', strtotime($parameter['from'])),
+                    date('Y-m-d H:i:s', strtotime('+1 day'))
+                );
+            } else {
+                $paramData = array(
+                    'inventori_stok_log.gudang' => '= ?',
+                    'AND',
+                    'master_inv.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_inv_gudang.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'AND',
+                    'inventori_stok_log.logged_at' => 'BETWEEN ? AND ?'
+                );
+
+                $paramValue = array(
+                    $parameter['gudang'],
+                    date('Y-m-d H:i:00', strtotime($parameter['from'])),
+                    date('Y-m-d H:i:s', strtotime('+1 day'))
+                );
+            }
+            
+        } else {
+            if($parameter['gudang'] === 'all') {
+                $paramData = array(
+                    'master_inv.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_inv_gudang.deleted_at' => 'IS NULL',
+                    'AND',
+                    'inventori_stok_log.logged_at' => 'BETWEEN ? AND ?'
+                );
+
+                $paramValue = array(
+                    date('Y-m-d H:i:00', strtotime($parameter['from'])),
+                    date('Y-m-d H:i:s', strtotime('+1 day'))
+                );
+            } else {
+                $paramData = array(
+                    'inventori_stok_log.gudang' => '=?',
+                    'AND',
+                    'master_inv.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_inv_gudang.deleted_at' => 'IS NULL',
+                    'AND',
+                    'inventori_stok_log.logged_at' => 'BETWEEN ? AND ?'
+                );
+
+                $paramValue = array(
+                    $parameter['gudang'],
+                    date('Y-m-d H:i:00', strtotime($parameter['from'])),
+                    date('Y-m-d H:i:s', strtotime('+1 day'))
+                );
+            }
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('inventori_stok_log', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'masuk',
+                'keluar',
+                'saldo',
+                'type',
+                'jenis_transaksi',
+                'uid_foreign',
+                'keterangan',
+                'logged_at'
+            ))
+                ->order(array(
+                    'master_inv.nama' => 'ASC',
+                    'inventori_stok_log.logged_at' => 'ASC'
+                ))
+                ->join('master_inv', array(
+                    'nama as nama_barang'
+                ))
+                ->join('master_inv_gudang', array(
+                    'nama as nama_gudang'
+                ))
+                ->join('inventori_batch', array(
+                    'batch'
+                ))
+                ->on(array(
+                    array('inventori_stok_log.barang', '=', 'master_inv.uid'),
+                    array('inventori_stok_log.gudang', '=', 'master_inv_gudang.uid'),
+                    array('inventori_stok_log.batch', '=', 'inventori_batch.uid')
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok_log', array(
+                'id',
+                'barang',
+                'batch',
+                'gudang',
+                'masuk',
+                'keluar',
+                'saldo',
+                'type',
+                'jenis_transaksi',
+                'uid_foreign',
+                'keterangan',
+                'logged_at'
+            ))
+                ->order(array(
+                    'master_inv.nama' => 'ASC',
+                    'inventori_stok_log.logged_at' => 'ASC'
+                ))
+                ->join('master_inv', array(
+                    'nama as nama_barang'
+                ))
+                ->join('master_inv_gudang', array(
+                    'nama as nama_gudang'
+                ))
+                ->join('inventori_batch', array(
+                    'batch'
+                ))
+                ->on(array(
+                    array('inventori_stok_log.barang', '=', 'master_inv.uid'),
+                    array('inventori_stok_log.gudang', '=', 'master_inv_gudang.uid'),
+                    array('inventori_stok_log.batch', '=', 'inventori_batch.uid')
+                ))
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->where($paramData, $paramValue)
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $PenjaminObat = new Penjamin(self::$pdo);
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['logged_at_parsed'] = date('d F Y, H:i:s', strtotime($value['logged_at']));
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('inventori_stok_log', array(
+            'id'
+        ))
+            ->join('master_inv', array(
+                'nama as nama_barang'
+            ))
+            ->join('master_inv_gudang', array(
+                'nama as nama_gudang'
+            ))
+            ->join('inventori_batch', array(
+                'batch'
+            ))
+            ->on(array(
+                array('inventori_stok_log.barang', '=', 'master_inv.uid'),
+                array('inventori_stok_log.gudang', '=', 'master_inv_gudang.uid'),
+                array('inventori_stok_log.batch', '=', 'inventori_batch.uid')
+            ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
     }
 
     private function get_setting_group_backend($parameter) {
