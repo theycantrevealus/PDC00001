@@ -128,6 +128,12 @@ class Inventori extends Utility
     public function __POST__($parameter = array())
     {
         switch ($parameter['request']) {
+            case 'manual_add_batch':
+                return self::manual_add_batch($parameter);
+                break;
+            case 'finish_temp_stock':
+                return self::finish_temp_stock($parameter);
+                break;
             case 'auto_so_prog':
                 return self::auto_so_prog($parameter);
                 break;
@@ -313,6 +319,85 @@ class Inventori extends Utility
                 return $parameter;
                 break;
         }
+    }
+
+    private function manual_add_batch($parameter) {
+        $check = self::$query->select('inventori_batch', array(
+            'uid'
+        ))
+            ->where(array(
+                'inventori_batch.barang' => '= ?',
+                'AND',
+                'inventori_batch.batch' => '= ?',
+                'AND',
+                'inventori_batch.expired_date' => '= ?',
+                'AND',
+                'inventori_batch.deleted_at' => 'IS NULL'
+            ), array(
+                $parameter['uid_barang'],
+                $parameter['kode_batch'],
+                date('Y-m-d', strtotime($parameter['ed']))
+            ))
+            ->execute();
+        if(count($check['response_data']) > 0) {
+            $targetBatch = $check['response_data'][0]['uid'];
+            $proc = self::$query->update('inventori_batch', array(
+                'deleted_at' => NULL,
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'inventori_batch.uid' => '= ?'
+                ), array(
+                    $targetBatch
+                ))
+                ->execute();
+        } else {
+            $targetBatch = parent::gen_uuid();
+            $proc = self::$query->insert('inventori_batch', array(
+                'uid' => $targetBatch,
+                'barang' => $parameter['uid_barang'],
+                'batch' => $parameter['kode_batch'],
+                'expired_date' => date('Y-m-d', strtotime($parameter['ed'])),
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+            ))
+                ->execute();
+        }
+        if($proc['response_result'] > 0) {
+            //Tambahkan ke inventori_stok
+            $checkStok = self::$query->select('inventori_stok', array(
+                'id'
+            ))
+                ->where(array(
+                    'inventori_stok.batch' => '= ?',
+                    'AND',
+                    'inventori_stok.barang' => '= ?',
+                    'AND',
+                    'inventori_stok.gudang' => '= ?'
+                ), array(
+                    $targetBatch,
+                    $parameter['uid_barang'],
+                    $parameter['uid_gudang']
+                ))
+                ->execute();
+            if(count($checkStok['response_data']) > 0) {
+                //
+            } else {
+                $procStok = self::$query->insert('inventori_stok', array(
+                    'barang' => $parameter['uid_barang'],
+                    'batch' => $targetBatch,
+                    'gudang' => $parameter['uid_gudang'],
+                    'stok_terkini' => 0
+                ))
+                    ->execute();
+            }
+        }
+        return $proc;
+    }
+
+    private function finish_temp_stock($parameter) {
+        //Jika resep maka update status jadi D = Done
+        // Jika mutasi pastikan gudang tujuan adalah IGD
     }
 
 
