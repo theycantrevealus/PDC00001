@@ -827,6 +827,7 @@
                         // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].nilai = (dataSet[a].old_value !== undefined && dataSet[a].old_value !== null) ? dataSet[a].old_value : 0;
                         // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].keterangan = (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-";
                         // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_akhir = opnameItemIden[dataSet[a].uid + "_" + dataSet[a].batch.uid];
+
 					}
 
 					$("#txt_keterangan").val(response.response_package.keterangan);
