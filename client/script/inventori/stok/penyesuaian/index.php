@@ -821,11 +821,13 @@
 							};
 						}
 
-                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_awal = dataSet[a].stok_terkini;
-                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].batch = dataSet[a].batch.uid;
-                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].nilai = (dataSet[a].old_value !== undefined && dataSet[a].old_value !== null) ? dataSet[a].old_value : 0;
-                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].keterangan = (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-";
-                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_akhir = opnameItemIden[dataSet[a].uid + "_" + dataSet[a].batch.uid];
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_awal = dataSet[a].stok_terkini;
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].batch = dataSet[a].batch.uid;
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].signed = (dataSet[a].supervisi === __ME__) ? 1 : 0;
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].nilai = (dataSet[a].old_value !== undefined && dataSet[a].old_value !== null) ? dataSet[a].old_value : 0;
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].keterangan = (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-";
+                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_akhir = opnameItemIden[dataSet[a].uid + "_" + dataSet[a].batch.uid];
+
 					}
 
 					$("#txt_keterangan").val(response.response_package.keterangan);
@@ -987,6 +989,16 @@
 
             var batch = $(this).attr("batch");
 
+            if(metaDataOpname[uid + "_" + batch] == undefined) {
+                metaDataOpname[uid + "_" + batch] = {
+                    qty_awal: 0,
+                    signed: 0,
+                    batch: "",
+                    nilai: 0,
+                    keterangan: "-"
+                };
+            }
+
             metaDataOpname[uid + "_" + batch].signed = 1;
 			metaDataOpname[uid + "_" + batch].nilai = parseFloat($(this).inputmask("unmaskedvalue"));
 		});
@@ -996,6 +1008,17 @@
 			uid = uid[uid.length - 1];
 
             var batch = $(this).attr("batch");
+
+            if(metaDataOpname[uid + "_" + batch] == undefined) {
+                metaDataOpname[uid + "_" + batch] = {
+                    qty_awal: 0,
+                    signed: 0,
+                    batch: "",
+                    nilai: 0,
+                    keterangan: "-"
+                };
+            }
+
             metaDataOpname[uid + "_" + batch].signed = 1;
 			metaDataOpname[uid + "_" + batch].keterangan = $(this).val();
 		});
