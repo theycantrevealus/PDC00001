@@ -57,9 +57,9 @@
 						var penjaminList = [];
 						var penjaminListData = productData[a].penjamin;
 						for(var penjaminKey in penjaminListData) {
-							if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
-								penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
-							}
+							// if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
+							// 	penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
+							// }
 						}
 
 						if(selected.indexOf(productData[a].uid) < 0 && appendData) {
@@ -453,6 +453,7 @@
                                         reCheckStatus(currentStatus);
                                         if(response.response_package.temp_stok.length === 0) {
                                             $("#form-tambah").modal("show");
+                                            tableCurrentStock.ajax.reload();
                                         } else {
                                             Swal.fire(
                                                 'Penyesuaian Stok',
@@ -802,7 +803,6 @@
 					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 				},
 				dataSrc:function(response) {
-                    console.clear();
                     var opnameItemIden = response.response_package.opname_iden;
 					var dataSet = response.response_package.response_data;
 					if(dataSet == undefined) {
@@ -810,7 +810,7 @@
 					}
 
 					for(var a in dataSet) {
-                        console.log(dataSet[a].supervisi_detail);
+                        //console.log(dataSet[a].supervisi_detail);
                         if(metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid] == undefined) {
 							metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid] = {
 								qty_awal: dataSet[a].stok_terkini,
@@ -821,11 +821,11 @@
 							};
 						}
 
-                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_awal = dataSet[a].stok_terkini;
-                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].batch = dataSet[a].batch.uid;
-                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].nilai = (dataSet[a].old_value !== undefined && dataSet[a].old_value !== null) ? dataSet[a].old_value : 0;
-                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].keterangan = (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-";
-                        // metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_akhir = opnameItemIden[dataSet[a].uid + "_" + dataSet[a].batch.uid];
+                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_awal = dataSet[a].stok_terkini;
+                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].batch = dataSet[a].batch.uid;
+                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].nilai = (dataSet[a].old_value !== undefined && dataSet[a].old_value !== null) ? dataSet[a].old_value : 0;
+                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].keterangan = (dataSet[a].keterangan !== undefined && dataSet[a].keterangan !== null) ? dataSet[a].keterangan : "-";
+                        metaDataOpname[dataSet[a].uid + "_" + dataSet[a].batch.uid].qty_akhir = opnameItemIden[dataSet[a].uid + "_" + dataSet[a].batch.uid];
 					}
 
 					$("#txt_keterangan").val(response.response_package.keterangan);
