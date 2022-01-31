@@ -988,6 +988,16 @@
 
             var batch = $(this).attr("batch");
 
+            if(metaDataOpname[uid + "_" + batch] == undefined) {
+                metaDataOpname[uid + "_" + batch] = {
+                    qty_awal: 0,
+                    signed: 0,
+                    batch: "",
+                    nilai: 0,
+                    keterangan: "-"
+                };
+            }
+
             metaDataOpname[uid + "_" + batch].signed = 1;
 			metaDataOpname[uid + "_" + batch].nilai = parseFloat($(this).inputmask("unmaskedvalue"));
 		});
@@ -997,6 +1007,17 @@
 			uid = uid[uid.length - 1];
 
             var batch = $(this).attr("batch");
+
+            if(metaDataOpname[uid + "_" + batch] == undefined) {
+                metaDataOpname[uid + "_" + batch] = {
+                    qty_awal: 0,
+                    signed: 0,
+                    batch: "",
+                    nilai: 0,
+                    keterangan: "-"
+                };
+            }
+
             metaDataOpname[uid + "_" + batch].signed = 1;
 			metaDataOpname[uid + "_" + batch].keterangan = $(this).val();
 		});
