@@ -536,7 +536,7 @@
                                 serverSide: true,
                                 sPaginationType: "full_numbers",
                                 bPaginate: true,
-                                lengthMenu: [[5, 10, 15, 50], [5, 10, 15, 50]],
+                                lengthMenu: [[20, 50, 200], [20, 50, 200]],
                                 serverMethod: "POST",
                                 "ajax":{
                                     url: __HOSTAPI__ + "/Inventori",
