@@ -9667,7 +9667,9 @@ class Inventori extends Utility
                 'OR',
                 'inventori_mutasi.ke' => '= ?)',
                 'AND',
-                'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+                '(pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'inventori_mutasi.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
             $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);

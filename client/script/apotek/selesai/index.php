@@ -738,7 +738,7 @@
                             keterangan: detail_apotek[a].keterangan,
                             alasan_ubah: (detail_apotek[a].alasan_ubah !== "" && detail_apotek[a].alasan_ubah !== undefined && detail_apotek[a].alasan_ubah !== null) ? detail_apotek[a].alasan_ubah : "-",
                             harga: "<h6 class=\"number_style\">" + ((detail_apotek[a].pay[0] !== undefined) ? number_format(parseFloat(detail_apotek[a].pay[0].harga), 2, ".", ",") : number_format(parseFloat(0), 2, ".", ",")) + "</h6>",
-                            subtotal: "<h6 class=\"number_style\">" + ((detail_apotek[a].pay[0] !== undefined) ? number_format(parseFloat(detail_apotek[a].pay[0].subtotal), 2, ".", ",") : number_format(parseFloat(0), 2, ".", ",")) + "</h6>",
+                            subtotal: "<h6 class=\"number_style\">" + ((detail_apotek[a].pay[0] !== undefined) ? number_format(parseFloat(detail_apotek[a].pay[0].harga * detail_apotek[a].qty), 2, ".", ",") : number_format(parseFloat(0), 2, ".", ",")) + "</h6>",
                         });
                         totalAll += ((detail_apotek[a].pay[0] !== undefined) ? parseFloat(detail_apotek[a].pay[0].subtotal) : 0);
                     }

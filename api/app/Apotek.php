@@ -4827,46 +4827,67 @@ class Apotek extends Utility
                 $paramValue = array('D', 'P', __POLI_IGD__, __POLI_INAP__);
             }
         } else {
-            //Resep Poli Biasa
-            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-                $paramData = array(
-                    'resep.deleted_at' => 'IS NULL',
-                    'AND',
-                    '(NOT antrian.departemen' =>'= ?',
-                    'AND',
-                    'NOT antrian.departemen' =>'= ?)',
-                    'AND',
-                    '((resep.status_resep' => '= ?',
-                    'OR',
-                    'resep.status_resep' => '= ?)',
-                    'OR',
-                    '(resep.status_resep' => '= ?))',
-                    'AND',
-                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                    'OR',
-                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
-                    'AND',
-                    'pasien.deleted_at' => 'IS NULL'
-                );
-            } else {
-                $paramData = array(
-                    'resep.deleted_at' => 'IS NULL',
-                    'AND',
-                    '(NOT antrian.departemen' =>'= ?',
-                    'AND',
-                    'NOT antrian.departemen' =>'= ?)',
-                    'AND',
-                    '((resep.status_resep' => '= ?',
-                    'OR',
-                    'resep.status_resep' => '= ?)',
-                    'OR',
-                    '(resep.status_resep' => '= ?))',
-                    'AND',
-                    'pasien.deleted_at' => 'IS NULL'
-                );
-            }
+            if(isset($parameter['history'])) {
+                //Resep Poli Biasa
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'pasien.deleted_at' => 'IS NULL',
+                        'AND',
+                        'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'resep.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+                    );
+                } else {
+                    $paramData = array(
+                        'pasien.deleted_at' => 'IS NULL'
+                    );
+                }
 
-            $paramValue = array(__POLI_IGD__, __POLI_INAP__, 'L', 'P', 'S');
+                $paramValue = array();
+            } else {
+                //Resep Poli Biasa
+                if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(NOT antrian.departemen' =>'= ?',
+                        'AND',
+                        'NOT antrian.departemen' =>'= ?)',
+                        'AND',
+                        '((resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'OR',
+                        '(resep.status_resep' => '= ?))',
+                        'AND',
+                        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                        'OR',
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
+                    );
+                } else {
+                    $paramData = array(
+                        'resep.deleted_at' => 'IS NULL',
+                        'AND',
+                        '(NOT antrian.departemen' =>'= ?',
+                        'AND',
+                        'NOT antrian.departemen' =>'= ?)',
+                        'AND',
+                        '((resep.status_resep' => '= ?',
+                        'OR',
+                        'resep.status_resep' => '= ?)',
+                        'OR',
+                        '(resep.status_resep' => '= ?))',
+                        'AND',
+                        'pasien.deleted_at' => 'IS NULL'
+                    );
+                }
+
+                $paramValue = array(__POLI_IGD__, __POLI_INAP__, 'L', 'P', 'S');
+            }
         }
 
         $dataIGD = self::$query->select('resep', array(
