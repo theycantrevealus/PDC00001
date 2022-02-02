@@ -7980,7 +7980,7 @@ class Inventori extends Utility
             $data['response_data'][$key]['dari'] = date('d F Y', strtotime($value['dari']));
             $data['response_data'][$key]['sampai'] = date('d F Y', strtotime($value['sampai']));
 
-            $PegawaiDetail = $Pegawai->get_detail($value['pegawai'])['response_data'][0];
+            $PegawaiDetail = $Pegawai->get_info($value['pegawai'])['response_data'][0];
             $data['response_data'][$key]['pegawai'] = $PegawaiDetail;
 
             $OpnameDetail = self::$query->select('inventori_stok_opname_detail', array(
@@ -8002,8 +8002,8 @@ class Inventori extends Utility
             $autonum = 1;
             foreach ($OpnameDetail['response_data'] as $OKey => $OValue) {
                 $OpnameDetail['response_data'][$OKey]['autonum'] = $autonum;
-                $OpnameDetail['response_data'][$OKey]['item'] = self::get_item_detail($OValue['item'])['response_data'][0];
-                $OpnameDetail['response_data'][$OKey]['batch'] = self::get_batch_detail($OValue['batch'])['response_data'][0];
+                $OpnameDetail['response_data'][$OKey]['item'] = self::get_item_info($OValue['item'])['response_data'][0];
+                $OpnameDetail['response_data'][$OKey]['batch'] = self::get_batch_info($OValue['batch'])['response_data'][0];
                 $autonum++;
             }
             $data['response_data'][$key]['detail'] = $OpnameDetail['response_data'];
