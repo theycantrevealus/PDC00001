@@ -2595,6 +2595,7 @@
                                 $("#table-resep-racikan > tbody > tr").each(function(e) {
                                     var racikanVerifIDSave = (e + 1);
                                     var racikan_nama = $(this).find("td:eq(1) input").val();
+                                    var qtyRacikan = parseFloat($(this).find("td input.racikan_signa_jlh").inputmask("unmaskedvalue"));
                                     if(racikan_nama !== undefined && racikan_nama !== "") {
                                         var komposisi = [];
                                         $(this).find("td:eq(1) table tbody tr").each(function() {
@@ -2615,6 +2616,7 @@
                                                             allowSave = true;
                                                         } else {
                                                             if($(this).find("i").hasClass("text-danger")) {
+                                                                
                                                                 if(parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")) === 0) {
                                                                     allowSave = true;
                                                                 } else {
@@ -2631,7 +2633,7 @@
 
                                             komposisi.push({
                                                 "obat": $(this).find("td:eq(1) h6").attr("uid-obat"),
-                                                "jumlah": $(this).find("td:eq(2) input").inputmask("unmaskedvalue"),
+                                                "jumlah": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
                                                 "kekuatan": $(this).find("td:eq(3)").html(),
                                                 "harga": parseFloat(hargaPerObatRacikan)
                                             });

@@ -651,6 +651,7 @@ class Apotek extends Utility
             ->execute();*/
         $resepItem = self::$query->select('resep_change_log', array(
             'item',
+            'batch',
             'qty'
         ))
             ->where(array(
@@ -662,70 +663,78 @@ class Apotek extends Utility
             ))
             ->execute();
         foreach ($resepItem['response_data'] as $key => $value) {
-            //Potong Batch terdekat
-            $InventoriBatch = $Inventori->get_item_batch($value['item']);
 
-            $kebutuhan = floatval($value['qty']);
+            // TODO : Set Per Batch Hilangkan
 
-            //Batch terpotong
-            foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
-            {
-                if($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
-                {
-                    if($kebutuhan >= $bValue['stok_terkini'])
-                    {
-                        if($parameter['departemen'] === __POLI_INAP__ || $parameter['departemen'] === __POLI_IGD__) {
-                            //Racikan tidak usah charge stok karena stok dianggap habis diproses
-                            if($bValue['stok_terkini'] > 0) {
-                                array_push($usedBatchInap, array(
-                                    'batch' => $bValue['batch'],
-                                    'barang' => $value['item'],
-                                    'gudang' => $bValue['gudang']['uid'],
-                                    'qty' => $bValue['stok_terkini']
-                                ));
-                                $kebutuhan -= $bValue['stok_terkini'];
-                            }
-                        }
+            array_push($usedBatch, array(
+                'batch' => $value['batch'],
+                'barang' => $value['item'],
+                'gudang' => __GUDANG_APOTEK__,
+                'qty' => floatval($value['qty']),
+                'temp_stat' => 'resep'
+            ));
+            // Potong Batch terdekat
+            // $InventoriBatch = $Inventori->get_item_batch($value['item']);
 
-                        if($bValue['stok_terkini'] > 0) {
-                            array_push($usedBatch, array(
-                                'batch' => $bValue['batch'],
-                                'barang' => $value['item'],
-                                'gudang' => $bValue['gudang']['uid'],
-                                'qty' => $bValue['stok_terkini']
-                            ));
-                            $kebutuhan -= $bValue['stok_terkini'];
-                        }
+            // $kebutuhan = floatval($value['qty']);
+            // foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
+            //     if($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
+            //     {
+            //         if($kebutuhan >= $bValue['stok_terkini'])
+            //         {
+            //             if($parameter['departemen'] === __POLI_INAP__ || $parameter['departemen'] === __POLI_IGD__) {
+            //                 //Racikan tidak usah charge stok karena stok dianggap habis diproses
+            //                 if($bValue['stok_terkini'] > 0) {
+            //                     array_push($usedBatchInap, array(
+            //                         'batch' => $bValue['batch'],
+            //                         'barang' => $value['item'],
+            //                         'gudang' => $bValue['gudang']['uid'],
+            //                         'qty' => $bValue['stok_terkini']
+            //                     ));
+            //                     $kebutuhan -= $bValue['stok_terkini'];
+            //                 }
+            //             }
+
+            //             if($bValue['stok_terkini'] > 0) {
+            //                 array_push($usedBatch, array(
+            //                     'batch' => $bValue['batch'],
+            //                     'barang' => $value['item'],
+            //                     'gudang' => $bValue['gudang']['uid'],
+            //                     'qty' => $bValue['stok_terkini']
+            //                 ));
+            //                 $kebutuhan -= $bValue['stok_terkini'];
+            //             }
 
 
-                    } else {
-                        if($parameter['departemen'] === __POLI_INAP__ || $parameter['departemen'] === __POLI_IGD__) {
-                            //Racikan tidak usah charge stok karena stok dianggap habis diproses
-                            if($kebutuhan > 0) {
-                                array_push($usedBatchInap, array(
-                                    'batch' => $bValue['batch'],
-                                    'barang' => $value['item'],
-                                    'gudang' => $bValue['gudang']['uid'],
-                                    'qty' => $kebutuhan
-                                ));
-                                $kebutuhan = 0;
-                            }
+            //         } else {
+            //             if($parameter['departemen'] === __POLI_INAP__ || $parameter['departemen'] === __POLI_IGD__) {
+            //                 if($kebutuhan > 0) {
+            //                     array_push($usedBatchInap, array(
+            //                         'batch' => $bValue['batch'],
+            //                         'barang' => $value['item'],
+            //                         'gudang' => $bValue['gudang']['uid'],
+            //                         'qty' => $kebutuhan
+            //                     ));
+            //                     $kebutuhan = 0;
+            //                 }
 
-                        }
+            //             }
 
-                        if($kebutuhan > 0) {
-                            array_push($usedBatch, array(
-                                'batch' => $bValue['batch'],
-                                'barang' => $value['item'],
-                                'gudang' => $bValue['gudang']['uid'],
-                                'qty' => $kebutuhan
-                            ));
-                            $kebutuhan = 0;
-                        }
-                    }
-                }
-            }
+            //             if($kebutuhan > 0) {
+            //                 array_push($usedBatch, array(
+            //                     'batch' => $bValue['batch'],
+            //                     'barang' => $value['item'],
+            //                     'gudang' => $bValue['gudang']['uid'],
+            //                     'qty' => $kebutuhan
+            //                 ));
+            //                 $kebutuhan = 0;
+            //             }
+            //         }
+            //     }
+            // }
         }
+
+        $racikan_batch_list = array();
 
         $racikan = self::$query->select('racikan', array(
             'uid',
@@ -738,7 +747,7 @@ class Apotek extends Utility
                 'AND',
                 'racikan.deleted_at' => 'IS NULL'
             ), array(
-                $parameter['asesmen'], (($parameter['departemen'] === __POLI_IGD__ || $parameter['departemen'] === __POLI_INAP__) ? 'N' : 'L')
+                $parameter['asesmen'], ($parameter['penjamin'] !== __UIDPENJAMINUMUM__) ? 'N' : ((($parameter['departemen'] === __POLI_IGD__ || $parameter['departemen'] === __POLI_INAP__) ? 'N' : 'L'))
             ))
             ->execute();
         foreach ($racikan['response_data'] as $rKey => $rValue)
@@ -757,7 +766,7 @@ class Apotek extends Utility
                 ->execute();
 
             $racikanItem = self::$query->select('racikan_detail_change_log', array(
-                'obat', 'jumlah'
+                'obat', 'jumlah', 'batch'
             ))
                 ->where(array(
                     'racikan_detail_change_log.racikan' => '= ?',
@@ -768,43 +777,48 @@ class Apotek extends Utility
                 ))
                 ->execute();
 
-            $racikan['detail'] = $racikanItem['response_data'];
+            $racikan['response_data'][$rKey]['detail'] = $racikanItem['response_data'];
 
             foreach ($racikanItem['response_data'] as $rIKey => $rIValue) {
-                //Potong Batch terdekat
-                $InventoriBatch = $Inventori->get_item_batch($rIValue['obat']);
+                array_push($usedBatch, array(
+                    'batch' => $rIValue['batch'],
+                    'barang' => $rIValue['obat'],
+                    'gudang' => __GUDANG_APOTEK__,
+                    'qty' => $rIValue['jumlah'],
+                    'temp_stat' => 'racikan'
+                ));
+                // $InventoriBatch = $Inventori->get_item_batch($rIValue['obat']);
 
-                $kebutuhan = floatval($rIValue['jumlah']);
+                // $kebutuhan = floatval($rIValue['jumlah']);
 
-                //Batch terpotong
-                foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
-                {
-                    if($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
-                    {
-                        if($kebutuhan >= $bValue['stok_terkini'])
-                        {
-                            if(floatval($bValue['stok_terkini']) > 0) {
-                                array_push($usedBatch, array(
-                                    'batch' => $bValue['batch'],
-                                    'barang' => $rIValue['obat'],
-                                    'gudang' => $bValue['gudang']['uid'],
-                                    'qty' => $bValue['stok_terkini']
-                                ));
-                                $kebutuhan -= $bValue['stok_terkini'];
-                            }
-                        } else {
-                            if($kebutuhan > 0) {
-                                array_push($usedBatch, array(
-                                    'batch' => $bValue['batch'],
-                                    'barang' => $rIValue['obat'],
-                                    'gudang' => $bValue['gudang']['uid'],
-                                    'qty' => $kebutuhan
-                                ));
-                                $kebutuhan = 0;
-                            }
-                        }
-                    }
-                }
+                // foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
+                    
+                //     if($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
+                //     {
+                //         if($kebutuhan >= $bValue['stok_terkini'])
+                //         {
+                //             if(floatval($bValue['stok_terkini']) > 0) {
+                //                 array_push($usedBatch, array(
+                //                     'batch' => $bValue['batch'],
+                //                     'barang' => $rIValue['obat'],
+                //                     'gudang' => $bValue['gudang']['uid'],
+                //                     'qty' => $bValue['stok_terkini']
+                //                 ));
+                //                 $kebutuhan -= $bValue['stok_terkini'];
+                //             }
+                //         } else {
+                //             if($kebutuhan > 0) {
+                //                 array_push($usedBatch, array(
+                //                     'batch' => $bValue['batch'],
+                //                     'barang' => $rIValue['obat'],
+                //                     'gudang' => $bValue['gudang']['uid'],
+                //                     'qty' => $kebutuhan
+                //                 ));
+                //                 $kebutuhan = 0;
+                //             }
+                //         }
+                //     }
+                // }
             }
 
         }
@@ -1171,7 +1185,7 @@ class Apotek extends Utility
                                 'racikan.deleted_at' => 'IS NULL'
                             ), array(
                                 $parameter['asesmen'],
-                                (($parameter['departemen'] === __POLI_IGD__ || $parameter['departemen'] === __POLI_INAP__) ? 'N' : 'L')
+                                ($parameter['penjamin'] !== __UIDPENJAMINUMUM__) ? 'N' : ((($parameter['departemen'] === __POLI_IGD__ || $parameter['departemen'] === __POLI_INAP__) ? 'N' : 'L'))
                             ))
                             ->execute();
 
@@ -1275,13 +1289,14 @@ class Apotek extends Utility
                     'racikan.deleted_at' => 'IS NULL'
                 ), array(
                     $parameter['asesmen'],
-                    'L'
+                    ($parameter['penjamin'] !== __UIDPENJAMINUMUM__) ? 'N' : ((($parameter['departemen'] === __POLI_IGD__ || $parameter['departemen'] === __POLI_INAP__) ? 'N' : 'L'))
                 ))
                 ->execute();
         } else {
             //Jika bukan Rawat Inap / IGD potong seperti biasa
             $updateResult = 0;
             $updateProgress = array();
+            $tempProgress = array();
 
             foreach ($usedBatch as $bKey => $bValue)
             {
@@ -1325,42 +1340,48 @@ class Apotek extends Utility
                                 'racikan.deleted_at' => 'IS NULL'
                             ), array(
                                 $parameter['asesmen'],
-                                'L'
+                                ($parameter['penjamin'] !== __UIDPENJAMINUMUM__) ? 'N' : ((($parameter['departemen'] === __POLI_IGD__ || $parameter['departemen'] === __POLI_INAP__) ? 'N' : 'L'))
                             ))
                             ->execute();
 
                         //Update Temp Stok Status
-                        $TempStokResep = self::$query->update('inventori_temp_stok', array(
-                            'status' => 'D'
-                        ))
-                            ->where(array(
-                                'inventori_temp_stok.transact_table' => '= ?',
-                                'AND',
-                                'inventori_temp_stok.transact_iden' => '= ?',
-                                'AND',
-                                'inventori_temp_stok.barang' => '= ?',
-                                'AND',
-                                'inventori_temp_stok.batch' => '= ?'
-                            ), array(
-                                'resep', $parameter['resep'], $bValue['barang'], $bValue['batch']
+                        if($bValue['temp_stat'] === 'resep') {
+                            $TempStokResep = self::$query->update('inventori_temp_stok', array(
+                                'status' => 'D'
                             ))
-                            ->execute();
+                                ->where(array(
+                                    'inventori_temp_stok.transact_table' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.transact_iden' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.barang' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.batch' => '= ?'
+                                ), array(
+                                    'resep', $parameter['resep'], $bValue['barang'], $bValue['batch']
+                                ))
+                                ->execute();
+                            array_push($tempProgress, $TempStokResep);   
+                        }
 
-                        $TempStokRacikan = self::$query->update('inventori_temp_stok', array(
-                            'status' => 'D'
-                        ))
-                            ->where(array(
-                                'inventori_temp_stok.transact_table' => '= ?',
-                                'AND',
-                                'inventori_temp_stok.transact_iden' => '= ?',
-                                'AND',
-                                'inventori_temp_stok.barang' => '= ?',
-                                'AND',
-                                'inventori_temp_stok.batch' => '= ?'
-                            ), array(
-                                'racikan', $targetRacikan['response_data'][0]['uid'], $bValue['barang'], $bValue['batch']
+                        if($bValue['temp_stat'] === 'racikan') {
+                            $TempStokRacikan = self::$query->update('inventori_temp_stok', array(
+                                'status' => 'D'
                             ))
-                            ->execute();
+                                ->where(array(
+                                    'inventori_temp_stok.transact_table' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.transact_iden' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.barang' => '= ?',
+                                    'AND',
+                                    'inventori_temp_stok.batch' => '= ?'
+                                ), array(
+                                    'racikan', $targetRacikan['response_data'][0]['uid'], $bValue['barang'], $bValue['batch']
+                                ))
+                                ->execute();
+                            array_push($tempProgress, $TempStokRacikan);
+                        }
 
                         if($TempStokResep['response_result'] > 0 || $TempStokRacikan['response_result'] > 0) {
                             $updateStok = self::$query->update('inventori_stok', array(
@@ -1462,6 +1483,8 @@ class Apotek extends Utility
         }
 
         return array(
+            'atempres' => $tempProgress,
+            'racikan_batch' => $racikanItem,
             'result' => $usedBatch,
             'resep' => $resepItem,
             'racikan' => $racikan,
@@ -2256,6 +2279,7 @@ class Apotek extends Utility
                 'qty',
                 'aturan_pakai',
                 'signa_qty',
+                'batch',
                 'signa_pakai',
                 'aturan_pakai',
                 'verifikator',
@@ -2273,24 +2297,46 @@ class Apotek extends Utility
                 $VerifikatorInfo = $Pegawai->get_info($ResValue['verifikator']);
                 $resep_verifikator['response_data'][$ResKey]['verifikator'] = $VerifikatorInfo['response_data'][0];
 
-                $InventoriInfo = $Inventori->get_item_detail($ResValue['item']);
+                $InventoriInfo = $Inventori->get_item_info($ResValue['item']);
                 $resep_verifikator['response_data'][$ResKey]['detail'] = $InventoriInfo['response_data'][0];
+
+                //Check Ketersediaan Obat
+                $CheckStokResepDetail = self::$query->select('inventori_stok', array(
+                    'stok_terkini'
+                ))
+                    ->where(array(
+                        'inventori_stok.batch' => '= ?',
+                        'AND',
+                        'inventori_stok.barang' => '= ?',
+                        'AND',
+                        'inventori_stok.gudang' => '= ?'
+                    ), array(
+                        $ResValue['batch'],
+                        $ResValue['item'],
+                        __GUDANG_APOTEK__
+                    ))
+                    ->execute();
+                $resep_verifikator['response_data'][$ResKey]['stok_terkini'] = floatval($CheckStokResepDetail['response_data'][0]['stok_terkini']);
 
                 $batch_current = array();
                 //Batch Info
-                $InventoriBatch = $Inventori->get_item_batch($ResValue['item']);
+                // $InventoriBatch = $Inventori->get_item_batch($ResValue['item']);
 
-                $total_sedia = 0;
-                foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
-                {
-                    if($bValue['gudang']['uid'] === $UserData['data']->gudang) {
-                        array_push($batch_current, $bValue);
-                        $total_sedia += $bValue['stok_terkini'];
-                    }
-                }
+                // $total_sedia = 0;
+                // foreach ($InventoriBatch['response_data'] as $bKey => $bValue)
+                // {
+                //     if($bValue['gudang']['uid'] === $UserData['data']->gudang) {
+                //         array_push($batch_current, $bValue);
+                //         $total_sedia += $bValue['stok_terkini'];
+                //     }
+                // }
                 
-                $resep_verifikator['response_data'][$ResKey]['batch'] = $batch_current;
-                $resep_verifikator['response_data'][$ResKey]['sedia'] = $total_sedia;
+                $batchData = $Inventori->get_batch_info($ResValue['batch']);
+                foreach($batchData['response_data'] as $batchKey => $batchValue) {
+                    $batchData['response_data'][$batchKey]['expired_date_parsed'] = date('d F Y', strtotime($batchValue['expired_date']));
+                }
+                $resep_verifikator['response_data'][$ResKey]['batch'] = $batchData['response_data'][0];
+                //$resep_verifikator['response_data'][$ResKey]['sedia'] = $total_sedia;
                 $InvoiceDetailCharged = self::$query->select('invoice_detail', array(
                     'qty',
                     'harga',
@@ -2425,6 +2471,7 @@ class Apotek extends Utility
                     'id',
                     'obat',
                     'jumlah',
+                    'batch',
                     'kekuatan',
                     'created_at',
                     'updated_at'
@@ -2438,21 +2485,42 @@ class Apotek extends Utility
                     ))
                     ->execute();
                 foreach ($racikan_detail['response_data'] as $RDIKey => $RDIValue) {
-                    $InventoriInfo = $Inventori->get_item_detail($RDIValue['obat']);
+                    $InventoriInfo = $Inventori->get_item_info($RDIValue['obat']);
                     $racikan_detail['response_data'][$RDIKey]['detail'] = $InventoriInfo['response_data'][0];
 
-                    $InventoriBacthRacikan = $Inventori->get_item_batch($RDIValue['obat']);
-                    $racikan_detail['response_data'][$RDIKey]['batch'] = $InventoriBacthRacikan['response_data'];
+                    $BatchInfo = $Inventori->get_batch_info($RDIValue['batch']);
+                    $BatchInfo['response_data'][0]['expired_date_parsed'] = date('d F Y', strtotime($BatchInfo['response_data'][0]['expired_date']));
+                    $racikan_detail['response_data'][$RDIKey]['batch'] = $BatchInfo['response_data'][0];
 
-                    $total_sedia_racikan = 0;
-                    foreach ($InventoriBacthRacikan['response_data'] as $bRKey => $bRValue)
-                    {
-                        if($bRValue['gudang']['uid'] === $UserData['data']->gudang)
-                        {
-                            $total_sedia_racikan += floatval($bRValue['stok_terkini']);
-                        }
-                    }
-                    $racikan_detail['response_data'][$RDIKey]['sedia'] = $total_sedia_racikan;
+                    $CheckStokRacikanDetail = self::$query->select('inventori_stok', array(
+                        'stok_terkini'
+                    ))
+                        ->where(array(
+                            'inventori_stok.batch' => '= ?',
+                            'AND',
+                            'inventori_stok.barang' => '= ?',
+                            'AND',
+                            'inventori_stok.gudang' => '= ?'
+                        ), array(
+                            $RDIValue['batch'],
+                            $RDIValue['obat'],
+                            __GUDANG_APOTEK__
+                        ))
+                        ->execute();
+                    $racikan_detail['response_data'][$RDIKey]['stok_terkini'] = floatval($CheckStokRacikanDetail['response_data'][0]['stok_terkini']);
+
+                    // $InventoriBacthRacikan = $Inventori->get_item_batch($RDIValue['obat']);
+                    // $racikan_detail['response_data'][$RDIKey]['batch'] = $InventoriBacthRacikan['response_data'];
+
+                    // $total_sedia_racikan = 0;
+                    // foreach ($InventoriBacthRacikan['response_data'] as $bRKey => $bRValue)
+                    // {
+                    //     if($bRValue['gudang']['uid'] === $UserData['data']->gudang)
+                    //     {
+                    //         $total_sedia_racikan += floatval($bRValue['stok_terkini']);
+                    //     }
+                    // }
+                    // $racikan_detail['response_data'][$RDIKey]['sedia'] = $total_sedia_racikan;
 
 
 
@@ -4798,15 +4866,17 @@ class Apotek extends Utility
                         '(resep.status_resep' => '= ?',
                         'OR',
                         'resep.status_resep' => '= ?)',
+                        'AND',
                         '(NOT antrian.departemen' =>'= ?',
                         'AND',
                         'NOT antrian.departemen' =>'= ?)',
                         'AND',
+                        'pasien.deleted_at' => 'IS NULL',
+                        'AND',
                         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
                         'OR',
-                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
-                        'AND',
-                        'pasien.deleted_at' => 'IS NULL'
+                        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                        
                     );
                 } else {
                     $paramData = array(
@@ -6129,21 +6199,22 @@ class Apotek extends Utility
                 }
             }
 
-            $resepChange = self::$query->insert('resep_change_log', array(
-                'resep' => $parameter['uid'],
-                'verifikator' => $UserData['data']->uid,
-                'item' => $value['obat'],
-                'qty' => floatval($value['jumlah']),
-                'aturan_pakai' => intval($value['aturan_pakai']),
-                'signa_qty' => $value['signa_qty'],
-                'signa_pakai' => $value['signa_pakai'],
-                'keterangan' => (isset($value['keterangan'])) ? $value['keterangan'] : '',
-                'alasan_ubah' => $value['alasan_ubah'],
-                'created_at' => parent::format_date(),
-                'updated_at' => parent::format_date(),
-            ))
-                ->execute();
-            array_push($resepChangedRecord, $resepChange);
+            //TODO : Simpan penggunaan batch. Dulu bentuk begini
+            // $resepChange = self::$query->insert('resep_change_log', array(
+            //     'resep' => $parameter['uid'],
+            //     'verifikator' => $UserData['data']->uid,
+            //     'item' => $value['obat'],
+            //     'qty' => floatval($value['jumlah']),
+            //     'aturan_pakai' => intval($value['aturan_pakai']),
+            //     'signa_qty' => $value['signa_qty'],
+            //     'signa_pakai' => $value['signa_pakai'],
+            //     'keterangan' => (isset($value['keterangan'])) ? $value['keterangan'] : '',
+            //     'alasan_ubah' => $value['alasan_ubah'],
+            //     'created_at' => parent::format_date(),
+            //     'updated_at' => parent::format_date(),
+            // ))
+            //     ->execute();
+            // array_push($resepChangedRecord, $resepChange);
 
             //Check pengecasan biaya untuk resep dengan nomor yang digenerate
             $CheckInvoiceCharged = self::$query->select('invoice_detail', array(
@@ -6191,82 +6262,151 @@ class Apotek extends Utility
                     'document' => 'RESEP' . $ResepDetail['response_data'][0]['kode']
                 ));
 
-                if($resepChange['response_result'] > 0) {
-                    //Update Charged Harga
-                    $updateHargaResepDetail = self::$query->update('resep_detail', array(
-                        'harga' => floatval($value['harga'])
+                // if($resepChange['response_result'] > 0) {
+                //     //Update Charged Harga
+                //     $updateHargaResepDetail = self::$query->update('resep_detail', array(
+                //         'harga' => floatval($value['harga'])
+                //     ))
+                //         ->where(array(
+                //             'resep_detail.deleted_at' => 'IS NULL',
+                //             'AND',
+                //             'resep_detail.resep' => '= ?',
+                //             'AND',
+                //             'resep_detail.obat' => '= ?'
+                //         ), array(
+                //             $ResepDetail['response_data'][0]['uid'],
+                //             $value['obat']
+                //         ))
+                //         ->execute();
+                // }
+                //Update Charged Harga
+                $updateHargaResepDetail = self::$query->update('resep_detail', array(
+                    'harga' => floatval($value['harga'])
+                ))
+                    ->where(array(
+                        'resep_detail.deleted_at' => 'IS NULL',
+                        'AND',
+                        'resep_detail.resep' => '= ?',
+                        'AND',
+                        'resep_detail.obat' => '= ?'
+                    ), array(
+                        $ResepDetail['response_data'][0]['uid'],
+                        $value['obat']
                     ))
-                        ->where(array(
-                            'resep_detail.deleted_at' => 'IS NULL',
-                            'AND',
-                            'resep_detail.resep' => '= ?',
-                            'AND',
-                            'resep_detail.obat' => '= ?'
-                        ), array(
-                            $ResepDetail['response_data'][0]['uid'],
-                            $value['obat']
-                        ))
-                        ->execute();
-                }
+                    ->execute();
 
                 array_push($invoice_detail, $AppendInvoice);
             }
 
             $usedBatch = array();
-            $InventoriBatch = $Inventori->get_item_batch($value['obat']);
+            $InventoriBatch = $Inventori->get_item_batch($value['obat'], __GUDANG_APOTEK__);
+            $AlternateBatch = $Inventori->get_item_batch($value['obat'], __GUDANG_UTAMA__);
             $kebutuhan = floatval($value['jumlah']);
             foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
-                if($kebutuhan >= $bValue['stok_terkini']) {
-                    if($bValue['stok_terkini'] > 0) {
-                        array_push($usedBatch, array(
-                            'batch' => $bValue['batch'],
-                            'barang' => $bValue['barang'],
-                            'gudang' => $bValue['gudang']['uid'],
-                            'qty' => $bValue['stok_terkini']
-                        ));
-                        $kebutuhan -= $bValue['stok_terkini'];
+                if($bValue['gudang']['uid'] === __GUDANG_APOTEK__) {
+                    if($kebutuhan >= $bValue['stok_terkini']) {
+                        if($bValue['stok_terkini'] > 0) {
+                            array_push($usedBatch, array(
+                                'batch' => $bValue['batch'],
+                                'barang' => $bValue['barang'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'qty' => $bValue['stok_terkini']
+                            ));
+                            $kebutuhan -= $bValue['stok_terkini'];
+                        }
+                    } else {
+                        if($kebutuhan > 0) {
+                            array_push($usedBatch, array(
+                                'batch' => $bValue['batch'],
+                                'barang' => $bValue['barang'],
+                                'gudang' => $bValue['gudang']['uid'],
+                                'qty' => $kebutuhan
+                            ));
+                            $kebutuhan = 0;
+                        }
                     }
-                } else {
-                    if($kebutuhan > 0) {
-                        array_push($usedBatch, array(
-                            'batch' => $bValue['batch'],
-                            'barang' => $bValue['barang'],
-                            'gudang' => $bValue['gudang']['uid'],
-                            'qty' => $kebutuhan
-                        ));
-                        $kebutuhan = 0;
+                    /*if($bValue['gudang']['uid'] === $UserData['data']->gudang) {
+    
+                    }*/
+                }
+            }
+
+            if($kebutuhan > 0) {
+                foreach ($AlternateBatch['response_data'] as $bKey => $bValue) {
+                    if($bValue['gudang']['uid'] === __GUDANG_UTAMA__) {
+                        if($kebutuhan >= $bValue['stok_terkini']) {
+                            if($bValue['stok_terkini'] > 0) {
+                                array_push($usedBatch, array(
+                                    'batch' => $bValue['batch'],
+                                    'barang' => $bValue['barang'],
+                                    'gudang' => $bValue['gudang']['uid'],
+                                    'qty' => $bValue['stok_terkini']
+                                ));
+                                $kebutuhan -= $bValue['stok_terkini'];
+                            }
+                        } else {
+                            if($kebutuhan > 0) {
+                                array_push($usedBatch, array(
+                                    'batch' => $bValue['batch'],
+                                    'barang' => $bValue['barang'],
+                                    'gudang' => $bValue['gudang']['uid'],
+                                    'qty' => $kebutuhan
+                                ));
+                                $kebutuhan = 0;
+                            }
+                        }
+                        /*if($bValue['gudang']['uid'] === $UserData['data']->gudang) {
+        
+                        }*/
                     }
                 }
-                /*if($bValue['gudang']['uid'] === $UserData['data']->gudang) {
-
-                }*/
             }
 
             foreach ($usedBatch as $BatchKey => $BatchValue) {
-                //Potong Stok Virtual
-                if($UserData['data']->gudang === $BatchValue['gudang']) {
-                    $Virtual = $Inventori->virtual_stok(array(
-                        'transact_table' => 'resep',
-                        'transact_iden' => $parameter['uid'],
-                        'gudang_asal' => $UserData['data']->gudang,
-                        'barang' => $BatchValue['barang'],
-                        'batch' => $BatchValue['batch'],
-                        'qty' => $BatchValue['qty'],
-                        'remark' => 'Reserved stok resep'
-                    ));
-                } else {
-                    $Virtual = $Inventori->virtual_stok(array(
-                        'transact_table' => 'resep',
-                        'transact_iden' => $parameter['uid'],
-                        'gudang_asal' => $BatchValue['gudang'],
-                        'gudang_tujuan' => $UserData['data']->gudang,
-                        'barang' => $BatchValue['barang'],
-                        'batch' => $BatchValue['batch'],
-                        'qty' => $BatchValue['qty'],
-                        'remark' => 'Reserved stok resep'
-                    ));
+
+                $resepChange = self::$query->insert('resep_change_log', array(
+                    'resep' => $parameter['uid'],
+                    'verifikator' => $UserData['data']->uid,
+                    'item' => $value['obat'],
+                    'batch' => $BatchValue['batch'],
+                    'qty' => floatval($BatchValue['qty']),
+                    'aturan_pakai' => intval($value['aturan_pakai']),
+                    'signa_qty' => $value['signa_qty'],
+                    'signa_pakai' => $value['signa_pakai'],
+                    'keterangan' => (isset($value['keterangan'])) ? $value['keterangan'] : '',
+                    'alasan_ubah' => $value['alasan_ubah'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date(),
+                ))
+                    ->execute();
+                array_push($resepChangedRecord, $resepChange);
+
+                if($resepChange['response_result'] > 0) {
+                    //Potong Stok Virtual
+                    if($UserData['data']->gudang === $BatchValue['gudang']) {
+                        $Virtual = $Inventori->virtual_stok(array(
+                            'transact_table' => 'resep',
+                            'transact_iden' => $parameter['uid'],
+                            'gudang_asal' => $UserData['data']->gudang,
+                            'barang' => $BatchValue['barang'],
+                            'batch' => $BatchValue['batch'],
+                            'qty' => $BatchValue['qty'],
+                            'remark' => 'Reserved stok resep'
+                        ));
+                    } else {
+                        $Virtual = $Inventori->virtual_stok(array(
+                            'transact_table' => 'resep',
+                            'transact_iden' => $parameter['uid'],
+                            'gudang_asal' => $BatchValue['gudang'],
+                            'gudang_tujuan' => $UserData['data']->gudang,
+                            'barang' => $BatchValue['barang'],
+                            'batch' => $BatchValue['batch'],
+                            'qty' => $BatchValue['qty'],
+                            'remark' => 'Reserved stok resep'
+                        ));
+                    }
+                    array_push($virtual, $Virtual);
                 }
-                array_push($virtual, $Virtual);
             }
 
 
@@ -6294,15 +6434,7 @@ class Apotek extends Utility
                 ->execute();
 
             foreach ($value['racikan_komposisi'] as $KKey => $KValue) {
-                $racikanDetailChange = self::$query->insert('racikan_detail_change_log', array(
-                    'racikan' => $value['racikan_uid'],
-                    'obat' => $KValue['obat'],
-                    'jumlah' => $KValue['jumlah'],
-                    'kekuatan' => $KValue['kekuatan'],
-                    'created_at' => parent::format_date(),
-                    'updated_at' => parent::format_date()
-                ))
-                    ->execute();
+                
 
                 //Check pengecasan biaya untuk resep dengan nomor yang digenerate
                 $CheckInvoiceCharged = self::$query->select('invoice_detail', array(
@@ -6352,76 +6484,133 @@ class Apotek extends Utility
                     ));
                     array_push($invoice_detail, $AppendInvoice);
 
-                    if($racikanDetailChange['response_resul'] > 0) {
-                        $updateHargaRacikanDetail = self::$query->update('racikan_detail', array(
-                            'harga' => floatval($value['harga'])
+                    // if($racikanDetailChange['response_resul'] > 0) {
+                    //     $updateHargaRacikanDetail = self::$query->update('racikan_detail', array(
+                    //         'harga' => floatval($value['harga'])
+                    //     ))
+                    //         ->where(array(
+                    //             'racikan_detail.deleted_at' => 'IS NULL',
+                    //             'AND',
+                    //             'racikan_detail.asesmen' => '= ?',
+                    //             'AND',
+                    //             'racikan_detail.obat' => '= ?'
+                    //         ), array(
+                    //             $ResepDetail['response_data'][0]['asesmen'],
+                    //             $value['obat']
+                    //         ))
+                    //         ->execute();
+                    // }
+                    $updateHargaRacikanDetail = self::$query->update('racikan_detail', array(
+                        'harga' => floatval($value['harga'])
+                    ))
+                        ->where(array(
+                            'racikan_detail.deleted_at' => 'IS NULL',
+                            'AND',
+                            'racikan_detail.asesmen' => '= ?',
+                            'AND',
+                            'racikan_detail.obat' => '= ?'
+                        ), array(
+                            $ResepDetail['response_data'][0]['asesmen'],
+                            $value['obat']
                         ))
-                            ->where(array(
-                                'racikan_detail.deleted_at' => 'IS NULL',
-                                'AND',
-                                'racikan_detail.asesmen' => '= ?',
-                                'AND',
-                                'racikan_detail.obat' => '= ?'
-                            ), array(
-                                $ResepDetail['response_data'][0]['asesmen'],
-                                $value['obat']
-                            ))
-                            ->execute();
-                    }
+                        ->execute();
                 }
                 
                 $usedBatch = array();
-                $InventoriBatch = $Inventori->get_item_batch($KValue['obat']);
+                $InventoriBatch = $Inventori->get_item_batch($KValue['obat'], __GUDANG_APOTEK__);
+                $AlternatedBatch = $Inventori->get_item_batch($KValue['obat'], __GUDANG_UTAMA__);
                 $kebutuhanRacikan = floatval($KValue['jumlah']);
                 foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
-                    if($kebutuhanRacikan >= $bValue['stok_terkini']) {
-                        if($bValue['stok_terkini'] > 0) {
-                            array_push($usedBatch, array(
-                                'batch' => $bValue['batch'],
-                                'barang' => $bValue['barang'],
-                                'gudang' => $bValue['gudang']['uid'],
-                                'qty' => $bValue['stok_terkini']
-                            ));
-                            $kebutuhanRacikan -= $bValue['stok_terkini'];
+                    if($bValue['gudang']['uid'] === __GUDANG_APOTEK__) {
+                        if($kebutuhanRacikan >= $bValue['stok_terkini']) {
+                            if($bValue['stok_terkini'] > 0) {
+                                array_push($usedBatch, array(
+                                    'batch' => $bValue['batch'],
+                                    'barang' => $bValue['barang'],
+                                    'gudang' => $bValue['gudang']['uid'],
+                                    'qty' => $bValue['stok_terkini']
+                                ));
+                                $kebutuhanRacikan -= $bValue['stok_terkini'];
+                            }
+                        } else {
+                            if($kebutuhanRacikan > 0) {
+                                array_push($usedBatch, array(
+                                    'batch' => $bValue['batch'],
+                                    'barang' => $bValue['barang'],
+                                    'gudang' => $bValue['gudang']['uid'],
+                                    'qty' => $kebutuhanRacikan
+                                ));
+                                $kebutuhanRacikan = 0;
+                            }
                         }
-                    } else {
-                        if($kebutuhanRacikan > 0) {
-                            array_push($usedBatch, array(
-                                'batch' => $bValue['batch'],
-                                'barang' => $bValue['barang'],
-                                'gudang' => $bValue['gudang']['uid'],
-                                'qty' => $kebutuhanRacikan
-                            ));
-                            $kebutuhanRacikan = 0;
+                    }
+                }
+
+                if($kebutuhanRacikan > 0) {
+                    foreach ($AlternatedBatch['response_data'] as $bKey => $bValue) {
+                        if($bValue['gudang']['uid'] === __GUDANG_UTAMA__) {
+                            if($kebutuhanRacikan >= $bValue['stok_terkini']) {
+                                if($bValue['stok_terkini'] > 0) {
+                                    array_push($usedBatch, array(
+                                        'batch' => $bValue['batch'],
+                                        'barang' => $bValue['barang'],
+                                        'gudang' => $bValue['gudang']['uid'],
+                                        'qty' => $bValue['stok_terkini']
+                                    ));
+                                    $kebutuhanRacikan -= $bValue['stok_terkini'];
+                                }
+                            } else {
+                                if($kebutuhanRacikan > 0) {
+                                    array_push($usedBatch, array(
+                                        'batch' => $bValue['batch'],
+                                        'barang' => $bValue['barang'],
+                                        'gudang' => $bValue['gudang']['uid'],
+                                        'qty' => $kebutuhanRacikan
+                                    ));
+                                    $kebutuhanRacikan = 0;
+                                }
+                            }
                         }
                     }
                 }
 
                 foreach ($usedBatch as $BatchKey => $BatchValue) {
-                    //Potong Stok Virtual
-                    if($UserData['data']->gudang === $BatchValue['gudang']) {
-                        $Virtual = $Inventori->virtual_stok(array(
-                            'transact_table' => 'racikan',
-                            'transact_iden' => $value['racikan_uid'],
-                            'gudang_asal' => $UserData['data']->gudang,
-                            'barang' => $BatchValue['barang'],
-                            'batch' => $BatchValue['batch'],
-                            'qty' => $BatchValue['qty'],
-                            'remark' => 'Reserved stok racikan'
-                        ));
-                    } else {
-                        $Virtual = $Inventori->virtual_stok(array(
-                            'transact_table' => 'racikan',
-                            'transact_iden' => $value['racikan_uid'],
-                            'gudang_asal' => $BatchValue['gudang'],
-                            'gudang_tujuan' => $UserData['data']->gudang,
-                            'barang' => $BatchValue['barang'],
-                            'batch' => $BatchValue['batch'],
-                            'qty' => $BatchValue['qty'],
-                            'remark' => 'Reserved stok racikan'
-                        ));
+                    $racikanDetailChange = self::$query->insert('racikan_detail_change_log', array(
+                        'racikan' => $value['racikan_uid'],
+                        'obat' => $KValue['obat'],
+                        'jumlah' => floatval($BatchValue['qty']),
+                        'batch' => $BatchValue['batch'],
+                        'kekuatan' => $KValue['kekuatan'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+                    if($racikanDetailChange['response_result'] > 0) {
+                        //Potong Stok Virtual
+                        if($UserData['data']->gudang === $BatchValue['gudang']) {
+                            $Virtual = $Inventori->virtual_stok(array(
+                                'transact_table' => 'racikan',
+                                'transact_iden' => $value['racikan_uid'],
+                                'gudang_asal' => $UserData['data']->gudang,
+                                'barang' => $BatchValue['barang'],
+                                'batch' => $BatchValue['batch'],
+                                'qty' => $BatchValue['qty'],
+                                'remark' => 'Reserved stok racikan'
+                            ));
+                        } else {
+                            $Virtual = $Inventori->virtual_stok(array(
+                                'transact_table' => 'racikan',
+                                'transact_iden' => $value['racikan_uid'],
+                                'gudang_asal' => $BatchValue['gudang'],
+                                'gudang_tujuan' => $UserData['data']->gudang,
+                                'barang' => $BatchValue['barang'],
+                                'batch' => $BatchValue['batch'],
+                                'qty' => $BatchValue['qty'],
+                                'remark' => 'Reserved stok racikan'
+                            ));
+                        }
+                        array_push($virtual, $Virtual);
                     }
-                    array_push($virtual, $Virtual);
                 }
             }
 

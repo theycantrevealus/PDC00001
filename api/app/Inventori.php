@@ -2957,24 +2957,44 @@ class Inventori extends Utility
         return $data;
     }
 
-    public function get_item_batch($parameter)
-    {
+    public function get_item_batch($parameter, $target = '') {
         $filteredData = array();
-        $data = self::$query->select('inventori_stok', array(
-            'batch',
-            'barang',
-            'gudang',
-            'stok_terkini'
-        ))
-            ->where(array(
-                'inventori_stok.barang' => '= ?'
-            ), array(
-                $parameter
+        if(!empty($target)) {
+            $data = self::$query->select('inventori_stok', array(
+                'batch',
+                'barang',
+                'gudang',
+                'stok_terkini'
             ))
-            ->order(array(
-                'gudang' => 'DESC'
+                ->where(array(
+                    'inventori_stok.barang' => '= ?',
+                    'AND',
+                    'inventori_stok.gudang' => '= ?'
+                ), array(
+                    $parameter, $target
+                ))
+                ->order(array(
+                    'gudang' => 'DESC'
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok', array(
+                'batch',
+                'barang',
+                'gudang',
+                'stok_terkini'
             ))
-            ->execute();
+                ->where(array(
+                    'inventori_stok.barang' => '= ?'
+                ), array(
+                    $parameter
+                ))
+                ->order(array(
+                    'gudang' => 'DESC'
+                ))
+                ->execute();
+        }
+        
         foreach ($data['response_data'] as $key => $value) {
             $batch_info = self::get_batch_detail($value['batch'])['response_data'][0];
 

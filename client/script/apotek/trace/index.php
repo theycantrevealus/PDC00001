@@ -139,6 +139,12 @@
         }*/
 
 
+        var currentPage = 1;
+        $("body").on("click", ".paginate_button.page-item a", function() {
+            currentPage = parseInt($(this).html());
+            console.log(currentPage);
+        });
+
         var tableResep = $("#table-resep").DataTable({
             processing: true,
             serverSide: true,
@@ -158,8 +164,6 @@
                 },
                 dataSrc:function(response) {
 
-                    console.clear();
-                    console.log(response);
                     var resepDataRaw = response.response_package.response_data;
                     var parsedData = [];
                     var IGD = [];
@@ -178,7 +182,7 @@
                             console.log(resepDataRaw[resepKey]);
                         }
                     }
-                    var autonum = 1;
+                    var autonum = ((currentPage - 1) * 15) + 1;
                     var finalData = IGD.concat(parsedData);
                     for(var az in finalData) {
                         finalData[az].autonum = autonum;
@@ -227,7 +231,6 @@
                                     return row.departemen.nama + "<br />" +
                                         "<span class=\"text-info\">" + ((row.ns_detail.kode_ns !== undefined && row.ns_detail.kode_ns !== null) ? row.ns_detail.kode_ns : "-") + "</span> - " + row.ns_detail.nama_ns;
                                 } else {
-                                    console.log(row.ns_response);
                                     return "-";
                                 }
                             } else {
