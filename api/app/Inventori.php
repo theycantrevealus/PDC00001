@@ -2957,24 +2957,44 @@ class Inventori extends Utility
         return $data;
     }
 
-    public function get_item_batch($parameter)
-    {
+    public function get_item_batch($parameter, $target = '') {
         $filteredData = array();
-        $data = self::$query->select('inventori_stok', array(
-            'batch',
-            'barang',
-            'gudang',
-            'stok_terkini'
-        ))
-            ->where(array(
-                'inventori_stok.barang' => '= ?'
-            ), array(
-                $parameter
+        if(!empty($target)) {
+            $data = self::$query->select('inventori_stok', array(
+                'batch',
+                'barang',
+                'gudang',
+                'stok_terkini'
             ))
-            ->order(array(
-                'gudang' => 'DESC'
+                ->where(array(
+                    'inventori_stok.barang' => '= ?',
+                    'AND',
+                    'inventori_stok.gudang' => '= ?'
+                ), array(
+                    $parameter, $target
+                ))
+                ->order(array(
+                    'gudang' => 'DESC'
+                ))
+                ->execute();
+        } else {
+            $data = self::$query->select('inventori_stok', array(
+                'batch',
+                'barang',
+                'gudang',
+                'stok_terkini'
             ))
-            ->execute();
+                ->where(array(
+                    'inventori_stok.barang' => '= ?'
+                ), array(
+                    $parameter
+                ))
+                ->order(array(
+                    'gudang' => 'DESC'
+                ))
+                ->execute();
+        }
+        
         foreach ($data['response_data'] as $key => $value) {
             $batch_info = self::get_batch_detail($value['batch'])['response_data'][0];
 
@@ -7980,7 +8000,7 @@ class Inventori extends Utility
             $data['response_data'][$key]['dari'] = date('d F Y', strtotime($value['dari']));
             $data['response_data'][$key]['sampai'] = date('d F Y', strtotime($value['sampai']));
 
-            $PegawaiDetail = $Pegawai->get_detail($value['pegawai'])['response_data'][0];
+            $PegawaiDetail = $Pegawai->get_info($value['pegawai'])['response_data'][0];
             $data['response_data'][$key]['pegawai'] = $PegawaiDetail;
 
             $OpnameDetail = self::$query->select('inventori_stok_opname_detail', array(
@@ -8002,8 +8022,8 @@ class Inventori extends Utility
             $autonum = 1;
             foreach ($OpnameDetail['response_data'] as $OKey => $OValue) {
                 $OpnameDetail['response_data'][$OKey]['autonum'] = $autonum;
-                $OpnameDetail['response_data'][$OKey]['item'] = self::get_item_detail($OValue['item'])['response_data'][0];
-                $OpnameDetail['response_data'][$OKey]['batch'] = self::get_batch_detail($OValue['batch'])['response_data'][0];
+                $OpnameDetail['response_data'][$OKey]['item'] = self::get_item_info($OValue['item'])['response_data'][0];
+                $OpnameDetail['response_data'][$OKey]['batch'] = self::get_batch_info($OValue['batch'])['response_data'][0];
                 $autonum++;
             }
             $data['response_data'][$key]['detail'] = $OpnameDetail['response_data'];
@@ -9667,7 +9687,9 @@ class Inventori extends Utility
                 'OR',
                 'inventori_mutasi.ke' => '= ?)',
                 'AND',
-                'pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+                '(pegawai.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'inventori_mutasi.kode' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
             );
 
             $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);

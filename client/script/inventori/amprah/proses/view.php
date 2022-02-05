@@ -272,7 +272,7 @@
 					for(var bKey in metaData[selectedItem].batch) {
 						var newListBatch = document.createElement("LI");
 
-						if(floatval(metaData[selectedItem].batch[bKey].disetujui) > 0) {
+						if(parseFloat(metaData[selectedItem].batch[bKey].disetujui) > 0) {
 							$(newListBatch).html(metaData[selectedItem].batch[bKey].kode + " - [<b>" + metaData[selectedItem].batch[bKey].expired + "</b>] <b style=\"padding-right: 120px; float: right\" class=\"text-info\">(" + metaData[selectedItem].batch[bKey].disetujui + ")</b>");
 							$("ol#item_batch_" + selectedItem).append(newListBatch);
 						}

@@ -536,7 +536,7 @@
                                 serverSide: true,
                                 sPaginationType: "full_numbers",
                                 bPaginate: true,
-                                lengthMenu: [[5, 10, 15, 50], [5, 10, 15, 50]],
+                                lengthMenu: [[20, 50, 200], [20, 50, 200]],
                                 serverMethod: "POST",
                                 "ajax":{
                                     url: __HOSTAPI__ + "/Inventori",
@@ -583,12 +583,12 @@
                                     },
                                     {
                                         "data" : null, render: function(data, type, row, meta) {
-                                            return "<h6 class=\"number_style text-right\">" + number_format(row.qty_awal, 2, ".", ",") + "</h6>";
+                                            return "<h5 class=\"number_style text-right\">" + number_format(row.qty_awal, 2, ".", ",") + "</h5>";
                                         }
                                     },
                                     {
                                         "data" : null, render: function(data, type, row, meta) {
-                                            return "<h6 class=\"number_style text-right\">" + number_format(row.qty_akhir, 2, ".", ",") + "</h6>";
+                                            return "<h5 class=\"number_style text-right\">" + number_format(row.qty_akhir, 2, ".", ",") + "</h5>";
                                         }
                                     },
                                     {
@@ -597,15 +597,15 @@
                                             var selisih = 0;
                                             if(row.qty_awal > row.qty_akhir) {
                                                 selisih = parseFloat(row.qty_awal) - parseFloat(row.qty_akhir);
-                                                parsedVisual = "<b class=\"text-danger\"><i class=\"fa fa-caret-down\"></i> " + selisih + "</b>";
+                                                parsedVisual = "<b class=\"text-danger\">" + selisih + " <i class=\"fa fa-arrow-down\"></i> </b>";
                                             } else if(row.qty_awal < row.qty_akhir) {
                                                 selisih = parseFloat(row.qty_akhir) - parseFloat(row.qty_awal);
-                                                parsedVisual = "<b class=\"text-warning\"><i class=\"fa fa-caret-up\"></i> " + selisih + "</b>";
+                                                parsedVisual = "<b class=\"text-warning\">" + selisih + " <i class=\"fa fa-arrow-up\"></i> </b>";
                                             } else {
                                                 selisih = parseFloat(row.qty_akhir) - parseFloat(row.qty_awal);
-                                                parsedVisual = "<b class=\"text-success\"><i class=\"fa fa-check\"></i> " + selisih + "</b>";
+                                                parsedVisual = "<b class=\"text-success\">" + selisih + " <i class=\"fa fa-check\"></i> </b>";
                                             }
-                                            return parsedVisual;
+                                            return "<h5 class=\"number_style text-right\" style=\"padding-right: 20px;\"><span class=\"wrap_content\">" + parsedVisual + "</span></h5>";
                                         }
                                     },
                                     {
@@ -1418,7 +1418,7 @@
 						<div class="col-lg-12 card-body">
 							<div class="row">
 								<div class="form-group col-md-12">
-									<table class="table table-bordered" id="detail-opname">
+									<table class="table table-bordered largeDataType" id="detail-opname">
 										<thead class="thead-dark">
 											<tr>
 												<th class="wrap_content">No</th>
@@ -1426,8 +1426,8 @@
 												<th class="wrap_content">Batch</th>
 												<th class="wrap_content">Awal</th>
 												<th class="wrap_content">Akhir</th>
-												<th>Selisih</th>
-												<th>Keterangan</th>
+												<th class="wrap_content">Selisih</th>
+												<th style="width: 15%;">Keterangan</th>
 											</tr>
 										</thead>
 										<tbody></tbody>

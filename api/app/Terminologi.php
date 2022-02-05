@@ -51,6 +51,9 @@ class Terminologi extends Utility {
 	public function __POST__($parameter = array()) {
 		try{
 			switch ($parameter['request']) {
+				case 'parent_terbilang':
+					return parent::terbilang($parameter['nilai']);
+					break;
 				case 'tambah-terminologi-item':
 					return self::tambah_terminologi_item('terminologi_item', $parameter);
 					break;

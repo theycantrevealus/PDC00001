@@ -812,7 +812,6 @@
                 success:function(response) {
                     batchData = response.response_package.response_data;
                     
-
                     if(batchData !== null) {
                         if(rowTarget !== "") {
 
@@ -834,7 +833,7 @@
 
 
                             if(type === "resep") {
-
+                                
                                 $("#batch_obat_" + rowTarget + " li").remove();
 
                                 total_kebutuhan = parseFloat($("#resep_jlh_hari_" + rowTarget).inputmask("unmaskedvalue"));
@@ -852,31 +851,35 @@
                                 var rebaseStorage = [];
                                 var alternateStorage = [];
                                 for(bKey in batchData) {
-                                    if(batchData[bKey].gudang.uid === __GUDANG_APOTEK__) {
-                                        rebaseStorage.push(batchData[bKey]);
-                                    } else {
-                                        alternateStorage.push(batchData[bKey]);
+                                    if(batchData[bKey].stok_terkini > 0) {
+                                        if(batchData[bKey].gudang.uid === __GUDANG_APOTEK__) {
+                                            rebaseStorage.push(batchData[bKey]);
+                                        } else if(batchData[bKey].gudang.uid === __GUDANG_UTAMA__) {
+                                            alternateStorage.push(batchData[bKey]);
+                                        }
                                     }
                                 }
 
                                 batchData = rebaseStorage.concat(alternateStorage);
+                                
                                 var alternatedBatchListGFar = [];
                                 var alternatedBatchListLain = [];
 
 
 
 
-                                for(bKey in batchData) {
-                                    if(batchData[bKey].gudang.uid === __GUDANG_APOTEK__) {
-                                        sortedGudangBatchApotek.push(batchData[bKey]);
-                                    } if(batchData[bKey].gudang.uid === __GUDANG_UTAMA__) {
-                                        sortedGudangBatchgFar.push(batchData[bKey]);
-                                    } else {
-                                        sortedGudangBatchLain.push(batchData[bKey]);
-                                    }
-                                }
+                                // for(bKey in batchData) {
+                                //     if(batchData[bKey].gudang.uid === __GUDANG_APOTEK__) {
+                                //         sortedGudangBatchApotek.push(batchData[bKey]);
+                                //     } if(batchData[bKey].gudang.uid === __GUDANG_UTAMA__) {
+                                //         sortedGudangBatchgFar.push(batchData[bKey]);
+                                //     } else {
+                                //         sortedGudangBatchLain.push(batchData[bKey]);
+                                //     }
+                                // }
 
-                                batchData = sortedGudangBatchApotek.concat(sortedGudangBatchgFar).concat(sortedGudangBatchLain);
+                                //batchData = sortedGudangBatchApotek.concat(sortedGudangBatchgFar).concat(sortedGudangBatchLain);
+                                //batchData = sortedGudangBatchApotek.concat(sortedGudangBatchgFar);
 
 
                                 for(bKey in batchData) {
@@ -903,12 +906,12 @@
                                                     uniqueBatch[batchData[bKey].batch + "-" + batchData[bKey].gudang.uid] = 1;
                                                 }
                                             }
-                                        } else {
+                                        } else if(batchData[bKey].gudang.uid === __GUDANG_UTAMA__) {
                                             if(kebutuhan > batchData[bKey].stok_terkini) {
                                                 batchData[bKey].used = parseFloat(batchData[bKey].stok_terkini);
                                                 kebutuhan -= parseFloat(batchData[bKey].stok_terkini);
                                                 if(uniqueBatch[batchData[bKey].batch + "-" + batchData[bKey].gudang.uid]  === undefined) {
-                                                    if(batchData[bKey].gudang.uid === __GUDANG_UTAMA__) {
+                                                    if(batchData[bKey].gudang.uid === __GUDANG_APOTEK__) {
                                                         alternatedBatchListGFar.push(batchData[bKey]);
                                                     } else {
                                                         alternatedBatchListLain.push(batchData[bKey]);
@@ -920,7 +923,7 @@
                                                 batchData[bKey].used = parseFloat(kebutuhan);
                                                 kebutuhan = 0;
                                                 if(uniqueBatch[batchData[bKey].batch + "-" + batchData[bKey].gudang.uid]  === undefined) {
-                                                    if(batchData[bKey].gudang.uid === __GUDANG_UTAMA__) {
+                                                    if(batchData[bKey].gudang.uid === __GUDANG_APOTEK__) {
                                                         alternatedBatchListGFar.push(batchData[bKey]);
                                                     } else {
                                                         alternatedBatchListLain.push(batchData[bKey]);
@@ -943,6 +946,11 @@
                                 } else {
                                     targettedBatch = alternatedBatchList;
                                     alternatedBatchList = [];
+                                }
+
+
+                                if(item == 'fc62d22d-3aef-45b9-839f-9a84dceaaf7c') {
+                                    console.log(targettedBatch);
                                 }
 
 
@@ -988,11 +996,23 @@
                                         finalTotal = rawTotal + selectedProfitValue;
                                     }
 
+                                    var counter_kebutuhan = total_kebutuhan;
+
                                     for(var batchSelKey in targettedBatch) {
+                                        
+                                        // if(targettedBatch[batchSelKey].barang === 'fc62d22d-3aef-45b9-839f-9a84dceaaf7c') {
+                                        //     console.log(targettedBatch[batchSelKey].used + " --- " + counter_kebutuhan);
+                                        // }
+
+                                        counter_kebutuhan -= targettedBatch[batchSelKey].used;
+
+                                        
+                                        
                                         if(targettedBatch[batchSelKey].gudang.uid === __GUDANG_APOTEK__) {
-                                            $("#batch_obat_" + rowTarget).append("<li style=\"color:" + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#12a500") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                            //$("#batch_obat_" + rowTarget).append("<li style=\"color:" + ((counter_kebutuhan === 0) ? "#cf0000" : "#12a500") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + ((counter_kebutuhan > 0) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                            $("#batch_obat_" + rowTarget).append("<li batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + "</li>");
                                         } else {
-                                            $("#batch_obat_" + rowTarget).append("<li style=\"color:" + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#F58D00") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                            $("#batch_obat_" + rowTarget).append("<li style=\"color:" + ((counter_kebutuhan === 0) ? "#cf0000" : "#F58D00") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + ((counter_kebutuhan > 0) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
                                         }
                                     }
 
@@ -1159,8 +1179,9 @@
 
                                     for(var batchSelKey in targettedBatch) {
                                         if(targettedBatch[batchSelKey].used > 0) {
-                                            if(targettedBatch[batchSelKey].gudang.uid === __UNIT__.gudang) {
-                                                $("#obat_komposisi_batch_" + rowTarget).append("<li style=\"color:" + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#12a500") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                            if(targettedBatch[batchSelKey].gudang.uid === __GUDANG_APOTEK__) {
+                                                //$("#obat_komposisi_batch_" + rowTarget).append("<li style=\"color:" + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#12a500") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                                $("#obat_komposisi_batch_" + rowTarget).append("<li batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + "</li>");
                                             } else {
                                                 $("#obat_komposisi_batch_" + rowTarget).append("<li style=\"color:" + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? "#cf0000" : "#F58D00") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + ((targettedBatch[batchSelKey].used < total_kebutuhan) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
                                             }
@@ -2569,12 +2590,12 @@
                                 }
                             });
 
-
                             if(allowSave) {
                                 var racikanItem = [];
                                 $("#table-resep-racikan > tbody > tr").each(function(e) {
                                     var racikanVerifIDSave = (e + 1);
                                     var racikan_nama = $(this).find("td:eq(1) input").val();
+                                    var qtyRacikan = parseFloat($(this).find("td input.racikan_signa_jlh").inputmask("unmaskedvalue"));
                                     if(racikan_nama !== undefined && racikan_nama !== "") {
                                         var komposisi = [];
                                         $(this).find("td:eq(1) table tbody tr").each(function() {
@@ -2595,6 +2616,7 @@
                                                             allowSave = true;
                                                         } else {
                                                             if($(this).find("i").hasClass("text-danger")) {
+                                                                
                                                                 if(parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")) === 0) {
                                                                     allowSave = true;
                                                                 } else {
@@ -2611,7 +2633,7 @@
 
                                             komposisi.push({
                                                 "obat": $(this).find("td:eq(1) h6").attr("uid-obat"),
-                                                "jumlah": $(this).find("td:eq(2) input").inputmask("unmaskedvalue"),
+                                                "jumlah": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
                                                 "kekuatan": $(this).find("td:eq(3)").html(),
                                                 "harga": parseFloat(hargaPerObatRacikan)
                                             });

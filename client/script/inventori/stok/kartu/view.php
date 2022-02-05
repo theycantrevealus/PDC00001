@@ -202,9 +202,16 @@
                     
 
                     var totalAllStock = 0;
+                    var m = today.getMonth() + 1;
+                    var d = today.getDay();
+                    var y = today.getFullYear();
+
+                    var todayUnparsed = new Date(y,m,d);
+
                     for(var a in batchGroup) {
                         var eachBatchTotal = 0;
                         for(var b in batchGroup[a].log) {
+                            var checkED = new Date(batchGroup[a].batch_info.expired_date);
                             var newRow = document.createElement("TR");
                             var newTgl = document.createElement("TD");
                             var newBatch = document.createElement("TD");
@@ -228,7 +235,16 @@
                             $(newTgl).html("<b>" + batchGroup[a].log[b].logged_at + "</b>").addClass("wrap_content");
                             $(newDoc).html("<span class=\"wrap_content\">" + batchGroup[a].log[b].dokumen + "</span>");
                             $(newBatch).html("<span class=\"wrap_content\">" + batchGroup[a].batch_info.batch + "</span>");
+                            
                             $(newED).html(batchGroup[a].batch_info.expired_date_parsed).addClass("wrap_content");
+                            if(checkED === todayUnparsed) {
+                                $(newED).addClass("text-warning").prepend("<i class=\"fa fa-exclamation\"></i> ");
+                            } else if(checkED < todayUnparsed) {
+                                $(newED).addClass("text-danger").prepend("<i class=\"fa fa-ban\"></i> ");
+                            } else {
+                                $(newED).addClass("text-success").prepend("<i class=\"fa fa-check-circle\"></i> ");
+                            }
+
                             $(newMasuk).html("<h6 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].masuk) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].masuk, 2, ",", ".") + "</h6>").addClass("number_style");
                             $(newKeluar).html("<h6 class=\"number_style " + ((parseFloat(batchGroup[a].log[b].keluar) > 0) ? "" : "text-muted") + "\">" + number_format(batchGroup[a].log[b].keluar, 2, ",", ".") + "</h6>").addClass("number_style");
                             $(newSaldo).html("<h6 class=\"number_style\" rawval=\"" + batchGroup[a].log[b].saldo + "\">" + number_format(batchGroup[a].log[b].saldo, 2, ",", ".") + "</h6>").addClass("number_style");
