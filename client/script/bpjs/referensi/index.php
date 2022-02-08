@@ -13,7 +13,19 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
+            //searchDelay: 3000,
             serverMethod: "POST",
+            initComplete: function()  {
+                $("#bpjs_table_diagnosa_filter input").unbind().bind("keyup", function(e) {
+                    if(e.keyCode == 13) {
+                        if(this.value.length > 2 || this.value.length == 0) {
+                            DIAGNOSA.search(this.value).draw();
+                        }
+                    }
+
+                    return;
+                });
+            },
             "ajax": {
                 async: false,
                 url: __HOSTAPI__ + "/BPJS",
@@ -25,20 +37,30 @@
                     d.request = "get_referensi_diagnosa";
                 },
                 dataSrc: function (response) {
-                    allowLoading = true;
-                    $("#tab-referensi-bpjs .nav-link").removeClass("disabled");
-                    var data = response.response_package.data;
+                    if(response !== null && response.response_package !== null) {
+                        
+                        allowLoading = true;
+                        $("#tab-referensi-bpjs .nav-link").removeClass("disabled");
+                        var data = response.response_package.data;
 
-                    response.draw = parseInt(response.response_package.response_draw);
-                    response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = response.response_package.recordsFiltered;
+                        response.draw = parseInt(response.response_package.response_draw);
+                        response.recordsTotal = response.response_package.recordsTotal;
+                        response.recordsFiltered = response.response_package.recordsFiltered;
 
-                    return data;
+                        return data;
+                    } else {
+                        return [];
+                    }
+                },
+                error: function(response) {
+                    console.clear();
+                    console.log(response);
+                    return [];
                 }
             },
             autoWidth: false,
             "bInfo": false,
-            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
             aaSorting: [[0, "asc"]],
             "columnDefs": [{
                 "targets": 0,
@@ -47,7 +69,7 @@
             "columns": [
                 {
                     "data": null, render: function (data, type, row, meta) {
-                        return row.autonum;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
@@ -83,6 +105,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_poli_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            POLI.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -107,7 +140,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -116,7 +149,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -143,6 +176,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_fakses_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            FASKES.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -168,7 +212,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -177,7 +221,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -204,6 +248,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_dpjp_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            DPJP.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -231,7 +286,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -240,7 +295,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -267,6 +322,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_provinsi_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            PROVINSI.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -291,7 +357,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -300,7 +366,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -329,6 +395,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_kabupaten_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            KABUPATEN.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 url: __HOSTAPI__ + "/BPJS",
                                 type: "POST",
@@ -352,7 +429,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -361,7 +438,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -388,6 +465,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_kecamatan_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            KECAMATAN.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 url: __HOSTAPI__ + "/BPJS",
                                 type: "POST",
@@ -411,7 +499,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -420,7 +508,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -447,6 +535,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_procedure_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            PROCEDURE.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -471,7 +570,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -480,12 +579,12 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.kode;
+                                        return "<h5 class=\"autonum\">" + row.kode + "</h5>";
                                     }
                                 },
                                 {
@@ -498,15 +597,26 @@
                     }
                 } else if(child === 7) {
                     if (clickedTab.indexOf(child) >= 0) {
-                        PROCEDURE.ajax.reload();
+                        KELAS_RAWAT.ajax.reload();
                     } else {
                         clickedTab.push(7);
-                        PROVINSI = $("#bpjs_table_kelas_rawat").DataTable({
+                        KELAS_RAWAT = $("#bpjs_table_kelas_rawat").DataTable({
                             processing: true,
                             serverSide: true,
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_kelas_rawat_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            KELAS_RAWAT.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -531,7 +641,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -540,12 +650,12 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.kode;
+                                        return "<h5 class=\"autonum\">" + row.kode + "</h5>";
                                     }
                                 },
                                 {
@@ -567,6 +677,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_dokter_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            DOKTER.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -591,7 +712,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -600,7 +721,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -627,6 +748,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_spesialistik_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            SPESIALISTIK.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -651,7 +783,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -660,7 +792,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -687,6 +819,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_ruang_rawat_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            RUANG_RAWAT.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -711,7 +854,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -720,7 +863,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -747,6 +890,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_cara_keluar_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            CARA_KELUAR.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -771,7 +925,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -780,7 +934,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
@@ -807,6 +961,17 @@
                             sPaginationType: "full_numbers",
                             bPaginate: true,
                             serverMethod: "POST",
+                            initComplete: function()  {
+                                $("#bpjs_table_pasca_pulang_filter input").unbind().bind("keyup", function(e) {
+                                    if(e.keyCode == 13) {
+                                        if(this.value.length > 2 || this.value.length == 0) {
+                                            PASCA_PULANG.search(this.value).draw();
+                                        }
+                                    }
+
+                                    return;
+                                });
+                            },
                             "ajax": {
                                 async: false,
                                 url: __HOSTAPI__ + "/BPJS",
@@ -831,7 +996,7 @@
                             },
                             autoWidth: false,
                             "bInfo": false,
-                            lengthMenu: [[5, 10, 20, -1], [5, 10, 20, "All"]],
+                            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
                             aaSorting: [[0, "asc"]],
                             "columnDefs": [{
                                 "targets": 0,
@@ -840,7 +1005,7 @@
                             "columns": [
                                 {
                                     "data": null, render: function (data, type, row, meta) {
-                                        return row.autonum;
+                                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
                                 },
                                 {
