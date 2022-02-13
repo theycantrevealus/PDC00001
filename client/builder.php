@@ -511,7 +511,6 @@
             var sideWidth = maxLength < 9 ? 1 : 2;
             var leftWidth = (maxLength - sideWidth*2 - 3) >> 1;
             var rightWidth = (maxLength - sideWidth*2 - 2) >> 1;
-            console.log("==================");
             
             if (totalPages <= maxLength) {
                 // no breaks in list
@@ -555,6 +554,8 @@
                     current: UID
                 },
                 success:function(response) {
+                    console.clear();
+                    console.log(response);
                     var data = response.response_package.data;
                     var total = parseInt(response.response_package.total);
 

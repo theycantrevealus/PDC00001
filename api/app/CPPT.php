@@ -490,7 +490,7 @@ class CPPT extends Utility {
                 $parameter['pasien'], date('Y-m-d', strtotime('-1 day', strtotime($parameter['from']))), date('Y-m-d', strtotime('+1 day', strtotime($parameter['to'])))
             ))
             ->limit(1)
-            ->offset($parameter['offset'])
+            ->offset(intval($parameter['offset'] - 1))
             ->order(array(
                 'created_at' => 'DESC'
             ))
@@ -920,6 +920,7 @@ class CPPT extends Utility {
 
 	    return array(
             'data' => $GroupTanggal,
+            'antrian' => $Antrian,
             'total' => count($AntrianTotal['response_data'])
         );
     }

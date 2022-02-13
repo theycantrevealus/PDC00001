@@ -23,6 +23,9 @@
                         </div>
                         <div class="card-body tab-content">
                             <div class="row">
+                                <div class="col-lg-3 text-right">
+                                    Filter Tanggal Pencarian Data
+                                </div>
                                 <div class="col-lg-6">
                                     <input id="range_pasien" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
                                 </div>

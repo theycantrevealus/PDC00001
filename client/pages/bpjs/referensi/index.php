@@ -1,5 +1,10 @@
 <?php
     $day=new DateTime('last day of this month');
+    $yesterday = new DateTime(date('Y-m-d')); // For today/now, don't pass an arg.
+    $yesterday->modify("-1 day");
+
+    $tomorrow = new DateTime(date('Y-m-d'));
+    $tomorrow->modify("+1 day");
 ?>
 <div class="container-fluid page__heading-container">
     <div class="page__heading d-flex align-items-center">
@@ -205,7 +210,7 @@
                                 <div class="col-6">
                                     Tanggal Pelayanan:
                                     <div style="border: solid 1px #DBDFE4 !important;">
-                                        <input id="range_dpjp" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                        <input id="range_dpjp" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $yesterday->format("Y-m-d"); ?> to <?php echo $tomorrow->format("Y-m-d"); ?>" />
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -232,7 +237,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-4">
+                                <div class="col-4 table-responsive">
                                     <table class="table table-bordered largeDataType" id="bpjs_table_provinsi">
                                         <thead class="thead-dark">
                                         <tr>
@@ -245,7 +250,7 @@
                                         <tbody></tbody>
                                     </table>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-4 table-responsive">
                                     <table class="table table-bordered largeDataType" id="bpjs_table_kabupaten">
                                         <thead class="thead-dark">
                                         <tr>
@@ -258,7 +263,7 @@
                                         <tbody></tbody>
                                     </table>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-4 table-responsive">
                                     <table class="table table-bordered largeDataType" id="bpjs_table_kecamatan">
                                         <thead class="thead-dark">
                                         <tr>
