@@ -757,8 +757,6 @@
                         temp_apotek.push(unique_apotek[abz]);
                     }
 
-                    console.log(temp_apotek);
-
                     detail_apotek = temp_apotek;
 
                     for(var a in detail_apotek) {
@@ -772,7 +770,7 @@
                             harga: "<h6 class=\"number_style\">" + number_format(detail_apotek[a].harga, 2, ".", ",") + "</h6>",
                             subtotal: "<h6 class=\"number_style\">" + number_format(detail_apotek[a].harga * detail_apotek[a].kuantitas, 2, ".", ",") + "</h6>"
                         });
-                        totalAll += detail_apotek[a].harga * detail_apotek[a].kuantitas;
+                        totalAll += parseFloat(detail_apotek[a].harga * detail_apotek[a].kuantitas);
                     }
 
                     // for(var a in detail_apotek) {
@@ -828,7 +826,7 @@
                                 });
                             }
                             subtotalRacikanApotek += ((detailRacikanApotek[c].pay[0] !== undefined) ? parseFloat(detailRacikanApotek[c].pay[0].subtotal) : 0);
-                            totalAll += ((detailRacikanApotek[c].pay[0] !== undefined) ? parseFloat(detailRacikanApotek[c].pay[0].subtotal) : 0);
+                            totalAll += parseFloat((detailRacikanApotek[c].pay[0] !== undefined) ? parseFloat(detailRacikanApotek[c].pay[0].subtotal) : 0);
                         }
 
                         racikan_apotek.push(prepareRacikanApotek);
@@ -842,8 +840,9 @@
 
                     var terbilangFinal = "";
                     //Get Terbilang totalAll
+                    totalAll = Math.floor(totalAll * 100) / 100;
+                    
                     $.ajax({
-                        async: false,
                         url: __HOSTAPI__ + "/Terminologi",
                         beforeSend: function (request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -855,56 +854,57 @@
                         },
                         success: function(response) {
                             terbilangFinal = response.response_package;
+                            $.ajax({
+                                async: false,
+                                url: __HOST__ + "miscellaneous/print_template/resep_view.php",
+                                beforeSend: function (request) {
+                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                                },
+                                type: "POST",
+                                data: {
+                                    __PC_CUSTOMER__: __PC_CUSTOMER__,
+                                    __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
+                                    __PC_IDENT__: __PC_IDENT__,
+                                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                                    kode: targettedData.kode,
+                                    tanggal_resep: targettedData.created_at_parsed,
+                                    no_mr: targettedData.pasien.no_rm,
+                                    jenis_pasien: jenis_pasien,
+                                    nama_pasien: targettedData.pasien.nama,
+                                    departemen: (targettedData.antrian.poli_info !== undefined && targettedData.antrian.poli_info !== null) ? targettedData.antrian.poli_info.nama : "Rawat Inap",
+                                    tanggal_lahir: targettedData.pasien.tanggal_lahir_parsed,
+                                    dokter: targettedData.dokter.nama,
+                                    jenis_kelamin: (targettedData.pasien.jenkel_detail !== undefined && targettedData.pasien.jenkel_detail !== null) ? targettedData.pasien.jenkel_detail.nama : "-",
+                                    penjamin: targettedData.antrian.penjamin_data.nama,
+                                    keterangan_resep: targettedData.keterangan,
+                                    keterangan_racikan: targettedData.keterangan_racikan,
+                                    alasan_ubah: targettedData.alasan_ubah,
+                                    alergi: targettedData.alergi_obat,
+                                    sep: (targettedData.antrian.penjamin === __UIDPENJAMINUMUM__) ? "-" : ((targettedData.bpjs !== undefined) ? ((targettedData.bpjs.sep !== undefined) ? targettedData.bpjs.sep : "-") : "-"),
+                                    resep_dokter: resep_dokter,
+                                    racikan_dokter: racikan_dokter,
+                                    resep_apotek: resep_apotek,
+                                    racikan_apotek: racikan_apotek,
+                                    verifikator: targettedData.verifikator.nama,
+                                    total_bayar: "<h6 class=\"number_style\">Rp. " + number_format(totalAll, 2, ".", ",") + "</h6>",
+                                    terbilang: titleCase(terbilangFinal)
+                                },
+                                success: function (response) {
+                                    $("#modal-cetak").modal("show");
+                                    $("#cetak").html(response);
+                                },
+                                error: function () {
+                                    //
+                                }
+                            });
                         },
                         error: function(response) {
                             //
                         }
                     });
 
-                    $.ajax({
-                        async: false,
-                        url: __HOST__ + "miscellaneous/print_template/resep_view.php",
-                        beforeSend: function (request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
-                        type: "POST",
-                        data: {
-                            __PC_CUSTOMER__: __PC_CUSTOMER__,
-                            __PC_CUSTOMER_GROUP__: __PC_CUSTOMER_GROUP__,
-                            __PC_IDENT__: __PC_IDENT__,
-                            __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
-                            __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
-                            kode: targettedData.kode,
-                            tanggal_resep: targettedData.created_at_parsed,
-                            no_mr: targettedData.pasien.no_rm,
-                            jenis_pasien: jenis_pasien,
-                            nama_pasien: targettedData.pasien.nama,
-                            departemen: (targettedData.antrian.poli_info !== undefined && targettedData.antrian.poli_info !== null) ? targettedData.antrian.poli_info.nama : "Rawat Inap",
-                            tanggal_lahir: targettedData.pasien.tanggal_lahir_parsed,
-                            dokter: targettedData.dokter.nama,
-                            jenis_kelamin: (targettedData.pasien.jenkel_detail !== undefined && targettedData.pasien.jenkel_detail !== null) ? targettedData.pasien.jenkel_detail.nama : "-",
-                            penjamin: targettedData.antrian.penjamin_data.nama,
-                            keterangan_resep: targettedData.keterangan,
-                            keterangan_racikan: targettedData.keterangan_racikan,
-                            alasan_ubah: targettedData.alasan_ubah,
-                            alergi: targettedData.alergi_obat,
-                            sep: (targettedData.antrian.penjamin === __UIDPENJAMINUMUM__) ? "-" : ((targettedData.bpjs !== undefined) ? ((targettedData.bpjs.sep !== undefined) ? targettedData.bpjs.sep : "-") : "-"),
-                            resep_dokter: resep_dokter,
-                            racikan_dokter: racikan_dokter,
-                            resep_apotek: resep_apotek,
-                            racikan_apotek: racikan_apotek,
-                            verifikator: targettedData.verifikator.nama,
-                            total_bayar: "<h6 class=\"number_style\">Rp. " + number_format(totalAll, 2, ".", ",") + "</h6>",
-                            terbilang: titleCase(terbilangFinal)
-                        },
-                        success: function (response) {
-                            $("#modal-cetak").modal("show");
-                            $("#cetak").html(response);
-                        },
-                        error: function () {
-                            //
-                        }
-                    });
+                    
                 },
                 error: function(response) {
                     console.log(response);
