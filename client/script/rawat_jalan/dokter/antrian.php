@@ -1068,7 +1068,8 @@
             }
 
             for(var key in tindakanMeta) {
-                if(selected.indexOf(key) < 0 && tindakanMeta[key].nama !== undefined && key !== __UID_KONSULTASI__ && key !== __UID_KARTU__) {
+                //if(selected.indexOf(key) < 0 && tindakanMeta[key].nama !== undefined && key !== __UID_KONSULTASI__ && key !== __UID_KARTU__) {
+                if(tindakanMeta[key].nama !== undefined && key !== __UID_KONSULTASI__ && key !== __UID_KARTU__) {
                     $("#txt_tindakan").append(
                         "<option value=\"" + key + "\" kelas=\"" + tindakanMeta[key].kelas + "\">" + tindakanMeta[key].nama + "</option>"
                     );
