@@ -580,9 +580,11 @@ class Radiologi extends Utility
             ->where(array(
                 'rad_order.status'  => '= ?',
                 'AND',
-                'rad_order.deleted_at' => 'IS NULL'
+                'rad_order.deleted_at' => 'IS NULL',
+                'AND',
+                'antrian.departemen' => '!= ?'
             ), array(
-                $status
+                $status, __POLI_INAP__
             ))
             ->order(
                 array(
