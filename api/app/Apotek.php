@@ -871,8 +871,8 @@ class Apotek extends Utility
             ->where(array(
               'rawat_inap.kunjungan' => '= ?',
               'AND',
-              'rawat_inap.dokter' => '= ?',
-              'AND',
+              // 'rawat_inap.dokter' => '= ?',
+              // 'AND',
               'rawat_inap.penjamin' => '= ?',
               'AND',
               'rawat_inap.deleted_at' => 'IS NULL',
@@ -883,7 +883,7 @@ class Apotek extends Utility
                             $parameter['antrian']['dokter'],
                             $parameter['antrian']['penjamin']*/
               $parameter['kunjungan'],
-              $parameter['dokter']['uid'],
+              //$parameter['dokter']['uid'],
               $parameter['penjamin']
             ))
             ->execute();
@@ -1117,8 +1117,8 @@ class Apotek extends Utility
             ->where(array(
               'igd.kunjungan' => '= ?',
               'AND',
-              'igd.dokter' => '= ?',
-              'AND',
+              // 'igd.dokter' => '= ?',
+              // 'AND',
               'igd.penjamin' => '= ?',
               'AND',
               'igd.deleted_at' => 'IS NULL',
@@ -1126,7 +1126,7 @@ class Apotek extends Utility
               'nurse_station.deleted_at' => 'IS NULL'
             ), array(
               $parameter['kunjungan'],
-              $parameter['dokter']['uid'],
+              // $parameter['dokter']['uid'],
               $parameter['penjamin']
             ))
             ->execute();

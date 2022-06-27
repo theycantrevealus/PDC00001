@@ -1007,13 +1007,11 @@
                                     "data": null, render: function (data, type, row, meta) {
                                         return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                                     }
-                                },
-                                {
+                                }, {
                                     "data": null, render: function (data, type, row, meta) {
                                         return row.kode;
                                     }
-                                },
-                                {
+                                }, {
                                     "data": null, render: function (data, type, row, meta) {
                                         return row.nama;
                                     }

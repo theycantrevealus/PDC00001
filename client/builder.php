@@ -554,8 +554,6 @@
                     current: UID
                 },
                 success:function(response) {
-                    console.clear();
-                    console.log(response);
                     var data = response.response_package.data;
                     var total = parseInt(response.response_package.total);
 

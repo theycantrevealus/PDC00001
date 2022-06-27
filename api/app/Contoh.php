@@ -211,10 +211,19 @@ class Contoh extends Utility {
         return $worker;
     }
 
+    private static function uji_class() {
+        //return Inventori::get_satuan();
+        $Inv = new Inventori(self::$pdo);
+        return $Inv->get_satuan();
+    }
+
 	public function __GET__($parameter = array()) {
 		try {
 
 			switch($parameter[1]) {
+                case 'ujiclass':
+                    return self::uji_class();
+                    break;
                 case 'select':
 					return
 

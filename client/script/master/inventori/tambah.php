@@ -845,6 +845,7 @@
 							},
 							type:"POST",
 							success:function(response) {
+								console.log(response);
 								if(response.response_package > 0) {
 									notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");
 								}

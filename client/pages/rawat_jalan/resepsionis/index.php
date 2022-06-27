@@ -44,7 +44,7 @@
 							<center>Antrian terkini</center>
 							<h1 class="text-center" id="txt_current_antrian">0</h1>
 						</div>
-						<div class="col-lg-3">
+						<div class="col-lg-4">
                             <div class="col-lg-12">
                                 <br />
                             </div>
@@ -130,7 +130,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-lg-12">
+                                        <div class="col-lg-12 table-responsive">
                                             <table class="table table-bordered table-striped largeDataType" id="table-antrian-rawat-jalan" style="font-size: 0.9rem;">
                                                 <thead class="thead-dark">
                                                 <tr>

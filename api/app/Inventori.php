@@ -2044,10 +2044,8 @@ class Inventori extends Utility
     }
 
 //===========================================================================================SATUAN
-    private function get_satuan()
-    {
-        $data = self::$query
-            ->select('master_inv_satuan', array(
+    public function get_satuan() {
+        $data = self::$query ->select('master_inv_satuan', array(
                 'uid',
                 'nama',
                 'created_at',

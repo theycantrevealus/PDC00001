@@ -59,14 +59,11 @@
                     d.request = "get_history_sep_local";
                     d.dari = getDateRange("#range_sep")[0];
                     d.sampai = getDateRange("#range_sep")[1];
-                    d.pelayanan_jenis = $("#jenis_pelayanan").val();
+                    d.pelayanan_jenis = $("#jenis_pelayanan option:selected").val();
                     d.sync_bpjs = refreshData;
                 },
                 dataSrc: function (response) {
                     var data = response.response_package.response_data;
-                    console.clear();
-                    console.log(data);
-
                     if (data === undefined || data === null) {
                         return [];
                     } else {
@@ -91,7 +88,7 @@
                 },
                 {
                     "data": null, render: function (data, type, row, meta) {
-                        return "<b id=\"sep_no_" + row.uid + "\">" + row.sep_no + "</b>";
+                        return "<h5 id=\"sep_no_" + row.uid + "\" class=\"number_style\">" + row.sep_no + "</h5>";
                     }
                 },
                 {
@@ -102,19 +99,32 @@
                 {
                     "data": null, render: function (data, type, row, meta) {
                         var allowClaim = "";
+                        var history_penjamin = row.pasien.history_penjamin;
+                        var restMeta;
+                        for(var a in history_penjamin) {
+                            if(history_penjamin[a].penjamin === __UIDPENJAMINBPJS__) {
+                                restMeta = JSON.parse(history_penjamin[a].rest_meta);
+                            }
+                        }
+
                         if(row.claim.length > 0) {
                             allowClaim = "";
                         } else {
-                            allowClaim = "<button class=\"btn btn-purple btn-sm btn-buat-claim\" no_sep=\"" + row.sep_no + "\" id=\"sep_buat_claim_" + row.uid + "\">" +
+                            allowClaim = "<button class=\"btn btn-purple btn-sm btn-buat-claim\" no-kartu=\"" + restMeta.data.peserta.noKartu + "\" ktp=\"" + row.pasien.nik + "\" no_sep=\"" + row.sep_no + "\" id=\"sep_buat_claim_" + row.uid + "\">" +
                                 "<i class=\"fa fa-search\"></i> Claim" +
                                 "</button>";
                         }
+
+                        var rujukBaru = "<button class=\"btn btn-purple btn-sm btn-buat-rujukan\" uid-pasien=\"" + row.pasien.uid + "\" no-mr=\"" + row.pasien.no_mr + "\" no-kartu=\"" + restMeta.data.peserta.noKartu + "\" ktp=\"" + row.pasien.nik + "\" nama-pasien=\"" + row.pasien.nama + "\" telp=\"" + row.no_telp + "\" no-sep=\"" + row.sep_no + "\" id=\"sep_rujuk_" + row.uid + "\">" +
+                                "<i class=\"fa fa-folder\"></i> Rujuk" +
+                                "</button>";
                         if(row.claim !== undefined && row.claim !== null) {
                             if(row.claim.length > 0) {
                                 return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                                     "<button class=\"btn btn-info btn-sm btn-edit-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_edit_" + row.uid + "\">" +
                                     "<i class=\"fa fa-pencil-alt\"></i> Edit" +
                                     "</button>" +
+                                    rujukBaru +
                                     "<button class=\"btn btn-success btn-sm btn-cetak-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_cetak_" + row.uid + "\">" +
                                     "<i class=\"fa fa-print\"></i> Cetak" +
                                     "</button>" +
@@ -126,6 +136,7 @@
                                     "<button class=\"btn btn-info btn-sm btn-edit-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_edit_" + row.uid + "\">" +
                                     "<i class=\"fa fa-pencil-alt\"></i> Edit" +
                                     "</button>" +
+                                    rujukBaru +
                                     "<button class=\"btn btn-success btn-sm btn-cetak-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_cetak_" + row.uid + "\">" +
                                     "<i class=\"fa fa-print\"></i> Cetak" +
                                     "</button>" +
@@ -138,6 +149,7 @@
                                 "<button class=\"btn btn-info btn-sm btn-edit-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_edit_" + row.uid + "\">" +
                                 "<i class=\"fa fa-pencil-alt\"></i> Edit" +
                                 "</button>" +
+                                rujukBaru +
                                 "<button class=\"btn btn-success btn-sm btn-cetak-sep\" no_sep=\"" + row.sep_no + "\" id=\"sep_cetak_" + row.uid + "\">" +
                                 "<i class=\"fa fa-print\"></i> Cetak" +
                                 "</button>" +
@@ -150,6 +162,172 @@
                     }
                 }
             ]
+        });
+
+        $("#txt_bpjs_rujuk_tipe_rujukan").select2();
+        $("#txt_bpjs_rujuk_jenis_faskes").select2();
+        $("#txt_bpjs_rujuk_jenis_pelayanan").select2();
+
+        var selectednoKartu = "";
+        var selectednoTelp = "";
+        var selectedNamaPasien = "";
+        var selectedNIK = "";
+        var selectedMR = "";
+        var selectedSEP = "";
+        var selectedUIDPasien = "";
+
+        $("body").on("click", ".btn-buat-rujukan", function() {
+            $("#modal-rujuk").modal("show");
+
+            var noKartu = $(this).attr("no-kartu");
+            var nik = $(this).attr("ktp");
+            var namaPasien = $(this).attr("nama-pasien");
+            var telp = $(this).attr("telp");
+            var mr = $(this).attr("no-mr");
+            var sep = $(this).attr("no-sep");
+            var uidPasien = $(this).attr("uid-pasien");
+
+            selectednoKartu = noKartu;
+            selectednoTelp = telp;
+            selectedNamaPasien = namaPasien;
+            selectedNIK = nik;
+            selecterMR = mr;
+            selectedSEP = sep;
+            selectedUIDPasien = uidPasien;
+
+
+            $("#txt_bpjs_rujuk_nomor_kartu").val(noKartu);
+            $("#txt_bpjs_rujuk_nik").val(nik);
+            $("#txt_bpjs_rujuk_nama").val(namaPasien);
+            $("#txt_bpjs_rujuk_telepon").val(telp);
+        });
+
+        $("#btnProsesRujuk").click(function() {
+            var tanggal_rencana_kunjungan = $("#txt_bpjs_rujuk_tanggak_rencana").val();
+            var tipe_rujukan = $("#txt_bpjs_rujuk_tipe_rujukan option:selected").val();
+            var jenis_pelayanan = $("#txt_bpjs_rujuk_jenis_pelayanan option:selected").val();
+            var jenis_faskes = $("#txt_bpjs_rujuk_jenis_faskes option:selected").val();
+            var tujuan_faskes = $("#txt_bpjs_rujuk_faskes option:selected").val();
+            var tujuan_poli = $("#txt_bpjs_rujuk_poli option:selected").val();
+            var diagnosa = $("#txt_bpjs_rujuk_diagnosa option:selected").val();
+            var catatan = $("#txt_bpjs_rujuk_catatan").val();
+
+            $(this).attr({
+                "disabled": "disabled"
+            });
+
+            console.log({
+                request: "rujukan_baru_v2",
+                sep: selectedSEP,
+                pasien: selectedUIDPasien,
+                tanggal_rencana_kunjungan: tanggal_rencana_kunjungan,
+                tipe: tipe_rujukan,
+                jenis_pelayanan: jenis_pelayanan,
+                jenis_faskes: jenis_faskes,
+                tujuan_faskes: tujuan_faskes,
+                tujuan_poli: tujuan_poli,
+                diagnosa: diagnosa,
+                catatan: catatan,
+                telp: selectednoTelp,
+                nama_pasien: selectedNamaPasien,
+                no_mr: selectedMR,
+                nik: selectedNIK,
+                no_kartu: selectednoKartu
+            });
+
+            if(
+                selectednoKartu != "" &&
+                selectednoTelp != "" &&
+                selectedNamaPasien != "" &&
+                selectedNIK != "" &&
+                selecterMR != "" &&
+                selectedSEP != "" &&
+                selectedUIDPasien != ""
+            ) {
+                Swal.fire({
+                    title: "BPJS Rujukan",
+                    text: "Proses Rujukan Baru?",
+                    showDenyButton: true,
+                    confirmButtonText: "Ya",
+                    denyButtonText: "Tidak",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            async: false,
+                            url:__HOSTAPI__ + "/BPJS",
+                            type: "POST",
+                            data: {
+                                request: "rujukan_baru_v2",
+                                sep: selectedSEP,
+                                pasien: selectedUIDPasien,
+                                tanggal_rencana_kunjungan: tanggal_rencana_kunjungan,
+                                tipe: tipe_rujukan,
+                                jenis_pelayanan: jenis_pelayanan,
+                                jenis_faskes: jenis_faskes,
+                                tujuan_faskes: tujuan_faskes,
+                                tujuan_poli: tujuan_poli,
+                                diagnosa: diagnosa,
+                                catatan: catatan,
+                                telp: selectednoTelp,
+                                nama_pasien: selectedNamaPasien,
+                                no_mr: selectedMR,
+                                nik: selectedNIK,
+                                no_kartu: selectednoKartu
+                            },
+                            beforeSend: function(request) {
+                                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                            },
+                            success: function(response) {
+                                $(this).removeAttr("disabled");
+                                console.log(response.response_package);
+                                
+                                if(parseInt(response.response_package.bpjs.metaData.code) === 200) {
+                                    Swal.fire(
+                                        "Pembuatan Rujukan Berhasil",
+                                        "Rujukan telah dibuat",
+                                        "success"
+                                    ).then((result) => {
+                                        $("#modal-rujuk").modal("hide");
+
+                                        //Reset Form
+                                        $("#txt_bpjs_rujuk_tanggak_rencana").val("");
+                                        $("#txt_bpjs_rujuk_catatan").val("");
+
+                                        selectednoKartu = "";
+                                        selectednoTelp = "";
+                                        selectedNamaPasien = "";
+                                        selectedNIK = "";
+                                        selecterMR = "";
+                                        selectedSEP = "";
+                                        selectedUIDPasien = "";
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        "Gagal Buat Rujukan",
+                                        response.response_package.bpjs.metaData.message,
+                                        "warning"
+                                    ).then((result) => {
+                                        //
+                                    });
+                                }
+                            },
+                            error: function(response) {
+                                $(this).removeAttr("disabled");
+                                console.clear();
+                                console.log(response);
+                            }
+                        });
+                    }
+                });
+            } else {
+                Swal.fire(
+                    "Gagal Buat Rujukan",
+                    "Data Tidak Lengkap",
+                    "warning"
+                ).then((result) => {
+                    $(this).removeAttr("disabled");
+                });
+            }
         });
 
         $("body").on("click", ".btn-buat-claim", function() {
@@ -179,7 +357,7 @@
                     $("#sep_nomor").html(dataSEP.sep_no);
                     $("#sep_tanggal").html(dataSEP.sep_tanggal);
                     $("#sep_spesialis").html(dataSEP.poli_tujuan_detail.kode + " - " + dataSEP.poli_tujuan_detail.nama);
-                    $("#sep_faskes_asal").html(dataSEP.asal_rujukan_ppk + " - " + ((dataSEP.asal_rujukan_nama !== undefined && dataSEP.asal_rujukan_nama !== null && dataSEP.asal_rujukan_nama !== "null") ? dataSEP.asal_rujukan_nama : "[TIDAK DITEMUKAN]") + "<b class=\"text-info\">[No. Rujuk: " + dataSEP.asal_rujukan_nomor + "]");
+                    $("#sep_faskes_asal").html(((dataSEP.asal_rujukan_ppk !== null && dataSEP.asal_rujukan_ppk !== undefined) ? dataSEP.asal_rujukan_ppk : '[TIDAK DITEMUKAN]') + " - " + ((dataSEP.asal_rujukan_nama !== undefined && dataSEP.asal_rujukan_nama !== null && dataSEP.asal_rujukan_nama !== "null") ? dataSEP.asal_rujukan_nama : "[TIDAK DITEMUKAN]") + "<b class=\"text-info\">[No. Rujuk: " + ((dataSEP.asal_rujukan_nomor !== undefined && dataSEP.asal_rujukan_nomor !== null && dataSEP.asal_rujukan_nomor !== '') ? dataSEP.asal_rujukan_nomor : '-') + "]");
                     $("#sep_diagnosa_awal").html(dataSEP.diagnosa_nama);
                     $("#sep_catatan").html(dataSEP.catatan);
                     $("#sep_kelas_rawat").html(dataSEP.kelas_rawat.nama);
@@ -190,20 +368,20 @@
                     for(var pKey in penjaminList) {
                         if(penjaminList[pKey].penjamin === __UIDPENJAMINBPJS__) {
                             var metaData = JSON.parse(penjaminList[pKey].rest_meta);
-                            $("#sep_nomor_kartu").html(metaData.response.peserta.noKartu);
-                            $("#sep_nama_peserta").html(metaData.response.peserta.nama + "<b class=\"text-info\">[" + metaData.response.peserta.mr.noMR + "]</b>");
-                            $("#sep_tanggal_lahir").html(metaData.response.peserta.tglLahir);
-                            $("#sep_nomor_telepon").html(metaData.response.peserta.mr.noTelepon);
-                            $("#sep_peserta").html(metaData.response.peserta.jenisPeserta.keterangan);
+                            $("#sep_nomor_kartu").html(metaData.data.peserta.noKartu);
+                            $("#sep_nama_peserta").html(metaData.data.peserta.nama + "<b class=\"text-info\">[" + metaData.data.peserta.mr.noMR + "]</b>");
+                            $("#sep_tanggal_lahir").html(metaData.data.peserta.tglLahir);
+                            $("#sep_nomor_telepon").html(metaData.data.peserta.mr.noTelepon);
+                            $("#sep_peserta").html(metaData.data.peserta.jenisPeserta.keterangan);
                             if(
-                                metaData.response.peserta.cob.noAsuransi !== undefined &&
-                                metaData.response.peserta.cob.nmAsuransi !== undefined &&
-                                metaData.response.peserta.cob.noAsuransi !== "" &&
-                                metaData.response.peserta.cob.nmAsuransi !== "" &&
-                                metaData.response.peserta.cob.noAsuransi !== null &&
-                                metaData.response.peserta.cob.nmAsuransi !== null
+                                metaData.data.peserta.cob.noAsuransi !== undefined &&
+                                metaData.data.peserta.cob.nmAsuransi !== undefined &&
+                                metaData.data.peserta.cob.noAsuransi !== "" &&
+                                metaData.data.peserta.cob.nmAsuransi !== "" &&
+                                metaData.data.peserta.cob.noAsuransi !== null &&
+                                metaData.data.peserta.cob.nmAsuransi !== null
                             ) {
-                                $("#sep_cob").html(metaData.response.peserta.cob.noAsuransi + " - " + metaData.response.peserta.cob.nmAsuransi);
+                                $("#sep_cob").html(metaData.data.peserta.cob.noAsuransi + " - " + metaData.data.peserta.cob.nmAsuransi);
                             } else {
                                 $("#sep_cob").html("-");
                             }
@@ -248,6 +426,137 @@
             });
         });
 
+
+
+
+        $("#txt_bpjs_rujuk_poli").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function(){
+                    return "Faskes tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-rujuk"),
+            ajax: {
+                quietMillis: 1000,
+                dataType: "json",
+                headers:{
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_poli",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.data.poli;
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.nama,
+                                id: item.kode
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
+
+        $("#txt_bpjs_rujuk_faskes").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function(){
+                    return "Faskes tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-rujuk"),
+            ajax: {
+                quietMillis: 1000,
+                dataType: "json",
+                headers:{
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_faskes_select2",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        jenis: $("#txt_bpjs_rujuk_jenis_faskes option:selected").val(),
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    var data = response.response_package.data.faskes;
+                    console.log(data);
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.nama,
+                                id: item.kode
+                            }
+                        })
+                    };
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            
+        });
+
+        $("#txt_bpjs_rujuk_diagnosa").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function(){
+                    return "Diagnosa tidak ditemukan";
+                }
+            },
+            dropdownParent: $("#modal-rujuk"),
+            ajax: {
+                quietMillis: 1000,
+                dataType: "json",
+                headers:{
+                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                    "Content-Type" : "application/json",
+                },
+                url:__HOSTAPI__ + "/BPJS/get_diagnosa",
+                type: "GET",
+                data: function (term) {
+                    return {
+                        search:term.term
+                    };
+                },
+                cache: true,
+                processResults: function (response) {
+                    console.log(response);
+                    if(response.response_package.data === null) {
+                        $("#txt_bpjs_diagnosa_awal").trigger("change.select2");
+                    } else {
+                        var data = response.response_package.data.diagnosa;
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    }
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            //
+        });
+
+
+
+
+
         $("body").on("click", ".btn-edit-sep", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
@@ -284,7 +593,7 @@
                         for(var pKey in pasien_penjamin) {
                             if(pasien_penjamin[pKey].penjamin === __UIDPENJAMINBPJS__) {
                                 var rest_meta = JSON.parse(pasien_penjamin[pKey].rest_meta);
-                                bpjs_no = rest_meta.response.peserta.noKartu;
+                                bpjs_no = rest_meta.data.peserta.noKartu;
                             }
                         }
 
@@ -395,7 +704,7 @@
                                 },
                                 cache: true,
                                 processResults: function (response) {
-                                    var data = response.response_package.content.response.poli;
+                                    var data = response.response_package.data.poli;
                                     return {
                                         results: $.map(data, function (item) {
                                             return {
@@ -547,7 +856,10 @@
                             $(".laka_lantas_suplesi_container").hide();
                         }
 
-                        var laka_penjamin = data.laka_lantas_penjamin.split(",");
+                        var laka_penjamin = [];
+                        if(data.laka_lantas !== undefined && data.laka_lantas !== null) {
+                            laka_penjamin = data.laka_lantas_penjamin.split(",");
+                        }
                         for(var lakaKey in laka_penjamin) {
                             $("input[name=\"txt_bpjs_laka_penjamin\"][value=\"" + laka_penjamin[lakaKey] + "\"]").prop("checked", true);
                             if(selectedLakaPenjamin.indexOf(laka_penjamin[lakaKey]) < 0) {
@@ -767,7 +1079,7 @@
                         },
                         success: function(response){
                             SEPList.ajax.reload();
-                            if(parseInt(response.response_package.bpjs.content.metaData.code) === 200) {
+                            if(parseInt(response.response_package.bpjs.metaData.code) === 200) {
                                 Swal.fire(
                                     "Edit SEP Berhasil!",
                                     "SEP telah diedit",
@@ -778,7 +1090,7 @@
                             } else {
                                 Swal.fire(
                                     "Gagal buat SEP",
-                                    response.response_package.bpjs.content.metaData.message,
+                                    response.response_package.bpjs.metaData.message,
                                     "warning"
                                 ).then((result) => {
                                     console.log(response);
@@ -813,7 +1125,9 @@
                         },
                         type: "DELETE",
                         success: function (response) {
-                            if(parseInt(response.response_package.bpjs.content.metaData.code) === 200) {
+                            console.clear();
+                            console.log(response);
+                            if(parseInt(response.response_package.bpjs.value.metaData.code) === 200) {
                                 Swal.fire(
                                     'BPJS',
                                     'SEP Berhasil dihapus',
@@ -824,7 +1138,7 @@
                             } else {
                                 Swal.fire(
                                     'BPJS',
-                                    response.response_package.bpjs.content.metaData.message,
+                                    response.response_package.bpjs.value.metaData.message,
                                     'error'
                                 ).then((result) => {
                                     SEPList.ajax.reload();
@@ -1227,8 +1541,6 @@
                 }
             });
 
-            alert(dpjp);
-
             if(diagnosa_kode.length > 0 && procedure.length > 0) {
                 Swal.fire({
                     title: "Proses Claim Baru ?",
@@ -1362,8 +1674,12 @@
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                success: function(response){
-                    var data = response.response_package.content.response.list;
+                success: function(response) {
+
+                    var data = [];
+                    if(response.response_package.data !== undefined && response.response_package.data !== null) {
+                        data = response.response_package.data.list;
+                    }
 
                     $(target + " option").remove();
                     var targetParse = ["0", "I", "II", "III"];
@@ -1516,68 +1832,64 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    if(response.response_package.content === null) {
-                        loadSpesialistik(target);
-                    } else {
-                        var data = response.response_package.content.response.list;
+                    var data = response.response_package.data.list;
 
-                        $(target + " option").remove();
-                        for(var a = 0; a < data.length; a++) {
-                            var selection = document.createElement("OPTION");
-                            if(data[a].kode === selected.kode) {
-                                $(selection).attr({
-                                    "selected": "selected"
-                                });
-                            }
-                            $(selection).attr("value", data[a].kode).html(data[a].nama);
-                            $(target).append(selection);
+                    $(target + " option").remove();
+                    for(var a = 0; a < data.length; a++) {
+                        var selection = document.createElement("OPTION");
+                        if(data[a].kode === selected.kode) {
+                            $(selection).attr({
+                                "selected": "selected"
+                            });
                         }
-                        loadDPJP((target === "txt_bpjs_dpjp_spesialistik") ? "#txt_bpjs_dpjp" : "#claim_dpjpz", (target === "txt_bpjs_dpjp_spesialistik") ? $("#txt_bpjs_jenis_asal_rujukan").val() : $("#claim_dirujuk_ke_jenis").val(), $(target).val(), dpjp);
-                        $("#claim_dpjp").select2({
-                            minimumInputLength: 1,
-                            "language": {
-                                "noResults": function(){
-                                    return "Dokter tidak ditemukan";
-                                }
+                        $(selection).attr("value", data[a].kode).html(data[a].nama);
+                        $(target).append(selection);
+                    }
+                    loadDPJP((target === "txt_bpjs_dpjp_spesialistik") ? "#txt_bpjs_dpjp" : "#claim_dpjpz", (target === "txt_bpjs_dpjp_spesialistik") ? $("#txt_bpjs_jenis_asal_rujukan").val() : $("#claim_dirujuk_ke_jenis").val(), $(target).val(), dpjp);
+                    $("#claim_dpjp").select2({
+                        minimumInputLength: 1,
+                        "language": {
+                            "noResults": function(){
+                                return "Dokter tidak ditemukan";
+                            }
+                        },
+                        dropdownParent: $("#modal-sep-claim"),
+                        ajax: {
+                            dataType: "json",
+                            headers:{
+                                "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                                "Content-Type" : "application/json",
                             },
-                            dropdownParent: $("#modal-sep-claim"),
-                            ajax: {
-                                dataType: "json",
-                                headers:{
-                                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                                    "Content-Type" : "application/json",
-                                },
-                                url:__HOSTAPI__ + "/BPJS/get_dpjp_claim",
-                                type: "GET",
-                                data: function (term) {
+                            url:__HOSTAPI__ + "/BPJS/get_dpjp_claim",
+                            type: "GET",
+                            data: function (term) {
+                                return {
+                                    search:term.term
+                                };
+                            },
+                            cache: true,
+                            processResults: function (response) {
+                                if(parseInt(response.response_package.content.metaData.code) === 200) {
+                                    var data = response.response_package.content.response.list;
                                     return {
-                                        search:term.term
+                                        results: $.map(data, function (item) {
+                                            return {
+                                                text: item.nama,
+                                                id: item.kode
+                                            }
+                                        })
                                     };
-                                },
-                                cache: true,
-                                processResults: function (response) {
-                                    if(parseInt(response.response_package.content.metaData.code) === 200) {
-                                        var data = response.response_package.content.response.list;
-                                        return {
-                                            results: $.map(data, function (item) {
-                                                return {
-                                                    text: item.nama,
-                                                    id: item.kode
-                                                }
-                                            })
-                                        };
-                                    } else {
-                                        return [];
-                                    }
+                                } else {
+                                    return [];
                                 }
                             }
-                        }).addClass("form-control").on("select2:select", function(e) {
-                            var id = $(this).attr("id").split("_");
-                            id = id[id.length - 1];
+                        }
+                    }).addClass("form-control").on("select2:select", function(e) {
+                        var id = $(this).attr("id").split("_");
+                        id = id[id.length - 1];
 
-                            autoProcedure();
-                        });
-                    }
+                        autoProcedure();
+                    });
                 },
                 error: function(response) {
                     console.log(response);
@@ -1597,26 +1909,25 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    if(response.response_package.content === null) {
-                        loadDPJP(target, jenis, spesialistik);
-                    } else {
-                        var data = response.response_package.content.response.list;
+                    var data = [];
+                    if(response.response_package.data !== undefined && response.response_package.data !== null) {
+                        data = response.response_package.data.list;
+                    }
+                    
 
-                        $(target + " option").remove();
-                        //$(target).select2('data', null);
-                        for(var a = 0; a < data.length; a++) {
-                            var selection = document.createElement("OPTION");
+                    $(target + " option").remove();
+                    //$(target).select2('data', null);
+                    for(var a = 0; a < data.length; a++) {
+                        var selection = document.createElement("OPTION");
 
-                            if(data[a].kode === selected.kode) {
-                                $(selection).attr({
-                                    "selected": "selected"
-                                });
-                            }
-
-                            $(selection).attr("value", data[a].kode).html(data[a].kode + " - " + data[a].nama);
-                            $(target).append(selection);
+                        if(data[a].kode === selected.kode) {
+                            $(selection).attr({
+                                "selected": "selected"
+                            });
                         }
 
+                        $(selection).attr("value", data[a].kode).html(data[a].kode + " - " + data[a].nama);
+                        $(target).append(selection);
                     }
                 },
                 error: function(response) {
@@ -1635,7 +1946,7 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    var data = response.response_package.content.response.list;
+                    var data = response.response_package.data.list;
 
                     $(target + " option").remove();
 
@@ -1669,7 +1980,7 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    var data = response.response_package.content.response.list;
+                    var data = response.response_package.data.list;
 
                     $(target + " option").remove();
                     for(var a = 0; a < data.length; a++) {
@@ -1701,7 +2012,7 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response){
-                    var data = response.response_package.content.response.list;
+                    var data = response.response_package.data.list;
 
                     $(target + " option").remove();
                     for(var a = 0; a < data.length; a++) {
@@ -1944,6 +2255,113 @@
         }
     });
 </script>
+
+
+<div id="modal-rujuk" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-large-title">
+                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> Rujukan Baru
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                <h5 class="card-header__title flex m-0 text-info"><i class="fa fa-hashtag"></i> Informasi Pasien</h5>
+                            </div>
+                            <div class="card-body row">
+                                <div class="col-12 col-md-2 mb-2 form-group">
+                                    <label for="">No Kartu</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rujuk_nomor_kartu" readonly>
+                                </div>
+                                <div class="col-12 col-md-2 mb-2 form-group">
+                                    <label for="">NIK Pasien</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rujuk_nik" readonly>
+                                </div>
+                                <div class="col-12 col-md-5 mb-5 form-group">
+                                    <label for="">Nama Pasien</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rujuk_nama" readonly>
+                                </div>
+                                <div class="col-12 col-md-3 mb-3 form-group">
+                                    <label for="">Kontak</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rujuk_telepon" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                <h5 class="card-header__title flex m-0 text-info"><i class="fa fa-hashtag"></i> Informasi Rujukan</h5>
+                            </div>
+                            <div class="card-body row">
+                                <div class="col-3 form-group">
+                                    <label for="">Tanggal Rujukan</label>
+                                    <input type="date" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rujuk_tanggal_rujukan" value="<?php echo date('Y-m-d'); ?>" readonly>
+                                </div>
+                                <div class="col-3 form-group">
+                                    <label for="">Tanggal Rencana Kunjungan</label>
+                                    <input type="date" autocomplete="off" class="form-control uppercase" value="<?php echo date('Y-m-d'); ?>" id="txt_bpjs_rujuk_tanggak_rencana">
+                                </div>
+                                <div class="col-3 form-group">
+                                    <label for="">Tipe Rujukan</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_rujuk_tipe_rujukan">
+                                        <option value="0">Penuh</option>
+                                        <option value="1">Partial</option>
+                                        <option value="2">Balik PRB</option>
+                                    </select>
+                                </div>
+                                <div class="col-3 form-group">
+                                    <label for="">Jenis Pelayanan</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_rujuk_jenis_pelayanan">
+                                        <option value="1">Rawat Inap</option>
+                                        <option value="2">Rawat Jalan</option>
+                                    </select>
+                                </div>
+                                <div class="col-3 form-group">
+                                    <label for="">Tujuan (Jenis)</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_rujuk_jenis_faskes">
+                                        <option value="1">Faskes I</option>
+                                        <option value="2">Faskes II (RS)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <label for="">Tujuan (Faskes)</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_rujuk_faskes"></select>
+                                </div>
+                                <div class="col-3 form-group">
+                                    <label for="">Tujuan (Poli)</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_rujuk_poli"></select>
+                                </div>
+                                <div class="col-12 form-group">
+                                    <label for="">Diagnosa Rujukan</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_rujuk_diagnosa"></select>
+                                </div>
+                                <div class="col-12 form-group">
+                                    <label for="">Catatan</label>
+                                    <textarea class="form-control" id="txt_bpjs_rujuk_catatan"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnProsesRujuk">
+                    <i class="fa fa-check"></i> Rujuk
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="modal-sep" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">

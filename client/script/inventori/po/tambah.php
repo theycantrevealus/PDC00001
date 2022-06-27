@@ -279,8 +279,8 @@
 			
 			var newQty = document.createElement("INPUT");
 			$(newQty).inputmask({
-				alias: 'currency', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true
-			}).addClass("form-control qty");
+				alias: 'currency', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true, min: 1
+			}).addClass("form-control qty").val(1);
 			$(newCellQty).append(newQty);
 
 			/*var newSatuan = document.createElement("SELECT");
@@ -665,6 +665,11 @@
 		});
 
 		$("#submitPO").submit(function() {
+			var oldCaption = $("#btnSubmitPO").html();
+			$("#btnSubmitPO").attr({
+				"disabled": "disabled"
+			}).html("<i class=\"fa fa-save\"></i> Sedang Proses").removeClass("btn-success");
+
 			var supplier = $("#txt_supplier").val();
 			var tanggal = $.datepicker.formatDate('yy-mm-dd', new Date($("#txt_tanggal").datepicker("getDate")));
 			var diskonAll = $("#txt_diskon_all").inputmask("unmaskedvalue");
@@ -744,6 +749,9 @@
 						}
 					},
 					error: function(resp) {
+						$("#btnSubmitPO").attr({
+							"disabled": "disabled"
+						}).html("<i class=\"fa fa-save\"></i> Sedang Proses").removeClass("btn-success");
 						console.clear();
 						console.log(resp);
 					}

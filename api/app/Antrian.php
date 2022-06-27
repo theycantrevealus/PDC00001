@@ -15,579 +15,607 @@ use PondokCoder\Poli as Poli;
 
 class Antrian extends Utility
 {
-    static $pdo;
-    static $query;
+  static $pdo;
+  static $query;
 
-    public function __construct($connection)
-    {
-        self::$pdo = $connection;
-        self::$query = new Query(self::$pdo);
+  public function __construct($connection)
+  {
+    self::$pdo = $connection;
+    self::$query = new Query(self::$pdo);
+  }
+
+  protected static function getConn()
+  {
+    return self::$pdo;
+  }
+
+  public function __POST__($parameter = array())
+  {
+    switch ($parameter['request']) {
+      case 'get_list_antrian_backend':
+        return self::get_list_antrian_backend($parameter);
+        break;
+      case 'tambah-kunjungan':
+        return self::tambah_kunjungan('kunjungan', $parameter);
+        break;
+      case 'ubah_dokter_antrian':
+        return self::ubah_dokter_antrian($parameter);
+        break;
+      case 'pulangkan_pasien':
+        return self::pulangkan_pasien($parameter);
+        break;
+      case 'igd':
+        return self::antrian_igd($parameter);
+        break;
+      case 'cari_pasien':
+        return self::cari_pasien2($parameter);
+        break;
+      default:
+        # code...
+        break;
+    }
+  }
+
+  private function antrian_igd($parameter)
+  {
+    $Authorization = new Authorization();
+    $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+    if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+      $paramData = array(
+        'igd.deleted_at' => 'IS NULL',
+        'AND',
+        'igd.waktu_keluar' => 'IS NULL',
+        'AND',
+        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+        'OR',
+        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+      );
+
+      $paramValue = array();
+    } else {
+      $paramData = array(
+        'igd.deleted_at' => 'IS NULL',
+        'AND',
+        'igd.waktu_keluar' => 'IS NULL'
+      );
+
+      $paramValue = array();
     }
 
-    protected static function getConn()
-    {
-        return self::$pdo;
+
+    if ($parameter['length'] < 0) {
+      $data = self::$query->select('igd', array(
+        'uid',
+        'pasien',
+        'dokter',
+        'penjamin',
+        'kunjungan',
+        'waktu_masuk',
+        'waktu_keluar',
+        'kamar',
+        'bed',
+        'keterangan',
+        'jenis_pulang',
+        'alasan_pulang',
+        'pegawai_daftar',
+        'created_at',
+        'updated_at'
+      ))
+        ->join('pasien', array(
+          'uid as uid_pasien',
+          'nama as nama_pasien',
+          'no_rm'
+        ))
+        ->on(array(
+          array('igd.pasien', '=', 'pasien.uid')
+        ))
+        ->order(array(
+          'created_at' => 'DESC'
+        ))
+        ->where($paramData, $paramValue)
+        ->execute();
+    } else {
+      $data = self::$query->select('igd', array(
+        'uid',
+        'pasien',
+        'dokter',
+        'penjamin',
+        'kunjungan',
+        'waktu_masuk',
+        'waktu_keluar',
+        'kamar',
+        'bed',
+        'keterangan',
+        'jenis_pulang',
+        'alasan_pulang',
+        'pegawai_daftar',
+        'created_at',
+        'updated_at'
+      ))
+        ->join('pasien', array(
+          'uid as uid_pasien',
+          'nama as nama_pasien',
+          'no_rm'
+        ))
+        ->on(array(
+          array('igd.pasien', '=', 'pasien.uid')
+        ))
+        ->where($paramData, $paramValue)
+        ->order(array(
+          'created_at' => 'DESC'
+        ))
+        ->offset(intval($parameter['start']))
+        ->limit(intval($parameter['length']))
+        ->execute();
     }
 
-    public function __POST__($parameter = array())
-    {
-        switch ($parameter['request']) {
-            case 'get_list_antrian_backend':
-                return self::get_list_antrian_backend($parameter);
-                break;
-            case 'tambah-kunjungan':
-                return self::tambah_kunjungan('kunjungan', $parameter);
-                break;
-            case 'ubah_dokter_antrian':
-                return self::ubah_dokter_antrian($parameter);
-                break;
-            case 'pulangkan_pasien':
-                return self::pulangkan_pasien($parameter);
-                break;
-            case 'igd':
-                return self::antrian_igd($parameter);
-                break;
-            case 'cari_pasien':
-                return self::cari_pasien2($parameter);
-                break;
-            default:
-                # code...
-                break;
-        }
-    }
+    $Pegawai = new Pegawai(self::$pdo);
+    $Penjamin = new Penjamin(self::$pdo);
 
-    private function antrian_igd($parameter) {
-        $Authorization = new Authorization();
-        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+    $data['response_draw'] = $parameter['draw'];
+    $autonum = intval($parameter['start']) + 1;
+    foreach ($data['response_data'] as $key => $value) {
+      $data['response_data'][$key]['autonum'] = $autonum;
+      $autonum++;
 
-        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-            $paramData = array(
-                'igd.deleted_at' => 'IS NULL',
-                'AND',
-                'igd.waktu_keluar' => 'IS NULL',
-                'AND',
-                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                'OR',
-                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
-            );
+      if ($value['penjamin'] == __UIDPENJAMINBPJS__) {
 
-            $paramValue = array();
+        $SEP = self::$query->select('bpjs_sep', array(
+          'uid',
+          'sep_no'
+        ))
+          ->where(array(
+            'bpjs_sep.antrian' => '= ?',
+            'AND',
+            'bpjs_sep.deleted_at' => 'IS NULL'
+          ), array(
+            $value['uid']
+          ))
+          ->execute();
+        if (count($SEP['response_data']) > 0) {
+          $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['sep_no'];
+          $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
         } else {
-            $paramData = array(
-                'igd.deleted_at' => 'IS NULL',
-                'AND',
-                'igd.waktu_keluar' => 'IS NULL'
-            );
-
-            $paramValue = array();
+          $data['response_data'][$key]['sep'] = $SEP;
+          $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
         }
+      }
 
-
-        if ($parameter['length'] < 0) {
-            $data = self::$query->select('igd', array(
-                'uid',
-                'pasien',
-                'dokter',
-                'penjamin',
-                'kunjungan',
-                'waktu_masuk',
-                'waktu_keluar',
-                'kamar',
-                'bed',
-                'keterangan',
-                'jenis_pulang',
-                'alasan_pulang',
-                'pegawai_daftar',
-                'created_at',
-                'updated_at'
-            ))
-                ->join('pasien', array(
-                    'nama as nama_pasien',
-                    'no_rm'
-                ))
-                ->on(array(
-                    array('igd.pasien', '=' , 'pasien.uid')
-                ))
-                ->where($paramData, $paramValue)
-                ->execute();
-        } else {
-            $data = self::$query->select('igd', array(
-                'uid',
-                'pasien',
-                'dokter',
-                'penjamin',
-                'kunjungan',
-                'waktu_masuk',
-                'waktu_keluar',
-                'kamar',
-                'bed',
-                'keterangan',
-                'jenis_pulang',
-                'alasan_pulang',
-                'pegawai_daftar',
-                'created_at',
-                'updated_at'
-            ))
-                ->join('pasien', array(
-                    'nama as nama_pasien',
-                    'no_rm'
-                ))
-                ->on(array(
-                    array('igd.pasien', '=' , 'pasien.uid')
-                ))
-                ->where($paramData, $paramValue)
-                ->offset(intval($parameter['start']))
-                ->limit(intval($parameter['length']))
-                ->execute();
-        }
-
-        $Pegawai = new Pegawai(self::$pdo);
-        $Penjamin = new Penjamin(self::$pdo);
-
-        $data['response_draw'] = $parameter['draw'];
-        $autonum = intval($parameter['start']) + 1;
-        foreach ($data['response_data'] as $key => $value) {
-            $data['response_data'][$key]['autonum'] = $autonum;
-            $autonum++;
-
-            $data['response_data'][$key]['waktu_masuk'] = date('d F Y . H:i', strtotime($value['waktu_masuk']));
-            $data['response_data'][$key]['dokter'] = $Pegawai::get_detail_pegawai($value['dokter'])['response_data'][0]['nama'];
-            $data['response_data'][$key]['penjamin'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0]['nama'];
-            $data['response_data'][$key]['user_resepsionis'] = $Pegawai::get_detail_pegawai($value['pegawai_daftar'])['response_data'][0]['nama'];
-        }
-
-        $itemTotal = self::$query->select('igd', array(
-            'uid'
-        ))
-            ->join('pasien', array(
-                'nama as nama_pasien',
-                'no_rm'
-            ))
-            ->on(array(
-                array('igd.pasien', '=' , 'pasien.uid')
-            ))
-            ->where($paramData, $paramValue)
-            ->execute();
-
-        $data['recordsTotal'] = count($itemTotal['response_data']);
-        $data['recordsFiltered'] = count($itemTotal['response_data']);
-        $data['length'] = intval($parameter['length']);
-        $data['start'] = intval($parameter['start']);
-
-        return $data;
+      $data['response_data'][$key]['waktu_masuk'] = date('d F Y . H:i', strtotime($value['waktu_masuk']));
+      $data['response_data'][$key]['dokter'] = $Pegawai::get_detail_pegawai($value['dokter'])['response_data'][0]['nama'];
+      $data['response_data'][$key]['penjamin'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0]['nama'];
+      $data['response_data'][$key]['uid_penjamin'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0]['uid'];
+      $data['response_data'][$key]['user_resepsionis'] = $Pegawai::get_detail_pegawai($value['pegawai_daftar'])['response_data'][0]['nama'];
     }
 
-    private function pulangkan_pasien($parameter) {
-        $Authorization = new Authorization();
-        $UserData = $Authorization::readBearerToken($parameter['access_token']);
+    $itemTotal = self::$query->select('igd', array(
+      'uid'
+    ))
+      ->join('pasien', array(
+        'nama as nama_pasien',
+        'no_rm'
+      ))
+      ->on(array(
+        array('igd.pasien', '=', 'pasien.uid')
+      ))
+      ->where($paramData, $paramValue)
+      ->execute();
 
-        //Keluar Antrian
-        $update_antrian = self::$query->update('antrian', array(
-            'waktu_keluar' => parent::format_date()
+    $data['recordsTotal'] = count($itemTotal['response_data']);
+    $data['recordsFiltered'] = count($itemTotal['response_data']);
+    $data['length'] = intval($parameter['length']);
+    $data['start'] = intval($parameter['start']);
+
+    return $data;
+  }
+
+  private function pulangkan_pasien($parameter)
+  {
+    $Authorization = new Authorization();
+    $UserData = $Authorization::readBearerToken($parameter['access_token']);
+
+    //Keluar Antrian
+    $update_antrian = self::$query->update('antrian', array(
+      'waktu_keluar' => parent::format_date()
+    ))
+      ->where(array(
+        'antrian.uid' => '= ?',
+        'AND',
+        'antrian.deleted_at' => 'IS NULL'
+      ), array(
+        $parameter['uid']
+      ))
+      ->execute();
+
+    $antrian = self::$query->select('antrian', array(
+      'kunjungan'
+    ))
+      ->where(array(
+        'antrian.uid' => '= ?',
+        'AND',
+        'antrian.deleted_at' => 'IS NULL'
+      ), array(
+        $parameter['uid']
+      ))
+      ->execute();
+
+    $worker = self::$query->update('kunjungan', array(
+      'waktu_keluar' => parent::format_date()
+    ))
+      ->where(array(
+        'kunjungan.uid' => '= ?',
+        'AND',
+        'kunjungan.deleted_at' => 'IS NULL'
+      ), array(
+        $antrian['response_data'][0]['kunjungan']
+      ))
+      ->execute();
+
+    return $worker;
+  }
+
+  private function tambah_igd($parameter)
+  {
+    $Authorization = new Authorization();
+    $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+    $worker = '';
+  }
+
+  private function tambah_kunjungan($table, $parameter)
+  {
+    $Authorization = new Authorization();
+    $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+    if (isset($parameter['dataObj']['konsul'])) { //Kunjungan karena konsul
+
+
+      $PoliTindakan = new Poli(self::$pdo);
+      $PoliTindakanInfo = $PoliTindakan->get_poli_detail($parameter['dataObj']['departemen'])['response_data'][0];
+      $SInvoice = new Invoice(self::$pdo);
+
+      if ($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__) { // Jika umum
+
+        //Invoice Manager
+        $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
+          'uid'
         ))
-            ->where(array(
-                'antrian.uid' => '= ?',
-                'AND',
-                'antrian.deleted_at' => 'IS NULL'
-            ), array(
-                $parameter['uid']
-            ))
-            ->execute();
+          ->where(array(
+            'invoice.deleted_at' => 'IS NULL',
+            'AND',
+            'invoice.kunjungan' => '= ?'
+          ), array(
+            $parameter['dataObj']['kunjungan']
+          ))
+          ->execute();
 
-        $antrian = self::$query->select('antrian', array(
-            'kunjungan'
+
+        if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
+
+          $InvoiceUID = $InvoiceCheck['response_data'][0]['uid'];
+        } else { //Belum ada Invoice Master
+
+          $Invoice = $SInvoice->create_invoice(array(
+            'kunjungan' => $parameter['dataObj']['kunjungan'],
+            'pasien' => $parameter['dataObj']['pasien'],
+            'keterangan' => 'Kunjungan Penjamin BPJS'
+          ));
+
+          $InvoiceUID = $Invoice['response_unique'];
+        }
+
+        //Simpan tagihan penjamin
+
+        $HargaTindakan = $SInvoice->get_harga_tindakan(array(
+          'poli' => $parameter['dataObj']['departemen'],
+          'kelas' => __UID_KELAS_GENERAL_RJ__,
+          'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
+          'penjamin' => $parameter['dataObj']['penjamin']
+        ));
+
+        $Invoice = $SInvoice->append_invoice(array(
+          'invoice' => $InvoiceUID,
+          'item' => $PoliTindakanInfo['tindakan_konsultasi'],
+          'item_origin' => 'master_tindakan',
+          'qty' => 1,
+          'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
+          'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
+          'status_bayar' => 'N', //Umum Bayar dulu
+          'discount' => 0,
+          'discount_type' => 'N',
+          'pasien' => $parameter['dataObj']['currentPasien'],
+          'penjamin' => $parameter['dataObj']['penjamin'],
+          'billing_group' => 'tindakan',
+          'keterangan' => 'Biaya konsultasi',
+          'departemen' => $parameter['dataObj']['departemen']
+        ));
+        //$antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
+
+        $updateNomorAntrian = self::$query->update('antrian_nomor', array(
+          'status' => 'K',
+          'prioritas' => $parameter['dataObj']['prioritas'],
+          'poli' => $parameter['dataObj']['departemen'],
+          'dokter' => $parameter['dataObj']['dokter'],
         ))
-            ->where(array(
-                'antrian.uid' => '= ?',
-                'AND',
-                'antrian.deleted_at' => 'IS NULL'
-            ), array(
-                $parameter['uid']
-            ))
-            ->execute();
+          ->where(
+            array(
+              'antrian_nomor.pasien' => '= ?',
+              'AND',
+              'antrian_nomor.penjamin' => '= ?'
+            ),
+            array(
+              $parameter['dataObj']['currentPasien'],
+              $parameter['dataObj']['penjamin']
+            )
+          )
+          ->execute();
 
-        $worker = self::$query->update('kunjungan', array(
-            'waktu_keluar' => parent::format_date()
+        if ($updateNomorAntrian['response_result'] <= 0) {
+          // $log = parent::log(array(
+          //     'type' => 'error',
+          //     'column' => array(
+          //         'type_err',
+          //         'class_err',
+          //         'messages',
+          //         'logged_at'
+          //     ), 'value' => array(
+          //         'CRITICAL',
+          //         'Pendaftaran',
+          //         $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse'],
+          //         parent::format_date()
+          //     ), 'class' => __CLASS__));
+        }
+
+        unset($parameter['dataObj']['currentPasien']);
+        $antrian['response_notif'] = 'K';
+        return $antrian;
+      } else { // Jika selain umum
+
+        //Invoice Manager
+        $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
+          'uid'
         ))
-            ->where(array(
-                'kunjungan.uid' => '= ?',
-                'AND',
-                'kunjungan.deleted_at' => 'IS NULL'
-            ), array(
-                $antrian['response_data'][0]['kunjungan']
-            ))
-            ->execute();
-
-        return $worker;
-    }
-
-    private function tambah_igd($parameter) {
-        $Authorization = new Authorization();
-        $UserData = $Authorization->readBearerToken($parameter['access_token']);
-
-        $worker = '';
-    }
-
-    private function tambah_kunjungan($table, $parameter) {
-        $Authorization = new Authorization();
-        $UserData = $Authorization->readBearerToken($parameter['access_token']);
-
-        if(isset($parameter['dataObj']['konsul'])) { //Kunjungan karena konsul
+          ->where(array(
+            'invoice.deleted_at' => 'IS NULL',
+            'AND',
+            'invoice.kunjungan' => '= ?'
+          ), array(
+            $parameter['dataObj']['kunjungan']
+          ))
+          ->execute();
 
 
-            $PoliTindakan = new Poli(self::$pdo);
-            $PoliTindakanInfo = $PoliTindakan->get_poli_detail($parameter['dataObj']['departemen'])['response_data'][0];
-            $SInvoice = new Invoice(self::$pdo);
+        if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
 
-            if ($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__) { // Jika umum
+          $InvoiceUID = $InvoiceCheck['response_data'][0]['uid'];
+        } else { //Belum ada Invoice Master
 
-                //Invoice Manager
-                $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
-                    'uid'
-                ))
-                    ->where(array(
-                        'invoice.deleted_at' => 'IS NULL',
-                        'AND',
-                        'invoice.kunjungan' => '= ?'
-                    ), array(
-                        $parameter['dataObj']['kunjungan']
-                    ))
-                    ->execute();
+          $Invoice = $SInvoice->create_invoice(array(
+            'kunjungan' => $parameter['dataObj']['kunjungan'],
+            'pasien' => $parameter['dataObj']['pasien'],
+            'keterangan' => 'Kunjungan Penjamin BPJS'
+          ));
 
+          $InvoiceUID = $Invoice['response_unique'];
+        }
 
-                if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
+        //Simpan tagihan penjamin
 
-                    $InvoiceUID = $InvoiceCheck['response_data'][0]['uid'];
+        $HargaTindakan = $SInvoice->get_harga_tindakan(array(
+          'poli' => $parameter['dataObj']['departemen'],
+          'kelas' => __UID_KELAS_GENERAL_RJ__,
+          'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
+          'penjamin' => $parameter['dataObj']['penjamin']
+        ));
 
-                } else { //Belum ada Invoice Master
+        $Invoice = $SInvoice->append_invoice(array(
+          'invoice' => $InvoiceUID,
+          'item' => $PoliTindakanInfo['tindakan_konsultasi'],
+          'item_origin' => 'master_tindakan',
+          'qty' => 1,
+          'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
+          'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
+          'status_bayar' => 'Y', //Karena penjamin selain ini otomatis status menjadi terbayar
+          'discount' => 0,
+          'discount_type' => 'N',
+          'pasien' => $parameter['dataObj']['currentPasien'],
+          'penjamin' => $parameter['dataObj']['penjamin'],
+          'billing_group' => 'tindakan',
+          'keterangan' => 'Biaya konsultasi',
+          'departemen' => $parameter['dataObj']['departemen']
+        ));
 
-                    $Invoice = $SInvoice->create_invoice(array(
-                        'kunjungan' => $parameter['dataObj']['kunjungan'],
-                        'pasien' => $parameter['dataObj']['pasien'],
-                        'keterangan' => 'Kunjungan Penjamin BPJS'
-                    ));
+        unset($parameter['dataObj']['currentPasien']);
+        unset($parameter['dataObj']['bangsal']);
 
-                    $InvoiceUID = $Invoice['response_unique'];
+        //Keluar dari poli
+        $keluar = self::$query->update('antrian', array(
+          'waktu_keluar' => parent::format_date()
+        ))
+          ->where(array(
+            'antrian.uid' => '= ?',
+            'AND',
+            'antrian.deleted_at' => 'IS NULL'
+          ), array(
+            $parameter['dataObj']['antrian']
+          ))
+          ->execute();
 
-                }
+        unset($parameter['dataObj']['antrian']);
 
-                //Simpan tagihan penjamin
-
-                $HargaTindakan = $SInvoice->get_harga_tindakan(array(
-                    'poli' => $parameter['dataObj']['departemen'],
-                    'kelas' => __UID_KELAS_GENERAL_RJ__,
-                    'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
-                    'penjamin' => $parameter['dataObj']['penjamin']
-                ));
-
-                $Invoice = $SInvoice->append_invoice(array(
-                    'invoice' => $InvoiceUID,
-                    'item' => $PoliTindakanInfo['tindakan_konsultasi'],
-                    'item_origin' => 'master_tindakan',
-                    'qty' => 1,
-                    'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
-                    'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
-                    'status_bayar' => 'N', //Umum Bayar dulu
-                    'discount' => 0,
-                    'discount_type' => 'N',
-                    'pasien' => $parameter['dataObj']['currentPasien'],
-                    'penjamin' => $parameter['dataObj']['penjamin'],
-                    'billing_group' => 'tindakan',
-                    'keterangan' => 'Biaya konsultasi',
-                    'departemen' => $parameter['dataObj']['departemen']
-                ));
-                //$antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
-
-                $updateNomorAntrian = self::$query->update('antrian_nomor', array(
-                    'status' => 'K',
-                    'prioritas' => $parameter['dataObj']['prioritas'],
-                    'poli' => $parameter['dataObj']['departemen'],
-                    'dokter' => $parameter['dataObj']['dokter'],
-                ))
-                    ->where(array(
-                        'antrian_nomor.pasien' => '= ?',
-                        'AND',
-                        'antrian_nomor.penjamin' => '= ?'
-                    ), array(
-                            $parameter['dataObj']['currentPasien'],
-                            $parameter['dataObj']['penjamin']
-                        )
-                    )
-                    ->execute();
-
-                if($updateNomorAntrian['response_result'] <= 0) {
-                    // $log = parent::log(array(
-                    //     'type' => 'error',
-                    //     'column' => array(
-                    //         'type_err',
-                    //         'class_err',
-                    //         'messages',
-                    //         'logged_at'
-                    //     ), 'value' => array(
-                    //         'CRITICAL',
-                    //         'Pendaftaran',
-                    //         $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse'],
-                    //         parent::format_date()
-                    //     ), 'class' => __CLASS__));
-                }
-
-                unset($parameter['dataObj']['currentPasien']);
-                $antrian['response_notif'] = 'K';
-                return $antrian;
-
-            } else { // Jika selain umum
-
-                //Invoice Manager
-                $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
-                    'uid'
-                ))
-                    ->where(array(
-                        'invoice.deleted_at' => 'IS NULL',
-                        'AND',
-                        'invoice.kunjungan' => '= ?'
-                    ), array(
-                        $parameter['dataObj']['kunjungan']
-                    ))
-                    ->execute();
+        $antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
+        $antrian['response_notif'] = 'P';
+        $antrian['inap_check'] = 3;
+        $antrian['param'] = $parameter;
+        return $antrian;
+      }
+    } else { //Kunjungan Pertama
 
 
-                if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
+      $uid = parent::gen_uuid();
+      //Tentukan tindakan untuk poli bersangkutan
+      $PoliTindakan = new Poli(self::$pdo);
+      $PoliTindakanInfo = $PoliTindakan->get_poli_detail($parameter['dataObj']['departemen'])['response_data'][0];
 
-                    $InvoiceUID = $InvoiceCheck['response_data'][0]['uid'];
+      $kunjungan = self::$query->insert($table, array(
+        'uid' => $uid,
+        'waktu_masuk' => parent::format_date(),
+        'pj_pasien' => $parameter['dataObj']['pj_pasien'],
+        'info_didapat_dari' => $parameter['dataObj']['info_didapat_dari'],
+        'cara_datang' => intval($parameter['dataObj']['cara_datang']),
+        'keterangan_cara_datang' => $parameter['dataObj']['keterangan_cara_datang'],
+        'pegawai' => $UserData['data']->uid,
+        'created_at' => parent::format_date(),
+        'updated_at' => parent::format_date()
+      ))->execute();
 
-                } else { //Belum ada Invoice Master
 
-                    $Invoice = $SInvoice->create_invoice(array(
-                        'kunjungan' => $parameter['dataObj']['kunjungan'],
-                        'pasien' => $parameter['dataObj']['pasien'],
-                        'keterangan' => 'Kunjungan Penjamin BPJS'
-                    ));
 
-                    $InvoiceUID = $Invoice['response_unique'];
-
-                }
-
-                //Simpan tagihan penjamin
-
-                $HargaTindakan = $SInvoice->get_harga_tindakan(array(
-                    'poli' => $parameter['dataObj']['departemen'],
-                    'kelas' => __UID_KELAS_GENERAL_RJ__,
-                    'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
-                    'penjamin' => $parameter['dataObj']['penjamin']
-                ));
-
-                $Invoice = $SInvoice->append_invoice(array(
-                    'invoice' => $InvoiceUID,
-                    'item' => $PoliTindakanInfo['tindakan_konsultasi'],
-                    'item_origin' => 'master_tindakan',
-                    'qty' => 1,
-                    'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
-                    'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
-                    'status_bayar' => 'Y', //Karena penjamin selain ini otomatis status menjadi terbayar
-                    'discount' => 0,
-                    'discount_type' => 'N',
-                    'pasien' => $parameter['dataObj']['currentPasien'],
-                    'penjamin' => $parameter['dataObj']['penjamin'],
-                    'billing_group' => 'tindakan',
-                    'keterangan' => 'Biaya konsultasi',
-                    'departemen' => $parameter['dataObj']['departemen']
-                ));
-
-                unset($parameter['dataObj']['currentPasien']);
-                unset($parameter['dataObj']['bangsal']);
-
-                //Keluar dari poli
-                $keluar = self::$query->update('antrian', array(
-                    'waktu_keluar' => parent::format_date()
-                ))
-                    ->where(array(
-                        'antrian.uid' => '= ?',
-                        'AND',
-                        'antrian.deleted_at' => 'IS NULL'
-                    ), array(
-                        $parameter['dataObj']['antrian']
-                    ))
-                    ->execute();
-
-                unset($parameter['dataObj']['antrian']);
-
-                $antrian = self::tambah_antrian('antrian', $parameter, $parameter['dataObj']['kunjungan']);
-                $antrian['response_notif'] = 'P';
-                $antrian['inap_check'] = 3;
-                $antrian['param'] = $parameter;
-                return $antrian;
-
-            }
+      if ($kunjungan['response_result'] > 0) {
+        $log = parent::log(array(
+          'type' => 'activity',
+          'column' => array(
+            'unique_target',
+            'user_uid',
+            'table_name',
+            'action',
+            'logged_at',
+            'status',
+            'login_id'
+          ), 'value' => array(
+            $uid,
+            $UserData['data']->uid,
+            $table,
+            'I',
+            parent::format_date(),
+            'N',
+            $UserData['data']->log_id
+          ), 'class' => __CLASS__
+        ));
 
 
 
 
+        $SInvoice = new Invoice(self::$pdo);
+        $HargaKartu = $SInvoice->get_harga_tindakan(array(
+          'poli' => $parameter['dataObj']['departemen'],
+          'kelas' => __UID_KELAS_GENERAL_RJ__,
+          'tindakan' => __UID_KARTU__,
+          'penjamin' => $parameter['dataObj']['penjamin']
+        ));
 
-        } else { //Kunjungan Pertama
+        //Update antrian kunjungan
+        if ($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__) { // Jika umum
+          if (count($HargaKartu['response_data']) > 0 && floatval($HargaKartu['response_data'][0]['harga']) > 0) {
+            $Pasien = new Pasien(self::$pdo);
+            $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
 
 
-            $uid = parent::gen_uuid();
-            //Tentukan tindakan untuk poli bersangkutan
-            $PoliTindakan = new Poli(self::$pdo);
-            $PoliTindakanInfo = $PoliTindakan->get_poli_detail($parameter['dataObj']['departemen'])['response_data'][0];
 
-            $kunjungan = self::$query->insert($table, array(
-                'uid' => $uid,
-                'waktu_masuk' => parent::format_date(),
-                'pj_pasien' => $parameter['dataObj']['pj_pasien'],
-                'info_didapat_dari' => $parameter['dataObj']['info_didapat_dari'],
-                'cara_datang' => intval($parameter['dataObj']['cara_datang']),
-                'keterangan_cara_datang' => $parameter['dataObj']['keterangan_cara_datang'],
+            if ($parameter['dataObj']['departemen'] === __POLI_IGD__) {
+
+              //KHUSUS AUTO ANTRIAN
+              $antrianKunjungan = self::$query->insert('antrian_nomor', array(
+                'nomor_urut' => 'IGD',
                 'pegawai' => $UserData['data']->uid,
+                'kunjungan' => $uid,
+                'prioritas' => $parameter['dataObj']['prioritas'],
+                'pasien' => $parameter['dataObj']['currentPasien'],
+                'dokter' => $parameter['dataObj']['dokter'],
+                'penjamin' => $parameter['dataObj']['penjamin'],
+                'poli' => __POLI_IGD__,
+                'status' => 'K',
+                'created_at' => parent::format_date(),
+                'jenis_antrian' => __ANTRIAN_KHUSUS__
+              ))
+                ->execute();
+
+
+              //Ambil Nurse Station Terkait
+              $NSAdil = array();
+              $NSMonitor = array();
+              $NSRanjang = self::$query->select('nurse_station_ranjang', array(
+                'nurse_station'
+              ))
+                ->where(array(
+                  'nurse_station_ranjang.ranjang' => '= ?',
+                  'AND',
+                  'nurse_station_ranjang.deleted_at' => 'IS NULL'
+                ), array(
+                  $parameter['dataObj']['bangsal']
+                ))
+                ->execute();
+              foreach ($NSRanjang['response_data'] as $NSKey => $NSValue) {
+                if (!isset($NSAdil[$NSValue['nurse_station']])) {
+                  $NSAdil[$NSValue['nurse_station']] = 0;
+                }
+              }
+
+              foreach ($NSAdil as $NSAKey => $NSAValue) {
+                $CountIGDNS = self::$query->select('igd', array(
+                  'uid'
+                ))
+                  ->where(array(
+                    'igd.nurse_station' => '= ?',
+                    'AND',
+                    'igd.deleted_at' => 'IS NULL',
+                    'AND',
+                    'igd.waktu_keluar' => 'IS NULL'
+                  ), array(
+                    $NSAKey
+                  ))
+                  ->execute();
+
+                $NSAdil[$NSAKey] = count($CountIGDNS['response_data']);
+
+                array_push($NSMonitor, array(
+                  'ns' => $NSAKey,
+                  'jumlah' => $NSAdil[$NSAKey]
+                ));
+              }
+
+              usort($NSMonitor, function ($a, $b) {
+                $t1 = $a['jumlah'];
+                $t2 = $b['jumlah'];
+                return $t1 - $t2;
+              });
+
+              //Auto IGD
+              $IGD = parent::gen_uuid();
+              //todo: IGD kerjakan coy
+              $igd_log = self::$query->insert('igd', array(
+                'uid' => $IGD,
+                'pasien' => $parameter['dataObj']['currentPasien'],
+                'dokter' => $parameter['dataObj']['dokter'],
+                'penjamin' => $parameter['dataObj']['penjamin'],
+                'kunjungan' => $uid,
+                'waktu_masuk' => parent::format_date(),
+                'kamar' => __KAMAR_IGD__,
+                'bed' => $parameter['dataObj']['bangsal'],
+                'pegawai_daftar' => $UserData['data']->uid,
+                'nurse_station' => $NSMonitor[0]['ns'],
+                'keterangan' => '',
                 'created_at' => parent::format_date(),
                 'updated_at' => parent::format_date()
-            ))->execute();
-
-
-
-            if ($kunjungan['response_result'] > 0) {
-                $log = parent::log(array(
-                    'type' => 'activity',
-                    'column' => array(
-                        'unique_target',
-                        'user_uid',
-                        'table_name',
-                        'action',
-                        'logged_at',
-                        'status',
-                        'login_id'
-                    ), 'value' => array(
-                        $uid,
-                        $UserData['data']->uid,
-                        $table,
-                        'I',
-                        parent::format_date(),
-                        'N',
-                        $UserData['data']->log_id
-                    ), 'class' => __CLASS__));
+              ))
+                ->execute();
 
 
 
 
-                $SInvoice = new Invoice(self::$pdo);
-                $HargaKartu = $SInvoice->get_harga_tindakan(array(
-                    'poli' => $parameter['dataObj']['departemen'],
-                    'kelas' => __UID_KELAS_GENERAL_RJ__,
-                    'tindakan' => __UID_KARTU__,
-                    'penjamin' => $parameter['dataObj']['penjamin']
-                ));
+              $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
+              $antrianKunjungan['response_notif'] = 'K';
 
-                //Update antrian kunjungan
-                if ($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__) { // Jika umum
-                    if (count($HargaKartu['response_data']) > 0 && floatval($HargaKartu['response_data'][0]['harga']) > 0) {
-                        $Pasien = new Pasien(self::$pdo);
-                        $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
+              //Auto Tambah ke Antrian Poli
+              $parameter['dataObj']['currentAntrianID'] = 0;
+              $currentPasien = $parameter['dataObj']['currentPasien'];
+              unset($parameter['dataObj']['currentPasien']);
+              unset($parameter['dataObj']['bangsal']);
+              $AntrianProses = self::tambah_antrian('antrian', $parameter, $uid);
+              $antrianKunjungan['response_poli'] = $AntrianProses;
 
-
-
-                        if($parameter['dataObj']['departemen'] === __POLI_IGD__) {
-
-                            //KHUSUS AUTO ANTRIAN
-                            $antrianKunjungan = self::$query->insert('antrian_nomor', array(
-                                'nomor_urut' => 'IGD',
-                                'pegawai' => $UserData['data']->uid,
-                                'kunjungan' => $uid,
-                                'prioritas' => $parameter['dataObj']['prioritas'],
-                                'pasien' => $parameter['dataObj']['currentPasien'],
-                                'dokter' => $parameter['dataObj']['dokter'],
-                                'penjamin' => $parameter['dataObj']['penjamin'],
-                                'poli' => __POLI_IGD__,
-                                'status' => 'K',
-                                'created_at' => parent::format_date(),
-                                'jenis_antrian' => __ANTRIAN_KHUSUS__
-                            ))
-                                ->execute();
-
-
-                            //Ambil Nurse Station Terkait
-                            $NSAdil = array();
-                            $NSMonitor = array();
-                            $NSRanjang = self::$query->select('nurse_station_ranjang', array(
-                                'nurse_station'
-                            ))
-                                ->where(array(
-                                    'nurse_station_ranjang.ranjang' => '= ?',
-                                    'AND',
-                                    'nurse_station_ranjang.deleted_at' => 'IS NULL'
-                                ), array(
-                                    $parameter['dataObj']['bangsal']
-                                ))
-                                ->execute();
-                            foreach ($NSRanjang['response_data'] as $NSKey => $NSValue) {
-                                if(!isset($NSAdil[$NSValue['nurse_station']])) {
-                                    $NSAdil[$NSValue['nurse_station']] = 0;
-                                }
-                            }
-
-                            foreach ($NSAdil as $NSAKey => $NSAValue) {
-                                $CountIGDNS = self::$query->select('igd', array(
-                                    'uid'
-                                ))
-                                    ->where(array(
-                                        'igd.nurse_station' => '= ?',
-                                        'AND',
-                                        'igd.deleted_at' => 'IS NULL',
-                                        'AND',
-                                        'igd.waktu_keluar' => 'IS NULL'
-                                    ), array(
-                                        $NSAKey
-                                    ))
-                                    ->execute();
-
-                                $NSAdil[$NSAKey] = count($CountIGDNS['response_data']);
-
-                                array_push($NSMonitor, array(
-                                    'ns' => $NSAKey,
-                                    'jumlah' => $NSAdil[$NSAKey]
-                                ));
-                            }
-
-                            usort($NSMonitor, function($a, $b){
-                                $t1 = $a['jumlah'];
-                                $t2 = $b['jumlah'];
-                                return $t1 - $t2;
-                            });
-
-                            //Auto IGD
-                            $IGD = parent::gen_uuid();
-                            //todo: IGD kerjakan coy
-                            $igd_log = self::$query->insert('igd', array(
-                                'uid' => $IGD,
-                                'pasien' => $parameter['dataObj']['currentPasien'],
-                                'dokter' => $parameter['dataObj']['dokter'],
-                                'penjamin' => $parameter['dataObj']['penjamin'],
-                                'kunjungan' => $uid,
-                                'waktu_masuk' => parent::format_date(),
-                                'kamar' => __KAMAR_IGD__,
-                                'bed' => $parameter['dataObj']['bangsal'],
-                                'pegawai_daftar' => $UserData['data']->uid,
-                                'nurse_station' => $NSMonitor[0]['ns'],
-                                'keterangan' => '',
-                                'created_at' => parent::format_date(),
-                                'updated_at' => parent::format_date()
-                            ))
-                                ->execute();
-
-
-
-
-                            $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
-                            $antrianKunjungan['response_notif'] = 'K';
-
-                            //Auto Tambah ke Antrian Poli
-                            $parameter['dataObj']['currentAntrianID'] = 0;
-                            $currentPasien = $parameter['dataObj']['currentPasien'];
-                            unset($parameter['dataObj']['currentPasien']);
-                            unset($parameter['dataObj']['bangsal']);
-                            $AntrianProses = self::tambah_antrian('antrian', $parameter, $uid);
-                            $antrianKunjungan['response_poli'] = $AntrianProses;
-
-                            /*$no_antrian = self::ambilNomorAntrianPoli($parameter['dataObj']['departemen']);
+              /*$no_antrian = self::ambilNomorAntrianPoli($parameter['dataObj']['departemen']);
                             $antrian = self::$query
                                 ->insert('antrian', array(
                                         'uid' => $uid,
@@ -605,123 +633,123 @@ class Antrian extends Utility
                                 )
                                 ->execute();*/
 
-                            $parameter['dataObj']['currentPasien'] = $currentPasien;
-                        } else {
-                            $antrianKunjungan = self::$query->update('antrian_nomor', array(
-                                'status' => 'K',
-                                'kunjungan' => $uid,
-                                'prioritas' => $parameter['dataObj']['prioritas'],
-                                'poli' => $parameter['dataObj']['departemen'],
-                                'pasien' => $parameter['dataObj']['currentPasien'],
-                                'penjamin' => $parameter['dataObj']['penjamin'],
-                                'dokter' => $parameter['dataObj']['dokter']
-                            ))
-                                ->where(array(
-                                    'antrian_nomor.id' => '= ?',
-                                    'AND',
-                                    '(antrian_nomor.status' => '= ?',
-                                    'OR',
-                                    'antrian_nomor.status' => '= ?)'
-                                ), array(
-                                    $parameter['dataObj']['currentAntrianID'],
-                                    'D', 'C'
-                                ))
-                                ->execute();
-                            $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
-                            $antrianKunjungan['response_notif'] = 'K';
-                        }
+              $parameter['dataObj']['currentPasien'] = $currentPasien;
+            } else {
+              $antrianKunjungan = self::$query->update('antrian_nomor', array(
+                'status' => 'K',
+                'kunjungan' => $uid,
+                'prioritas' => $parameter['dataObj']['prioritas'],
+                'poli' => $parameter['dataObj']['departemen'],
+                'pasien' => $parameter['dataObj']['currentPasien'],
+                'penjamin' => $parameter['dataObj']['penjamin'],
+                'dokter' => $parameter['dataObj']['dokter']
+              ))
+                ->where(array(
+                  'antrian_nomor.id' => '= ?',
+                  'AND',
+                  '(antrian_nomor.status' => '= ?',
+                  'OR',
+                  'antrian_nomor.status' => '= ?)'
+                ), array(
+                  $parameter['dataObj']['currentAntrianID'],
+                  'D', 'C'
+                ))
+                ->execute();
+              $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
+              $antrianKunjungan['response_notif'] = 'K';
+            }
 
 
 
 
-                        //Invoice Manager
-                        $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
-                            'uid'
-                        ))
-                            ->where(array(
-                                'invoice.deleted_at' => 'IS NULL',
-                                'AND',
-                                'invoice.kunjungan' => '= ?'
-                            ), array(
-                                $uid
-                            ))
-                            ->execute();
+            //Invoice Manager
+            $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
+              'uid'
+            ))
+              ->where(array(
+                'invoice.deleted_at' => 'IS NULL',
+                'AND',
+                'invoice.kunjungan' => '= ?'
+              ), array(
+                $uid
+              ))
+              ->execute();
 
 
-                        if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
-                            $checkBiayaKartu = self::$query->select('antrian', array( //New Detail. Rekap tagihan
-                                'uid'
-                            ))
-                                ->where(array(
-                                    'antrian.pasien' => '= ?'
-                                ), array(
-                                    $parameter['dataObj']['currentPasien']
-                                ))
-                                ->execute();
+            if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
+              $checkBiayaKartu = self::$query->select('antrian', array( //New Detail. Rekap tagihan
+                'uid'
+              ))
+                ->where(array(
+                  'antrian.pasien' => '= ?'
+                ), array(
+                  $parameter['dataObj']['currentPasien']
+                ))
+                ->execute();
 
-                            if (count($checkBiayaKartu['response_data']) <= 0) { //Biaya Kartu
-                                $Invoice = $SInvoice->append_invoice(array(
-                                    'invoice' => $InvoiceCheck['response_data'][0]['uid'],
-                                    'item' => __UID_KARTU__,
-                                    'item_origin' => 'master_tindakan',
-                                    'qty' => 1,
-                                    'harga' => floatval($HargaKartu['response_data'][0]['harga']),
-                                    'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
-                                    'discount' => 0,
-                                    'discount_type' => 'N',
-                                    'pasien' => $parameter['dataObj']['currentPasien'],
-                                    'penjamin' => $parameter['dataObj']['penjamin'],
-                                    'billing_group' => 'administrasi',
-                                    'keterangan' => 'Biaya kartu pasien baru',
-                                    'departemen' => $parameter['dataObj']['departemen']
-                                ));
-                            }
+              if (count($checkBiayaKartu['response_data']) <= 0) { //Biaya Kartu
+                $Invoice = $SInvoice->append_invoice(array(
+                  'invoice' => $InvoiceCheck['response_data'][0]['uid'],
+                  'item' => __UID_KARTU__,
+                  'item_origin' => 'master_tindakan',
+                  'qty' => 1,
+                  'harga' => floatval($HargaKartu['response_data'][0]['harga']),
+                  'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
+                  'discount' => 0,
+                  'discount_type' => 'N',
+                  'pasien' => $parameter['dataObj']['currentPasien'],
+                  'penjamin' => $parameter['dataObj']['penjamin'],
+                  'billing_group' => 'administrasi',
+                  'keterangan' => 'Biaya kartu pasien baru',
+                  'departemen' => $parameter['dataObj']['departemen']
+                ));
+              }
 
-                            $HargaTindakan = $SInvoice->get_harga_tindakan(array(
-                                'poli' => $parameter['dataObj']['departemen'],
-                                'kelas' => __UID_KELAS_GENERAL_RJ__,
-                                'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
-                                'penjamin' => $parameter['dataObj']['penjamin']
-                            ));
+              $HargaTindakan = $SInvoice->get_harga_tindakan(array(
+                'poli' => $parameter['dataObj']['departemen'],
+                'kelas' => __UID_KELAS_GENERAL_RJ__,
+                'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
+                'penjamin' => $parameter['dataObj']['penjamin']
+              ));
 
-                            //print_r($HargaTindakan['response_data']);
+              //print_r($HargaTindakan['response_data']);
 
-                            $Invoice = $SInvoice->append_invoice(array(
-                                'invoice' => $InvoiceCheck['response_data'][0]['uid'],
-                                'item' => $PoliTindakanInfo['tindakan_konsultasi'],
-                                'item_origin' => 'master_tindakan',
-                                'qty' => 1,
-                                'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
-                                'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
-                                'discount' => 0,
-                                'discount_type' => 'N',
-                                'pasien' => $parameter['dataObj']['currentPasien'],
-                                'penjamin' => $parameter['dataObj']['penjamin'],
-                                'billing_group' => 'tindakan',
-                                'keterangan' => 'Biaya konsultasi',
-                                'departemen' => $parameter['dataObj']['departemen']
-                            ));
-                        } else { //Belum ada invoice master umum
-                            $Invoice = $SInvoice->create_invoice(array(
-                                'kunjungan' => $uid,
-                                'pasien' => $parameter['dataObj']['pasien'],
-                                'keterangan' => ''
-                            ));
+              $Invoice = $SInvoice->append_invoice(array(
+                'invoice' => $InvoiceCheck['response_data'][0]['uid'],
+                'item' => $PoliTindakanInfo['tindakan_konsultasi'],
+                'item_origin' => 'master_tindakan',
+                'qty' => 1,
+                'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
+                'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
+                'discount' => 0,
+                'discount_type' => 'N',
+                'pasien' => $parameter['dataObj']['currentPasien'],
+                'penjamin' => $parameter['dataObj']['penjamin'],
+                'billing_group' => 'tindakan',
+                'keterangan' => 'Biaya konsultasi',
+                'departemen' => $parameter['dataObj']['departemen']
+              ));
+            } else { //Belum ada invoice master umum
+              $Invoice = $SInvoice->create_invoice(array(
+                'kunjungan' => $uid,
+                'pasien' => $parameter['dataObj']['pasien'],
+                'keterangan' => ''
+              ));
 
-                            if (isset($Invoice['response_unique']) && $Invoice['response_result'] > 0) {
-                                $NewInvoiceUID = $Invoice['response_unique'];
-                                $checkBiayaKartu = self::$query->select('antrian', array(
-                                    'uid'
-                                ))
-                                    ->where(array(
-                                        'antrian.pasien' => '= ?'
-                                    ), array(
-                                        $parameter['dataObj']['pasien']
-                                    ))
-                                    ->execute();
+              if (isset($Invoice['response_unique']) && $Invoice['response_result'] > 0) {
+                $NewInvoiceUID = $Invoice['response_unique'];
+                $checkBiayaKartu = self::$query->select('antrian', array(
+                  'uid'
+                ))
+                  ->where(array(
+                    'antrian.pasien' => '= ?'
+                  ), array(
+                    $parameter['dataObj']['pasien']
+                  ))
+                  ->execute();
 
-                                if (count($checkBiayaKartu['response_data']) == 0) { //Biaya Kartu
-                                    /*if(isset($HargaKartu['response_data']) && count($HargaKartu['response_data']) > 0) {
+                if (count($checkBiayaKartu['response_data']) == 0) { //Biaya Kartu
+                  /*if(isset($HargaKartu['response_data']) && count($HargaKartu['response_data']) > 0) {
                                         $Invoice = $SInvoice::append_invoice(array(
                                             'invoice' => $NewInvoiceUID,
                                             'item' => __UID_KARTU__,
@@ -736,1393 +764,1504 @@ class Antrian extends Utility
                                             'keterangan' => 'Biaya kartu pasien baru'
                                         ));
                                     }*/
-                                    $Invoice = $SInvoice->append_invoice(array(
-                                        'invoice' => $NewInvoiceUID,
-                                        'item' => __UID_KARTU__,
-                                        'item_origin' => 'master_tindakan',
-                                        'qty' => 1,
-                                        'harga' => floatval($HargaKartu['response_data'][0]['harga']),
-                                        'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
-                                        'discount' => 0,
-                                        'discount_type' => 'N',
-                                        'pasien' => $parameter['dataObj']['currentPasien'],
-                                        'penjamin' => $parameter['dataObj']['penjamin'],
-                                        'billing_group' => 'administrasi',
-                                        'keterangan' => 'Biaya kartu pasien baru',
-                                        'departemen' => $parameter['dataObj']['departemen']
-                                    ));
-                                }
-
-                                $HargaTindakan = $SInvoice->get_harga_tindakan(array(
-                                    'poli' => $parameter['dataObj']['departemen'],
-                                    'kelas' => __UID_KELAS_GENERAL_RJ__,
-                                    'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
-                                    'penjamin' => $parameter['dataObj']['penjamin']
-                                ));
-
-                                $Invoice = $SInvoice->append_invoice(array(
-                                    'invoice' => $NewInvoiceUID,
-                                    'item' => $PoliTindakanInfo['tindakan_konsultasi'],
-                                    'item_origin' => 'master_tindakan',
-                                    'qty' => 1,
-                                    'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
-                                    'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
-                                    'discount' => 0,
-                                    'discount_type' => 'N',
-                                    'pasien' => $parameter['dataObj']['currentPasien'],
-                                    'penjamin' => $parameter['dataObj']['penjamin'],
-                                    'billing_group' => 'tindakan',
-                                    'keterangan' => 'Biaya konsultasi',
-                                    'departemen' => $parameter['dataObj']['departemen'],
-                                    'document' => ''
-                                ));
-                            } else {
-                                //
-                            }
-                        }
-                        $antrianKunjungan['response_harga'] = $HargaTindakan;
-                        $antrianKunjungan['response_invoice'] = $Invoice;
-
-                        return $antrianKunjungan;
-                    } else {
-                        return $HargaKartu;
-                    }
-
-                } else { // Jika selain umum
-
-
-
-                    //Simpan Data Non Umum
-
-                    $CheckNonUmum = self::$query->select('pasien_penjamin', array(
-                        'id'
-                    ))
-                        ->where(array(
-                            'pasien_penjamin.penjamin' => '= ?',
-                            'AND',
-                            'pasien_penjamin.pasien' => '= ?'
-                        ), array(
-                            $parameter['dataObj']['penjamin'],
-                            $parameter['dataObj']['pasien']
-                        ))
-                        ->execute();
-
-                    if($parameter['dataObj']['penjamin'] === __UIDPENJAMINBPJS__) { //META BPJS
-                        if(count($CheckNonUmum['response_data']) > 0) {
-                            $RekamPenjamin = self::$query->update('pasien_penjamin', array(
-                                'valid_awal' => $parameter['dataObj']['valid_start'],
-                                'valid_akhir' => $parameter['dataObj']['valid_end'],
-                                'rest_meta' => $parameter['dataObj']['penjaminMeta'],
-                                'terdaftar' => parent::format_date(),
-                                'updated_at' => parent::format_date(),
-                                'deleted_at' => NULL
-                            ))
-                                ->where(array(
-                                    'pasien_penjamin.penjamin' => '= ?',
-                                    'AND',
-                                    'pasien_penjamin.pasien' => '= ?'
-                                ), array(
-                                    $parameter['dataObj']['penjamin'],
-                                    $parameter['dataObj']['pasien']
-                                ))
-                                ->execute();
-                        } else {
-                            $RekamPenjamin = self::$query->insert('pasien_penjamin', array(
-                                'penjamin' => $parameter['dataObj']['penjamin'],
-                                'pasien' => $parameter['dataObj']['pasien'],
-                                'valid_awal' => $parameter['dataObj']['valid_start'],
-                                'valid_akhir' => $parameter['dataObj']['valid_end'],
-                                'rest_meta' => $parameter['dataObj']['penjaminMeta'],
-                                'terdaftar' => parent::format_date(),
-                                'created_at' => parent::format_date(),
-                                'updated_at' => parent::format_date()
-                            ))
-                                ->execute();
-                        }
-                    } else {
-                        //TODO: Meta Penjamin Lainnya
-                    }
-
-
-
-
-                    //Invoice Manager
-                    $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
-                        'uid'
-                    ))
-                        ->where(array(
-                            'invoice.deleted_at' => 'IS NULL',
-                            'AND',
-                            'invoice.kunjungan' => '= ?'
-                        ), array(
-                            $uid
-                        ))
-                        ->execute();
-
-
-                    if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
-
-                        $InvoiceUID = $InvoiceCheck['response_data'][0]['uid'];
-
-                    } else { //Belum ada Invoice Master
-
-                        $Invoice = $SInvoice->create_invoice(array(
-                            'kunjungan' => $uid,
-                            'pasien' => $parameter['dataObj']['pasien'],
-                            'keterangan' => 'Kunjungan Penjamin BPJS'
-                        ));
-
-                        $InvoiceUID = $Invoice['response_unique'];
-
-                    }
-
-                    //Simpan tagihan penjamin
-
-                    $HargaTindakan = $SInvoice->get_harga_tindakan(array(
-                        'poli' => $parameter['dataObj']['departemen'],
-                        'kelas' => __UID_KELAS_GENERAL_RJ__,
-                        'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
-                        'penjamin' => $parameter['dataObj']['penjamin']
-                    ));
-
-                    $Invoice = $SInvoice->append_invoice(array(
-                        'invoice' => $InvoiceUID,
-                        'item' => $PoliTindakanInfo['tindakan_konsultasi'],
-                        'item_origin' => 'master_tindakan',
-                        'qty' => 1,
-                        'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
-                        'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
-                        'status_bayar' => 'Y', //Karena penjamin selain ini otomatis status menjadi terbayar
-                        'discount' => 0,
-                        'discount_type' => 'N',
-                        'pasien' => $parameter['dataObj']['currentPasien'],
-                        'penjamin' => $parameter['dataObj']['penjamin'],
-                        'billing_group' => 'tindakan',
-                        'keterangan' => 'Biaya konsultasi',
-                        'departemen' => $parameter['dataObj']['departemen']
-                    ));
-
-
-                    //Cek Pasien Baru?
-                    $checkStatusPasien = self::$query->select('antrian', array(
-                        'uid'
-                    ))
-                        ->where(array(
-                            'antrian.pasien' => '= ?',
-                            'AND',
-                            'antrian.deleted_at' => 'IS NULL'
-                        ), array(
-                            $parameter['dataObj']['currentPasien']
-                        ))
-                        ->execute();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    if($parameter['dataObj']['departemen'] === __POLI_IGD__) {
-
-                        $Pasien = new Pasien(self::$pdo);
-                        $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
-
-                        //KHUSUS AUTO ANTRIAN
-                        $antrianKunjungan = self::$query->insert('antrian_nomor', array(
-                            'nomor_urut' => 'IGD',
-                            'pegawai' => $UserData['data']->uid,
-                            'kunjungan' => $uid,
-                            'prioritas' => $parameter['dataObj']['prioritas'],
-                            'pasien' => $parameter['dataObj']['currentPasien'],
-                            'dokter' => $parameter['dataObj']['dokter'],
-                            'penjamin' => $parameter['dataObj']['penjamin'],
-                            'poli' => __POLI_IGD__,
-                            'status' => 'K',
-                            'created_at' => parent::format_date(),
-                            'jenis_antrian' => __ANTRIAN_KHUSUS__
-                        ))
-                            ->execute();
-
-
-                        //Ambil Nurse Station Terkait
-                        $NSAdil = array();
-                        $NSMonitor = array();
-                        $NSRanjang = self::$query->select('nurse_station_ranjang', array(
-                            'nurse_station'
-                        ))
-                            ->where(array(
-                                'nurse_station_ranjang.ranjang' => '= ?',
-                                'AND',
-                                'nurse_station_ranjang.deleted_at' => 'IS NULL'
-                            ), array(
-                                $parameter['dataObj']['bangsal']
-                            ))
-                            ->execute();
-                        foreach ($NSRanjang['response_data'] as $NSKey => $NSValue) {
-                            if(!isset($NSAdil[$NSValue['nurse_station']])) {
-                                $NSAdil[$NSValue['nurse_station']] = 0;
-                            }
-                        }
-
-                        foreach ($NSAdil as $NSAKey => $NSAValue) {
-                            $CountIGDNS = self::$query->select('igd', array(
-                                'uid'
-                            ))
-                                ->where(array(
-                                    'igd.nurse_station' => '= ?',
-                                    'AND',
-                                    'igd.deleted_at' => 'IS NULL',
-                                    'AND',
-                                    'igd.waktu_keluar' => 'IS NULL'
-                                ), array(
-                                    $NSAKey
-                                ))
-                                ->execute();
-
-                            $NSAdil[$NSAKey] = count($CountIGDNS['response_data']);
-
-                            array_push($NSMonitor, array(
-                                'ns' => $NSAKey,
-                                'jumlah' => $NSAdil[$NSAKey]
-                            ));
-                        }
-
-                        usort($NSMonitor, function($a, $b){
-                            $t1 = $a['jumlah'];
-                            $t2 = $b['jumlah'];
-                            return $t1 - $t2;
-                        });
-
-                        //Auto IGD
-                        $IGD = parent::gen_uuid();
-                        //todo: IGD kerjakan coy
-                        $igd_log = self::$query->insert('igd', array(
-                            'uid' => $IGD,
-                            'pasien' => $parameter['dataObj']['currentPasien'],
-                            'dokter' => $parameter['dataObj']['dokter'],
-                            'penjamin' => $parameter['dataObj']['penjamin'],
-                            'kunjungan' => $uid,
-                            'waktu_masuk' => parent::format_date(),
-                            'kamar' => __KAMAR_IGD__,
-                            'bed' => $parameter['dataObj']['bangsal'],
-                            'pegawai_daftar' => $UserData['data']->uid,
-                            'nurse_station' => $NSMonitor[0]['ns'],
-                            'keterangan' => '',
-                            'created_at' => parent::format_date(),
-                            'updated_at' => parent::format_date()
-                        ))
-                            ->execute();
-
-
-
-
-                        $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
-                        $antrianKunjungan['response_notif'] = 'K';
-
-                        //Auto Tambah ke Antrian Poli
-                        $parameter['dataObj']['currentAntrianID'] = 0;
-                        $currentPasien = $parameter['dataObj']['currentPasien'];
-                        unset($parameter['dataObj']['currentPasien']);
-                        unset($parameter['dataObj']['bangsal']);
-                        $AntrianProses = self::tambah_antrian('antrian', $parameter, $uid);
-                        $antrianKunjungan['response_poli'] = $AntrianProses;
-
-
-                        $parameter['dataObj']['currentPasien'] = $currentPasien;
-
-                        return $antrianKunjungan;
-                    } else {
-                        if (count($checkStatusPasien['response_data']) > 0) { //Pasien sudah pernah terdaftar
-                            $antrianKunjungan = self::$query->update('antrian_nomor', array(
-                                'status' => 'P',
-                                'kunjungan' => $uid,
-                                'prioritas' => $parameter['dataObj']['prioritas'],
-                                'poli' => $parameter['dataObj']['departemen'],
-                                'pasien' => $parameter['dataObj']['currentPasien'],
-                                'penjamin' => $parameter['dataObj']['penjamin'],
-                                'dokter' => $parameter['dataObj']['dokter']
-                            ))
-                                ->where(array(
-                                    'antrian_nomor.id' => '= ?',
-                                    'AND',
-                                    '((antrian_nomor.status' => '= ?)',
-                                    'OR',
-                                    '(antrian_nomor.status' => '= ?',
-                                    'OR',
-                                    'antrian_nomor.status' => '= ?))'
-                                ), array(
-                                    $parameter['dataObj']['currentAntrianID'],
-                                    'N', 'C', 'D'
-                                ))
-                                ->execute();
-                            
-                            $Pasien = new Pasien(self::$pdo);
-                            $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
-                            $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
-                            $antrianKunjungan['response_data'][0]['inap_check'] = 1;
-
-                            if ($antrianKunjungan['response_result'] > 0) {
-                                unset($parameter['dataObj']['currentPasien']);
-                                unset($parameter['dataObj']['valid_start']);
-                                unset($parameter['dataObj']['valid_end']);
-                                unset($parameter['dataObj']['penjaminMeta']);
-                                unset($parameter['dataObj']['currentPasien']);
-                                unset($parameter['dataObj']['bangsal']);
-                                $antrian = self::tambah_antrian('antrian', $parameter, $uid);
-                                $antrian['response_notif'] = 'P';
-                                return $antrian;
-                            } else {
-                                $antrianKunjungan['response_notif'] = 'P';
-                                $antrianKunjungan['inap_check'] = 4;
-                                return $antrianKunjungan;
-                            }
-
-
-                        } else {
-
-
-                            //Dikenakan Biaya Kartu Jika Pasien Baru
-                            $Invoice = $SInvoice->append_invoice(array(
-                                'invoice' => $InvoiceUID,
-                                'item' => __UID_KARTU__,
-                                'item_origin' => 'master_tindakan',
-                                'qty' => 1,
-                                'harga' => floatval($HargaKartu['response_data'][0]['harga']),
-                                'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
-                                'discount' => 0,
-                                'discount_type' => 'N',
-                                'pasien' => $parameter['dataObj']['currentPasien'],
-                                'penjamin' => $parameter['dataObj']['penjamin'],
-                                'billing_group' => 'administrasi',
-                                'keterangan' => 'Biaya kartu pasien baru',
-                                'departemen' => $parameter['dataObj']['departemen']
-                            ));
-
-
-                            $antrianKunjungan = self::$query->update('antrian_nomor', array(
-                                'status' => 'K',
-                                'kunjungan' => $uid,
-                                'prioritas' => $parameter['dataObj']['prioritas'],
-                                'poli' => $parameter['dataObj']['departemen'],
-                                'pasien' => $parameter['dataObj']['currentPasien'],
-                                'penjamin' => $parameter['dataObj']['penjamin'],
-                                'dokter' => $parameter['dataObj']['dokter']
-                            ))
-                                ->where(array(
-                                    'antrian_nomor.id' => '= ?',
-                                    'AND',
-                                    'antrian_nomor.status' => '= ?'
-                                ), array(
-                                    $parameter['dataObj']['currentAntrianID'],
-                                    'D'
-                                ))
-                                ->execute();
-
-                            $Pasien = new Pasien(self::$pdo);
-                            $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
-                            $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
-                            $antrianKunjungan['response_data'][0]['response_invoice'] = 'asd';
-                            $antrianKunjungan['response_notif'] = 'K';
-                            $antrianKunjungan['inap_check'] = 2;
-                            $antrianKunjungan['womaak'] = $Invoice;
-                            $antrianKunjungan['aaawdaw'] = $parameter;
-                            return $antrianKunjungan;
-                        }
-                    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    //Biaya Non Umum
-
+                  $Invoice = $SInvoice->append_invoice(array(
+                    'invoice' => $NewInvoiceUID,
+                    'item' => __UID_KARTU__,
+                    'item_origin' => 'master_tindakan',
+                    'qty' => 1,
+                    'harga' => floatval($HargaKartu['response_data'][0]['harga']),
+                    'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
+                    'discount' => 0,
+                    'discount_type' => 'N',
+                    'pasien' => $parameter['dataObj']['currentPasien'],
+                    'penjamin' => $parameter['dataObj']['penjamin'],
+                    'billing_group' => 'administrasi',
+                    'keterangan' => 'Biaya kartu pasien baru',
+                    'departemen' => $parameter['dataObj']['departemen']
+                  ));
                 }
-            } else {
-                return array("No Data");
+
+                $HargaTindakan = $SInvoice->get_harga_tindakan(array(
+                  'poli' => $parameter['dataObj']['departemen'],
+                  'kelas' => __UID_KELAS_GENERAL_RJ__,
+                  'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
+                  'penjamin' => $parameter['dataObj']['penjamin']
+                ));
+
+                $Invoice = $SInvoice->append_invoice(array(
+                  'invoice' => $NewInvoiceUID,
+                  'item' => $PoliTindakanInfo['tindakan_konsultasi'],
+                  'item_origin' => 'master_tindakan',
+                  'qty' => 1,
+                  'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
+                  'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
+                  'discount' => 0,
+                  'discount_type' => 'N',
+                  'pasien' => $parameter['dataObj']['currentPasien'],
+                  'penjamin' => $parameter['dataObj']['penjamin'],
+                  'billing_group' => 'tindakan',
+                  'keterangan' => 'Biaya konsultasi',
+                  'departemen' => $parameter['dataObj']['departemen'],
+                  'document' => ''
+                ));
+              } else {
+                //
+              }
             }
+            $antrianKunjungan['response_harga'] = $HargaTindakan;
+            $antrianKunjungan['response_invoice'] = $Invoice;
+
+            return $antrianKunjungan;
+          } else {
+            return $HargaKartu;
+          }
+        } else { // Jika selain umum
+
+
+
+          //Simpan Data Non Umum
+
+          $CheckNonUmum = self::$query->select('pasien_penjamin', array(
+            'id'
+          ))
+            ->where(array(
+              'pasien_penjamin.penjamin' => '= ?',
+              'AND',
+              'pasien_penjamin.pasien' => '= ?'
+            ), array(
+              $parameter['dataObj']['penjamin'],
+              $parameter['dataObj']['pasien']
+            ))
+            ->execute();
+
+          if ($parameter['dataObj']['penjamin'] === __UIDPENJAMINBPJS__) { //META BPJS
+            if (count($CheckNonUmum['response_data']) > 0) {
+              $RekamPenjamin = self::$query->update('pasien_penjamin', array(
+                'valid_awal' => $parameter['dataObj']['valid_start'],
+                'valid_akhir' => $parameter['dataObj']['valid_end'],
+                'rest_meta' => $parameter['dataObj']['penjaminMeta'],
+                'terdaftar' => parent::format_date(),
+                'updated_at' => parent::format_date(),
+                'deleted_at' => NULL
+              ))
+                ->where(array(
+                  'pasien_penjamin.penjamin' => '= ?',
+                  'AND',
+                  'pasien_penjamin.pasien' => '= ?'
+                ), array(
+                  $parameter['dataObj']['penjamin'],
+                  $parameter['dataObj']['pasien']
+                ))
+                ->execute();
+            } else {
+              $RekamPenjamin = self::$query->insert('pasien_penjamin', array(
+                'penjamin' => $parameter['dataObj']['penjamin'],
+                'pasien' => $parameter['dataObj']['pasien'],
+                'valid_awal' => $parameter['dataObj']['valid_start'],
+                'valid_akhir' => $parameter['dataObj']['valid_end'],
+                'rest_meta' => $parameter['dataObj']['penjaminMeta'],
+                'terdaftar' => parent::format_date(),
+                'created_at' => parent::format_date(),
+                'updated_at' => parent::format_date()
+              ))
+                ->execute();
+            }
+          } else {
+            //TODO: Meta Penjamin Lainnya
+          }
+
+
+
+
+          //Invoice Manager
+          $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
+            'uid'
+          ))
+            ->where(array(
+              'invoice.deleted_at' => 'IS NULL',
+              'AND',
+              'invoice.kunjungan' => '= ?'
+            ), array(
+              $uid
+            ))
+            ->execute();
+
+
+          if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
+
+            $InvoiceUID = $InvoiceCheck['response_data'][0]['uid'];
+          } else { //Belum ada Invoice Master
+
+            $Invoice = $SInvoice->create_invoice(array(
+              'kunjungan' => $uid,
+              'pasien' => $parameter['dataObj']['pasien'],
+              'keterangan' => 'Kunjungan Penjamin BPJS'
+            ));
+
+            $InvoiceUID = $Invoice['response_unique'];
+          }
+
+          //Simpan tagihan penjamin
+
+          $HargaTindakan = $SInvoice->get_harga_tindakan(array(
+            'poli' => $parameter['dataObj']['departemen'],
+            'kelas' => __UID_KELAS_GENERAL_RJ__,
+            'tindakan' => $PoliTindakanInfo['tindakan_konsultasi'],
+            'penjamin' => $parameter['dataObj']['penjamin']
+          ));
+
+          $Invoice = $SInvoice->append_invoice(array(
+            'invoice' => $InvoiceUID,
+            'item' => $PoliTindakanInfo['tindakan_konsultasi'],
+            'item_origin' => 'master_tindakan',
+            'qty' => 1,
+            'harga' => floatval($HargaTindakan['response_data'][0]['harga']),
+            'subtotal' => floatval($HargaTindakan['response_data'][0]['harga']),
+            'status_bayar' => 'Y', //Karena penjamin selain ini otomatis status menjadi terbayar
+            'discount' => 0,
+            'discount_type' => 'N',
+            'pasien' => $parameter['dataObj']['currentPasien'],
+            'penjamin' => $parameter['dataObj']['penjamin'],
+            'billing_group' => 'tindakan',
+            'keterangan' => 'Biaya konsultasi',
+            'departemen' => $parameter['dataObj']['departemen']
+          ));
+
+
+          //Cek Pasien Baru?
+          $checkStatusPasien = self::$query->select('antrian', array(
+            'uid'
+          ))
+            ->where(array(
+              'antrian.pasien' => '= ?',
+              'AND',
+              'antrian.deleted_at' => 'IS NULL'
+            ), array(
+              $parameter['dataObj']['currentPasien']
+            ))
+            ->execute();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          if ($parameter['dataObj']['departemen'] === __POLI_IGD__) {
+
+            $Pasien = new Pasien(self::$pdo);
+            $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
+
+            //KHUSUS AUTO ANTRIAN
+            $antrianKunjungan = self::$query->insert('antrian_nomor', array(
+              'nomor_urut' => 'IGD',
+              'pegawai' => $UserData['data']->uid,
+              'kunjungan' => $uid,
+              'prioritas' => $parameter['dataObj']['prioritas'],
+              'pasien' => $parameter['dataObj']['currentPasien'],
+              'dokter' => $parameter['dataObj']['dokter'],
+              'penjamin' => $parameter['dataObj']['penjamin'],
+              'poli' => __POLI_IGD__,
+              'status' => 'K',
+              'created_at' => parent::format_date(),
+              'jenis_antrian' => __ANTRIAN_KHUSUS__
+            ))
+              ->execute();
+
+
+            //Ambil Nurse Station Terkait
+            $NSAdil = array();
+            $NSMonitor = array();
+            $NSRanjang = self::$query->select('nurse_station_ranjang', array(
+              'nurse_station'
+            ))
+              ->where(array(
+                'nurse_station_ranjang.ranjang' => '= ?',
+                'AND',
+                'nurse_station_ranjang.deleted_at' => 'IS NULL'
+              ), array(
+                $parameter['dataObj']['bangsal']
+              ))
+              ->execute();
+            foreach ($NSRanjang['response_data'] as $NSKey => $NSValue) {
+              if (!isset($NSAdil[$NSValue['nurse_station']])) {
+                $NSAdil[$NSValue['nurse_station']] = 0;
+              }
+            }
+
+            foreach ($NSAdil as $NSAKey => $NSAValue) {
+              $CountIGDNS = self::$query->select('igd', array(
+                'uid'
+              ))
+                ->where(array(
+                  'igd.nurse_station' => '= ?',
+                  'AND',
+                  'igd.deleted_at' => 'IS NULL',
+                  'AND',
+                  'igd.waktu_keluar' => 'IS NULL'
+                ), array(
+                  $NSAKey
+                ))
+                ->execute();
+
+              $NSAdil[$NSAKey] = count($CountIGDNS['response_data']);
+
+              array_push($NSMonitor, array(
+                'ns' => $NSAKey,
+                'jumlah' => $NSAdil[$NSAKey]
+              ));
+            }
+
+            usort($NSMonitor, function ($a, $b) {
+              $t1 = $a['jumlah'];
+              $t2 = $b['jumlah'];
+              return $t1 - $t2;
+            });
+
+            //Auto IGD
+            $IGD = parent::gen_uuid();
+            //todo: IGD kerjakan coy
+            $igd_log = self::$query->insert('igd', array(
+              'uid' => $IGD,
+              'pasien' => $parameter['dataObj']['currentPasien'],
+              'dokter' => $parameter['dataObj']['dokter'],
+              'penjamin' => $parameter['dataObj']['penjamin'],
+              'kunjungan' => $uid,
+              'waktu_masuk' => parent::format_date(),
+              'kamar' => __KAMAR_IGD__,
+              'bed' => $parameter['dataObj']['bangsal'],
+              'pegawai_daftar' => $UserData['data']->uid,
+              'nurse_station' => $NSMonitor[0]['ns'],
+              'keterangan' => '',
+              'created_at' => parent::format_date(),
+              'updated_at' => parent::format_date()
+            ))
+              ->execute();
+
+            if ($igd_log['response_result'] > 0) {
+              $no_antrian = self::ambilNomorAntrianPoli(__POLI_IGD__);
+              $antrian = self::$query
+                ->insert(
+                  'antrian',
+                  array(
+                    'uid' => $uid,
+                    'no_antrian' => $no_antrian,
+                    'kunjungan' => $uid,
+                    'prioritas' => 36,
+                    'pasien' => $parameter['dataObj']['currentPasien'],
+                    'departemen' => __POLI_IGD__,
+                    'dokter' => $parameter['dataObj']['dokter'],
+                    'penjamin' => $parameter['dataObj']['penjamin'],
+                    'waktu_masuk' => parent::format_date(),
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                  )
+                )
+                ->execute();
+            }
+
+
+
+
+            $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
+            $antrianKunjungan['response_notif'] = 'K';
+
+            //Auto Tambah ke Antrian Poli
+            $parameter['dataObj']['currentAntrianID'] = 0;
+            $currentPasien = $parameter['dataObj']['currentPasien'];
+            unset($parameter['dataObj']['currentPasien']);
+            unset($parameter['dataObj']['bangsal']);
+            $AntrianProses = self::tambah_antrian('antrian', $parameter, $uid);
+            $antrianKunjungan['response_poli'] = $AntrianProses;
+
+
+            $parameter['dataObj']['currentPasien'] = $currentPasien;
+
+            return $antrianKunjungan;
+          } else {
+            if (count($checkStatusPasien['response_data']) > 0) { //Pasien sudah pernah terdaftar
+              $antrianKunjungan = self::$query->update('antrian_nomor', array(
+                'status' => 'P',
+                'kunjungan' => $uid,
+                'prioritas' => $parameter['dataObj']['prioritas'],
+                'poli' => $parameter['dataObj']['departemen'],
+                'pasien' => $parameter['dataObj']['currentPasien'],
+                'penjamin' => $parameter['dataObj']['penjamin'],
+                'dokter' => $parameter['dataObj']['dokter']
+              ))
+                ->where(array(
+                  'antrian_nomor.id' => '= ?',
+                  'AND',
+                  '((antrian_nomor.status' => '= ?)',
+                  'OR',
+                  '(antrian_nomor.status' => '= ?',
+                  'OR',
+                  'antrian_nomor.status' => '= ?))'
+                ), array(
+                  $parameter['dataObj']['currentAntrianID'],
+                  'N', 'C', 'D'
+                ))
+                ->execute();
+
+              $Pasien = new Pasien(self::$pdo);
+              $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
+              $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
+              $antrianKunjungan['response_data'][0]['inap_check'] = 1;
+
+              if ($antrianKunjungan['response_result'] > 0) {
+                unset($parameter['dataObj']['currentPasien']);
+                unset($parameter['dataObj']['valid_start']);
+                unset($parameter['dataObj']['valid_end']);
+                unset($parameter['dataObj']['penjaminMeta']);
+                unset($parameter['dataObj']['currentPasien']);
+                unset($parameter['dataObj']['bangsal']);
+                $antrian = self::tambah_antrian('antrian', $parameter, $uid);
+                $antrian['response_notif'] = 'P';
+                return $antrian;
+              } else {
+                $antrianKunjungan['response_notif'] = 'P';
+                $antrianKunjungan['inap_check'] = 4;
+                return $antrianKunjungan;
+              }
+            } else {
+
+
+              //Dikenakan Biaya Kartu Jika Pasien Baru
+              $Invoice = $SInvoice->append_invoice(array(
+                'invoice' => $InvoiceUID,
+                'item' => __UID_KARTU__,
+                'item_origin' => 'master_tindakan',
+                'qty' => 1,
+                'harga' => floatval($HargaKartu['response_data'][0]['harga']),
+                'subtotal' => floatval($HargaKartu['response_data'][0]['harga']),
+                'discount' => 0,
+                'discount_type' => 'N',
+                'pasien' => $parameter['dataObj']['currentPasien'],
+                'penjamin' => $parameter['dataObj']['penjamin'],
+                'billing_group' => 'administrasi',
+                'keterangan' => 'Biaya kartu pasien baru',
+                'departemen' => $parameter['dataObj']['departemen']
+              ));
+
+
+              $antrianKunjungan = self::$query->update('antrian_nomor', array(
+                'status' => 'K',
+                'kunjungan' => $uid,
+                'prioritas' => $parameter['dataObj']['prioritas'],
+                'poli' => $parameter['dataObj']['departemen'],
+                'pasien' => $parameter['dataObj']['currentPasien'],
+                'penjamin' => $parameter['dataObj']['penjamin'],
+                'dokter' => $parameter['dataObj']['dokter']
+              ))
+                ->where(array(
+                  'antrian_nomor.id' => '= ?',
+                  'AND',
+                  'antrian_nomor.status' => '= ?'
+                ), array(
+                  $parameter['dataObj']['currentAntrianID'],
+                  'D'
+                ))
+                ->execute();
+
+              $Pasien = new Pasien(self::$pdo);
+              $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
+              $antrianKunjungan['response_data'][0]['pasien_detail'] = $PasienDetail['response_data'][0];
+              $antrianKunjungan['response_data'][0]['response_invoice'] = 'asd';
+              $antrianKunjungan['response_notif'] = 'K';
+              $antrianKunjungan['inap_check'] = 2;
+              $antrianKunjungan['womaak'] = $Invoice;
+              $antrianKunjungan['aaawdaw'] = $parameter;
+              return $antrianKunjungan;
+            }
+          }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          //Biaya Non Umum
+
         }
+      } else {
+        return array("No Data");
+      }
     }
+  }
 
 
-    /*=================== GET ANTRIAN ====================*/
+  /*=================== GET ANTRIAN ====================*/
 
-    public function tambah_antrian($table, $parameter, $uid_kunjungan) {
-        /*dataObj Key
+  public function tambah_antrian($table, $parameter, $uid_kunjungan)
+  {
+    /*dataObj Key
             kunjungan,
             poli,
             dokter,
         */
-        $Authorization = new Authorization();
-        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+    $Authorization = new Authorization();
+    $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        /*$AntrianID = $parameter['dataObj']['currentAntrianID'];*/
-        unset($parameter['dataObj']['currentAntrianID']);
-        $uid = parent::gen_uuid();
-        $no_antrian = self::ambilNomorAntrianPoli($parameter['dataObj']['departemen']);
+    /*$AntrianID = $parameter['dataObj']['currentAntrianID'];*/
+    unset($parameter['dataObj']['currentAntrianID']);
+    $uid = parent::gen_uuid();
+    $no_antrian = self::ambilNomorAntrianPoli($parameter['dataObj']['departemen']);
 
-        $allData = [];
-        $allData['uid'] = $uid;
-        $allData['no_antrian'] = $no_antrian;
-        $allData['kunjungan'] = $uid_kunjungan;
-        $allData['waktu_masuk'] = parent::format_date();
-        $allData['created_at'] = parent::format_date();
-        $allData['updated_at'] = parent::format_date();
+    $allData = [];
+    $allData['uid'] = $uid;
+    $allData['no_antrian'] = $no_antrian;
+    $allData['kunjungan'] = $uid_kunjungan;
+    $allData['waktu_masuk'] = parent::format_date();
+    $allData['created_at'] = parent::format_date();
+    $allData['updated_at'] = parent::format_date();
 
-        /*=========== MATCHING VALUE WITH KEY, BECAUSE KEY NAME SAME AS FIELD NAME AT TABLE =========*/
-        foreach ($parameter['dataObj'] as $key => $value) {
-            if($key !== 'konsul') {
-                $allData[$key] = $value;
-            }
+    /*=========== MATCHING VALUE WITH KEY, BECAUSE KEY NAME SAME AS FIELD NAME AT TABLE =========*/
+    foreach ($parameter['dataObj'] as $key => $value) {
+      if ($key !== 'konsul') {
+        $allData[$key] = $value;
+      }
 
-            if($key === 'cara_datang') {
-                $allData[$key] = intval($value);
-            }
-        }
-
-        $antrian = self::$query
-            ->insert($table, $allData)
-            ->execute();
-
-        if ($antrian['response_result'] > 0) {
-            if(isset($parameter['dataObj']['konsul'])) {
-                if($allData['penjamin'] === __UIDPENJAMINUMUM__) {
-                    $updateNomorAntrian = self::$query->update('antrian_nomor', array(
-                        'antrian' => $uid,
-                        'status' => 'K',
-                        'poli' => $allData['departemen'],
-                        'dokter' => $allData['dokter'],
-                    ))
-                        ->where(array(
-                            'antrian_nomor.pasien' => '= ?',
-                            'AND',
-                            'antrian_nomor.penjamin' => '= ?'
-                        ), array(
-                                $allData['pasien'],
-                                $allData['penjamin']
-                            )
-                        )
-                        ->execute();   
-                } else {
-                    $updateNomorAntrian = self::$query->update('antrian_nomor', array(
-                        'antrian' => $uid,
-                        'status' => 'P',
-                        'poli' => $allData['departemen'],
-                        'dokter' => $allData['dokter'],
-                    ))
-                        ->where(array(
-                            'antrian_nomor.pasien' => '= ?',
-                            'AND',
-                            'antrian_nomor.penjamin' => '= ?'
-                        ), array(
-                                $allData['pasien'],
-                                $allData['penjamin']
-                            )
-                        )
-                        ->execute();
-                }
-            } else {
-                //TODO : Check Inap
-
-                $updateNomorAntrian = self::$query->update('antrian_nomor', array(
-                    'antrian' => $uid,
-                    'status' => 'P'
-                ))
-                    ->where(array(
-                        'antrian_nomor.pasien' => '= ?',
-                        'AND',
-                        'antrian_nomor.poli' => '= ?',
-                        'AND',
-                        /*'antrian_nomor.dokter' => '= ?',
-                        'AND',*/
-                        'antrian_nomor.penjamin' => '= ?',
-                        'AND',
-                        '((antrian_nomor.status' => '= ?)',
-                        'OR',
-                        '(antrian_nomor.status' => '= ?',
-                        'OR',
-                        'antrian_nomor.status' => '= ?))'
-                    ), array(
-                            $allData['pasien'],
-                            $allData['departemen'],
-                            //$allData['dokter'],
-                            $allData['penjamin'],
-                            'K', 'N', 'P'
-                            //Dulu N?
-                        )
-                    )
-                    ->execute();
-                $updateNomorAntrian['inap_check'] = 5;
-            }
-
-            if ($updateNomorAntrian['response_result'] > 0) {
-                $log = parent::log(array(
-                    'type' => 'activity',
-                    'column' => array(
-                        'unique_target',
-                        'user_uid',
-                        'table_name',
-                        'action',
-                        'logged_at',
-                        'status',
-                        'login_id'
-                    ),
-                    'value' => array(
-                        $uid,
-                        $UserData['data']->uid,
-                        $table,
-                        'I',
-                        parent::format_date(),
-                        'N',
-                        $UserData['data']->log_id
-                    ),
-                    'class' => __CLASS__
-                ));
-                return $antrian;
-
-            } else {
-                if($updateNomorAntrian['response_result'] <= 0) {
-                    // $log = parent::log(array(
-                    //     'type' => 'error',
-                    //     'column' => array(
-                    //         'type_err',
-                    //         'class_err',
-                    //         'messages',
-                    //         'logged_at'
-                    //     ), 'value' => array(
-                    //         'CRITICAL',
-                    //         'Pendaftaran',
-                    //         $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse'],
-                    //         parent::format_date()
-                    //     ), 'class' => __CLASS__));
-                }
-                return $updateNomorAntrian;
-            }
-        } else {
-            if($antrian['response_result'] <= 0) {
-                // $log = parent::log(array(
-                //     'type' => 'error',
-                //     'column' => array(
-                //         'type_err',
-                //         'class_err',
-                //         'messages',
-                //         'logged_at'
-                //     ), 'value' => array(
-                //         'CRITICAL',
-                //         'Pendaftaran',
-                //         $antrian['response_query'] . '|' . $antrian['response_values_parse'],
-                //         parent::format_date()
-                //     ), 'class' => __CLASS__));
-            }
-            return $antrian;
-        }
+      if ($key === 'cara_datang') {
+        $allData[$key] = intval($value);
+      }
     }
 
-    public function ambilNomorAntrianPoli($poli)
-    {
-        $waktu = date("Y-m-d", strtotime(parent::format_date()));
+    $antrian = self::$query
+      ->insert($table, $allData)
+      ->execute();
 
-        $data = self::$query
-            ->select('antrian', array('no_antrian'))
-            ->where(array(
-                'antrian.deleted_at' => 'IS NULL',
+    if ($antrian['response_result'] > 0) {
+      if (isset($parameter['dataObj']['konsul'])) {
+        if ($allData['penjamin'] === __UIDPENJAMINUMUM__) {
+          $updateNomorAntrian = self::$query->update('antrian_nomor', array(
+            'antrian' => $uid,
+            'status' => 'K',
+            'poli' => $allData['departemen'],
+            'dokter' => $allData['dokter'],
+          ))
+            ->where(
+              array(
+                'antrian_nomor.pasien' => '= ?',
                 'AND',
-                'antrian.departemen' => '= ?',
-                'AND',
-                'DATE(antrian.waktu_masuk)' => '= ?'
-            ), array(
-                    $poli,
-                    $waktu
-                )
+                'antrian_nomor.penjamin' => '= ?'
+              ),
+              array(
+                $allData['pasien'],
+                $allData['penjamin']
+              )
             )
-            ->order(array('no_antrian' => 'DESC'))
-            ->limit(1)
             ->execute();
-
-
-        $nomor = 1;
-        if ($data['response_result'] > 0) {
-            $nomor = intval($data['response_data'][0]['no_antrian']) + 1;
+        } else {
+          $updateNomorAntrian = self::$query->update('antrian_nomor', array(
+            'antrian' => $uid,
+            'status' => 'P',
+            'poli' => $allData['departemen'],
+            'dokter' => $allData['dokter'],
+          ))
+            ->where(
+              array(
+                'antrian_nomor.pasien' => '= ?',
+                'AND',
+                'antrian_nomor.penjamin' => '= ?'
+              ),
+              array(
+                $allData['pasien'],
+                $allData['penjamin']
+              )
+            )
+            ->execute();
         }
+      } else {
+        //TODO : Check Inap
 
-        return $nomor;
-    }
-
-    private function ubah_dokter_antrian($parameter)
-    {
-        return self::$query->update('antrian', array(
-            'dokter' => $parameter['dokter']
+        $updateNomorAntrian = self::$query->update('antrian_nomor', array(
+          'antrian' => $uid,
+          'status' => 'P'
         ))
-            ->where(array(
-                'antrian.deleted_at' => 'IS NULL',
-                'AND',
-                'antrian.uid' => '= ?'
-            ), array(
-                $parameter['uid']
-            ))
-            ->execute();
+          ->where(
+            array(
+              'antrian_nomor.pasien' => '= ?',
+              'AND',
+              'antrian_nomor.poli' => '= ?',
+              'AND',
+              /*'antrian_nomor.dokter' => '= ?',
+                        'AND',*/
+              'antrian_nomor.penjamin' => '= ?',
+              'AND',
+              '((antrian_nomor.status' => '= ?)',
+              'OR',
+              '(antrian_nomor.status' => '= ?',
+              'OR',
+              'antrian_nomor.status' => '= ?))'
+            ),
+            array(
+              $allData['pasien'],
+              $allData['departemen'],
+              //$allData['dokter'],
+              $allData['penjamin'],
+              'K', 'N', 'P'
+              //Dulu N?
+            )
+          )
+          ->execute();
+        $updateNomorAntrian['inap_check'] = 5;
+      }
+
+      if ($updateNomorAntrian['response_result'] > 0) {
+        $log = parent::log(array(
+          'type' => 'activity',
+          'column' => array(
+            'unique_target',
+            'user_uid',
+            'table_name',
+            'action',
+            'logged_at',
+            'status',
+            'login_id'
+          ),
+          'value' => array(
+            $uid,
+            $UserData['data']->uid,
+            $table,
+            'I',
+            parent::format_date(),
+            'N',
+            $UserData['data']->log_id
+          ),
+          'class' => __CLASS__
+        ));
+        return $antrian;
+      } else {
+        if ($updateNomorAntrian['response_result'] <= 0) {
+          // $log = parent::log(array(
+          //     'type' => 'error',
+          //     'column' => array(
+          //         'type_err',
+          //         'class_err',
+          //         'messages',
+          //         'logged_at'
+          //     ), 'value' => array(
+          //         'CRITICAL',
+          //         'Pendaftaran',
+          //         $updateNomorAntrian['response_query'] . '|' . $updateNomorAntrian['response_values_parse'],
+          //         parent::format_date()
+          //     ), 'class' => __CLASS__));
+        }
+        return $updateNomorAntrian;
+      }
+    } else {
+      if ($antrian['response_result'] <= 0) {
+        // $log = parent::log(array(
+        //     'type' => 'error',
+        //     'column' => array(
+        //         'type_err',
+        //         'class_err',
+        //         'messages',
+        //         'logged_at'
+        //     ), 'value' => array(
+        //         'CRITICAL',
+        //         'Pendaftaran',
+        //         $antrian['response_query'] . '|' . $antrian['response_values_parse'],
+        //         parent::format_date()
+        //     ), 'class' => __CLASS__));
+      }
+      return $antrian;
+    }
+  }
+
+  public function ambilNomorAntrianPoli($poli)
+  {
+    $waktu = date("Y-m-d", strtotime(parent::format_date()));
+
+    $data = self::$query
+      ->select('antrian', array('no_antrian'))
+      ->where(
+        array(
+          'antrian.deleted_at' => 'IS NULL',
+          'AND',
+          'antrian.departemen' => '= ?',
+          'AND',
+          'DATE(antrian.waktu_masuk)' => '= ?'
+        ),
+        array(
+          $poli,
+          $waktu
+        )
+      )
+      ->order(array('no_antrian' => 'DESC'))
+      ->limit(1)
+      ->execute();
+
+
+    $nomor = 1;
+    if ($data['response_result'] > 0) {
+      $nomor = intval($data['response_data'][0]['no_antrian']) + 1;
     }
 
-    public function get_antrian_by_dokter($parameter, $condition = '')
-    {
-        if($condition === 'igd') {
-            $paramKey = array(
-                'antrian.waktu_keluar' => 'IS NULL',
-                'AND',
-                'antrian.deleted_at' => 'IS NULL'
-            );
+    return $nomor;
+  }
 
-            $parameterValue = array();
-        } else if($condition === 'inap') {
-            $paramKey = array(
-                'antrian.deleted_at' => 'IS NULL'
-            );
+  private function ubah_dokter_antrian($parameter)
+  {
+    return self::$query->update('antrian', array(
+      'dokter' => $parameter['dokter']
+    ))
+      ->where(array(
+        'antrian.deleted_at' => 'IS NULL',
+        'AND',
+        'antrian.uid' => '= ?'
+      ), array(
+        $parameter['uid']
+      ))
+      ->execute();
+  }
 
-            $parameterValue = array();
-        } else {
-            $paramKey = array(
-                'antrian.waktu_keluar' => 'IS NULL',
-                'AND',
-                'antrian.deleted_at' => 'IS NULL',
-                'AND',
-                'antrian.dokter' => '= ?'
-            );
+  public function get_antrian_by_dokter($parameter, $condition = '')
+  {
+    if ($condition === 'igd') {
+      $paramKey = array(
+        'antrian.waktu_keluar' => 'IS NULL',
+        'AND',
+        'antrian.deleted_at' => 'IS NULL'
+      );
 
-            $parameterValue = array($parameter);
-        }
+      $parameterValue = array();
+    } else if ($condition === 'inap') {
+      $paramKey = array(
+        'antrian.deleted_at' => 'IS NULL'
+      );
+
+      $parameterValue = array();
+    } else {
+      $paramKey = array(
+        'antrian.waktu_keluar' => 'IS NULL',
+        'AND',
+        'antrian.deleted_at' => 'IS NULL',
+        'AND',
+        'antrian.dokter' => '= ?'
+      );
+
+      $parameterValue = array($parameter);
+    }
 
 
 
-        if($condition === 'inap') {
-            $data = self::$query->select('antrian', array(
-                'uid',
-                'pasien as uid_pasien',
-                'dokter as uid_dokter',
-                'departemen as uid_poli',
-                'penjamin as uid_penjamin',
-                'waktu_masuk',
-                'waktu_keluar',
-                'prioritas'
-            ))
-                ->join('pasien', array(
-                    'nama as pasien',
-                    'no_rm'
-                ))
-                ->join('pegawai', array(
-                    'nama as dokter'
-                ))
-                ->join('master_penjamin', array(
-                    'nama as penjamin'
-                ))
-                ->join('kunjungan', array(
-                    'uid as uid_kunjungan',
-                    'pegawai as uid_resepsionis'
-                ))
-                ->on(array(
-                    /*array('pasien.uid','=', 'antrian.pasien'),
+    if ($condition === 'inap') {
+      $data = self::$query->select('antrian', array(
+        'uid',
+        'pasien as uid_pasien',
+        'dokter as uid_dokter',
+        'departemen as uid_poli',
+        'penjamin as uid_penjamin',
+        'waktu_masuk',
+        'waktu_keluar',
+        'prioritas'
+      ))
+        ->join('pasien', array(
+          'nama as pasien',
+          'no_rm'
+        ))
+        ->join('pegawai', array(
+          'nama as dokter'
+        ))
+        ->join('master_penjamin', array(
+          'nama as penjamin'
+        ))
+        ->join('kunjungan', array(
+          'uid as uid_kunjungan',
+          'pegawai as uid_resepsionis'
+        ))
+        ->on(array(
+          /*array('pasien.uid','=', 'antrian.pasien'),
                     array('master_poli.uid','=', 'antrian.departemen'),
                     array('pegawai.uid','=', 'antrian.dokter'),
                     array('master_penjamin.uid','=', 'antrian.penjamin'),
                     array('kunjungan.uid','=', 'antrian.kunjungan')*/
-                    array('antrian.pasien', '=', 'pasien.uid'),
-                    array('antrian.dokter', '=', 'pegawai.uid'),
-                    array('antrian.penjamin', '=', 'master_penjamin.uid'),
-                    array('antrian.kunjungan', '=', 'kunjungan.uid')
-                ))
-                ->where($paramKey, $parameterValue)
-                ->order(array(
-                    'antrian.prioritas' => 'DESC',
-                    'antrian.waktu_masuk' => 'ASC'
-                ))
-                ->execute();
-        } else {
-            $data = self::$query->select('antrian', array(
-                'uid',
-                'pasien as uid_pasien',
-                'dokter as uid_dokter',
-                'departemen as uid_poli',
-                'penjamin as uid_penjamin',
-                'waktu_masuk',
-                'prioritas'
-            ))
-                ->join('pasien', array(
-                    'nama as pasien',
-                    'no_rm'
-                ))
-                ->join('master_poli', array(
-                    'nama as departemen'
-                ))
-                ->join('pegawai', array(
-                    'nama as dokter'
-                ))
-                ->join('master_penjamin', array(
-                    'nama as penjamin'
-                ))
-                ->join('kunjungan', array(
-                    'uid as uid_kunjungan',
-                    'pegawai as uid_resepsionis'
-                ))
-                ->on(array(
-                    /*array('pasien.uid','=', 'antrian.pasien'),
+          array('antrian.pasien', '=', 'pasien.uid'),
+          array('antrian.dokter', '=', 'pegawai.uid'),
+          array('antrian.penjamin', '=', 'master_penjamin.uid'),
+          array('antrian.kunjungan', '=', 'kunjungan.uid')
+        ))
+        ->where($paramKey, $parameterValue)
+        ->order(array(
+          'antrian.prioritas' => 'DESC',
+          'antrian.waktu_masuk' => 'ASC'
+        ))
+        ->execute();
+    } else {
+      $data = self::$query->select('antrian', array(
+        'uid',
+        'pasien as uid_pasien',
+        'dokter as uid_dokter',
+        'departemen as uid_poli',
+        'penjamin as uid_penjamin',
+        'waktu_masuk',
+        'prioritas'
+      ))
+        ->join('pasien', array(
+          'nama as pasien',
+          'no_rm'
+        ))
+        ->join('master_poli', array(
+          'nama as departemen'
+        ))
+        ->join('pegawai', array(
+          'nama as dokter'
+        ))
+        ->join('master_penjamin', array(
+          'nama as penjamin'
+        ))
+        ->join('kunjungan', array(
+          'uid as uid_kunjungan',
+          'pegawai as uid_resepsionis'
+        ))
+        ->on(array(
+          /*array('pasien.uid','=', 'antrian.pasien'),
                     array('master_poli.uid','=', 'antrian.departemen'),
                     array('pegawai.uid','=', 'antrian.dokter'),
                     array('master_penjamin.uid','=', 'antrian.penjamin'),
                     array('kunjungan.uid','=', 'antrian.kunjungan')*/
-                    array('antrian.pasien', '=', 'pasien.uid'),
-                    array('antrian.departemen', '=', 'master_poli.uid'),
-                    array('antrian.dokter', '=', 'pegawai.uid'),
-                    array('antrian.penjamin', '=', 'master_penjamin.uid'),
-                    array('antrian.kunjungan', '=', 'kunjungan.uid')
-                ))
-                ->where($paramKey, $parameterValue)
-                ->order(array(
-                    'antrian.prioritas' => 'DESC',
-                    'antrian.waktu_masuk' => 'ASC'
-                ))
-                ->execute();
-        }
-
-        $autonum = 1;
-        foreach ($data['response_data'] as $key => $value) {
-            $data['response_data'][$key]['autonum'] = $autonum;
-            $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
-            $autonum++;
-
-            $pegawai = new Pegawai(self::$pdo);
-            $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
-            $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
-        }
-
-        return $data;
+          array('antrian.pasien', '=', 'pasien.uid'),
+          array('antrian.departemen', '=', 'master_poli.uid'),
+          array('antrian.dokter', '=', 'pegawai.uid'),
+          array('antrian.penjamin', '=', 'master_penjamin.uid'),
+          array('antrian.kunjungan', '=', 'kunjungan.uid')
+        ))
+        ->where($paramKey, $parameterValue)
+        ->order(array(
+          'antrian.prioritas' => 'DESC',
+          'antrian.waktu_masuk' => 'ASC'
+        ))
+        ->execute();
     }
 
-    public function get_kunjungan_detail($parameter)
-    {
-        $data = self::$query
-            ->select('kunjungan', array(
-                    'uid',
-                    'waktu_masuk',
-                    'pj_pasien',
-                    'info_didapat_dari'
-                )
-            )
-            ->where(array(
-                'kunjungan.uid' => '= ?',
-                'AND',
-                'kunjungan.deleted_at' => 'IS NULL'
-            ), array($parameter)
-            )
-            ->execute();
+    $autonum = 1;
+    foreach ($data['response_data'] as $key => $value) {
+      $data['response_data'][$key]['autonum'] = $autonum;
+      $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
+      $autonum++;
 
-        return $data;
+      $pegawai = new Pegawai(self::$pdo);
+      $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
+      $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
     }
 
-    public function get_data_pasien_dan_antrian($parameter)
-    {    //$parameter = uid_antrian
-        $dataAntrian = self::get_data_antrian_detail($parameter);
+    return $data;
+  }
 
-        $pasien = new Pasien(self::$pdo);
-        $dataPasien = $pasien->get_pasien_info('pasien', $dataAntrian['uid_pasien'])['response_data'][0];
+  public function get_kunjungan_detail($parameter)
+  {
+    $data = self::$query
+      ->select(
+        'kunjungan',
+        array(
+          'uid',
+          'waktu_masuk',
+          'pj_pasien',
+          'info_didapat_dari'
+        )
+      )
+      ->where(
+        array(
+          'kunjungan.uid' => '= ?',
+          'AND',
+          'kunjungan.deleted_at' => 'IS NULL'
+        ),
+        array($parameter)
+      )
+      ->execute();
 
-        $result = ['antrian' => $dataAntrian, 'pasien' => $dataPasien];
+    return $data;
+  }
 
-        return $result;
-    }
+  public function get_data_pasien_dan_antrian($parameter)
+  {    //$parameter = uid_antrian
+    $dataAntrian = self::get_data_antrian_detail($parameter);
 
-    public function get_data_antrian_detail($parameter)
-    { //$parameter = uid antrian
-        /*-------- GET DATA ANTRIAN ----------*/
-        $antrian = new Antrian(self::$pdo);
-        $param = ['', 'antrian-detail', $parameter];
-        $get_antrian = $antrian->__GET__($param);
-        $result = array(
-            "uid" => $get_antrian['response_data'][0]['uid'],
-            "kunjungan" => $get_antrian['response_data'][0]['kunjungan'],
-            "uid_pasien" => $get_antrian['response_data'][0]['pasien'],
-            "departemen" => $get_antrian['response_data'][0]['departemen'],
-            "penjamin" => $get_antrian['response_data'][0]['penjamin'],
-            "dokter" => $get_antrian['response_data'][0]['dokter'],
-            "waktu_masuk" => $get_antrian['response_data'][0]['waktu_masuk']
-        );
+    $pasien = new Pasien(self::$pdo);
+    $dataPasien = $pasien->get_pasien_info('pasien', $dataAntrian['uid_pasien'])['response_data'][0];
 
-        return $result;
-    }
+    $result = ['antrian' => $dataAntrian, 'pasien' => $dataPasien];
 
-    public function __GET__($parameter = array())
-    {
-        try {
-            switch ($parameter[1]) {
-                case 'antrian':
-                    return self::get_list_antrian('antrian');
-                    break;
+    return $result;
+  }
 
-                case 'igd_old':
-                    return self::get_list_antrian('antrian', __POLI_IGD__);
-                    break;
+  public function get_data_antrian_detail($parameter)
+  { //$parameter = uid antrian
+    /*-------- GET DATA ANTRIAN ----------*/
+    $antrian = new Antrian(self::$pdo);
+    $param = ['', 'antrian-detail', $parameter];
+    $get_antrian = $antrian->__GET__($param);
+    $result = array(
+      "uid" => $get_antrian['response_data'][0]['uid'],
+      "kunjungan" => $get_antrian['response_data'][0]['kunjungan'],
+      "uid_pasien" => $get_antrian['response_data'][0]['pasien'],
+      "departemen" => $get_antrian['response_data'][0]['departemen'],
+      "penjamin" => $get_antrian['response_data'][0]['penjamin'],
+      "dokter" => $get_antrian['response_data'][0]['dokter'],
+      "waktu_masuk" => $get_antrian['response_data'][0]['waktu_masuk']
+    );
 
-                case 'rawat_inap':
-                    //return self::get_list_antrian('antrian', __POLI_INAP__);
-                    return self::get_list_antrian_inap($parameter);
-                    break;
+    return $result;
+  }
 
-                case 'antrian-detail':
-                    return self::get_antrian_detail('antrian', $parameter[2]);
-                    break;
+  public function __GET__($parameter = array())
+  {
+    try {
+      switch ($parameter[1]) {
+        case 'antrian':
+          return self::get_list_antrian('antrian');
+          break;
 
-                case 'cari-pasien':
-                    return self::cari_pasien($parameter[2]);
-                    break;
+        case 'igd_old':
+          return self::get_list_antrian('antrian', __POLI_IGD__);
+          break;
 
-                case 'pasien-detail':
-                    return self::pasien_detail($parameter[2]);
-                    break;
+        case 'rawat_inap':
+          //return self::get_list_antrian('antrian', __POLI_INAP__);
+          return self::get_list_antrian_inap($parameter);
+          break;
 
-                case 'cek-status-antrian':
-                    return self::cekStatusAntrian($parameter[2]);
-                    break;
+        case 'antrian-detail':
+          return self::get_antrian_detail('antrian', $parameter[2]);
+          break;
 
-                case 'get-antrian-by-poli':
-                    return self::get_antrian_by_poli($parameter[2]);
-                    break;
+        case 'cari-pasien':
+          return self::cari_pasien($parameter[2]);
+          break;
 
-                /*case 'ambil-antrian-poli':
+        case 'pasien-detail':
+          return self::pasien_detail($parameter[2]);
+          break;
+
+        case 'cek-status-antrian':
+          return self::cekStatusAntrian($parameter[2]);
+          break;
+
+        case 'get-antrian-by-poli':
+          return self::get_antrian_by_poli($parameter[2]);
+          break;
+
+          /*case 'ambil-antrian-poli':
                     return self::ambilNomorAntrianPoli($parameter[2]);
                     break;*/
 
-                default:
-                    # code...
-                    break;
-            }
-        } catch (QueryException $e) {
-            return 'Error => ' . $e;
-        }
+        default:
+          # code...
+          break;
+      }
+    } catch (QueryException $e) {
+      return 'Error => ' . $e;
+    }
+  }
+
+  private function get_list_antrian_backend($parameter)
+  {
+    if ($parameter['poli'] === 'all') {
+      if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+        $paramData = array(
+          '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+          'OR',
+          'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+          'AND',
+          'antrian.deleted_at' => 'IS NULL',
+          'AND',
+          '(NOT antrian.departemen' => '= ?',
+          'AND',
+          'NOT antrian.departemen' => '= ?)',
+          'AND',
+          'kunjungan.waktu_keluar' => 'IS NULL'
+        );
+        $paramValue = array(__POLI_IGD__, __POLI_INAP__);
+      } else {
+        $paramData = array(
+          'antrian.deleted_at' => 'IS NULL',
+          'AND',
+          '(NOT antrian.departemen' => '= ?',
+          'AND',
+          'NOT antrian.departemen' => '= ?)',
+          'AND',
+          'kunjungan.waktu_keluar' => 'IS NULL'
+        );
+        $paramValue = array(__POLI_IGD__, __POLI_INAP__);
+      }
+    } else {
+      if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+        $paramData = array(
+          '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+          'OR',
+          'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+          'AND',
+          'antrian.deleted_at' => 'IS NULL',
+          'AND',
+          '(NOT antrian.departemen' => '= ?',
+          'AND',
+          'NOT antrian.departemen' => '= ?)',
+          'AND',
+          'kunjungan.waktu_keluar' => 'IS NULL',
+          'AND',
+          'master_poli.uid' => '= ?'
+        );
+        $paramValue = array(
+          __POLI_IGD__, __POLI_INAP__, $parameter['poli']
+        );
+      } else {
+        $paramData = array(
+          'antrian.deleted_at' => 'IS NULL',
+          'AND',
+          '(NOT antrian.departemen' => '= ?',
+          'AND',
+          'NOT antrian.departemen' => '= ?)',
+          'AND',
+          'kunjungan.waktu_keluar' => 'IS NULL',
+          'AND',
+          'master_poli.uid' => '= ?'
+        );
+        $paramValue = array(
+          __POLI_IGD__, __POLI_INAP__, $parameter['poli']
+        );
+      }
     }
 
-    private function get_list_antrian_backend($parameter) {
-        if($parameter['poli'] === 'all') {
-            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-                $paramData = array(
-                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                    'OR',
-                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
-                    'AND',
-                    'antrian.deleted_at' => 'IS NULL',
-                    'AND',
-                    '(NOT antrian.departemen' => '= ?',
-                    'AND',
-                    'NOT antrian.departemen' => '= ?)',
-                    'AND',
-                    'kunjungan.waktu_keluar' => 'IS NULL'
-                );
-                $paramValue = array(__POLI_IGD__, __POLI_INAP__);
-            } else {
-                $paramData = array(
-                    'antrian.deleted_at' => 'IS NULL',
-                    'AND',
-                    '(NOT antrian.departemen' => '= ?',
-                    'AND',
-                    'NOT antrian.departemen' => '= ?)',
-                    'AND',
-                    'kunjungan.waktu_keluar' => 'IS NULL'
-                );
-                $paramValue = array(__POLI_IGD__, __POLI_INAP__);
-            }
-        } else {
-            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-                $paramData = array(
-                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                    'OR',
-                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
-                    'AND',
-                    'antrian.deleted_at' => 'IS NULL',
-                    'AND',
-                    '(NOT antrian.departemen' => '= ?',
-                    'AND',
-                    'NOT antrian.departemen' => '= ?)',
-                    'AND',
-                    'kunjungan.waktu_keluar' => 'IS NULL',
-                    'AND',
-                    'master_poli.uid' => '= ?'
-                );
-                $paramValue = array(
-                    __POLI_IGD__, __POLI_INAP__, $parameter['poli']
-                );
-            } else {
-                $paramData = array(
-                    'antrian.deleted_at' => 'IS NULL',
-                    'AND',
-                    '(NOT antrian.departemen' => '= ?',
-                    'AND',
-                    'NOT antrian.departemen' => '= ?)',
-                    'AND',
-                    'kunjungan.waktu_keluar' => 'IS NULL',
-                    'AND',
-                    'master_poli.uid' => '= ?'
-                );
-                $paramValue = array(
-                    __POLI_IGD__, __POLI_INAP__, $parameter['poli']
-                );
-            }
-        }
 
-
-        if (intval($parameter['length']) < 0) {
-            $data = self::$query
-                ->select('antrian',
-                    array(
-                        'uid',
-                        'pasien as uid_pasien',
-                        'dokter as uid_dokter',
-                        'departemen as uid_poli',
-                        'penjamin as uid_penjamin',
-                        'waktu_masuk',
-                        'waktu_keluar'
-                    )
-                )
-                ->join('pasien', array(
-                        'nama as pasien',
-                        'no_rm'
-                    )
-                )
-                ->join('master_poli', array(
-                        'nama as departemen'
-                    )
-                )
-                ->join('pegawai', array(
-                        'nama as dokter'
-                    )
-                )
-                ->join('master_penjamin', array(
-                        'nama as penjamin'
-                    )
-                )
-                ->join('kunjungan', array(
-                        'pegawai as uid_resepsionis'
-                    )
-                )
-                ->on(array(
-                        array('pasien.uid', '=', 'antrian.pasien'),
-                        array('master_poli.uid', '=', 'antrian.departemen'),
-                        array('pegawai.uid', '=', 'antrian.dokter'),
-                        array('master_penjamin.uid', '=', 'antrian.penjamin'),
-                        array('kunjungan.uid', '=', 'antrian.kunjungan')
-                    )
-                )
-                ->where($paramData, $paramValue)
-                ->order(array(
-                    'antrian.waktu_masuk' => 'DESC'
-                ))
-                ->execute();
-        } else {
-            $data = self::$query
-                ->select('antrian',
-                    array(
-                        'uid',
-                        'pasien as uid_pasien',
-                        'dokter as uid_dokter',
-                        'departemen as uid_poli',
-                        'penjamin as uid_penjamin',
-                        'waktu_masuk',
-                        'waktu_keluar'
-                    )
-                )
-                ->join('pasien', array(
-                        'nama as pasien',
-                        'no_rm'
-                    )
-                )
-                ->join('master_poli', array(
-                        'nama as departemen'
-                    )
-                )
-                ->join('pegawai', array(
-                        'nama as dokter'
-                    )
-                )
-                ->join('master_penjamin', array(
-                        'nama as penjamin'
-                    )
-                )
-                ->join('kunjungan', array(
-                        'pegawai as uid_resepsionis'
-                    )
-                )
-                ->on(array(
-                        array('pasien.uid', '=', 'antrian.pasien'),
-                        array('master_poli.uid', '=', 'antrian.departemen'),
-                        array('pegawai.uid', '=', 'antrian.dokter'),
-                        array('master_penjamin.uid', '=', 'antrian.penjamin'),
-                        array('kunjungan.uid', '=', 'antrian.kunjungan')
-                    )
-                )
-                ->where($paramData, $paramValue)
-                ->offset(intval($parameter['start']))
-                ->limit(intval($parameter['length']))
-                ->order(array(
-                    'antrian.waktu_masuk' => 'DESC'
-                ))
-                ->execute();
-        }
-
-        $data['response_draw'] = intval($parameter['draw']);
-        $autonum = intval($parameter['start']) + 1;
-        $pegawai = new Pegawai(self::$pdo);
-        foreach ($data['response_data'] as $key => $value) {
-            $data['response_data'][$key]['autonum'] = $autonum;
-
-
-            $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
-
-            $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
-            $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
-
-            //Harga
-            $harga = self::$query->select('master_poli_tindakan_penjamin', array(
-                'id',
-                'harga',
-                'uid_poli',
-                'uid_tindakan',
-                'uid_penjamin',
-                'created_at',
-                'updated_at'
-            ))
-                ->where(array(
-                    'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
-                    'AND',
-                    'master_poli_tindakan_penjamin.uid_poli' => '= ?',
-                    'AND',
-                    'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
-                    'AND',
-                    'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'),
-                    array(
-                        $value['uid_poli'],
-                        __UIDKONSULDOKTER__,
-                        __UIDPENJAMINUMUM__))
-                ->execute();
-
-            if ($value['uid_penjamin'] == __UIDPENJAMINBPJS__) {
-
-                $SEP = self::$query->select('bpjs_sep', array(
-                    'uid',
-                    'sep_no'
-                ))
-                    ->where(array(
-                        'bpjs_sep.antrian' => '= ?',
-                        'AND',
-                        'bpjs_sep.deleted_at' => 'IS NULL'
-                    ), array(
-                        $value['uid']
-                    ))
-                    ->execute();
-                if (count($SEP['response_data']) > 0) {
-                    $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['sep_no'];
-                    $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
-                } else {
-                    $data['response_data'][$key]['sep'] = $SEP;
-                    $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
-                }
-            }
-
-
-            $data['response_data'][$key]['harga'] = $harga['response_data'][0];
-
-
-            $autonum++;
-        }
-
-        $AntrianTotal = self::$query->select('antrian',
-                                            array(
-                                                'uid',
-                                                'pasien as uid_pasien',
-                                                'dokter as uid_dokter',
-                                                'departemen as uid_poli',
-                                                'penjamin as uid_penjamin',
-                                                'waktu_masuk',
-                                                'waktu_keluar'
-                                            )
-                                        )
-                                        ->join('pasien', array(
-                                                'nama as pasien',
-                                                'no_rm'
-                                            )
-                                        )
-                                        ->join('master_poli', array(
-                                                'nama as departemen'
-                                            )
-                                        )
-                                        ->join('pegawai', array(
-                                                'nama as dokter'
-                                            )
-                                        )
-                                        ->join('master_penjamin', array(
-                                                'nama as penjamin'
-                                            )
-                                        )
-                                        ->join('kunjungan', array(
-                                                'pegawai as uid_resepsionis'
-                                            )
-                                        )
-                                        ->on(array(
-                                                array('pasien.uid', '=', 'antrian.pasien'),
-                                                array('master_poli.uid', '=', 'antrian.departemen'),
-                                                array('pegawai.uid', '=', 'antrian.dokter'),
-                                                array('master_penjamin.uid', '=', 'antrian.penjamin'),
-                                                array('kunjungan.uid', '=', 'antrian.kunjungan')
-                                            )
-                                        )
-                                        ->where($paramData, $paramValue)
-                                        ->execute();
-
-        $data['recordsTotal'] = count($AntrianTotal['response_data']);
-        $data['recordsFiltered'] = count($data['response_data']);
-        $data['length'] = intval($parameter['length']);
-        $data['start'] = intval($parameter['start']);
-
-        return $data;
-    }
-
-    private function get_list_antrian_inap($parameter) {
-        $data = self::$query->select('rawat_inap', array(
+    if (intval($parameter['length']) < 0) {
+      $data = self::$query
+        ->select(
+          'antrian',
+          array(
             'uid',
-            'pasien',
-            'dokter',
-            'penjamin',
-            'kunjungan',
+            'pasien as uid_pasien',
+            'dokter as uid_dokter',
+            'departemen as uid_poli',
+            'penjamin as uid_penjamin',
+            'waktu_masuk',
+            'waktu_keluar'
+          )
+        )
+        ->join(
+          'pasien',
+          array(
+            'nama as pasien',
+            'no_rm'
+          )
+        )
+        ->join(
+          'master_poli',
+          array(
+            'nama as departemen'
+          )
+        )
+        ->join(
+          'pegawai',
+          array(
+            'nama as dokter'
+          )
+        )
+        ->join(
+          'master_penjamin',
+          array(
+            'nama as penjamin'
+          )
+        )
+        ->join(
+          'kunjungan',
+          array(
+            'pegawai as uid_resepsionis'
+          )
+        )
+        ->on(
+          array(
+            array('pasien.uid', '=', 'antrian.pasien'),
+            array('master_poli.uid', '=', 'antrian.departemen'),
+            array('pegawai.uid', '=', 'antrian.dokter'),
+            array('master_penjamin.uid', '=', 'antrian.penjamin'),
+            array('kunjungan.uid', '=', 'antrian.kunjungan')
+          )
+        )
+        ->where($paramData, $paramValue)
+        ->order(array(
+          'antrian.waktu_masuk' => 'DESC'
+        ))
+        ->execute();
+    } else {
+      $data = self::$query
+        ->select(
+          'antrian',
+          array(
+            'uid',
+            'pasien as uid_pasien',
+            'dokter as uid_dokter',
+            'departemen as uid_poli',
+            'penjamin as uid_penjamin',
+            'waktu_masuk',
+            'waktu_keluar'
+          )
+        )
+        ->join(
+          'pasien',
+          array(
+            'nama as pasien',
+            'no_rm'
+          )
+        )
+        ->join(
+          'master_poli',
+          array(
+            'nama as departemen'
+          )
+        )
+        ->join(
+          'pegawai',
+          array(
+            'nama as dokter'
+          )
+        )
+        ->join(
+          'master_penjamin',
+          array(
+            'nama as penjamin'
+          )
+        )
+        ->join(
+          'kunjungan',
+          array(
+            'pegawai as uid_resepsionis'
+          )
+        )
+        ->on(
+          array(
+            array('pasien.uid', '=', 'antrian.pasien'),
+            array('master_poli.uid', '=', 'antrian.departemen'),
+            array('pegawai.uid', '=', 'antrian.dokter'),
+            array('master_penjamin.uid', '=', 'antrian.penjamin'),
+            array('kunjungan.uid', '=', 'antrian.kunjungan')
+          )
+        )
+        ->where($paramData, $paramValue)
+        ->offset(intval($parameter['start']))
+        ->limit(intval($parameter['length']))
+        ->order(array(
+          'antrian.waktu_masuk' => 'DESC'
+        ))
+        ->execute();
+    }
+
+    $data['response_draw'] = intval($parameter['draw']);
+    $autonum = intval($parameter['start']) + 1;
+    $pegawai = new Pegawai(self::$pdo);
+    foreach ($data['response_data'] as $key => $value) {
+      $data['response_data'][$key]['autonum'] = $autonum;
+
+
+      $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
+
+      $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
+      $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
+
+      //Harga
+      $harga = self::$query->select('master_poli_tindakan_penjamin', array(
+        'id',
+        'harga',
+        'uid_poli',
+        'uid_tindakan',
+        'uid_penjamin',
+        'created_at',
+        'updated_at'
+      ))
+        ->where(
+          array(
+            'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
+            'AND',
+            'master_poli_tindakan_penjamin.uid_poli' => '= ?',
+            'AND',
+            'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
+            'AND',
+            'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
+          ),
+          array(
+            $value['uid_poli'],
+            __UIDKONSULDOKTER__,
+            __UIDPENJAMINUMUM__
+          )
+        )
+        ->execute();
+
+      if ($value['uid_penjamin'] == __UIDPENJAMINBPJS__) {
+
+        $SEP = self::$query->select('bpjs_sep', array(
+          'uid',
+          'sep_no'
+        ))
+          ->where(array(
+            'bpjs_sep.antrian' => '= ?',
+            'AND',
+            'bpjs_sep.deleted_at' => 'IS NULL'
+          ), array(
+            $value['uid']
+          ))
+          ->execute();
+        if (count($SEP['response_data']) > 0) {
+          $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['sep_no'];
+          $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
+        } else {
+          $data['response_data'][$key]['sep'] = $SEP;
+          $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
+        }
+      }
+
+
+      $data['response_data'][$key]['harga'] = $harga['response_data'][0];
+
+
+      $autonum++;
+    }
+
+    $AntrianTotal = self::$query->select(
+      'antrian',
+      array(
+        'uid',
+        'pasien as uid_pasien',
+        'dokter as uid_dokter',
+        'departemen as uid_poli',
+        'penjamin as uid_penjamin',
+        'waktu_masuk',
+        'waktu_keluar'
+      )
+    )
+      ->join(
+        'pasien',
+        array(
+          'nama as pasien',
+          'no_rm'
+        )
+      )
+      ->join(
+        'master_poli',
+        array(
+          'nama as departemen'
+        )
+      )
+      ->join(
+        'pegawai',
+        array(
+          'nama as dokter'
+        )
+      )
+      ->join(
+        'master_penjamin',
+        array(
+          'nama as penjamin'
+        )
+      )
+      ->join(
+        'kunjungan',
+        array(
+          'pegawai as uid_resepsionis'
+        )
+      )
+      ->on(
+        array(
+          array('pasien.uid', '=', 'antrian.pasien'),
+          array('master_poli.uid', '=', 'antrian.departemen'),
+          array('pegawai.uid', '=', 'antrian.dokter'),
+          array('master_penjamin.uid', '=', 'antrian.penjamin'),
+          array('kunjungan.uid', '=', 'antrian.kunjungan')
+        )
+      )
+      ->where($paramData, $paramValue)
+      ->execute();
+
+    $data['recordsTotal'] = count($AntrianTotal['response_data']);
+    $data['recordsFiltered'] = count($data['response_data']);
+    $data['length'] = intval($parameter['length']);
+    $data['start'] = intval($parameter['start']);
+
+    return $data;
+  }
+
+  private function get_list_antrian_inap($parameter)
+  {
+    $data = self::$query->select('rawat_inap', array(
+      'uid',
+      'pasien',
+      'dokter',
+      'penjamin',
+      'kunjungan',
+      'waktu_masuk',
+      'waktu_keluar',
+      'kamar',
+      'bed',
+      'keterangan',
+      'jenis_pulang',
+      'alasan_pulang'
+    ))
+      ->join(
+        'pasien',
+        array(
+          'nama as pasien',
+          'no_rm'
+        )
+      )
+      ->join(
+        'pegawai',
+        array(
+          'nama as dokter'
+        )
+      )
+      ->join(
+        'master_penjamin',
+        array(
+          'nama as penjamin'
+        )
+      )
+      ->join(
+        'kunjungan',
+        array(
+          'pegawai as uid_resepsionis'
+        )
+      )
+      ->on(
+        array(
+          array('pasien.uid', '=', 'rawat_inap.pasien'),
+          array('pegawai.uid', '=', 'rawat_inap.dokter'),
+          array('master_penjamin.uid', '=', 'rawat_inap.penjamin'),
+          array('kunjungan.uid', '=', 'rawat_inap.kunjungan')
+        )
+      )
+      ->where(array(
+        'rawat_inap.deleted_at' => 'IS NULL'
+      ), array())
+      ->execute();
+    $autonum = 1;
+    foreach ($data['response_data'] as $key => $value) {
+      $data['response_data'][$key]['autonum'] = $autonum;
+      $autonum++;
+    }
+    return $data;
+  }
+
+  private function get_list_antrian($table, $target = '')
+  {
+    if ($target !== '') {
+
+      $data = self::$query
+        ->select(
+          $table,
+          array(
+            'uid',
+            'pasien as uid_pasien',
+            'dokter as uid_dokter',
+            'departemen as uid_poli',
+            'penjamin as uid_penjamin',
             'waktu_masuk',
             'waktu_keluar',
-            'kamar',
-            'bed',
-            'keterangan',
-            'jenis_pulang',
-            'alasan_pulang'
-        ))
-            ->join('pasien', array(
-                    'nama as pasien',
-                    'no_rm'
-                )
-            )
-            ->join('pegawai', array(
-                    'nama as dokter'
-                )
-            )
-            ->join('master_penjamin', array(
-                    'nama as penjamin'
-                )
-            )
-            ->join('kunjungan', array(
-                    'pegawai as uid_resepsionis'
-                )
-            )
-            ->on(array(
-                    array('pasien.uid', '=', 'rawat_inap.pasien'),
-                    array('pegawai.uid', '=', 'rawat_inap.dokter'),
-                    array('master_penjamin.uid', '=', 'rawat_inap.penjamin'),
-                    array('kunjungan.uid', '=', 'rawat_inap.kunjungan')
-                )
-            )
-            ->where(array(
-                'rawat_inap.deleted_at' => 'IS NULL'
-            ), array())
-            ->execute();
-        $autonum = 1;
-        foreach ($data['response_data'] as $key => $value) {
-            $data['response_data'][$key]['autonum'] = $autonum;
-            $autonum++;
-        }
-        return $data;
-    }
-
-    private function get_list_antrian($table, $target = '')
-    {
-        if($target !== '') {
-
-            $data = self::$query
-                ->select($table,
-                    array(
-                        'uid',
-                        'pasien as uid_pasien',
-                        'dokter as uid_dokter',
-                        'departemen as uid_poli',
-                        'penjamin as uid_penjamin',
-                        'waktu_masuk',
-                        'waktu_keluar',
-                        'created_at'
-                    )
-                )
-                ->join('pasien', array(
-                        'nama as pasien',
-                        'no_rm'
-                    )
-                )
-                ->join('master_poli', array(
-                        'nama as departemen'
-                    )
-                )
-                ->join('pegawai', array(
-                        'nama as dokter'
-                    )
-                )
-                ->join('master_penjamin', array(
-                        'nama as penjamin'
-                    )
-                )
-                ->join('kunjungan', array(
-                        'pegawai as uid_resepsionis'
-                    )
-                )
-                ->on(array(
-                        array('pasien.uid', '=', $table . '.pasien'),
-                        array('master_poli.uid', '=', $table . '.departemen'),
-                        array('pegawai.uid', '=', $table . '.dokter'),
-                        array('master_penjamin.uid', '=', $table . '.penjamin'),
-                        array('kunjungan.uid', '=', $table . '.kunjungan')
-                    )
-                )
-                ->where(array(
-                    $table . '.departemen' => '= ?',
-                    'AND',
-                    /*$table . '.waktu_keluar' => 'IS NULL',
+            'created_at'
+          )
+        )
+        ->join(
+          'pasien',
+          array(
+            'nama as pasien',
+            'no_rm'
+          )
+        )
+        ->join(
+          'master_poli',
+          array(
+            'nama as departemen'
+          )
+        )
+        ->join(
+          'pegawai',
+          array(
+            'nama as dokter'
+          )
+        )
+        ->join(
+          'master_penjamin',
+          array(
+            'nama as penjamin'
+          )
+        )
+        ->join(
+          'kunjungan',
+          array(
+            'pegawai as uid_resepsionis'
+          )
+        )
+        ->on(
+          array(
+            array('pasien.uid', '=', $table . '.pasien'),
+            array('master_poli.uid', '=', $table . '.departemen'),
+            array('pegawai.uid', '=', $table . '.dokter'),
+            array('master_penjamin.uid', '=', $table . '.penjamin'),
+            array('kunjungan.uid', '=', $table . '.kunjungan')
+          )
+        )
+        ->where(
+          array(
+            $table . '.departemen' => '= ?',
+            'AND',
+            /*$table . '.waktu_keluar' => 'IS NULL',
                     'AND',*/
 
-                    $table . '.deleted_at' => 'IS NULL',
-                    'AND',
-                    'kunjungan.waktu_keluar' => 'IS NULL'
-                ), array(
-                        $target
-                    )
-                )
-                ->order(
-                    array(
-                        $table . '.waktu_masuk' => 'DESC'
-                    )
-                )
-                ->execute();
-        } else {
-            $data = self::$query
-                ->select($table,
-                    array(
-                        'uid',
-                        'pasien as uid_pasien',
-                        'dokter as uid_dokter',
-                        'departemen as uid_poli',
-                        'penjamin as uid_penjamin',
-                        'waktu_masuk',
-                        'waktu_keluar'
-                    )
-                )
-                ->join('pasien', array(
-                        'nama as pasien',
-                        'no_rm'
-                    )
-                )
-                ->join('master_poli', array(
-                        'nama as departemen'
-                    )
-                )
-                ->join('pegawai', array(
-                        'nama as dokter'
-                    )
-                )
-                ->join('master_penjamin', array(
-                        'nama as penjamin'
-                    )
-                )
-                ->join('kunjungan', array(
-                        'pegawai as uid_resepsionis'
-                    )
-                )
-                ->on(array(
-                        array('pasien.uid', '=', $table . '.pasien'),
-                        array('master_poli.uid', '=', $table . '.departemen'),
-                        array('pegawai.uid', '=', $table . '.dokter'),
-                        array('master_penjamin.uid', '=', $table . '.penjamin'),
-                        array('kunjungan.uid', '=', $table . '.kunjungan')
-                    )
-                )
-                ->where(array(
-                        /*$table . '.waktu_keluar' => 'IS NULL',
+            $table . '.deleted_at' => 'IS NULL',
+            'AND',
+            'kunjungan.waktu_keluar' => 'IS NULL'
+          ),
+          array(
+            $target
+          )
+        )
+        ->order(
+          array(
+            $table . '.waktu_masuk' => 'DESC'
+          )
+        )
+        ->execute();
+    } else {
+      $data = self::$query
+        ->select(
+          $table,
+          array(
+            'uid',
+            'pasien as uid_pasien',
+            'dokter as uid_dokter',
+            'departemen as uid_poli',
+            'penjamin as uid_penjamin',
+            'waktu_masuk',
+            'waktu_keluar'
+          )
+        )
+        ->join(
+          'pasien',
+          array(
+            'nama as pasien',
+            'no_rm'
+          )
+        )
+        ->join(
+          'master_poli',
+          array(
+            'nama as departemen'
+          )
+        )
+        ->join(
+          'pegawai',
+          array(
+            'nama as dokter'
+          )
+        )
+        ->join(
+          'master_penjamin',
+          array(
+            'nama as penjamin'
+          )
+        )
+        ->join(
+          'kunjungan',
+          array(
+            'pegawai as uid_resepsionis'
+          )
+        )
+        ->on(
+          array(
+            array('pasien.uid', '=', $table . '.pasien'),
+            array('master_poli.uid', '=', $table . '.departemen'),
+            array('pegawai.uid', '=', $table . '.dokter'),
+            array('master_penjamin.uid', '=', $table . '.penjamin'),
+            array('kunjungan.uid', '=', $table . '.kunjungan')
+          )
+        )
+        ->where(
+          array(
+            /*$table . '.waktu_keluar' => 'IS NULL',
                         'AND',*/
-                        $table . '.deleted_at' => 'IS NULL',
-                        'AND',
-                        'kunjungan.waktu_keluar' => 'IS NULL'
-                    )
-                )
-                ->order(
-                    array(
-                        $table . '.waktu_masuk' => 'DESC'
-                    )
-                )
-                ->execute();
-        }
+            $table . '.deleted_at' => 'IS NULL',
+            'AND',
+            'kunjungan.waktu_keluar' => 'IS NULL'
+          )
+        )
+        ->order(
+          array(
+            $table . '.waktu_masuk' => 'DESC'
+          )
+        )
+        ->execute();
+    }
 
-        $autonum = 1;
-        foreach ($data['response_data'] as $key => $value) {
-            $data['response_data'][$key]['autonum'] = $autonum;
-            $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
-            $autonum++;
+    $autonum = 1;
+    foreach ($data['response_data'] as $key => $value) {
+      $data['response_data'][$key]['autonum'] = $autonum;
+      $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
+      $autonum++;
 
-            $pegawai = new Pegawai(self::$pdo);
-            $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
-            $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
+      $pegawai = new Pegawai(self::$pdo);
+      $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
+      $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
 
-            //Harga
-            $harga = self::$query->select('master_poli_tindakan_penjamin', array(
-                'id',
-                'harga',
-                'uid_poli',
-                'uid_tindakan',
-                'uid_penjamin',
-                'created_at',
-                'updated_at'
-            ))
-                ->where(array(
-                    'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
-                    'AND',
-                    'master_poli_tindakan_penjamin.uid_poli' => '= ?',
-                    'AND',
-                    'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
-                    'AND',
-                    'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'),
-                    array(
-                        $value['uid_poli'],
-                        __UIDKONSULDOKTER__,
-                        __UIDPENJAMINUMUM__))
-                ->execute();
+      //Harga
+      $harga = self::$query->select('master_poli_tindakan_penjamin', array(
+        'id',
+        'harga',
+        'uid_poli',
+        'uid_tindakan',
+        'uid_penjamin',
+        'created_at',
+        'updated_at'
+      ))
+        ->where(
+          array(
+            'master_poli_tindakan_penjamin.deleted_at' => 'IS NULL',
+            'AND',
+            'master_poli_tindakan_penjamin.uid_poli' => '= ?',
+            'AND',
+            'master_poli_tindakan_penjamin.uid_tindakan' => '= ?',
+            'AND',
+            'master_poli_tindakan_penjamin.uid_penjamin' => '= ?'
+          ),
+          array(
+            $value['uid_poli'],
+            __UIDKONSULDOKTER__,
+            __UIDPENJAMINUMUM__
+          )
+        )
+        ->execute();
 
 
-            //Cek Penjamin. Jika BPJS maka cek status SEP pada lokal
-            if ($value['uid_penjamin'] === __UIDPENJAMINBPJS__) {
-                //Cek tabel SEP
-                /*$SEP = self::$query->select('penjamin_sep', array(
+      //Cek Penjamin. Jika BPJS maka cek status SEP pada lokal
+      if ($value['uid_penjamin'] === __UIDPENJAMINBPJS__) {
+        //Cek tabel SEP
+        /*$SEP = self::$query->select('penjamin_sep', array(
                     'id',
                     'bpjs_no_sep'
                 ))
@@ -2143,605 +2282,631 @@ class Antrian extends Utility
                     $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['bpjs_no_sep'];
                 }*/
 
-                $SEP = self::$query->select('bpjs_sep', array(
-                    'uid',
-                    'sep_no'
-                ))
-                    ->where(array(
-                        'bpjs_sep.antrian' => '= ?',
-                        'AND',
-                        'bpjs_sep.deleted_at' => 'IS NULL'
-                    ), array(
-                        $value['uid']
-                    ))
-                    ->execute();
-                if (count($SEP['response_data']) > 0) {
-                    $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['sep_no'];
-                    $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
-                } else {
-                    $data['response_data'][$key]['sep'] = $SEP;
-                    $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
-                }
-            }
-
-
-            $data['response_data'][$key]['harga'] = $harga['response_data'][0];
+        $SEP = self::$query->select('bpjs_sep', array(
+          'uid',
+          'sep_no'
+        ))
+          ->where(array(
+            'bpjs_sep.antrian' => '= ?',
+            'AND',
+            'bpjs_sep.deleted_at' => 'IS NULL'
+          ), array(
+            $value['uid']
+          ))
+          ->execute();
+        if (count($SEP['response_data']) > 0) {
+          $data['response_data'][$key]['sep'] = $SEP['response_data'][0]['sep_no'];
+          $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
+        } else {
+          $data['response_data'][$key]['sep'] = $SEP;
+          $data['response_data'][$key]['sep_uid'] = $SEP['response_data'][0]['uid'];
         }
+      }
 
-        return $data;
+
+      $data['response_data'][$key]['harga'] = $harga['response_data'][0];
     }
 
-    public function get_antrian_detail($table, $params)
-    {
-        $data = self::$query
-            ->select($table, array(
-                    'uid',
-                    'pasien',
-                    'kunjungan',
-                    'departemen',
-                    'penjamin',
-                    'dokter',
-                    'waktu_masuk',
-                    'waktu_keluar',
-                    'prioritas'
-                )
-            )
-            ->where(array(
-                $table . '.deleted_at' => 'IS NULL',
-                'AND',
-                $table . '.uid' => '= ?'
-            ),
-                array($params)
-            )
-            ->execute();
-        //More Info
-        $Pasien = new Pasien(self::$pdo);
-        //$Terminologi = new Terminologi(self::$pdo);
-        $Penjamin = new Penjamin(self::$pdo);
-        $Poli = new Poli(self::$pdo);
-        $Dokter = new Pegawai(self::$pdo);
-        foreach ($data['response_data'] as $key => $value) {
-            $Kunjungan = self::$query->select('kunjungan', array(
-                'uid',
-                'waktu_masuk',
-                'waktu_keluar',
-                'pegawai',
-                'pj_pasien',
-                'info_didapat_dari'
-            ))
-                ->where(array(
-                    'kunjungan.uid' => '= ?',
-                    'AND',
-                    'kunjungan.deleted_at' => 'IS NULL'
-                ), array(
-                    $value['kunjungan']
-                ))
-                ->execute();
-            $data['response_data'][$key]['kunjungan_detail'] = $Kunjungan['response_data'][0];
-            $data['response_data'][$key]['dokter'] = $Dokter->get_info($value['dokter'])['response_data'][0];
+    return $data;
+  }
 
-            $PasienData = $Pasien->get_pasien_info('pasien', $value['pasien']);
-            $PoliData = $Poli->get_poli_info($value['departemen']);
-            $data['response_data'][$key]['poli_info'] = $PoliData['response_data'][0];
+  public function get_antrian_detail($table, $params)
+  {
+    $data = self::$query
+      ->select(
+        $table,
+        array(
+          'uid',
+          'pasien',
+          'kunjungan',
+          'departemen',
+          'penjamin',
+          'dokter',
+          'waktu_masuk',
+          'waktu_keluar',
+          'prioritas'
+        )
+      )
+      ->where(
+        array(
+          $table . '.deleted_at' => 'IS NULL',
+          'AND',
+          $table . '.uid' => '= ?'
+        ),
+        array($params)
+      )
+      ->execute();
+    //More Info
+    $Pasien = new Pasien(self::$pdo);
+    //$Terminologi = new Terminologi(self::$pdo);
+    $Penjamin = new Penjamin(self::$pdo);
+    $Poli = new Poli(self::$pdo);
+    $Dokter = new Pegawai(self::$pdo);
+    foreach ($data['response_data'] as $key => $value) {
+      $Kunjungan = self::$query->select('kunjungan', array(
+        'uid',
+        'waktu_masuk',
+        'waktu_keluar',
+        'pegawai',
+        'pj_pasien',
+        'info_didapat_dari'
+      ))
+        ->where(array(
+          'kunjungan.uid' => '= ?',
+          'AND',
+          'kunjungan.deleted_at' => 'IS NULL'
+        ), array(
+          $value['kunjungan']
+        ))
+        ->execute();
+      $data['response_data'][$key]['kunjungan_detail'] = $Kunjungan['response_data'][0];
+      $data['response_data'][$key]['dokter'] = $Dokter->get_info($value['dokter'])['response_data'][0];
 
-            //$PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
+      $PasienData = $Pasien->get_pasien_info('pasien', $value['pasien']);
+      $PoliData = $Poli->get_poli_info($value['departemen']);
+      $data['response_data'][$key]['poli_info'] = $PoliData['response_data'][0];
 
-            //Terminologi Jenis Kelamin
-            /*$TerminologiJenkel = $Terminologi->get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
+      //$PasienData['response_data'][0]['tanggal_lahir'] = date('d F Y', strtotime($PasienData['response_data'][0]['tanggal_lahir']));
+
+      //Terminologi Jenis Kelamin
+      /*$TerminologiJenkel = $Terminologi->get_terminologi_items_detail('terminologi_item', $PasienData['response_data'][0]['jenkel']);
             $PasienData['response_data'][0]['jenkel_nama'] = $TerminologiJenkel['response_data'][0]['nama'];*/
 
-            $data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
+      $data['response_data'][$key]['pasien_info'] = $PasienData['response_data'][0];
 
 
-            //Penjamin
-            $data['response_data'][$key]['penjamin_data'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
-        }
-        return $data;
+      //Penjamin
+      $data['response_data'][$key]['penjamin_data'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
     }
+    return $data;
+  }
 
-    private function cari_pasien2($parameter) {
-        $Authorization = new Authorization();
-        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+  private function cari_pasien2($parameter)
+  {
+    $Authorization = new Authorization();
+    $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        $term = new Terminologi(self::$pdo);
-        // $expect_data = array(
-        //     'no_rm',
-        //     'nik',
-        //     'tanggal_lahir',
-        //     'nama',
-        //     'id_panggilan',
-        //     'id_jenkel',
-        //     'agama',
-        //     'warganegara',
-        //     'pendidikan',
-        //     'nama_ibu',
-        //     'alamat',
-        //     'no_telp'
-        // );
-        $expect_data = array(
-            'no_rm',
-            'nik',
-            'tanggal_lahir',
-            'nama',
-            'id_panggilan',
-            'id_jenkel',
-            'agama',
-            'nama_ibu',
-            'alamat',
-            'no_telp'
-        );
-        if (isset($parameter['cari']) && !empty($parameter['cari'])) {
-            $paramData = array(
-                '(pasien.nik' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
-                'OR',
-                'pasien.no_rm' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
-                'OR',
-                'pasien.no_passport' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
-                'OR',
-                'pasien.driving_license' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
-                'OR',
-                'LOWER(pasien.nama)' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\')',
-                'AND',
-                'pasien.deleted_at' => 'IS NULL'
-            );
-            $paramValue = array();
+    $term = new Terminologi(self::$pdo);
+    // $expect_data = array(
+    //     'no_rm',
+    //     'nik',
+    //     'tanggal_lahir',
+    //     'nama',
+    //     'id_panggilan',
+    //     'id_jenkel',
+    //     'agama',
+    //     'warganegara',
+    //     'pendidikan',
+    //     'nama_ibu',
+    //     'alamat',
+    //     'no_telp'
+    // );
+    $expect_data = array(
+      'no_rm',
+      'nik',
+      'tanggal_lahir',
+      'nama',
+      'id_panggilan',
+      'id_jenkel',
+      'agama',
+      'nama_ibu',
+      'alamat',
+      'no_telp'
+    );
+    if (isset($parameter['cari']) && !empty($parameter['cari'])) {
+      $paramData = array(
+        '(pasien.nik' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
+        'OR',
+        'pasien.no_rm' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
+        'OR',
+        'pasien.no_passport' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
+        'OR',
+        'pasien.driving_license' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\'',
+        'OR',
+        'LOWER(pasien.nama)' => 'LIKE \'%' . str_replace('-', '', $parameter['cari']) . '%\')',
+        'AND',
+        'pasien.deleted_at' => 'IS NULL'
+      );
+      $paramValue = array();
 
-            if ($parameter['length'] < 0) {
-                $data = self::$query->select('pasien', array(
-                    'uid',
-                    'no_rm',
-                    'nik',
-                    'nama',
-                    'tanggal_lahir',
-                    'jenkel AS id_jenkel',
-                    'panggilan AS id_panggilan',
-                    'warganegara',
-                    'tempat_lahir',
-                    'agama',
-                    'pendidikan',
-                    'nama_ibu',
-                    'alamat',
-                    'no_telp',
-                    'no_passport',
-                    'driving_license'
-                ))
-                    ->where($paramData, $paramValue)
-                    ->order(array(
-                        'nama' => 'ASC'
-                    ))
-                    ->execute();
-            } else {
-                $data = self::$query->select('pasien', array(
-                    'uid',
-                    'no_rm',
-                    'nik',
-                    'nama',
-                    'tanggal_lahir',
-                    'jenkel AS id_jenkel',
-                    'panggilan AS id_panggilan',
-                    'warganegara',
-                    'tempat_lahir',
-                    'agama',
-                    'pendidikan',
-                    'nama_ibu',
-                    'alamat',
-                    'no_telp',
-                    'no_passport',
-                    'driving_license'
-                ))
-                    ->where($paramData, $paramValue)
-                    ->order(array(
-                        'nama' => 'ASC'
-                    ))
-                    ->offset(intval($parameter['start']))
-                    ->limit(intval($parameter['length']))
-                    ->execute();
-            }
+      if ($parameter['length'] < 0) {
+        $data = self::$query->select('pasien', array(
+          'uid',
+          'no_rm',
+          'nik',
+          'nama',
+          'tanggal_lahir',
+          'jenkel AS id_jenkel',
+          'panggilan AS id_panggilan',
+          'warganegara',
+          'tempat_lahir',
+          'agama',
+          'pendidikan',
+          'nama_ibu',
+          'alamat',
+          'no_telp',
+          'no_passport',
+          'driving_license'
+        ))
+          ->where($paramData, $paramValue)
+          ->order(array(
+            'nama' => 'ASC'
+          ))
+          ->execute();
+      } else {
+        $data = self::$query->select('pasien', array(
+          'uid',
+          'no_rm',
+          'nik',
+          'nama',
+          'tanggal_lahir',
+          'jenkel AS id_jenkel',
+          'panggilan AS id_panggilan',
+          'warganegara',
+          'tempat_lahir',
+          'agama',
+          'pendidikan',
+          'nama_ibu',
+          'alamat',
+          'no_telp',
+          'no_passport',
+          'driving_license'
+        ))
+          ->where($paramData, $paramValue)
+          ->order(array(
+            'nama' => 'ASC'
+          ))
+          ->offset(intval($parameter['start']))
+          ->limit(intval($parameter['length']))
+          ->execute();
+      }
 
-            $autonum = intval($parameter['start']) + 1;
+      $autonum = intval($parameter['start']) + 1;
 
-            foreach ($data['response_data'] as $key => $value) {
-                $data_lengkap = false;
-                $data['response_data'][$key]['autonum'] = $autonum;
+      foreach ($data['response_data'] as $key => $value) {
+        $data_lengkap = false;
+        $data['response_data'][$key]['autonum'] = $autonum;
 
-                if(strlen($value['no_rm']) < 6) {
-                    $updateRM = self::$query->update('pasien', array(
-                        'no_rm' => str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT)
-                    ))
-                        ->where(array(
-                            'pasien.uid' => '= ?'
-                        ), array(
-                            $value['uid']
-                        ))
-                        ->execute();
-                }
-    
-                if (stripos(strtolower($value['no_rm']), '-') !== false) {
-                    $updateRM = self::$query->update('pasien', array(
-                        'no_rm' => str_replace('-', '', $value['no_rm'])
-                    ))
-                        ->where(array(
-                            'pasien.uid' => '= ?'
-                        ), array(
-                            $value['uid']
-                        ))
-                        ->execute();
-                }
-    
-                $data['response_data'][$key]['no_rm'] = str_replace('-', '', str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT));
-
-                $data['response_data'][$key]['berobat'] = self::cekStatusAntrian($value['uid']);
-                $param = ['', 'terminologi-items-detail', $value['id_panggilan']];
-                $get_panggilan = $term->__GET__($param);
-                $data['response_data'][$key]['panggilan'] = $get_panggilan['response_data'][0]['nama'];
-
-                $param = ['', 'terminologi-items-detail', $value['id_jenkel']];
-                $get_jenkel = $term->__GET__($param);
-                $data['response_data'][$key]['jenkel'] = $get_jenkel['response_data'][0]['nama'];
-
-
-                //Penjamin
-                $Penjamin = self::$query->select('pasien_penjamin', array(
-                    'penjamin',
-                    'valid_awal',
-                    'valid_akhir',
-                    'rest_meta',
-                    'terdaftar'
-                ))
-                    ->where(array(
-                        'pasien_penjamin.deleted_at' => 'IS NULL',
-                        'AND',
-                        'pasien_penjamin.pasien' => '= ?'
-                    ), array(
-                        $value['uid']
-                    ))
-                    ->execute();
-                $data['response_data'][$key]['penjamin'] = $Penjamin['response_data'];
-
-                if($value['warganegara'] === __WNI__) {
-                    foreach ($expect_data as $ExpKey => $ExpValue) {
-                        if(
-                            !isset($value[$ExpValue]) ||
-                            is_null($value[$ExpValue]) ||
-                            $value[$ExpValue] === '' ||
-                            empty($value[$ExpValue])
-                        ) {
-                            $data_lengkap = false;
-                            break;
-                        } else {
-                            $data_lengkap = true;
-                        }
-                    }
-                } else {
-                    if(
-                        !isset($value['no_passport']) ||
-                        is_null($value['no_passport']) ||
-                        $value['no_passport'] === '' ||
-                        empty($value['no_passport'])
-                    ) {
-                        $data_lengkap = false;
-                    }
-                }
-
-
-                $data['response_data'][$key]['lengkap'] = $data_lengkap;
-                $autonum++;
-            }
-
-            $itemTotal = count($data['response_data']);
-            $data['response_draw'] = $parameter['draw'];
-            $data['recordsTotal'] = $itemTotal;
-            $data['recordsFiltered'] = $itemTotal;
-            $data['length'] = intval($parameter['length']);
-            $data['start'] = intval($parameter['start']);
-
-            return $data;
-        } else {
-            return array(
-                'response_draw' => $parameter['draw'],
-                'response_data' => array(),
-                'recordsTotal' => 0,
-                'recordsFiltered' => 0,
-                'length' => intval($parameter['length']),
-                'start' => intval($parameter['start'])
-
-            );
-        }
-    }
-
-    public function cari_pasien($params) {
-        $parameter = strtoupper($params);
-
-        $data = self::$query
-            ->select('pasien', array(
-                    'uid',
-                    'no_rm',
-                    'nik',
-                    'nama',
-                    'tanggal_lahir',
-                    'jenkel AS id_jenkel',
-                    'panggilan AS id_panggilan',
-                    'warganegara',
-                    'no_passport',
-                    'driving_license'
-                )
-            )
+        if (strlen($value['no_rm']) < 6) {
+          $updateRM = self::$query->update('pasien', array(
+            'no_rm' => str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT)
+          ))
             ->where(array(
-                '(pasien.nik' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
-                'OR',
-                'pasien.no_rm' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
-                'OR',
-                'pasien.no_passport' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
-                'OR',
-                'pasien.driving_license' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
-                'OR',
-                'pasien.nama' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\')',
-                'AND',
-                'pasien.deleted_at' => 'IS NULL'
-            ),
-                array()
-            )
-            ->order(array(
-                    'pasien.created_at' => 'ASC'
-                )
-            )
-            ->limit(10)
-            ->execute();
-
-        $autonum = 1;
-        $term = new Terminologi(self::$pdo);
-
-        $expect_data = array(
-            'no_rm', 'nik', 'tanggal_lahir', 'nama', 'panggilan', 'tanggal_lahir', 'tempat_lahir', 'jenkel', 'agama', 'warganegara', 'pendidikan',
-            'nama_ibu', 'alamat', 'no_telp', 'kode_pos'
-        );
-
-        foreach ($data['response_data'] as $key => $value) {
-            $data_lengkap = false;
-            $data['response_data'][$key]['autonum'] = $autonum;
-            $autonum++;
-
-            if(strlen($value['no_rm']) < 6) {
-                $updateRM = self::$query->update('pasien', array(
-                    'no_rm' => str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT)
-                ))
-                    ->where(array(
-                        'pasien.uid' => '= ?'
-                    ), array(
-                        $value['uid']
-                    ))
-                    ->execute();
-            }
-
-            if (stripos(strtolower($value['no_rm']), '-') !== false) {
-                $updateRM = self::$query->update('pasien', array(
-                    'no_rm' => str_replace('-', '', $value['no_rm'])
-                ))
-                    ->where(array(
-                        'pasien.uid' => '= ?'
-                    ), array(
-                        $value['uid']
-                    ))
-                    ->execute();
-            }
-
-            $data['response_data'][$key]['no_rm'] = str_replace('-', '', str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT));
-
-            $data['response_data'][$key]['berobat'] = self::cekStatusAntrian($value['uid']);
-            $param = ['', 'terminologi-items-detail', $value['id_panggilan']];
-            $get_panggilan = $term->__GET__($param);
-            $data['response_data'][$key]['panggilan'] = $get_panggilan['response_data'][0]['nama'];
-
-            $param = ['', 'terminologi-items-detail', $value['id_jenkel']];
-            $get_jenkel = $term->__GET__($param);
-            $data['response_data'][$key]['jenkel'] = $get_jenkel['response_data'][0]['nama'];
-
-
-            //Penjamin
-            $Penjamin = self::$query->select('pasien_penjamin', array(
-                'penjamin',
-                'valid_awal',
-                'valid_akhir',
-                'rest_meta',
-                'terdaftar'
-            ))
-                ->where(array(
-                    'pasien_penjamin.deleted_at' => 'IS NULL',
-                    'AND',
-                    'pasien_penjamin.pasien' => '= ?'
-                ), array(
-                    $value['uid']
-                ))
-                ->execute();
-            $data['response_data'][$key]['penjamin'] = $Penjamin['response_data'];
-
-            if($value['warganegara'] === __WNI__) {
-                foreach ($expect_data as $ExpKey => $ExpValue) {
-                    if(
-                        !isset($value[$ExpValue]) ||
-                        is_null($value[$ExpValue]) ||
-                        $value[$ExpValue] === '' ||
-                        empty($value[$ExpValue])
-                    ) {
-                        $data_lengkap = false;
-                        break;
-                    } else {
-                        $data_lengkap = true;
-                    }
-                }
-            } else {
-                if(
-                    !isset($value['no_passport']) ||
-                    is_null($value['no_passport']) ||
-                    $value['no_passport'] === '' ||
-                    empty($value['no_passport'])
-                ) {
-                    $data_lengkap = false;
-                }
-            }
-
-
-            $data['response_data'][$key]['lengkap'] = $data_lengkap;
-        }
-
-        return $data;
-    }
-
-    /*================= GET DATA ANTRIAN FOR ALL CLASS USE ==============*/
-
-    private function cekStatusAntrian($uid_pasien)
-    {
-        $status_berobat = false;
-
-        $data = self::$query
-            ->select('antrian', array(
-                    'uid',
-                    'pasien',
-                    'waktu_keluar',
-                    'waktu_masuk'
-                )
-            )
-            ->where(array(
-                'antrian.waktu_keluar' => 'IS NULL',
-                'AND',
-                'antrian.pasien' => '= ?'
-            ),
-                array(
-                    $uid_pasien
-                )
-            )
-            ->execute();
-
-        if (count($data['response_data']) > 0) {
-            $d1 = new \DateTime(date('Y-m-d', strtotime($data['response_data'][0]['waktu_masuk'])));
-            $d2 = new \DateTime(date('Y-m-d'));
-            if($d1 < $d2) {
-                $status_berobat = false;
-            } else {
-                $status_berobat = true;
-            }
-        }
-
-        return $status_berobat;
-    }
-    /*====================================================================*/
-
-
-    /*================= GET DATA ANTRIAN DAN PASIEN FOR ALL CLASS USE ==============*/
-
-    public function pasien_detail($parameter)
-    {
-        $pasien = new Pasien(self::$pdo);
-        $dataPasien = array();
-
-        $get_pasien = $pasien->get_pasien_detail('pasien', $parameter);
-        if (count($get_pasien['response_data']) > 0) {
-            $dataPasien = $get_pasien['response_data'][0];
-
-            $term = new Terminologi(self::$pdo);
-            $param_arr = ['', 'terminologi-items-detail', $dataPasien['jenkel']];
-            $get_jenkel = $term->__GET__($param_arr);
-            $dataPasien['nama_jenkel'] = $get_jenkel['response_data'][0]['nama'];
-        }
-
-        return $dataPasien;
-    }
-
-    /*====================================================================*/
-
-    public function get_antrian_by_poli($parameter)
-    {
-        $data = self::$query
-            ->select('antrian',
-                array(
-                    'uid',
-                    'prioritas',
-                    'pasien as uid_pasien',
-                    'dokter as uid_dokter',
-                    'departemen as uid_poli',
-                    'penjamin as uid_penjamin',
-                    'waktu_masuk'
-                )
-            )
-            ->join('pasien', array(
-                    'nama as pasien',
-                    'no_rm'
-                )
-            )
-            ->join('master_poli', array(
-                    'nama as departemen'
-                )
-            )
-            ->join('pegawai', array(
-                    'nama as dokter'
-                )
-            )
-            ->join('master_penjamin', array(
-                    'nama as penjamin'
-                )
-            )
-            ->join('kunjungan', array(
-                    'pegawai as uid_resepsionis'
-                )
-            )
-            ->on(array(
-                    array('pasien.uid', '=', 'antrian.pasien'),
-                    array('master_poli.uid', '=', 'antrian.departemen'),
-                    array('pegawai.uid', '=', 'antrian.dokter'),
-                    array('master_penjamin.uid', '=', 'antrian.penjamin'),
-                    array('kunjungan.uid', '=', 'antrian.kunjungan')
-                )
-            )
-            ->order(array(
-                'prioritas' => 'DESC'
-            ))
-            ->where(array(
-                'antrian.waktu_keluar' => 'IS NULL',
-                'AND',
-                'antrian.deleted_at' => 'IS NULL',
-                'AND',
-                'antrian.departemen' => '= ?'
+              'pasien.uid' => '= ?'
             ), array(
-                    $parameter
-                )
-            )
-            ->order(
-                array(
-                    'antrian.waktu_masuk' => 'ASC'
-                )
-            )
-            ->execute();
-
-        $autonum = 1;
-        $pegawai = new Pegawai(self::$pdo);
-        $pasien = new Pasien(self::$pdo);
-        foreach ($data['response_data'] as $key => $value) {
-            $data['response_data'][$key]['autonum'] = $autonum;
-            $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
-            $autonum++;
-
-            $get_pasien = $pasien->get_pasien_detail('pasien', $value['uid_pasien']);
-            $data['response_data'][$key]['pasien_detail'] = $get_pasien['response_data'][0];
-
-
-            $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
-            $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
-
-            $prioritas = self::$query->select('terminologi_item', array(
-                'id',
-                'nama'
+              $value['uid']
             ))
-                ->where(array(
-                    'terminologi_item.deleted_at' => 'IS NULL',
-                    'AND',
-                    'terminologi_item.id' => '= ?'
-                ), array(
-                    $value['prioritas']
-                ))
-                ->execute();
-            $data['response_data'][$key]['prioritas'] = $prioritas['response_data'][0];
+            ->execute();
         }
 
-        return $data;
+        if (stripos(strtolower($value['no_rm']), '-') !== false) {
+          $updateRM = self::$query->update('pasien', array(
+            'no_rm' => str_replace('-', '', $value['no_rm'])
+          ))
+            ->where(array(
+              'pasien.uid' => '= ?'
+            ), array(
+              $value['uid']
+            ))
+            ->execute();
+        }
+
+        $data['response_data'][$key]['no_rm'] = str_replace('-', '', str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT));
+
+        $data['response_data'][$key]['berobat'] = self::cekStatusAntrian($value['uid']);
+        $param = ['', 'terminologi-items-detail', $value['id_panggilan']];
+        $get_panggilan = $term->__GET__($param);
+        $data['response_data'][$key]['panggilan'] = $get_panggilan['response_data'][0]['nama'];
+
+        $param = ['', 'terminologi-items-detail', $value['id_jenkel']];
+        $get_jenkel = $term->__GET__($param);
+        $data['response_data'][$key]['jenkel'] = $get_jenkel['response_data'][0]['nama'];
+
+
+        //Penjamin
+        $Penjamin = self::$query->select('pasien_penjamin', array(
+          'penjamin',
+          'valid_awal',
+          'valid_akhir',
+          'rest_meta',
+          'terdaftar'
+        ))
+          ->where(array(
+            'pasien_penjamin.deleted_at' => 'IS NULL',
+            'AND',
+            'pasien_penjamin.pasien' => '= ?'
+          ), array(
+            $value['uid']
+          ))
+          ->execute();
+        $data['response_data'][$key]['penjamin'] = $Penjamin['response_data'];
+
+        if ($value['warganegara'] === __WNI__) {
+          foreach ($expect_data as $ExpKey => $ExpValue) {
+            if (
+              !isset($value[$ExpValue]) ||
+              is_null($value[$ExpValue]) ||
+              $value[$ExpValue] === '' ||
+              empty($value[$ExpValue])
+            ) {
+              $data_lengkap = false;
+              break;
+            } else {
+              $data_lengkap = true;
+            }
+          }
+        } else {
+          if (
+            !isset($value['no_passport']) ||
+            is_null($value['no_passport']) ||
+            $value['no_passport'] === '' ||
+            empty($value['no_passport'])
+          ) {
+            $data_lengkap = false;
+          }
+        }
+
+
+        $data['response_data'][$key]['lengkap'] = $data_lengkap;
+        $autonum++;
+      }
+
+      $itemTotal = count($data['response_data']);
+      $data['response_draw'] = $parameter['draw'];
+      $data['recordsTotal'] = $itemTotal;
+      $data['recordsFiltered'] = $itemTotal;
+      $data['length'] = intval($parameter['length']);
+      $data['start'] = intval($parameter['start']);
+
+      return $data;
+    } else {
+      return array(
+        'response_draw' => $parameter['draw'],
+        'response_data' => array(),
+        'recordsTotal' => 0,
+        'recordsFiltered' => 0,
+        'length' => intval($parameter['length']),
+        'start' => intval($parameter['start'])
+
+      );
     }
+  }
+
+  public function cari_pasien($params)
+  {
+    $parameter = strtoupper($params);
+
+    $data = self::$query
+      ->select(
+        'pasien',
+        array(
+          'uid',
+          'no_rm',
+          'nik',
+          'nama',
+          'tanggal_lahir',
+          'jenkel AS id_jenkel',
+          'panggilan AS id_panggilan',
+          'warganegara',
+          'no_passport',
+          'driving_license'
+        )
+      )
+      ->where(
+        array(
+          '(pasien.nik' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
+          'OR',
+          'pasien.no_rm' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
+          'OR',
+          'pasien.no_passport' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
+          'OR',
+          'pasien.driving_license' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\'',
+          'OR',
+          'pasien.nama' => 'ILIKE \'%' . str_replace('-', '', $parameter) . '%\')',
+          'AND',
+          'pasien.deleted_at' => 'IS NULL'
+        ),
+        array()
+      )
+      ->order(
+        array(
+          'pasien.created_at' => 'ASC'
+        )
+      )
+      ->limit(10)
+      ->execute();
+
+    $autonum = 1;
+    $term = new Terminologi(self::$pdo);
+
+    $expect_data = array(
+      'no_rm', 'nik', 'tanggal_lahir', 'nama', 'panggilan', 'tanggal_lahir', 'tempat_lahir', 'jenkel', 'agama', 'warganegara', 'pendidikan',
+      'nama_ibu', 'alamat', 'no_telp', 'kode_pos'
+    );
+
+    foreach ($data['response_data'] as $key => $value) {
+      $data_lengkap = false;
+      $data['response_data'][$key]['autonum'] = $autonum;
+      $autonum++;
+
+      if (strlen($value['no_rm']) < 6) {
+        $updateRM = self::$query->update('pasien', array(
+          'no_rm' => str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT)
+        ))
+          ->where(array(
+            'pasien.uid' => '= ?'
+          ), array(
+            $value['uid']
+          ))
+          ->execute();
+      }
+
+      if (stripos(strtolower($value['no_rm']), '-') !== false) {
+        $updateRM = self::$query->update('pasien', array(
+          'no_rm' => str_replace('-', '', $value['no_rm'])
+        ))
+          ->where(array(
+            'pasien.uid' => '= ?'
+          ), array(
+            $value['uid']
+          ))
+          ->execute();
+      }
+
+      $data['response_data'][$key]['no_rm'] = str_replace('-', '', str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT));
+
+      $data['response_data'][$key]['berobat'] = self::cekStatusAntrian($value['uid']);
+      $param = ['', 'terminologi-items-detail', $value['id_panggilan']];
+      $get_panggilan = $term->__GET__($param);
+      $data['response_data'][$key]['panggilan'] = $get_panggilan['response_data'][0]['nama'];
+
+      $param = ['', 'terminologi-items-detail', $value['id_jenkel']];
+      $get_jenkel = $term->__GET__($param);
+      $data['response_data'][$key]['jenkel'] = $get_jenkel['response_data'][0]['nama'];
+
+
+      //Penjamin
+      $Penjamin = self::$query->select('pasien_penjamin', array(
+        'penjamin',
+        'valid_awal',
+        'valid_akhir',
+        'rest_meta',
+        'terdaftar'
+      ))
+        ->where(array(
+          'pasien_penjamin.deleted_at' => 'IS NULL',
+          'AND',
+          'pasien_penjamin.pasien' => '= ?'
+        ), array(
+          $value['uid']
+        ))
+        ->execute();
+      $data['response_data'][$key]['penjamin'] = $Penjamin['response_data'];
+
+      if ($value['warganegara'] === __WNI__) {
+        foreach ($expect_data as $ExpKey => $ExpValue) {
+          if (
+            !isset($value[$ExpValue]) ||
+            is_null($value[$ExpValue]) ||
+            $value[$ExpValue] === '' ||
+            empty($value[$ExpValue])
+          ) {
+            $data_lengkap = false;
+            break;
+          } else {
+            $data_lengkap = true;
+          }
+        }
+      } else {
+        if (
+          !isset($value['no_passport']) ||
+          is_null($value['no_passport']) ||
+          $value['no_passport'] === '' ||
+          empty($value['no_passport'])
+        ) {
+          $data_lengkap = false;
+        }
+      }
+
+
+      $data['response_data'][$key]['lengkap'] = $data_lengkap;
+    }
+
+    return $data;
+  }
+
+  /*================= GET DATA ANTRIAN FOR ALL CLASS USE ==============*/
+
+  private function cekStatusAntrian($uid_pasien)
+  {
+    $status_berobat = false;
+
+    $data = self::$query
+      ->select(
+        'antrian',
+        array(
+          'uid',
+          'pasien',
+          'waktu_keluar',
+          'waktu_masuk'
+        )
+      )
+      ->where(
+        array(
+          'antrian.waktu_keluar' => 'IS NULL',
+          'AND',
+          'antrian.pasien' => '= ?'
+        ),
+        array(
+          $uid_pasien
+        )
+      )
+      ->execute();
+
+    if (count($data['response_data']) > 0) {
+      $d1 = new \DateTime(date('Y-m-d', strtotime($data['response_data'][0]['waktu_masuk'])));
+      $d2 = new \DateTime(date('Y-m-d'));
+      if ($d1 < $d2) {
+        $status_berobat = false;
+      } else {
+        $status_berobat = true;
+      }
+    }
+
+    return $status_berobat;
+  }
+  /*====================================================================*/
+
+
+  /*================= GET DATA ANTRIAN DAN PASIEN FOR ALL CLASS USE ==============*/
+
+  public function pasien_detail($parameter)
+  {
+    $pasien = new Pasien(self::$pdo);
+    $dataPasien = array();
+
+    $get_pasien = $pasien->get_pasien_detail('pasien', $parameter);
+    if (count($get_pasien['response_data']) > 0) {
+      $dataPasien = $get_pasien['response_data'][0];
+
+      $term = new Terminologi(self::$pdo);
+      $param_arr = ['', 'terminologi-items-detail', $dataPasien['jenkel']];
+      $get_jenkel = $term->__GET__($param_arr);
+      $dataPasien['nama_jenkel'] = $get_jenkel['response_data'][0]['nama'];
+    }
+
+    return $dataPasien;
+  }
+
+  /*====================================================================*/
+
+  public function get_antrian_by_poli($parameter)
+  {
+    $data = self::$query
+      ->select(
+        'antrian',
+        array(
+          'uid',
+          'prioritas',
+          'pasien as uid_pasien',
+          'dokter as uid_dokter',
+          'departemen as uid_poli',
+          'penjamin as uid_penjamin',
+          'waktu_masuk'
+        )
+      )
+      ->join(
+        'pasien',
+        array(
+          'nama as pasien',
+          'no_rm'
+        )
+      )
+      ->join(
+        'master_poli',
+        array(
+          'nama as departemen'
+        )
+      )
+      ->join(
+        'pegawai',
+        array(
+          'nama as dokter'
+        )
+      )
+      ->join(
+        'master_penjamin',
+        array(
+          'nama as penjamin'
+        )
+      )
+      ->join(
+        'kunjungan',
+        array(
+          'pegawai as uid_resepsionis'
+        )
+      )
+      ->on(
+        array(
+          array('pasien.uid', '=', 'antrian.pasien'),
+          array('master_poli.uid', '=', 'antrian.departemen'),
+          array('pegawai.uid', '=', 'antrian.dokter'),
+          array('master_penjamin.uid', '=', 'antrian.penjamin'),
+          array('kunjungan.uid', '=', 'antrian.kunjungan')
+        )
+      )
+      ->order(array(
+        'prioritas' => 'DESC'
+      ))
+      ->where(
+        array(
+          'antrian.waktu_keluar' => 'IS NULL',
+          'AND',
+          'antrian.deleted_at' => 'IS NULL',
+          'AND',
+          'antrian.departemen' => '= ?'
+        ),
+        array(
+          $parameter
+        )
+      )
+      ->order(
+        array(
+          'antrian.waktu_masuk' => 'ASC'
+        )
+      )
+      ->execute();
+
+    $autonum = 1;
+    $pegawai = new Pegawai(self::$pdo);
+    $pasien = new Pasien(self::$pdo);
+    foreach ($data['response_data'] as $key => $value) {
+      $data['response_data'][$key]['autonum'] = $autonum;
+      $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
+      $autonum++;
+
+      $get_pasien = $pasien->get_pasien_detail('pasien', $value['uid_pasien']);
+      $data['response_data'][$key]['pasien_detail'] = $get_pasien['response_data'][0];
+
+
+      $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
+      $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
+
+      $prioritas = self::$query->select('terminologi_item', array(
+        'id',
+        'nama'
+      ))
+        ->where(array(
+          'terminologi_item.deleted_at' => 'IS NULL',
+          'AND',
+          'terminologi_item.id' => '= ?'
+        ), array(
+          $value['prioritas']
+        ))
+        ->execute();
+      $data['response_data'][$key]['prioritas'] = $prioritas['response_data'][0];
+    }
+
+    return $data;
+  }
 }

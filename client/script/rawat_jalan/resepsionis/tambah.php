@@ -36,6 +36,10 @@
 				loadDokter(poli);
 			}
 		});
+
+        $("#modal-sep").on('hidden.bs.modal', function () {
+            $("#btnSubmit").removeAttr("disabled").addClass("btn-success").removeClass("btn-warning").html("Simpan Data");
+        });
 		
 		$("#btnSubmit").click(function(){
             var me = $(this);
@@ -77,16 +81,18 @@
                                     var data = response.response_package.response_data[0];
                                     var restMeta;
                                     var penjaminList = data.history_penjamin;
+                                    console.log(penjaminList);
                                     for(var penjaminKey in penjaminList) {
                                         if(penjaminList[penjaminKey].penjamin === __UIDPENJAMINBPJS__) {
                                             restMeta = JSON.parse(penjaminList[penjaminKey].rest_meta);
+                                            console.log(restMeta);
                                         }
                                     }
 
                                     if(restMeta !== undefined) {
                                         if(restMeta !== undefined && restMeta !== null) {
-                                            $("#txt_no_bpjs").val(restMeta.response.peserta.noKartu);
-                                            penjaminMetaData = cekPasienBPJS(loadPasien(__PAGES__[3]), restMeta.response.peserta.noKartu);
+                                            $("#txt_no_bpjs").val(restMeta.data.peserta.noKartu);
+                                            penjaminMetaData = cekPasienBPJS(loadPasien(__PAGES__[3]), restMeta.data.peserta.noKartu);
                                         }
 
                                     } else {
@@ -385,8 +391,8 @@
 			dataObj.currentAntrianID = currentAntrianID;
 			if(dataObj.penjamin === __UIDPENJAMINBPJS__) {
 			    //Add SEP Info
-                dataObj.valid_start = penjaminMetaData.response.peserta.tglTMT;
-                dataObj.valid_end = penjaminMetaData.response.peserta.tglTAT;
+                dataObj.valid_start = penjaminMetaData.data.peserta.tglTMT;
+                dataObj.valid_end = penjaminMetaData.data.peserta.tglTAT;
                 dataObj.penjaminMeta = JSON.stringify(penjaminMetaData);
             }
 
@@ -462,8 +468,8 @@
 	    $("#hasil_bpjs").hide();
         $("#btnProsesPasien").hide();
         $.ajax({
-            async: false,
             url: __HOSTAPI__ + "/BPJS",
+            async: false,
             data: {
                 request : "cek_peserta",
                 no_bpjs: target
@@ -473,49 +479,57 @@
             },
             type: "POST",
             success: function(response) {
-                var data = response.response_package.content;
 
-                console.log(data);
+                console.clear();
+
+                console.log(response);
+                
+                var data = response.response_package;
+
+                
                 penjaminMetaData = data;
 
                 if(data.metaData !== undefined) {
                     if(parseInt(data.metaData.code) === 200) {
-
-                        $("#hasil_bpjs").fadeIn();
-                        var pasienData = data.response.peserta;
-                        if(pasienData.statusPeserta.keterangan === "AKTIF") {
-                            if(pasienData.nik != dataPasien.nik) { //Cek NIK
-                                $("#status_bpjs").addClass("text-danger").removeClass("text-success").html("NIK tidak sama");
-                            } else {
-                                $("#status_bpjs").addClass("text-success").removeClass("text-danger").html(pasienData.statusPeserta.keterangan);
-                                $("#btnProsesPasien").show();
-                            }
+                        if(data.data === null) {
+                            cekPasienBPJS(dataPasien, target);
                         } else {
-                            $("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
+                            $("#hasil_bpjs").fadeIn();
+                            var pasienData = data.data.peserta;
+                            $("#btnProsesPasien").show();
+                            
+                            if(pasienData.statusPeserta.keterangan === "AKTIF") {
+                                if(pasienData.nik != dataPasien.nik) { //Cek NIK
+                                    $("#status_bpjs").addClass("text-danger").removeClass("text-success").html("NIK tidak sama");
+                                } else {
+                                    $("#status_bpjs").addClass("text-success").removeClass("text-danger").html(pasienData.statusPeserta.keterangan);
+                                    //$("#btnProsesPasien").show();
+                                }
+                            } else {
+                                $("#status_bpjs").addClass("text-danger").removeClass("text-success").html(pasienData.statusPeserta.keterangan);
+                            }
+
+                            $("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
+                            $("#nama_pasien").html(pasienData.nama);
+                            $("#nik_pasien").html(pasienData.nik);
+                            $("#nomor_peserta").html(pasienData.noKartu);
+                            $("#tll_pasien").html(pasienData.tglLahir);
+                            //$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
+                            $("#faskes_pasien").html(pasienData.provUmum.kdProvider + " - " + pasienData.provUmum.nmProvider);
+                            $("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
+                            $("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
+
+                            $("#tanggal_kartu").html(pasienData.tglCetakKartu);
+
+                            //TAT Tanggal Akhir Kartu
+                            //TMT Tanggal Mulai Kartu
+
+
+                            $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
+                            $("#txt_bpjs_nik").val(pasienData.nik);
+                            $("#txt_bpjs_nama").val(pasienData.nama);
+                            $("#txt_bpjs_rm").val($("#no_rm").val());
                         }
-
-                        $("#pekerjaan_pasien").html(pasienData.jenisPeserta.keterangan);
-                        $("#nama_pasien").html(pasienData.nama);
-                        $("#nik_pasien").html(pasienData.nik);
-                        $("#nomor_peserta").html(pasienData.noKartu);
-                        $("#tll_pasien").html(pasienData.tglLahir);
-                        //$("#faskes_pasien").html(pasienData.provUmum.kdProvider + " " + pasienData.provUmum.nmProvider);
-                        $("#faskes_pasien").html(pasienData.provUmum.nmProvider);
-                        $("#usia_pasien").html(pasienData.umur.umurSaatPelayanan);
-                        $("#kelamin_pasien").html((pasienData.sex == "L") ? "Laki-laki" : "Perempuan");
-
-                        $("#tanggal_kartu").html(pasienData.tglCetakKartu);
-
-                        //TAT Tanggal Akhir Kartu
-                        //TMT Tanggal Mulai Kartu
-
-
-                        $("#txt_bpjs_nomor").val($("#txt_no_bpjs").val());
-                        $("#txt_bpjs_nik").val(pasienData.nik);
-                        $("#txt_bpjs_nama").val(pasienData.nama);
-                        $("#txt_bpjs_rm").val($("#no_rm").val());
-
-
                     } else {
                         Swal.fire(
                             'BPJS',

@@ -106,6 +106,10 @@ class Pasien extends Utility
                 return self::bpjs_sep_add_offline($parameter);
                 break;
 
+            case 'pasien_cppt':
+                return self::pasien_cppt($parameter);
+                break;
+
             default:
                 # code...
                 break;
@@ -119,10 +123,198 @@ class Pasien extends Utility
 
 
     /*=======================GET FUNCTION======================*/
+    private function pasien_cppt($parameter)
+    {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if (!isset($parameter['pasien']) || empty($parameter['pasien'])) {
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'asesmen.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pasien.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_poli.deleted_at' => 'IS NULL'
+                );
+
+                $paramValue = array();
+            } else {
+                $paramData = array(
+                    'asesmen.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pasien.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_poli.deleted_at' => 'IS NULL',
+                );
+                $paramValue = array();
+            }
+        } else {
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'asesmen.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pasien.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_poli.deleted_at' => 'IS NULL',
+                    'AND',
+                    'asesmen.pasien' => '= ?'
+                );
+
+                $paramValue = array($parameter['pasien']);
+            } else {
+                $paramData = array(
+                    'asesmen.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pegawai.deleted_at' => 'IS NULL',
+                    'AND',
+                    'pasien.deleted_at' => 'IS NULL',
+                    'AND',
+                    'master_poli.deleted_at' => 'IS NULL',
+                    'AND',
+                    'asesmen.pasien' => '= ?'
+                );
+                $paramValue = array($parameter['pasien']);
+            }
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query->select('asesmen', array(
+                'uid',
+                'poli',
+                'dokter',
+                'perawat',
+                'created_at'
+            ))
+                ->join('pegawai', array(
+                    'nama'
+                ))
+                ->join('master_poli', array(
+                    'nama as nama_poli',
+                    'poli_asesmen'
+                ))
+                ->join('pasien', array(
+                    'nama as nama_pasien',
+                    'no_rm'
+                ))
+                ->on(array(
+                    array('asesmen.dokter', '=', 'pegawai.uid'),
+                    array('asesmen.poli', '=', 'master_poli.uid'),
+                    array('asesmen.pasien', '=', 'pasien.uid')
+                ))
+                ->order(array(
+                    'created_at' => 'DESC'
+                ))
+                ->where($paramData, $paramValue)
+                ->execute();
+        } else {
+            $data = self::$query->select('asesmen', array(
+                'uid',
+                'poli',
+                'dokter',
+                'perawat',
+                'created_at'
+            ))
+                ->join('pegawai', array(
+                    'nama as nama_dokter'
+                ))
+                ->join('master_poli', array(
+                    'nama as nama_poli',
+                    'poli_asesmen'
+                ))
+                ->join('pasien', array(
+                    'nama as nama_pasien',
+                    'no_rm'
+                ))
+                ->on(array(
+                    array('asesmen.dokter', '=', 'pegawai.uid'),
+                    array('asesmen.poli', '=', 'master_poli.uid'),
+                    array('asesmen.pasien', '=', 'pasien.uid')
+                ))
+                ->order(array(
+                    'created_at' => 'DESC'
+                ))
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            $data['response_data'][$key]['created_at_parsed'] = date('d F Y, H:i', strtotime($value['created_at']));
+            //Load Asesmen Detail
+
+            $asesmenDetailMedis = 'asesmen_medis_' . $value['poli_asesmen'];
+            $asesmenDetailRawat = 'asesmen_rawat_' . $value['poli_asesmen'];
+
+            $AsesmenDetailMedisData = self::$query->select($asesmenDetailMedis, array(
+                '*'
+            ))
+                ->where(array(
+                    $asesmenDetailMedis . '.asesmen' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+
+            $AsesmenDetailRawatData = self::$query->select($asesmenDetailRawat, array(
+                '*'
+            ))
+                ->where(array(
+                    $asesmenDetailRawat . '.asesmen' => '= ?'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            $data['response_data'][$key]['medis'] = $AsesmenDetailMedisData['response_data'][0];
+            $data['response_data'][$key]['rawat'] = $AsesmenDetailRawatData['response_data'][0];
+
+            $autonum++;
+        }
+
+        $itemTotal = self::$query->select('asesmen', array(
+            'uid'
+        ))
+            ->join('pegawai', array(
+                'nama'
+            ))
+            ->join('master_poli', array(
+                'nama as nama_poli'
+            ))
+            ->join('pasien', array(
+                'nama as nama_pasien'
+            ))
+            ->on(array(
+                array('asesmen.dokter', '=', 'pegawai.uid'),
+                array('asesmen.poli', '=', 'master_poli.uid'),
+                array('asesmen.pasien', '=', 'pasien.uid')
+            ))
+            ->where($paramData, $paramValue)
+            ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+
+        return $data;
+    }
+
     private function get_pasien($table)
     {
         $data = self::$query
-            ->select($table, array(
+            ->select(
+                $table,
+                array(
                     'uid',
                     'no_rm',
                     'nama',
@@ -133,7 +325,8 @@ class Pasien extends Utility
                     'updated_at'
                 )
             )
-            ->where(array(
+            ->where(
+                array(
                     $table . '.deleted_at' => 'IS NULL'
                 )
             )
@@ -167,7 +360,9 @@ class Pasien extends Utility
     public function get_pasien_info($table, $parameter)
     {
         $data = self::$query
-            ->select($table, array(
+            ->select(
+                $table,
+                array(
                     'uid',
                     'no_rm',
                     'nik',
@@ -200,11 +395,12 @@ class Pasien extends Utility
                     'updated_at'
                 )
             )
-            ->where(array(
-                $table . '.deleted_at' => 'IS NULL',
-                'AND',
-                $table . '.uid' => '= ?'
-            ),
+            ->where(
+                array(
+                    $table . '.deleted_at' => 'IS NULL',
+                    'AND',
+                    $table . '.uid' => '= ?'
+                ),
                 array(
                     $parameter
                 )
@@ -244,7 +440,9 @@ class Pasien extends Utility
     public function get_pasien_detail($table, $parameter)
     {
         $data = self::$query
-            ->select($table, array(
+            ->select(
+                $table,
+                array(
                     'uid',
                     'no_rm',
                     'nik',
@@ -277,11 +475,12 @@ class Pasien extends Utility
                     'updated_at'
                 )
             )
-            ->where(array(
-                $table . '.deleted_at' => 'IS NULL',
-                'AND',
-                $table . '.uid' => '= ?'
-            ),
+            ->where(
+                array(
+                    $table . '.deleted_at' => 'IS NULL',
+                    'AND',
+                    $table . '.uid' => '= ?'
+                ),
                 array(
                     $parameter
                 )
@@ -395,8 +594,7 @@ class Pasien extends Utility
                     $value['uid']
                 ))
                 ->execute();
-            foreach ($Detail['response_data'] as $DKey => $DValue)
-            {
+            foreach ($Detail['response_data'] as $DKey => $DValue) {
                 //Detail Penjamin
                 $PenjaminDetail = $Penjamin->get_penjamin_detail($DValue['penjamin']);
                 $Detail['response_data'][$DKey]['penjamin_detail'] = $PenjaminDetail['response_data'][0];
@@ -417,7 +615,8 @@ class Pasien extends Utility
 
     /*==================== CRUD ====================*/
 
-    private function pulangkan_pasien($parameter) {
+    private function pulangkan_pasien($parameter)
+    {
         $Antrian = self::$query->select('antrian', array(
             'uid', 'departemen', 'waktu_masuk', 'waktu_keluar',
             'kunjungan'
@@ -428,9 +627,9 @@ class Pasien extends Utility
                 'antrian.waktu_keluar' => 'IS NULL'
             ), array())
             ->execute();
-        foreach($Antrian['response_data'] as $key => $value) {
-            if(date('d', strtotime($value['waktu_masuk'])) !== date('d')) {
-                if($value['departemen'] !== __POLI_IGD__ && $value['departemen'] !== __POLI_INAP__) {
+        foreach ($Antrian['response_data'] as $key => $value) {
+            if (date('d', strtotime($value['waktu_masuk'])) !== date('d')) {
+                if ($value['departemen'] !== __POLI_IGD__ && $value['departemen'] !== __POLI_INAP__) {
                     //Pulangkan
                     $UAntrian = self::$query->update('antrian', array(
                         'waktu_keluar' => parent::format_date()
@@ -443,8 +642,8 @@ class Pasien extends Utility
                         ->execute();
 
 
-                        
-    
+
+
                     //Kunjungan
                     $UKunjungan = self::$query->update('kunjungan', array())
                         ->where(array(
@@ -453,7 +652,7 @@ class Pasien extends Utility
                             $value['kunjungan']
                         ))
                         ->execute();
-                }   
+                }
             }
         }
         return $Antrian['response_data'];
@@ -494,7 +693,8 @@ class Pasien extends Utility
                 ->execute();
 
             if ($pasien['response_result'] > 0) {
-                $log = parent::log(array(
+                $log = parent::log(
+                    array(
                         'type' => 'activity',
                         'column' => array(
                             'unique_target',
@@ -525,7 +725,8 @@ class Pasien extends Utility
         }
     }
 
-    private function reformat_rm() {
+    private function reformat_rm()
+    {
         $data = self::$query->select('pasien', array(
             'uid', 'no_rm'
         ))
@@ -534,7 +735,7 @@ class Pasien extends Utility
         $pattern = '/(-)/i';
         foreach ($data['response_data'] as $key => $value) {
             $newRM = preg_replace($pattern, '', $value['no_rm']);
-            if($newRM !== '') {
+            if ($newRM !== '') {
                 $update = self::$query->update('pasien', array(
                     'no_rm' => $newRM
                 ))
@@ -544,7 +745,7 @@ class Pasien extends Utility
                         $value['uid']
                     ))
                     ->execute();
-                if($update['response_result'] > 0) {
+                if ($update['response_result'] > 0) {
                     array_push($formatted, $value['uid'] . '  |   ' . $newRM);
                 }
             }
@@ -565,11 +766,12 @@ class Pasien extends Utility
         $allData['updated_at'] = parent::format_date();
         $pasien = self::$query
             ->update($table, $allData)
-            ->where(array(
-                $table . '.deleted_at' => 'IS NULL',
-                'AND',
-                $table . '.uid' => '= ?'
-            ),
+            ->where(
+                array(
+                    $table . '.deleted_at' => 'IS NULL',
+                    'AND',
+                    $table . '.uid' => '= ?'
+                ),
                 array(
                     $parameter['uid']
                 )
@@ -579,7 +781,8 @@ class Pasien extends Utility
         if ($pasien['response_result'] > 0) {
             unset($parameter['access_token']);
 
-            $log = parent::log(array(
+            $log = parent::log(
+                array(
                     'type' => 'activity',
                     'column' => array(
                         'unique_target',
@@ -618,16 +821,19 @@ class Pasien extends Utility
 
         $pasien = self::$query
             ->delete($table)
-            ->where(array(
-                $table . '.uid' => '= ?'
-            ), array(
+            ->where(
+                array(
+                    $table . '.uid' => '= ?'
+                ),
+                array(
                     $parameter[6]
                 )
             )
             ->execute();
 
         if ($pasien['response_result'] > 0) {
-            $log = parent::log(array(
+            $log = parent::log(
+                array(
                     'type' => 'activity',
                     'column' => array(
                         'unique_target',
@@ -690,7 +896,8 @@ class Pasien extends Utility
                 ),
                 array(
                     $parameter
-                ))
+                )
+            )
             ->execute();
 
         $result = false;
@@ -701,7 +908,8 @@ class Pasien extends Utility
         return $data;
     }
 
-    private function reformat_pasien($parameter) {
+    private function reformat_pasien($parameter)
+    {
         $Data = self::$query->select('pasien', array(
             'uid', 'no_rm'
         ))
@@ -710,7 +918,7 @@ class Pasien extends Utility
             ), array())
             ->execute();
         $failedData = array();
-        foreach($Data['response_data'] as $key => $value) {
+        foreach ($Data['response_data'] as $key => $value) {
             $U = self::$query->update('pasien', array(
                 'no_rm' => str_replace('-', '', $value['no_rm'])
             ))
@@ -759,7 +967,8 @@ class Pasien extends Utility
         }
     }
 
-    private function proceed_import_pasien($parameter) {
+    private function proceed_import_pasien($parameter)
+    {
         $Authorization = new Authorization();
         $UserData = $Authorization::readBearerToken($parameter['access_token']);
 
@@ -823,8 +1032,8 @@ class Pasien extends Utility
                         $TermiValue['nama'], $TermiValue['id']
                     ))
                     ->execute();
-                if(count($check_terminologi['response_data']) > 0) {
-                    if(!empty($check_terminologi['response_data'][0]['deleted_at'])) {
+                if (count($check_terminologi['response_data']) > 0) {
+                    if (!empty($check_terminologi['response_data'][0]['deleted_at'])) {
                         $update_status_delete = self::$query->update('terminologi_item', array(
                             'deleted_at' => NULL
                         ))
@@ -837,7 +1046,7 @@ class Pasien extends Utility
                     }
                     $data_terminologi[$TermiKey]['target'] = $check_terminologi['response_data'][0]['id'];
                 } else {
-                    if($TermiValue['nama'] != "") {
+                    if ($TermiValue['nama'] != "") {
                         $new_terminologi = self::$query->insert('terminologi_item', array(
                             'nama' => $TermiValue['nama'],
                             'terminologi' => $TermiValue['id'],
@@ -846,7 +1055,7 @@ class Pasien extends Utility
                         ))
                             ->returning('id')
                             ->execute();
-                        if($new_terminologi['response_result'] > 0) {
+                        if ($new_terminologi['response_result'] > 0) {
                             $data_terminologi[$TermiKey]['target'] = $new_terminologi['response_unique'];
                         } else {
                             $data_terminologi[$TermiKey]['target'] = 0;
@@ -860,13 +1069,13 @@ class Pasien extends Utility
 
             //Prepare Jenis Kelamin
             $target_jenkel = 0;
-            if($value['jenkel'] == 'Laki-laki') {
+            if ($value['jenkel'] == 'Laki-laki') {
                 $target_jenkel = 2;
-            } else if($value['jenkel'] == 'Perempuan') {
+            } else if ($value['jenkel'] == 'Perempuan') {
                 $target_jenkel = 3;
             }
-            
-            if(count($check['response_data']) > 0) {
+
+            if (count($check['response_data']) > 0) {
                 $updatePasien = self::$query->update('pasien', array(
                     'no_rm' => str_replace('-', '', $value['no_rm']),
                     'nik' => $value['nik'],
@@ -895,7 +1104,7 @@ class Pasien extends Utility
                     ->execute();
             } else {
                 //New Pasien
-                if($value['no_rm'] != '' && $value['nama'] != '') {
+                if ($value['no_rm'] != '' && $value['nama'] != '') {
                     $new_pasien = self::$query->insert('pasien', array(
                         'no_rm' => str_replace('-', '', $value['no_rm']),
                         'nik' => $value['nik'],
@@ -919,7 +1128,7 @@ class Pasien extends Utility
                     ))
                         ->execute();
 
-                    if($new_pasien['response_result'] > 0) {
+                    if ($new_pasien['response_result'] > 0) {
                         $success_proceed += 1;
                     } else {
                         //array_push($failedData, $new_pasien);
@@ -963,7 +1172,8 @@ class Pasien extends Utility
         );
     }
 
-    private function bpjs_sep_add_offline($parameter) {
+    private function bpjs_sep_add_offline($parameter)
+    {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
@@ -989,7 +1199,8 @@ class Pasien extends Utility
         return $BPJSAdd;
     }
 
-    private function get_pasien_back_end($parameter) {
+    private function get_pasien_back_end($parameter)
+    {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
@@ -1026,7 +1237,9 @@ class Pasien extends Utility
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
-            $data = self::$query->select('pasien', array(
+            $data = self::$query->select(
+                'pasien',
+                array(
                     'uid',
                     'no_rm',
                     'nama',
@@ -1048,7 +1261,7 @@ class Pasien extends Utility
         $term = new Terminologi(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
 
-            if(strlen($value['no_rm']) < 6) {
+            if (strlen($value['no_rm']) < 6) {
                 $updateRM = self::$query->update('pasien', array(
                     'no_rm' => str_pad($value['no_rm'], 6, "0", STR_PAD_LEFT)
                 ))
@@ -1077,7 +1290,7 @@ class Pasien extends Utility
             $data['response_data'][$key]['autonum'] = $autonum;
             $autonum++;
             $data['response_data'][$key]['tanggal_lahir'] = date('d F Y', strtotime($data['response_data'][$key]['tanggal_lahir']));
-            
+
 
             $value = $data['response_data'][$key]['id_panggilan'];
             $param = ['', 'terminologi-items-detail', $value];
@@ -1108,9 +1321,10 @@ class Pasien extends Utility
         return $data;
     }
 
-    private function asesmen_resep_lupa($parameter) {
+    private function asesmen_resep_lupa($parameter)
+    {
         $data = self::$query->select('asesmen', array(
-            'uid', 'pasien', 'poli', 'kunjungan', 'antrian'
+            'uid', 'pasien', 'poli', 'kunjungan', 'antrian', 'created_at'
         ))
             ->join('pasien', array(
                 'nama', 'no_rm'
@@ -1123,8 +1337,8 @@ class Pasien extends Utility
                 array('asesmen.antrian', '=', 'antrian.uid')
             ))
             ->where(array(
-                'asesmen.created_at' => '>= now()::date + interval \'1h\'',
-                'AND',
+                // 'asesmen.created_at' => '>= now()::date + interval \'1h\'',
+                // 'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
                 'OR',
                 'pasien.no_rm' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
@@ -1134,10 +1348,15 @@ class Pasien extends Utility
             ))
             ->limit(1)*/
             ->execute();
+
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['created_at'] = date('d F Y', strtotime($value['created_at']));
+        }
         return $data;
     }
 
-    private function get_pasien_select2($parameter) {
+    private function get_pasien_select2($parameter)
+    {
         $data = self::$query->select('pasien', array(
             'uid',
             'no_rm',
@@ -1145,6 +1364,9 @@ class Pasien extends Utility
             'panggilan AS id_panggilan',
             'tanggal_lahir',
             'jenkel AS id_jenkel',
+            'alamat',
+            'no_telp',
+            'email',
             'created_at',
             'updated_at'
         ))
@@ -1159,8 +1381,44 @@ class Pasien extends Utility
             ->execute();
 
         $autonum = 1;
+        $Terminologi = new Terminologi(self::$pdo);
+
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
+
+            $data['response_data'][$key]['id'] = $value['uid'];
+            $JenkelInfo = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['id_jenkel']);
+            $data['response_data'][$key]['jenkel_detail'] = $JenkelInfo['response_data'][0];
+
+            $data['response_data'][$key]['text'] = $value['no_rm'] . '-' . $value['nama'];
+
+
+
+            $Detail = self::$query->select('pasien_penjamin', array(
+                'penjamin',
+                'valid_awal',
+                'valid_akhir',
+                'rest_meta',
+                'terdaftar'
+            ))
+                ->where(array(
+                    'pasien_penjamin.pasien' => '= ?',
+                    'AND',
+                    'pasien_penjamin.deleted_at' => 'IS NULL'
+                ), array(
+                    $value['uid']
+                ))
+                ->execute();
+            foreach ($Detail['response_data'] as $DKey => $DValue) {
+                //Detail Penjamin
+                $Detail['response_data'][$DKey]['valid_awal'] = date('d F Y', strtotime($DValue['valid_awal']));
+                $Detail['response_data'][$DKey]['valid_akhir'] = date('d F Y', strtotime($DValue['valid_akhir']));
+                $Detail['response_data'][$DKey]['terdaftar'] = date('d F Y', strtotime($DValue['terdaftar']));
+            }
+            $data['response_data'][$key]['history_penjamin'] = $Detail['response_data'];
+
+
+
             $autonum++;
         }
         return $data;
@@ -1178,7 +1436,8 @@ class Pasien extends Utility
                 ),
                 array(
                     $parameter
-                ))
+                )
+            )
             ->execute();
         return $data;
     }

@@ -19,6 +19,7 @@
       type: "GET",
       success: function(response) {
         targettedData = response.response_package.response_data[0];
+        console.log(targettedData);
 
 
         selectedUIDPasien = targettedData.antrian.pasien_info.uid;
@@ -1027,6 +1028,7 @@
           denyButtonText: "Tidak",
         }).then((result) => {
           if (result.isConfirmed) {
+            console.log(dokter);
             $.ajax({
               url: __HOSTAPI__ + "/Apotek",
               async: false,
