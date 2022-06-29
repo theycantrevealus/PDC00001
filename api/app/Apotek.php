@@ -1403,8 +1403,8 @@ class Apotek extends Utility
       $log = parent::log(array(
         'type' => 'error',
         'column' => array(
-          'type',
-          'class',
+          'type_err',
+          'class_err',
           'logged_at',
           'message'
         ),
