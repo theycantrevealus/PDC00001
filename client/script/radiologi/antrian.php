@@ -36,10 +36,10 @@
 
 
       if (forSave["tindakan_" + tindakanID] === undefined) {
-        /*forSave["tindakan_" + tindakanID] = {
-            keterangan: "",
-            kesimpulan: ""
-        };*/
+        forSave["tindakan_" + tindakanID] = {
+          keterangan: "",
+          kesimpulan: ""
+        };
       } else {
         console.log(forSave);
       }
@@ -124,6 +124,7 @@
       allowSave = false;
       //Check
       for (var az in forSave) {
+        console.log(forSave[az]);
         if (forSave[az].keterangan === "" || forSave[az].kesimpulan === "") {
           allowSave = false;
           break;
@@ -318,7 +319,10 @@
         var img = new Image;
         img.src = URL.createObjectURL(file);
         img.onload = function() {
-          ctx.drawImage(img, 0, 0, 100, 100 * img.height / img.width);
+          ctx.imageSmoothingEnabled = false;
+          ctx.canvas.width = img.width;
+          ctx.canvas.height = img.height;
+          ctx.drawImage(img, 0, 0, img.width, img.height);
         }
       }
     });
@@ -344,7 +348,7 @@
         if (status_file == true) {
           $("#form-upload-lampiran").modal("show");
         } else {
-          alert("Berkas harus PDF");
+          // alert("Berkas harus PDF");
         }
       } else {
         Swal.fire(
@@ -406,8 +410,9 @@
           if (MetaData !== "" && MetaData !== undefined && MetaData !== null) {
             var autonumRadio = 1;
             for (i = 0; i < MetaData.length; i++) {
+              var html = "";
               //Yang sudah dibayar saja yang di proses
-              if ((MetaData[i].invoice !== null && MetaData[i].invoice !== undefined) || $("#no_rm").attr("penjamin") === __UIDPENJAMINBPJS__) {
+              if ((MetaData[i].invoice !== null && MetaData[i].invoice !== undefined) || $("#no_rm").attr("penjamin") === __UIDPENJAMINBPJS__ || $("#no_rm").attr("penjamin") === __UIDPENJAMINBPJSOFFLINE__) {
                 html = "<tr id=\"tindakan_" + MetaData[i].id + "\">" +
                   "<td class=\"autonum\">" + (autonumRadio) + "</td>" +
                   "<td>" + MetaData[i].tindakan + "</td>" +
@@ -421,21 +426,19 @@
                   "</a>" +
                   "</td>" +
                   "</tr>";
-                $("#list-tindakan-radiologi tbody").append(html);
-                autonumRadio++;
               } else {
-                /*html = "<tr id=\"tindakan_" + MetaData[i].id + "\">" +
-                    "<td class=\"autonum\">" + (autonumRadio) +"</td>" +
-                    "<td class=\"text-muted\">" + MetaData[i].tindakan + "</td>" +
-                    "<td class=\"text-muted\">" + MetaData[i].penjamin + "</td>" +
-                    "<td class=\"text-muted\">" + MetaData[i].mitra.nama + "</td>" +
-                    "<td>" +
-                    "<span class=\"text-warning wrap_content\">" +
-                    "<i class=\"fa fa-exclamation-triangle\"></i> Belum Bayar" +
-                    "</span>" +
-                    "</td>" +
-                    "</tr>";*/
+                //html += "<tr id=\"tindakan_" + MetaData[i].id + "\"><td>" + (autonumRadio) + "</td><td colspan=\"4\">Harap Lunaskan Biaya Tindakan</td></tr>";
+                html = "<tr id=\"tindakan_" + MetaData[i].id + "\">" +
+                  "<td class=\"autonum\">" + (autonumRadio) + "</td>" +
+                  "<td>" + MetaData[i].tindakan + "</td>" +
+                  "<td>" + MetaData[i].penjamin + "</td>" +
+                  "<td>" + MetaData[i].mitra.nama + "</td>" +
+                  "<td class=\"wrap_content\">Harap Lunaskan Biaya Tindakan</td>" +
+                  "</tr>";
               }
+
+              $("#list-tindakan-radiologi tbody").append(html);
+              autonumRadio++;
 
               /*$("#list-tindakan-radiologi tbody").append(html);
               autonumRadio++;*/
@@ -561,38 +564,49 @@
       .attr("id", "pdfViewer_" + id);
 
     $(newDocCellDoc).append(newDocument);
-    if (doc_url != undefined) {
-      // Using DocumentInitParameters object to load binary data.
-      var loadingTask = pdfjsLib.getDocument({
-        url: doc_url
-      });
-      loadingTask.promise.then(function(pdf) {
-        // Fetch the first page
-        var pageNumber = 1;
-        pdf.getPage(pageNumber).then(function(page) {
-          var scale = 1.5;
-          var viewport = page.getViewport({
-            scale: scale
-          });
-          // Prepare canvas using PDF page dimensions
-          var canvas = $(newDocument)[0];
-          var context = canvas.getContext("2d");
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-          // Render PDF page into canvas context
-          var renderContext = {
-            canvasContext: context,
-            viewport: viewport
-          };
-          var renderTask = page.render(renderContext);
-          renderTask.promise.then(function() {
-            //
-          });
-        });
-      }, function(reason) {
-        console.error(reason);
-      });
+
+    var ctx = $(newDocument)[0].getContext('2d');
+    var img = new Image;
+    img.src = doc_url;
+    img.onload = function() {
+      ctx.imageSmoothingEnabled = false;
+      ctx.canvas.width = img.width;
+      ctx.canvas.height = img.height;
+      ctx.drawImage(img, 0, 0, img.width, img.height);
     }
+
+    // if (doc_url != undefined) {
+    //   // Using DocumentInitParameters object to load binary data.
+    //   var loadingTask = pdfjsLib.getDocument({
+    //     url: doc_url
+    //   });
+    //   loadingTask.promise.then(function(pdf) {
+    //     // Fetch the first page
+    //     var pageNumber = 1;
+    //     pdf.getPage(pageNumber).then(function(page) {
+    //       var scale = 1.5;
+    //       var viewport = page.getViewport({
+    //         scale: scale
+    //       });
+    //       // Prepare canvas using PDF page dimensions
+    //       var canvas = $(newDocument)[0];
+    //       var context = canvas.getContext("2d");
+    //       canvas.height = viewport.height;
+    //       canvas.width = viewport.width;
+    //       // Render PDF page into canvas context
+    //       var renderContext = {
+    //         canvasContext: context,
+    //         viewport: viewport
+    //       };
+    //       var renderTask = page.render(renderContext);
+    //       renderTask.promise.then(function() {
+    //         //
+    //       });
+    //     });
+    //   }, function(reason) {
+    //     console.error(reason);
+    //   });
+    // }
 
     var newDeleteDoc = document.createElement("button");
     $(newDeleteDoc)
@@ -671,7 +685,15 @@
       fileReader.readAsArrayBuffer(file);
     } else {
       // Image
-      // TODO : Image Viewer after
+      var ctx = $(newDocument)[0].getContext('2d');
+      var img = new Image;
+      img.src = URL.createObjectURL(file);
+      img.onload = function() {
+        ctx.imageSmoothingEnabled = false;
+        ctx.canvas.width = img.width;
+        ctx.canvas.height = img.height;
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+      }
     }
 
     var newDeleteDoc = document.createElement("button");
