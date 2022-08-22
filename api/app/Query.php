@@ -12,6 +12,7 @@ class Query {
 	static $queryParams = array();
 	static $queryValues = array();
 	static $joinString = array();
+    static $joinType = array();
 	static $whereParameter = array();
 	static $whereLogic = array();
 	private $tables = array();
@@ -156,7 +157,7 @@ class Query {
 		return $this;
 	}
 
-	function offset($parameter) {
+    function offset($parameter) {
 
 		self::$offset = 'OFFSET ' . $parameter;
 		return $this;
@@ -170,13 +171,31 @@ class Query {
 
 	}
 
+    /**
+     * How to use
+     * ->on(array('terminologi_item.id', '=', 'pasien.panggilan'))          // JOIN
+     * ->on(array('terminologi_item.id', '=', 'pasien.panggilan', 'LEFT'))  // LEFT JOIN
+     * ->on(array('terminologi_item.id', '=', 'pasien.panggilan', 'RIGHT')) // RIGHT JOIN
+     */
 	function on($parameter = array()) {
 		if(count($parameter) + 1 == count($this->tables)) {
 			$buildJoin = array();
+            $buildJoinType = array();
+
 			foreach ($parameter as $key => $value) {
-				array_push($buildJoin, implode(' ', $value));
+
+                // define join type by array from index 3
+                if (isset($value[3])) {
+                    $buildJoinType[] = $value[3];
+                    unset($value[3]);
+                }
+                else $buildJoinType[] = "";
+
+                //set join string
+				$buildJoin[] = implode(' ', $value);
 			}
 
+            self::$joinType = $buildJoinType;
 			self::$joinString = $buildJoin;
 			return $this;
 		} else {
@@ -184,7 +203,7 @@ class Query {
 		}
 	}
 
-	private function buildQuery() {
+    private function buildQuery() {
 	
 		$buildQuery = self::$queryString;
 		if(self::$queryMode == 'select') {
@@ -198,7 +217,7 @@ class Query {
 				}
 				
 				if($key != $tableArrange[0] && count(self::$joinString) > 0) {
-					$joinString .= ' JOIN ' . $key . ' ON ' . self::$joinString[array_search($key, $tableArrange) - 1];
+					$joinString .= ' ' . self::$joinType[array_search($key, $tableArrange) - 1] . ' JOIN ' . $key . ' ON ' . self::$joinString[array_search($key, $tableArrange) - 1];
 				}
 			}
 			if(count($this->tables) > 1) {
