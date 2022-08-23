@@ -638,12 +638,6 @@
             // /console.log(dataPasien.antrian);
         });
 
-        $('.numberonly').keypress(function(event){
-            if (event.which < 48 || event.which > 57) {
-                event.preventDefault();
-            }
-        });
-
         $("#program_kb").on('change', function(){
             let status = $(this).val();
 

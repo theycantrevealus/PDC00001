@@ -245,6 +245,14 @@ $lastExist = '';
     }
 
     $(function() {
+      $('.numberonly').keypress(function(event){
+          if (((event.which != 46 || (event.which == 46 && $(this).val() == '')) || $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
+              event.preventDefault();
+          }
+      }).on('paste', function(event) {
+          event.preventDefault();
+      });
+      
       var targetModule = 0;
       var tutorList = {};
       var currentPageURL = document.URL;
