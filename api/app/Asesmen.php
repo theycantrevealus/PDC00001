@@ -1882,10 +1882,10 @@ class Asesmen extends Utility
 
         if (in_array($value['obat'], $used_obat)) {
           $worker = self::$query->update('resep_detail', array(
-            'signa_qty' => $value['signaKonsumsi'],
-            'signa_pakai' => $value['signaTakar'],
+            'signa_qty' => floatval($value['signaKonsumsi']),
+            'signa_pakai' => floatval($value['signaTakar']),
             'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
-            'qty' => $value['signaHari'],
+            'qty' => floatval($value['signaHari']),
             'aturan_pakai' => intval($value['aturanPakai']),
             'keterangan' => $value['keteranganPerObat'],
             'satuan_konsumsi' => $value['satuanPemakaian'],
@@ -1907,9 +1907,9 @@ class Asesmen extends Utility
             'obat' => $value['obat'],
             'harga' => 0,
             'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
-            'signa_qty' => $value['signaKonsumsi'],
-            'signa_pakai' => $value['signaTakar'],
-            'qty' => $value['signaHari'],
+            'signa_qty' => floatval($value['signaKonsumsi']),
+            'signa_pakai' => floatval($value['signaTakar']),
+            'qty' => floatval($value['signaHari']),
             'satuan' => $ObatInfo['satuan_terkecil'],
             'aturan_pakai' => intval($value['aturanPakai']),
             'keterangan' => $value['keteranganPerObat'],

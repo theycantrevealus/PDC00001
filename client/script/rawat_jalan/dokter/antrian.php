@@ -3072,13 +3072,13 @@
         if (
           obat !== undefined &&
           obat !== "none" &&
-          obat !== "" &&
+          obat !== "" 
 
-          /*parseFloat(signaKonsumsi) > 0 &&
-          parseFloat(signaTakar) > 0 &&*/
-          parseFloat(signaKonsumsi) > 0 &&
-          parseFloat(signaTakar) > 0 &&
-          parseFloat(signaHari) > 0
+          //&& parseFloat(signaKonsumsi) > 0 &&
+          // parseFloat(signaTakar) > 0 &&
+          // parseFloat(signaKonsumsi) > 0 &&
+          // parseFloat(signaTakar) > 0&&
+          // parseFloat(signaHari) > 0
         ) {
           resep.push({
             "obat": obat,
@@ -3156,11 +3156,12 @@
             dataRacikan.nama !== "" &&
             dataRacikan.item.length > 0 &&
 
-            /*dataRacikan.signaKonsumsi > 0 &&
-            dataRacikan.signaTakar > 0 &&*/
-            parseFloat(dataRacikan.signaKonsumsi) > 0 &&
-            parseFloat(dataRacikan.signaTakar) > 0 &&
-            parseFloat(dataRacikan.signaHari) > 0
+            dataRacikan.signaKonsumsi > 0 &&
+            dataRacikan.signaTakar > 0
+            // &&
+            // parseFloat(dataRacikan.signaKonsumsi) > 0 &&
+            // parseFloat(dataRacikan.signaTakar) > 0 &&
+            // parseFloat(dataRacikan.signaHari) > 0
           ) {
             racikan.push(dataRacikan);
             allowSaveAsesmen = true;
@@ -5498,7 +5499,7 @@
           "Pilih nilai lab yang ingin diuji",
           "error"
         ).then((result) => {
-          console.log(listTindakanLabTerpilih[uidTindakanLab]);
+          // console.log(listTindakanLabTerpilih[uidTindakanLab]);
         });
       }
     });
@@ -6164,11 +6165,9 @@
                   },
                   type: "POST",
                   success: function(response) {
-                    console.log(response);
                     proceed(response);
                   },
                   error: function(response) {
-                    console.log("Error : ");
                     console.log(response);
                   }
                 });
