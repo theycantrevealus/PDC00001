@@ -2511,261 +2511,7 @@
             alert(allowVerifRacikanReason);*/
 
             if(allowVerifReason && allowVerifRacikanReason) {
-                Swal.fire({
-                    title: "Verfikasi Resep",
-                    text: "Pastikan semua obat sudah sesuai dan stok mencukupi. Data sudah benar?",
-                    showDenyButton: true,
-                    confirmButtonText: "Ya",
-                    denyButtonText: "Tidak",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        //Populate Resep
-
-                        var allowSave = false;
-                        var kajianCheck = false;
-                        var kajian = populateAllKajian();
-
-                        for(var  zz in kajian) {
-                            if(kajian[zz] === "" || kajian[zz] === "") {
-                                allowSave = false;
-                                kajianCheck = false;
-                                break;
-                            } else {
-                                allowSave = true;
-                                kajianCheck = true;
-                            }
-                        }
-
-                        if(allowSave) {
-                            var resepItem = [];
-                            if($("#table-resep tbody tr").length === 1 && $("#table-resep tbody tr:eq(1)").hasClass("no-resep")) {
-                                allowSave = true;
-                            }
-
-                            $("#table-resep tbody tr").each(function(e) {
-                                if(!$(this).hasClass("no-resep")) {
-                                    var resepVerifIDSave = (e + 1);
-                                    var obat = $(this).find("td:eq(1) select:eq(0)").val();
-                                    if(obat !== null) {
-                                        
-                                        if($(this).find("td:eq(1) ol li").length === 0) {
-                                            if(parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")) === 0) {
-                                                allowSave = true;
-                                            } else {
-                                                allowSave = false;
-                                                return false;
-                                            }
-                                        } else {
-                                            $(this).find("td:eq(1) ol li").each(function() {
-                                                if($(this).find("i").hasClass("text-danger")) {
-                                                    if(currentStatusOpname === "O") {
-                                                        allowSave = true;
-                                                    } else {
-                                                        if(parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")) === 0) {
-                                                            allowSave = true;
-                                                        } else {
-                                                            allowSave = false;
-                                                            return false;
-                                                        }
-                                                    }
-                                                } else {
-                                                    allowSave = true;
-                                                }
-                                            });
-                                        }
-
-                                        resepItem.push({
-                                            "obat": $(this).find("td:eq(1) select:eq(0)").val(),
-                                            /*"signa_qty": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
-                                            "signa_pakai": parseFloat($(this).find("td:eq(4) input").inputmask("unmaskedvalue")),*/
-                                            "signa_qty": $(this).find("td:eq(2) input").val(),
-                                            "signa_pakai": $(this).find("td:eq(4) input").val(),
-                                            "jumlah": parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")),
-                                            "harga": parseFloat($(this).find("td:eq(1) ol").attr("harga")),
-                                            "aturan_pakai": $(this).find("td:eq(1) select:eq(1)").val(),
-                                            "keterangan": $(this).find("td:eq(1) textarea").val(),
-                                            "alasan_ubah": ($("#alasan_" + resepVerifIDSave).length > 0) ? $("#alasan_" + resepVerifIDSave).val() : ""
-                                        });
-                                    }
-                                }
-                            });
-
-                            if(allowSave) {
-                                var racikanItem = [];
-                                $("#table-resep-racikan > tbody > tr").each(function(e) {
-                                    var racikanVerifIDSave = (e + 1);
-                                    var racikan_nama = $(this).find("td:eq(1) input").val();
-                                    var qtyRacikan = parseFloat($(this).find("td input.racikan_signa_jlh").inputmask("unmaskedvalue"));
-                                    if(racikan_nama !== undefined && racikan_nama !== "") {
-                                        var komposisi = [];
-                                        $(this).find("td:eq(1) table tbody tr").each(function() {
-                                            var hargaPerObatRacikan = 0;
-                                            if($(this).find("td:eq(1) ol").length > 0) {
-                                                hargaPerObatRacikan = $(this).find("td:eq(1) ol").attr("harga");
-
-                                                if($(this).find("td:eq(1) ol li").length === 0) {
-                                                    if(parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")) === 0) {
-                                                        allowSave = true;
-                                                    } else {
-                                                        allowSave = false;
-                                                        return false;
-                                                    }
-                                                } else {
-                                                    $(this).find("td:eq(1) ol li").each(function() {
-                                                        if(currentStatusOpname === "O") {
-                                                            allowSave = true;
-                                                        } else {
-                                                            if($(this).find("i").hasClass("text-danger")) {
-                                                                
-                                                                if(parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")) === 0) {
-                                                                    allowSave = true;
-                                                                } else {
-                                                                    allowSave = false;
-                                                                    return false;
-                                                                }
-                                                            } else {
-                                                                allowSave = true;
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                            }
-
-                                            komposisi.push({
-                                                "obat": $(this).find("td:eq(1) h6").attr("uid-obat"),
-                                                "jumlah": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
-                                                "kekuatan": $(this).find("td:eq(3)").html(),
-                                                "harga": parseFloat(hargaPerObatRacikan)
-                                            });
-
-                                            // if($(this).find("td:eq(2) input").inputmask("unmaskedvalue") < 1) {
-                                            //     allowSave = false;
-                                            //     return  false;
-                                            // }
-                                        });
-
-                                        racikanItem.push({
-                                            "racikan_uid": $(this).attr("uid"),
-                                            "racikan_nama": racikan_nama,
-                                            "racikan_komposisi": komposisi,
-                                            "alasan_ubah": ($("#alasan_racikan_" + racikanVerifIDSave).length > 0) ? $("#alasan_racikan_" + racikanVerifIDSave).val() : "",
-                                            "aturan_pakai": $(this).find("td:eq(1) select").val(),
-                                            "keterangan": $(this).find("td:eq(1) textarea").val(),
-                                            /*"signa_qty": parseFloat($(this).find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue")),
-                                            "signa_pakai": parseFloat($(this).find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue")),*/
-                                            "signa_qty": $(this).find("td.master-racikan-cell:eq(2) input").val(),
-                                            "signa_pakai": $(this).find("td.master-racikan-cell:eq(4) input").val(),
-                                            "harga": parseFloat($(this).find("td.master-racikan-cell:eq(6) span").html().replace(/(,)/g, "")),
-                                            "jumlah": parseFloat($(this).find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"))
-                                        });
-                                    }
-                                });
-                            } else {
-                                console.log("Disallow Save Resep");
-                            }
-                        }
-
-                        if(allowSave) {
-                            
-                            $.ajax({
-                                url:__HOSTAPI__ + "/Apotek",
-                                async:false,
-                                beforeSend: function(request) {
-                                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                                },
-                                type:"POST",
-                                data: {
-                                    request: "verifikasi_resep_2",
-                                    uid: __PAGES__[3],
-                                    alasan_ubah: $("#alasan-ubah-resep").val(),
-                                    alasan_resep: alasanLib,
-                                    alasan_racikan: alasanRacikanLib,
-                                    asesmen:currentAsesmen,
-                                    kunjungan: currentMetaData.kunjungan,
-                                    antrian:currentMetaData.uid,
-                                    pasien:currentMetaData.pasien.uid,
-                                    penjamin: currentMetaData.penjamin.uid,
-                                    resep: resepItem,
-                                    racikan: racikanItem,
-                                    departemen: currentMetaData.departemen.uid,
-                                    kajian: kajian
-                                },
-                                success:function(response) {
-                                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
-
-                                    if(response.response_package.antrian.response_result > 0) {
-                                        if(currentMetaData.departemen.uid === __POLI_IGD__) {
-                                            Swal.fire(
-                                                "Verifikasi Berhasil!",
-                                                "Silahkan minta pasien menunggu proses persiapan obat",
-                                                "success"
-                                            ).then((result) => {
-                                                push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru IGD", "warning").then(function() {
-                                                    location.href = __HOSTNAME__ + "/apotek/resep/";
-                                                });
-                                            });
-                                        } else {
-                                            if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
-                                                Swal.fire(
-                                                    "Verifikasi Berhasil!",
-                                                    "Silahkan pasien menuju kasir",
-                                                    "success"
-                                                ).then((result) => {
-                                                    push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya obat baru", "warning").then(function() {
-                                                        location.href = __HOSTNAME__ + "/apotek/resep/";
-                                                    });
-                                                });
-                                            } else {
-                                                Swal.fire(
-                                                    "Verifikasi Berhasil!",
-                                                    "Silahkan minta pasien menunggu proses persiapan obat",
-                                                    "success"
-                                                ).then((result) => {
-                                                    push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru BPJS", "warning").then(function() {
-                                                        location.href = __HOSTNAME__ + "/apotek/resep/";
-                                                    });
-                                                });
-                                            }
-                                        }
-                                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
-                                    } else {
-                                        console.log(response);
-                                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
-                                    }
-                                },
-                                error: function(response) {
-                                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
-                                    console.log(response);
-                                }
-                            });
-                        } else {
-                            if(!kajianCheck) {
-                                Swal.fire(
-                                    "Verifikasi Gagal!",
-                                    "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong. Harap isi kajian resep",
-                                    "warning"
-                                ).then((result) => {
-                                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
-                                    $("#form-alasan-ubah").modal("hide");
-                                });
-                            } else {
-                                Swal.fire(
-                                    "Verifikasi Gagal!",
-                                    "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong",
-                                    "warning"
-                                ).then((result) => {
-                                    $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
-                                    $("#form-alasan-ubah").modal("hide");
-                                });
-                            }
-
-                            $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
-                        }
-                    } else {
-                        $("#form-alasan-ubah").modal("hide");
-                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
-                    }
-                });
+                $("#form-konfirmasi-verif").modal("show");
             } else {
                 Swal.fire(
                     "Verifikasi Gagal!",
@@ -2777,6 +2523,266 @@
                 });
             }
         }
+
+        $("#btnDismissVerif").click(function (){
+            $("#form-konfirmasi-verif").modal("hide");
+            $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
+        });
+
+        $("#btnKonfirmasiVerif").click(function() {
+            $(".btnFormVerif").prop("disabled", true);
+
+            //Populate Resep
+            var allowSave = false;
+            var kajianCheck = false;
+            var kajian = populateAllKajian();
+
+            for(var  zz in kajian) {
+                if(kajian[zz] === "" || kajian[zz] === "") {
+                    allowSave = false;
+                    kajianCheck = false;
+                    break;
+                } else {
+                    allowSave = true;
+                    kajianCheck = true;
+                }
+            }
+
+            if(allowSave) {
+                var resepItem = [];
+                if($("#table-resep tbody tr").length === 1 && $("#table-resep tbody tr:eq(1)").hasClass("no-resep")) {
+                    allowSave = true;
+                }
+
+                $("#table-resep tbody tr").each(function(e) {
+                    if(!$(this).hasClass("no-resep")) {
+                        var resepVerifIDSave = (e + 1);
+                        var obat = $(this).find("td:eq(1) select:eq(0)").val();
+                        if(obat !== null) {
+
+                            if($(this).find("td:eq(1) ol li").length === 0) {
+                                if(parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")) === 0) {
+                                    allowSave = true;
+                                } else {
+                                    allowSave = false;
+                                    return false;
+                                }
+                            } else {
+                                $(this).find("td:eq(1) ol li").each(function() {
+                                    if($(this).find("i").hasClass("text-danger")) {
+                                        if(currentStatusOpname === "O") {
+                                            allowSave = true;
+                                        } else {
+                                            if(parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")) === 0) {
+                                                allowSave = true;
+                                            } else {
+                                                allowSave = false;
+                                                return false;
+                                            }
+                                        }
+                                    } else {
+                                        allowSave = true;
+                                    }
+                                });
+                            }
+
+                            resepItem.push({
+                                "obat": $(this).find("td:eq(1) select:eq(0)").val(),
+                                /*"signa_qty": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
+                                "signa_pakai": parseFloat($(this).find("td:eq(4) input").inputmask("unmaskedvalue")),*/
+                                "signa_qty": $(this).find("td:eq(2) input").val(),
+                                "signa_pakai": $(this).find("td:eq(4) input").val(),
+                                "jumlah": parseFloat($(this).find("td:eq(5) input").inputmask("unmaskedvalue")),
+                                "harga": parseFloat($(this).find("td:eq(1) ol").attr("harga")),
+                                "aturan_pakai": $(this).find("td:eq(1) select:eq(1)").val(),
+                                "keterangan": $(this).find("td:eq(1) textarea").val(),
+                                "alasan_ubah": ($("#alasan_" + resepVerifIDSave).length > 0) ? $("#alasan_" + resepVerifIDSave).val() : ""
+                            });
+                        }
+                    }
+                });
+
+                if(allowSave) {
+                    var racikanItem = [];
+                    $("#table-resep-racikan > tbody > tr").each(function(e) {
+                        var racikanVerifIDSave = (e + 1);
+                        var racikan_nama = $(this).find("td:eq(1) input").val();
+                        var qtyRacikan = parseFloat($(this).find("td input.racikan_signa_jlh").inputmask("unmaskedvalue"));
+                        if(racikan_nama !== undefined && racikan_nama !== "") {
+                            var komposisi = [];
+                            $(this).find("td:eq(1) table tbody tr").each(function() {
+                                var hargaPerObatRacikan = 0;
+                                if($(this).find("td:eq(1) ol").length > 0) {
+                                    hargaPerObatRacikan = $(this).find("td:eq(1) ol").attr("harga");
+
+                                    if($(this).find("td:eq(1) ol li").length === 0) {
+                                        if(parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")) === 0) {
+                                            allowSave = true;
+                                        } else {
+                                            allowSave = false;
+                                            return false;
+                                        }
+                                    } else {
+                                        $(this).find("td:eq(1) ol li").each(function() {
+                                            if(currentStatusOpname === "O") {
+                                                allowSave = true;
+                                            } else {
+                                                if($(this).find("i").hasClass("text-danger")) {
+
+                                                    if(parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")) === 0) {
+                                                        allowSave = true;
+                                                    } else {
+                                                        allowSave = false;
+                                                        return false;
+                                                    }
+                                                } else {
+                                                    allowSave = true;
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+
+                                komposisi.push({
+                                    "obat": $(this).find("td:eq(1) h6").attr("uid-obat"),
+                                    "jumlah": parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue")),
+                                    "kekuatan": $(this).find("td:eq(3)").html(),
+                                    "harga": parseFloat(hargaPerObatRacikan)
+                                });
+
+                                // if($(this).find("td:eq(2) input").inputmask("unmaskedvalue") < 1) {
+                                //     allowSave = false;
+                                //     return  false;
+                                // }
+                            });
+
+                            racikanItem.push({
+                                "racikan_uid": $(this).attr("uid"),
+                                "racikan_nama": racikan_nama,
+                                "racikan_komposisi": komposisi,
+                                "alasan_ubah": ($("#alasan_racikan_" + racikanVerifIDSave).length > 0) ? $("#alasan_racikan_" + racikanVerifIDSave).val() : "",
+                                "aturan_pakai": $(this).find("td:eq(1) select").val(),
+                                "keterangan": $(this).find("td:eq(1) textarea").val(),
+                                /*"signa_qty": parseFloat($(this).find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue")),
+                                "signa_pakai": parseFloat($(this).find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue")),*/
+                                "signa_qty": $(this).find("td.master-racikan-cell:eq(2) input").val(),
+                                "signa_pakai": $(this).find("td.master-racikan-cell:eq(4) input").val(),
+                                "harga": parseFloat($(this).find("td.master-racikan-cell:eq(6) span").html().replace(/(,)/g, "")),
+                                "jumlah": parseFloat($(this).find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"))
+                            });
+                        }
+                    });
+                } else {
+                    console.log("Disallow Save Resep");
+                }
+            }
+
+            if(allowSave) {
+
+                $.ajax({
+                    url:__HOSTAPI__ + "/Apotek",
+                    async:false,
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    type:"POST",
+                    data: {
+                        request: "verifikasi_resep_2",
+                        uid: __PAGES__[3],
+                        alasan_ubah: $("#alasan-ubah-resep").val(),
+                        alasan_resep: alasanLib,
+                        alasan_racikan: alasanRacikanLib,
+                        asesmen:currentAsesmen,
+                        kunjungan: currentMetaData.kunjungan,
+                        antrian:currentMetaData.uid,
+                        pasien:currentMetaData.pasien.uid,
+                        penjamin: currentMetaData.penjamin.uid,
+                        resep: resepItem,
+                        racikan: racikanItem,
+                        departemen: currentMetaData.departemen.uid,
+                        kajian: kajian
+                    },
+                    success:function(response) {
+                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
+
+                        if(response.response_package.antrian.response_result > 0) {
+                            if(currentMetaData.departemen.uid === __POLI_IGD__) {
+                                Swal.fire(
+                                    "Verifikasi Berhasil!",
+                                    "Silahkan minta pasien menunggu proses persiapan obat",
+                                    "success"
+                                ).then((result) => {
+                                    push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru IGD", "warning").then(function() {
+                                        location.href = __HOSTNAME__ + "/apotek/resep/";
+                                    });
+                                });
+                            } else {
+                                if(currentMetaData.penjamin.uid === __UIDPENJAMINUMUM__) {
+                                    Swal.fire(
+                                        "Verifikasi Berhasil!",
+                                        "Silahkan pasien menuju kasir",
+                                        "success"
+                                    ).then((result) => {
+                                        push_socket(__ME__, "kasir_daftar_baru", "*", "Biaya obat baru", "warning").then(function() {
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        "Verifikasi Berhasil!",
+                                        "Silahkan minta pasien menunggu proses persiapan obat",
+                                        "success"
+                                    ).then((result) => {
+                                        push_socket(__ME__, "antrian_apotek_baru", "*", "Permintaan Resep Baru BPJS", "warning").then(function() {
+                                            location.href = __HOSTNAME__ + "/apotek/resep/";
+                                        });
+                                    });
+                                }
+                            }
+                            $("#form-konfirmasi-verif").modal("hide");
+                            $(".btnFormVerif").prop("disabled", false);
+                            $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
+                        } else {
+                            console.log(response);
+                            $("#form-konfirmasi-verif").modal("hide");orm-alasan
+                            $(".btnFormVerif").prop("disabled", false);
+                            $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
+                        }
+                    },
+                    error: function(response) {
+                        $("#form-konfirmasi-verif").modal("hide");
+                        $(".btnFormVerif").prop("disabled", false);
+                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
+                        console.log(response);
+                    }
+                });
+            } else {
+                if(!kajianCheck) {
+                    Swal.fire(
+                        "Verifikasi Gagal!",
+                        "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong. Harap isi kajian resep",
+                        "warning"
+                    ).then((result) => {
+                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
+                        $(".btnFormVerif").prop("disabled", false);
+                        $("#form-konfirmasi-verif").modal("hide");
+                    });
+                } else {
+                    Swal.fire(
+                        "Verifikasi Gagal!",
+                        "Pastikan semua obat memiliki stok tersedia dan tidak bernilai kosong",
+                        "warning"
+                    ).then((result) => {
+                        $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
+                        $("#form-konfirmasi-verif").modal("hide");
+                        $(".btnFormVerif").prop("disabled", false);
+                    });
+                }
+                $("#form-konfirmasi-verif").modal("hide");
+                $(".btnFormVerif").prop("disabled", false);
+                $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
+            }
+        });
 
         $("#btnCopyResep").click(function() {
             var itemP = [];
@@ -2935,7 +2941,7 @@
 </script>
 
 <div id="form-alasan-ubah" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog modal-md" role="document">
+    <div class="modal-dialog modal-md " role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modal-large-title">Alasan Ubah Resep</h5>
@@ -3040,6 +3046,24 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Kembali</button>
                 <button type="button" class="btn btn-primary" id="btnSubmitKomposisi">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="form-konfirmasi-verif" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Verfikasi Resep</h4>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 15pt">Pastikan semua obat sudah sesuai dan stok mencukupi. Data sudah benar?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger btn-lg btnFormVerif" id="btnDismissVerif" data-dismiss="modal">Tidak</button>
+                <button type="button" class="btn btn-primary btn-lg btnFormVerif" id="btnKonfirmasiVerif">Ya</button>
             </div>
         </div>
     </div>
