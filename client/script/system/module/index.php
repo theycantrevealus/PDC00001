@@ -297,6 +297,7 @@
 				<div class="form-group">
 					<label for="txt_color_modul">Group Color:</label>
 					<input type="text" class="form-control" id="txt_color_modul" placeholder="Warna pada Menu">
+					<b>Ex: sidemenu-brown</b>
 				</div>
 				<div class="form-group">
 					<label for="txt_lokasi_modul">Lokasi:</label>

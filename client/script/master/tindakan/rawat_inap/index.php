@@ -1,12 +1,14 @@
 <script type="text/javascript">
-	$(function(){
-		var MODE = "tambah", selectedUID;
+	$(function() {
+		var MODE = "tambah",
+			selectedUID;
 		var tindakanKelas = "RI";
 		var columnBuilder = [];
 		var penjaminBuilder = [];
 		var tindakanBuilder = [];
 		var dataBuilder;
 		var tableTindakan;
+		var classNameBuilder;
 
 		var metaData = {};
 
@@ -14,16 +16,16 @@
 			var penjaminData = [];
 			$.ajax({
 				async: false,
-				url:__HOSTAPI__ + "/Penjamin/penjamin",
+				url: __HOSTAPI__ + "/Penjamin/penjamin",
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
-				type:"GET",
-				success:function(response) {
+				type: "GET",
+				success: function(response) {
 					var data = response.response_package.response_data;
 					penjaminData = data;
 					$(target).find("option").remove();
-					for(var key in data) {
+					for (var key in data) {
 						$(target).append("<option " + ((data[key].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + data[key].uid + "\">" + data[key].nama + "</option>");
 					}
 					$(target).select2();
@@ -36,18 +38,18 @@
 			var tindakanData = [];
 			$.ajax({
 				async: false,
-				url:__HOSTAPI__ + "/Tindakan/tindakan",
+				url: __HOSTAPI__ + "/Tindakan/tindakan",
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
-				type:"GET",
-				success:function(response) {
+				type: "GET",
+				success: function(response) {
 					var data = response.response_package.response_data;
 					tindakanData = data;
 					$(target).find("option").remove();
-					for(var key in data) {
+					for (var key in data) {
 						//Check Tindakan Perpenjamin
-						if(oldData[data[key].uid] == undefined) {
+						if (oldData[data[key].uid] == undefined) {
 							$(target).append("<option " + ((data[key].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + data[key].uid + "\">" + data[key].nama + "</option>");
 						}
 					}
@@ -60,8 +62,10 @@
 		refresh_penjamin("#filter-penjamin", __UIDPENJAMINUMUM__);
 		var returnProceed = refresh_kelas(tindakanKelas);
 		columnBuilder = returnProceed.dataKelas;
+		console.log(columnBuilder);
 		tableTindakan = returnProceed.table;
 		dataBuilder = returnProceed.dataBuilder;
+		classNameBuilder = returnProceed.dataNamaKelas;
 
 		tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
 		penjaminBuilder = refresh_penjamin("#txt_penjamin", __UIDPENJAMINUMUM__);
@@ -73,33 +77,33 @@
 				"title": "No",
 				"data": "autonum"
 			}, {
-				"title" : "Tindakan",
+				"title": "Tindakan",
 				"data": "tindakan"
 			}];
 
 			$.ajax({
 				async: false,
-				url:__HOSTAPI__ + "/Tindakan/kelas/" + tindakanKelas,
+				url: __HOSTAPI__ + "/Tindakan/kelas/" + tindakanKelas,
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
-				type:"GET",
-				success:function(response) {
+				type: "GET",
+				success: function(response) {
 
 					var data = response.response_package.response_data;
-					for(var key in data) {
-						if(columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] == undefined) {
+					for (var key in data) {
+						if (columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] == undefined) {
 							columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] = 0;
 						}
 						generateHeader.push({
 							"uid": data[key].uid,
-							"title" : data[key].nama,
+							"title": data[key].nama,
 							"data": data[key].nama.replace(" ", "_").toLowerCase()
 						});
 					}
 
 					generateHeader.push({
-						"title" : "Aksi",
+						"title": "Aksi",
 						"data": "action"
 					});
 
@@ -110,8 +114,8 @@
 						beforeSend: function(request) {
 							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 						},
-						type:"GET",
-						success:function(response) {
+						type: "GET",
+						success: function(response) {
 
 							var DataPopulator = {};
 							var DataPopulatorParsed = [];
@@ -120,38 +124,38 @@
 							//Parse data from vertical to horizontal
 							var data_harga = response.response_package;
 
-							for(var key = 0; key < data_harga.length; key++) {
-								if(data_harga[key].tindakan_detail != null) {
+							for (var key = 0; key < data_harga.length; key++) {
+								if (data_harga[key].tindakan_detail != null) {
 									var kelasTarget = data_harga[key].tindakan;
-									if(DataPopulator[kelasTarget] === undefined) {
+									if (DataPopulator[kelasTarget] === undefined) {
 										DataPopulator[kelasTarget] = {
 											uid: kelasTarget,
 											nama: data_harga[key].tindakan_detail.nama
 										};
 
-										if(DataPopulator[kelasTarget].kelas_harga == undefined) {
+										if (DataPopulator[kelasTarget].kelas_harga == undefined) {
 											DataPopulator[kelasTarget].kelas_harga = columnKelas;
 										}
 									}
 									var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
-									if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
+									if (kelasKey in DataPopulator[kelasTarget].kelas_harga) {
 										DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
 									}
 								}
 							}
-							
+
 							//Convert to array data
 							var autonum = 1;
-							for(var key in DataPopulator) {
+							for (var key in DataPopulator) {
 								var parseKelas = {
 									autonum: autonum,
 									tindakan: "<label id=\"tindakan_" + DataPopulator[key].uid + "\">" + DataPopulator[key].nama + "</label>",
-									tindakan_uid : DataPopulator[key].uid,
+									tindakan_uid: DataPopulator[key].uid,
 									action: "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-pencil-alt\"></i></button>"
 								};
 
-								for(var KelasKey in DataPopulator[key]) {
-									if(KelasKey in columnKelas) {
+								for (var KelasKey in DataPopulator[key]) {
+									if (KelasKey in columnKelas) {
 										parseKelas[KelasKey] = "<h6 class=\"text-right\">" + number_format(DataPopulator[key][KelasKey], 2, ".", ",") + "</h6>";
 									}
 								}
@@ -170,7 +174,7 @@
 
 
 
-		
+
 
 
 
@@ -182,93 +186,175 @@
 			var columnKelas = {};
 			var tableTindakan;
 			var dataBuilder;
-			var generateHeader = [{
-				"title": "No",
-				"data": "autonum"
+			var generateHeaderName = [{
+				uid: "",
+				title: "No",
+				identifier: "auto_number"
 			}, {
-				"title" : "Tindakan",
-				"data": "tindakan"
+				uid: "",
+				title: "Tindakan",
+				identifier: "tindakan"
+			}];
+
+			var generateHeader = [{
+				"data": null,
+				render: function(data, type, row, meta) {
+					return row.autonum;
+				}
+			}, {
+				"data": null,
+				render: function(data, type, row, meta) {
+					return row.tindakan;
+				}
 			}];
 
 			$.ajax({
 				async: false,
-				url:__HOSTAPI__ + "/Tindakan/kelas/" + tindakanKelas,
+				url: __HOSTAPI__ + "/Tindakan/kelas/" + tindakanKelas,
 				beforeSend: function(request) {
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
-				type:"GET",
-				success:function(response) {
+				type: "GET",
+				success: function(response) {
 					var data = response.response_package.response_data;
-					for(var key in data) {
-						$("#table-tindakan thead tr").append("<th>" + data[key].nama + "</th>");
-						if(columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] == undefined) {
-							columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] = 0;
+					for (var key in data) {
+
+						if (data[key] !== undefined) {
+							var nama_target = data[key].nama.replace(" ", "_").toLowerCase();
+							$("#table-tindakan thead tr").append("<th>" + data[key].nama + "</th>");
+							if (columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] == undefined) {
+								columnKelas[data[key].nama.replace(" ", "_").toLowerCase()] = 0;
+							}
+
+							generateHeaderName.push({
+								uid: data[key].uid,
+								title: data[key].nama,
+								identifier: nama_target
+							});
+
+							generateHeader.push({
+								"data": null,
+								render: function(data, type, row, meta) {
+									return row[nama_target];
+								}
+							});
 						}
-						generateHeader.push({
-							"uid": data[key].uid,
-							"title" : data[key].nama,
-							"data": data[key].nama.replace(" ", "_").toLowerCase()
-						});
 					}
-					$("#table-tindakan thead tr").append("<th>Aksi</th>");
+					$("#table-tindakan thead tr").append("<th>Poli</th>").append("<th>Aksi</th>");
+
 
 					generateHeader.push({
-						"title" : "Aksi",
-						"data": "action"
+						"data": null,
+						render: function(data, type, row, meta) {
+							return row.poli;
+						}
 					});
 
+					generateHeaderName.push({
+						uid: "",
+						title: "Poli",
+						identifier: "poli"
+					});
 
-					if(generateHeader.length == $("#table-tindakan thead th").length) {
+					generateHeader.push({
+						"data": null,
+						render: function(data, type, row, meta) {
+							return row.action;
+						}
+					});
+
+					generateHeaderName.push({
+						uid: "",
+						title: "Aksi",
+						identifier: "action"
+					});
+
+					if (generateHeader.length == $("#table-tindakan thead th").length) {
 						tableTindakan = $("#table-tindakan").DataTable({
-							"ajax":{
+							serverSide: true,
+							sPaginationType: "full_numbers",
+							bPaginate: true,
+							lengthMenu: [
+								[20, 50, -1],
+								[20, 50, "All"]
+							],
+							serverMethod: "POST",
+							headers: {
+								Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+							},
+							ajax: {
 								async: false,
-								url: __HOSTAPI__ + "/Tindakan/get-harga-per-kelas/" + tindakanKelas + "/" + $("#filter-penjamin").val(),
-								type: "GET",
-								headers:{
+								url: __HOSTAPI__ + "/Tindakan",
+								type: "POST",
+								data: function(d) {
+									d.request = "get_harga_per_tindakan_backend";
+									d.penjamin = $("#filter-penjamin").val();
+									d.jenis = tindakanKelas;
+								},
+								headers: {
 									Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
 								},
-								dataSrc:function(response) {
+								dataSrc: function(response) {
+
 									var DataPopulator = {};
 									var DataPopulatorParsed = [];
 
 
 									//Parse data from vertical to horizontal
-									var data_harga = response.response_package;
+									var data_harga = response.response_package.response_data;
 
-									for(var key = 0; key < data_harga.length; key++) {
-										if(data_harga[key].tindakan_detail != undefined) {
+									for (var key = 0; key < data_harga.length; key++) {
+										if (data_harga[key].tindakan_detail != undefined) {
 											var kelasTarget = data_harga[key].tindakan;
-											
-											if(DataPopulator[kelasTarget] === undefined) {
+
+											if (DataPopulator[kelasTarget] === undefined) {
 												DataPopulator[kelasTarget] = {
 													uid: kelasTarget,
 													nama: data_harga[key].tindakan_detail.nama
 												};
 
-												if(DataPopulator[kelasTarget].kelas_harga == undefined) {
+												if (DataPopulator[kelasTarget].kelas_harga == undefined) {
 													DataPopulator[kelasTarget].kelas_harga = columnKelas;
 												}
 											}
 
 											var kelasKey = data_harga[key].kelas.nama.toLowerCase().replace(" ", "_");
-											if(kelasKey in DataPopulator[kelasTarget].kelas_harga) {
+											if (kelasKey in DataPopulator[kelasTarget].kelas_harga) {
 												DataPopulator[kelasTarget][kelasKey] = data_harga[key].harga;
 											}
+
+											DataPopulator[kelasTarget].poli = data_harga[key].poli;
 										}
 									}
-									
+
 									//Convert to array data
 									var autonum = 1;
-									for(var key in DataPopulator) {
+									for (var key in DataPopulator) {
+
+										var poliParse = "<ol type=\"1\">";
+										var poliInfo = DataPopulator[key].poli;
+										for (var pInfoKey in poliInfo) {
+											if (poliInfo[pInfoKey].detail !== undefined && poliInfo[pInfoKey].detail !== null) {
+												poliParse += "<li>" + poliInfo[pInfoKey].detail.nama + "</li>";
+											}
+										}
+
+										poliParse += "</ol>";
+
 										var parseKelas = {
 											autonum: autonum,
 											tindakan: "<label id=\"tindakan_" + DataPopulator[key].uid + "\">" + DataPopulator[key].nama + "</label>",
-											tindakan_uid : DataPopulator[key].uid,
-											action: "<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-pencil-alt\"></i></button> <button class=\"btn btn-danger btn-sm btn-delete-tindakan-kelas\" tindakan=\"" + DataPopulator[key].uid + "\"><i class=\"fa fa-trash\"></i></button>"
+											tindakan_uid: DataPopulator[key].uid,
+											poli: poliParse,
+											action: "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+												"<button class=\"btn btn-info btn-sm btn-edit-tindakan\" tindakan=\"" + DataPopulator[key].uid + "\">" +
+												"<span><i class=\"fa fa-pencil-alt\"></i>Edit</span></button> " +
+												"<button class=\"btn btn-danger btn-sm btn-delete-tindakan-kelas\" tindakan=\"" + DataPopulator[key].uid + "\">" +
+												"<span><i class=\"fa fa-trash\"></i>Hapus</span></button></div>"
 										};
 
-										for(var KelasKey in DataPopulator[key]) {
-											if(KelasKey in columnKelas) {
+										for (var KelasKey in DataPopulator[key]) {
+											if (KelasKey in columnKelas) {
 												parseKelas[KelasKey] = "<h6 class=\"text-right\">" + number_format(DataPopulator[key][KelasKey], 2, ".", ",") + "</h6>";
 											}
 										}
@@ -277,18 +363,19 @@
 										autonum++;
 									}
 									dataBuilder = DataPopulator;
+
 									return DataPopulatorParsed;
 								}
 							},
-							fixedColumns:   {
-								leftColumns: 2
-							},
 							autoWidth: false,
-							aaSorting: [[0, "asc"]],
-							columnDefs:[
-								{"targets":0, "className":"dt-body-left"}
+							aaSorting: [
+								[0, "asc"]
 							],
-							columns : generateHeader
+							columnDefs: [{
+								"targets": 0,
+								"className": "dt-body-left"
+							}],
+							columns: generateHeader
 						});
 					}
 
@@ -302,6 +389,7 @@
 
 			return {
 				table: tableTindakan,
+				dataNamaKelas: generateHeaderName,
 				dataKelas: generateHeader,
 				dataBuilder: dataBuilder
 			};
@@ -319,28 +407,35 @@
 			/*$("#txt_tindakan option[value=\"" + uid + "\"").prop("selected", true);
 			$("#txt_tindakan").val(uid).trigger("change");
 			$("#txt_tindakan").parent().html("<h4>" + $("#tindakan_" + uid).html() + "</h4>");*/
-			
+
 			$("#form-tambah table tbody").html("");
 
-			for(var i in columnBuilder) {
 
-				if(
-					columnBuilder[i].data != "autonum" &&
-					columnBuilder[i].data != "tindakan" &&
-					columnBuilder[i].data != "action"
+			for (var i in columnBuilder) {
+
+				if (
+					classNameBuilder[i].identifier != "auto_number" &&
+					classNameBuilder[i].identifier != "tindakan" &&
+					classNameBuilder[i].identifier != "poli" &&
+					classNameBuilder[i].identifier != "action"
 				) {
 					var newRow = document.createElement("TR");
 					var newName = document.createElement("TD");
 					var newPrice = document.createElement("TD");
 
-					$(newName).html(columnBuilder[i].title);
+					$(newName).html(classNameBuilder[i].title);
 
 					var newInput = document.createElement("INPUT");
-					$(newInput).addClass("form-control harga-tindakan").val(tempDataBuilder[$("#txt_tindakan").val()][columnBuilder[i].data.replace(" ", "_").toLowerCase()]).attr({
-						"kelas": columnBuilder[i].uid,
-						"identifier": columnBuilder[i].data.replace(" ", "_").toLowerCase()
+					$(newInput).addClass("form-control harga-tindakan").val(tempDataBuilder[$("#txt_tindakan").val()][classNameBuilder[i].identifier.replace(" ", "_").toLowerCase()]).attr({
+						"kelas": classNameBuilder[i].uid,
+						"identifier": classNameBuilder[i].identifier.replace(" ", "_").toLowerCase()
 					}).inputmask({
-						alias: 'currency', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true
+						alias: 'currency',
+						rightAlign: true,
+						placeholder: "0,00",
+						prefix: "",
+						autoGroup: false,
+						digitsOptional: true
 					});
 
 					$(newPrice).append(newInput);
@@ -358,20 +453,20 @@
 			return false;
 		});
 
-		
-		$("body").on("click", ".btn-delete-tindakan", function(){
+
+		$("body").on("click", ".btn-delete-tindakan", function() {
 			var uid = $(this).attr("id").split("_");
 			uid = uid[uid.length - 1];
 
 			var conf = confirm("Hapus tindakan item?");
-			if(conf) {
+			if (conf) {
 				$.ajax({
-					url:__HOSTAPI__ + "/Tindakan/master_tindakan/" + uid,
+					url: __HOSTAPI__ + "/Tindakan/master_tindakan/" + uid,
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
-					type:"DELETE",
-					success:function(response) {
+					type: "DELETE",
+					success: function(response) {
 						tableTindakan.ajax.reload();
 					},
 					error: function(response) {
@@ -384,15 +479,14 @@
 		$("body").on("click", ".btn-delete-tindakan-kelas", function() {
 			var tindakan = $(this).attr("tindakan");
 			var conf = confirm("Hapus tindakan item?");
-			if(conf) {
+			if (conf) {
 				$.ajax({
-					url:__HOSTAPI__ + "/Tindakan/master_tindakan_kelas_harga/" + tindakan + "/" + $("#filter-penjamin").val(),
+					url: __HOSTAPI__ + "/Tindakan/master_tindakan_kelas_harga/" + tindakan + "/" + $("#filter-penjamin").val(),
 					beforeSend: function(request) {
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
-					type:"DELETE",
-					success:function(response) {
-						console.log(response);
+					type: "DELETE",
+					success: function(response) {
 						tableTindakan.ajax.reload();
 					},
 					error: function(response) {
@@ -411,20 +505,18 @@
 			/*$("#txt_penjamin option[value=\"" + me.val() + "\"").prop("selected", true);
 			$("#txt").val(me.val()).trigger("change");*/
 		});
-		
+
 		/*$("body").on("click", ".btn-edit-tindakan", function() {
-			var uid = $(this).attr("id").split("_");
-			uid = uid[uid.length - 1];
-			selectedUID = uid;
-			MODE = "edit";
+		    var uid = $(this).attr("id").split("_");
+		    uid = uid[uid.length - 1];
+		    selectedUID = uid;
+		    MODE = "edit";
+		    let harga = $(this).data('harga');
+		    $("#txt_nama").val($("#nama_" + selectedUID).html());
+		    $("#txt_harga").val(harga);
 
-			let harga = $(this).data('harga');
-
-			$("#txt_nama").val($("#nama_" + selectedUID).html());
-			$("#txt_harga").val(harga);
-			
-			$("#form-tambah").modal("show");
-			return false;
+		    $("#form-tambah").modal("show");
+		    return false;
 		});*/
 
 		$("#tambah_master_tindakan").click(function() {
@@ -433,15 +525,15 @@
 			return false;
 		});
 
-		
+
 		$("#tambah-tindakan").click(function() {
 			$("#txt_nama").val("");
 			$("#txt_tindakan").removeAttr("disabled");
 
 			//Prepare Kelas
 			$("#form-tambah table tbody").html("");
-			for(var i in columnBuilder) {
-				if(
+			for (var i in columnBuilder) {
+				if (
 					columnBuilder[i].data != "autonum" &&
 					columnBuilder[i].data != "tindakan" &&
 					columnBuilder[i].data != "action"
@@ -457,7 +549,12 @@
 						"kelas": columnBuilder[i].uid,
 						"identifier": columnBuilder[i].data.replace(" ", "_").toLowerCase()
 					}).inputmask({
-						alias: 'currency', rightAlign: true, placeholder: "0,00", prefix: "", autoGroup: false, digitsOptional: true
+						alias: 'currency',
+						rightAlign: true,
+						placeholder: "0,00",
+						prefix: "",
+						autoGroup: false,
+						digitsOptional: true
 					});
 
 					$(newPrice).append(newInput);
@@ -475,17 +572,17 @@
 		});
 
 		$("#txt_tindakan").change(function() {
-			if(metaData[$("#txt_penjamin").val()] == undefined) {
+			if (metaData[$("#txt_penjamin").val()] == undefined) {
 				metaData[$("#txt_penjamin").val()] = {};
 			}
 
-			if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
+			if (metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
 				metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
 			}
 
 			$("#form-tambah table tbody tr").each(function() {
 				var us = $(this);
-				if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+				if (metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
 					metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
 				}
 
@@ -500,17 +597,17 @@
 
 			tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
 
-			if(metaData[$("#txt_penjamin").val()] == undefined) {
+			if (metaData[$("#txt_penjamin").val()] == undefined) {
 				metaData[$("#txt_penjamin").val()] = {};
 			}
 
-			if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
+			if (metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
 				metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
 			}
 
 			$("#form-tambah table tbody tr").each(function() {
 				var us = $(this);
-				if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+				if (metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
 					metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
 				}
 
@@ -522,57 +619,57 @@
 			var me = $(this);
 			var kelas = me.attr("kelas");
 			var kelasIden = me.attr("identifier");
-            if($("#satu_harga").is(":checked")) {
-                $("#txt_penjamin option").each(function () {
-                    var penjaminType = $(this);
-                    if (metaData[penjaminType.attr("value")] == undefined) {
-                        metaData[penjaminType.attr("value")] = {};
-                    }
+			if ($("#satu_harga").is(":checked")) {
+				$("#txt_penjamin option").each(function() {
+					var penjaminType = $(this);
+					if (metaData[penjaminType.attr("value")] == undefined) {
+						metaData[penjaminType.attr("value")] = {};
+					}
 
-                    if(metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] == undefined) {
-                        metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] = {};
-                    }
-                });
-            } else {
-                if (metaData[$("#txt_penjamin").val()] == undefined) {
-                    metaData[$("#txt_penjamin").val()] = {};
-                }
+					if (metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] == undefined) {
+						metaData[penjaminType.attr("value")][$("#txt_tindakan").val()] = {};
+					}
+				});
+			} else {
+				if (metaData[$("#txt_penjamin").val()] == undefined) {
+					metaData[$("#txt_penjamin").val()] = {};
+				}
 
-                if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
-                    metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
-                }
-            }
+				if (metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] == undefined) {
+					metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()] = {};
+				}
+			}
 
 
 
 			$("#form-tambah table tbody tr").each(function() {
 				var us = $(this);
-                if($("#satu_harga").is(":checked")) {
-                    $("#txt_penjamin option").each(function () {
-                        var penjaminType = $(this);
-                        if(metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
-                            metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
-                        }
-                    });
-                } else {
-                    if(metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
-                        metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
-                    }
-                }
+				if ($("#satu_harga").is(":checked")) {
+					$("#txt_penjamin option").each(function() {
+						var penjaminType = $(this);
+						if (metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+							metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
+						}
+					});
+				} else {
+					if (metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] == undefined) {
+						metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][us.find("td:eq(1) input").attr("kelas")] = 0;
+					}
+				}
 			});
-            if($("#satu_harga").is(":checked")) {
-                $("#txt_penjamin option").each(function () {
-                    var penjaminType = $(this);
-                    metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
-                });
-            } else {
-                metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
-            }
+			if ($("#satu_harga").is(":checked")) {
+				$("#txt_penjamin option").each(function() {
+					var penjaminType = $(this);
+					metaData[penjaminType.attr("value")][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+				});
+			} else {
+				metaData[$("#txt_penjamin").val()][$("#txt_tindakan").val()][kelas] = me.inputmask("unmaskedvalue");
+			}
 		});
 
 		$("#btnSubmitMasterTindakan").click(function() {
 			var nama = $("#txt_nama_master_tindakan_baru").val();
-			if(nama != "") {
+			if (nama != "") {
 				$.ajax({
 					async: false,
 					url: __HOSTAPI__ + "/Tindakan",
@@ -584,13 +681,13 @@
 						request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 					},
 					type: "POST",
-					success: function(response){
-						if(response.response_package.response_result > 0) {
+					success: function(response) {
+						if (response.response_package.response_result > 0) {
 							tindakanBuilder = refresh_tindakan("#txt_tindakan", response.response_package.response_unique);
 							$("#form-tambah-tindakan").modal("hide");
 							$("#txt_nama_master_tindakan_baru").val("");
 						} else {
-							notification ("warning", response.response_package.response_message, 3000, "duplicate_tindakan");
+							notification("warning", response.response_package.response_message, 3000, "duplicate_tindakan");
 						}
 					},
 					error: function(response) {
@@ -603,9 +700,10 @@
 
 		$("#btnSubmit").click(function() {
 			var penjaminList = tindakanBuilder;
-			
+
+
 			var form_data = {};
-			if(MODE == "tambah") {
+			if (MODE == "tambah") {
 				form_data = {
 					request: "update_tindakan_kelas_harga",
 					data: metaData
@@ -625,8 +723,7 @@
 					request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
 				},
 				type: "POST",
-				success: function(response){
-					console.log(response);
+				success: function(response) {
 					metaData = {};
 					dataBuilder = refresh_kelas_data(tindakanKelas);
 					tindakanBuilder = refresh_tindakan("#txt_tindakan", "", dataBuilder);
@@ -638,7 +735,7 @@
 				}
 			});
 		});
-		
+
 		//$(".harga").inputmask({alias: 'currency', rightAlign: false, placeholder: "0.00", prefix: "", autoGroup: false, digitsOptional: true});
 	});
 </script>
@@ -671,15 +768,15 @@
 						<select class="form-control" id="txt_penjamin"></select>
 					</div>
 				</div>
-                <div class="row">
-                    <div class="form-group col-md-5">
-                        <div class="custom-control custom-checkbox-toggle custom-control-inline mr-1">
-                            <input checked="" type="checkbox" id="satu_harga" class="custom-control-input">
-                            <label class="custom-control-label" for="satu_harga">Yes</label>
-                        </div>
-                        <label for="subscribe">Satu Harga</label>
-                    </div>
-                </div>
+				<div class="row">
+					<div class="form-group col-md-5">
+						<div class="custom-control custom-checkbox-toggle custom-control-inline mr-1">
+							<input checked="" type="checkbox" id="satu_harga" class="custom-control-input">
+							<label class="custom-control-label" for="satu_harga">Yes</label>
+						</div>
+						<label for="subscribe">Satu Harga</label>
+					</div>
+				</div>
 				<div class="row">
 					<div class="form-group col-md-12" id="kelas_loader">
 						<table class="table largeDataType">

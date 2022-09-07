@@ -51,3 +51,4 @@ client/template/
 client/plugins/
 client/header.php
 client/head.php
+client/pages/system/login.php

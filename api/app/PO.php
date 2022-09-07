@@ -105,6 +105,9 @@ class PO extends Utility {
 				'keterangan'
 			))
 				->where($paramData, $paramValue)
+				->order(array(
+					'created_at' => 'DESC'
+				))
 				->execute();
 		} else {
 			$data = self::$query->select('inventori_po', array(
@@ -119,6 +122,9 @@ class PO extends Utility {
 				'keterangan'
 			))
 				->where($paramData, $paramValue)
+				->order(array(
+					'created_at' => 'DESC'
+				))
 				->offset(intval($parameter['start']))
 				->limit(intval($parameter['length']))
 				->execute();

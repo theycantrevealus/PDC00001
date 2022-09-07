@@ -49,6 +49,7 @@
                         var tagihanAllow = 0;
                         var itemTagihanApotek = [];
                         var tagihan = row.invoice;
+                        var penjamin = row.penjamin.uid;
                         for(var ab in tagihan) {
                             for(az in tagihan[ab].invoice_detail) {
                                 if(tagihan[ab].invoice_detail[az].status_bayar === "Y") {
@@ -148,7 +149,11 @@
                                 return "<h5 class=\"autonum\" allow-inap=\"" + apotekAllow + "|" + laborAllow + "|" + radioAllow + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
                             }
                         } else {
-                            return "<h5 class=\"autonum\" allowTagihan=\"" + tagihanAllow + "\" allow-inap=\"" + 0 + "|" + 0 + "|" + 0 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
+                            if(penjamin !== __UIDPENJAMINUMUM__) {
+                                return "<h5 class=\"autonum\" allow-inap=\"" + 1 + "|" + 1 + "|" + 1 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
+                            } else {
+                                return "<h5 class=\"autonum\" allowTagihan=\"" + tagihanAllow + "\" allow-inap=\"" + 0 + "|" + 0 + "|" + 0 + "\" id=\"uid_" + row.uid + "\" keterangan=\"" + row.keterangan + "\">" + row.autonum + "</h5>";
+                            }
                         }
 
                     }

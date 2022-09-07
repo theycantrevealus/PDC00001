@@ -201,11 +201,7 @@
 		
 		$('#no_rm').inputmask('99-99-99');
 
-		$('.numberonly').keypress(function(event){
-            if (event.which < 48 || event.which > 57) {
-                event.preventDefault();
-            }
-        });
+		
 	});
 
 	function cekNoRM(no_rm, no_rm_lama) {

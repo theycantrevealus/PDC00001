@@ -5,7 +5,7 @@
 
         protocolLib = {
             permintaan_resep_baru: function(protocols, type, parameter, sender, receiver, time) {
-                notification ("info", parameter, 3000, "notif_pasien_baru");
+                notification("info", parameter, 3000, "notif_pasien_baru");
                 tableResep.ajax.reload();
             }
         };
@@ -14,16 +14,16 @@
             var selected = [];
             var resepData = [];
             $.ajax({
-                url:__HOSTAPI__ + "/Apotek",
-                async:false,
+                url: __HOSTAPI__ + "/Apotek",
+                async: false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                type:"GET",
-                success:function(response) {
+                type: "GET",
+                success: function(response) {
                     var resepDataRaw = response.response_package.response_data;
-                    for(var resepKey in resepDataRaw) {
-                        if(
+                    for (var resepKey in resepDataRaw) {
+                        if (
                             resepDataRaw[resepKey].antrian.departemen != null
                         ) {
                             resepData.push(resepDataRaw[resepKey]);
@@ -42,24 +42,24 @@
             var selected = [];
             var productData;
             $.ajax({
-                url:__HOSTAPI__ + "/Inventori/item_detail/" + selectedData,
-                async:false,
+                url: __HOSTAPI__ + "/Inventori/item_detail/" + selectedData,
+                async: false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                type:"GET",
-                success:function(response) {
+                type: "GET",
+                success: function(response) {
                     productData = response.response_package.response_data;
                     for (var a = 0; a < productData.length; a++) {
                         var penjaminList = [];
                         var penjaminListData = productData[a].penjamin;
-                        for(var penjaminKey in penjaminListData) {
-                            if(penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
+                        for (var penjaminKey in penjaminListData) {
+                            if (penjaminList.indexOf(penjaminListData[penjaminKey].penjamin.uid) < 0) {
                                 penjaminList.push(penjaminListData[penjaminKey].penjamin.uid);
                             }
                         }
 
-                        if(selected.indexOf(productData[a].uid) < 0 && appendData) {
+                        if (selected.indexOf(productData[a].uid) < 0 && appendData) {
                             $(target).append("<option penjamin-list=\"" + penjaminList.join(",") + "\" satuan-caption=\"" + productData[a].satuan_terkecil.nama + "\" satuan-terkecil=\"" + productData[a].satuan_terkecil.uid + "\" " + ((productData[a].uid == selectedData) ? "selected=\"selected\"" : "") + " value=\"" + productData[a].uid + "\">" + productData[a].nama.toUpperCase() + "</option>");
                         }
                     }
@@ -77,11 +77,11 @@
 
         function populateObat(data) {
             var obatList = {};
-            for(var a = 0; a < data.length; a++) {
-                if(data[a].detail != undefined) {
+            for (var a = 0; a < data.length; a++) {
+                if (data[a].detail != undefined) {
                     var listBiasa = data[a].detail;
-                    for(var b = 0; b < listBiasa.length; b++) {
-                        if(obatList[listBiasa[b].obat] == undefined) {
+                    for (var b = 0; b < listBiasa.length; b++) {
+                        if (obatList[listBiasa[b].obat] == undefined) {
                             obatList[listBiasa[b].obat] = {
                                 nama: "",
                                 counter: 0
@@ -93,9 +93,9 @@
                     }
 
                     var listRacikan = data[a].racikan;
-                    for(var c = 0; c < listRacikan.length; c++) {
-                        for(var d = 0; d < listRacikan[c].detail.length; d++) {
-                            if(obatList[listRacikan[c].detail[d].obat] == undefined) {
+                    for (var c = 0; c < listRacikan.length; c++) {
+                        for (var d = 0; d < listRacikan[c].detail.length; d++) {
+                            if (obatList[listRacikan[c].detail[d].obat] == undefined) {
                                 obatList[listRacikan[c].detail[d].obat] = {
                                     nama: "",
                                     counter: 0
@@ -124,35 +124,38 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            lengthMenu: [
+                [20, 50, -1],
+                [20, 50, "All"]
+            ],
             serverMethod: "POST",
-            "ajax":{
+            "ajax": {
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: function(d) {
                     d.request = "get_resep_dokter";
                 },
-                headers:{
+                headers: {
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
-                dataSrc:function(response) {
+                dataSrc: function(response) {
                     var resepDataRaw = response.response_package.response_data;
                     var parsedData = [];
                     var IGD = [];
                     var INAP = [];
 
-                    for(var resepKey in resepDataRaw) {
-                        if(resepDataRaw[resepKey].antrian.departemen !== undefined && resepDataRaw[resepKey].antrian.departemen !== null) {
-                            if(
+                    for (var resepKey in resepDataRaw) {
+                        if (resepDataRaw[resepKey].antrian.departemen !== undefined && resepDataRaw[resepKey].antrian.departemen !== null) {
+                            if (
                                 resepDataRaw[resepKey].antrian.departemen.uid === __POLI_IGD__
                             ) {
-                                if(resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
+                                if (resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
                                     IGD.push(resepDataRaw[resepKey]);
                                 }
-                            } else if(
+                            } else if (
                                 resepDataRaw[resepKey].antrian.departemen.uid === __POLI_INAP__
                             ) {
-                                if(resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
+                                if (resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
                                     INAP.push(resepDataRaw[resepKey]);
                                 }
                             } else {
@@ -162,7 +165,7 @@
                     }
                     var autonum = 1;
                     var finalData = IGD.concat(parsedData).concat(INAP);
-                    for(var az in finalData) {
+                    for (var az in finalData) {
                         finalData[az].autonum = autonum;
                         autonum++;
                     }
@@ -179,26 +182,31 @@
                 searchPlaceholder: "No.RM/Nama Pasien"
             },
             autoWidth: false,
-            "bInfo" : false,
-            aaSorting: [[2, "asc"]],
-            "columnDefs":[
-                {"targets":0, "className":"dt-body-left"}
+            "bInfo": false,
+            aaSorting: [
+                [2, "asc"]
             ],
-            "columns" : [
-                {
-                    "data" : null, render: function(data, type, row, meta) {
+            "columnDefs": [{
+                "targets": 0,
+                "className": "dt-body-left"
+            }],
+            "columns": [{
+                    "data": null,
+                    render: function(data, type, row, meta) {
                         return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
-                    "data" : null, render: function(data, type, row, meta) {
+                    "data": null,
+                    render: function(data, type, row, meta) {
                         return row.created_at_parsed;
                     }
                 },
                 {
-                    "data" : null, render: function(data, type, row, meta) {
-                        if(row.departemen !== undefined && row.antrian.departemen !== null) {
-                            if(row.departemen.uid === __POLI_INAP__ && row.ns_detail !== null) {
+                    "data": null,
+                    render: function(data, type, row, meta) {
+                        if (row.departemen !== undefined && row.antrian.departemen !== null) {
+                            if (row.departemen.uid === __POLI_INAP__ && row.ns_detail !== null) {
                                 return row.departemen.nama + "<br />" +
                                     "<span class=\"text-info\">" + row.ns_detail.kode_ns + "</span> - " + row.ns_detail.nama_ns;
                             } else {
@@ -210,22 +218,26 @@
                     }
                 },
                 {
-                    "data" : null, render: function(data, type, row, meta) {
+                    "data": null,
+                    render: function(data, type, row, meta) {
                         return ((row.pasien_info.panggilan_name !== undefined && row.pasien_info.panggilan_name !== null) ? row.pasien_info.panggilan_name.nama : "") + " " + row.pasien_info.nama;
                     }
                 },
                 {
-                    "data" : null, render: function(data, type, row, meta) {
+                    "data": null,
+                    render: function(data, type, row, meta) {
                         return row.dokter.nama;
                     }
                 },
                 {
-                    "data" : null, render: function(data, type, row, meta) {
+                    "data": null,
+                    render: function(data, type, row, meta) {
                         return row.penjamin.nama;
                     }
                 },
                 {
-                    "data" : null, render: function(data, type, row, meta) {
+                    "data": null,
+                    render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
                             "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/resep/view/" + row.uid + "\">" +
                             "<span><i class=\"fa fa-pencil-alt\"></i> Detail</span>" +
@@ -240,32 +252,34 @@
             $("#pasien_saya").select2({
                 minimumInputLength: 2,
                 "language": {
-                    "noResults": function(){
+                    "noResults": function() {
                         return "Pasien tidak ditemukan";
                     }
                 },
                 placeholder: "Cari Pasien",
                 ajax: {
                     dataType: "json",
-                    headers:{
-                        "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                        "Content-Type" : "application/json",
+                    headers: {
+                        "Authorization": "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type": "application/json",
                     },
-                    url:__HOSTAPI__ + "/Pasien/asesmen_resep_lupa",
+                    url: __HOSTAPI__ + "/Pasien/asesmen_resep_lupa",
                     type: "GET",
-                    data: function (term) {
+                    data: function(term) {
                         return {
-                            search:term.term
+                            search: term.term
                         };
                     },
                     cache: true,
-                    processResults: function (response) {
+                    processResults: function(response) {
                         var data = response.response_package.response_data;
+                        console.clear();
+                        console.log(response);
                         return {
-                            results: $.map(data, function (item) {
-                                console.log(item);
+                            results: $.map(data, function(item) {
+
                                 return {
-                                    text: "[" + item.no_rm + "] " + item.nama,
+                                    text: item.created_at + " - [" + item.no_rm + "] " + item.nama,
                                     id: item.pasien,
                                     asesmen: item.uid,
                                     kunjungan: item.kunjungan,
@@ -322,14 +336,14 @@
                 url: __HOSTAPI__ + "/Apotek",
                 type: "POST",
                 data: protocol,
-                beforeSend: function (request) {
+                beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                success: function (response) {
+                success: function(response) {
                     tableResep.ajax.reload();
                     location.href = __HOSTNAME__ + "/resep/view/" + response.response_package.response_unique;
                 },
-                error: function (response) {
+                error: function(response) {
                     //
                 }
             });
@@ -351,7 +365,7 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-lg-12">
-                        <strong>Pasien:</strong>
+                        <strong>Pasien (Berdasarkan asesmen sebelumnya):</strong>
                         <select id="pasien_saya" class="form-control"></select>
                         <br /><br />
                     </div>

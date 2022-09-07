@@ -22,12 +22,17 @@
                     if(data === undefined) {
                         data = [];
                     }
+                    
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsFiltered;
+                    
                     return data;
                 }
             },
             autoWidth: false,
             "bInfo" : false,
-            lengthMenu: [[-1], ["All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             aaSorting: [[0, "asc"]],
             "columnDefs":[{
                 "targets":0,
@@ -48,6 +53,7 @@
                     "data" : null, render: function(data, type, row, meta) {
                         var selectedID = {};
                         var selectedMetaData;
+                        console.log(row.pasien.history_penjamin);
                         for(var a = 0; a < row.pasien.history_penjamin.length; a++) {
                             if(row.pasien.history_penjamin[a].penjamin === row.penjamin.uid) {
                                 selectedID = row.pasien.history_penjamin[a];
@@ -55,7 +61,8 @@
                             }
                         }
 
-                        return "<span pasien=\"" + row.pasien.uid + "\" id=\"pasien_" + row.uid + "\" nik=\"" + row.pasien.nik + "\" no_kartu=\"" + selectedMetaData.response.peserta.noKartu + "\">" + row.pasien.no_rm + "</span>";
+                        return "";
+                        //return "<span pasien=\"" + row.pasien.uid + "\" id=\"pasien_" + row.uid + "\" nik=\"" + row.pasien.nik + "\" no_kartu=\"" + selectedMetaData.response.peserta.noKartu + "\">" + row.pasien.no_rm + "</span>";
                     }
                 },
                 {
@@ -844,6 +851,7 @@
                     d.cari = $("#cari_pasien_bpjs").val();
                 },
                 dataSrc:function(response) {
+                    console.log(response);
                     var data = response.response_package.response_data;
                     if(data === undefined) {
                         data = [];
@@ -853,7 +861,7 @@
             },
             autoWidth: false,
             "bInfo" : false,
-            lengthMenu: [[-1], ["All"]],
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
             aaSorting: [[0, "asc"]],
             "columnDefs":[{
                 "targets":0,
@@ -956,7 +964,7 @@
                                     for(var penj in item.penjamin) {
                                         if(item.penjamin[penj].penjamin === __UIDPENJAMINBPJS__) {
                                             var dataBPJS = JSON.parse(item.penjamin[penj].rest_meta);
-                                            targetBPJS = dataBPJS.response.peserta.noKartu;
+                                            targetBPJS = dataBPJS.data.peserta.noKartu;
                                         }
                                     }
 

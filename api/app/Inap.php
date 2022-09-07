@@ -2736,4 +2736,3 @@ class Inap extends Utility
         return $AntrianProses;
     }
 }
-?>

@@ -69,9 +69,9 @@ class Rujukan extends Utility
 
         if($parameter['sync_data'] === 'Y') {
             if(isset($parameter['cari']) && !empty($parameter['cari'])) {
-                $Rujukan = $BPJS->launchUrl('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/RS/List/Peserta/' . $parameter['cari']);
-                if(intval($Rujukan['content']['metaData']['code']) === 200) {
-                    $data = $Rujukan['content']['response']['rujukan'];
+                $Rujukan = $BPJS->getUrl2('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/RS/List/Peserta/' . $parameter['cari']);
+                if(intval($Rujukan['metaData']['code']) === 200) {
+                    $data = $Rujukan['data']['rujukan'];
                     foreach ($data as $key => $value) {
                         $check = self::$query->select('bpjs_rujukan', array(
                             'uid'
@@ -155,7 +155,7 @@ class Rujukan extends Utility
                                 ->where(array(
                                     'rujukan.deleted_at' => 'IS NULL',
                                     'AND',
-                                    'rujukan.created_at::date' => '= date \'' . $value['tglKunjungan'] . '\''
+                                    'rujukan.created_at::date' => '= date(\'' . $value['tglKunjungan'] . '\')'
                                 ))
                                 ->execute();
 
@@ -163,7 +163,7 @@ class Rujukan extends Utility
                                 'uid' => parent::gen_uuid(),
                                 'pasien' => $parameter['pasien'],
                                 'sep' => $SEP['response_data'][0]['uid'],
-                                'request_rujukan' => $RequestRujukan['response_data'][0]['uid'],
+                                //'request_rujukan' => $RequestRujukan['response_data'][0]['uid'],
                                 'pegawai' => $UserData['data']->uid,
                                 'no_kunjungan' => $value['noKunjungan'],
                                 'asal_rujukan_kode' => (empty($value['provPerujuk']['kode']) ? '' : $value['provPerujuk']['kode']),
@@ -224,7 +224,9 @@ class Rujukan extends Utility
             $paramData = array(
                 'bpjs_rujukan.deleted_at' => 'IS NULL',
                 'AND',
-                'bpjs_rujukan.tujuan_rujukan_kode' => 'IS NULL'
+                'bpjs_rujukan.tujuan_rujukan_kode' => 'IS NULL',
+                'AND',
+                'pasien.deleted_at' => 'IS NULL'
             );
 
             $paramValue = array();
@@ -232,7 +234,9 @@ class Rujukan extends Utility
             $paramData = array(
                 'bpjs_rujukan.deleted_at' => 'IS NULL',
                 'AND',
-                'bpjs_rujukan.tujuan_rujukan_kode' => 'IS NULL'
+                'bpjs_rujukan.tujuan_rujukan_kode' => 'IS NULL',
+                'AND',
+                'pasien.deleted_at' => 'IS NULL'
             );
 
             $paramValue = array();
@@ -289,6 +293,12 @@ class Rujukan extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('pasien', array(
+                    'no_rm'
+                ))
+                ->on(array(
+                    array('bpjs_rujukan.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->order(array(
                     'created_at' => 'DESC'
@@ -344,6 +354,12 @@ class Rujukan extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('pasien', array(
+                    'no_rm'
+                ))
+                ->on(array(
+                    array('bpjs_rujukan.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->order(array(
                     'created_at' => 'DESC'
@@ -356,10 +372,9 @@ class Rujukan extends Utility
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $Pasien = new Pasien(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
-
-            $Pasien = new Pasien(self::$pdo);
             $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienDetail['response_data'][0];
 
@@ -369,6 +384,12 @@ class Rujukan extends Utility
         $itemTotal = self::$query->select('bpjs_rujukan', array(
             'uid'
         ))
+            ->join('pasien', array(
+                'no_rm'
+            ))
+            ->on(array(
+                array('bpjs_rujukan.pasien', '=', 'pasien.uid')
+            ))
             ->where($paramData, $paramValue)
             ->execute();
 
@@ -389,13 +410,17 @@ class Rujukan extends Utility
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
-                'rujukan.deleted_at' => 'IS NULL'
+                'rujukan.deleted_at' => 'IS NULL',
+                'AND',
+                'pasien.deleted_at' => 'IS NULL'
             );
 
             $paramValue = array();
         } else {
             $paramData = array(
-                'rujukan.deleted_at' => 'IS NULL'
+                'rujukan.deleted_at' => 'IS NULL',
+                'AND',
+                'pasien.deleted_at' => 'IS NULL'
                 /*'rujukan.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''*/
             );
 
@@ -420,6 +445,12 @@ class Rujukan extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('pasien', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('rujukan.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->order(array(
                     'status' => 'DESC'
@@ -442,6 +473,12 @@ class Rujukan extends Utility
                 'created_at',
                 'updated_at'
             ))
+                ->join('pasien', array(
+                    'nama'
+                ))
+                ->on(array(
+                    array('rujukan.pasien', '=', 'pasien.uid')
+                ))
                 ->where($paramData, $paramValue)
                 ->order(array(
                     'status' => 'DESC'
@@ -453,28 +490,30 @@ class Rujukan extends Utility
 
         $data['response_draw'] = $parameter['draw'];
         $autonum = intval($parameter['start']) + 1;
+        $Poli = new Poli(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        $Pasien = new Pasien(self::$pdo);
+        $Pegawai = new Pegawai(self::$pdo);
+        $Asesmen = new Asesmen(self::$pdo);
+
         foreach ($data['response_data'] as $key => $value) {
 
 
             $data['response_data'][$key]['autonum'] = $autonum;
 
             //Poli
-            $Poli = new Poli(self::$pdo);
             $PoliDetail = $Poli->get_poli_detail($value['poli']);
             $data['response_data'][$key]['poli'] = $PoliDetail['response_data'][0];
 
             //Penjamin
-            $Penjamin = new Penjamin(self::$pdo);
             $PenjaminDetail = $Penjamin->get_penjamin_detail($value['penjamin']);
             $data['response_data'][$key]['penjamin'] = $PenjaminDetail['response_data'][0];
 
             //Pasien
-            $Pasien = new Pasien(self::$pdo);
             $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['pasien']);
             $data['response_data'][$key]['pasien'] = $PasienDetail['response_data'][0];
 
             //Dokter
-            $Pegawai = new Pegawai(self::$pdo);
             $DokterDetail = $Pegawai->get_detail($value['dokter']);
             $data['response_data'][$key]['dokter'] = $DokterDetail['response_data'][0];
 
@@ -485,8 +524,7 @@ class Rujukan extends Utility
                 $PegawaiDetail = $Pegawai->get_detail($value['pegawai_rekam_medis']);
                 $data['response_data'][$key]['pegawai_rekam_medis'] = $PegawaiDetail['response_data'][0];
             }
-
-            $Asesmen = new Asesmen(self::$pdo);
+            
             $AsesmenDetail = $Asesmen->get_asesmen_medis($value['antrian']);
             $data['response_data'][$key]['asesmen'] = $AsesmenDetail['response_data'][0];
 
@@ -515,11 +553,17 @@ class Rujukan extends Utility
         $itemTotal = self::$query->select('rujukan', array(
             'uid'
         ))
+            ->join('pasien', array(
+                'nama'
+            ))
+            ->on(array(
+                array('rujukan.pasien', '=', 'pasien.uid')
+            ))
             ->where($paramData, $paramValue)
             ->execute();
 
         $data['recordsTotal'] = count($itemTotal['response_data']);
-        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($data['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
 
