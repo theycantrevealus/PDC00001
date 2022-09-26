@@ -250,7 +250,9 @@ $lastExist = '';
               event.preventDefault();
           }
       }).on('paste', function(event) {
+        if (event.originalEvent.clipboardData.getData('Text').match(/[^\d]/)) {
           event.preventDefault();
+        }
       });
       
       var targetModule = 0;
