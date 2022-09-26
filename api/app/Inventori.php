@@ -8257,6 +8257,7 @@ class Inventori extends Utility
               ))
               ->execute();
 
+            /* update yogi
             $update_stok_old_dari = self::$query->update('inventori_stok', array(
               'stok_terkini' => floatval($stok_dari_old['response_data'][0]['stok_terkini']) - floatval($MutValue['qty'])
             ))
@@ -8272,6 +8273,7 @@ class Inventori extends Utility
                 $tarValue['dari']
               ))
               ->execute();
+            update yogi */
 
             if ($update_stok_old_dari['response_result'] > 0) {
 
@@ -8291,6 +8293,7 @@ class Inventori extends Utility
                   'inventori_mutasi', $parameter['uid'], $MutValue['item'], $MutValue['batch']
                 ))
                 ->execute();
+                /* update yogi
               if ($TempStatus['response_result'] > 0) {
                 //Update Stok Log Dari
                 $update_dari_log = self::$query->insert('inventori_stok_log', array(
@@ -8307,6 +8310,7 @@ class Inventori extends Utility
                 ))
                   ->execute();
               }
+              update yogi */
             }
 
 
