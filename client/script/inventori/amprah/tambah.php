@@ -114,9 +114,8 @@
 
 			var aksi = document.createElement("TD");
 			var btnDelete = document.createElement("BUTTON");
-			$(btnDelete).addClass("btn btn-danger btn-sm").html("<i class=\"fa fa-trash\"></i>");
+			$(btnDelete).html("<i class=\"fa fa-trash\"></i>").addClass("btn btn-danger btn-sm delete");
 			$(aksi).append(btnDelete);
-
 			$(row).append(num);
 			$(row).append(item);
 			$(row).append(satuan);
@@ -136,6 +135,7 @@
                 $(this).find("td:eq(1) span.kentut").attr("id", "stok_" + (e + 1));
 				$(this).find("td:eq(2)").attr("id", "satuan_" + (e + 1));
 				$(this).find("td:eq(3) input").attr("id", "qty_" + (e + 1));
+				$(this).find("td:eq(4) button").attr("id", "delete_" + (e + 1));
 			});
 		}
 
@@ -218,6 +218,15 @@
 
 			if($(this).inputmask("unmaskedvalue") > 0 && $("#row_" + id).hasClass("new-row") && $("#item_" + id).val() != "none") {
 				autoTable("#table-detail-amprah");
+			}
+		});
+
+		$("body").on("click", ".delete", function() {
+			var id = $(this).attr("id").split("_");
+			id = id[id.length - 1];
+			if(!$("#row_" + id).hasClass("new-row")) {
+				$("#row_" + id).remove();
+				rebaseTable("#table-detail-amprah");
 			}
 		});
 
