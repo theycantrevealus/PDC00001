@@ -3421,7 +3421,7 @@
       if (checkAlergi === 'Y') {
         if ((resep.length > 0 || racikan.length > 0)) {
 
-          if (editorAlergiObat !== "" && editorAlergiObat !== undefined && editorAlergiObat !== null) {
+          // if (editorAlergiObat !== "" && editorAlergiObat !== undefined && editorAlergiObat !== null) {
             $.ajax({
               async: false,
               url: __HOSTAPI__ + "/Asesmen",
@@ -3434,19 +3434,19 @@
                 savingResult = response;
               },
               error: function(response) {
-                console.clear();
+                // console.clear();
                 console.log(response);
               }
             });
-          } else {
-            Swal.fire(
-              'Asesmen Medis',
-              'Alergi obat wajib diisi',
-              'warning'
-            ).then((result) => {
-              //
-            });
-          }
+          // } else {
+            // Swal.fire(
+            //   'Asesmen Medis',
+            //   'Alergi obat wajib diisi',
+            //   'warning'
+            // ).then((result) => {
+            //   //
+            // });
+          // }
         } else {
           $.ajax({
             async: false,
