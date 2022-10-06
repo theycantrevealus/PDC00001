@@ -1634,7 +1634,9 @@ class Asesmen extends Utility
     $returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter, $MasterUID);
 
     //Resep dan Racikan
-    $returnResponse['resep_response'] = self::set_resep_asesment($parameter, $MasterUID);
+    if ($parameter['resep'][0]['obat'] !== "") {
+      $returnResponse['resep_response'] = self::set_resep_asesment($parameter, $MasterUID);
+    }
 
     if ($parameter['poli'] !== __POLI_INAP__) {
       //Pasien Keluar Poli
