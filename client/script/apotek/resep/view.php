@@ -645,14 +645,14 @@
             var totalRacikan = 0;
             $("#table-resep-racikan > tbody.racikan > tr").each(function(e) {
                 var id = (e + 1);
-                var batchHarga = $("#racikan_harga_" + id).attr("harga");
+                // var batchHarga = $("#racikan_harga_" + id).attr("harga");
                 //totalRacikan += parseFloat(batchHarga);
 
                 var currentPriceRacikan = 0;
 
                 $("#komposisi_" + id + " tbody tr").each(function(f) {
                     var harga = $(this).find("td:eq(1) ol").attr("harga");
-                    var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                    var qty = parseFloat($(this).closest('tr').find('td').eq(2).find('input').val());
 
                     if(qty < 1 || isNaN(qty)) {
                         currentPriceRacikan += 0
@@ -679,7 +679,7 @@
             var totalResep = 0;
             $("#table-resep tbody tr").each(function(e) {
                 var id = (e + 1);
-                var batchHarga = $("#harga_obat_" + id).attr("harga");
+                var batchHarga = +$("#harga_obat_" + id).attr("harga");
                 totalResep += parseFloat(batchHarga);
             });
 
@@ -1170,7 +1170,6 @@
                                         finalTotal = rawTotal + selectedProfitValue;
                                     }
 
-
                                     //Racikan session
                                     $("#obat_komposisi_batch_" + rowTarget).attr({
                                         "harga": finalTotal
@@ -1210,6 +1209,12 @@
                                     });
 
                                     final_price = totalKalkulasi
+                                }
+                                else{
+                                    //Racikan session
+                                    $("#obat_komposisi_batch_" + rowTarget).attr({
+                                        "harga": 0
+                                    });
                                 }
                             }
 
