@@ -3112,7 +3112,7 @@
             "satuan_konsumsi": "",
             "iterasi": 0,
             "signaKonsumsi": 0,
-            "signaTakar": 0,
+            "signaTakar": "",
             "signaHari": 0,
             "aturanPakai": 0
           };
@@ -3125,7 +3125,7 @@
           /*dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
           dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));*/
           dataRacikan.signaKonsumsi = masterRacikanRow.find("td.master-racikan-cell:eq(2) input").val();
-          dataRacikan.signaTakar = masterRacikanRow.find("td.master-racikan-cell:eq(4) input").val();
+          dataRacikan.signaTakar = masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue");
           dataRacikan.signaHari = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"));
 
 
@@ -3157,10 +3157,10 @@
             dataRacikan.item.length > 0 &&
 
             dataRacikan.signaKonsumsi > 0 &&
-            dataRacikan.signaTakar > 0
+            // dataRacikan.signaTakar > 0
             // &&
             // parseFloat(dataRacikan.signaKonsumsi) > 0 &&
-            // parseFloat(dataRacikan.signaTakar) > 0 &&
+            parseFloat(dataRacikan.signaTakar) > 0
             // parseFloat(dataRacikan.signaHari) > 0
           ) {
             racikan.push(dataRacikan);
