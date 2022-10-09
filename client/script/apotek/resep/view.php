@@ -25,7 +25,11 @@
 
         function checkEachTab() {
             //Check Resep
-            $("#identifier_jumlah_resep").html($("#table-resep tbody tr").length);
+            if($("#table-resep tbody tr:eq(0)").hasClass("no-resep")){
+              $("#identifier_jumlah_resep").html(0);
+            } else {
+              $("#identifier_jumlah_resep").html($("#table-resep tbody tr").length);
+            }
             $("#identifier_jumlah_racikan").html($("#table-resep-racikan tbody tr.racikan-master").length);
             var kajianCheck = false;
             var kajian = populateAllKajian();
