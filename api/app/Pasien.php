@@ -679,15 +679,15 @@ class Pasien extends Utility
         } else {
             $uid = parent::gen_uuid();
 
-            $allData['uid'] = $uid;
-            $allData['no_rm'] = str_replace('-', '', $allData['no_rm']);
-            $allData['created_at'] = parent::format_date();
-            $allData['updated_at'] = parent::format_date();
+            $dataObj['uid'] = $uid;
+            $dataObj['no_rm'] = str_replace('-', '', $dataObj['no_rm']);
+            $dataObj['created_at'] = parent::format_date();
+            $dataObj['updated_at'] = parent::format_date();
 
             foreach ($dataObj as $key => $value) {
                 $allData[$key] = $value;
             }
-
+    
             $pasien = self::$query
                 ->insert($table, $allData)
                 ->execute();

@@ -25,7 +25,11 @@
 
         function checkEachTab() {
             //Check Resep
-            $("#identifier_jumlah_resep").html($("#table-resep tbody tr").length);
+            if($("#table-resep tbody tr:eq(0)").hasClass("no-resep")){
+              $("#identifier_jumlah_resep").html(0);
+            } else {
+              $("#identifier_jumlah_resep").html($("#table-resep tbody tr").length);
+            }
             $("#identifier_jumlah_racikan").html($("#table-resep-racikan tbody tr.racikan-master").length);
             var kajianCheck = false;
             var kajian = populateAllKajian();
@@ -645,14 +649,14 @@
             var totalRacikan = 0;
             $("#table-resep-racikan > tbody.racikan > tr").each(function(e) {
                 var id = (e + 1);
-                var batchHarga = $("#racikan_harga_" + id).attr("harga");
+                // var batchHarga = $("#racikan_harga_" + id).attr("harga");
                 //totalRacikan += parseFloat(batchHarga);
 
                 var currentPriceRacikan = 0;
 
                 $("#komposisi_" + id + " tbody tr").each(function(f) {
                     var harga = $(this).find("td:eq(1) ol").attr("harga");
-                    var qty = parseFloat($(this).find("td:eq(2) input").inputmask("unmaskedvalue"));
+                    var qty = parseFloat($(this).closest('tr').find('td').eq(2).find('input').val());
 
                     if(qty < 1 || isNaN(qty)) {
                         currentPriceRacikan += 0
@@ -679,7 +683,7 @@
             var totalResep = 0;
             $("#table-resep tbody tr").each(function(e) {
                 var id = (e + 1);
-                var batchHarga = $("#harga_obat_" + id).attr("harga");
+                var batchHarga = +$("#harga_obat_" + id).attr("harga");
                 totalResep += parseFloat(batchHarga);
             });
 
@@ -1170,7 +1174,6 @@
                                         finalTotal = rawTotal + selectedProfitValue;
                                     }
 
-
                                     //Racikan session
                                     $("#obat_komposisi_batch_" + rowTarget).attr({
                                         "harga": finalTotal
@@ -1210,6 +1213,12 @@
                                     });
 
                                     final_price = totalKalkulasi
+                                }
+                                else{
+                                    //Racikan session
+                                    $("#obat_komposisi_batch_" + rowTarget).attr({
+                                        "harga": 0
+                                    });
                                 }
                             }
 
