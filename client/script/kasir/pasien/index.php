@@ -14,6 +14,10 @@
 		var totalItemPayDiscount = 0;
 		var currentPasienName;
 		var itemMeta = [];
+        var tabActive = 1;
+        var tableAntrianBayarRJ;
+        var tableAntrianBayarRI;
+        var tableAntrianBayarIGD;
 
 		
 
@@ -408,505 +412,911 @@
 			tableKwitansi.ajax.reload();
 		});
 
-		
-		var tableAntrianBayarRJ = $("#table-biaya-pasien-rj").DataTable({
-            processing: true,
-            serverSide: true,
-            sPaginationType: "full_numbers",
-            bPaginate: true,
-            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
-            serverMethod: "POST",
-			"ajax":{
-				url: __HOSTAPI__ + "/Invoice",
-				type: "POST",
-				data: function(d) {
-					d.request = "biaya_pasien";
-					d.from = getDateRange("#range_invoice_rajal")[0];
-					d.to = getDateRange("#range_invoice_rajal")[1];
-					d.filter_poli = "rajal";
-				},
-				headers:{
-					Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
-				},
-				dataSrc:function(response) {
-					var returnedData = [];
-					if(returnedData == undefined || returnedData.response_package == undefined) {
-						returnedData = [];
-					}
+        $("#tab-link-rj").click(function(){
+            tabActive = 1;
+            initDataTable();
+        });
 
-					for(var InvKeyData in response.response_package.response_data) {
-                        //returnedData.push(response.response_package.response_data[InvKeyData]);
-					    if(
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
-                        ) {
+        $("#tab-link-ri").click(function(){
+            tabActive = 2;
+            initDataTable();
+        });
 
-                            if(
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                                response.response_package.response_data[InvKeyData].pasien !== null &&
-                                (response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__) || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
-                            ) {
-                                if(!response.response_package.response_data[InvKeyData].lunas) {
+        $("#tab-link-igd").click(function(){
+            tabActive = 3;
+            initDataTable();
+        });
+        
 
-                                    if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
-                                    }
-                                    var showIt = false;
-                                    for(var az in response.response_package.response_data[InvKeyData].invoice_detail) {
-                                        if(response.response_package.response_data[InvKeyData].invoice_detail[az].status_bayar === "N" && response.response_package.response_data[InvKeyData].invoice_detail[az].departemen !== __POLI_INAP__) {
-                                            showIt = true;
-                                            break;
-                                        } else {
-                                            showIt = false;
+		function initDataTable(){
+            
+            if(tabActive == 1){
+                // NEW RAWAT JALAN
+                if ( $.fn.dataTable.isDataTable( '#table-biaya-pasien-rj' ) ) {
+                    tableAntrianBayarRJ.ajax.reload();
+                }else{
+                    tableAntrianBayarRJ = $("#table-biaya-pasien-rj").DataTable({
+                        processing: true,
+                        serverSide: true,
+                        sPaginationType: "full_numbers",
+                        bPaginate: true,
+                        lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+                        serverMethod: "POST",
+                        pageLength: 10,
+                        "ajax":{
+                            url: __HOSTAPI__ + "/Invoice",
+                            type: "POST",
+                            data: function(d) {
+                                d.request = "biaya_pasien_rawat_jalan";
+                                d.from = getDateRange("#range_invoice_rajal")[0];
+                                d.to = getDateRange("#range_invoice_rajal")[1];
+                                d.filter_poli = "rajal";
+                            },
+                            headers:{
+                                Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                            },
+                            dataSrc:function(response) {
+                                var returnedData = response.response_package.response_data;
+
+                                if(returnedData == undefined || returnedData == undefined) {
+                                    returnedData = [];
+                                }
+                                response.draw = parseInt(response.response_package.response_draw);
+                                response.recordsTotal = response.response_package.recordsTotal;
+                                response.recordsFiltered = response.response_package.recordsFiltered;
+                                return returnedData;
+                            }
+                        },
+                        autoWidth: false,
+                        language: {
+                            search: "",
+                            searchPlaceholder: "Cari Nomor Invoice"
+                        },
+                        "columns" : [
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return "<h5 class=\"autonum\">" + row.no + "</h5>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    var uniquePenjamin = {};
+                                    var detailPenjamin = row.invoice_detail;
+                                    for(var a in detailPenjamin) {
+                                        if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                            uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
                                         }
                                     }
 
-                                    if(showIt) {
-                                        returnedData.push(response.response_package.response_data[InvKeyData]);
+                                    var parsedPenjaminList = "";
+
+                                    for(var b in uniquePenjamin) {
+                                        parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                                    }
+
+                                    return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    if(
+                                        row.pasien.panggilan_name !== undefined &&
+                                        row.pasien.panggilan_name !== null
+                                    ) {
+                                        return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+                                    } else {
+                                        return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
                                     }
                                 }
-                            } else {
-
-                            }
-                        }
-					}
-
-					for(var a in returnedData) {
-					    returnedData[a].autonum = (parseInt(a) + 1);
-                    }
-
-					response.draw = parseInt(response.response_package.response_draw);
-					response.recordsTotal = response.response_package.recordsTotal;
-					response.recordsFiltered = returnedData.length;
-					
-					return returnedData;
-				}
-			},
-			autoWidth: false,
-			language: {
-				search: "",
-				searchPlaceholder: "Cari Nomor Invoice"
-			},
-			"columns" : [
-				{
-					"data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-                        var uniquePenjamin = {};
-                        var detailPenjamin = row.invoice_detail;
-                        for(var a in detailPenjamin) {
-                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
-                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
-                            }
-                        }
-
-                        var parsedPenjaminList = "";
-
-                        for(var b in uniquePenjamin) {
-                            parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
-                        }
-
-						return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
-					}
-				},
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
-                    }
-                },
-				{
-					"data" : null, render: function(data, type, row, meta) {
-					    if(
-					        row.pasien.panggilan_name !== undefined &&
-                            row.pasien.panggilan_name !== null
-                        ) {
-                            return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
-                        } else {
-                            return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
-                        }
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-					    var poliList = [];
-					    var uniquePoliList = [];
-					    for(var az in row.antrian_kunjungan.poli_list) {
-					        var targetPoli = {
-					            uid: "",
-                                nama: ""
-                            };
-					        if(row.antrian_kunjungan.poli_list[az].poli !== null) {
-                                targetPoli = {
-                                    uid: row.antrian_kunjungan.poli_list[az].poli.uid,
-                                    nama: row.antrian_kunjungan.poli_list[az].poli.nama
-                                };
-                            } else {
-                                targetPoli = {
-                                    uid: __POLI_INAP__,
-                                    nama: "Rawat Inap"
-                                };
-                            }
-					        if(uniquePoliList.indexOf(targetPoli.uid) < 0) {
-					            uniquePoliList.push(targetPoli.uid);
-                                poliList.push("<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + targetPoli.nama + "</span>");
-                            }
-                        }
-					    if(poliList.length > 0) {
-                            return poliList.join(" ");
-                        } else {
-                            return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli.nama + "</span>";
-                        }
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-                        var invDetail = row.invoice_detail;
-                        var totalParse = 0;
-                        for(var a in invDetail) {
-                            if(
-                                invDetail[a].departemen !== __POLI_INAP__ &&
-                                invDetail[a].departemen !== __POLI_IGD__
-                            ) {
-                                totalParse += parseFloat(invDetail[a].subtotal);
-                            }
-                        }
-                        return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
-					}
-				},
-				{
-					"data" : null, render: function(data, type, row, meta) {
-						return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"RJ\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
-                            "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
-                            "</button>" +
-                            "</div>";
-					}
-				}
-			]
-		});
-
-
-
-
-
-
-
-
-
-        var tableAntrianBayarRI = $("#table-biaya-pasien-ri").DataTable({
-            processing: true,
-            serverSide: true,
-            sPaginationType: "full_numbers",
-            bPaginate: true,
-            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
-            serverMethod: "POST",
-            "ajax":{
-                url: __HOSTAPI__ + "/Invoice",
-                type: "POST",
-                data: function(d) {
-                    d.request = "biaya_pasien";
-                    d.from = getDateRange("#range_invoice_ranap")[0];
-                    d.to = getDateRange("#range_invoice_ranap")[1];
-                    d.filter_poli = "ranap";
-                },
-                headers:{
-                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
-                },
-                dataSrc:function(response) {
-                    var returnedData = [];
-
-                    if(response == undefined || response.response_package == undefined) {
-                        returnedData = [];
-                    }
-                    for(var InvKeyData in response.response_package.response_data) {
-                        if(
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
-                        ) {
-                            if (
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                                response.response_package.response_data[InvKeyData].pasien !== null &&
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_INAP__ || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
-                            ) {
-                                if (!response.response_package.response_data[InvKeyData].lunas) {
-                                    if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    var poliList = [];
+                                    var uniquePoliList = [];
+                                    for(var az in row.antrian_kunjungan.poli_list) {
+                                        var targetPoli = {
+                                            uid: "",
+                                            nama: ""
+                                        };
+                                        if(row.antrian_kunjungan.poli_list[az].poli !== null) {
+                                            targetPoli = {
+                                                uid: row.antrian_kunjungan.poli_list[az].poli.uid,
+                                                nama: row.antrian_kunjungan.poli_list[az].poli.nama
+                                            };
+                                        } else {
+                                            targetPoli = {
+                                                uid: __POLI_INAP__,
+                                                nama: "Rawat Inap"
+                                            };
+                                        }
+                                        if(uniquePoliList.indexOf(targetPoli.uid) < 0) {
+                                            uniquePoliList.push(targetPoli.uid);
+                                            poliList.push("<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + targetPoli.nama + "</span>");
+                                        }
                                     }
-                                    returnedData.push(response.response_package.response_data[InvKeyData]);
-                                }
-                            } else {
-                                if(response.response_package.response_data[InvKeyData].departemen_terkait.indexOf(__POLI_INAP__) >= 0) {
-                                    returnedData.push(response.response_package.response_data[InvKeyData]);
-                                }
-                            }
-                        } else {
-                            if(response.response_package.response_data[InvKeyData].departemen_terkait.indexOf(__POLI_INAP__) >= 0) {
-                                returnedData.push(response.response_package.response_data[InvKeyData]);
-                            }
-                        }
-                    }
-
-                    response.draw = parseInt(response.response_package.response_draw);
-                    response.recordsTotal = response.response_package.recordsTotal;
-                    response.recordsFiltered = returnedData.length;
-
-                    return returnedData;
-                }
-            },
-            autoWidth: false,
-            language: {
-                search: "",
-                searchPlaceholder: "Cari Nomor Invoice"
-            },
-            "columns" : [
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        var uniquePenjamin = {};
-                        var detailPenjamin = row.invoice_detail;
-                        for(var a in detailPenjamin) {
-                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
-                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
-                            }
-                        }
-
-                        var parsedPenjaminList = "";
-
-                        for(var b in uniquePenjamin) {
-                            parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
-                        }
-
-                        return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        if(
-                            row.pasien.panggilan_name !== undefined &&
-                            row.pasien.panggilan_name !== null
-                        ) {
-                            return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
-                        } else {
-                            return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
-                        }
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> Rawat Inap</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        var invDetail = row.invoice_detail;
-                        var totalParse = 0;
-                        for(var a in invDetail) {
-                            if(invDetail[a].departemen === __POLI_INAP__) {
-                                totalParse += parseFloat(invDetail[a].subtotal);
-                            }
-                        }
-                        return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"RI\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
-                            "<span><i class=\"fa fa-eye\"></i>Detail</span></button>" +
-                            "</div>";
-                    }
-                }
-            ]
-        });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        var tableAntrianBayarIGD = $("#table-biaya-pasien-igd").DataTable({
-            processing: true,
-            serverSide: true,
-            sPaginationType: "full_numbers",
-            bPaginate: true,
-            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
-            serverMethod: "POST",
-            "ajax":{
-                url: __HOSTAPI__ + "/Invoice",
-                type: "POST",
-                data: function(d) {
-                    d.request = "biaya_pasien";
-                    d.from = getDateRange("#range_invoice_igd")[0];
-                    d.to = getDateRange("#range_invoice_igd")[1];
-                    d.filter_poli = "igd";
-                },
-                headers:{
-                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
-                },
-                dataSrc:function(response) {
-                    var returnedData = [];
-                    if(returnedData == undefined || returnedData.response_package == undefined) {
-                        returnedData = [];
-                    }
-
-                    for(var InvKeyData in response.response_package.response_data) {
-                        if(
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
-                            response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
-                        ) {
-                            if (
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
-                                response.response_package.response_data[InvKeyData].pasien !== undefined &&
-                                response.response_package.response_data[InvKeyData].pasien !== null &&
-                                response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__ || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
-                            ) {
-                                if (!response.response_package.response_data[InvKeyData].lunas) {
-                                    if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
-                                        response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+                                    if(poliList.length > 0) {
+                                        return poliList.join(" ");
+                                    } else {
+                                        return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli.nama + "</span>";
                                     }
-                                    returnedData.push(response.response_package.response_data[InvKeyData]);
                                 }
-                            } else {
-                                //
-                            }
-                        }
-                    }
-
-                    response.draw = parseInt(response.response_package.response_draw);
-                    response.recordsTotal = returnedData.length;
-                    response.recordsFiltered = returnedData.length;
-
-                    return returnedData;
-                }
-            },
-            autoWidth: false,
-            language: {
-                search: "",
-                searchPlaceholder: "Cari Nomor Invoice"
-            },
-            "columns" : [
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        var uniquePenjamin = {};
-                        var detailPenjamin = row.invoice_detail;
-                        for(var a in detailPenjamin) {
-                            if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
-                                uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
-                            }
-                        }
-
-                        var parsedPenjaminList = "";
-
-                        for(var b in uniquePenjamin) {
-                            parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
-                        }
-
-                        return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"wrap_content\">" + row.created_at_parse + "</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        if(
-                            row.pasien.panggilan_name !== undefined &&
-                            row.pasien.panggilan_name !== null
-                        ) {
-                            return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
-                        } else {
-                            return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
-                        }
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return "<span class=\"badge badge-custom-caption badge-outline-danger\"><i class=\"fa fa-tags\"></i> IGD</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        //return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
-                        return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        var invDetail = row.invoice_detail;
-
-
-
-                        var totalParse = 0;
-                        for(var a in invDetail) {
-                            if(invDetail[a].status_bayar === "N") {
-                                if(invDetail[a].departemen === __POLI_IGD__ || invDetail[a].departemen === __POLI_OPERASI__) {
-                                    totalParse += parseFloat(invDetail[a].subtotal);
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    var invDetail = row.invoice_detail;
+                                    var totalParse = 0;
+                                    for(var a in invDetail) {
+                                        if(
+                                            invDetail[a].departemen !== __POLI_INAP__ &&
+                                            invDetail[a].departemen !== __POLI_IGD__
+                                        ) {
+                                            totalParse += parseFloat(invDetail[a].subtotal);
+                                        }
+                                    }
+                                    return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                        "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"RJ\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+                                        "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                                        "</button>" +
+                                        "</div>";
                                 }
                             }
-                        }
-                        return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"IGD\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
-                            "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
-                            "</button>" +
-                            "</div>";
-                    }
+                        ]
+                    });
                 }
-            ]
-        });
+            }else if(tabActive === 2){
+                // NEW RAWAT INAP
+                if ( $.fn.dataTable.isDataTable( '#table-biaya-pasien-ri' ) ) {
+                    tableAntrianBayarRI.ajax.reload();
+                }else {
+                    tableAntrianBayarRI = $("#table-biaya-pasien-ri").DataTable({
+                    processing: true,
+                    serverSide: true,
+                    sPaginationType: "full_numbers",
+                    bPaginate: true,
+                    lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+                    serverMethod: "POST",
+                    pageLength: 10,
+                    "ajax":{
+                        url: __HOSTAPI__ + "/Invoice",
+                        type: "POST",
+                        data: function(d) {
+                            d.request = "biaya_pasien_rawat_inap";
+                            d.from = getDateRange("#range_invoice_ranap")[0];
+                            d.to = getDateRange("#range_invoice_ranap")[1];
+                            d.filter_poli = "ranap";
+                        },
+                        headers:{
+                            Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                        },
+                        dataSrc:function(response) {
+                            var returnedData = response.response_package.response_data;
+
+                            if(returnedData == undefined || returnedData == undefined) {
+                                returnedData = [];
+                            }
+                            response.draw = parseInt(response.response_package.response_draw);
+                            response.recordsTotal = response.response_package.recordsTotal;
+                            response.recordsFiltered = response.response_package.recordsFiltered;
+                            return returnedData;
+                        }
+                    },
+                    autoWidth: false,
+                    language: {
+                        search: "",
+                        searchPlaceholder: "Cari Nomor Invoice"
+                    },
+                    "columns" : [
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return "<h5 class=\"autonum\">" + row.no + "</h5>";
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                var uniquePenjamin = {};
+                                var detailPenjamin = row.invoice_detail;
+                                for(var a in detailPenjamin) {
+                                    if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                        uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                                    }
+                                }
+
+                                var parsedPenjaminList = "";
+
+                                for(var b in uniquePenjamin) {
+                                    parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                                }
+
+                                return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                if(
+                                    row.pasien.panggilan_name !== undefined &&
+                                    row.pasien.panggilan_name !== null
+                                ) {
+                                    return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+                                } else {
+                                    return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
+                                }
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> Rawat Inap</span>";
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                var invDetail = row.invoice_detail;
+                                var totalParse = 0;
+                                for(var a in invDetail) {
+                                    if(invDetail[a].departemen === __POLI_INAP__) {
+                                        totalParse += parseFloat(invDetail[a].subtotal);
+                                    }
+                                }
+                                return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
+                            }
+                        },
+                        {
+                            "data" : null, render: function(data, type, row, meta) {
+                                return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                    "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"RI\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+                                    "<span><i class=\"fa fa-eye\"></i>Detail</span></button>" +
+                                    "</div>";
+                            }
+                        }
+                    ]
+                    });
+                }
+            }else if(tabActive === 3) {
+                //NEW IGD
+                if ( $.fn.dataTable.isDataTable( '#table-biaya-pasien-igd' ) ) {
+                    tableAntrianBayarIGD.ajax.reload();
+                }else {
+                    tableAntrianBayarIGD = $("#table-biaya-pasien-igd").DataTable({
+                        processing: true,
+                        serverSide: true,
+                        sPaginationType: "full_numbers",
+                        bPaginate: true,
+                        lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+                        serverMethod: "POST",
+                        pageLength: 10,
+                        "ajax":{
+                            url: __HOSTAPI__ + "/Invoice",
+                            type: "POST",
+                            data: function(d) {
+                                d.request = "biaya_pasien_igd";
+                                d.from = getDateRange("#range_invoice_igd")[0];
+                                d.to = getDateRange("#range_invoice_igd")[1];
+                                d.filter_poli = "igd";
+                            },
+                            headers:{
+                                Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                            },
+                            dataSrc:function(response) {
+                                var returnedData = response.response_package.response_data;
+
+                                if(returnedData == undefined || returnedData == undefined) {
+                                    returnedData = [];
+                                }
+                                response.draw = parseInt(response.response_package.response_draw);
+                                response.recordsTotal = response.response_package.recordsTotal;
+                                response.recordsFiltered = response.response_package.recordsFiltered;
+                                return returnedData;
+                            }
+                        },
+                        autoWidth: false,
+                        language: {
+                            search: "",
+                            searchPlaceholder: "Cari Nomor Invoice"
+                        },
+                        "columns" : [
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return "<h5 class=\"autonum\">" + row.no + "</h5>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    var uniquePenjamin = {};
+                                    var detailPenjamin = row.invoice_detail;
+                                    for(var a in detailPenjamin) {
+                                        if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+                                            uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+                                        }
+                                    }
+
+                                    var parsedPenjaminList = "";
+
+                                    for(var b in uniquePenjamin) {
+                                        parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+                                    }
+
+                                    return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return "<span class=\"wrap_content\">" + row.created_at_parse + "</span>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    if(
+                                        row.pasien.panggilan_name !== undefined &&
+                                        row.pasien.panggilan_name !== null
+                                    ) {
+                                        return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+                                    } else {
+                                        return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
+                                    }
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return "<span class=\"badge badge-custom-caption badge-outline-danger\"><i class=\"fa fa-tags\"></i> IGD</span>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    //return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
+                                    return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    var invDetail = row.invoice_detail;
+
+
+
+                                    var totalParse = 0;
+                                    for(var a in invDetail) {
+                                        if(invDetail[a].status_bayar === "N") {
+                                            if(invDetail[a].departemen === __POLI_IGD__ || invDetail[a].departemen === __POLI_OPERASI__) {
+                                                totalParse += parseFloat(invDetail[a].subtotal);
+                                            }
+                                        }
+                                    }
+                                    return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
+                                }
+                            },
+                            {
+                                "data" : null, render: function(data, type, row, meta) {
+                                    return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                                        "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"IGD\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+                                        "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+                                        "</button>" +
+                                        "</div>";
+                                }
+                            }
+                        ]
+                    });
+                }
+            }
+        }
+
+        initDataTable();
+
+        //OLD RAWAT JALAN
+        // var tableAntrianBayarRJ = $("#table-biaya-pasien-rj").DataTable({
+        //             processing: true,
+        //             serverSide: true,
+        //             sPaginationType: "full_numbers",
+        //             bPaginate: true,
+        //             lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+        //             serverMethod: "POST",
+        //             "ajax":{
+        //                 url: __HOSTAPI__ + "/Invoice",
+        //                 type: "POST",
+        //                 data: function(d) {
+        //                     d.request = "biaya_pasien";
+        //                     d.from = getDateRange("#range_invoice_rajal")[0];
+        //                     d.to = getDateRange("#range_invoice_rajal")[1];
+        //                     d.filter_poli = "rajal";
+        //                 },
+        //                 headers:{
+        //                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+        //                 },
+        //                 dataSrc:function(response) {
+        //                     var returnedData = [];
+        //                     if(returnedData == undefined || returnedData.response_package == undefined) {
+        //                         returnedData = [];
+        //                     }
+
+        //                     for(var InvKeyData in response.response_package.response_data) {
+        //                         //returnedData.push(response.response_package.response_data[InvKeyData]);
+        //                         if(
+        //                             response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+        //                             response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
+        //                         ) {
+
+        //                             if(
+        //                                 response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+        //                                 response.response_package.response_data[InvKeyData].pasien !== undefined &&
+        //                                 response.response_package.response_data[InvKeyData].pasien !== null &&
+        //                                 (response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_IGD__ &&
+        //                                 response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid !== __POLI_INAP__) || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
+        //                             ) {
+        //                                 if(!response.response_package.response_data[InvKeyData].lunas) {
+
+        //                                     if(response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+        //                                         response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+        //                                     }
+        //                                     var showIt = false;
+        //                                     for(var az in response.response_package.response_data[InvKeyData].invoice_detail) {
+        //                                         if(response.response_package.response_data[InvKeyData].invoice_detail[az].status_bayar === "N" && response.response_package.response_data[InvKeyData].invoice_detail[az].departemen !== __POLI_INAP__) {
+        //                                             showIt = true;
+        //                                             break;
+        //                                         } else {
+        //                                             showIt = false;
+        //                                         }
+        //                                     }
+
+        //                                     if(showIt) {
+        //                                         returnedData.push(response.response_package.response_data[InvKeyData]);
+        //                                     }
+        //                                 }
+        //                             } else {
+
+        //                             }
+        //                         }
+        //                     }
+
+        //                     for(var a in returnedData) {
+        //                         returnedData[a].autonum = (parseInt(a) + 1);
+        //                     }
+
+        //                     response.draw = parseInt(response.response_package.response_draw);
+        //                     response.recordsTotal = response.response_package.recordsTotal;
+        //                     response.recordsFiltered = returnedData.length;
+                            
+        //                     return returnedData;
+        //                 }
+        //             },
+        //             autoWidth: false,
+        //             language: {
+        //                 search: "",
+        //                 searchPlaceholder: "Cari Nomor Invoice"
+        //             },
+        //             "columns" : [
+        //                 {
+        //                     "data" : null, render: function(data, type, row, meta) {
+        //                         return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+        //                     }
+        //                 },
+        //                 {
+        //                     "data" : null, render: function(data, type, row, meta) {
+        //                         var uniquePenjamin = {};
+        //                         var detailPenjamin = row.invoice_detail;
+        //                         for(var a in detailPenjamin) {
+        //                             if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+        //                                 uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+        //                             }
+        //                         }
+
+        //                         var parsedPenjaminList = "";
+
+        //                         for(var b in uniquePenjamin) {
+        //                             parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+        //                         }
+
+        //                         return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
+        //                     }
+        //                 },
+        //                 {
+        //                     "data" : null, render: function(data, type, row, meta) {
+        //                         return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
+        //                     }
+        //                 },
+        //                 {
+        //                     "data" : null, render: function(data, type, row, meta) {
+        //                         if(
+        //                             row.pasien.panggilan_name !== undefined &&
+        //                             row.pasien.panggilan_name !== null
+        //                         ) {
+        //                             return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+        //                         } else {
+        //                             return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
+        //                         }
+        //                     }
+        //                 },
+        //                 {
+        //                     "data" : null, render: function(data, type, row, meta) {
+        //                         var poliList = [];
+        //                         var uniquePoliList = [];
+        //                         for(var az in row.antrian_kunjungan.poli_list) {
+        //                             var targetPoli = {
+        //                                 uid: "",
+        //                                 nama: ""
+        //                             };
+        //                             if(row.antrian_kunjungan.poli_list[az].poli !== null) {
+        //                                 targetPoli = {
+        //                                     uid: row.antrian_kunjungan.poli_list[az].poli.uid,
+        //                                     nama: row.antrian_kunjungan.poli_list[az].poli.nama
+        //                                 };
+        //                             } else {
+        //                                 targetPoli = {
+        //                                     uid: __POLI_INAP__,
+        //                                     nama: "Rawat Inap"
+        //                                 };
+        //                             }
+        //                             if(uniquePoliList.indexOf(targetPoli.uid) < 0) {
+        //                                 uniquePoliList.push(targetPoli.uid);
+        //                                 poliList.push("<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + targetPoli.nama + "</span>");
+        //                             }
+        //                         }
+        //                         if(poliList.length > 0) {
+        //                             return poliList.join(" ");
+        //                         } else {
+        //                             return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> " + row.antrian_kunjungan.poli.nama + "</span>";
+        //                         }
+        //                     }
+        //                 },
+        //                 {
+        //                     "data" : null, render: function(data, type, row, meta) {
+        //                         return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
+        //                     }
+        //                 },
+        //                 {
+        //                     "data" : null, render: function(data, type, row, meta) {
+        //                         var invDetail = row.invoice_detail;
+        //                         var totalParse = 0;
+        //                         for(var a in invDetail) {
+        //                             if(
+        //                                 invDetail[a].departemen !== __POLI_INAP__ &&
+        //                                 invDetail[a].departemen !== __POLI_IGD__
+        //                             ) {
+        //                                 totalParse += parseFloat(invDetail[a].subtotal);
+        //                             }
+        //                         }
+        //                         return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
+        //                     }
+        //                 },
+        //                 {
+        //                     "data" : null, render: function(data, type, row, meta) {
+        //                         return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+        //                             "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"RJ\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+        //                             "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+        //                             "</button>" +
+        //                             "</div>";
+        //                     }
+        //                 }
+        //             ]
+        // });          
 
 
 
 
+
+
+
+
+        // OLD RAWAT INAP
+        // var tableAntrianBayarRI = $("#table-biaya-pasien-ri").DataTable({
+        //     processing: true,
+        //     serverSide: true,
+        //     sPaginationType: "full_numbers",
+        //     bPaginate: true,
+        //     lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+        //     serverMethod: "POST",
+        //     "ajax":{
+        //         url: __HOSTAPI__ + "/Invoice",
+        //         type: "POST",
+        //         data: function(d) {
+        //             d.request = "biaya_pasien";
+        //             d.from = getDateRange("#range_invoice_ranap")[0];
+        //             d.to = getDateRange("#range_invoice_ranap")[1];
+        //             d.filter_poli = "ranap";
+        //         },
+        //         headers:{
+        //             Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+        //         },
+        //         dataSrc:function(response) {
+        //            console.log(response)
+        //             var returnedData = [];
+
+        //             if(response == undefined || response.response_package == undefined) {
+        //                 returnedData = [];
+        //             }
+        //             for(var InvKeyData in response.response_package.response_data) {
+        //                 if(
+        //                     response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+        //                     response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
+        //                 ) {
+        //                     if (
+        //                         response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+        //                         response.response_package.response_data[InvKeyData].pasien !== undefined &&
+        //                         response.response_package.response_data[InvKeyData].pasien !== null &&
+        //                         response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_INAP__ || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
+        //                     ) {
+        //                         if (!response.response_package.response_data[InvKeyData].lunas) {
+        //                             if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+        //                                 response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+        //                             }
+        //                             returnedData.push(response.response_package.response_data[InvKeyData]);
+        //                         }
+        //                     } else {
+        //                         if(response.response_package.response_data[InvKeyData].departemen_terkait.indexOf(__POLI_INAP__) >= 0) {
+        //                             returnedData.push(response.response_package.response_data[InvKeyData]);
+        //                         }
+        //                     }
+        //                 } else {
+        //                     if(response.response_package.response_data[InvKeyData].departemen_terkait.indexOf(__POLI_INAP__) >= 0) {
+        //                         returnedData.push(response.response_package.response_data[InvKeyData]);
+        //                     }
+        //                 }
+        //             }
+
+        //             response.draw = parseInt(response.response_package.response_draw);
+        //             response.recordsTotal = response.response_package.recordsTotal;
+        //             response.recordsFiltered = returnedData.length;
+        //             console.log(returnedData)
+        //             return returnedData;
+        //         }
+        //     },
+        //     autoWidth: false,
+        //     language: {
+        //         search: "",
+        //         searchPlaceholder: "Cari Nomor Invoice"
+        //     },
+        //     "columns" : [
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 var uniquePenjamin = {};
+        //                 var detailPenjamin = row.invoice_detail;
+        //                 for(var a in detailPenjamin) {
+        //                     if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+        //                         uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+        //                     }
+        //                 }
+
+        //                 var parsedPenjaminList = "";
+
+        //                 for(var b in uniquePenjamin) {
+        //                     parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+        //                 }
+
+        //                 return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 return "<span style=\"white-space: pre\">" + row.created_at_parse + "</span>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 if(
+        //                     row.pasien.panggilan_name !== undefined &&
+        //                     row.pasien.panggilan_name !== null
+        //                 ) {
+        //                     return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+        //                 } else {
+        //                     return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
+        //                 }
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 return "<span class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tags\"></i> Rawat Inap</span>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 var invDetail = row.invoice_detail;
+        //                 var totalParse = 0;
+        //                 for(var a in invDetail) {
+        //                     if(invDetail[a].departemen === __POLI_INAP__) {
+        //                         totalParse += parseFloat(invDetail[a].subtotal);
+        //                     }
+        //                 }
+        //                 return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+        //                     "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"RI\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+        //                     "<span><i class=\"fa fa-eye\"></i>Detail</span></button>" +
+        //                     "</div>";
+        //             }
+        //         }
+        //     ]
+        // });
+        
+
+        
+
+
+
+
+
+
+
+
+        // OLD IGD
+        // var tableAntrianBayarIGD = $("#table-biaya-pasien-igd").DataTable({
+        //     processing: true,
+        //     serverSide: true,
+        //     sPaginationType: "full_numbers",
+        //     bPaginate: true,
+        //     lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+        //     serverMethod: "POST",
+        //     "ajax":{
+        //         url: __HOSTAPI__ + "/Invoice",
+        //         type: "POST",
+        //         data: function(d) {
+        //             d.request = "biaya_pasien";
+        //             d.from = getDateRange("#range_invoice_igd")[0];
+        //             d.to = getDateRange("#range_invoice_igd")[1];
+        //             d.filter_poli = "igd";
+        //         },
+        //         headers:{
+        //             Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+        //         },
+        //         dataSrc:function(response) {
+        //             console.log(response)
+        //             var returnedData = [];
+        //             if(returnedData == undefined || returnedData.response_package == undefined) {
+        //                 returnedData = [];
+        //             }
+
+        //             for(var InvKeyData in response.response_package.response_data) {
+        //                 if(
+        //                     response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== undefined &&
+        //                     response.response_package.response_data[InvKeyData].antrian_kunjungan.poli !== null
+        //                 ) {
+        //                     if (
+        //                         response.response_package.response_data[InvKeyData].antrian_kunjungan !== undefined &&
+        //                         response.response_package.response_data[InvKeyData].pasien !== undefined &&
+        //                         response.response_package.response_data[InvKeyData].pasien !== null &&
+        //                         response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_IGD__ || response.response_package.response_data[InvKeyData].antrian_kunjungan.poli.uid === __POLI_OPERASI__
+        //                     ) {
+        //                         if (!response.response_package.response_data[InvKeyData].lunas) {
+        //                             if (response.response_package.response_data[InvKeyData].pasien.panggilan_name === undefined) {
+        //                                 response.response_package.response_data[InvKeyData].pasien.panggilan_name = "";
+        //                             }
+        //                             returnedData.push(response.response_package.response_data[InvKeyData]);
+        //                         }
+        //                     } else {
+        //                         //
+        //                     }
+        //                 }
+        //             }
+
+        //             response.draw = parseInt(response.response_package.response_draw);
+        //             response.recordsTotal = returnedData.length;
+        //             response.recordsFiltered = returnedData.length;
+
+        //             return returnedData;
+        //         }
+        //     },
+        //     autoWidth: false,
+        //     language: {
+        //         search: "",
+        //         searchPlaceholder: "Cari Nomor Invoice"
+        //     },
+        //     "columns" : [
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 var uniquePenjamin = {};
+        //                 var detailPenjamin = row.invoice_detail;
+        //                 for(var a in detailPenjamin) {
+        //                     if(uniquePenjamin[detailPenjamin[a].penjamin] === undefined) {
+        //                         uniquePenjamin[detailPenjamin[a].penjamin] = detailPenjamin[a].nama_penjamin;
+        //                     }
+        //                 }
+
+        //                 var parsedPenjaminList = "";
+
+        //                 for(var b in uniquePenjamin) {
+        //                     parsedPenjaminList += "<span class=\"badge badge-outline-info badge-custom-caption\">" + uniquePenjamin[b] + "</span>";
+        //                 }
+
+        //                 return "<span class=\"wrap_content\">" + row.nomor_invoice + "</span><br />" + parsedPenjaminList;
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 return "<span class=\"wrap_content\">" + row.created_at_parse + "</span>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 if(
+        //                     row.pasien.panggilan_name !== undefined &&
+        //                     row.pasien.panggilan_name !== null
+        //                 ) {
+        //                     return row.pasien.no_rm + "<br /><b>" + row.pasien.panggilan_name.nama + " " + row.pasien.nama + "</b>";
+        //                 } else {
+        //                     return row.pasien.no_rm + "<br /><b>" + row.pasien.nama + "</b>";
+        //                 }
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 return "<span class=\"badge badge-custom-caption badge-outline-danger\"><i class=\"fa fa-tags\"></i> IGD</span>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 //return row.antrian_kunjungan.pegawai.nama + " di <b>" + row.antrian_kunjungan.loket.nama_loket + "</b>";
+        //                 return "<span class=\"wrap_content\">" + row.antrian_kunjungan.pegawai.nama + "</span>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 var invDetail = row.invoice_detail;
+
+
+
+        //                 var totalParse = 0;
+        //                 for(var a in invDetail) {
+        //                     if(invDetail[a].status_bayar === "N") {
+        //                         if(invDetail[a].departemen === __POLI_IGD__ || invDetail[a].departemen === __POLI_OPERASI__) {
+        //                             totalParse += parseFloat(invDetail[a].subtotal);
+        //                         }
+        //                     }
+        //                 }
+        //                 return "<span style=\"display: block\" class=\"text-right number_style\">" + number_format(totalParse, 2, ".", ",") + "</span>";
+        //             }
+        //         },
+        //         {
+        //             "data" : null, render: function(data, type, row, meta) {
+        //                 return 	"<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+        //                     "<button class=\"btn btn-info btn-sm btnDetail\" classified=\"IGD\" id=\"invoice_" + row.uid + "\" pasien=\"" + row.pasien.uid + "\" penjamin=\"" + row.antrian_kunjungan.penjamin + "\" poli=\"" + row.antrian_kunjungan.poli.uid + "\" kunjungan=\"" + row.kunjungan + "\">" +
+        //                     "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
+        //                     "</button>" +
+        //                     "</div>";
+        //             }
+        //         }
+        //     ]
+        // });
+
+
+        
 
 
 
@@ -924,9 +1334,7 @@
             },
             kasir_daftar_baru: function(protocols, type, parameter, sender, receiver, time) {
                 notification ("info", "Transaksi baru", 3000, "notif_pasien_baru");
-                tableAntrianBayarRJ.ajax.reload();
-                tableAntrianBayarRI.ajax.reload();
-                tableAntrianBayarIGD.ajax.reload();
+                initDataTable()
             },
             asesmen_berlangsung: function(protocols, type, parameter, sender, receiver, time) {
                 if(
@@ -948,9 +1356,10 @@
 
 
 		$(".range_invoice").change(function() {
-            tableAntrianBayarRJ.ajax.reload();
-            tableAntrianBayarRI.ajax.reload();
-            tableAntrianBayarIGD.ajax.reload();
+            // tableAntrianBayarRJ.ajax.reload();
+            // tableAntrianBayarRI.ajax.reload();
+            // tableAntrianBayarIGD.ajax.reload();
+            initDataTable();
 		});
 
 		
@@ -1438,9 +1847,10 @@
                                         });
                                     }
                                 }).then((result) => {
-                                    tableAntrianBayarRJ.ajax.reload();
-                                    tableAntrianBayarRI.ajax.reload();
-                                    tableAntrianBayarIGD.ajax.reload();
+                                    // tableAntrianBayarRJ.ajax.reload();
+                                    // tableAntrianBayarRI.ajax.reload();
+                                    // tableAntrianBayarIGD.ajax.reload();
+                                    initDataTable();
                                     tableKwitansi.ajax.reload();
                                     $("#form-invoice").modal("hide");
                                     $("#form-payment").modal("hide");
@@ -1453,9 +1863,10 @@
 
                                 });
                             } else {
-                                tableAntrianBayarRJ.ajax.reload();
-                                tableAntrianBayarRI.ajax.reload();
-                                tableAntrianBayarIGD.ajax.reload();
+                                // tableAntrianBayarRJ.ajax.reload();
+                                // tableAntrianBayarRI.ajax.reload();
+                                // tableAntrianBayarIGD.ajax.reload();
+                                initDataTable();
                                 tableKwitansi.ajax.reload();
                                 $("#form-invoice").modal("hide");
                                 $("#form-payment").modal("hide");
