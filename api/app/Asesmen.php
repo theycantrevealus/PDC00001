@@ -1634,7 +1634,7 @@ class Asesmen extends Utility
     $returnResponse['tindakan_response'] = self::set_tindakan_asesment($parameter, $MasterUID);
 
     //Resep dan Racikan
-    if ($parameter['resep'][0]['obat'] !== "" || $parameter['racikan'][0]['nama'] !== "") {
+    if ($parameter['resep'][0]['obat'] != "" || $parameter['racikan'][0]['nama'] != "") {
       $returnResponse['resep_response'] = self::set_resep_asesment($parameter, $MasterUID);
     }
 

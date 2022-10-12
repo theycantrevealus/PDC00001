@@ -55,7 +55,7 @@
                             <div class="z-0">
                                 <ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tutor_filter_jenis_pelayanan">
                                     <li class="nav-item">
-                                        <a href="#tab-rawat_jalan" class="active nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-tagihan" >
+                                        <a id="tab-link-rj" href="#tab-rawat_jalan" class="active nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-tagihan" >
                                             <span class="nav-link__count">
                                                 01
                                             </span>
@@ -63,7 +63,7 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="#tab-rawat_inap" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                                        <a id="tab-link-ri" href="#tab-rawat_inap" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
                                             <span class="nav-link__count">
                                                 02
                                             </span>
@@ -71,7 +71,7 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="#tab-igd" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
+                                        <a id="tab-link-igd" href="#tab-igd" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
                                             <span class="nav-link__count">
                                                 03
                                             </span>

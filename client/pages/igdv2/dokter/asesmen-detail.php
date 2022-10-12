@@ -109,12 +109,12 @@
                                             <ul class="pagination"></ul>
                                         </nav>
                                     </div>
-                                    <div class="col-lg-2">
+                                    <!-- <div class="col-lg-2">
                                         <br /><br />
                                         <button class="btn btn-info pull-right" id="btnTambahAsesmen">
                                             <i class="fa fa-plus"></i> Tambah Asesmen
                                         </button>
-                                    </div>
+                                    </div> -->
                                     <div class="col-lg-12">
                                         <hr />
                                         <div id="cppt_loader" class="card-body">
