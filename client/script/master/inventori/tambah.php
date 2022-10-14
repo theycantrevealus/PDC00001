@@ -851,7 +851,7 @@
 									}
 								},
 								error: function(response) {
-									// console.clear();
+									console.clear();
 									console.log(response);
 								}
 							});
@@ -972,7 +972,7 @@
 								}
 							},
 							error: function(response) {
-								// console.clear();
+								console.clear();
 								console.log(response);
 							}
 						});
