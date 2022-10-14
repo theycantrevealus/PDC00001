@@ -2002,10 +2002,19 @@ class Invoice extends Utility
 
                 $dataResult[] = $value;
             } else {
+                    $query_penjamin = self::$query->select('antrian_nomor', array(
+                        'penjamin'
+                    ))
+                        ->where(array(
+                            'antrian_nomor.kunjungan' => '= ?',
+                        ), array(
+                            $value['kunjungan']
+                        ))->execute();
+
                     $value['antrian_kunjungan'] = array(
                         'poli' => $Poli->get_poli_info(__POLI_IGD__)['response_data'][0],
                         'pegawai' => $Pegawai->get_info($UserData['data']->uid)['response_data'][0],
-                        'penjamin' => $value['penjamin']
+                        'penjamin' => $query_penjamin['response_data'][0]['penjamin']
                     );
                     $dataResult[] = $value;
             }
@@ -2135,11 +2144,20 @@ class Invoice extends Utility
             $value['departemen_terkait'] = $departemen_terkait;
             $value['invoice_detail'] = $InvoiceDetail['response_data']; 
 
+            $query_penjamin = self::$query->select('antrian_nomor', array(
+                'penjamin'
+            ))
+                ->where(array(
+                    'antrian_nomor.kunjungan' => '= ?',
+                ), array(
+                    $value['kunjungan']
+                ))->execute();
+
             //Antrian Info
             $value['antrian_kunjungan'] = array(
                 'poli' => $Poli->get_poli_info(__POLI_IGD__)['response_data'][0],
                 'pegawai' => $Pegawai->get_info($UserData['data']->uid)['response_data'][0],
-                'penjamin' => $value['penjamin']
+                'penjamin' => $query_penjamin['response_data'][0]['penjamin']
             );
             $dataResult[] = $value;
         }
