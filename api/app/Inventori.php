@@ -3382,6 +3382,11 @@ class Inventori extends Utility
       $check['response_result'] = 0;
       unset($check['response_data']);
       return $check;
+    } else if (!$parameter['kandungan']){
+      $check['response_message'] = 'Kandungan Wajib Diisi';
+      $check['response_result'] = 0;
+      unset($check['response_data']);
+      return $check;
     } else {
       $uid = parent::gen_uuid();
       $worker = self::$query->insert('master_inv', array(

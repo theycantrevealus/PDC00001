@@ -818,46 +818,44 @@
                             }
                         });
 
-
-
-
-						$.ajax({
-							url:__HOSTAPI__ + "/Inventori",
-							async:false,
-							beforeSend: function(request) {
-								request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-							},
-							data:{
-								request:"tambah_item",
-								kode:kode,
-								nama:nama,
-								image:image,
-								kategori:kategori,
-								keterangan:keterangan,
-								manufacture:manufacture,
-                                kandungan: kandungan,
-								satuan_terkecil:satuan_terkecil,
-								listKategoriObat:listKategoriObat,
-								satuanKonversi:satuanKonversi,
-								penjaminList:penjaminList,
-								gudangMeta:gudangMeta,
-								monitoring:monitoring
-							},
-							type:"POST",
-							success:function(response) {
-								console.log(response);
-								if(response.response_package > 0) {
-									notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");
+						if (kandungan == "") {
+							notification ("danger", "Kandungan Wajib Diisi", 3000, "hasil_tambah");
+						} else {
+							$.ajax({
+								url:__HOSTAPI__ + "/Inventori",
+								async:false,
+								beforeSend: function(request) {
+									request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+								},
+								data:{
+									request:"tambah_item",
+									kode:kode,
+									nama:nama,
+									image:image,
+									kategori:kategori,
+									keterangan:keterangan,
+									manufacture:manufacture,
+									kandungan: kandungan,
+									satuan_terkecil:satuan_terkecil,
+									listKategoriObat:listKategoriObat,
+									satuanKonversi:satuanKonversi,
+									penjaminList:penjaminList,
+									gudangMeta:gudangMeta,
+									monitoring:monitoring
+								},
+								type:"POST",
+								success:function(response) {
+									console.log(response);
+									if(response.response_package > 0) {
+										notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");
+									}
+								},
+								error: function(response) {
+									// console.clear();
+									console.log(response);
 								}
-							},
-							error: function(response) {
-								console.clear();
-								console.log(response);
-							}
-						});
-
-
-
+							});
+						}
 
 					});
 				} else {
@@ -940,42 +938,45 @@
                             });
                         }
                     });
-
-					$.ajax({
-						url:__HOSTAPI__ + "/Inventori",
-						async:false,
-						beforeSend: function(request) {
-							request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-						},
-						data:{
-							request:"tambah_item",
-							kode:kode,
-							nama:nama,
-							image:settedImage,
-							kategori:kategori,
-							keterangan:keterangan,
-                            kandungan: kandungan,
-							manufacture:manufacture,
-							satuan_terkecil:satuan_terkecil,
-							listKategoriObat:listKategoriObat,
-							satuanKonversi:satuanKonversi,
-							penjaminList:penjaminList,
-							gudangMeta:gudangMeta,
-							monitoring:monitoring
-						},
-						type:"POST",
-						success:function(response) {
-							if(response.response_package == 0) {
-								notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");
-							} else {
-								notification ("danger", "Data gagal diproses", 3000, "hasil_tambah");
+					if (kandungan == "") {
+						notification ("danger", "Kandungan Wajib Diisi", 3000, "hasil_tambah");
+					} else {
+						$.ajax({
+							url:__HOSTAPI__ + "/Inventori",
+							async:false,
+							beforeSend: function(request) {
+								request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+							},
+							data:{
+								request:"tambah_item",
+								kode:kode,
+								nama:nama,
+								image:settedImage,
+								kategori:kategori,
+								keterangan:keterangan,
+								kandungan: kandungan,
+								manufacture:manufacture,
+								satuan_terkecil:satuan_terkecil,
+								listKategoriObat:listKategoriObat,
+								satuanKonversi:satuanKonversi,
+								penjaminList:penjaminList,
+								gudangMeta:gudangMeta,
+								monitoring:monitoring
+							},
+							type:"POST",
+							success:function(response) {
+								if(response.response_package == 0) {
+									notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");
+								} else {
+									notification ("danger", "Data gagal diproses", 3000, "hasil_tambah");
+								}
+							},
+							error: function(response) {
+								// console.clear();
+								console.log(response);
 							}
-						},
-						error: function(response) {
-							console.clear();
-							console.log(response);
-						}
-					});
+						});
+					}
 				}
 			}
 		});
