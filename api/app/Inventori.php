@@ -2836,7 +2836,7 @@ class Inventori extends Utility
         'OR',
         'master_inv.nama' => 'ILIKE ' . '\'%' . (trim(strtoupper($_GET['search']))) . '%\')'
       ))
-      ->limit(10)
+      ->limit(25)
       ->execute();
 
     $autonum = 1;
