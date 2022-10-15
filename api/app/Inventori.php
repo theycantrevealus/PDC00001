@@ -2836,7 +2836,7 @@ class Inventori extends Utility
         'OR',
         'master_inv.nama' => 'ILIKE ' . '\'%' . (trim(strtoupper($_GET['search']))) . '%\')'
       ))
-      ->limit(10)
+      ->limit(25)
       ->execute();
 
     $autonum = 1;
@@ -3379,6 +3379,11 @@ class Inventori extends Utility
     ));
     if (count($check['response_data']) > 0) {
       $check['response_message'] = 'Duplicate data detected';
+      $check['response_result'] = 0;
+      unset($check['response_data']);
+      return $check;
+    } else if (!$parameter['kandungan']){
+      $check['response_message'] = 'Kandungan Wajib Diisi';
       $check['response_result'] = 0;
       unset($check['response_data']);
       return $check;

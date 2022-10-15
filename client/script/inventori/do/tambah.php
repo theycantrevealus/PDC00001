@@ -427,10 +427,13 @@
                 } else {
                     $("#table-item-do tbody tr:eq(" + e + ") td").addClass("bg-error");
                     if(batch == "") {
+						notification("danger", "Batch Wajib Diisi", 3000, "hasil_tamba_do");
                         $(this).find("td:eq(2) input").focus();
-                    } else if(qty <=0) {
+                    } else if(qty <= 0 || qty == "") {
+						notification("danger", "Jumlah Item (qty) Wajib Diisi dan lebih dari 0", 3000, "hasil_tamba_do");
                         $(this).find("td:eq(3) input").focus();
                     } else {
+						notification("danger", "Tanggal Kadaluarsa Wajib Diisi", 3000, "hasil_tamba_do");
                         $(this).find("td:eq(1) input").focus();
                     }
 
@@ -439,7 +442,13 @@
                 }
 			});
 
-			if(gudang != "none" && supplier != "none" && tgl_dokumen != "" && itemDetailResult.length > 0 && allowSave == true) {
+			if(gudang != "none" && supplier != "none" && nomor_do != "" && tgl_dokumen != "" && no_invoice != "" && tgl_invoice != "" && itemDetailResult.length > 0 && allowSave == true) {
+				$('#select2-gudang-container').parents('.select2-selection').removeClass("bg-error");
+				$('#select2-gudang-container').parents('.select2-selection').removeClass("bg-error");
+				$('#no_do').removeClass("bg-error");
+				$('#tgl_dokumen').removeClass("bg-error");
+				$('#no_invoice').removeClass("bg-error");
+				$('#tgl_invoice').removeClass("bg-error");
 				$.ajax({
 					url: __HOSTAPI__ + "/DeliveryOrder",
 					beforeSend: function(request) {
@@ -469,6 +478,28 @@
 						console.log(response);
 					}
 				});
+			} else {
+				if(gudang == "none") {
+					notification("danger", "Gudang Tidak Boleh Kosong.", 3000, "hasil_tamba_do");
+					$('#select2-gudang-container').parents('.select2-selection').addClass("bg-error");
+				} else if(supplier == "") {
+					notification("danger", "Pemasok Tidak Boleh Kosong.", 3000, "hasil_tamba_do");
+					$('#select2-gudang-container').parents('.select2-selection').addClass("bg-error");
+				} else if(nomor_do == "") {
+					notification("danger", "No. Delivery Order Tidak Boleh Kosong.", 3000, "hasil_tamba_do");
+					$('#no_do').addClass("bg-error");
+				} else if(tgl_dokumen == "") {
+					notification("danger", "Tanggal DO Tidak Boleh Kosong.", 3000, "hasil_tamba_do");
+					$('#tgl_dokumen').addClass("bg-error");
+				} else if(no_invoice == "") {
+					notification("danger", "No. Invoice Tidak Boleh Kosong.", 3000, "hasil_tamba_do");
+					$('#no_invoice').addClass("bg-error");
+				} else if(tgl_invoice == "") {
+					notification("danger", "Tanggal Invoice Tidak Boleh Kosong.", 3000, "hasil_tamba_do");
+					$('#tgl_invoice').addClass("bg-error");
+				} else {
+					notification("danger", "Data gagal diproses.", 3000, "hasil_tamba_do");
+				}
 			}
 		});
 	});
