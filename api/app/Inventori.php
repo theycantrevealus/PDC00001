@@ -3739,6 +3739,7 @@ class Inventori extends Utility
           ))
             ->execute();
         }
+        return $worker;
       } else {
         $error_count++;
       }
