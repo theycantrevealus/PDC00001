@@ -103,6 +103,9 @@ class Inventori extends Utility
         case 'get_item_select2':
           return self::get_item_select2($parameter);
           break;
+        case 'get_item_resep_obat_select2':
+          return self::get_item_resep_obat_select2($parameter);
+          break;
         case 'get_mutasi_item':
           return self::get_mutasi_item($parameter[2]);
           break;
@@ -2963,7 +2966,7 @@ class Inventori extends Utility
 
       $autonum++;
     }
-    return $data;
+    return json_encode($data['batch'], JSON_UNESCAPED_SLASHES);
   }
 
   public function get_item_batch($parameter, $target = '')
@@ -3044,6 +3047,47 @@ class Inventori extends Utility
 
     $data['response_data'] = $original;
     return $data;
+  }
+
+  public function get_item_resep_obat_select2($parameter){
+    $filteredData = Array();
+    $data = self::$pdo->query("SELECT JSON_AGG(response_data) response_data FROM (SELECT JSON_BUILD_OBJECT(
+              'autonum', ROW_NUMBER() OVER(ORDER BY master_inv.created_at ASC),
+              'penjamin', (SELECT JSON_AGG(penjamin) penjamin FROM (SELECT JSON_BUILD_OBJECT(
+                    'barang', master_inv_harga.barang,
+                    'penjamin', (SELECT JSON_BUILD_OBJECT(
+                            'uid', master_penjamin.uid,
+                            'nama', master_penjamin.nama,
+                            'created_at', master_penjamin.created_at,
+                            'updated_at', master_penjamin.updated_at) 
+                          FROM master_penjamin 
+                          WHERE master_penjamin.deleted_at IS NULL AND master_penjamin.uid = master_inv_harga.penjamin),
+                    'profit', master_inv_harga.profit,
+                    'profit_type', master_inv_harga.profit_type,
+                    'created_at', master_inv_harga.created_at,
+                    'updated_at', master_inv_harga.updated_at) penjamin
+                    FROM master_inv_harga WHERE master_inv_harga.deleted_at IS NULL AND master_inv_harga.barang = master_inv.uid AND master_inv_harga.profit > 0) response_data),
+              'id', master_inv_obat_kandungan.id,
+              'kandungan', master_inv_obat_kandungan.kandungan,
+              'uid', master_inv.uid,
+              'kode_barang', master_inv.kode_barang,
+              'nama', CONCAT(master_inv.nama , ' [' , master_inv_obat_kandungan.kandungan , ']'),
+              'kategori',master_inv.kategori,
+              'satuan_terkecil', (SELECT JSON_BUILD_OBJECT(
+                          'uid', master_inv_satuan.uid, 
+                          'nama', master_inv_satuan.nama,
+                          'created_at', master_inv_satuan.created_at,
+                          'updated_at', master_inv_satuan.updated_at) FROM master_inv_satuan 
+                        WHERE master_inv_satuan.deleted_at IS NULL AND master_inv_satuan.uid = master_inv.satuan_terkecil),
+              'stok', (SELECT COALESCE(stok.sum,0) FROM (SELECT SUM(COALESCE(inventori_stok.stok_terkini, 0)) FROM inventori_stok JOIN inventori_batch ON inventori_stok.batch = inventori_batch.uid WHERE inventori_batch.expired_date >= CURRENT_DATE AND inventori_stok.barang = master_inv.uid) stok),
+              'created_at', master_inv.created_at,
+              'updated_at', master_inv.updated_at
+            ) response_data FROM master_inv 
+            JOIN master_inv_obat_kandungan 
+            ON master_inv.uid = master_inv_obat_kandungan.uid_obat 
+            WHERE master_inv.deleted_at IS NULL AND (master_inv.nama ILIKE '%".trim(strtoupper($_GET['search']))."%' OR master_inv_obat_kandungan.kandungan ILIKE '%".trim(strtoupper($_GET['search']))."%' OR master_inv.kode_barang ILIKE '%".trim(strtoupper($_GET['search']))."%') LIMIT 25) r")->fetchAll(\PDO::FETCH_ASSOC);
+    $filteredData['response_data'] = json_decode($data[0]['response_data']);
+    return $filteredData;
   }
 
   public function get_batch_info($parameter)
