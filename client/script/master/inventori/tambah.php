@@ -846,8 +846,17 @@
 								type:"POST",
 								success:function(response) {
 									console.log(response);
-									if(response.response_package > 0) {
-										notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");
+									if(response.response_package.response_result > 0) {
+										notification("success", "Data berhasil diproses", 3000, "hasil_tambah");
+										location.href = __HOSTNAME__ + "/master/inventori";	
+									} else {
+										if (response.response_package.response_message == "Duplicate data detected") {
+											notification("danger", "Duplicate data detected", 3000, "hasil_tambah");
+										} else if (response.response_package.response_message == "Kandungan Wajib Diisi") {
+											notification ("danger", "Duplicate data detected", 3000, "hasil_tambah");
+										} else {
+											notification ("danger", "Data gagal diproses", 3000, "hasil_tambah");
+										}
 									}
 								},
 								error: function(response) {
@@ -965,10 +974,17 @@
 							},
 							type:"POST",
 							success:function(response) {
-								if(response.response_package == 0) {
-									notification ("success", "Data berhasil diproses", 3000, "hasil_tambah");
+								if(response.response_package.response_result > 0) {
+									notification("success", "Data berhasil diproses", 3000, "hasil_tambah");
+									location.href = __HOSTNAME__ + "/master/inventori";	
 								} else {
-									notification ("danger", "Data gagal diproses", 3000, "hasil_tambah");
+									if (response.response_package.response_message == "Duplicate data detected") {
+										notification("danger", "Duplicate data detected", 3000, "hasil_tambah");
+									} else if (response.response_package.response_message == "Kandungan Wajib Diisi") {
+										notification ("danger", "Duplicate data detected", 3000, "hasil_tambah");
+									} else {
+										notification ("danger", "Data gagal diproses", 3000, "hasil_tambah");
+									}
 								}
 							},
 							error: function(response) {
