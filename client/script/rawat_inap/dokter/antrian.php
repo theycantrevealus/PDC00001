@@ -2290,7 +2290,9 @@
                         "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
                         "Content-Type" : "application/json",
                     },
-                    url:__HOSTAPI__ + "/Inventori/get_item_select2",
+                    //OLD
+                    // url:__HOSTAPI__ + "/Inventori/get_item_select2",
+                    url:__HOSTAPI__ + "/Inventori/get_item_resep_obat_select2",
                     type: "GET",
                     data: function (term) {
                         return {
