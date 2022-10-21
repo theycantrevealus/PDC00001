@@ -3045,6 +3045,37 @@ class Inventori extends Utility
       return $t1 - $t2;
     });
 
+    /**
+     * ------------------------------------------------------------------
+     *    - Getting Temporary verification SUM stok obat On Apotek -
+     * ------------------------------------------------------------------
+     * @devAg
+     * 
+     */
+    $data_stock_apotek = self::$query->select( 'resep',array(
+      'uid, qty'
+    ))
+      ->join('resep_detail')
+      ->on(array(
+        array('(resep_detail.resep', '=', 'resep.uid)')
+      ))
+      ->where(array(
+        'resep_detail.obat' => '= ?',
+        'AND',
+        '( status_resep' => " = 'L'",
+        'OR',
+        'status_resep' => "= 'K')"
+      ), array(
+        $parameter
+      ))
+      ->execute();
+    $sum_stock_apotek = 0;
+    foreach ($data_stock_apotek['response_data'] as $key => $value) {
+        $sum_stock_apotek = $data_stock_apotek['response_data']['sum_apotek'] += floatval($value['qty']);
+      }
+    $data['apotek'] = $sum_stock_apotek;
+    // ------------------------- end code ------------------------------
+
     $data['response_data'] = $original;
     return $data;
   }

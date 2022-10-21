@@ -1076,6 +1076,13 @@
             });
           }
         });
+      }else{
+        Swal.fire({
+                    title: "Stock Apotek Tidak Mencukupi",
+                    text: "Silahkan Lakukan Proses Amprah telebih dahulu sebeum memproses resep!",
+                    showDenyButton: false,
+                    confirmButtonText: "Oke",
+        })
       }
     });
   });
