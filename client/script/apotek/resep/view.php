@@ -1019,7 +1019,9 @@
                                             // }
                                             counter_kebutuhan -= targettedBatch[batchSelKey].used; //targettedbatch used adalah yang digunakan , counter kebutuhan harus dikurangkan lagi dengan yang sudah diverifikasi
                                             if(counter_kebutuhan !== 0){
-                                                var keperluan = total_kebutuhan_resep - alternatedBatchList[batchSelKey].used;
+                                                if (alternatedBatchList[batchSelKey] !== undefined){
+                                                    var keperluan = total_kebutuhan_resep - alternatedBatchList[batchSelKey].used;
+                                                }
                                             }
                                             // console.log(counter_kebutuhan);
                                             // console.log(targettedBatch[batchSelKey].used);
@@ -1028,7 +1030,11 @@
                                             
                                         if(targettedBatch[batchSelKey].gudang.uid === __GUDANG_APOTEK__) {
                                             if(counter_kebutuhan !== 0){
-                                                $("#batch_obat_" + rowTarget).append("<li class=\"check_stock_apotek " + ((counter_kebutuhan !== 0) ? "text-danger" : "text-success") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + keperluan + ") - " + targettedBatch[batchSelKey].gudang.nama + ((counter_kebutuhan > 0) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                                if(alternatedBatchList[batchSelKey] === undefined){
+                                                    $("#batch_obat_" + rowTarget).append("<li class=\"check_stock_apotek " + ((counter_kebutuhan !== 0) ? "text-danger" : "text-success") + " (" + keperluan + ") - " + targettedBatch[batchSelKey].gudang.nama + ((counter_kebutuhan > 0) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Stok Obat Tidak Mencukupi, Silahkan Lakukan Order Obat Segera" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                                }else{
+                                                    $("#batch_obat_" + rowTarget).append("<li class=\"check_stock_apotek " + ((counter_kebutuhan !== 0) ? "text-danger" : "text-success") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + keperluan + ") - " + targettedBatch[batchSelKey].gudang.nama + ((counter_kebutuhan > 0) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
+                                                }
                                             }else{
                                                 $("#batch_obat_" + rowTarget).append("<li class=\"check_stock_apotek " + ((counter_kebutuhan !== 0) ? "text-danger" : "text-success") + "\" batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + total_kebutuhan_resep + ") - " + targettedBatch[batchSelKey].gudang.nama + ((counter_kebutuhan > 0) ? " <i class=\"fa fa-exclamation-triangle text-danger\"></i> Butuh Amprah" : " <i class=\"fa fa-check-circle text-success\"></i>") + "</li>");
                                             // $("#batch_obat_" + rowTarget).append("<li batch=\"" + targettedBatch[batchSelKey].batch + "\"><b>[" + targettedBatch[batchSelKey].kode + "]</b> " + targettedBatch[batchSelKey].expired + " (" + targettedBatch[batchSelKey].used + ") - " + targettedBatch[batchSelKey].gudang.nama + "</li>");
