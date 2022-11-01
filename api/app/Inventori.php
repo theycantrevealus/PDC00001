@@ -3110,7 +3110,7 @@ class Inventori extends Utility
                           'created_at', master_inv_satuan.created_at,
                           'updated_at', master_inv_satuan.updated_at) FROM master_inv_satuan 
                         WHERE master_inv_satuan.deleted_at IS NULL AND master_inv_satuan.uid = master_inv.satuan_terkecil),
-              'stok', (SELECT COALESCE(stok.sum,0) FROM (SELECT SUM(COALESCE(inventori_stok.stok_terkini, 0)) FROM inventori_stok JOIN inventori_batch ON inventori_stok.batch = inventori_batch.uid WHERE (inventori_stok.gudang = 'e7273646-1d2e-40e8-bcbc-028f6a8ce1e0' OR inventori_stok.gudang = '5bda12c3-1589-40b6-97a5-2992a8a90677') AND  inventori_batch.expired_date >= CURRENT_DATE AND inventori_stok.barang = master_inv.uid) stok),
+              'stok', (SELECT COALESCE(stok.sum,0) FROM (SELECT SUM(COALESCE(inventori_stok.stok_terkini, 0)) FROM inventori_stok JOIN inventori_batch ON inventori_stok.batch = inventori_batch.uid WHERE inventori_stok.gudang = 'e7273646-1d2e-40e8-bcbc-028f6a8ce1e0' AND  inventori_batch.expired_date >= CURRENT_DATE AND inventori_stok.barang = master_inv.uid) stok),
               'created_at', master_inv.created_at,
               'updated_at', master_inv.updated_at
             ) response_data FROM master_inv 
