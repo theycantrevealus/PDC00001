@@ -1297,6 +1297,7 @@
             "sat_konsumsi": "",
             "item":[]
         }) {
+            console.log(setter)
             $("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
             var newRacikanRow = document.createElement("TR");
             $(newRacikanRow).attr("uid", setter.uid);

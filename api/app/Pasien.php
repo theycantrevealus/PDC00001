@@ -1337,8 +1337,8 @@ class Pasien extends Utility
                 array('asesmen.antrian', '=', 'antrian.uid')
             ))
             ->where(array(
-                // 'asesmen.created_at' => '>= now()::date + interval \'1h\'',
-                // 'AND',
+                'asesmen.created_at' => '>= now()::date - interval \'24h\'',
+                'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
                 'OR',
                 'pasien.no_rm' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'

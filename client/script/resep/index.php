@@ -311,6 +311,14 @@
             var antrian = $("#pasien_saya option:selected").attr("antrian");
             var penjamin = $("#pasien_saya option:selected").attr("penjamin");
 
+            if(pasien === null) {
+                alert('Form pasien tidak boleh kosong!');
+                return;
+            }else if(alasan === ""){
+                alert('Form alasan tidak boleh kosong');
+                return;
+            }
+
             var protocol = {
                 request: "extend_resep",
                 asesmen: asesmen,

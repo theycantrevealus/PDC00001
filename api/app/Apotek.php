@@ -2,6 +2,7 @@
 
 namespace PondokCoder;
 
+use GuzzleHttp\Psr7\Response;
 use PondokCoder\Authorization;
 use PondokCoder\Query as Query;
 use PondokCoder\QueryException as QueryException;
@@ -3958,7 +3959,7 @@ class Apotek extends Utility
         'C'
       ))
       ->execute();
-
+    
     if (count($check['response_data']) > 0) {
       $uid = $check['response_data'][0]['uid'];
       $Kode = $check['response_data'][0]['kode'];
@@ -4098,6 +4099,7 @@ class Apotek extends Utility
           'kode' => '[' . $Kode . ']' . $parameter['racikan'][$key]['nama'],
           'iterasi' => (isset($parameter['racikan'][$key]['iterasi'])) ? intval($parameter['racikan'][$key]['iterasi']) : 0,
           'aturan_pakai' => intval($parameter['racikan'][$key]['aturanPakai']),
+          'satuan_konsumsi' => $parameter['racikan'][$key]['satuan_konsumsi'],
           'keterangan' => $parameter['racikan'][$key]['keterangan'],
           'signa_qty' => $parameter['racikan'][$key]['signaKonsumsi'],
           'signa_pakai' => $parameter['racikan'][$key]['signaTakar'],
@@ -4237,6 +4239,7 @@ class Apotek extends Utility
           'iterasi' => (isset($value['iterasi'])) ? intval($value['iterasi']) : 0,
           'keterangan' => $value['keterangan'],
           'signa_pakai' => $value['signaTakar'],
+          'satuan_konsumsi' => $value['satuan_konsumsi'],
           'aturan_pakai' => intval($value['aturanPakai']),
           'qty' => $value['signaHari'],
           'created_at' => parent::format_date(),
@@ -4346,6 +4349,7 @@ class Apotek extends Utility
               'signa_qty' => $value['signaKonsumsi'],
               'signa_pakai' => $value['signaTakar'],
               'keterangan' => $value['keterangan'],
+              'satuan_konsumsi' => $value['satuan_konsumsi'],
               'aturan_pakai' => intval($value['aturanPakai']),
               'qty' => $value['signaHari'],
               'total' => 0,
@@ -4505,6 +4509,8 @@ class Apotek extends Utility
         'AND',
         'resep.dokter' => '= ?',
         'AND',
+        'resep.created_at' => '>= now()::date - interval \'24h\'',
+        'AND',
         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
         'OR',
         'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
@@ -4514,9 +4520,16 @@ class Apotek extends Utility
       $paramData = array(
         'master_penjamin.deleted_at' => 'IS NULL',
         'AND',
-        'resep.dokter' => '= ?'
+        'resep.dokter' => '= ?',
+        'AND',
+        'resep.created_at' => '>= now()::date - interval \'24h\'',
+        'AND',
+        '(resep.status_resep' => '= ?',
+        'OR',
+        'resep.status_resep' => '= ?)',
+        
       );
-      $paramValue = array($UserData['data']->uid);
+      $paramValue = array($UserData['data']->uid,'N','C');
     }
 
     if ($parameter['length'] < 0) {
@@ -5291,7 +5304,7 @@ class Apotek extends Utility
 
       $data['response_data'][$key]['cancelation'] = $Cancelation['response_data'];
 
-
+      
       //Dokter Info
       $PegawaiInfo = $Pegawai->get_info($value['dokter']);
       $data['response_data'][$key]['dokter'] = $PegawaiInfo['response_data'][0];
@@ -5304,11 +5317,30 @@ class Apotek extends Utility
         $since_start = $start_date->diff(new \DateTime($value['waktu_terima']));
         $data['response_data'][$key]['response_time'] = (isset($value['waktu_terima']) && $value['waktu_terima'] !== '' && !empty($value['waktu_terima'])) ? str_pad($since_start->h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->i, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->s, 2, '0', STR_PAD_LEFT) : '-';
         $data['response_data'][$key]['response_to'] = $value['waktu_terima'];
+        $data['response_data'][$key]['resep_tambahan'] = 0;
       } else {
         $start_date = new \DateTime($value['created_at']);
         $since_start = $start_date->diff(new \DateTime($value['waktu_panggil']));
         $data['response_data'][$key]['response_time'] = (isset($value['waktu_panggil']) && $value['waktu_panggil'] !== '' && !empty($value['waktu_panggil'])) ? str_pad($since_start->h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->i, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->s, 2, '0', STR_PAD_LEFT) : '-';
         $data['response_data'][$key]['response_to'] = $value['waktu_panggil'];
+
+        //Check Resep Tambahan
+        $ResepTambahan = self::$query->select('resep', array(
+          'uid'
+        ))
+          ->where(array(
+            'resep.asesmen' => '= ?',
+          ), array(
+            $value['asesmen']
+          ))
+          ->execute();
+
+        if($ResepTambahan["response_result"] > 1){
+          $data['response_data'][$key]['resep_tambahan'] = 1;
+        }else {
+          $data['response_data'][$key]['resep_tambahan'] = 0;
+        }
+        $data['response_data'][$key]['resep_tambahan_count'] = $ResepTambahan["response_result"];
       }
 
       $minutes = $since_start->days * 24 * 60;

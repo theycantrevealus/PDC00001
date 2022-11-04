@@ -149,8 +149,128 @@
             //$("#table-resep tbody tr").each(function(e));
         });
 
+        // $("#btnSelesai").click(function() {
+        //     //$("#form-alasan-edit").modal("show");
+        //     var resep = [];
+        //     $("#table-resep tbody tr").each(function() {
+        //         var obat = $(this).find("td:eq(1) select.resep-obat").val();
+        //         var aturanPakai = $(this).find("td:eq(1) select.aturan-pakai-resep").val();
+        //         var keteranganPerObat = $(this).find("td:eq(1) textarea").val();
+        //         var iterasi = $(this).find("td:eq(1) input.resep-iterasi").inputmask("unmaskedvalue");
+        //         var satuanPemakaian = $(this).find("td:eq(1) input.resep-satuan-pemakaian").val();
+        //         /*var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
+        //         var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");*/
+        //         var signaKonsumsi = $(this).find("td:eq(2) input").val();
+        //         var signaTakar = $(this).find("td:eq(4) input").val();
+        //         var signaHari = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
+        //         //var penjamin = $(this).find("td:eq(6) select").val();
+        //         if (
+        //             obat !== undefined &&
+        //             obat !== "none" &&
+        //             obat !== "" &&
+
+        //             /*parseFloat(signaKonsumsi) > 0 &&
+        //             parseFloat(signaTakar) > 0 &&*/
+        //             parseFloat(signaKonsumsi) !== "" &&
+        //             parseFloat(signaTakar) !== "" &&
+        //             parseFloat(signaHari) > 0
+
+        //         ) {
+        //             resep.push({
+        //                 "obat": obat,
+        //                 "aturanPakai": parseInt(aturanPakai),
+        //                 "keteranganPerObat": keteranganPerObat,
+        //                 "signaKonsumsi": signaKonsumsi,
+        //                 "signaTakar": signaTakar,
+        //                 "signaHari": signaHari,
+        //                 "iterasi": iterasi,
+        //                 "satuanPemakaian": satuanPemakaian
+        //             });
+        //         }
+        //     });
+
+        //     var racikan = [];
+        //     $("#resep-racikan tbody.racikan tr.racikan-master").each(function() {
+        //         var masterRacikanRow = $(this);
+        //         var dataRacikan = {
+        //             "nama": "",
+        //             "item": [],
+        //             "keterangan": "",
+        //             "satuan_konsumsi": "",
+        //             "iterasi": 0,
+        //             "signaKonsumsi": 0,
+        //             "signaTakar": 0,
+        //             "signaHari": 0,
+        //             "aturanPakai": 0
+        //         };
+
+        //         dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.nama_racikan").val();
+        //         dataRacikan.aturanPakai = (masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val() === "none") ? 0 : parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
+        //         dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
+        //         dataRacikan.iterasi = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.racikan_iterasi").inputmask("unmaskedvalue");
+        //         dataRacikan.satuan_konsumsi = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.satuan_konsumsi").val();
+        //         /*dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
+        //         dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));*/
+        //         dataRacikan.signaKonsumsi = masterRacikanRow.find("td.master-racikan-cell:eq(2) input").val();
+        //         dataRacikan.signaTakar = masterRacikanRow.find("td.master-racikan-cell:eq(4) input").val();
+        //         dataRacikan.signaHari = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"));
+
+
+
+
+        //         masterRacikanRow.find("td:eq(1) table.komposisi-racikan tbody.komposisi-item tr.komposisi-row").each(function() {
+        //             var obat = $(this).find("td:eq(1)").attr("uid-obat");
+        //             //var qty = $(this).find("td:eq(2)").html();
+        //             var takaranBulat = $(this).find("td:eq(2) b").html();
+        //             var takaranDecimal = $(this).find("td:eq(2) sub").attr("nilaiExact");
+        //             var takaranDecimalText = $(this).find("td:eq(2) sub").html();
+        //             var takaranKekuatan = $(this).find("td:eq(2) h6").html();
+        //             var takaran = parseFloat(takaranBulat) + parseFloat(takaranDecimal);
+
+        //             if (obat !== undefined) {
+        //                 dataRacikan.item.push({
+        //                     "obat": obat,
+        //                     "takaranBulat": takaranBulat,
+        //                     "takaranDecimal": takaranDecimal,
+        //                     "takaranDecimalText": takaranDecimalText,
+        //                     "takaran": (isNaN(takaran) ? 1 : takaran),
+        //                     "kekuatan": takaranKekuatan
+        //                 });
+        //             }
+        //         });
+
+        //         if (
+        //             dataRacikan.nama !== "" &&
+        //             dataRacikan.item.length > 0 &&
+
+        //             /*dataRacikan.signaKonsumsi > 0 &&
+        //             dataRacikan.signaTakar > 0 &&*/
+        //             dataRacikan.signaKonsumsi !== "" &&
+        //             dataRacikan.signaTakar !== "" &&
+        //             dataRacikan.signaHari > 0
+        //         ) {
+        //             racikan.push(dataRacikan);
+        //         }
+        //     });
+
+        //     var keteranganResepData = keteranganResep.getData();
+        //     var keteranganRacikanData = keteranganRacikan.getData();
+        //     var iterasi = $("#iterasi_resep").inputmask("unmaskedvalue");
+        //     var alergiObat = $("#alergi_obat").val();
+
+        //     if (resep.length > 0 || racikan.length > 0) { // Minimal ada 1
+        //         console.clear();
+        //         console.log(resep);
+        //         console.log(racikan);
+        //         console.log(keteranganResepData);
+        //         console.log(keteranganRacikanData);
+        //     }
+
+        //     console.log(resep);
+        // });
+
         $("#btnSelesai").click(function() {
-            //$("#form-alasan-edit").modal("show");
+            var alasan = $("#txt_alasan_perubahan").val();
             var resep = [];
             $("#table-resep tbody tr").each(function() {
                 var obat = $(this).find("td:eq(1) select.resep-obat").val();
@@ -258,113 +378,25 @@
             var iterasi = $("#iterasi_resep").inputmask("unmaskedvalue");
             var alergiObat = $("#alergi_obat").val();
 
-            if (resep.length > 0 || racikan.length > 0) { // Minimal ada 1
-                console.clear();
-                console.log(resep);
-                console.log(racikan);
-                console.log(keteranganResepData);
-                console.log(keteranganRacikanData);
+            if(keteranganResepData === "") {
+                alert("Keterangan resep tidak boleh kosong!")
+                return;
+            }else if(racikan.length > 0){
+                if(keteranganRacikanData === ""){
+                    alert("Keterangan racikan tidak boleh kosong!")
+                    return;
+                }
             }
-        });
 
-        $("#btnSubmitAlasan").click(function() {
-            var alasan = $("#txt_alasan_perubahan").val();
-            var resep = [];
-            $("#table-resep tbody tr").each(function() {
-                var obat = $(this).find("td:eq(1) select.resep-obat").val();
-                var aturanPakai = $(this).find("td:eq(1) select.aturan-pakai-resep").val();
-                var keteranganPerObat = $(this).find("td:eq(1) textarea").val();
-                var iterasi = $(this).find("td:eq(1) input.resep-iterasi").inputmask("unmaskedvalue");
-                var satuanPemakaian = $(this).find("td:eq(1) input.resep-satuan-pemakaian").val();
-                /*var signaKonsumsi = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
-                var signaTakar = $(this).find("td:eq(4) input").inputmask("unmaskedvalue");*/
-                var signaKonsumsi = $(this).find("td:eq(2) input").val();
-                var signaTakar = $(this).find("td:eq(4) input").val();
-                var signaHari = $(this).find("td:eq(5) input").inputmask("unmaskedvalue");
-                //var penjamin = $(this).find("td:eq(6) select").val();
-                if (
-                    obat !== undefined &&
-                    obat !== "none" &&
-                    obat !== "" &&
+            // if (resep.length > 0 || racikan.length > 0) { // Minimal ada 1
+            //     console.clear();
+            //     console.log(resep);
+            //     console.log(racikan);
+            //     console.log(keteranganResepData);
+            //     console.log(keteranganRacikanData);
+            // }
 
-                    /*parseFloat(signaKonsumsi) > 0 &&
-                    parseFloat(signaTakar) > 0 &&*/
-                    parseFloat(signaKonsumsi) !== "" &&
-                    parseFloat(signaTakar) !== "" &&
-                    parseFloat(signaHari) > 0
-
-                ) {
-                    resep.push({
-                        "obat": obat,
-                        "aturanPakai": parseInt(aturanPakai),
-                        "keteranganPerObat": keteranganPerObat,
-                        "signaKonsumsi": signaKonsumsi,
-                        "signaTakar": signaTakar,
-                        "signaHari": signaHari,
-                        "iterasi": iterasi,
-                        "satuanPemakaian": satuanPemakaian
-                    });
-                }
-            });
-
-            var keteranganResepData = keteranganResep.getData();
-            var keteranganRacikanData = keteranganRacikan.getData();
-
-            var racikan = [];
-            $("#resep-racikan tbody.racikan tr.racikan-master").each(function() {
-                var masterRacikanRow = $(this);
-                var dataRacikan = {
-                    "nama": "",
-                    "item": [],
-                    "keterangan": "",
-                    "iterasi": 0,
-                    "signaKonsumsi": 0,
-                    "signaTakar": 0,
-                    "signaHari": 0,
-                    "aturanPakai": 0
-                };
-
-                dataRacikan.nama = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.nama_racikan").val();
-                dataRacikan.aturanPakai = (masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val() === "none") ? 0 : parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(1) select").val());
-                dataRacikan.keterangan = masterRacikanRow.find("td.master-racikan-cell:eq(1) textarea").val();
-                dataRacikan.iterasi = masterRacikanRow.find("td.master-racikan-cell:eq(1) input.racikan_iterasi").inputmask("unmaskedvalue");
-                dataRacikan.signaKonsumsi = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(2) input").inputmask("unmaskedvalue"));
-                dataRacikan.signaTakar = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(4) input").inputmask("unmaskedvalue"));
-                dataRacikan.signaHari = parseInt(masterRacikanRow.find("td.master-racikan-cell:eq(5) input").inputmask("unmaskedvalue"));
-
-                masterRacikanRow.find("td:eq(1) table.komposisi-racikan tbody.komposisi-item tr.komposisi-row").each(function() {
-                    var obat = $(this).find("td:eq(1)").attr("uid-obat");
-                    //var qty = $(this).find("td:eq(2)").html();
-                    var takaranBulat = $(this).find("td:eq(2) b").html();
-                    var takaranDecimal = $(this).find("td:eq(2) sub").attr("nilaiExact");
-                    var takaranDecimalText = $(this).find("td:eq(2) sub").html();
-                    var takaranKekuatan = $(this).find("td:eq(2) h6").html();
-                    var takaran = parseFloat(takaranBulat) + parseFloat(takaranDecimal);
-
-                    if (obat !== undefined) {
-                        dataRacikan.item.push({
-                            "obat": obat,
-                            "takaranBulat": takaranBulat,
-                            "takaranDecimal": takaranDecimal,
-                            "takaranDecimalText": takaranDecimalText,
-                            "takaran": (isNaN(takaran) ? 1 : takaran),
-                            "kekuatan": takaranKekuatan
-                        });
-                    }
-                });
-
-                if (
-                    dataRacikan.nama !== "" &&
-                    dataRacikan.item.length > 0 &&
-
-                    dataRacikan.signaKonsumsi > 0 &&
-                    dataRacikan.signaTakar > 0 &&
-                    dataRacikan.signaHari > 0
-                ) {
-                    racikan.push(dataRacikan);
-                }
-            });
-
+            console.log(racikan);
 
             //Simpan Data
             Swal.fire({
@@ -415,7 +447,7 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function(response) {
-                            location.href = __HOSTNAME__ + "/resep"
+                            // location.href = __HOSTNAME__ + "/resep"
                         },
                         error: function(response) {
                             //
@@ -588,7 +620,7 @@
                 type: "GET",
                 success: function(response) {
                     var data = response.response_package[0];
-                    console.clear();
+                    // console.clear();
                     console.log(data);
 
                     if (__PAGES__[2] === "none") {
@@ -756,21 +788,20 @@
                             }
 
                             var racikan_detail = data.racikan;
+                            console.log(racikan_detail);
                             if (racikan_detail.length === 0) {
                                 //$("#table-resep-racikan tbody.racikan").append("<tr><td colspan=\"8\" class=\"text-center text-info\"><i class=\"fa fa-info-circle\"></i> Tidak ada racikan</td></tr>");
                             } else {
                                 for (var racikanKey in racikan_detail) {
                                     autoRacikan({
-                                        uid: racikan_detail[racikanKey].uid,
                                         nama: racikan_detail[racikanKey].kode,
                                         keterangan: racikan_detail[racikanKey].keterangan,
                                         signaKonsumsi: racikan_detail[racikanKey].signa_qty,
                                         signaTakar: racikan_detail[racikanKey].signa_pakai,
                                         signaHari: racikan_detail[racikanKey].qty,
-                                        item: racikan_detail[racikanKey].item,
                                         iterasi: racikan_detail[racikanKey].iterasi,
-                                        aturan_pakai: racikan_detail[racikanKey].aturan_pakai,
-                                        qty_roman: racikan_detail[racikanKey].qty_roman
+                                        item: racikan_detail[racikanKey].item,
+                                        aturan_pakai: racikan_detail[racikanKey].aturan_pakai
                                     });
 
                                     if (currentData.racikan[racikan_detail[racikanKey].uid] === undefined) {
@@ -1010,7 +1041,9 @@
                         "Authorization": "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
                         "Content-Type": "application/json",
                     },
-                    url: __HOSTAPI__ + "/Inventori/get_item_select2",
+                    //OLD
+                    // url:__HOSTAPI__ + "/Inventori/get_item_select2",
+                    url:__HOSTAPI__ + "/Inventori/get_item_resep_obat_select2",
                     type: "GET",
                     data: function(term) {
                         return {
@@ -1020,8 +1053,8 @@
                     },
                     cache: true,
                     processResults: function(response) {
-                        console.clear();
-                        console.log(response);
+                        // console.clear();
+                        // console.log(response);
                         var data = response.response_package.response_data;
                         return {
                             results: $.map(data, function(item) {
@@ -1372,6 +1405,7 @@
             "iterasi": 0,
             "item": []
         }) {
+            console.log(setter);
             $("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
             var newRacikanRow = document.createElement("TR");
             $(newRacikanRow).addClass("last-racikan racikan-master");
@@ -1773,7 +1807,9 @@
                         "Authorization": "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
                         "Content-Type": "application/json",
                     },
-                    url: __HOSTAPI__ + "/Inventori/get_item_select2",
+                    //OLD
+                    // url:__HOSTAPI__ + "/Inventori/get_item_select2",
+                    url:__HOSTAPI__ + "/Inventori/get_item_resep_obat_select2",
                     type: "GET",
                     data: function(term) {
                         return {
@@ -2115,7 +2151,7 @@
 
         function checkGenerateRacikan(id = 0) {
             if ($(".last-racikan").length === 0) {
-                autoRacikan();
+                // autoRacikan();
             } else {
                 var obat = $("#racikan_nama_" + id).val();
                 var komposisi = $("#komposisi_" + id + " tbody tr").length;
