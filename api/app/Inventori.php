@@ -9786,6 +9786,8 @@ class Inventori extends Utility
       $paramData = array(
         'inventori_mutasi.deleted_at' => 'IS NULL',
         'AND',
+        '(inventori_mutasi.tanggal' => 'BETWEEN ? AND ?)',
+        'AND',
         '(inventori_mutasi.dari' => '= ?',
         'OR',
         'inventori_mutasi.ke' => '= ?)',
@@ -9797,17 +9799,27 @@ class Inventori extends Utility
         'inventori_mutasi.keterangan' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
       );
 
-      $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
+      // $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
+      $paramValue = array(
+        $parameter['from'], $parameter['to'],
+        $UserData['data']->gudang, $UserData['data']->gudang
+      );
     } else {
       $paramData = array(
         'inventori_mutasi.deleted_at' => 'IS NULL',
         'AND',
+        '(inventori_mutasi.tanggal' => 'BETWEEN ? AND ?)',
+        'AND',
         '(inventori_mutasi.dari' => '= ?',
         'OR',
-        'inventori_mutasi.ke' => '= ?)'
+        'inventori_mutasi.ke' => '= ?)',
       );
-
-      $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
+      
+      // $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
+      $paramValue = array(
+        $parameter['from'], $parameter['to'],
+        $UserData['data']->gudang, $UserData['data']->gudang
+      );
     }
 
 
