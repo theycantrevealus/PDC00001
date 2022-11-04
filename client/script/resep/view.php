@@ -447,7 +447,7 @@
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
                         success: function(response) {
-                            // location.href = __HOSTNAME__ + "/resep"
+                            location.href = __HOSTNAME__ + "/resep"
                         },
                         error: function(response) {
                             //
