@@ -680,7 +680,7 @@ class Apotek extends Utility
       $InventoriBatch = $Inventori->get_item_batch($value['item']);
 
       $kebutuhan = floatval($value['qty']);
-      // foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
+      foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
         if ($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
         {
           if ($kebutuhan >= $bValue['stok_terkini']) {
@@ -730,7 +730,7 @@ class Apotek extends Utility
             }
           }
         }
-      // }
+      }
     }
 
     $racikan_batch_list = array();
