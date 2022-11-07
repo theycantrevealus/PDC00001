@@ -431,8 +431,13 @@
 
         var tableAntrian= $("#table-antrian-rawat-jalan").DataTable({
             "ajax":{
-                url: __HOSTAPI__ + "/Asesmen/antrian-asesmen-medis/igd",
-                type: "GET",
+                url: __HOSTAPI__ + "/Asesmen",
+                type: "POST",
+                data: function(d) {
+                    d.request = "get_antrian_asesmen_medis_2";
+                    d.condition = 'igd';
+                    d.pasien = __PAGES__[3];
+                },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
@@ -1464,9 +1469,9 @@
                             keterangan: $("#txt_keterangan_pulang").val()
                         },
                         success: function (response) {
-                            console.clear();
-                            console.log(response);
-                            //location.href = __HOSTNAME__ + "/igdv2/perawat";
+                            // console.clear();
+                            // console.log(response);
+                            location.href = __HOSTNAME__ + "/igdv2/perawat";
                         },
                         error: function (response) {
 
