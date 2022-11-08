@@ -326,7 +326,7 @@
             }
 
             var protocol = {
-                request: "extend_resep",
+                request: "extend_resep_2",
                 asesmen: asesmen,
                 kunjungan: kunjungan,
                 antrian: antrian,

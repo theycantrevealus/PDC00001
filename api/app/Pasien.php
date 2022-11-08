@@ -1337,7 +1337,7 @@ class Pasien extends Utility
                 array('asesmen.antrian', '=', 'antrian.uid')
             ))
             ->where(array(
-                'antrian.waktu_masuk' => '>= now()::date - interval \'24h\'',
+                'DATE(antrian.waktu_masuk)' => '= ?',
                 'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
                 'OR',
@@ -1346,7 +1346,7 @@ class Pasien extends Utility
                 '(asesmen.poli' => '!= ?',
                 'OR',
                 'asesmen.poli' => '!= ?)',
-            ), array(__POLI_IGD__,__POLI_INAP__))
+            ), array(date('Y-m-d'),__POLI_IGD__,__POLI_INAP__))
             /*->order(array(
                 'created_at' => 'DESC'
             ))
