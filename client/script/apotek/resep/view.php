@@ -1536,7 +1536,7 @@
                     "id": "racikan_delete_" + id
                 });
                 $(this).find("td:eq(7) input").attr({
-                    "id": "racikan_copy_" + id
+                    "id": "racikan_signaA_" + id
                 });
             });
         }
